@@ -1,0 +1,66 @@
+{
+  "name": "@holoscript/core",
+  "version": "1.0.0-alpha.1",
+  "description": "Core HoloScript language - parser, runtime, and AST types",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./parser": {
+      "types": "./dist/parser.d.ts",
+      "import": "./dist/parser.mjs",
+      "require": "./dist/parser.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.mjs",
+      "require": "./dist/runtime.js"
+    },
+    "./type-checker": {
+      "types": "./dist/type-checker.d.ts",
+      "import": "./dist/type-checker.mjs",
+      "require": "./dist/type-checker.js"
+    },
+    "./debugger": {
+      "types": "./dist/debugger.d.ts",
+      "import": "./dist/debugger.mjs",
+      "require": "./dist/debugger.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "holoscript",
+    "vr",
+    "virtual-reality",
+    "parser",
+    "ast",
+    "runtime",
+    "spatial-programming",
+    "voice-commands",
+    "gesture-control"
+  ],
+  "author": "HoloScript Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holoscript/holoscript.git",
+    "directory": "packages/core"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
+  }
+}

@@ -6,7 +6,6 @@
 import { EventEmitter } from 'eventemitter3';
 import type {
   AgentEventMap,
-  AgentEventType,
   AgentUserMessage,
   AgentMessageContext,
   AgentResponse,

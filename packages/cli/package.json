@@ -1,0 +1,36 @@
+{
+  "name": "@holoscript/cli",
+  "version": "1.0.0-alpha.1",
+  "description": "Command-line interface for HoloScript",
+  "main": "./dist/index.js",
+  "bin": {
+    "holoscript": "./dist/cli.js",
+    "hs": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "start": "node ./dist/cli.js"
+  },
+  "keywords": [
+    "holoscript",
+    "cli",
+    "vr",
+    "metaverse",
+    "voice-commands"
+  ],
+  "author": "HoloScript Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holoscript/holoscript.git",
+    "directory": "packages/cli"
+  },
+  "dependencies": {
+    "@holoscript/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  }
+}

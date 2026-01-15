@@ -1,29 +1,54 @@
 # HoloScript
 
-**Open source VR scene description language and runtime**
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 
-HoloScript is a declarative language for building virtual reality experiences. Write simple commands, get immersive 3D worlds.
+**Open source VR/AI-inspired programming language and runtime**
 
-## What is HoloScript?
+HoloScript is a declarative language for building virtual reality experiences. Code exists as spatial holograms that developers manipulate with voice commands, hand gestures, and spatial reasoning.
 
-```javascript
-create scene "My World"
-  create cube at (0, 1, 0) with color red
-  create sphere at (2, 1, 0) with physics enabled
-  create light at (0, 10, 0) with intensity 1.5
-```
+## Features
 
-HoloScript makes VR development accessible to everyone - from beginners to professionals.
+- **Voice Command Parsing** - Natural language commands like `create orb myOrb`
+- **Gesture Recognition** - Hand gestures for object manipulation (pinch, swipe, grab)
+- **2D UI Elements** - Define buttons, text inputs, panels, and sliders
+- **Spatial Programming** - 3D positioning and connections between code objects
+- **AST-based Execution** - Parse HoloScript code into executable Abstract Syntax Trees
 
 ## Packages
 
 | Package | Description |
 |---------|-------------|
+| [@holoscript/core](./packages/core) | Core parser, runtime, and AST types |
+| [@holoscript/cli](./packages/cli) | Command-line interface for HoloScript |
 | [@holoscript/uaa2-client](./packages/uaa2-client) | API client for uaa2-service (AI building, agents, voice) |
 
 ## Quick Start
 
-### Using with uaa2-service
+### Using @holoscript/core
+
+```bash
+npm install @holoscript/core
+```
+
+```typescript
+import { HoloScriptParser, HoloScriptRuntime } from '@holoscript/core';
+
+const parser = new HoloScriptParser();
+const runtime = new HoloScriptRuntime();
+
+// Parse a voice command
+const nodes = parser.parseVoiceCommand({
+  command: 'create orb myOrb',
+  confidence: 0.95,
+  timestamp: Date.now()
+});
+
+// Execute the AST
+const results = await runtime.executeProgram(nodes);
+```
+
+### Using @holoscript/uaa2-client
 
 ```bash
 npm install @holoscript/uaa2-client
@@ -59,10 +84,10 @@ agent.send('Help me add furniture');
 
 HoloScript is the open source foundation for VR development:
 
-```
+```text
 +------------------+     +------------------+     +------------------+
 |    HoloScript    | --> |     Hololand     | --> |   uaa2-service   |
-|   (Open Source)  |     |   (Proprietary)  |     |   (Proprietary)  |
+|   (Open Source)  |     | (Elastic 2.0)    |     |   (Proprietary)  |
 |                  |     |                  |     |                  |
 |  - Language spec |     |  - Full platform |     |  - AI agents     |
 |  - Runtime       |     |  - Networking    |     |  - Voice → VR    |
@@ -71,47 +96,210 @@ HoloScript is the open source foundation for VR development:
 ```
 
 - **HoloScript** (MIT): Language, runtime, and tooling anyone can use
-- **Hololand** (Proprietary): Full metaverse platform built on HoloScript
+- **Hololand** (Elastic 2.0): Full metaverse platform built on HoloScript
 - **uaa2-service** (Proprietary): AI infrastructure powering intelligent features
 
-## Language Features
+## HoloScript Syntax
 
-### Objects
+### Orbs (Data Objects)
 
-```javascript
-create cube at (0, 0, 0)
-create sphere at (2, 0, 0) with radius 0.5
-create box at (0, 1, 0) with size (2, 0.1, 1)
+```holoscript
+orb greeting {
+  message: "Hello, HoloScript World!"
+  color: "#00ffff"
+  glow: true
+}
 ```
 
-### Materials
+### Functions
 
-```javascript
-create cube with color red
-create sphere with color #667eea
-create box with texture "wood.jpg"
+```holoscript
+function processQuery(query: string): string {
+  analyze query
+  generate response
+  return response
+}
 ```
 
-### Physics
+### Connections
 
-```javascript
-create sphere with physics enabled
-create cube with physics { mass: 2, friction: 0.5 }
+```holoscript
+orb inputLayer { neurons: 784 }
+orb outputLayer { neurons: 10 }
+
+connect inputLayer to outputLayer as "weights"
 ```
 
-### Lighting
+### Gates (Conditional Logic)
 
-```javascript
-create light at (0, 10, 0) with intensity 2
-create spotlight at (5, 5, 0) pointing at (0, 0, 0)
-create ambient light with color warm
+```holoscript
+gate isAuthenticated {
+  condition: user.loggedIn
+  onTrue: showDashboard
+  onFalse: showLogin
+}
 ```
 
-### Interactivity
+### Streams (Data Flow)
 
-```javascript
-create button at (0, 1.5, -2) with text "Click Me"
-  on click -> spawn cube at (0, 3, 0)
+```holoscript
+stream dataFlow {
+  source: apiEndpoint
+  through: [validate, transform, cache]
+  to: displayComponent
+}
+```
+
+### 2D UI Elements
+
+```holoscript
+button loginBtn {
+  text: "Login"
+  x: 100
+  y: 150
+  width: 200
+  height: 40
+  onClick: handleLogin
+}
+
+textinput usernameInput {
+  placeholder: "Username"
+  x: 100
+  y: 50
+  width: 200
+  height: 36
+}
+```
+
+## Voice Commands
+
+| Command | Description |
+| ------- | ----------- |
+| `create orb [name]` | Create a new data orb |
+| `summon function [name]` | Create a new function |
+| `connect [from] to [to]` | Connect two objects |
+| `execute [function]` | Run a function |
+| `debug program` | Enter debug mode |
+| `visualize [data]` | Display data visualization |
+| `gate [condition]` | Create conditional logic |
+| `stream [source] through [transforms]` | Create data stream |
+| `create button [name]` | Create a 2D button |
+| `add textinput [name]` | Add a text input field |
+
+## Gestures
+
+| Gesture | Action |
+| ------- | ------ |
+| Pinch | Create object |
+| Swipe | Connect objects |
+| Rotate | Modify properties |
+| Grab | Select object |
+| Spread | Expand view |
+| Fist | Execute action |
+
+## Supported Platforms
+
+- WebXR
+- Oculus Quest
+- HTC Vive
+- Valve Index
+- Apple Vision Pro
+- Windows Mixed Reality
+
+## API Reference
+
+### HoloScriptParser
+
+```typescript
+const parser = new HoloScriptParser();
+
+// Parse voice commands
+parser.parseVoiceCommand(command: VoiceCommand): ASTNode[];
+
+// Parse gesture input
+parser.parseGesture(gesture: GestureData): ASTNode[];
+
+// Parse HoloScript code
+parser.parse(code: string): ASTNode[];
+
+// Get current AST
+parser.getAST(): ASTNode[];
+
+// Find node by name
+parser.findNode(name: string): ASTNode | null;
+
+// Clear parser state
+parser.clear(): void;
+```
+
+### HoloScriptRuntime
+
+```typescript
+const runtime = new HoloScriptRuntime();
+
+// Execute a program (array of AST nodes)
+runtime.executeProgram(nodes: ASTNode[]): Promise<ExecutionResult[]>;
+
+// Execute a single node
+runtime.executeNode(node: ASTNode): Promise<ExecutionResult>;
+
+// Get runtime context
+runtime.getContext(): RuntimeContext;
+```
+
+### HoloScriptCodeParser
+
+```typescript
+import { HoloScriptCodeParser } from '@holoscript/core';
+
+const codeParser = new HoloScriptCodeParser();
+const result = codeParser.parse(`
+  orb myData {
+    value: 42
+  }
+`);
+
+if (result.success) {
+  console.log(result.ast);
+} else {
+  console.error(result.errors);
+}
+```
+
+## CLI Usage
+
+```bash
+# Install CLI globally
+npm install -g @holoscript/cli
+
+# Run a HoloScript file
+holoscript run script.hs
+
+# Parse and show AST
+holoscript parse script.hs --ast
+
+# Interactive REPL
+holoscript repl
+```
+
+## Development
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/HoloScript.git
+cd HoloScript
+
+# Install dependencies
+pnpm install
+
+# Build all packages
+pnpm build
+
+# Run tests
+pnpm test
+
+# Run linting
+pnpm lint
 ```
 
 ## Contributing
@@ -119,13 +307,15 @@ create button at (0, 1.5, -2) with text "Click Me"
 HoloScript is open source under the MIT license. Contributions welcome!
 
 1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT
+MIT - see [LICENSE](LICENSE) for details.
 
 ---
 
-**HoloScript is part of the Hololand ecosystem**
+HoloScript is part of the Hololand ecosystem
