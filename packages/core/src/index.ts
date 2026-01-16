@@ -1,30 +1,31 @@
 /**
  * @holoscript/core
  *
- * Core HoloScript language - parser, runtime, and AST types.
+ * HoloScript+ - VR language with declarative syntax, state management, and VR interactions.
+ * Enhanced version of HoloScript with:
+ * - VR interaction traits (@grabbable, @throwable, @hoverable, etc.)
+ * - Reactive state management (@state { ... })
+ * - Control flow (@for, @if directives)
+ * - TypeScript companion imports
+ * - Expression interpolation ${...}
  *
- * HoloScript is an open source VR scene description language that supports:
- * - Voice commands for 3D object creation
- * - Gesture input parsing
- * - 2D UI element definition
- * - Spatial programming concepts
+ * Fully backward compatible with original HoloScript syntax.
  *
  * @example
  * ```typescript
- * import { HoloScriptParser, HoloScriptRuntime } from '@holoscript/core';
+ * import { HoloScriptPlusParser, HoloScriptPlusRuntime } from '@holoscript/core';
  *
- * const parser = new HoloScriptParser();
- * const runtime = new HoloScriptRuntime();
+ * const parser = new HoloScriptPlusParser();
+ * const result = parser.parse(`
+ *   orb#myOrb {
+ *     position: [0, 0, 0]
+ *     @grabbable(snap_to_hand: true)
+ *     @throwable(bounce: true)
+ *   }
+ * `);
  *
- * // Parse a voice command
- * const nodes = parser.parseVoiceCommand({
- *   command: 'create orb myOrb',
- *   confidence: 0.95,
- *   timestamp: Date.now()
- * });
- *
- * // Execute the AST
- * const results = await runtime.executeProgram(nodes);
+ * const runtime = new HoloScriptPlusRuntime(result.ast);
+ * await runtime.mount(document.body);
  * ```
  *
  * @packageDocumentation
@@ -33,14 +34,27 @@
 // Import for use in utility functions
 import { HoloScriptParser } from './HoloScriptParser';
 import { HoloScriptRuntime } from './HoloScriptRuntime';
+import { HoloScriptPlusParser } from './parser/HoloScriptPlusParser';
 
 // Parser
 export { HoloScriptParser } from './HoloScriptParser';
 export { HoloScript2DParser } from './HoloScript2DParser';
 export { HoloScriptCodeParser, type ParseResult, type ParseError } from './HoloScriptCodeParser';
 
+// HoloScript+ Parser (NEW)
+export { HoloScriptPlusParser, createParser, parse as parseHoloScriptPlus } from './parser/HoloScriptPlusParser';
+
 // Runtime
 export { HoloScriptRuntime } from './HoloScriptRuntime';
+
+// HoloScript+ Runtime (NEW)
+export { HoloScriptPlusRuntime } from './runtime/HoloScriptPlusRuntime';
+
+// HoloScript+ State Management (NEW)
+export { ReactiveState, createReactiveState, bindStateToDOM } from './state/ReactiveState';
+
+// HoloScript+ VR Traits (NEW)
+export { VRTraitRegistry, registerTraits } from './traits/VRTraitSystem';
 
 // Type Checker
 export {
@@ -98,6 +112,41 @@ export type {
   ConnectionNode,
   GateNode,
   StreamNode,
+
+  // HoloScript+ Types (NEW)
+  Vector3,
+  Vector2,
+  Color,
+  Duration,
+  Transform,
+  VRHand,
+  ThrowVelocity,
+  CollisionEvent,
+  GrabbableTrait,
+  ThrowableTrait,
+  PointableTrait,
+  HoverableTrait,
+  ScalableTrait,
+  RotatableTrait,
+  StackableTrait,
+  SnappableTrait,
+  BreakableTrait,
+  StateDeclaration,
+  ReactiveState as ReactiveStateType,
+  LifecycleHook,
+  VRLifecycleHook,
+  ControllerHook,
+  HSPlusDirective,
+  VRTraitName,
+  HSPlusNode,
+  HSPlusAST,
+  HSPlusRuntimeContext,
+  HSPlusBuiltins,
+  HSPlusParserOptions,
+  HSPlusCompileResult,
+  HoloScriptPlusModule,
+  HSPlusRuntime,
+};
   TransformationNode,
   GenericASTNode,
 

@@ -341,6 +341,15 @@ export class HoloScriptCodeParser {
         case 'export':
           return this.parseExport();
         // Phase 2: Variable declarations
+        // UI Extensions
+        case 'ui2d':
+        case 'card':
+        case 'metric':
+        case 'button':
+        case 'row':
+        case 'col':
+        case 'text':
+           return this.parseUIElement();
         case 'const':
         case 'let':
         case 'var':
@@ -1053,6 +1062,89 @@ export class HoloScriptCodeParser {
       message: `Expected identifier, got ${token?.type || 'EOF'}`,
     });
     return null;
+  }
+
+    return null;
+  }
+
+  /**
+   * Parse UI Element: ui2d dashboard#id { ... }
+   */
+  private parseUIElement(): ASTNode | null {
+      const typeToken = this.currentToken();
+      if (!typeToken) return null;
+      
+      const elementType = typeToken.value;
+      this.advance();
+      
+      let elementId = `${elementType}_${Date.now()}`;
+      
+      // Check for ID syntax
+      if (this.currentToken()?.type === 'punctuation' && this.currentToken()?.value === '#') {
+         this.advance(); 
+         const idToken = this.currentToken();
+         if (idToken) {
+             elementId = idToken.value;
+             this.advance();
+         }
+      } else if (this.currentToken()?.type === 'identifier' && this.currentToken()?.value.startsWith('#')) {
+          elementId = this.currentToken()?.value.slice(1) || elementId;
+          this.advance();
+      }
+      
+      const properties: Record<string, any> = {};
+      
+      if (this.check('punctuation', '{')) {
+          this.advance();
+          while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+              this.skipNewlines();
+              if (this.check('punctuation', '}')) break;
+              
+              const prop = this.parseProperty();
+              if (prop) {
+                  properties[prop.key] = prop.value;
+              }
+              this.skipNewlines();
+          }
+          this.expect('punctuation', '}');
+      }
+      
+      return {
+          type: 'ui2d', 
+          name: elementType,
+          properties: { id: elementId, ...properties },
+          position: { x: 0, y: 0, z: 0 }
+      } as ASTNode;
+  }
+
+  /**
+   * Parse property: key: value
+   */
+  private parseProperty(): { key: string, value: any } | null {
+      const keyToken = this.currentToken();
+      if (!keyToken || (keyToken.type !== 'identifier' && keyToken.type !== 'string')) {
+          this.advance();
+          return null;
+      }
+      
+      const key = keyToken.value;
+      this.advance();
+      
+      if (this.check('punctuation', ':')) {
+          this.advance();
+          const valueToken = this.currentToken();
+          let value: any = valueToken?.value;
+          
+          if (valueToken?.type === 'number') value = parseFloat(valueToken.value);
+          else if (valueToken?.type === 'string') value = valueToken.value;
+          else if (valueToken?.value === 'true') value = true;
+          else if (valueToken?.value === 'false') value = false;
+          
+          this.advance();
+          return { key, value };
+      }
+      
+      return null;
   }
 
   private skipNewlines(): void {

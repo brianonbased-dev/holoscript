@@ -7,6 +7,19 @@
 
 HoloScript is a declarative language for building virtual reality experiences. Code exists as spatial holograms that developers manipulate with voice commands, hand gestures, and spatial reasoning.
 
+## HoloScript+ (NEW)
+
+**Version 1.0** includes HoloScript+, an enhanced version with:
+
+- **9 VR Traits** - `@grabbable`, `@throwable`, `@pointable`, `@hoverable`, `@scalable`, `@rotatable`, `@stackable`, `@snappable`, `@breakable`
+- **Reactive State** - `@state { count: 0 }` with automatic UI updates
+- **Control Flow** - `@for`, `@if` directives for dynamic content
+- **Lifecycle Hooks** - `@on_grab`, `@on_collision`, `@on_mount`, etc.
+- **TypeScript Interop** - `@import "./companion.ts"` for advanced logic
+- **Expression Interpolation** - `${state.count > 5 ? 'active' : 'inactive'}`
+
+All 100% backward compatible with original HoloScript syntax.
+
 ## Features
 
 - **Voice Command Parsing** - Natural language commands like `create orb myOrb`
@@ -14,6 +27,8 @@ HoloScript is a declarative language for building virtual reality experiences. C
 - **2D UI Elements** - Define buttons, text inputs, panels, and sliders
 - **Spatial Programming** - 3D positioning and connections between code objects
 - **AST-based Execution** - Parse HoloScript code into executable Abstract Syntax Trees
+- **VR Interactions** (NEW) - Rich hand gestures, haptics, physics-based throwing
+- **Reactive State** (NEW) - Fine-grained reactivity with automatic DOM updates
 
 ## Packages
 
@@ -25,7 +40,41 @@ HoloScript is a declarative language for building virtual reality experiences. C
 
 ## Quick Start
 
-### Using @holoscript/core
+### Using @holoscript/core (HoloScript+)
+
+```bash
+npm install @holoscript/core
+```
+
+```typescript
+import { HoloScriptPlusParser, HoloScriptPlusRuntime } from '@holoscript/core';
+
+const parser = new HoloScriptPlusParser();
+const source = `
+  scene {
+    orb#myOrb {
+      position: [0, 0, -2]
+      @grabbable(snap_to_hand: true)
+      @hoverable(scale_on_hover: 1.2)
+      @throwable(bounce: true)
+    }
+  }
+`;
+
+const result = parser.parse(source);
+const runtime = new HoloScriptPlusRuntime(result.ast);
+await runtime.mount(document.body);
+```
+
+### HoloScript+ Highlights (v1.0.0)
+
+- 9 VR traits: `@grabbable`, `@throwable`, `@pointable`, `@hoverable`, `@scalable`, `@rotatable`, `@stackable`, `@snappable`, `@breakable`
+- Reactive state: `@state { ... }`, computed values, lifecycle hooks like `@on_grab`, `@on_collision`
+- TypeScript interop: `@import "./companion.ts"` for advanced logic
+- Training pipeline examples: see `examples/vr-interactions.hsplus` and uaa2-service’s Brittney agent (end-to-end VR event logging + export)
+- Dual-source model: `@holoscript/core` is canonical; uaa2-service maintains an enhanced copy for service-level features
+
+### Using Original HoloScript
 
 ```bash
 npm install @holoscript/core

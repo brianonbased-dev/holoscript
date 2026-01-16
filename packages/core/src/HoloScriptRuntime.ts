@@ -24,6 +24,7 @@ import type {
   StreamNode,
   SpatialPosition,
   HologramProperties,
+  HologramShape,
   RuntimeContext,
   ExecutionResult,
   ParticleSystem,
@@ -315,6 +316,9 @@ export class HoloScriptRuntime {
           break;
         case 'return':
           result = await this.executeReturn(node as ASTNode & { value: unknown });
+          break;
+        case 'generic':
+          result = await this.executeGeneric(node);
           break;
         default:
           result = {
@@ -936,6 +940,242 @@ export class HoloScriptRuntime {
     return {
       success: true,
       output: element,
+    };
+  }
+
+  /**
+   * Execute generic voice commands
+   * Handles commands like: show, hide, animate, pulse, create
+   */
+  private async executeGeneric(_node: ASTNode): Promise<ExecutionResult> {
+    const genericNode = _node as any;
+    const command = String(genericNode.command || '').trim().toLowerCase();
+    const tokens = command.split(/\s+/);
+    const action = tokens[0];
+    const target = tokens[1];
+
+    logger.info('Executing generic command', { command, action, target });
+
+    try {
+      let result: any;
+
+      switch (action) {
+        case 'show':
+          result = await this.executeShowCommand(target, genericNode);
+          break;
+        case 'hide':
+          result = await this.executeHideCommand(target, genericNode);
+          break;
+        case 'create':
+        case 'summon':
+          result = await this.executeCreateCommand(tokens.slice(1), genericNode);
+          break;
+        case 'animate':
+          result = await this.executeAnimateCommand(target, tokens.slice(2), genericNode);
+          break;
+        case 'pulse':
+          result = await this.executePulseCommand(target, tokens.slice(2), genericNode);
+          break;
+        case 'move':
+          result = await this.executeMoveCommand(target, tokens.slice(2), genericNode);
+          break;
+        case 'delete':
+        case 'remove':
+          result = await this.executeDeleteCommand(target, genericNode);
+          break;
+        default:
+          // Default: create visual representation of the generic command
+          logger.warn('Unknown voice command action', { action, command });
+          result = {
+            executed: false,
+            message: `Unknown command: ${action}`,
+          };
+      }
+
+      return {
+        success: true,
+        output: result,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Generic command execution failed: ${String(error)}`,
+      };
+    }
+  }
+
+  /**
+   * Execute 'show' command
+   */
+  private async executeShowCommand(target: string, _node: any): Promise<any> {
+    // Create or show orb for this target
+    const hologram = _node.hologram || {
+      shape: 'orb',
+      color: '#00ffff',
+      size: 0.8,
+      glow: true,
+      interactive: true,
+    };
+
+    const position = _node.position || { x: 0, y: 0, z: 0 };
+    this.context.spatialMemory.set(target, position);
+    this.createParticleEffect(`${target}_show`, position, hologram.color, 15);
+
+    logger.info('Show command executed', { target, position });
+
+    return {
+      showed: target,
+      hologram,
+      position,
+    };
+  }
+
+  /**
+   * Execute 'hide' command
+   */
+  private async executeHideCommand(target: string, _node: any): Promise<any> {
+    const position = this.context.spatialMemory.get(target) || { x: 0, y: 0, z: 0 };
+    this.createParticleEffect(`${target}_hide`, position, '#ff0000', 10);
+    
+    logger.info('Hide command executed', { target });
+
+    return {
+      hidden: target,
+    };
+  }
+
+  /**
+   * Execute 'create' command
+   */
+  private async executeCreateCommand(tokens: string[], _node: any): Promise<any> {
+    if (tokens.length < 2) {
+      return { error: 'Create command requires shape and name' };
+    }
+
+    const shape = tokens[0];
+    const name = tokens[1];
+    const position = _node.position || { x: 0, y: 0, z: 0 };
+
+    const hologram: HologramProperties = {
+      shape: shape as HologramShape,
+      color: _node.hologram?.color || '#00ffff',
+      size: _node.hologram?.size || 1,
+      glow: _node.hologram?.glow !== false,
+      interactive: _node.hologram?.interactive !== false,
+    };
+
+    this.context.spatialMemory.set(name, position);
+    this.createParticleEffect(`${name}_create`, position, hologram.color, 20);
+
+    logger.info('Create command executed', { shape, name, position });
+
+    return {
+      created: name,
+      shape,
+      hologram,
+      position,
+    };
+  }
+
+  /**
+   * Execute 'animate' command
+   */
+  private async executeAnimateCommand(target: string, tokens: string[], _node: any): Promise<any> {
+    const property = tokens[0] || 'position.y';
+    const duration = parseInt(tokens[1] || '1000', 10);
+    
+    const animation: Animation = {
+      target,
+      property,
+      from: 0,
+      to: 1,
+      duration,
+      startTime: Date.now(),
+      easing: 'ease-in-out',
+    };
+
+    this.animations.set(`${target}_${property}`, animation);
+
+    logger.info('Animate command executed', { target, property, duration });
+
+    return {
+      animating: target,
+      animation,
+    };
+  }
+
+  /**
+   * Execute 'pulse' command
+   */
+  private async executePulseCommand(target: string, tokens: string[], _node: any): Promise<any> {
+    const duration = parseInt(tokens[0] || '500', 10);
+    const position = this.context.spatialMemory.get(target) || { x: 0, y: 0, z: 0 };
+
+    // Create pulsing particle effect
+    this.createParticleEffect(`${target}_pulse`, position, '#ffff00', 30);
+
+    // Create animation for scale
+    const animation: Animation = {
+      target,
+      property: 'scale',
+      from: 1,
+      to: 1.5,
+      duration,
+      startTime: Date.now(),
+      easing: 'sine',
+      yoyo: true,
+      loop: true,
+    };
+
+    this.animations.set(`${target}_pulse`, animation);
+
+    logger.info('Pulse command executed', { target, duration });
+
+    return {
+      pulsing: target,
+      duration,
+    };
+  }
+
+  /**
+   * Execute 'move' command
+   */
+  private async executeMoveCommand(target: string, tokens: string[], _node: any): Promise<any> {
+    const x = parseFloat(tokens[0] || '0');
+    const y = parseFloat(tokens[1] || '0');
+    const z = parseFloat(tokens[2] || '0');
+    const position: SpatialPosition = { x, y, z };
+
+    const current = this.context.spatialMemory.get(target);
+    if (current) {
+      this.context.spatialMemory.set(target, position);
+      this.createConnectionStream(target, `${target}_move`, current, position, 'movement');
+    } else {
+      this.context.spatialMemory.set(target, position);
+    }
+
+    logger.info('Move command executed', { target, position });
+
+    return {
+      moved: target,
+      to: position,
+    };
+  }
+
+  /**
+   * Execute 'delete' command
+   */
+  private async executeDeleteCommand(target: string, _node: any): Promise<any> {
+    const position = this.context.spatialMemory.get(target);
+    if (position) {
+      this.createParticleEffect(`${target}_delete`, position, '#ff0000', 15);
+      this.context.spatialMemory.delete(target);
+    }
+
+    logger.info('Delete command executed', { target });
+
+    return {
+      deleted: target,
     };
   }
 
