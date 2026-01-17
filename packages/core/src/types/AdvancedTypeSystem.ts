@@ -343,3 +343,70 @@ export class AdvancedTypeChecker {
     }
   }
 }
+
+/**
+ * HoloScript+ AST Types
+ */
+export interface HSPlusNode {
+  type: string;
+  [key: string]: any;
+}
+
+export interface HSPlusAST extends HSPlusNode {
+  type: 'Program';
+  body: HSPlusNode[];
+}
+
+export interface HSPlusDirective {
+  type: 'directive';
+  name: string;
+  args: string[];
+  enableTypeScriptImports?: boolean;
+  [key: string]: any;
+}
+
+export interface HSPlusCompileResult {
+  success: boolean;
+  code: string;
+  sourceMap?: any;
+  errors: string[];
+}
+
+export interface HSPlusParserOptions {
+  sourceMap?: boolean;
+  strict?: boolean;
+  enableTypeScriptImports?: boolean;
+}
+
+export type VRTraitName =
+  | 'grabbable'
+  | 'throwable'
+  | 'pointable'
+  | 'scalable'
+  | 'draggable'
+  | 'rotatable'
+  | 'clickable'
+  | 'hoverable'
+  | 'pressable';
+
+export interface StateDeclaration {
+  name: string;
+  type: HoloScriptType;
+  initialValue?: any;
+  [key: string]: any;
+}
+
+export interface LifecycleHook {
+  name: 'mounted' | 'updated' | 'destroyed';
+  handler: string;
+}
+
+export interface VRLifecycleHook {
+  name: 'grabbed' | 'released' | 'pointed' | 'unpoin pointed' | 'thrown';
+  handler: string;
+}
+
+export interface ControllerHook {
+  name: 'trigger' | 'grip' | 'thumbstick' | 'button_a' | 'button_b';
+  handler: string;
+}
