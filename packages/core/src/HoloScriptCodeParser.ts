@@ -67,6 +67,22 @@ export class HoloScriptCodeParser {
   private warnings: string[] = [];
   private tokens: Token[] = [];
   private position: number = 0;
+  private keywordSet: Set<string>;
+
+  constructor() {
+    // Pre-compute keyword set for O(1) lookup instead of O(n) array search
+    this.keywordSet = new Set([
+      'orb', 'function', 'connect', 'to', 'as', 'gate', 'stream', 'from', 'through', 'return',
+      'if', 'else', 'nexus', 'building', 'pillar', 'foundation',
+      'for', 'while', 'forEach', 'in', 'of', 'break', 'continue',
+      'import', 'export', 'module', 'use',
+      'type', 'interface', 'extends', 'implements',
+      'async', 'await', 'spawn', 'parallel',
+      'class', 'new', 'this', 'super', 'static', 'private', 'public',
+      'try', 'catch', 'finally', 'throw',
+      'const', 'let', 'var',
+    ]);
+  }
 
   /**
    * Parse HoloScript code string into AST
@@ -131,25 +147,6 @@ export class HoloScriptCodeParser {
     let line = 1;
     let column = 1;
     let i = 0;
-
-    const keywords = [
-      'orb', 'function', 'connect', 'to', 'as', 'gate', 'stream', 'from', 'through', 'return',
-      'if', 'else', 'nexus', 'building', 'pillar', 'foundation',
-      // Phase 2: Loop constructs
-      'for', 'while', 'forEach', 'in', 'of', 'break', 'continue',
-      // Phase 2: Module system
-      'import', 'export', 'module', 'use',
-      // Phase 2: Type system
-      'type', 'interface', 'extends', 'implements',
-      // Phase 2: Async
-      'async', 'await', 'spawn', 'parallel',
-      // Phase 2: Object-oriented
-      'class', 'new', 'this', 'super', 'static', 'private', 'public',
-      // Phase 2: Error handling
-      'try', 'catch', 'finally', 'throw',
-      // Phase 2: Constants
-      'const', 'let', 'var',
-    ];
 
     while (i < code.length) {
       const char = code[i];
@@ -231,7 +228,7 @@ export class HoloScriptCodeParser {
           column++;
         }
 
-        const isKeyword = keywords.includes(ident.toLowerCase());
+        const isKeyword = this.keywordSet.has(ident.toLowerCase());
         tokens.push({
           type: isKeyword ? 'keyword' : 'identifier',
           value: ident,
