@@ -1064,9 +1064,6 @@ export class HoloScriptCodeParser {
     return null;
   }
 
-    return null;
-  }
-
   /**
    * Parse UI Element: ui2d dashboard#id { ... }
    */
