@@ -348,34 +348,47 @@ export class AdvancedTypeChecker {
  * HoloScript+ AST Types
  */
 export interface HSPlusNode {
-  type: string;
+  type: 'directive' | 'trait' | 'lifecycle' | 'state' | 'for' | 'if' | 'import' | 'component' | 'element' | 'fragment';
   [key: string]: any;
 }
 
 export interface HSPlusAST extends HSPlusNode {
   type: 'Program';
   body: HSPlusNode[];
+  version: string;
+  root: HSPlusNode;
+  imports: Array<{ path: string; alias: string }>;
+  hasState: boolean;
+  hasVRTraits: boolean;
+  hasControlFlow: boolean;
 }
 
-export interface HSPlusDirective {
-  type: 'directive';
+export interface HSPlusDirective extends HSPlusNode {
+  type: 'directive' | 'trait' | 'lifecycle' | 'state' | 'for' | 'if' | 'import' | 'fragment';
   name: string;
   args: string[];
   enableTypeScriptImports?: boolean;
-  [key: string]: any;
+  enableVRTraits?: boolean;
 }
 
 export interface HSPlusCompileResult {
   success: boolean;
-  code: string;
+  code?: string;
   sourceMap?: any;
-  errors: string[];
+  errors: Array<{ message: string; line: number; column: number }>;
+  ast?: any;
+  compiledExpressions?: any;
+  requiredCompanions?: string[];
+  features?: any;
+  warnings?: any[];
+  [key: string]: any;
 }
 
 export interface HSPlusParserOptions {
   sourceMap?: boolean;
   strict?: boolean;
   enableTypeScriptImports?: boolean;
+  enableVRTraits?: boolean;
 }
 
 export type VRTraitName =
@@ -387,7 +400,10 @@ export type VRTraitName =
   | 'rotatable'
   | 'clickable'
   | 'hoverable'
-  | 'pressable';
+  | 'pressable'
+  | 'stackable'
+  | 'snappable'
+  | 'breakable';
 
 export interface StateDeclaration {
   name: string;
@@ -402,7 +418,7 @@ export interface LifecycleHook {
 }
 
 export interface VRLifecycleHook {
-  name: 'grabbed' | 'released' | 'pointed' | 'unpoin pointed' | 'thrown';
+  name: 'grabbed' | 'released' | 'pointed' | 'unpointed' | 'thrown';
   handler: string;
 }
 

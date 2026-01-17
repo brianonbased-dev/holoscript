@@ -638,7 +638,7 @@ export class HoloScriptRuntime {
 
     // Binary operations: a + b, a - b, etc.
     const binaryOps = [
-      { pattern: /(.+)\s*\+\s*(.+)/, op: (a: unknown, b: unknown) => Number(a) + Number(b) },
+      { pattern: /(.+)\s*\+\s*(.+)/, op: (a: unknown, b: unknown) => (typeof a === 'string' || typeof b === 'string') ? String(a) + String(b) : Number(a) + Number(b) },
       { pattern: /(.+)\s*-\s*(.+)/, op: (a: unknown, b: unknown) => Number(a) - Number(b) },
       { pattern: /(.+)\s*\*\s*(.+)/, op: (a: unknown, b: unknown) => Number(a) * Number(b) },
       { pattern: /(.+)\s*\/\s*(.+)/, op: (a: unknown, b: unknown) => Number(b) !== 0 ? Number(a) / Number(b) : 0 },

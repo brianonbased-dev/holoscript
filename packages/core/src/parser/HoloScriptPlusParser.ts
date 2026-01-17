@@ -17,10 +17,6 @@ import type {
   HSPlusCompileResult,
   HSPlusParserOptions,
   VRTraitName,
-  StateDeclaration,
-  LifecycleHook,
-  VRLifecycleHook,
-  ControllerHook,
 } from '../types/AdvancedTypeSystem';
 
 // =============================================================================
@@ -81,7 +77,9 @@ const VR_TRAITS: VRTraitName[] = [
 // LIFECYCLE HOOKS
 // =============================================================================
 
-const LIFECYCLE_HOOKS: (LifecycleHook | VRLifecycleHook | ControllerHook)[] = [
+type HookName = string;
+
+const LIFECYCLE_HOOKS: HookName[] = [
   // Standard lifecycle
   'on_mount',
   'on_unmount',
@@ -584,6 +582,8 @@ export class HoloScriptPlusParser {
 
     // Build AST
     const ast: HSPlusAST = {
+      type: 'Program',
+      body: root.directives || [],
       version: '1.0',
       root,
       imports: this.imports,
@@ -593,6 +593,7 @@ export class HoloScriptPlusParser {
     };
 
     return {
+      success: true,
       ast,
       compiledExpressions: this.compiledExpressions,
       requiredCompanions: this.imports.map((i) => i.path),
@@ -601,7 +602,7 @@ export class HoloScriptPlusParser {
         vrTraits: this.hasVRTraits,
         loops: this.hasControlFlow,
         conditionals: this.hasControlFlow,
-        lifecycleHooks: root.directives.some((d: HSPlusDirective) => d.type === 'lifecycle'),
+        lifecycleHooks: root.directives.some((d: any) => d.type === 'lifecycle'),
       },
       warnings: this.warnings,
       errors: this.errors,
@@ -646,7 +647,7 @@ export class HoloScriptPlusParser {
         const directive = this.parseDirective();
         if (directive) {
           if (directive.type === 'trait') {
-            traits.set(directive.name, directive.config);
+            traits.set(directive.name as VRTraitName, (directive as any).config);
             this.hasVRTraits = true;
           } else {
             directives.push(directive);
@@ -675,7 +676,7 @@ export class HoloScriptPlusParser {
           const directive = this.parseDirective();
           if (directive) {
             if (directive.type === 'trait') {
-              traits.set(directive.name, directive.config);
+              traits.set(directive.name as VRTraitName, (directive as any).config);
               this.hasVRTraits = true;
             } else {
               directives.push(directive);
@@ -704,7 +705,7 @@ export class HoloScriptPlusParser {
     }
 
     return {
-      type,
+      type: type as any,
       id,
       properties,
       directives,
@@ -727,10 +728,10 @@ export class HoloScriptPlusParser {
         return null;
       }
       const config = this.parseTraitConfig();
-      return { type: 'trait', name: name as VRTraitName, config };
+      return { type: 'trait' as const, name: name as VRTraitName, config } as any;
     }
 
-    if (LIFECYCLE_HOOKS.includes(name as LifecycleHook | VRLifecycleHook | ControllerHook)) {
+    if (LIFECYCLE_HOOKS.includes(name)) {
       const params: string[] = [];
       if (this.check('LPAREN')) {
         this.advance();
@@ -750,17 +751,17 @@ export class HoloScriptPlusParser {
       }
 
       return {
-        type: 'lifecycle',
-        hook: name as LifecycleHook | VRLifecycleHook | ControllerHook,
+        type: 'lifecycle' as const,
+        hook: name,
         params,
         body,
-      };
+      } as any;
     }
 
     if (name === 'state') {
       this.hasState = true;
       const body = this.parseStateBlock();
-      return { type: 'state', body };
+      return { type: 'state' as const, body } as any;
     }
 
     if (name === 'for') {
@@ -769,7 +770,7 @@ export class HoloScriptPlusParser {
       this.expect('IDENTIFIER', 'Expected "in"');
       const iterable = this.parseInlineExpression();
       const body = this.parseControlFlowBody();
-      return { type: 'for', variable, iterable, body };
+      return { type: 'for' as const, variable, iterable, body } as any;
     }
 
     if (name === 'if') {
@@ -790,7 +791,7 @@ export class HoloScriptPlusParser {
         }
       }
 
-      return { type: 'if', condition, body, else: elseBody };
+      return { type: 'if' as const, condition, body, else: elseBody } as any;
     }
 
     if (name === 'import') {
@@ -805,7 +806,7 @@ export class HoloScriptPlusParser {
         alias = this.expect('IDENTIFIER', 'Expected alias').value;
       }
       this.imports.push({ path, alias });
-      return { type: 'import', path, alias };
+      return { type: 'import' as const, path, alias } as any;
     }
 
     if (this.options.strict) {
@@ -837,8 +838,8 @@ export class HoloScriptPlusParser {
     return config;
   }
 
-  private parseStateBlock(): StateDeclaration {
-    const state: StateDeclaration = {};
+  private parseStateBlock(): Record<string, any> {
+    const state: Record<string, any> = {};
 
     if (this.check('LBRACE')) {
       this.advance();
