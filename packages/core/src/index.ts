@@ -81,6 +81,47 @@ export {
   type BehaviorState,
 } from './traits/AIDriverTrait';
 
+// HoloScript+ Material Trait (NEW - Phase 2: Graphics)
+export {
+  MaterialTrait,
+  createMaterialTrait,
+  MATERIAL_PRESETS,
+  type MaterialType,
+  type TextureChannel,
+  type TextureMap,
+  type PBRMaterial,
+  type MaterialConfig,
+} from './traits/MaterialTrait';
+
+// HoloScript+ Lighting Trait (NEW - Phase 2: Graphics)
+export {
+  LightingTrait,
+  createLightingTrait,
+  LIGHTING_PRESETS,
+  type LightType,
+  type ShadowType,
+  type Color,
+  type Vector3,
+  type ShadowConfig,
+  type LightSource,
+  type GlobalIlluminationConfig,
+} from './traits/LightingTrait';
+
+// HoloScript+ Rendering Trait (NEW - Phase 2: Graphics)
+export {
+  RenderingTrait,
+  createRenderingTrait,
+  type CullingMode,
+  type LodStrategy,
+  type GPUResourceTier,
+  type LODLevel,
+  type CullingConfig,
+  type BatchingConfig,
+  type TextureOptimization,
+  type ShaderOptimization,
+  type RenderingOptimization,
+} from './traits/RenderingTrait';
+
 // Performance Telemetry (NEW - Phase 1)
 export {
   PerformanceTelemetry,
