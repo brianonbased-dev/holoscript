@@ -44,6 +44,15 @@ export { HoloScriptCodeParser, type ParseResult, type ParseError } from './HoloS
 // HoloScript+ Parser (NEW)
 export { HoloScriptPlusParser, createParser, parse as parseHoloScriptPlus } from './parser/HoloScriptPlusParser';
 
+// HoloScript+ Enhanced Parser with Trait Annotations (NEW - Phase 3)
+export {
+  HoloScriptPlusParser as HoloScriptTraitAnnotationParser,
+  type MaterialTraitAnnotation,
+  type LightingTraitAnnotation,
+  type RenderingTraitAnnotation,
+  type TraitAnnotationConfig,
+} from './HoloScriptPlusParser';
+
 // Runtime
 export { HoloScriptRuntime } from './HoloScriptRuntime';
 
@@ -134,6 +143,34 @@ export {
   type MemorySnapshot,
   type AnalyticsExporter,
 } from './runtime/PerformanceTelemetry';
+
+// Hololand Graphics Pipeline Service (NEW - Phase 4)
+export {
+  HololandGraphicsPipelineService,
+  type MaterialAsset,
+  type TextureAsset,
+  type ShaderProgram,
+  type PlatformConfig,
+  type GraphicsConfiguration,
+  type MaterialConfig as HololandMaterialConfig,
+  type LightingConfig as HololandLightingConfig,
+  type RenderingConfig as HololandRenderingConfig,
+  type GPUMemoryEstimate,
+  type PerformanceMetrics,
+  type QualityPreset,
+} from './services/HololandGraphicsPipelineService';
+
+// Platform Performance Optimizer (NEW - Phase 5)
+export {
+  PlatformPerformanceOptimizer,
+  type DeviceInfo,
+  type PerformanceProfile,
+  type AdaptiveQualitySettings,
+  type BenchmarkResult,
+  type PerformanceRecommendation,
+  type CompressionFormat,
+  type DeviceCapabilities,
+} from './services/PlatformPerformanceOptimizer';
 
 // Type Checker
 export {
