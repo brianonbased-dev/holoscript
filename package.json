@@ -12,7 +12,12 @@
     "dev": "pnpm -r --parallel dev",
     "test": "pnpm -r test",
     "lint": "eslint packages/*/src/**/*.ts",
-    "clean": "pnpm -r exec rm -rf dist"
+    "clean": "pnpm -r exec rm -rf dist",
+    "version:patch": "node scripts/version.js patch",
+    "version:minor": "node scripts/version.js minor",
+    "version:major": "node scripts/version.js major",
+    "version:prerelease": "node scripts/version.js prerelease",
+    "publish": "pnpm -r publish --access public"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
