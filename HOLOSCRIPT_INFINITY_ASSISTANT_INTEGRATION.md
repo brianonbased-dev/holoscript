@@ -4,7 +4,7 @@ Complete guide for HoloScript language integration with the Infinity Assistant p
 
 ## Overview
 
-HoloScript is now fully integrated with **Infinity Assistant** - the public API that replaces the private uaa2-service for component building and deployment. This guide explains how HoloScript, Infinity Builder, and the Infinity Assistant service work together.
+HoloScript is now fully integrated with **Infinity Assistant** at infinityassistant.io - the public API for component building and deployment. This guide explains how HoloScript, Infinity Builder, and the Infinity Assistant service work together.
 
 ## Architecture
 
@@ -43,7 +43,7 @@ HoloScript is now fully integrated with **Infinity Assistant** - the public API 
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│         uaa2-service Master Portal (Internal Orchestrator)       │
+│      Infinity Assistant Orchestrator (Internal Coordinator)      │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │ • Internal orchestration of agent operations              │  │
 │  │ • Service routing and scaling                             │  │
@@ -392,7 +392,7 @@ HoloScript/
 │   │   │   └── types.ts                     # Type definitions
 │   │   └── dist/                            # Built output
 │   │
-│   ├── uaa2-client/  (renamed from)
+│   ├── infinityassistant/  (infinity builder client)
 │   │   ├── src/
 │   │   │   ├── UAA2Client.ts                # InfinityBuilderClient class
 │   │   │   ├── types.ts                     # Config & types
@@ -522,6 +522,6 @@ optimizations.forEach((opt, i) => {
 ## References
 
 - [HoloScript Language Spec](../README.md)
-- [Infinity Builder Client Docs](./packages/uaa2-client/README.md)
+- [Infinity Builder Client Docs](./packages/infinityassistant/README.md)
 - [Infinity Assistant API](https://api.infinityassistant.io)
 - [Hololand Integration](../../Hololand/platform/backend/INFINITY_ASSISTANT_INTEGRATION.md)

@@ -2,7 +2,7 @@
 
 ## Current Status: ✅ COMPLETE
 
-The HoloScript language is now fully integrated with the **Infinity Assistant** public API service, replacing all previous references to the private uaa2-service for component building and deployment.
+The HoloScript language is now fully integrated with the **Infinity Assistant** public API service at infinityassistant.io for component building and deployment.
 
 ## What Changed
 
@@ -69,8 +69,8 @@ Users can now sign up for Infinity Assistant directly in Hololand:
 └─────────────────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────┐
-│   uaa2-service Master Portal (Internal)      │
-│  • Orchestrates Infinity Assistant features   │
+│   Infinity Assistant Orchestrator (Internal) │
+│  • Orchestrates all AI assistant features    │
 │  • Quantum MCP Mesh coordination              │
 │  • Knowledge management                       │
 │  • Internal agent decision-making             │
@@ -99,11 +99,11 @@ Users can now sign up for Infinity Assistant directly in Hololand:
    - Updated package link: `packages/uaa2-client` → `packages/infinity-builder-client`
    - API client reference updated
 
-### uaa2-service Repository
+### Infinity Assistant Orchestrator
 1. ✅ **src/services/orchestration/InfinityBuilderOrchestrationService.ts**
    - Updated JSDoc comments to clarify:
      - Infinity Assistant is the public API
-     - Master Portal is the internal orchestrator
+     - Orchestrator handles internal coordination
      - HoloScript + Hololand integration flow
 
 ### infinityassistant-service Repository
@@ -239,10 +239,10 @@ console.log(`Deployed at: ${deployment.deploymentUrl}`);
 
 - **Integration Guide**: [HOLOSCRIPT_INFINITY_ASSISTANT_INTEGRATION.md](./HOLOSCRIPT_INFINITY_ASSISTANT_INTEGRATION.md)
 - **Public API**: https://api.infinityassistant.io/api
-- **GitHub - HoloScript**: https://github.com/josep-dev/HoloScript
-- **GitHub - Hololand**: https://github.com/josep-dev/Hololand
-- **GitHub - Infinity Assistant**: https://github.com/josep-dev/infinityassistant-service
-- **GitHub - Master Portal**: https://github.com/josep-dev/uaa2-service
+- **GitHub - HoloScript**: https://github.com/brianonbased-dev/HoloScript
+- **GitHub - Hololand**: https://github.com/brianonbased-dev/Hololand
+- **GitHub - Infinity Assistant**: https://github.com/brianonbased-dev/infinityassistant-service
+- **GitHub - Orchestrator**: https://github.com/brianonbased-dev/uaa2-service
 
 ---
 

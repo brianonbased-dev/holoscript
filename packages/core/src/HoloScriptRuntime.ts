@@ -15,6 +15,7 @@
  */
 
 import { logger } from './logger';
+import { ReactiveState, ExpressionEvaluator, createState } from './ReactiveState';
 import type {
   ASTNode,
   OrbNode,
@@ -369,6 +370,9 @@ export class HoloScriptRuntime {
         case 'visualize':
           result = await this.executeVisualize(node as VisualizeNode);
           break;
+        case 'state-declaration':
+          result = await this.executeStateDeclaration(node as any);
+          break;
         default:
           result = {
             success: false,
@@ -607,104 +611,18 @@ export class HoloScriptRuntime {
   /**
    * Evaluate an expression
    */
-  /**
-   * Evaluate an expression
-   */
   evaluateExpression(expr: string): HoloScriptValue {
     if (!expr || typeof expr !== 'string') return expr;
 
-    expr = expr.trim();
+    const evaluator = new ExpressionEvaluator(this.context.state.getSnapshot());
+    // Also include currently set variables in context
+    const varContext: Record<string, any> = {};
+    this.context.variables.forEach((v, k) => varContext[k] = v);
+    evaluator.updateContext(varContext);
 
-    // Security check
-    const suspicious = ['eval', 'process', 'require', '__proto__', 'constructor', 'Function'];
-    if (suspicious.some(kw => expr.toLowerCase().includes(kw))) {
-      logger.warn('Suspicious expression blocked', { expr });
-      return undefined;
-    }
-
-    // String literal
-    if ((expr.startsWith('"') && expr.endsWith('"')) || (expr.startsWith("'") && expr.endsWith("'"))) {
-      return expr.slice(1, -1);
-    }
-
-    // Number literal
-    if (/^-?\d+(\.\d+)?$/.test(expr)) {
-      return parseFloat(expr);
-    }
-
-    // Boolean literal
-    if (expr === 'true') return true;
-    if (expr === 'false') return false;
-    if (expr === 'null') return null;
-    if (expr === 'undefined') return undefined;
-
-    // Array literal [a, b, c]
-    if (expr.startsWith('[') && expr.endsWith(']')) {
-      const inner = expr.slice(1, -1);
-      if (!inner.trim()) return [];
-      const elements = this.splitByComma(inner);
-      return elements.map(e => this.evaluateExpression(e.trim())) as HoloScriptValue[];
-    }
-
-    // Object literal {a: 1, b: 2}
-    if (expr.startsWith('{') && expr.endsWith('}')) {
-      const inner = expr.slice(1, -1);
-      if (!inner.trim()) return {};
-      const pairs = this.splitByComma(inner);
-      const obj: Record<string, HoloScriptValue> = {};
-      for (const pair of pairs) {
-        const colonIndex = pair.indexOf(':');
-        if (colonIndex > 0) {
-          const key = pair.slice(0, colonIndex).trim();
-          const value = pair.slice(colonIndex + 1).trim();
-          obj[key] = this.evaluateExpression(value);
-        }
-      }
-      return obj;
-    }
-
-    // Function call: name(args)
-    const funcMatch = expr.match(/^(\w+)\s*\((.*)?\)$/);
-    if (funcMatch) {
-      const [, funcName, argsStr] = funcMatch;
-      const args = argsStr ? this.splitByComma(argsStr).map(a => this.evaluateExpression(a.trim())) : [];
-
-      // Check builtins
-      const builtin = this.builtinFunctions.get(funcName);
-      if (builtin) {
-        return builtin(args);
-      }
-
-      // Check user functions (but don't execute - just reference)
-      if (this.context.functions.has(funcName)) {
-        // For async execution, return a promise marker
-        return { __holoCall: funcName, args } as unknown as HoloScriptValue;
-      }
-
-      return undefined;
-    }
-
-    // Binary operations: a + b, a - b, etc.
-    const binaryOps = [
-      { pattern: /(.+)\s*\+\s*(.+)/, op: (a: HoloScriptValue, b: HoloScriptValue) => (typeof a === 'string' || typeof b === 'string') ? String(a) + String(b) : Number(a) + Number(b) },
-      { pattern: /(.+)\s*-\s*(.+)/, op: (a: HoloScriptValue, b: HoloScriptValue) => Number(a) - Number(b) },
-      { pattern: /(.+)\s*\*\s*(.+)/, op: (a: HoloScriptValue, b: HoloScriptValue) => Number(a) * Number(b) },
-      { pattern: /(.+)\s*\/\s*(.+)/, op: (a: HoloScriptValue, b: HoloScriptValue) => Number(b) !== 0 ? Number(a) / Number(b) : 0 },
-      { pattern: /(.+)\s*%\s*(.+)/, op: (a: HoloScriptValue, b: HoloScriptValue) => Number(a) % Number(b) },
-    ];
-
-    for (const { pattern, op } of binaryOps) {
-      const match = expr.match(pattern);
-      if (match) {
-        const left = this.evaluateExpression(match[1]);
-        const right = this.evaluateExpression(match[2]);
-        return op(left, right);
-      }
-    }
-
-    // Variable reference
-    return this.getVariable(expr);
+    return evaluator.evaluate(expr);
   }
+
 
   /**
    * Split string by comma, respecting nesting
@@ -769,10 +687,19 @@ export class HoloScriptRuntime {
     } : undefined;
 
     // Create orb object with reactive properties
+    const evaluatedProperties: Record<string, HoloScriptValue> = {};
+    for (const [key, val] of Object.entries(node.properties)) {
+        if (typeof val === 'string') {
+            evaluatedProperties[key] = this.evaluateExpression(val);
+        } else {
+            evaluatedProperties[key] = val;
+        }
+    }
+
     const orbData = {
       __type: 'orb',
       name: node.name,
-      properties: { ...node.properties },
+      properties: evaluatedProperties,
       position: adjustedPos,
       hologram: hologram,
       created: Date.now(),
@@ -786,6 +713,11 @@ export class HoloScriptRuntime {
 
     if (hologram) {
       this.context.hologramState.set(node.name, hologram);
+    }
+
+    // Apply directives if any
+    if (node.directives) {
+        this.applyDirectives(node);
     }
 
     this.createParticleEffect(`${node.name}_creation`, adjustedPos, '#00ffff', 20);
@@ -1701,6 +1633,7 @@ export class HoloScriptRuntime {
       focusHistory: [],
       environment: {},
       templates: new Map(),
+      state: createState({}),
     };
   }
 
@@ -1863,6 +1796,29 @@ export class HoloScriptRuntime {
       hologram: node.hologram,
       executionTime: 0
     };
+  }
+
+  private async executeStateDeclaration(node: any): Promise<ExecutionResult> {
+    const stateDirective = node.directives?.find((d: any) => d.type === 'state');
+    if (stateDirective) {
+      this.context.state.update(stateDirective.body);
+    }
+    return { success: true, output: 'State updated' };
+  }
+
+  private applyDirectives(node: ASTNode): void {
+    if (!node.directives) return;
+
+    for (const d of node.directives) {
+        if (d.type === 'trait') {
+            logger.info(`Applying trait ${d.name} to ${node.type}`);
+            // TODO: Integrate with VRTraitSystem
+        } else if (d.type === 'lifecycle') {
+            if (d.hook === 'on_mount') {
+                this.evaluateExpression(d.body);
+            }
+        }
+    }
   }
 
   getExecutionHistory(): ExecutionResult[] {

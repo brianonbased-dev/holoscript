@@ -33,6 +33,7 @@ import type {
   ExecuteNode,
   DebugNode,
   VisualizeNode,
+  HSPlusDirective,
 } from './types';
 
 const HOLOSCRIPT_SECURITY_CONFIG = {
@@ -114,6 +115,8 @@ export class HoloScriptParser {
         return this.parseEnvironment(tokens.slice(1));
       case 'template':
         return this.parseTemplate(tokens.slice(1));
+      case '@state':
+        return this.parseStateDirective(tokens.slice(1));
       case 'every':
       case 'on_user_gesture':
         return this.parseGlobalHandler(commandType, tokens.slice(1));
@@ -165,26 +168,45 @@ export class HoloScriptParser {
 
     const shape = tokens[0];
     const name = tokens[1];
+    let res: ASTNode[] = [];
 
     switch (shape) {
       case 'orb':
       case 'sphere':
-        return [this.createOrbNode(name, position)];
+        res = [this.createOrbNode(name, position)];
+        break;
       case 'function':
-        return [this.createFunctionNode(name, tokens.slice(2), position)];
+        res = [this.createFunctionNode(name, tokens.slice(2), position)];
+        break;
       case 'gate':
-        return [this.createGateNode(name, tokens.slice(2), position)];
+        res = [this.createGateNode(name, tokens.slice(2), position)];
+        break;
       case 'stream':
-        return [this.createStreamNode(name, tokens.slice(2), position)];
+        res = [this.createStreamNode(name, tokens.slice(2), position)];
+        break;
       case 'server':
-        return [this.createServerNode(tokens.slice(1), position)];
+        res = [this.createServerNode(tokens.slice(1), position)];
+        break;
       case 'database':
-        return [this.createDatabaseNode(tokens.slice(1), position)];
+        res = [this.createDatabaseNode(tokens.slice(1), position)];
+        break;
       case 'fetch':
-        return [this.createFetchNode(tokens.slice(1), position)];
+        res = [this.createFetchNode(tokens.slice(1), position)];
+        break;
       default:
-        return [this.createGenericNode(shape, name, position)];
+        res = [this.createGenericNode(shape, name, position)];
+        break;
     }
+
+    // Attach any trailing directives
+    if (res.length > 0) {
+      const directives = this.extractDirectives(tokens.slice(2));
+      if (directives.length > 0) {
+        res[0].directives = directives;
+      }
+    }
+
+    return res;
   }
 
   private parseConnectCommand(tokens: string[]): ASTNode[] {
@@ -401,9 +423,10 @@ export class HoloScriptParser {
 
   private tokenizeCommand(command: string): string[] {
     return command
-      .toLowerCase()
-      // Allow alphanumeric, underscores, and common URL/path/SQL chars
-      .replace(/[^\w\s.,:/=?&"'*()\[\]@%-]/g, ' ')
+      // We don't lowercase everything anymore to preserve case in interpolation/state
+      // .toLowerCase()
+      // Allow alphanumeric, underscores, and common URL/path/SQL/interpolation chars
+      .replace(/[^\w\s.,:/=?&"'*()\[\]@%${}-]/g, ' ')
       .split(/\s+/)
       .filter(token => token.length > 0);
   }
@@ -520,6 +543,75 @@ export class HoloScriptParser {
       target: tokens[0] || 'origin',
       body: []
     }];
+  }
+
+  // ============================================================================
+  // HS+ Directive Parsing
+  // ============================================================================
+
+  private parseStateDirective(tokens: string[]): ASTNode[] {
+    const body: Record<string, HoloScriptValue> = {};
+    
+    // Simple key:value parsing for state
+    for (let i = 0; i < tokens.length; i += 2) {
+      if (tokens[i] && tokens[i+1]) {
+        const key = tokens[i].replace(':', '');
+        const val = this.parseLiteral(tokens[i+1]);
+        body[key] = val;
+      }
+    }
+
+    return [{
+      type: 'state-declaration',
+      directives: [{ type: 'state', body }]
+    } as any];
+  }
+
+  private extractDirectives(tokens: string[]): HSPlusDirective[] {
+    const directives: HSPlusDirective[] = [];
+    
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        if (token.startsWith('@')) {
+            const name = token.slice(1);
+            
+            // Check if it's a trait
+            if (this.isTrait(name)) {
+                directives.push({
+                    type: 'trait',
+                    name: name as any,
+                    config: {} // TODO: Parse config if present
+                });
+            } else if (this.isLifecycleHook(name)) {
+                directives.push({
+                    type: 'lifecycle',
+                    hook: name as any,
+                    body: tokens[i+1] || '' // Assume next token is body for now
+                });
+                i++; // Skip body token
+            }
+        }
+    }
+    
+    return directives;
+  }
+
+  private isTrait(name: string): boolean {
+    const traits = ['grabbable', 'throwable', 'pointable', 'hoverable', 'scalable', 'rotatable', 'stackable', 'snappable', 'breakable'];
+    return traits.includes(name);
+  }
+
+  private isLifecycleHook(name: string): boolean {
+    const hooks = ['on_mount', 'on_unmount', 'on_update', 'on_data_update', 'on_grab', 'on_release', 'on_click'];
+    return hooks.includes(name);
+  }
+
+  private parseLiteral(val: string): HoloScriptValue {
+    if (val === 'true') return true;
+    if (val === 'false') return false;
+    if (val === 'null') return null;
+    if (!isNaN(Number(val))) return Number(val);
+    return val;
   }
 
   getAST(): ASTNode[] {

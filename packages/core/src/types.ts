@@ -84,7 +84,68 @@ export interface ASTNode {
   line?: number;
   /** Source column number (0-indexed) */
   column?: number;
+  /** HS+ Directives */
+  directives?: HSPlusDirective[];
 }
+
+// ============================================================================
+// HS+ Directive Types
+// ============================================================================
+
+export type VRTraitName =
+  | 'grabbable'
+  | 'throwable'
+  | 'pointable'
+  | 'hoverable'
+  | 'scalable'
+  | 'rotatable'
+  | 'stackable'
+  | 'snappable'
+  | 'breakable';
+
+export type LifecycleHook =
+  | 'on_mount'
+  | 'on_unmount'
+  | 'on_update'
+  | 'on_data_update';
+
+export type VRLifecycleHook =
+  | 'on_grab'
+  | 'on_release'
+  | 'on_hover_enter'
+  | 'on_hover_exit'
+  | 'on_point_enter'
+  | 'on_point_exit'
+  | 'on_collision'
+  | 'on_trigger_enter'
+  | 'on_trigger_exit'
+  | 'on_click'
+  | 'on_double_click';
+
+export type ControllerHook =
+  | 'on_controller_button'
+  | 'on_trigger_hold'
+  | 'on_trigger_release'
+  | 'on_grip_hold'
+  | 'on_grip_release';
+
+export type HSPlusDirective =
+  | { type: 'state'; body: Record<string, HoloScriptValue> }
+  | { type: 'for'; variable: string; iterable: string; body: ASTNode[] }
+  | { type: 'if'; condition: string; body: ASTNode[]; else?: ASTNode[] }
+  | { type: 'import'; path: string; alias: string }
+  | { type: 'lifecycle'; hook: LifecycleHook | VRLifecycleHook | ControllerHook; params?: string[]; body: string }
+  | { type: 'trait'; name: VRTraitName; config: Record<string, HoloScriptValue> };
+
+export interface HSPlusAST {
+  version: string;
+  root: ASTNode;
+  imports: Array<{ path: string; alias: string }>;
+  hasState: boolean;
+  hasVRTraits: boolean;
+  hasControlFlow: boolean;
+}
+
 
 export interface OrbNode extends ASTNode {
   type: 'orb';
@@ -341,7 +402,19 @@ export interface RuntimeContext {
   // Composition & Environment
   environment: Record<string, HoloScriptValue>;
   templates: Map<string, TemplateNode>;
+
+  // HS+ State
+  state: ReactiveState;
 }
+
+export interface ReactiveState {
+  get(key: string): HoloScriptValue;
+  set(key: string, value: HoloScriptValue): void;
+  subscribe(callback: (state: Record<string, HoloScriptValue>) => void): () => void;
+  getSnapshot(): Record<string, HoloScriptValue>;
+  update(updates: Record<string, HoloScriptValue>): void;
+}
+
 
 export interface ExecutionResult {
   success: boolean;
