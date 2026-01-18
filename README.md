@@ -56,6 +56,7 @@ const result = parser.parse(`
 ## Features
 
 - **9 VR Traits** - `@grabbable`, `@throwable`, `@pointable`, `@hoverable`, `@scalable`, `@rotatable`, `@stackable`, `@snappable`, `@breakable`
+- **Scale Magnitude** - Build from `galactic` to `atomic` scale with seamless transitions
 - **Reactive State** - `@state { count: 0 }` with automatic updates
 - **TypeScript Interop** - `@import "./logic.ts"` *(coming soon)*
 - **Voice Commands** - Build by speaking (Web Speech API)
@@ -63,12 +64,12 @@ const result = parser.parse(`
 
 ## Packages
 
-| Package | What it does | Status |
-|---------|--------------|--------|
-| `@holoscript/core` | Parser, runtime, types | ✅ |
-| `@holoscript/cli` | Command line tools | ✅ |
-| `@holoscript/infinityassistant` | AI building client | ✅ |
-| `@holoscript/creator-tools` | Visual editors | 🟡 *beta* |
+| Package | Version | What it does | Status |
+|---------|---------|--------------|--------|
+| `@holoscript/core` | 1.0.0 | Parser, runtime, types | ✅ |
+| `@holoscript/cli` | 1.0.0 | Command line tools | ✅ |
+| `@holoscript/infinityassistant` | 1.0.0 | AI building client | ✅ |
+| `@holoscript/creator-tools` | 0.9.0 | Visual editors | 🟡 *beta* |
 
 ## Build with AI
 
@@ -121,6 +122,21 @@ component#cart @state { items: [] } {
     div.item { ${item.name} - $${item.price} }
   }
   div.total { "Total: $${state.items.reduce((a,b) => a + b.price, 0)}" }
+}
+```
+
+```holoscript
+// Scale magnitude - universe to atom
+scale galactic {
+  orb#sun { color: "#ffcc00", glow: true }
+  orb#earth { position: [50, 0, 0] }
+}
+
+focus sun {
+  scale atomic {
+    orb#nucleus { color: "#ff0000" }
+    orb#electron { position: [1, 0, 0], scale: 0.1 }
+  }
 }
 ```
 

@@ -7,6 +7,7 @@ import type { CLIOptions } from './args';
 import { formatAST, formatResult, formatError } from './formatters';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as readline from 'readline';
 
 export class HoloScriptCLI {
   private parser: HoloScriptParser;
@@ -32,6 +33,8 @@ export class HoloScriptCLI {
           return this.runCommand();
         case 'ast':
           return this.astCommand();
+        case 'repl':
+          return this.replCommand();
         default:
           return 0;
       }
@@ -156,5 +159,71 @@ export class HoloScriptCLI {
     }
 
     fs.writeFileSync(outputPath, content, 'utf-8');
+  }
+
+  private async replCommand(): Promise<number> {
+    console.log('HoloScript REPL v1.0.0');
+    console.log('Type HoloScript commands to execute. Type "exit" or Ctrl+C to quit.\n');
+
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      prompt: 'holoscript> ',
+    });
+
+    rl.prompt();
+
+    return new Promise((resolve) => {
+      rl.on('line', async (line) => {
+        const input = line.trim();
+
+        if (input === 'exit' || input === 'quit') {
+          console.log('Goodbye!');
+          rl.close();
+          resolve(0);
+          return;
+        }
+
+        if (!input) {
+          rl.prompt();
+          return;
+        }
+
+        try {
+          const voiceCommand = {
+            command: input,
+            confidence: 1.0,
+            timestamp: Date.now(),
+          };
+
+          const ast = this.parser.parseVoiceCommand(voiceCommand);
+
+          if (ast.length === 0) {
+            console.log('No valid nodes parsed.');
+          } else {
+            if (this.options.showAST) {
+              console.log(formatAST(ast, { json: this.options.json }));
+            }
+
+            const results = await this.runtime.executeProgram(ast);
+            for (const result of results) {
+              if (result.success) {
+                console.log(`✓ ${result.output || 'OK'}`);
+              } else {
+                console.log(`✗ ${result.error || 'Error'}`);
+              }
+            }
+          }
+        } catch (error) {
+          console.error(formatError(error as Error));
+        }
+
+        rl.prompt();
+      });
+
+      rl.on('close', () => {
+        resolve(0);
+      });
+    });
   }
 }
