@@ -346,7 +346,7 @@ export class HoloScriptTypeChecker {
   /**
    * Infer type from a value
    */
-  private inferType(value: unknown): TypeInfo {
+  public inferType(value: unknown): TypeInfo {
     if (value === null || value === undefined) {
       return { type: 'any', nullable: true };
     }

@@ -68,7 +68,6 @@ describe('VoiceInputTrait', () => {
     });
 
     it('should toggle listening state', () => {
-      const initialState = trait.isActive();
       trait.toggleListening();
       // Can't easily test state change without Web Speech API
       expect(trait).toBeDefined();

@@ -305,7 +305,7 @@ describe('MaterialTrait', () => {
         },
         textures: [
           { path: '/diffuse.png', channel: 'baseColor' },
-          { path: '/normal.png', channel: 'normalMap', normalStrength: 1.5 },
+          { path: '/normal.png', channel: 'normalMap' },
           { path: '/roughness.png', channel: 'roughnessMap' },
         ],
         doubleSided: false,

@@ -19,6 +19,9 @@ import type {
   ASTNode,
   OrbNode,
 } from './types';
+import { MaterialTrait } from './traits/MaterialTrait';
+import { LightingTrait, LIGHTING_PRESETS } from './traits/LightingTrait';
+import { RenderingTrait } from './traits/RenderingTrait';
 
 // ============================================================================
 // Trait Annotation Types
@@ -424,7 +427,11 @@ export class HoloScriptPlusParser {
   /**
    * Get trait annotations as graphics traits
    */
-  createGraphicsTraits(config: GraphicsConfiguration): any {
+  createGraphicsTraits(config: GraphicsConfiguration): {
+    material: MaterialTrait | null;
+    lighting: LightingTrait | null;
+    rendering: RenderingTrait | null;
+  } {
     // This will be called by the runtime to create actual trait instances
     return {
       material: config.material ? this.createMaterialTrait(config.material) : null,
@@ -436,9 +443,7 @@ export class HoloScriptPlusParser {
   /**
    * Create MaterialTrait from config
    */
-  private createMaterialTrait(config: any): any {
-    // Lazy import to avoid circular dependencies
-    const { MaterialTrait } = require('./traits/MaterialTrait');
+  private createMaterialTrait(config: any): MaterialTrait {
 
     const material = new MaterialTrait({
       type: config.type || 'pbr',
@@ -469,14 +474,14 @@ export class HoloScriptPlusParser {
   /**
    * Create LightingTrait from config
    */
-  private createLightingTrait(config: any): any {
-    const { LightingTrait, LIGHTING_PRESETS } = require('./traits/LightingTrait');
+  private createLightingTrait(config: any): LightingTrait {
 
     let lighting: any;
 
     if (config.preset) {
-      const preset = LIGHTING_PRESETS[config.preset];
-      lighting = new LightingTrait(preset);
+      const presetFactory = LIGHTING_PRESETS[config.preset as keyof typeof LIGHTING_PRESETS];
+      const presetConfig = presetFactory ? presetFactory() : undefined;
+      lighting = new LightingTrait(presetConfig);
     } else {
       lighting = new LightingTrait();
     }
@@ -497,8 +502,7 @@ export class HoloScriptPlusParser {
   /**
    * Create RenderingTrait from config
    */
-  private createRenderingTrait(config: any): any {
-    const { RenderingTrait } = require('./traits/RenderingTrait');
+  private createRenderingTrait(config: any): RenderingTrait {
 
     const rendering = new RenderingTrait();
 

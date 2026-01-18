@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { HoloScriptPlusParser } from '../HoloScriptPlusParser';
+import { HoloScriptPlusParser, type MaterialTraitAnnotation } from '../HoloScriptPlusParser';
 
 describe('HoloScriptPlusParser', () => {
   let parser: HoloScriptPlusParser;
@@ -35,7 +35,7 @@ describe('HoloScriptPlusParser', () => {
       const code = `@material { type: pbr }`;
       const traits = parser.extractTraitAnnotations(code);
 
-      expect(traits[0].config.type).toBe('pbr');
+      expect((traits[0] as MaterialTraitAnnotation).config.type).toBe('pbr');
     });
 
     it('should parse material with textures', () => {

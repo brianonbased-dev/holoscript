@@ -29,6 +29,11 @@ import type {
   ImportNode,
   ExportNode,
   VariableDeclarationNode,
+  ScaleNode,
+  FocusNode,
+  EnvironmentNode,
+  CompositionNode,
+  TemplateNode,
 } from './types';
 
 // Security configuration
@@ -82,6 +87,7 @@ export class HoloScriptCodeParser {
       'try', 'catch', 'finally', 'throw',
       'const', 'let', 'var',
       'animate', 'modify', 'pulse', 'move', 'show', 'hide',
+      'scale', 'focus', 'environment', 'composition', 'template'
     ]);
   }
 
@@ -357,6 +363,16 @@ export class HoloScriptCodeParser {
           return this.parseAnimate();
         case 'modify':
           return this.parseModify();
+        case 'scale':
+          return this.parseScale();
+        case 'focus':
+          return this.parseFocus();
+        case 'environment':
+          return this.parseEnvironment();
+        case 'composition':
+          return this.parseComposition();
+        case 'template':
+          return this.parseTemplate();
         default:
           this.advance();
           return null;
@@ -663,7 +679,7 @@ export class HoloScriptCodeParser {
           if (prop.key === 'position' || prop.key === 'at') {
             position = this.parsePosition(prop.value);
           } else if (prop.key === 'color' || prop.key === 'glow' || prop.key === 'size') {
-            hologram = hologram || { shape: 'orb', color: '#00ffff', size: 1, glow: true, interactive: true };
+            hologram = hologram || { shape: 'orb', color: '#00ffff', size: 0.5, glow: true, interactive: true };
             if (prop.key === 'color') hologram.color = String(prop.value);
             if (prop.key === 'glow') hologram.glow = Boolean(prop.value);
             if (prop.key === 'size') hologram.size = Number(prop.value);
@@ -682,7 +698,7 @@ export class HoloScriptCodeParser {
       type: 'orb',
       name,
       position: position || { x: 0, y: 0, z: 0 },
-      hologram: hologram || { shape: 'orb', color: '#00ffff', size: 1, glow: true, interactive: true },
+      hologram: hologram || { shape: 'orb', color: '#00ffff', size: 0.5, glow: true, interactive: true },
       properties,
       methods: [],
     };
@@ -785,6 +801,155 @@ export class HoloScriptCodeParser {
       to,
       dataType,
       bidirectional: false,
+    };
+  }
+
+  /**
+   * Parse scale block: scale <magnitude> { body }
+   */
+  private parseScale(): ScaleNode | null {
+    this.expect('keyword', 'scale');
+    const magnitude = (this.expectIdentifier() || 'standard') as ScaleNode['magnitude'];
+    
+    const multipliers: Record<string, number> = {
+      'galactic': 1000000,
+      'macro': 1000,
+      'standard': 1,
+      'micro': 0.001,
+      'atomic': 0.000001
+    };
+
+    const body: ASTNode[] = [];
+    if (this.check('punctuation', '{')) {
+      this.advance();
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+        this.skipNewlines();
+        const node = this.parseDeclaration();
+        if (node) body.push(node);
+        this.skipNewlines();
+      }
+      this.expect('punctuation', '}');
+    }
+
+    return {
+      type: 'scale',
+      magnitude,
+      multiplier: multipliers[magnitude] || 1,
+      body, 
+      position: { x: 0, y: 0, z: 0 }
+    };
+  }
+
+  /**
+   * Parse focus block: focus <target> { body }
+   */
+  private parseFocus(): FocusNode | null {
+    this.expect('keyword', 'focus');
+    const target = this.expectIdentifier() || 'origin';
+    
+    const body: ASTNode[] = [];
+    if (this.check('punctuation', '{')) {
+      this.advance();
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+        this.skipNewlines();
+        const node = this.parseDeclaration();
+        if (node) body.push(node);
+        this.skipNewlines();
+      }
+      this.expect('punctuation', '}');
+    }
+
+    return {
+      type: 'focus',
+      target,
+      body,
+      position: { x: 0, y: 0, z: 0 }
+    };
+  }
+
+  /**
+   * Parse environment declaration
+   */
+  private parseEnvironment(): EnvironmentNode | null {
+    this.expect('keyword', 'environment');
+    const settings: Record<string, unknown> = {};
+    
+    // Parse settings until newline or }
+    while (this.position < this.tokens.length && 
+           this.currentToken()?.type !== 'newline' && 
+           !this.check('punctuation', '}')) {
+      const key = this.expectIdentifier();
+      if (!key) break;
+      settings[key] = this.parseLiteral();
+    }
+
+    return {
+      type: 'environment',
+      settings
+    };
+  }
+
+  /**
+   * Parse composition block
+   */
+  private parseComposition(): CompositionNode | null {
+    this.expect('keyword', 'composition');
+    const name = this.expectIdentifier() || 'unnamed';
+    
+    const children: ASTNode[] = [];
+    if (this.check('punctuation', '{')) {
+      this.advance();
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+        this.skipNewlines();
+        const node = this.parseDeclaration();
+        if (node) children.push(node);
+        this.skipNewlines();
+      }
+      this.expect('punctuation', '}');
+    }
+
+    return {
+      type: 'composition',
+      name,
+      children
+    };
+  }
+
+  /**
+   * Parse template declaration
+   */
+  private parseTemplate(): TemplateNode | null {
+    this.expect('keyword', 'template');
+    const name = this.expectIdentifier() || 'template';
+    
+    const params: string[] = [];
+    if (this.check('punctuation', '(')) {
+      this.advance();
+      while (!this.check('punctuation', ')') && this.position < this.tokens.length) {
+        const p = this.expectIdentifier();
+        if (p) params.push(p);
+        if (this.check('punctuation', ',')) this.advance();
+      }
+      this.expect('punctuation', ')');
+    }
+
+    const body: ASTNode[] = [];
+    if (this.check('punctuation', '{')) {
+      this.advance();
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+        this.skipNewlines();
+        const node = this.parseDeclaration();
+        if (node) body.push(node);
+        this.skipNewlines();
+      }
+      this.expect('punctuation', '}');
+    }
+
+    return {
+      type: 'template',
+      name,
+      parameters: params,
+      body
     };
   }
 
@@ -914,6 +1079,44 @@ export class HoloScriptCodeParser {
   }
 
   /**
+   * Parse a literal value (string, number, boolean, array, or object)
+   */
+  private parseLiteral(): unknown {
+    const token = this.currentToken();
+    if (!token) return null;
+
+    if (token.type === 'string') {
+      this.advance();
+      return token.value;
+    }
+
+    if (token.type === 'number') {
+      this.advance();
+      return parseFloat(token.value);
+    }
+
+    if (token.type === 'identifier') {
+      const val = token.value.toLowerCase();
+      this.advance();
+      if (val === 'true') return true;
+      if (val === 'false') return false;
+      if (val === 'null') return null;
+      return token.value;
+    }
+
+    if (this.check('punctuation', '[')) {
+      return this.parseArray();
+    }
+
+    if (this.check('punctuation', '{')) {
+      return this.parseObject();
+    }
+
+    this.advance();
+    return token.value;
+  }
+
+  /**
    * Parse a property (key: value)
    */
   private parseProperty(): { key: string; value: unknown } | null {
@@ -926,29 +1129,7 @@ export class HoloScriptCodeParser {
 
     this.advance(); // :
 
-    const valueToken = this.currentToken();
-    if (!valueToken) return null;
-
-    let value: unknown;
-    if (valueToken.type === 'string') {
-      value = valueToken.value;
-      this.advance();
-    } else if (valueToken.type === 'number') {
-      value = parseFloat(valueToken.value);
-      this.advance();
-    } else if (valueToken.type === 'identifier') {
-      if (valueToken.value === 'true') value = true;
-      else if (valueToken.value === 'false') value = false;
-      else value = valueToken.value;
-      this.advance();
-    } else if (this.check('punctuation', '[')) {
-      value = this.parseArray();
-    } else if (this.check('punctuation', '{')) {
-      value = this.parseObject();
-    } else {
-      value = valueToken.value;
-      this.advance();
-    }
+    const value = this.parseLiteral();
 
     return { key, value };
   }
@@ -1010,6 +1191,13 @@ export class HoloScriptCodeParser {
    * Parse position from value
    */
   private parsePosition(value: unknown): SpatialPosition {
+    if (Array.isArray(value)) {
+      return {
+        x: Number(value[0]) || 0,
+        y: Number(value[1]) || 0,
+        z: Number(value[2]) || 0,
+      };
+    }
     if (typeof value === 'object' && value !== null) {
       const v = value as Record<string, unknown>;
       return {
@@ -1155,7 +1343,7 @@ export class HoloScriptCodeParser {
           this.advance();
       }
       
-      const properties: Record<string, any> = {};
+      const properties: Record<string, unknown> = {};
       
       if (this.check('punctuation', '{')) {
           this.advance();

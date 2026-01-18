@@ -54,6 +54,8 @@ export interface TraitContext {
   emit: (event: string, payload?: unknown) => void;
   getState: () => Record<string, unknown>;
   setState: (updates: Record<string, unknown>) => void;
+  getScaleMultiplier: () => number;
+  setScaleContext: (magnitude: string) => void;
 }
 
 export interface VRContext {
@@ -232,7 +234,8 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
           Math.pow(handPos[1] - nodePos[1], 2) +
           Math.pow(handPos[2] - nodePos[2], 2)
         );
-        if (distance > (config.max_grab_distance || 3)) return;
+        const maxDist = (config.max_grab_distance || 3) * context.getScaleMultiplier();
+        if (distance > maxDist) return;
       }
 
       state.isGrabbed = true;
@@ -279,7 +282,7 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
           // Apply velocity if throwable trait exists
           if (node.traits.has('throwable')) {
             const throwConfig = node.traits.get('throwable') as ThrowableTrait;
-            const multiplier = throwConfig.velocity_multiplier || 1;
+            const multiplier = (throwConfig.velocity_multiplier || 1) * context.getScaleMultiplier();
             context.physics.applyVelocity(node, [
               velocity[0] * multiplier,
               velocity[1] * multiplier,
@@ -535,6 +538,24 @@ const scalableHandler: TraitHandler<ScalableTrait> = {
     // Clamp scale
     newScale = Math.max(config.min_scale || 0.1, Math.min(config.max_scale || 10, newScale));
 
+    // Magnitude Thresholding: Transition global context if scale crosses boundaries
+    const scaleMultiplier = context.getScaleMultiplier();
+    const effectiveScale = newScale * scaleMultiplier;
+
+    if (effectiveScale > 1000000 && scaleMultiplier < 1000000) {
+      context.setScaleContext('galactic');
+      newScale /= 1000000;
+    } else if (effectiveScale > 1000 && scaleMultiplier < 1000) {
+      context.setScaleContext('macro');
+      newScale /= 1000;
+    } else if (effectiveScale < 0.001 && scaleMultiplier > 0.001) {
+      context.setScaleContext('micro');
+      newScale *= 1000;
+    } else if (effectiveScale < 0.000001 && scaleMultiplier > 0.000001) {
+      context.setScaleContext('atomic');
+      newScale *= 1000000;
+    }
+
     node.properties.scale = newScale;
 
     context.emit('scale_update', { node, scale: newScale });
@@ -776,7 +797,7 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
     magnetic: false,
   },
 
-  onUpdate(node, config, _context, _delta) {
+  onUpdate(node, config, context, _delta) {
     if (!config.snap_points || config.snap_points.length === 0) return;
     if (!config.magnetic) return;
 
@@ -784,7 +805,7 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
 
     // Find closest snap point
     let closestPoint: Vector3 | null = null;
-    let closestDistance = config.snap_distance || 0.3;
+    let closestDistance = (config.snap_distance || 0.3) * context.getScaleMultiplier();
 
     for (const snapPoint of config.snap_points) {
       const distance = Math.sqrt(
@@ -818,7 +839,7 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
 
     // Find closest snap point
     let closestPoint: Vector3 | null = null;
-    let closestDistance = config.snap_distance || 0.3;
+    let closestDistance = (config.snap_distance || 0.3) * context.getScaleMultiplier();
 
     for (const snapPoint of config.snap_points) {
       const distance = Math.sqrt(

@@ -4,9 +4,10 @@
  * Tests for HololandGraphicsPipelineService and PlatformPerformanceOptimizer
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { HololandGraphicsPipelineService } from '../services/HololandGraphicsPipelineService';
 import { PlatformPerformanceOptimizer } from '../services/PlatformPerformanceOptimizer';
+import type { GraphicsConfiguration } from '../HoloScriptPlusParser';
 
 // ============================================================================
 // Hololand Graphics Pipeline Service Tests
@@ -107,7 +108,7 @@ describe('HololandGraphicsPipelineService', () => {
   describe('Graphics Configuration', () => {
     it('should initialize from graphics configuration', () => {
       const service = new HololandGraphicsPipelineService('desktop');
-      const config = {
+      const config: GraphicsConfiguration = {
         material: { type: 'pbr', pbr: { metallic: 0.5 } },
         lighting: { preset: 'studio' },
         rendering: { quality: 'high' },

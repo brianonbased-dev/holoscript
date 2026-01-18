@@ -64,6 +64,18 @@ export interface GestureData {
 // AST Node Types
 // ============================================================================
 
+
+export type HoloScriptValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | HoloScriptValue[]
+  | { [key: string]: HoloScriptValue }
+  // We can include ASTNode if values can be nodes (e.g. templates)
+  | ASTNode;
+
 export interface ASTNode {
   type: string;
   position?: SpatialPosition;
@@ -77,7 +89,7 @@ export interface ASTNode {
 export interface OrbNode extends ASTNode {
   type: 'orb';
   name: string;
-  properties: Record<string, unknown>;
+  properties: Record<string, HoloScriptValue>;
   methods: MethodNode[];
 }
 
@@ -93,7 +105,7 @@ export interface ParameterNode extends ASTNode {
   type: 'parameter';
   name: string;
   dataType: string;
-  defaultValue?: unknown;
+  defaultValue?: HoloScriptValue;
 }
 
 export interface ConnectionNode extends ASTNode {
@@ -121,12 +133,13 @@ export interface StreamNode extends ASTNode {
 export interface TransformationNode extends ASTNode {
   type: 'transformation';
   operation: string;
-  parameters: Record<string, unknown>;
+  parameters: Record<string, HoloScriptValue>;
 }
 
 export interface GenericASTNode extends ASTNode {
-  [key: string]: unknown;
+  [key: string]: HoloScriptValue | unknown; // keeping unknown for flexibility but preferring HoloScriptValue
 }
+
 
 // ============================================================================
 // Phase 2: Loop Types
@@ -151,6 +164,52 @@ export interface ForEachLoopNode extends ASTNode {
   variable: string;
   collection: string;
   body: ASTNode[];
+}
+
+// ============================================================================
+// Universe Scale & Spatial Context Types
+// ============================================================================
+
+export interface ScaleNode extends ASTNode {
+  type: 'scale';
+  magnitude: string; // 'galactic', 'macro', 'standard', 'micro', 'atomic'
+  multiplier: number;
+  body: ASTNode[];
+}
+
+export interface FocusNode extends ASTNode {
+  type: 'focus';
+  target: string;
+  body: ASTNode[];
+}
+
+// ============================================================================
+// Composition & Environment Types
+// ============================================================================
+
+export interface CompositionNode extends ASTNode {
+  type: 'composition';
+  name: string;
+  children: ASTNode[];
+}
+
+export interface EnvironmentNode extends ASTNode {
+  type: 'environment';
+  settings: Record<string, HoloScriptValue>;
+}
+
+export interface TemplateNode extends ASTNode {
+  type: 'template';
+  name: string;
+  parameters: string[];
+  body: ASTNode[];
+}
+
+export interface GlobalHandlerNode extends ASTNode {
+  type: 'global_handler';
+  handlerType: 'every' | 'on_gesture';
+  config: Record<string, HoloScriptValue>;
+  action: string;
 }
 
 // ============================================================================
@@ -181,7 +240,7 @@ export interface VariableDeclarationNode extends ASTNode {
   kind: 'const' | 'let' | 'var';
   name: string;
   dataType?: string;
-  value?: unknown;
+  value?: HoloScriptValue;
   isExpression?: boolean;
 }
 
@@ -211,7 +270,7 @@ export interface UI2DNode {
   type: '2d-element';
   elementType: UIElementType;
   name: string;
-  properties: Record<string, unknown>;
+  properties: Record<string, HoloScriptValue>;
   children?: UI2DNode[];
   events?: Record<string, string>;
 }
@@ -233,23 +292,32 @@ export interface UIStyle {
 // ============================================================================
 
 export interface RuntimeContext {
-  variables: Map<string, unknown>;
+  variables: Map<string, HoloScriptValue>;
   functions: Map<string, MethodNode>;
-  exports: Map<string, unknown>;
+  exports: Map<string, HoloScriptValue>;
   connections: ConnectionNode[];
   spatialMemory: Map<string, SpatialPosition>;
   hologramState: Map<string, HologramProperties>;
   executionStack: ASTNode[];
+
+  // Scaling & Context
+  currentScale: number;
+  scaleMagnitude: string;
+  focusHistory: string[];
+
+  // Composition & Environment
+  environment: Record<string, HoloScriptValue>;
+  templates: Map<string, TemplateNode>;
 }
 
 export interface ExecutionResult {
   success: boolean;
-  output?: unknown;
+  output?: HoloScriptValue;
   hologram?: HologramProperties;
   spatialPosition?: SpatialPosition;
   error?: string;
   executionTime?: number;
-  learningSignals?: any;
+  learningSignals?: Record<string, HoloScriptValue>;
 }
 
 export interface ParticleSystem {

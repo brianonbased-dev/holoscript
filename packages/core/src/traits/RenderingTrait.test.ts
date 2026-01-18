@@ -3,7 +3,6 @@ import {
   RenderingTrait,
   createRenderingTrait,
   type RenderingOptimization,
-  type LODLevel,
 } from '../traits/RenderingTrait';
 
 describe('RenderingTrait', () => {

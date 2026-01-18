@@ -391,7 +391,7 @@ export class LightingTrait {
       area: 0,
       probe: 0,
     };
-    for (const light of this.lights.values()) {
+    for (const light of Array.from(this.lights.values())) {
       counts[light.type]++;
     }
     return counts;

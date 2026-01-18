@@ -20,6 +20,13 @@ import type {
   GestureData,
   UI2DNode,
   HologramShape,
+  ScaleNode,
+  FocusNode,
+  CompositionNode,
+  EnvironmentNode,
+  TemplateNode,
+  GlobalHandlerNode,
+  HoloScriptValue,
 } from './types';
 
 const HOLOSCRIPT_SECURITY_CONFIG = {
@@ -95,6 +102,19 @@ export class HoloScriptParser {
         return this.parseDebugCommand(tokens.slice(1));
       case 'visualize':
         return this.parseVisualizeCommand(tokens.slice(1));
+      case 'composition':
+        return this.parseComposition(tokens.slice(1));
+      case 'environment':
+        return this.parseEnvironment(tokens.slice(1));
+      case 'template':
+        return this.parseTemplate(tokens.slice(1));
+      case 'every':
+      case 'on_user_gesture':
+        return this.parseGlobalHandler(commandType, tokens.slice(1));
+      case 'scale':
+        return this.parseScale(tokens.slice(1));
+      case 'focus':
+        return this.parseFocus(tokens.slice(1));
       default:
         return this.parseGenericCommand(tokens);
     }
@@ -183,7 +203,7 @@ export class HoloScriptParser {
         glow: true,
         interactive: true,
       },
-      properties: {},
+      properties: {} as Record<string, HoloScriptValue>,
       methods: [],
     };
   }
@@ -356,6 +376,75 @@ export class HoloScriptParser {
       type: 'generic',
       command: tokens.join(' '),
       hologram: { shape: 'orb', color: '#808080', size: 0.5, glow: false, interactive: true },
+    }];
+  }
+
+  private parseComposition(tokens: string[]): CompositionNode[] {
+    const name = tokens[0] || 'unnamed_composition';
+    return [{
+      type: 'composition',
+      name,
+      children: [],
+      position: { x: 0, y: 0, z: 0 }
+    }];
+  }
+
+  private parseEnvironment(tokens: string[]): EnvironmentNode[] {
+    const settings: Record<string, HoloScriptValue> = {};
+    if (tokens.includes('fog')) settings.fog = true;
+    if (tokens.includes('audio')) settings.audio = tokens[tokens.indexOf('audio') + 1];
+    if (tokens.includes('theme')) settings.theme = tokens[tokens.indexOf('theme') + 1];
+
+    return [{
+      type: 'environment',
+      settings
+    }];
+  }
+
+  private parseTemplate(tokens: string[]): TemplateNode[] {
+    const name = tokens[0] || 'template';
+    const parameters = tokens.slice(1).filter(t => t !== 'with' && t !== 'params');
+
+    return [{
+      type: 'template',
+      name,
+      parameters,
+      body: []
+    }];
+  }
+
+  private parseGlobalHandler(type: string, tokens: string[]): GlobalHandlerNode[] {
+    return [{
+      type: 'global_handler',
+      handlerType: type === 'every' ? 'every' : 'on_gesture',
+      config: { value: tokens[0] },
+      action: tokens.slice(1).join(' ')
+    }];
+  }
+
+  private parseScale(tokens: string[]): ScaleNode[] {
+    const magnitude = tokens[0] || 'standard';
+    const multipliers: Record<string, number> = {
+      'galactic': 1000000,
+      'macro': 1000,
+      'standard': 1,
+      'micro': 0.001,
+      'atomic': 0.000001
+    };
+
+    return [{
+      type: 'scale',
+      magnitude,
+      multiplier: multipliers[magnitude] || 1,
+      body: []
+    }];
+  }
+
+  private parseFocus(tokens: string[]): FocusNode[] {
+    return [{
+      type: 'focus',
+      target: tokens[0] || 'origin',
+      body: []
     }];
   }
 

@@ -10,10 +10,16 @@ export interface SourceLocation {
   offset: number;
 }
 
+export interface ParsedToken {
+  type: string;
+  value: string;
+  location: SourceLocation;
+}
+
 export interface ParseError {
   message: string;
   location: SourceLocation;
-  token: any;
+  token: ParsedToken | undefined;
   suggestion?: string;
   context?: string;
 }
@@ -22,7 +28,7 @@ export interface ParseError {
  * Enhanced parser with better error handling
  */
 export class EnhancedHoloScriptParser {
-  private tokens: any[];
+  private tokens: ParsedToken[];
   private position: number = 0;
   private line: number = 1;
   private column: number = 0;
@@ -36,8 +42,8 @@ export class EnhancedHoloScriptParser {
   /**
    * Tokenize with line/column tracking
    */
-  private tokenizeWithLocation(source: string): any[] {
-    const tokens: any[] = [];
+  private tokenizeWithLocation(source: string): ParsedToken[] {
+    const tokens: ParsedToken[] = [];
     let pos = 0;
     let line = 1;
     let column = 0;
@@ -181,15 +187,15 @@ export class EnhancedHoloScriptParser {
   }
 
   // Utility methods
-  currentToken() {
+  currentToken(): ParsedToken | undefined {
     return this.tokens[this.position];
   }
 
-  private previous() {
+  private previous(): ParsedToken | undefined {
     return this.tokens[this.position - 1];
   }
 
-  private advance() {
+  private advance(): ParsedToken | undefined {
     if (!this.isAtEnd()) this.position++;
     return this.previous();
   }

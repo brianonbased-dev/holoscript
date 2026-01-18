@@ -30,6 +30,12 @@ import type {
   ParticleSystem,
   TransformationNode,
   UI2DNode,
+  ScaleNode,
+  FocusNode,
+  EnvironmentNode,
+  CompositionNode,
+  TemplateNode,
+  HoloScriptValue,
 } from './types';
 import type { ImportLoader } from './types';
 
@@ -45,13 +51,13 @@ const RUNTIME_SECURITY_LIMITS = {
 /**
  * Event handler type
  */
-type EventHandler = (data?: unknown) => void | Promise<void>;
+type EventHandler = (data?: HoloScriptValue) => void | Promise<void>;
 
 /**
  * Scope for variable resolution
  */
 interface Scope {
-  variables: Map<string, unknown>;
+  variables: Map<string, HoloScriptValue>;
   parent?: Scope;
 }
 
@@ -76,8 +82,8 @@ interface Animation {
 interface UIElementState {
   type: string;
   name: string;
-  properties: Record<string, unknown>;
-  value?: unknown;
+  properties: Record<string, HoloScriptValue>;
+  value?: HoloScriptValue;
   visible: boolean;
   enabled: boolean;
 }
@@ -95,7 +101,7 @@ export class HoloScriptRuntime {
   private eventHandlers: Map<string, EventHandler[]> = new Map();
   private animations: Map<string, Animation> = new Map();
   private uiElements: Map<string, UIElementState> = new Map();
-  private builtinFunctions: Map<string, (args: unknown[]) => unknown>;
+  private builtinFunctions: Map<string, (args: HoloScriptValue[]) => HoloScriptValue>;
 
   constructor(_importLoader?: ImportLoader) {
     this.context = this.createEmptyContext();
@@ -106,8 +112,8 @@ export class HoloScriptRuntime {
   /**
    * Initialize built-in functions
    */
-  private initBuiltins(): Map<string, (args: unknown[]) => unknown> {
-    const builtins = new Map<string, (args: unknown[]) => unknown>();
+  private initBuiltins(): Map<string, (args: HoloScriptValue[]) => HoloScriptValue> {
+    const builtins = new Map<string, (args: HoloScriptValue[]) => HoloScriptValue>();
 
     // Display commands
     builtins.set('show', (args) => {
@@ -324,6 +330,21 @@ export class HoloScriptRuntime {
         case 'expression-statement':
           result = await this.executeCall(node);
           break;
+        case 'scale':
+          result = await this.executeScale(node as ScaleNode);
+          break;
+        case 'focus':
+          result = await this.executeFocus(node as FocusNode);
+          break;
+        case 'environment':
+          result = await this.executeEnvironment(node as EnvironmentNode);
+          break;
+        case 'composition':
+          result = await this.executeComposition(node as CompositionNode);
+          break;
+        case 'template':
+          result = await this.executeTemplate(node as TemplateNode);
+          break;
         default:
           result = {
             success: false,
@@ -412,7 +433,7 @@ export class HoloScriptRuntime {
   /**
    * Call a function with arguments
    */
-  async callFunction(name: string, args: unknown[] = []): Promise<ExecutionResult> {
+  async callFunction(name: string, args: HoloScriptValue[] = []): Promise<ExecutionResult> {
     // Check built-in functions first
     const builtin = this.builtinFunctions.get(name);
     if (builtin) {
@@ -492,7 +513,7 @@ export class HoloScriptRuntime {
   /**
    * Set a variable in current scope
    */
-  setVariable(name: string, value: unknown): void {
+  setVariable(name: string, value: HoloScriptValue): void {
     // Handle property access (e.g., "obj.prop")
     if (name.includes('.')) {
       const parts = name.split('.');
@@ -502,15 +523,15 @@ export class HoloScriptRuntime {
       let obj = this.getVariable(objName);
       if (obj === undefined || typeof obj !== 'object' || obj === null) {
         obj = {};
-        this.currentScope.variables.set(objName, obj);
+        this.currentScope.variables.set(objName, obj as HoloScriptValue);
       }
 
-      let current = obj as Record<string, unknown>;
+      let current = obj as Record<string, HoloScriptValue>;
       for (let i = 0; i < propPath.length - 1; i++) {
         if (current[propPath[i]] === undefined || typeof current[propPath[i]] !== 'object') {
           current[propPath[i]] = {};
         }
-        current = current[propPath[i]] as Record<string, unknown>;
+        current = current[propPath[i]] as Record<string, HoloScriptValue>;
       }
       current[propPath[propPath.length - 1]] = value;
     } else {
@@ -521,7 +542,7 @@ export class HoloScriptRuntime {
   /**
    * Get a variable from scope chain
    */
-  getVariable(name: string): unknown {
+  getVariable(name: string): HoloScriptValue {
     // Handle property access (e.g., "obj.prop")
     if (name.includes('.')) {
       const parts = name.split('.');
@@ -529,7 +550,7 @@ export class HoloScriptRuntime {
 
       for (let i = 1; i < parts.length && value !== undefined; i++) {
         if (typeof value === 'object' && value !== null) {
-          value = (value as Record<string, unknown>)[parts[i]];
+          value = (value as Record<string, HoloScriptValue>)[parts[i]];
         } else {
           return undefined;
         }
@@ -562,7 +583,10 @@ export class HoloScriptRuntime {
   /**
    * Evaluate an expression
    */
-  evaluateExpression(expr: string): unknown {
+  /**
+   * Evaluate an expression
+   */
+  evaluateExpression(expr: string): HoloScriptValue {
     if (!expr || typeof expr !== 'string') return expr;
 
     expr = expr.trim();
@@ -595,7 +619,7 @@ export class HoloScriptRuntime {
       const inner = expr.slice(1, -1);
       if (!inner.trim()) return [];
       const elements = this.splitByComma(inner);
-      return elements.map(e => this.evaluateExpression(e.trim()));
+      return elements.map(e => this.evaluateExpression(e.trim())) as HoloScriptValue[];
     }
 
     // Object literal {a: 1, b: 2}
@@ -603,7 +627,7 @@ export class HoloScriptRuntime {
       const inner = expr.slice(1, -1);
       if (!inner.trim()) return {};
       const pairs = this.splitByComma(inner);
-      const obj: Record<string, unknown> = {};
+      const obj: Record<string, HoloScriptValue> = {};
       for (const pair of pairs) {
         const colonIndex = pair.indexOf(':');
         if (colonIndex > 0) {
@@ -630,7 +654,7 @@ export class HoloScriptRuntime {
       // Check user functions (but don't execute - just reference)
       if (this.context.functions.has(funcName)) {
         // For async execution, return a promise marker
-        return { __holoCall: funcName, args };
+        return { __holoCall: funcName, args } as unknown as HoloScriptValue;
       }
 
       return undefined;
@@ -638,11 +662,11 @@ export class HoloScriptRuntime {
 
     // Binary operations: a + b, a - b, etc.
     const binaryOps = [
-      { pattern: /(.+)\s*\+\s*(.+)/, op: (a: unknown, b: unknown) => (typeof a === 'string' || typeof b === 'string') ? String(a) + String(b) : Number(a) + Number(b) },
-      { pattern: /(.+)\s*-\s*(.+)/, op: (a: unknown, b: unknown) => Number(a) - Number(b) },
-      { pattern: /(.+)\s*\*\s*(.+)/, op: (a: unknown, b: unknown) => Number(a) * Number(b) },
-      { pattern: /(.+)\s*\/\s*(.+)/, op: (a: unknown, b: unknown) => Number(b) !== 0 ? Number(a) / Number(b) : 0 },
-      { pattern: /(.+)\s*%\s*(.+)/, op: (a: unknown, b: unknown) => Number(a) % Number(b) },
+      { pattern: /(.+)\s*\+\s*(.+)/, op: (a: HoloScriptValue, b: HoloScriptValue) => (typeof a === 'string' || typeof b === 'string') ? String(a) + String(b) : Number(a) + Number(b) },
+      { pattern: /(.+)\s*-\s*(.+)/, op: (a: HoloScriptValue, b: HoloScriptValue) => Number(a) - Number(b) },
+      { pattern: /(.+)\s*\*\s*(.+)/, op: (a: HoloScriptValue, b: HoloScriptValue) => Number(a) * Number(b) },
+      { pattern: /(.+)\s*\/\s*(.+)/, op: (a: HoloScriptValue, b: HoloScriptValue) => Number(b) !== 0 ? Number(a) / Number(b) : 0 },
+      { pattern: /(.+)\s*%\s*(.+)/, op: (a: HoloScriptValue, b: HoloScriptValue) => Number(a) % Number(b) },
     ];
 
     for (const { pattern, op } of binaryOps) {
@@ -704,17 +728,29 @@ export class HoloScriptRuntime {
   // ============================================================================
 
   private async executeOrb(node: OrbNode): Promise<ExecutionResult> {
+    const scale = this.context.currentScale || 1;
+    const adjustedPos = node.position ? {
+      x: node.position.x * scale,
+      y: node.position.y * scale,
+      z: node.position.z * scale
+    } : { x: 0, y: 0, z: 0 };
+
     if (node.position) {
-      this.context.spatialMemory.set(node.name, node.position);
+      this.context.spatialMemory.set(node.name, adjustedPos);
     }
+
+    const hologram = node.hologram ? {
+      ...node.hologram,
+      size: (node.hologram.size || 1) * scale
+    } : undefined;
 
     // Create orb object with reactive properties
     const orbData = {
       __type: 'orb',
       name: node.name,
       properties: { ...node.properties },
-      position: node.position || { x: 0, y: 0, z: 0 },
-      hologram: node.hologram,
+      position: adjustedPos,
+      hologram: hologram,
       created: Date.now(),
       // Methods bound to this orb
       show: () => this.builtinFunctions.get('show')!([node.name]),
@@ -724,19 +760,19 @@ export class HoloScriptRuntime {
 
     this.context.variables.set(node.name, orbData);
 
-    if (node.hologram) {
-      this.context.hologramState.set(node.name, node.hologram);
+    if (hologram) {
+      this.context.hologramState.set(node.name, hologram);
     }
 
-    this.createParticleEffect(`${node.name}_creation`, node.position || { x: 0, y: 0, z: 0 }, '#00ffff', 20);
+    this.createParticleEffect(`${node.name}_creation`, adjustedPos, '#00ffff', 20);
 
-    logger.info('Orb created', { name: node.name, properties: Object.keys(node.properties) });
+    logger.info('Orb created', { name: node.name, properties: Object.keys(node.properties), scale });
 
     return {
       success: true,
       output: orbData,
-      hologram: node.hologram,
-      spatialPosition: node.position,
+      hologram: hologram,
+      spatialPosition: adjustedPos,
     };
   }
 
@@ -1359,7 +1395,7 @@ export class HoloScriptRuntime {
         return Array.isArray(data) ? data.length : 1;
 
       case 'unique':
-        return Array.isArray(data) ? [...new Set(data)] : data;
+        return Array.isArray(data) ? Array.from(new Set(data)) : data;
 
       case 'flatten':
         return Array.isArray(data) ? data.flat() : data;
@@ -1636,7 +1672,61 @@ export class HoloScriptRuntime {
       spatialMemory: new Map(),
       hologramState: new Map(),
       executionStack: [],
+      currentScale: 1,
+      scaleMagnitude: 'standard',
+      focusHistory: [],
+      environment: {},
+      templates: new Map(),
     };
+  }
+
+  private async executeScale(node: ScaleNode): Promise<ExecutionResult> {
+    const parentScale = this.context.currentScale;
+    this.context.currentScale *= node.multiplier;
+    this.context.scaleMagnitude = node.magnitude;
+
+    logger.info('Scale context entering', { magnitude: node.magnitude, multiplier: this.context.currentScale });
+    
+    // Emit event for renderer sync
+    this.emit('scale:change', { multiplier: this.context.currentScale, magnitude: node.magnitude });
+
+    const results = await this.executeProgram(node.body, this.context.executionStack.length);
+
+    // Restore parent scale after block
+    this.context.currentScale = parentScale;
+    
+    // Restore renderer scale
+    this.emit('scale:change', { multiplier: this.context.currentScale });
+
+    return {
+      success: results.every(r => r.success),
+      output: `Executed scale block: ${node.magnitude}`
+    };
+  }
+
+  private async executeFocus(node: FocusNode): Promise<ExecutionResult> {
+    this.context.focusHistory.push(node.target);
+    const results = await this.executeProgram(node.body, this.context.executionStack.length);
+
+    return {
+      success: results.every(r => r.success),
+      output: `Focused on ${node.target}`
+    };
+  }
+
+  private async executeEnvironment(node: EnvironmentNode): Promise<ExecutionResult> {
+    this.context.environment = { ...this.context.environment, ...node.settings };
+    return { success: true, output: 'Environment updated' };
+  }
+
+  private async executeComposition(node: CompositionNode): Promise<ExecutionResult> {
+    const results = await this.executeProgram(node.children, this.context.executionStack.length);
+    return { success: true, output: `Composition ${node.name} executed` };
+  }
+
+  private async executeTemplate(node: TemplateNode): Promise<ExecutionResult> {
+    this.context.templates.set(node.name, node);
+    return { success: true, output: `Template ${node.name} registered` };
   }
 
   getExecutionHistory(): ExecutionResult[] {

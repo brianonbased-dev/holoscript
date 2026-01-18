@@ -207,6 +207,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   private lastUpdateTime: number = 0;
   private companions: Record<string, Record<string, (...args: unknown[]) => unknown>>;
   private mounted: boolean = false;
+  private scaleMultiplier: number = 1;
 
   // VR context
   vrContext = {
@@ -662,6 +663,21 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
       emit: this.emit.bind(this),
       getState: () => this.state.getSnapshot(),
       setState: (updates) => this.state.update(updates),
+      getScaleMultiplier: () => this.scaleMultiplier,
+      setScaleContext: (magnitude: string) => {
+        const multipliers: Record<string, number> = {
+          'galactic': 1000000,
+          'macro': 1000,
+          'standard': 1,
+          'micro': 0.001,
+          'atomic': 0.000001
+        };
+        const newMultiplier = multipliers[magnitude] || 1;
+        if (this.scaleMultiplier !== newMultiplier) {
+          this.scaleMultiplier = newMultiplier;
+          this.emit('scale_change', { magnitude, multiplier: newMultiplier });
+        }
+      },
     };
   }
 
