@@ -57,18 +57,18 @@ const result = parser.parse(`
 
 - **9 VR Traits** - `@grabbable`, `@throwable`, `@pointable`, `@hoverable`, `@scalable`, `@rotatable`, `@stackable`, `@snappable`, `@breakable`
 - **Reactive State** - `@state { count: 0 }` with automatic updates
-- **TypeScript Interop** - `@import "./logic.ts"`
-- **Voice Commands** - Build by speaking
+- **TypeScript Interop** - `@import "./logic.ts"` *(coming soon)*
+- **Voice Commands** - Build by speaking (Web Speech API)
 - **AI Building** - Natural language to code via [infinityassistant.io](https://infinityassistant.io)
 
 ## Packages
 
-| Package | What it does |
-|---------|--------------|
-| `@holoscript/core` | Parser, runtime, types |
-| `@holoscript/cli` | Command line tools |
-| `@holoscript/infinityassistant` | AI building client |
-| `@holoscript/creator-tools` | Visual editors |
+| Package | What it does | Status |
+|---------|--------------|--------|
+| `@holoscript/core` | Parser, runtime, types | ✅ |
+| `@holoscript/cli` | Command line tools | ✅ |
+| `@holoscript/infinityassistant` | AI building client | ✅ |
+| `@holoscript/creator-tools` | Visual editors | 🟡 *beta* |
 
 ## Build with AI
 
@@ -91,11 +91,11 @@ console.log(result.holoScript); // Ready to deploy
 | WebXR (VR) | ✅ |
 | WebAR | ✅ |
 | React Native | ✅ |
-| Flutter | ✅ |
-| iOS (SwiftUI) | ✅ |
-| Android (Jetpack) | ✅ |
+| Flutter | 🟡 *coming soon* |
+| iOS (SwiftUI) | 🟡 *coming soon* |
+| Android (Jetpack) | 🟡 *coming soon* |
 | Electron | ✅ |
-| Tauri | ✅ |
+| Tauri | 🟡 *coming soon* |
 
 ## Examples
 
