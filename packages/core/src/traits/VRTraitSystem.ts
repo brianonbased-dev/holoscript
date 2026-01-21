@@ -30,6 +30,7 @@ import type {
   StackableTrait,
   SnappableTrait,
   BreakableTrait,
+  ProactiveTrait,
   HSPlusNode,
 } from '../types/HoloScriptPlus';
 
@@ -935,6 +936,58 @@ const breakableHandler: TraitHandler<BreakableTrait> = {
 };
 
 // =============================================================================
+// PROACTIVE TRAIT
+// =============================================================================
+
+/**
+ * @proactive trait handler
+ * 
+ * Implements Phase 2 'Active Autonomy'. This trait allows the object to 
+ * observe its environment and proactively suggest actions or state changes.
+ */
+const proactiveHandler: TraitHandler<ProactiveTrait> = {
+  name: 'proactive',
+
+  defaultConfig: {
+    intelligence_tier: 'basic',
+    observation_range: 5,
+    learning_rate: 0.1,
+    auto_suggest: true,
+    context_window: 10,
+  },
+
+  onAttach(node, config, context) {
+    console.log(`[Proactive] Neural bridge attached to ${node.id || node.type}`);
+    context.emit('proactive_init', { nodeId: node.id, tier: config.intelligence_tier });
+  },
+
+  onUpdate(node, config, context, delta) {
+    if (!config || !config.auto_suggest) return;
+
+    // Observe proximity to user (hands or headset)
+    const vr = context.vr;
+    const pos = node.properties.position as Vector3;
+    if (!pos || !vr.headset.position) return;
+
+    const dx = pos[0] - vr.headset.position[0];
+    const dy = pos[1] - vr.headset.position[1];
+    const dz = pos[2] - vr.headset.position[2];
+    const distanceToHead = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+    if (distanceToHead < (config.observation_range || 5)) {
+      // Logic for proactive suggestion (simulated for Phase 2 baseline)
+      if (Math.random() < 0.01 * (config.learning_rate || 0.1) * delta) {
+        context.emit('proactive_suggestion', {
+          nodeId: node.id,
+          type: 'interaction_hint',
+          suggestion: 'Object is observing your proximity. Suggesting engagement.',
+        });
+      }
+    }
+  },
+};
+
+// =============================================================================
 // UTILITIES
 // =============================================================================
 
@@ -975,6 +1028,7 @@ export class VRTraitRegistry {
     this.register(stackableHandler);
     this.register(snappableHandler);
     this.register(breakableHandler);
+    this.register(proactiveHandler);
   }
 
   register<T>(handler: TraitHandler<T>): void {
@@ -1058,4 +1112,5 @@ export {
   stackableHandler,
   snappableHandler,
   breakableHandler,
+  proactiveHandler,
 };

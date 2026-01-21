@@ -58,52 +58,10 @@ interface Token {
 }
 
 // =============================================================================
-// VR TRAITS
+// SHARED CONSTANTS
 // =============================================================================
 
-const VR_TRAITS: VRTraitName[] = [
-  'grabbable',
-  'throwable',
-  'pointable',
-  'hoverable',
-  'scalable',
-  'rotatable',
-  'stackable',
-  'snappable',
-  'breakable',
-];
-
-// =============================================================================
-// LIFECYCLE HOOKS
-// =============================================================================
-
-type HookName = string;
-
-const LIFECYCLE_HOOKS: HookName[] = [
-  // Standard lifecycle
-  'on_mount',
-  'on_unmount',
-  'on_update',
-  'on_data_update',
-  // VR lifecycle
-  'on_grab',
-  'on_release',
-  'on_hover_enter',
-  'on_hover_exit',
-  'on_point_enter',
-  'on_point_exit',
-  'on_collision',
-  'on_trigger_enter',
-  'on_trigger_exit',
-  'on_click',
-  'on_double_click',
-  // Controller hooks
-  'on_controller_button',
-  'on_trigger_hold',
-  'on_trigger_release',
-  'on_grip_hold',
-  'on_grip_release',
-];
+import { VR_TRAITS, LIFECYCLE_HOOKS } from '../constants';
 
 // =============================================================================
 // LEXER
@@ -722,7 +680,7 @@ export class HoloScriptPlusParser {
     this.expect('AT', 'Expected @');
     const name = this.expect('IDENTIFIER', 'Expected directive name').value;
 
-    if (VR_TRAITS.includes(name as VRTraitName)) {
+    if ((VR_TRAITS as readonly string[]).includes(name)) {
       if (!this.options.enableVRTraits) {
         this.warn(`VR trait @${name} is disabled`);
         return null;
@@ -731,7 +689,7 @@ export class HoloScriptPlusParser {
       return { type: 'trait' as const, name: name as VRTraitName, config } as any;
     }
 
-    if (LIFECYCLE_HOOKS.includes(name)) {
+    if ((LIFECYCLE_HOOKS as readonly string[]).includes(name)) {
       const params: string[] = [];
       if (this.check('LPAREN')) {
         this.advance();
@@ -807,6 +765,29 @@ export class HoloScriptPlusParser {
       }
       this.imports.push({ path, alias });
       return { type: 'import' as const, path, alias } as any;
+    }
+
+    if (name === 'external_api') {
+      const config: Record<string, any> = this.parseTraitConfig();
+      const url = config.url || '';
+      const method = config.method || 'GET';
+      const interval = config.interval || '0s';
+      
+      let body: HSPlusNode[] = [];
+      if (this.check('LBRACE')) {
+        body = this.parseControlFlowBody();
+      }
+      
+      return { type: 'external_api' as const, url, method, interval, body } as any;
+    }
+
+    if (name === 'generate') {
+      const config: Record<string, any> = this.parseTraitConfig();
+      const prompt = config.prompt || '';
+      const context = config.context || '';
+      const target = config.target || 'children';
+      
+      return { type: 'generate' as const, prompt, context, target } as any;
     }
 
     if (this.options.strict) {

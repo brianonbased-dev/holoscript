@@ -35,6 +35,9 @@
 import { HoloScriptParser } from './HoloScriptParser';
 import { HoloScriptRuntime } from './HoloScriptRuntime';
 
+// Constants (New)
+export * from './constants';
+
 // Parser
 export { HoloScriptParser } from './HoloScriptParser';
 export { HoloScript2DParser } from './HoloScript2DParser';
@@ -234,13 +237,89 @@ export type {
   ThrowVelocity,
   CollisionEvent,
 
-  // VR Traits
+  // VR Traits (Core)
   GrabbableTrait,
   ThrowableTrait,
   PointableTrait,
   HoverableTrait,
   ScalableTrait,
   RotatableTrait,
+  StackableTrait,
+  SnappableTrait,
+  BreakableTrait,
+  StretchableTrait,
+  MoldableTrait,
+
+  // Humanoid/Avatar Traits
+  SkeletonTrait,
+  BodyTrait,
+  FaceTrait,
+  ExpressiveTrait,
+  HairTrait,
+  ClothingTrait,
+  HandsTrait,
+  CharacterVoiceTrait,
+  LocomotionTrait,
+  PoseableTrait,
+  MorphTrait,
+
+  NetworkedTrait,
+  ProactiveTrait,
+
+  // Media Production Traits
+  RecordableTrait,
+  StreamableTrait,
+  CameraTrait,
+  VideoTrait,
+
+  // Analytics & Research Traits
+  TrackableTrait,
+  SurveyTrait,
+  ABTestTrait,
+  HeatmapTrait,
+
+  // Social & Viral Traits
+  ShareableTrait,
+  EmbeddableTrait,
+  QRTrait,
+  CollaborativeTrait,
+
+  // Effects Traits
+  ParticleTrait,
+  TransitionTrait,
+  FilterTrait,
+  TrailTrait,
+
+  // Audio Traits
+  SpatialAudioTrait,
+  VoiceTrait,
+  ReactiveAudioTrait,
+
+  // AI & Generative Traits
+  NarratorTrait,
+  ResponsiveTrait,
+  ProceduralTrait,
+  CaptionedTrait,
+
+  // Timeline & Choreography Traits
+  TimelineTrait,
+  ChoreographyTrait,
+
+  // Lifecycle Hooks
+  AllLifecycleHooks,
+  MediaLifecycleHook,
+  AnalyticsLifecycleHook,
+  SocialLifecycleHook,
+  EffectsLifecycleHook,
+  AudioLifecycleHook,
+  AILifecycleHook,
+  TimelineLifecycleHook,
+
+  // Builtin Types
+  RecordingClip,
+  ShareContent,
+  ShareResult,
+  ParticleConfig,
 
   // Phase 2: Loop Nodes
   ForLoopNode,
