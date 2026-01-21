@@ -579,6 +579,22 @@ export class HoloScriptPlusParser {
       this.skipNewlines();
     }
 
+    // Support for Fragment (Directive-only) files
+    if (this.check('EOF') && directives.length > 0) {
+      return {
+        type: 'fragment' as any,
+        id: 'root',
+        properties: {},
+        directives,
+        children: [],
+        traits: new Map(),
+        loc: {
+          start: { line: 1, column: 1 },
+          end: { line: this.current().line, column: this.current().column },
+        },
+      };
+    }
+
     const root = this.parseNode();
     root.directives = [...directives, ...root.directives];
 
@@ -790,12 +806,85 @@ export class HoloScriptPlusParser {
       return { type: 'generate' as const, prompt, context, target } as any;
     }
 
+    if (name === 'npc') {
+      const npcName = this.expect('STRING', 'Expected NPC name').value;
+      const props = this.parsePropsBlock();
+      return { type: 'npc' as const, name: npcName, props } as any;
+    }
+
+    if (name === 'dialog') {
+      const dialogName = this.expect('STRING', 'Expected dialog name').value;
+      const { props, options } = this.parseDialogBlock();
+      return { type: 'dialog' as const, name: dialogName, props, options } as any;
+    }
+
     if (this.options.strict) {
       this.error(`Unknown directive @${name}`);
     } else {
       this.warn(`Unknown directive @${name}`);
     }
     return null;
+  }
+
+  private parsePropsBlock(): Record<string, unknown> {
+    this.skipNewlines();
+    const props: Record<string, unknown> = {};
+    if (this.check('LBRACE')) {
+      this.advance();
+      this.skipNewlines();
+      while (!this.check('RBRACE') && !this.check('EOF')) {
+        const key = this.expect('IDENTIFIER', 'Expected property name').value;
+        if (this.check('COLON') || this.check('EQUALS')) {
+          this.advance();
+          props[key] = this.parseValue();
+        } else {
+          props[key] = true;
+        }
+        this.skipNewlines();
+      }
+      this.expect('RBRACE', 'Expected }');
+    }
+    return props;
+  }
+
+  private parseDialogBlock(): { props: Record<string, any>; options: any[] } {
+    this.skipNewlines();
+    const props: Record<string, any> = {};
+    const options: any[] = [];
+
+    if (this.check('LBRACE')) {
+      this.advance();
+      this.skipNewlines();
+
+      while (!this.check('RBRACE') && !this.check('EOF')) {
+        if (this.check('IDENTIFIER') && this.current().value === 'option') {
+          this.advance(); // consume 'option'
+          const text = this.expect('STRING', 'Expected option text').value;
+          this.expect('ARROW', 'Expected ->');
+          let target: any;
+          if (this.check('AT')) {
+            // @close or @trigger
+             const d = this.parseDirective();
+             target = { type: 'directive', value: d };
+          } else {
+            target = this.expect('STRING', 'Expected target ID').value;
+          }
+          options.push({ text, target });
+        } else {
+          // Normal property
+          const key = this.expect('IDENTIFIER', 'Expected property name').value;
+          if (this.check('COLON') || this.check('EQUALS')) {
+            this.advance();
+            props[key] = this.parseValue();
+          } else {
+            props[key] = true;
+          }
+        }
+        this.skipNewlines();
+      }
+      this.expect('RBRACE', 'Expected }');
+    }
+    return { props, options };
   }
 
   private parseTraitConfig(): Record<string, unknown> {
