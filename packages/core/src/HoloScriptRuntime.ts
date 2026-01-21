@@ -95,17 +95,24 @@ export class HoloScriptRuntime {
   private uiElements: Map<string, UIElementState> = new Map();
   private builtinFunctions: Map<string, (args: HoloScriptValue[]) => HoloScriptValue>;
 
-  constructor(_importLoader?: ImportLoader) {
+  constructor(_importLoader?: ImportLoader, customFunctions?: Record<string, (args: HoloScriptValue[]) => HoloScriptValue>) {
     this.context = this.createEmptyContext();
     this.currentScope = { variables: this.context.variables };
-    this.builtinFunctions = this.initBuiltins();
+    this.builtinFunctions = this.initBuiltins(customFunctions);
   }
 
   /**
    * Initialize built-in functions
    */
-  private initBuiltins(): Map<string, (args: HoloScriptValue[]) => HoloScriptValue> {
+  private initBuiltins(customFunctions?: Record<string, (args: HoloScriptValue[]) => HoloScriptValue>): Map<string, (args: HoloScriptValue[]) => HoloScriptValue> {
     const builtins = new Map<string, (args: HoloScriptValue[]) => HoloScriptValue>();
+    
+    // Inject Custom Functions
+    if (customFunctions) {
+      for (const [name, func] of Object.entries(customFunctions)) {
+        builtins.set(name, func);
+      }
+    }
 
     // Display commands
     builtins.set('show', (args) => {
@@ -243,6 +250,17 @@ export class HoloScriptRuntime {
       const index = Number(args[1]);
       if (Array.isArray(arr)) return arr[index];
       return undefined;
+    });
+
+    builtins.set('showSettings', (): any => {
+      this.emit('show-settings');
+      return true;
+    });
+
+    builtins.set('openChat', (args): any => {
+      const config = args[0] || {};
+      this.emit('show-chat', config);
+      return true;
     });
 
     // Console/Debug
@@ -668,6 +686,8 @@ export class HoloScriptRuntime {
       __type: 'orb',
       name: node.name,
       properties: evaluatedProperties,
+      traits: node.directives?.filter(d => d.type === 'trait').map(d => (d as any).name) || [],
+      directives: node.directives || [],
       position: adjustedPos,
       hologram: hologram,
       created: Date.now(),
@@ -1446,6 +1466,89 @@ export class HoloScriptRuntime {
         anim.startTime = now;
       }
     }
+
+    // Update real-life / system variables
+    this.updateSystemVariables();
+  }
+
+  /**
+   * Update real-life and system variables ($time, $user, etc.)
+   */
+  private updateSystemVariables(): void {
+    const now = new Date();
+    
+    // Time variables
+    this.setVariable('$time', now.toLocaleTimeString());
+    this.setVariable('$date', now.toLocaleDateString());
+    this.setVariable('$timestamp', now.getTime());
+    this.setVariable('$hour', now.getHours());
+    this.setVariable('$minute', now.getMinutes());
+    this.setVariable('$second', now.getSeconds());
+
+    // Mock Real-Life Data (Can be overridden by host)
+    if (this.getVariable('$user') === undefined) {
+      this.setVariable('$user', {
+        id: 'user_123',
+        name: 'Alpha Explorer',
+        level: 42,
+        rank: 'Legendary',
+        achievements: ['First World', 'Spirit Guide'],
+        preferences: { theme: 'holographic', language: 'en' }
+      });
+    }
+
+    if (this.getVariable('$location') === undefined) {
+      this.setVariable('$location', {
+        city: 'Neo Tokyo',
+        region: 'Holo-Sector 7',
+        coordinates: { lat: 35.6895, lng: 139.6917 },
+        altitude: 450
+      });
+    }
+
+    if (this.getVariable('$weather') === undefined) {
+      this.setVariable('$weather', {
+        condition: 'Neon Mist',
+        temperature: 24,
+        humidity: 65,
+        windSpeed: 12,
+        unit: 'C'
+      });
+    }
+
+    if (this.getVariable('$wallet') === undefined) {
+      this.setVariable('$wallet', {
+        address: '0xHolo...42ff',
+        balance: 1337.50,
+        currency: 'HOLO',
+        network: 'MainNet'
+      });
+    }
+
+    if (this.getVariable('$ai_config') === undefined) {
+      const savedKeys = typeof localStorage !== 'undefined' ? localStorage.getItem('brittney_api_keys') : null;
+      let configuredCount = 0;
+      if (savedKeys) {
+        try {
+          const keys = JSON.parse(savedKeys);
+          configuredCount = Object.values(keys).filter(k => !!k).length;
+        } catch (e) {}
+      }
+
+      this.setVariable('$ai_config', {
+        status: configuredCount > 0 ? 'configured' : 'pending',
+        providerCount: configuredCount,
+        lastUpdated: Date.now()
+      });
+    }
+
+    if (this.getVariable('$chat_status') === undefined) {
+      this.setVariable('$chat_status', {
+        active: true,
+        typing: false,
+        version: '1.0.0-brittney'
+      });
+    }
   }
 
   // ==========================================================================
@@ -1696,6 +1799,8 @@ export class HoloScriptRuntime {
     this.eventHandlers.clear();
     this.animations.clear();
     this.uiElements.clear();
+    // Note: System variables are NOT re-added on reset.
+    // They will be initialized when the runtime is next used.
   }
 
   private createEmptyContext(): RuntimeContext {
@@ -1852,14 +1957,19 @@ export class HoloScriptRuntime {
     if (!node.directives) return;
 
     for (const d of node.directives) {
-        if (d.type === 'trait') {
-            logger.info(`Applying trait ${d.name} to ${node.type}`);
-            // TODO: Integrate with VRTraitSystem
-        } else if (d.type === 'lifecycle') {
-            if (d.hook === 'on_mount') {
-                this.evaluateExpression(d.body);
-            }
+      if (d.type === 'trait') {
+        logger.info(`Applying trait ${d.name} to ${node.type}`);
+        // Optional: Trigger custom initialization for specific traits
+        if (d.name as string === 'chat') {
+           this.emit('show-chat', d.config);
         }
+      } else if (d.type === 'state') {
+        this.context.state.update(d.body);
+      } else if (d.type === 'lifecycle') {
+        if (d.hook === 'on_mount') {
+          this.evaluateExpression(d.body);
+        }
+      }
     }
   }
 

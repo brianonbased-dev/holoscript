@@ -3,8 +3,8 @@
   "version": "2.0.2",
   "description": "HoloScript+: VR language with declarative syntax, state management, reactive traits, and VR interactions. Full backward compatible with original HoloScript.",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "sideEffects": false,
   "files": [
@@ -13,28 +13,28 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./parser": {
       "types": "./dist/parser.d.ts",
-      "import": "./dist/parser.mjs",
-      "require": "./dist/parser.js"
+      "import": "./dist/parser.js",
+      "require": "./dist/parser.cjs"
     },
     "./runtime": {
       "types": "./dist/runtime.d.ts",
-      "import": "./dist/runtime.mjs",
-      "require": "./dist/runtime.js"
+      "import": "./dist/runtime.js",
+      "require": "./dist/runtime.cjs"
     },
     "./type-checker": {
       "types": "./dist/type-checker.d.ts",
-      "import": "./dist/type-checker.mjs",
-      "require": "./dist/type-checker.js"
+      "import": "./dist/type-checker.js",
+      "require": "./dist/type-checker.cjs"
     },
     "./debugger": {
       "types": "./dist/debugger.d.ts",
-      "import": "./dist/debugger.mjs",
-      "require": "./dist/debugger.js"
+      "import": "./dist/debugger.js",
+      "require": "./dist/debugger.cjs"
     }
   },
   "scripts": {

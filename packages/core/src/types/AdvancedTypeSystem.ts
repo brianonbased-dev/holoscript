@@ -474,6 +474,8 @@ export interface HSPlusBuiltins {
   emit: (event: string, data?: any) => void;
   on: (event: string, handler: (data: any) => void) => void;
   off: (event: string, handler?: (data: any) => void) => void;
+  showSettings: () => void;
+  openChat: (config?: any) => void;
   [key: string]: any;
 }
 

@@ -71,6 +71,28 @@ export class ExpressionEvaluator {
   evaluate(expression: string): any {
     if (typeof expression !== 'string') return expression;
 
+    // Security: Block dangerous keywords
+    const dangerousPatterns = [
+      /\beval\s*\(/,
+      /\brequire\s*\(/,
+      /\bimport\s*\(/,
+      /\bprocess\s*\./,
+      /\bglobal\s*\./,
+      /\b__dirname\b/,
+      /\b__filename\b/,
+      /\bfs\s*\./,
+      /\bchild_process\s*\./,
+      /\bfs\.writeFileSync/,
+      /\bfs\.readFileSync/,
+    ];
+
+    for (const pattern of dangerousPatterns) {
+      if (pattern.test(expression)) {
+        console.warn(`Security: Blocked suspicious expression: ${expression}`);
+        return undefined;
+      }
+    }
+
     // If it's a template string with ${}, we need to interpolate
     if (expression.includes('${')) {
         // Special case: if the whole string is just one interpolation, return raw value

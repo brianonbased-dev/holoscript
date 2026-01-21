@@ -38,7 +38,9 @@ import { HoloScriptRuntime } from './HoloScriptRuntime';
 // Parser
 export { HoloScriptParser } from './HoloScriptParser';
 export { HoloScript2DParser } from './HoloScript2DParser';
-export { HoloScriptCodeParser, type ParseResult, type ParseError } from './HoloScriptCodeParser';
+// Editor & Tools
+export * from './HoloScriptValidator';
+export * from './HoloScriptCodeParser';
 
 // HoloScript+ Parser (NEW)
 export { HoloScriptPlusParser, createParser, parse as parseHoloScriptPlus } from './parser/HoloScriptPlusParser';

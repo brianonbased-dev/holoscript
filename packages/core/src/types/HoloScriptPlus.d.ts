@@ -435,6 +435,8 @@ export interface HSPlusRuntime {
   // Emit event
   emit: (event: string, payload?: unknown) => void;
 
+  updateEntity: (id: string, properties: Partial<Record<string, unknown>>) => boolean;
+
   // Subscribe to events
   on: (event: string, handler: (payload: unknown) => void) => () => void;
 }

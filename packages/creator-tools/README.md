@@ -556,6 +556,28 @@ MIT © 2026 HoloScript+ Team
 - **@holoscript/parser** - DSL parser
 - **@holoscript/graphics** - Graphics pipeline
 
+## 📦 Package Boundaries
+
+> **Important**: This package is distinct from `@hololand/builder`.
+
+| Package | Purpose | License | Use Case |
+|---------|---------|---------|----------|
+| `@holoscript/creator-tools` | **Embeddable Components** - React UI components | MIT | Embed trait editors in your own app |
+| `@hololand/builder` | **Full Application** - Complete world builder | Elastic-2.0 | Standalone drag-and-drop VR world creation |
+
+### When to use @holoscript/creator-tools (this package)
+
+- You're building **your own application** and need HoloScript editing components
+- You want to embed a TraitEditor or PreviewDashboard in your React app
+- You're creating a custom HoloScript development environment
+- You need **MIT-licensed** components for open-source projects
+
+### When to use @hololand/builder
+
+- You need a **complete, ready-to-use** world building application
+- Non-technical users need to create VR worlds without coding
+- You want template-based world creation with asset management
+
 ---
 
 ## 📞 Support

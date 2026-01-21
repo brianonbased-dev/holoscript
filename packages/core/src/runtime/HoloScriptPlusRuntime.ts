@@ -584,7 +584,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
     }
   }
 
-  private update(delta: number): void {
+  public update(delta: number): void {
     if (!this.rootInstance) return;
 
     // Update all instances
@@ -724,6 +724,66 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
     return this.state.getSnapshot();
   }
 
+  // ==========================================================================
+  // COMPATIBILITY METHODS
+  // ==========================================================================
+
+  getVariable(name: string): unknown {
+    return this.state.get(name as keyof StateDeclaration);
+  }
+
+  setVariable(name: string, value: unknown): void {
+    this.state.set(name as keyof StateDeclaration, value);
+  }
+
+  getContext(): any {
+    // Legacy mapping for context inspection
+    const spatialMemory = new Map<string, any>();
+    const hologramState = new Map<string, any>();
+
+    const traverse = (instance: NodeInstance) => {
+      if (instance.node.id) {
+        spatialMemory.set(instance.node.id, instance.node.properties.position || { x: 0, y: 0, z: 0 });
+        hologramState.set(instance.node.id, {
+          shape: instance.node.properties.shape || instance.node.type,
+          color: instance.node.properties.color,
+          size: instance.node.properties.size,
+          glow: instance.node.properties.glow,
+          interactive: instance.node.properties.interactive,
+        });
+      }
+      instance.children.forEach(traverse);
+    };
+
+    if (this.rootInstance) traverse(this.rootInstance);
+
+    return {
+      spatialMemory,
+      hologramState,
+      state: this.state,
+      builtins: this.builtins,
+      vr: this.vrContext,
+    };
+  }
+
+  reset(): void {
+    this.unmount();
+    this.state = createState({});
+    this.mounted = false;
+  }
+
+  updateAnimations(): void {
+    this.update(1 / 60);
+  }
+
+  updateParticles(delta: number): void {
+    this.update(delta);
+  }
+
+  getHologramStates(): Map<string, any> {
+    return this.getContext().hologramState;
+  }
+
   setState(updates: Partial<StateDeclaration>): void {
     this.state.update(updates);
   }
@@ -739,6 +799,26 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
         }
       });
     }
+  }
+
+  updateEntity(id: string, properties: Partial<Record<string, unknown>>): boolean {
+    if (!this.rootInstance) return false;
+
+    let found = false;
+    const traverse = (instance: NodeInstance) => {
+      if (instance.node.id === id) {
+        instance.node.properties = { ...instance.node.properties, ...properties };
+        // If we have a renderer, notify it of the change
+        if (this.options.renderer && instance.renderedNode) {
+          this.options.renderer.updateElement(instance.renderedNode, properties);
+        }
+        found = true;
+      }
+      instance.children.forEach(traverse);
+    };
+
+    traverse(this.rootInstance);
+    return found;
   }
 
   on(event: string, handler: (payload: unknown) => void): () => void {

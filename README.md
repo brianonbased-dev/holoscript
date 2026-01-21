@@ -4,6 +4,29 @@
 
 A declarative language that compiles to 9 platforms from one source.
 
+<p align="center">
+  <img src="docs/assets/gifs/holoscript-compile-demo.gif" alt="HoloScript compiling to multiple platforms" width="650">
+  <br>
+  <em>One file → Web, VR, AR, iOS, Android, Desktop</em>
+</p>
+
+---
+
+## 📁 File Types
+
+**Not sure which to use?**
+- **`.holo`** → You're learning or building something simple
+- **`.hsplus`** → You need multiplayer, advanced physics, or marketplace features
+
+| Extension | What It Does |
+|-----------|-------------|
+| `.holo` | Standard HoloScript – objects, animations, basic UI |
+| `.hsplus` | HoloScript Plus – adds networking, physics joints, procedural gen |
+
+> 💡 **Start with `.holo`**. Upgrade to `.hsplus` when your project grows.
+
+---
+
 > 💬 **Talk or type to build.** Powered by [Infinity Assistant](https://infinityassistant.io).
 >
 > - 🥽 **VR:** "Create a coffee shop with a counter and menu board"
