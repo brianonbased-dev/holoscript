@@ -534,6 +534,8 @@ export class HoloScriptPlusParser {
     // Tokenize
     const lexer = new Lexer(source);
     this.tokens = lexer.tokenize();
+    try { require('fs').writeFileSync('tokens.log', JSON.stringify(this.tokens, null, 2)); } catch(e){}
+
 
     // Parse root node
     const root = this.parseDocument();
@@ -807,6 +809,7 @@ export class HoloScriptPlusParser {
     }
 
     if (name === 'npc') {
+      try { require('fs').appendFileSync('debug_parser.log', `ENTERED NPC BLOCK. Name length: ${name.length}\n`); } catch(e){}
       const npcName = this.expect('STRING', 'Expected NPC name').value;
       const props = this.parsePropsBlock();
       return { type: 'npc' as const, name: npcName, props } as any;
