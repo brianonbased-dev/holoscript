@@ -1,0 +1,15 @@
+// Basic trait testing fixture
+orb#grabbable_ball @grabbable {
+  position: [0, 1, 0]
+  color: "#00ff00"
+}
+
+cube#throwable_cube @grabbable @throwable {
+  position: [2, 1, 0]
+  color: "#0000ff"
+}
+
+sphere#interactive @grabbable @hoverable @pointable {
+  position: [-2, 1, 0]
+  color: "#ffff00"
+}

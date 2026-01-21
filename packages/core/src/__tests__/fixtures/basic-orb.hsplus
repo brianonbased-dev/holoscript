@@ -1,0 +1,6 @@
+// Basic orb fixture for testing
+orb#test_orb {
+  position: [1, 2, 3]
+  color: "#ff0000"
+  size: 0.5
+}
