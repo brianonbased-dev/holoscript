@@ -6,6 +6,8 @@
  */
 
 import * as THREE from 'three';
+import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 
 /**
  * Renderer interface from HoloScriptPlusRuntime
@@ -33,6 +35,19 @@ interface ElementProperties {
   intensity?: number;
   castShadow?: boolean;
   receiveShadow?: boolean;
+  // Model properties
+  src?: string;
+  animations?: boolean;
+  // Audio properties
+  audio?: string;
+  volume?: number;
+  loop?: boolean;
+  spatial?: boolean;
+  // Physics properties
+  physics?: 'static' | 'dynamic' | 'kinematic';
+  mass?: number;
+  friction?: number;
+  restitution?: number;
   [key: string]: unknown;
 }
 
@@ -43,9 +58,24 @@ export class ThreeRenderer implements Renderer {
   private scene: THREE.Scene;
   private materials: Map<string, THREE.Material> = new Map();
   private geometries: Map<string, THREE.BufferGeometry> = new Map();
+  private modelCache: Map<string, GLTF> = new Map();
+  private gltfLoader: GLTFLoader;
+  private dracoLoader: DRACOLoader;
+  private audioLoader: THREE.AudioLoader;
+  private audioListener: THREE.AudioListener | null = null;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
+
+    // Initialize GLTF loader with Draco compression support
+    this.gltfLoader = new GLTFLoader();
+    this.dracoLoader = new DRACOLoader();
+    this.dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+    this.gltfLoader.setDRACOLoader(this.dracoLoader);
+
+    // Initialize audio loader
+    this.audioLoader = new THREE.AudioLoader();
+
     this.initializeDefaults();
   }
 
@@ -107,11 +137,67 @@ export class ThreeRenderer implements Renderer {
       case 'avatar':
         return this.createAvatar(props);
 
+      case 'model':
+      case 'gltf':
+        return this.createModelPlaceholder(props);
+
+      case 'audio':
+      case 'sound':
+        return this.createAudioSource(props);
+
       default:
         // Unknown type - create empty group
         console.warn(`Unknown element type: ${type}`);
         return this.createGroup(props);
     }
+  }
+
+  /**
+   * Load a GLTF/GLB model asynchronously
+   * Returns a promise that resolves when the model is loaded
+   */
+  async loadModel(src: string, options?: { animations?: boolean }): Promise<THREE.Group> {
+    // Check cache first
+    if (this.modelCache.has(src)) {
+      const cached = this.modelCache.get(src)!;
+      return cached.scene.clone();
+    }
+
+    return new Promise((resolve, reject) => {
+      this.gltfLoader.load(
+        src,
+        (gltf) => {
+          // Cache the loaded model
+          this.modelCache.set(src, gltf);
+
+          // Clone for this instance
+          const model = gltf.scene.clone();
+
+          // Enable shadows on all meshes
+          model.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+
+          resolve(model);
+        },
+        undefined,
+        (error) => {
+          console.error(`Failed to load model: ${src}`, error);
+          reject(error);
+        }
+      );
+    });
+  }
+
+  /**
+   * Get animations from a loaded model
+   */
+  getModelAnimations(src: string): THREE.AnimationClip[] {
+    const cached = this.modelCache.get(src);
+    return cached?.animations ?? [];
   }
 
   /**
@@ -318,6 +404,78 @@ export class ThreeRenderer implements Renderer {
     return group;
   }
 
+  private createModelPlaceholder(props: ElementProperties): THREE.Group {
+    // Create a group that will hold the model once loaded
+    const group = new THREE.Group();
+    group.name = 'model';
+    group.userData.modelSrc = props.src;
+    group.userData.isModelPlaceholder = true;
+
+    // Apply transforms
+    this.updateElement(group, props);
+
+    // If src is provided, start loading asynchronously
+    if (props.src) {
+      this.loadModel(props.src, { animations: props.animations })
+        .then((model) => {
+          // Add loaded model to group
+          group.add(model);
+          group.userData.isModelPlaceholder = false;
+          group.userData.loadedModel = model;
+        })
+        .catch((err) => {
+          console.error(`Failed to load model ${props.src}:`, err);
+        });
+    }
+
+    return group;
+  }
+
+  private createAudioSource(props: ElementProperties): THREE.Group {
+    const group = new THREE.Group();
+    group.name = 'audio';
+    group.userData.audioSrc = props.audio;
+
+    // Apply transforms
+    this.updateElement(group, props);
+
+    // Create audio source if we have a listener
+    if (props.audio && this.audioListener) {
+      const isSpatial = props.spatial !== false;
+
+      if (isSpatial) {
+        // Positional (3D) audio
+        const sound = new THREE.PositionalAudio(this.audioListener);
+        sound.setRefDistance(1);
+        sound.setRolloffFactor(1);
+        sound.setDistanceModel('inverse');
+
+        this.audioLoader.load(props.audio, (buffer) => {
+          sound.setBuffer(buffer);
+          sound.setLoop(props.loop ?? false);
+          sound.setVolume(props.volume ?? 1);
+          group.userData.audio = sound;
+        });
+
+        group.add(sound);
+      } else {
+        // Non-spatial (global) audio
+        const sound = new THREE.Audio(this.audioListener);
+
+        this.audioLoader.load(props.audio, (buffer) => {
+          sound.setBuffer(buffer);
+          sound.setLoop(props.loop ?? false);
+          sound.setVolume(props.volume ?? 1);
+          group.userData.audio = sound;
+        });
+
+        group.add(sound);
+      }
+    }
+
+    return group;
+  }
+
   // ==========================================================================
   // UTILITY METHODS
   // ==========================================================================
@@ -341,5 +499,54 @@ export class ThreeRenderer implements Renderer {
    */
   registerGeometry(name: string, geometry: THREE.BufferGeometry): void {
     this.geometries.set(name, geometry);
+  }
+
+  /**
+   * Set the audio listener (usually attached to camera)
+   */
+  setAudioListener(listener: THREE.AudioListener): void {
+    this.audioListener = listener;
+  }
+
+  /**
+   * Get the audio listener
+   */
+  getAudioListener(): THREE.AudioListener | null {
+    return this.audioListener;
+  }
+
+  /**
+   * Preload a model into cache
+   */
+  async preloadModel(src: string): Promise<void> {
+    if (!this.modelCache.has(src)) {
+      await this.loadModel(src);
+    }
+  }
+
+  /**
+   * Clear the model cache
+   */
+  clearModelCache(): void {
+    this.modelCache.clear();
+  }
+
+  /**
+   * Dispose of all resources
+   */
+  dispose(): void {
+    // Dispose geometries
+    this.geometries.forEach((geo) => geo.dispose());
+    this.geometries.clear();
+
+    // Dispose materials
+    this.materials.forEach((mat) => mat.dispose());
+    this.materials.clear();
+
+    // Clear model cache
+    this.modelCache.clear();
+
+    // Dispose draco loader
+    this.dracoLoader.dispose();
   }
 }

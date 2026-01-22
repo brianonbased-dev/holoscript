@@ -18,7 +18,9 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "holoscript",
@@ -31,15 +33,23 @@
   "author": "HoloScript Team",
   "license": "MIT",
   "peerDependencies": {
-    "three": ">=0.150.0"
+    "three": ">=0.150.0",
+    "@dimforge/rapier3d": ">=0.11.0"
+  },
+  "peerDependenciesMeta": {
+    "@dimforge/rapier3d": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@holoscript/core": "workspace:*"
   },
   "devDependencies": {
     "@types/three": "^0.160.0",
+    "jsdom": "^24.0.0",
     "three": "^0.160.0",
     "tsup": "^8.0.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
   }
 }

@@ -1,0 +1,70 @@
+// HoloScript+ Example Scene
+// Demonstrates @world configuration and VR traits
+
+@world {
+  backgroundColor: "#16213e"
+  fog: { type: "linear", color: "#16213e", near: 20, far: 100 }
+  shadows: "high"
+  lighting: "outdoor"
+  camera: { position: [0, 2, 8], fov: 60 }
+}
+
+// Ground plane
+plane#ground {
+  position: [0, 0, 0]
+  rotation: [-90, 0, 0]
+  scale: [50, 50, 1]
+  color: "#2d4a3e"
+}
+
+// Interactive orbs
+orb#red @grabbable @throwable {
+  position: [-2, 1, 0]
+  color: "#ff4444"
+  size: 0.5
+}
+
+orb#green @grabbable @throwable {
+  position: [0, 1, 0]
+  color: "#44ff44"
+  size: 0.5
+}
+
+orb#blue @grabbable @throwable {
+  position: [2, 1, 0]
+  color: "#4444ff"
+  size: 0.5
+}
+
+// Floating cube
+box#platform @hoverable {
+  position: [0, 0.25, -3]
+  scale: [4, 0.5, 4]
+  color: "#8844aa"
+}
+
+// Pedestal with glowing orb
+cylinder#pedestal {
+  position: [0, 0.5, -3]
+  scale: [0.5, 1, 0.5]
+  color: "#666666"
+}
+
+orb#crystal @pointable {
+  position: [0, 1.5, -3]
+  color: "#00ffff"
+  size: 0.3
+}
+
+// Ambient decorations
+box#pillar1 {
+  position: [-5, 1.5, -5]
+  scale: [1, 3, 1]
+  color: "#444466"
+}
+
+box#pillar2 {
+  position: [5, 1.5, -5]
+  scale: [1, 3, 1]
+  color: "#444466"
+}

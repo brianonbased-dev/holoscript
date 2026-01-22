@@ -53,6 +53,9 @@ export type { Renderer } from './ThreeRenderer';
 export { World, createWorld } from './World';
 export type { WorldOptions, HoloScriptConfig, WorldTraitConfig } from './World';
 
+export { PhysicsWorld, createPhysicsWorld } from './Physics';
+export type { PhysicsBodyConfig, PhysicsEvent, PhysicsEventType } from './Physics';
+
 /**
  * Create a World from a config file URL
  * Convenience function that loads config and returns ready-to-use world

@@ -144,6 +144,11 @@ export class World {
     // Create HoloScript renderer bridge
     this.threeRenderer = new ThreeRenderer(this.scene);
 
+    // Setup audio listener (attached to camera for spatial audio)
+    const audioListener = new THREE.AudioListener();
+    this.camera.add(audioListener);
+    this.threeRenderer.setAudioListener(audioListener);
+
     // Parser
     this.parser = new HoloScriptPlusParser({ enableVRTraits: true });
 

@@ -84,11 +84,14 @@ const result = parser.parse(`
 
 ## Features
 
-- **9 VR Traits** - `@grabbable`, `@throwable`, `@pointable`, `@hoverable`, `@scalable`, `@rotatable`, `@stackable`, `@snappable`, `@breakable`
+- **49 VR Traits** - `@grabbable`, `@throwable`, `@skeleton`, `@material`, `@lighting`, and 44 more
+- **@world Configuration** - Declarative scene setup in `.hsplus` files
 - **Scale Magnitude** - Build from `galactic` to `atomic` scale with seamless transitions
 - **Reactive State** - `@state { count: 0 }` with automatic updates
-- **Native Game Logic** - `@npc "Name" { ... }` and `@dialog` definitions *(New)*
-- **TypeScript Interop** - `@import "./logic.ts"` *(coming soon)*
+- **Control Flow** - `@for`, `@if`, `while`, `forEach` loops
+- **Module System** - `@import "./other.hsplus"` for code organization
+- **Native Game Logic** - `@npc "Name" { ... }` and `@dialog` definitions
+- **LSP Support** - Full IDE integration with completions, hover, and diagnostics
 - **Voice Commands** - Build by speaking (Web Speech API)
 - **AI Building** - Natural language to code via [infinityassistant.io](https://infinityassistant.io)
 
@@ -96,10 +99,64 @@ const result = parser.parse(`
 
 | Package | Version | What it does | Status |
 |---------|---------|--------------|--------|
-| `@holoscript/core` | 1.0.0 | Parser, runtime, types | ✅ |
-| `@holoscript/cli` | 1.0.0 | Command line tools | ✅ |
+| `@holoscript/core` | 2.1.0 | Parser, runtime, types | ✅ |
+| `@holoscript/cli` | 1.0.0 | Command line tools + LSP | ✅ |
+| `@holoscript/three-adapter` | 1.0.0 | Three.js 3D world integration | ✅ **New** |
 | `@holoscript/infinityassistant` | 1.0.0 | AI building client | ✅ |
 | `@holoscript/creator-tools` | 0.9.0 | Visual editors | 🟡 *beta* |
+
+## 🌐 Three.js World Integration
+
+> **NEW!** Run HoloScript directly in Three.js with full VR/XR support.
+
+```bash
+npm install @holoscript/three-adapter three
+```
+
+```typescript
+import { createWorld } from '@holoscript/three-adapter';
+
+const world = createWorld({
+  container: document.getElementById('app')!,
+  xrEnabled: true,
+});
+
+// Load from .hsplus files
+await world.loadFile('/scenes/main.hsplus');
+world.start();
+```
+
+**Declarative world config with `@world` trait:**
+
+```hsplus
+@world {
+  backgroundColor: "#16213e"
+  fog: { type: "linear", color: "#16213e", near: 10, far: 100 }
+  shadows: "high"
+  lighting: "outdoor"
+  camera: { position: [0, 2, 10], fov: 60 }
+}
+
+orb#player @grabbable {
+  position: [0, 1, 0]
+  color: "#00ffff"
+}
+```
+
+**Three loading patterns:**
+
+```typescript
+// 1. Load single file
+await world.loadFile('/scenes/main.hsplus');
+
+// 2. Auto-load index.hsplus from directory
+await world.loadDirectory('/scenes/level1');
+
+// 3. Load from config manifest
+await world.loadConfig('/project/holoscript.config.hsplus');
+```
+
+---
 
 ## 🎮 VRChat Alpha
 
