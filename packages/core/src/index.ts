@@ -61,7 +61,8 @@ export {
 export { HoloScriptRuntime } from './HoloScriptRuntime';
 
 // HoloScript+ Runtime (NEW)
-export { HoloScriptPlusRuntimeImpl } from './runtime/HoloScriptPlusRuntime';
+export { HoloScriptPlusRuntimeImpl, createRuntime } from './runtime/HoloScriptPlusRuntime';
+export type { RuntimeOptions, Renderer, NodeInstance } from './runtime/HoloScriptPlusRuntime';
 
 // HoloScript+ State Management (NEW)
 export { ReactiveState, createState, reactive, effect, computed, bind } from './state/ReactiveState';

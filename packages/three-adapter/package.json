@@ -1,0 +1,45 @@
+{
+  "name": "@holoscript/three-adapter",
+  "version": "1.0.0",
+  "description": "Three.js rendering adapter for HoloScript",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "keywords": [
+    "holoscript",
+    "three.js",
+    "3d",
+    "vr",
+    "xr",
+    "webgl"
+  ],
+  "author": "HoloScript Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "three": ">=0.150.0"
+  },
+  "dependencies": {
+    "@holoscript/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/three": "^0.160.0",
+    "three": "^0.160.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  }
+}
