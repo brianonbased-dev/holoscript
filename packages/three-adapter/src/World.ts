@@ -221,8 +221,17 @@ export class World {
 
   /**
    * Load and execute HoloScript source code
+   * Automatically extracts and applies @world trait if present
    */
   loadSource(source: string): void {
+    // Extract and apply @world trait if present
+    const worldTrait = this.extractWorldTrait(source);
+    if (worldTrait) {
+      this.applyWorldTrait(worldTrait);
+      // Strip @world from source before parsing
+      source = this.stripWorldTrait(source);
+    }
+
     // Parse the source
     const result = this.parser.parse(source);
 
