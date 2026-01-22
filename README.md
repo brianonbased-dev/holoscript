@@ -362,9 +362,9 @@ focus sun {
 ```bash
 npm install -g @holoscript/cli
 
-holoscript run app.hs       # Run a file
-holoscript parse app.hs     # Show AST
-holoscript repl             # Interactive mode
+holoscript run app.hsplus       # Run a file
+holoscript parse app.hsplus     # Show AST
+holoscript repl                 # Interactive mode
 ```
 
 ## 🛠️ Tools
