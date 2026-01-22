@@ -5,7 +5,7 @@
  * Responds to VR controller pointing and desktop mouse hover.
  */
 
-import type { HSPlusNode } from '@holoscript/core';
+import type { HSPlusNode } from '../types.js';
 import type {
   TraitMapping,
   ExportContext,

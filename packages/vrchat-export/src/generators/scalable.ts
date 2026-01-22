@@ -5,7 +5,7 @@
  * Allows users to pinch/stretch objects with both controllers.
  */
 
-import type { HSPlusNode } from '@holoscript/core';
+import type { HSPlusNode } from '../types.js';
 import type {
   TraitMapping,
   ExportContext,

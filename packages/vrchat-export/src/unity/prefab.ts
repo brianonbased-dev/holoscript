@@ -4,7 +4,7 @@
  * Generates Unity prefab YAML files from HoloScript nodes.
  */
 
-import type { HSPlusNode } from '@holoscript/core';
+import type { HSPlusNode } from '../types.js';
 import type { UnityPrefab, UnityComponent, ExportContext, TraitMapping } from '../types.js';
 import { generateGUID, generateFileId, generateMetaFile } from './guid.js';
 import { getRequiredComponents, mergePrefabModifications } from '../generators/index.js';

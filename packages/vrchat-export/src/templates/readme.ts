@@ -221,13 +221,13 @@ scene {
   }
 
   @for i in range(0, 3) {
-    group#table_${i} {
+    group#table_\${i} {
       position: [i * 3 - 3, 0, 0]
 
       cylinder#table { scale: [1, 0.4, 1], color: "#654321" }
 
       @for j in range(0, 4) {
-        cube#chair_${j} @grabbable {
+        cube#chair_\${j} @grabbable {
           position: [Math.cos(j * 90) * 0.8, 0.3, Math.sin(j * 90) * 0.8]
           scale: [0.3, 0.6, 0.3]
         }

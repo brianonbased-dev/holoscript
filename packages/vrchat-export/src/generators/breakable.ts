@@ -5,7 +5,7 @@
  * Uses object pooling for fragments (VRChat doesn't support runtime instantiation).
  */
 
-import type { HSPlusNode } from '@holoscript/core';
+import type { HSPlusNode } from '../types.js';
 import type {
   TraitMapping,
   ExportContext,

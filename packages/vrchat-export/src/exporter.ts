@@ -4,7 +4,7 @@
  * Main orchestrator for converting HoloScript AST to VRChat/Unity project.
  */
 
-import type { HSPlusAST, HSPlusNode } from '@holoscript/core';
+import type { HSPlusAST, HSPlusNode } from './types.js';
 import type {
   VRChatExportConfig,
   VRChatExportResult,

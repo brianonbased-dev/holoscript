@@ -5,7 +5,7 @@
  * Uses trigger colliders and material property changes.
  */
 
-import type { HSPlusNode } from '@holoscript/core';
+import type { HSPlusNode } from '../types.js';
 import type {
   TraitMapping,
   ExportContext,

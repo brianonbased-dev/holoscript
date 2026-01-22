@@ -5,7 +5,7 @@
  * This is the most commonly used VR interaction in VRChat.
  */
 
-import type { HSPlusNode } from '@holoscript/core';
+import type { HSPlusNode } from '../types.js';
 import type {
   TraitMapping,
   ExportContext,

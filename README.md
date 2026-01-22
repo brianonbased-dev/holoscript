@@ -81,6 +81,7 @@ const result = parser.parse(`
 - **9 VR Traits** - `@grabbable`, `@throwable`, `@pointable`, `@hoverable`, `@scalable`, `@rotatable`, `@stackable`, `@snappable`, `@breakable`
 - **Scale Magnitude** - Build from `galactic` to `atomic` scale with seamless transitions
 - **Reactive State** - `@state { count: 0 }` with automatic updates
+- **Native Game Logic** - `@npc "Name" { ... }` and `@dialog` definitions *(New)*
 - **TypeScript Interop** - `@import "./logic.ts"` *(coming soon)*
 - **Voice Commands** - Build by speaking (Web Speech API)
 - **AI Building** - Natural language to code via [infinityassistant.io](https://infinityassistant.io)
@@ -93,6 +94,13 @@ const result = parser.parse(`
 | `@holoscript/cli` | 1.0.0 | Command line tools | ✅ |
 | `@holoscript/infinityassistant` | 1.0.0 | AI building client | ✅ |
 | `@holoscript/creator-tools` | 0.9.0 | Visual editors | 🟡 *beta* |
+
+## 🧪 Experimental
+| Package | Status | Description |
+|---------|--------|-------------|
+| `@holoscript/vrchat-export` | 🧪 | Compile HoloScript to VRChat Udon |
+| `@holoscript/commerce` | 🧪 | In-world payments & inventory |
+| `@holoscript/llm` | 🧪 | Local LLM inference bindings |
 
 ## Build with AI
 
@@ -177,6 +185,16 @@ holoscript run app.hs       # Run a file
 holoscript parse app.hs     # Show AST
 holoscript repl             # Interactive mode
 ```
+
+## 🛠️ Tools
+
+### VS Code Extension
+The official **HoloScript** extension provides:
+- Syntax highlighting for `.holo` and `.hsplus`
+- IntelliSense for Traits (`@grabbable`, `@npc`)
+- Snippets for common patterns
+
+**Install**: Search "HoloScript" in VS Code Marketplace or install from `.vsix`.
 
 ## Contributing
 

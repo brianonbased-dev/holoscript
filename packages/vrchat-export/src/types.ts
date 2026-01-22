@@ -8,7 +8,49 @@
  * @license MIT
  */
 
-import type { HSPlusAST, HSPlusNode, VRTraitName } from '@holoscript/core';
+import type { ASTNode } from '@holoscript/core';
+
+// =============================================================================
+// VRCHAT SUPPORTED TRAITS
+// =============================================================================
+
+/**
+ * The 9 VR traits supported by VRChat export
+ * Note: VRChat/UdonSharp supports a subset of HoloScript+'s 49 traits
+ */
+export type VRChatSupportedTrait =
+  | 'grabbable'
+  | 'throwable'
+  | 'pointable'
+  | 'hoverable'
+  | 'scalable'
+  | 'rotatable'
+  | 'stackable'
+  | 'snappable'
+  | 'breakable';
+
+/**
+ * Node with traits for VRChat export
+ */
+export interface HSPlusNode extends ASTNode {
+  id?: string;
+  name?: string;
+  traits?: Map<string, Record<string, unknown>>;
+  properties: Record<string, unknown>;
+  children: HSPlusNode[];
+}
+
+/**
+ * HSPlus AST for VRChat export
+ */
+export interface HSPlusAST {
+  version: string;
+  root: HSPlusNode;
+  imports: Array<{ path: string; alias: string }>;
+  hasState: boolean;
+  hasVRTraits: boolean;
+  hasControlFlow: boolean;
+}
 
 // =============================================================================
 // EXPORT CONFIGURATION
@@ -98,7 +140,7 @@ export interface UdonSharpScript {
   source: string;
 
   /** Associated trait (if any) */
-  trait?: VRTraitName;
+  trait?: VRChatSupportedTrait;
 
   /** Required VRChat SDK components */
   requiredComponents: string[];
@@ -226,7 +268,7 @@ export interface UnityTransform {
  */
 export interface TraitMapping {
   /** Original HoloScript trait */
-  trait: VRTraitName;
+  trait: VRChatSupportedTrait;
 
   /** VRChat/Unity components to add */
   components: string[];

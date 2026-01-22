@@ -5,7 +5,7 @@
  * Allows users to rotate objects with hand gestures or grabbed rotation.
  */
 
-import type { HSPlusNode } from '@holoscript/core';
+import type { HSPlusNode } from '../types.js';
 import type {
   TraitMapping,
   ExportContext,

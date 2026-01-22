@@ -5,7 +5,7 @@
  * Allows objects to stack on top of each other.
  */
 
-import type { HSPlusNode } from '@holoscript/core';
+import type { HSPlusNode } from '../types.js';
 import type {
   TraitMapping,
   ExportContext,

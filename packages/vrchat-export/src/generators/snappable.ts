@@ -5,7 +5,7 @@
  * Objects snap to predefined positions when released nearby.
  */
 
-import type { HSPlusNode } from '@holoscript/core';
+import type { HSPlusNode } from '../types.js';
 import type {
   TraitMapping,
   ExportContext,

@@ -14,8 +14,7 @@ export { generateStackable } from './stackable.js';
 export { generateSnappable } from './snappable.js';
 export { generateBreakable } from './breakable.js';
 
-import type { HSPlusNode, VRTraitName } from '@holoscript/core';
-import type { TraitMapping, ExportContext, TraitGenerator } from '../types.js';
+import type { TraitMapping, ExportContext, TraitGenerator, VRChatSupportedTrait, HSPlusNode } from '../types.js';
 
 import { generateGrabbable } from './grabbable.js';
 import { generateThrowable } from './throwable.js';
@@ -30,7 +29,7 @@ import { generateBreakable } from './breakable.js';
 /**
  * Registry of all trait generators
  */
-export const traitGenerators: Record<VRTraitName, TraitGenerator> = {
+export const traitGenerators: Record<VRChatSupportedTrait, TraitGenerator> = {
   grabbable: generateGrabbable,
   throwable: generateThrowable,
   pointable: generatePointable,
@@ -56,7 +55,7 @@ export function generateTraitMappings(
   }
 
   for (const [traitName, traitConfig] of node.traits.entries()) {
-    const generator = traitGenerators[traitName];
+    const generator = traitGenerators[traitName as VRChatSupportedTrait];
     if (generator) {
       try {
         const mapping = generator(node, traitConfig as Record<string, unknown>, context);
