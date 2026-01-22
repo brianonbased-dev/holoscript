@@ -84,16 +84,31 @@ const result = parser.parse(`
 
 ## Features
 
-- **49 VR Traits** - `@grabbable`, `@throwable`, `@skeleton`, `@material`, `@lighting`, and 44 more
+### 🕹️ VR Traits (49 total)
+| Category | Traits |
+|----------|--------|
+| **Interaction** | `@grabbable`, `@throwable`, `@pointable`, `@teleportable` |
+| **Spatial** | `@stackable`, `@snappable`, `@rotatable`, `@scaleable` |
+| **Animation** | `@skeleton`, `@animation`, `@morph`, `@pose` |
+| **Materials** | `@material`, `@lighting`, `@rendering`, `@shader` |
+| **Physics** | `@physics`, `@collider`, `@rigidbody`, `@trigger` |
+| **AI/NPCs** | `@npc`, `@talkable`, `@patrol`, `@dialog` |
+
+### 🛠️ Language Features
 - **@world Configuration** - Declarative scene setup in `.hsplus` files
 - **Scale Magnitude** - Build from `galactic` to `atomic` scale with seamless transitions
 - **Reactive State** - `@state { count: 0 }` with automatic updates
-- **Control Flow** - `@for`, `@if`, `while`, `forEach` loops
+- **Control Flow** - `@for`, `@if`, `while`, `forEach`, `on_break` loops
+- **Expression Interpolation** - `${variable}` in strings and properties
 - **Module System** - `@import "./other.hsplus"` for code organization
 - **Native Game Logic** - `@npc "Name" { ... }` and `@dialog` definitions
+- **TypeScript Interop** - Export and import between `.hsplus` and `.ts`
+
+### 🧰 Tooling
 - **LSP Support** - Full IDE integration with completions, hover, and diagnostics
 - **Voice Commands** - Build by speaking (Web Speech API)
 - **AI Building** - Natural language to code via [infinityassistant.io](https://infinityassistant.io)
+- **MCP Server** - AI agents can create and manage VR worlds
 
 ## Packages
 
