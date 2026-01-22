@@ -382,7 +382,7 @@ The official **HoloScript** extension provides:
 MIT license. PRs welcome.
 
 ```bash
-git clone https://github.com/brianonbased-dev/HoloScript.git
+git clone https://github.com/brianonbased-dev/holoscript.git
 cd HoloScript
 pnpm install
 pnpm build

@@ -239,7 +239,7 @@ console.log(`Deployed at: ${deployment.deploymentUrl}`);
 
 - **Integration Guide**: [HOLOSCRIPT_INFINITY_ASSISTANT_INTEGRATION.md](./HOLOSCRIPT_INFINITY_ASSISTANT_INTEGRATION.md)
 - **Public API**: https://api.infinityassistant.io/api
-- **GitHub - HoloScript**: https://github.com/brianonbased-dev/HoloScript
+- **GitHub - HoloScript**: https://github.com/brianonbased-dev/holoscript
 - **GitHub - Hololand**: https://github.com/brianonbased-dev/Hololand
 - **GitHub - Infinity Assistant**: https://github.com/brianonbased-dev/infinityassistant-service
 - **GitHub - Orchestrator**: https://github.com/brianonbased-dev/uaa2-service
