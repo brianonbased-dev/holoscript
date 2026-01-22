@@ -5,6 +5,12 @@
 A declarative language that compiles to 9 platforms from one source.
 
 <p align="center">
+  <a href="#-vrchat-alpha">
+    <img src="https://img.shields.io/badge/🎮_VRChat_Alpha-NOW_AVAILABLE-ff6600?style=for-the-badge" alt="VRChat Alpha">
+  </a>
+</p>
+
+<p align="center">
   <img src="docs/assets/gifs/holoscript-compile-demo.gif" alt="HoloScript compiling to multiple platforms" width="650">
   <br>
   <em>One file → Web, VR, AR, iOS, Android, Desktop</em>
@@ -95,10 +101,56 @@ const result = parser.parse(`
 | `@holoscript/infinityassistant` | 1.0.0 | AI building client | ✅ |
 | `@holoscript/creator-tools` | 0.9.0 | Visual editors | 🟡 *beta* |
 
+## 🎮 VRChat Alpha
+
+> **NEW!** Export HoloScript directly to VRChat worlds. Write once, deploy to VRChat.
+
+```bash
+npm install @holoscript/vrchat-export
+```
+
+```holoscript
+// Define a VRChat-ready world
+world#my_club @vrchat {
+  spawn_point: [0, 0, 0]
+  max_players: 32
+  
+  object#dance_floor @grabbable @synced {
+    position: [0, 0, 0]
+    material: "neon_tiles"
+    on_step: trigger_lights()
+  }
+  
+  npc#dj @talkable {
+    dialog: "Welcome to the club!"
+    animations: ["idle", "wave", "dance"]
+  }
+}
+```
+
+```bash
+# Export to VRChat SDK
+holoscript export --target vrchat my_world.hsplus
+
+# Output: Unity project with Udon scripts ready for upload
+```
+
+**What's included:**
+- ✅ Automatic Udon graph generation
+- ✅ Synced object state (multiplayer-ready)
+- ✅ Trait mapping (`@grabbable` → VRC_Pickup)
+- ✅ NPC dialog system with voice support
+- 🟡 Custom shaders (coming soon)
+- 🟡 Avatar interactions (coming soon)
+
+[📖 VRChat Export Guide](./docs/VRCHAT_EXPORT.md) | [🎥 Demo Video](#)
+
+---
+
 ## 🧪 Experimental
 | Package | Status | Description |
 |---------|--------|-------------|
-| `@holoscript/vrchat-export` | 🧪 | Compile HoloScript to VRChat Udon |
+| `@holoscript/vrchat-export` | 🎮 **Alpha** | Compile HoloScript to VRChat Udon |
 | `@holoscript/commerce` | 🧪 | In-world payments & inventory |
 | `@holoscript/llm` | 🧪 | Local LLM inference bindings |
 
