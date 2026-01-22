@@ -18,7 +18,16 @@ import {
   type TypeDiagnostic,
 } from '@holoscript/core';
 
-// ... (LSP Types omitted for brevity, keeping existing) ...
+import {
+  CompletionItem,
+  CompletionItemKind,
+  Diagnostic,
+  DiagnosticSeverity,
+  Position,
+  Hover,
+  Location,
+  Range,
+} from 'vscode-languageserver/node';
 
 // Dynamic Trait Completions
 const TRAIT_COMPLETIONS: CompletionItem[] = VR_TRAITS.map(trait => ({

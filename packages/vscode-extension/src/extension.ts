@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as fs from 'fs';
 import { workspace, ExtensionContext } from 'vscode';
 import {
   LanguageClient,
@@ -7,18 +8,33 @@ import {
   TransportKind
 } from 'vscode-languageclient/node';
 
-let client: LanguageClient;
+let client: LanguageClient | undefined;
 
 export function activate(context: ExtensionContext) {
-  // Launch the server from the CLI package
-  // In a real build, this would point to the compiled server.js
-  // For dev, we point to the ts-node execution or built js
-  const serverModule = context.asAbsolutePath(
-    path.join('packages', 'cli', 'dist', 'lsp', 'server.js')
-  );
+  // Try multiple possible server locations
+  const possiblePaths = [
+    // Bundled with extension
+    path.join(context.extensionPath, 'server', 'lsp', 'server.js'),
+    // In workspace (monorepo development)
+    path.join(context.extensionPath, '..', 'cli', 'dist', 'lsp', 'server.js'),
+    // Installed globally via npm
+    path.join(context.extensionPath, 'node_modules', '@holoscript', 'cli', 'dist', 'lsp', 'server.js'),
+  ];
 
-  // If the extension is launched in debug mode then the debug server options are used
-  // Otherwise the run options are used
+  let serverModule: string | undefined;
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      serverModule = p;
+      break;
+    }
+  }
+
+  // If no server found, just provide syntax highlighting (no LSP features)
+  if (!serverModule) {
+    console.log('HoloScript: Language server not found. Running in syntax-only mode.');
+    return;
+  }
+
   const serverOptions: ServerOptions = {
     run: { module: serverModule, transport: TransportKind.ipc },
     debug: {
@@ -27,17 +43,13 @@ export function activate(context: ExtensionContext) {
     }
   };
 
-  // Options to control the language client
   const clientOptions: LanguageClientOptions = {
-    // Register the server for holoscript documents
     documentSelector: [{ scheme: 'file', language: 'holoscript' }],
     synchronize: {
-      // Notify the server about file changes to '.holoscriptrc files contained in the workspace
       fileEvents: workspace.createFileSystemWatcher('**/.holoscriptrc')
     }
   };
 
-  // Create the language client and start the client.
   client = new LanguageClient(
     'holoscriptLSP',
     'HoloScript Language Server',
@@ -45,8 +57,10 @@ export function activate(context: ExtensionContext) {
     clientOptions
   );
 
-  // Start the client. This will also launch the server
-  client.start();
+  // Start the client
+  client.start().catch((err) => {
+    console.error('HoloScript: Failed to start language server:', err);
+  });
 }
 
 export function deactivate(): Thenable<void> | undefined {
