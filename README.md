@@ -101,7 +101,10 @@ const result = parser.parse(`
 |---------|---------|--------------|--------|
 | `@holoscript/core` | 2.1.0 | Parser, runtime, types | ✅ |
 | `@holoscript/cli` | 1.0.0 | Command line tools + LSP | ✅ |
-| `@holoscript/three-adapter` | 1.0.0 | Three.js 3D world integration | ✅ **New** |
+| `@holoscript/three-adapter` | 1.0.0 | Three.js 3D world + physics + audio | ✅ |
+| `@holoscript/babylon-adapter` | 1.0.0 | Babylon.js 3D world | ✅ **New** |
+| `@holoscript/playcanvas-adapter` | 1.0.0 | PlayCanvas 3D world | ✅ **New** |
+| `@holoscript/network` | 1.0.0 | Multiplayer networking (@networked) | ✅ **New** |
 | `@holoscript/infinityassistant` | 1.0.0 | AI building client | ✅ |
 | `@holoscript/creator-tools` | 0.9.0 | Visual editors | 🟡 *beta* |
 
@@ -155,6 +158,60 @@ await world.loadDirectory('/scenes/level1');
 // 3. Load from config manifest
 await world.loadConfig('/project/holoscript.config.hsplus');
 ```
+
+---
+
+## 🌐 Multiplayer Networking
+
+> **NEW!** Sync `@networked` entities across clients with WebSocket/WebRTC.
+
+```bash
+npm install @holoscript/network
+```
+
+```typescript
+import { createNetworkManager } from '@holoscript/network';
+
+const network = createNetworkManager();
+
+// Connect to a multiplayer session
+const roomId = await network.connect({
+  serverUrl: 'wss://your-server.com',
+  transport: 'websocket', // or 'webrtc'
+  syncRate: 20,
+});
+
+// Register networked entities
+const networkId = network.registerEntity(playerMesh, 'player', {
+  sync: 'owner',
+  properties: ['position', 'rotation'],
+});
+
+// Listen for remote events
+network.on('peerJoined', (event) => {
+  console.log('Player joined:', event.peer.peerId);
+});
+
+network.on('entitySpawned', (event) => {
+  // Create visual for remote entity
+  createRemotePlayer(event.entity);
+});
+```
+
+**HoloScript+ `@networked` trait:**
+
+```hsplus
+orb#player @networked @grabbable {
+  position: [0, 1, 0]
+  color: "#00ffff"
+}
+
+cube#shared_object @networked { sync: "shared" } {
+  position: [5, 0, 0]
+}
+```
+
+**Example signaling server included** in `examples/network-server/`.
 
 ---
 
