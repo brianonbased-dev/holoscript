@@ -20,23 +20,23 @@ A declarative language that compiles to 9 platforms from one source.
 
 ## 📁 File Types
 
-**Not sure which to use?**
-- **`.holo`** → You're learning or building something simple
-- **`.hsplus`** → You need multiplayer, advanced physics, or marketplace features
+**Which should I use?**
+- **`.hsplus`** → Production apps, multiplayer, advanced features (**recommended**)
+- **`.holo`** → Learning tutorials and simple prototypes
 
 | Extension | What It Does |
 |-----------|-------------|
-| `.holo` | Standard HoloScript – objects, animations, basic UI |
-| `.hsplus` | HoloScript Plus – adds networking, physics joints, procedural gen |
+| `.hsplus` | HoloScript Plus – full language with networking, physics, NPCs |
+| `.holo` | Standard HoloScript – simpler syntax for beginners |
 
-> 💡 **Start with `.holo`**. Upgrade to `.hsplus` when your project grows.
+> 💡 **New projects should use `.hsplus`**. Use `.holo` only for learning.
 
 ---
 
 > 💬 **Talk or type to build.** Powered by [Infinity Assistant](https://infinityassistant.io).
 >
 > - 🥽 **VR:** "Create a coffee shop with a counter and menu board"
-> - 🌍 **VRR:** "Scan my storefront and make it a virtual showroom" *(coming soon)*
+> - 🌍 **VRR (Virtual Reality Reality):** "Scan my storefront and make it a virtual showroom" *(coming soon)*
 > - 📱 **AR:** "Place a 3D model of this chair in my living room"
 
 ```holoscript
