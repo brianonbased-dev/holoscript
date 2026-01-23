@@ -1,0 +1,499 @@
+#!/usr/bin/env node
+/**
+ * HoloScript Language Server
+ *
+ * Provides IDE features for .holo and .hsplus files:
+ * - Real-time diagnostics (errors/warnings)
+ * - Auto-completion
+ * - Hover information
+ * - Go to definition
+ * - Find references
+ * - Document symbols
+ * - Semantic tokens
+ */
+
+import {
+  createConnection,
+  TextDocuments,
+  Diagnostic,
+  DiagnosticSeverity,
+  ProposedFeatures,
+  InitializeParams,
+  InitializeResult,
+  TextDocumentSyncKind,
+  CompletionItem,
+  CompletionItemKind,
+  Hover,
+  MarkupKind,
+  Position,
+  Location,
+  SymbolInformation,
+  SymbolKind,
+  DocumentSymbol,
+  Range,
+  TextDocumentPositionParams,
+  DefinitionParams,
+  ReferenceParams,
+  DocumentSymbolParams,
+  SemanticTokensParams,
+  SemanticTokens,
+  SemanticTokensBuilder,
+  SemanticTokensLegend,
+} from 'vscode-languageserver/node.js';
+
+import { TextDocument } from 'vscode-languageserver-textdocument';
+
+import {
+  HoloScriptCodeParser,
+  HoloScriptValidator,
+  type ASTNode,
+  type OrbNode,
+  type ParseResult,
+  type ValidationError,
+} from '@hololand/core';
+
+// Create connection and document manager
+const connection = createConnection(ProposedFeatures.all);
+const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
+
+// Parser and validator instances
+const parser = new HoloScriptCodeParser();
+const validator = new HoloScriptValidator();
+
+// Cache for parsed documents
+const documentCache = new Map<string, {
+  ast: ASTNode[];
+  version: number;
+  symbols: Map<string, { node: ASTNode; line: number; column: number }>;
+}>();
+
+// Semantic token types and modifiers
+const tokenTypes = ['class', 'property', 'function', 'variable', 'number', 'string', 'keyword', 'operator', 'comment'];
+const tokenModifiers = ['declaration', 'definition', 'readonly', 'static', 'deprecated'];
+
+const legend: SemanticTokensLegend = {
+  tokenTypes,
+  tokenModifiers,
+};
+
+connection.onInitialize((params: InitializeParams): InitializeResult => {
+  return {
+    capabilities: {
+      textDocumentSync: TextDocumentSyncKind.Incremental,
+      completionProvider: {
+        resolveProvider: true,
+        triggerCharacters: ['.', ':', '{', '[', '"', "'", ' '],
+      },
+      hoverProvider: true,
+      definitionProvider: true,
+      referencesProvider: true,
+      documentSymbolProvider: true,
+      semanticTokensProvider: {
+        legend,
+        full: true,
+      },
+    },
+  };
+});
+
+// Validate document on open/change
+documents.onDidChangeContent((change) => {
+  validateDocument(change.document);
+});
+
+/**
+ * Parse and validate a document, sending diagnostics
+ */
+async function validateDocument(document: TextDocument): Promise<void> {
+  const text = document.getText();
+  const diagnostics: Diagnostic[] = [];
+  const symbols = new Map<string, { node: ASTNode; line: number; column: number }>();
+
+  try {
+    // Parse the document
+    const parseResult = parser.parse(text);
+
+    if (!parseResult.success && parseResult.errors) {
+      // Add parse errors as diagnostics
+      for (const error of parseResult.errors) {
+        diagnostics.push({
+          severity: DiagnosticSeverity.Error,
+          range: {
+            start: { line: (error.line || 1) - 1, character: (error.column || 1) - 1 },
+            end: { line: (error.line || 1) - 1, character: (error.column || 1) + 10 },
+          },
+          message: error.message,
+          source: 'holoscript',
+        });
+      }
+    }
+
+    if (parseResult.success && parseResult.ast) {
+      // Build symbol table
+      for (const node of parseResult.ast) {
+        if (node.type === 'orb') {
+          const orbNode = node as OrbNode;
+          symbols.set(orbNode.name, {
+            node,
+            line: node.line || 1,
+            column: node.column || 1,
+          });
+        }
+      }
+
+      // Validate the AST
+      const validationResult = (validator as any).validateSource(text);
+      const validationErrors = [...validationResult.errors, ...validationResult.warnings];
+
+      for (const error of validationErrors) {
+        diagnostics.push({
+          severity: error.severity === 'warning' ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error,
+          range: {
+            start: { line: (error.line || 1) - 1, character: (error.column || 1) - 1 },
+            end: { line: (error.line || 1) - 1, character: (error.column || 1) + 10 },
+          },
+          message: error.message,
+          source: 'holoscript',
+        });
+      }
+
+      // Cache the parsed result
+      documentCache.set(document.uri, {
+        ast: parseResult.ast,
+        version: document.version,
+        symbols,
+      });
+    }
+  } catch (error) {
+    diagnostics.push({
+      severity: DiagnosticSeverity.Error,
+      range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
+      message: `Parser error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      source: 'holoscript',
+    });
+  }
+
+  // Send diagnostics to client
+  connection.sendDiagnostics({ uri: document.uri, diagnostics });
+}
+
+/**
+ * Provide auto-completion items
+ */
+connection.onCompletion((params: TextDocumentPositionParams): CompletionItem[] => {
+  const document = documents.get(params.textDocument.uri);
+  if (!document) return [];
+
+  const text = document.getText();
+  const offset = document.offsetAt(params.position);
+  const linePrefix = text.substring(text.lastIndexOf('\n', offset - 1) + 1, offset);
+
+  const items: CompletionItem[] = [];
+
+  // Context-aware completions
+  if (linePrefix.match(/^\s*$/)) {
+    // Start of line - suggest top-level keywords
+    items.push(
+      { label: 'orb', kind: CompletionItemKind.Class, insertText: 'orb ${1:name} {\n  $0\n}', insertTextFormat: 2 },
+      { label: 'world', kind: CompletionItemKind.Module, insertText: 'world ${1:name} {\n  $0\n}', insertTextFormat: 2 },
+      { label: 'import', kind: CompletionItemKind.Keyword, insertText: 'import { $1 } from "$2"', insertTextFormat: 2 },
+      { label: 'system', kind: CompletionItemKind.Keyword, insertText: 'system ${1:name} {\n  $0\n}', insertTextFormat: 2 },
+    );
+  } else if (linePrefix.match(/^\s+\w*$/)) {
+    // Inside a block - suggest properties
+    items.push(
+      { label: 'position', kind: CompletionItemKind.Property, insertText: 'position: [${1:0}, ${2:0}, ${3:0}]', insertTextFormat: 2 },
+      { label: 'rotation', kind: CompletionItemKind.Property, insertText: 'rotation: [${1:0}, ${2:0}, ${3:0}]', insertTextFormat: 2 },
+      { label: 'scale', kind: CompletionItemKind.Property, insertText: 'scale: [${1:1}, ${2:1}, ${3:1}]', insertTextFormat: 2 },
+      { label: 'color', kind: CompletionItemKind.Property, insertText: 'color: "${1:#ffffff}"', insertTextFormat: 2 },
+      { label: 'opacity', kind: CompletionItemKind.Property, insertText: 'opacity: ${1:1.0}', insertTextFormat: 2 },
+      { label: 'visible', kind: CompletionItemKind.Property, insertText: 'visible: ${1:true}', insertTextFormat: 2 },
+      { label: 'interactive', kind: CompletionItemKind.Property, insertText: 'interactive: ${1:true}', insertTextFormat: 2 },
+      { label: 'model', kind: CompletionItemKind.Property, insertText: 'model: "${1:path/to/model.glb}"', insertTextFormat: 2 },
+      { label: 'material', kind: CompletionItemKind.Property, insertText: 'material: {\n  type: "${1:standard}"\n  $0\n}', insertTextFormat: 2 },
+    );
+
+    // Event handlers
+    items.push(
+      { label: 'on_click', kind: CompletionItemKind.Event, insertText: 'on_click: {\n  $0\n}', insertTextFormat: 2 },
+      { label: 'on_hover', kind: CompletionItemKind.Event, insertText: 'on_hover: {\n  $0\n}', insertTextFormat: 2 },
+      { label: 'on_enter', kind: CompletionItemKind.Event, insertText: 'on_enter: {\n  $0\n}', insertTextFormat: 2 },
+      { label: 'on_exit', kind: CompletionItemKind.Event, insertText: 'on_exit: {\n  $0\n}', insertTextFormat: 2 },
+      { label: 'on_collision', kind: CompletionItemKind.Event, insertText: 'on_collision: {\n  $0\n}', insertTextFormat: 2 },
+    );
+
+    // HSPlus-specific
+    items.push(
+      { label: 'networked', kind: CompletionItemKind.Property, insertText: 'networked: ${1:true}', insertTextFormat: 2 },
+      { label: 'physics', kind: CompletionItemKind.Property, insertText: 'physics: {\n  type: "${1:dynamic}"\n  mass: ${2:1.0}\n}', insertTextFormat: 2 },
+      { label: 'audio', kind: CompletionItemKind.Property, insertText: 'audio: {\n  src: "${1:sound.mp3}"\n  spatial: ${2:true}\n}', insertTextFormat: 2 },
+      { label: 'animation', kind: CompletionItemKind.Property, insertText: 'animation: {\n  name: "${1:idle}"\n  loop: ${2:true}\n}', insertTextFormat: 2 },
+    );
+  }
+
+  // Add symbols from current document
+  const cached = documentCache.get(params.textDocument.uri);
+  if (cached) {
+    for (const [name] of cached.symbols) {
+      items.push({
+        label: name,
+        kind: CompletionItemKind.Reference,
+        detail: 'orb',
+      });
+    }
+  }
+
+  return items;
+});
+
+/**
+ * Provide hover information
+ */
+connection.onHover((params: TextDocumentPositionParams): Hover | null => {
+  const document = documents.get(params.textDocument.uri);
+  if (!document) return null;
+
+  const text = document.getText();
+  const offset = document.offsetAt(params.position);
+
+  // Find word at position
+  const wordRange = getWordRangeAtPosition(text, offset);
+  if (!wordRange) return null;
+
+  const word = text.substring(wordRange.start, wordRange.end);
+
+  // Check if it's a keyword
+  const keywordDocs: Record<string, string> = {
+    orb: '**orb** - A 3D object in the scene.\n\n```holoscript\norb my_cube {\n  position: [0, 1, 0]\n  scale: [1, 1, 1]\n}\n```',
+    world: '**world** - A container for orbs and scene configuration.\n\n```holoscript\nworld my_world {\n  sky: "sunset"\n  ground: true\n}\n```',
+    position: '**position** - 3D coordinates [x, y, z]\n\nDefault: `[0, 0, 0]`',
+    rotation: '**rotation** - Euler angles in degrees [x, y, z]\n\nDefault: `[0, 0, 0]`',
+    scale: '**scale** - Size multiplier [x, y, z]\n\nDefault: `[1, 1, 1]`',
+    on_click: '**on_click** - Handler for click/tap events\n\n```holoscript\non_click: {\n  play_sound: "click.mp3"\n  animate: { scale: [1.2, 1.2, 1.2] }\n}\n```',
+    networked: '**networked** *(HSPlus)* - Enable multiplayer sync\n\nWhen `true`, this orb\'s state is synchronized across all connected clients.',
+    physics: '**physics** *(HSPlus)* - Enable physics simulation\n\n```holoscript\nphysics: {\n  type: "dynamic"  // or "static", "kinematic"\n  mass: 1.0\n  friction: 0.5\n}\n```',
+  };
+
+  if (keywordDocs[word]) {
+    return {
+      contents: {
+        kind: MarkupKind.Markdown,
+        value: keywordDocs[word],
+      },
+    };
+  }
+
+  // Check if it's a symbol
+  const cached = documentCache.get(params.textDocument.uri);
+  if (cached && cached.symbols.has(word)) {
+    const symbol = cached.symbols.get(word)!;
+    const orbNode = symbol.node as OrbNode;
+    const props = orbNode.properties ? Object.keys(orbNode.properties).join(', ') : 'none';
+
+    return {
+      contents: {
+        kind: MarkupKind.Markdown,
+        value: `**${word}** (orb)\n\nProperties: ${props}\n\nDefined at line ${symbol.line}`,
+      },
+    };
+  }
+
+  return null;
+});
+
+/**
+ * Go to definition
+ */
+connection.onDefinition((params: DefinitionParams): Location | null => {
+  const cached = documentCache.get(params.textDocument.uri);
+  if (!cached) return null;
+
+  const document = documents.get(params.textDocument.uri);
+  if (!document) return null;
+
+  const text = document.getText();
+  const offset = document.offsetAt(params.position);
+  const wordRange = getWordRangeAtPosition(text, offset);
+  if (!wordRange) return null;
+
+  const word = text.substring(wordRange.start, wordRange.end);
+
+  if (cached.symbols.has(word)) {
+    const symbol = cached.symbols.get(word)!;
+    return {
+      uri: params.textDocument.uri,
+      range: {
+        start: { line: symbol.line - 1, character: symbol.column - 1 },
+        end: { line: symbol.line - 1, character: symbol.column - 1 + word.length },
+      },
+    };
+  }
+
+  return null;
+});
+
+/**
+ * Find references
+ */
+connection.onReferences((params: ReferenceParams): Location[] => {
+  const document = documents.get(params.textDocument.uri);
+  if (!document) return [];
+
+  const text = document.getText();
+  const offset = document.offsetAt(params.position);
+  const wordRange = getWordRangeAtPosition(text, offset);
+  if (!wordRange) return [];
+
+  const word = text.substring(wordRange.start, wordRange.end);
+  const locations: Location[] = [];
+
+  // Find all occurrences of the word
+  const regex = new RegExp(`\\b${word}\\b`, 'g');
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    const startPos = document.positionAt(match.index);
+    const endPos = document.positionAt(match.index + word.length);
+
+    locations.push({
+      uri: params.textDocument.uri,
+      range: { start: startPos, end: endPos },
+    });
+  }
+
+  return locations;
+});
+
+/**
+ * Document symbols (outline)
+ */
+connection.onDocumentSymbol((params: DocumentSymbolParams): DocumentSymbol[] => {
+  const cached = documentCache.get(params.textDocument.uri);
+  if (!cached) return [];
+
+  const symbols: DocumentSymbol[] = [];
+
+  for (const node of cached.ast) {
+    if (node.type === 'orb') {
+      const orbNode = node as OrbNode;
+      const line = (node.line || 1) - 1;
+
+      const symbol: DocumentSymbol = {
+        name: orbNode.name,
+        kind: SymbolKind.Class,
+        range: {
+          start: { line, character: 0 },
+          end: { line: line + 10, character: 0 }, // Approximate
+        },
+        selectionRange: {
+          start: { line, character: 0 },
+          end: { line, character: orbNode.name.length + 4 },
+        },
+        children: [],
+      };
+
+      // Add properties as children
+      if (orbNode.properties) {
+        for (const [key] of Object.entries(orbNode.properties)) {
+          symbol.children!.push({
+            name: key,
+            kind: SymbolKind.Property,
+            range: { start: { line: line + 1, character: 2 }, end: { line: line + 1, character: 20 } },
+            selectionRange: { start: { line: line + 1, character: 2 }, end: { line: line + 1, character: 2 + key.length } },
+          });
+        }
+      }
+
+      symbols.push(symbol);
+    } else if (node.type === 'world') {
+      const worldNode = node as any;
+      const line = (node.line || 1) - 1;
+
+      symbols.push({
+        name: worldNode.name || 'world',
+        kind: SymbolKind.Module,
+        range: { start: { line, character: 0 }, end: { line: line + 5, character: 0 } },
+        selectionRange: { start: { line, character: 0 }, end: { line, character: 10 } },
+      });
+    }
+  }
+
+  return symbols;
+});
+
+/**
+ * Semantic tokens for syntax highlighting
+ */
+connection.onRequest('textDocument/semanticTokens/full', (params: SemanticTokensParams): SemanticTokens => {
+  const document = documents.get(params.textDocument.uri);
+  if (!document) return { data: [] };
+
+  const builder = new SemanticTokensBuilder();
+  const text = document.getText();
+  const lines = text.split('\n');
+
+  for (let lineNum = 0; lineNum < lines.length; lineNum++) {
+    const line = lines[lineNum];
+
+    // Keywords
+    const keywords = ['orb', 'world', 'import', 'from', 'system', 'true', 'false', 'null'];
+    for (const keyword of keywords) {
+      const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+      let match;
+      while ((match = regex.exec(line)) !== null) {
+        builder.push(lineNum, match.index, keyword.length, tokenTypes.indexOf('keyword'), 0);
+      }
+    }
+
+    // Properties (word followed by colon)
+    const propRegex = /(\w+):/g;
+    let propMatch;
+    while ((propMatch = propRegex.exec(line)) !== null) {
+      builder.push(lineNum, propMatch.index, propMatch[1].length, tokenTypes.indexOf('property'), 0);
+    }
+
+    // Strings
+    const stringRegex = /"[^"]*"|'[^']*'/g;
+    let stringMatch;
+    while ((stringMatch = stringRegex.exec(line)) !== null) {
+      builder.push(lineNum, stringMatch.index, stringMatch[0].length, tokenTypes.indexOf('string'), 0);
+    }
+
+    // Numbers
+    const numRegex = /\b\d+(\.\d+)?\b/g;
+    let numMatch;
+    while ((numMatch = numRegex.exec(line)) !== null) {
+      builder.push(lineNum, numMatch.index, numMatch[0].length, tokenTypes.indexOf('number'), 0);
+    }
+
+    // Comments
+    const commentIndex = line.indexOf('//');
+    if (commentIndex !== -1) {
+      builder.push(lineNum, commentIndex, line.length - commentIndex, tokenTypes.indexOf('comment'), 0);
+    }
+  }
+
+  return builder.build();
+});
+
+/**
+ * Helper: Get word range at position
+ */
+function getWordRangeAtPosition(text: string, offset: number): { start: number; end: number } | null {
+  const wordPattern = /[a-zA-Z_][a-zA-Z0-9_]*/g;
+  let match;
+
+  while ((match = wordPattern.exec(text)) !== null) {
+    if (match.index <= offset && offset <= match.index + match[0].length) {
+      return { start: match.index, end: match.index + match[0].length };
+    }
+  }
+
+  return null;
+}
+
+// Start listening
+documents.listen(connection);
+connection.listen();
+
+console.error('HoloScript Language Server started');

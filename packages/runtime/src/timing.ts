@@ -136,14 +136,14 @@ export function createLoop(
  * Execute callback on next idle period
  */
 export function onIdle(callback: () => void, timeout = 1000): CancelFn {
-  if ('requestIdleCallback' in window) {
-    const id = requestIdleCallback(callback, { timeout });
-    return () => cancelIdleCallback(id);
+  if (typeof (window as any).requestIdleCallback === 'function') {
+    const id = (window as any).requestIdleCallback(callback, { timeout });
+    return () => (window as any).cancelIdleCallback(id);
   }
 
   // Fallback for browsers without requestIdleCallback
-  const id = window.setTimeout(callback, 1) as unknown as TimerId;
-  return () => window.clearTimeout(id);
+  const id = setTimeout(callback, 1) as unknown as TimerId;
+  return () => clearTimeout(id);
 }
 
 /**

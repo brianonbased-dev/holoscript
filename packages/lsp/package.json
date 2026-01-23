@@ -1,0 +1,34 @@
+{
+  "name": "@holoscript/lsp",
+  "version": "2.0.0",
+  "description": "Language Server Protocol implementation for HoloScript",
+  "main": "dist/server.js",
+  "bin": {
+    "holoscript-lsp": "./dist/server.js"
+  },
+  "types": "dist/server.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "holoscript",
+    "lsp",
+    "language-server",
+    "hololand"
+  ],
+  "author": "Hololand",
+  "license": "ELv2",
+  "dependencies": {
+    "@holoscript/core": "workspace:*",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.11",
+    "vscode-uri": "^3.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}
