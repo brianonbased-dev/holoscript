@@ -20,14 +20,17 @@ A declarative language that compiles to 9 platforms from one source.
 
 ## 📁 File Types
 
-**Two complementary formats for different purposes:**
+| Format | What | When |
+|--------|------|------|
+| `.holo` | Structure | Worlds, agents, objects |
+| `.hsplus` | Logic | Systems, networking, behaviors |
 
-| Extension | Purpose | Best For |
-|-----------|---------|----------|
-| `.holo` | Declarative, visual | World layouts, agent definitions, AI-generated content |
-| `.hsplus` | Imperative, full language | Complex logic, networking, custom systems |
+```
+.holo   = "What exists"     (declarative graph)
+.hsplus = "How it works"    (imperative code)
+```
 
-> 💡 **Use both together:** `.holo` for *what exists*, `.hsplus` for *how it behaves*.
+**Both are AI-writable.** Use together.
 
 ---
 
