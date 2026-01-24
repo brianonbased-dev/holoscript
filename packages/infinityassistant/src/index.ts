@@ -41,7 +41,7 @@
  */
 
 // Main client
-export { InfinityBuilderClient } from './UAA2Client';
+export { InfinityBuilderClient } from './InfinityBuilderClient';
 
 // Agent session
 export { AgentSession } from './AgentSession';

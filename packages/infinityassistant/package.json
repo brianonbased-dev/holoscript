@@ -37,7 +37,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/holoscript/holoscript.git",
-    "directory": "packages/infinity-builder-client"
+    "directory": "packages/infinityassistant"
   },
   "devDependencies": {
     "tsup": "^8.0.1",
