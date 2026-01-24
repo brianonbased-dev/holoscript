@@ -704,3 +704,48 @@ export {
   type TreeShakeResult,
 } from './TreeShaker';
 
+// =============================================================================
+// AI Integration (Provider-Agnostic)
+// =============================================================================
+
+export {
+  // Core adapter interface
+  type AIAdapter,
+  type GenerateResult,
+  type ExplainResult,
+  type OptimizeResult,
+  type FixResult,
+  type GenerateOptions,
+
+  // Registry functions
+  registerAIAdapter,
+  getAIAdapter,
+  getDefaultAIAdapter,
+  setDefaultAIAdapter,
+  listAIAdapters,
+  unregisterAIAdapter,
+
+  // Convenience functions
+  generateHoloScript,
+  explainHoloScript,
+  optimizeHoloScript,
+  fixHoloScript,
+
+  // Built-in adapters
+  OpenAIAdapter,
+  AnthropicAdapter,
+  OllamaAdapter,
+  LMStudioAdapter,
+
+  // Config types
+  type OpenAIAdapterConfig,
+  type AnthropicAdapterConfig,
+  type OllamaAdapterConfig,
+  type LMStudioAdapterConfig,
+
+  // Factory functions
+  useOpenAI,
+  useAnthropic,
+  useOllama,
+  useLMStudio,
+} from './ai';
