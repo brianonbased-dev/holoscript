@@ -132,6 +132,58 @@ const CODE_SECURITY_CONFIG = {
   ],
 };
 
+/**
+ * Strip comments and strings from code before security checks.
+ * This prevents false positives when keywords appear in documentation or string literals.
+ */
+function stripCommentsAndStrings(code: string): string {
+  let result = '';
+  let i = 0;
+  
+  while (i < code.length) {
+    // Single-line comment
+    if (code[i] === '/' && code[i + 1] === '/') {
+      while (i < code.length && code[i] !== '\n') i++;
+      continue;
+    }
+    
+    // Multi-line comment
+    if (code[i] === '/' && code[i + 1] === '*') {
+      i += 2;
+      while (i < code.length - 1 && !(code[i] === '*' && code[i + 1] === '/')) i++;
+      i += 2;
+      continue;
+    }
+    
+    // Double-quoted string
+    if (code[i] === '"') {
+      i++;
+      while (i < code.length && code[i] !== '"') {
+        if (code[i] === '\\' && i + 1 < code.length) i++; // Skip escaped char
+        i++;
+      }
+      i++; // Skip closing quote
+      continue;
+    }
+    
+    // Single-quoted string
+    if (code[i] === "'") {
+      i++;
+      while (i < code.length && code[i] !== "'") {
+        if (code[i] === '\\' && i + 1 < code.length) i++; // Skip escaped char
+        i++;
+      }
+      i++; // Skip closing quote
+      continue;
+    }
+    
+    result += code[i];
+    i++;
+  }
+  
+  return result;
+}
+
 export interface ParseResult {
   success: boolean;
   ast: ASTNode[];
@@ -197,7 +249,13 @@ export class HoloScriptCodeParser {
       'try', 'catch', 'finally', 'throw',
       'const', 'let', 'var',
       'animate', 'modify', 'pulse', 'move', 'show', 'hide',
-      'scale', 'focus', 'environment', 'composition', 'template', 'settings', 'chat'
+      'scale', 'focus', 'environment', 'composition', 'template', 'settings', 'chat',
+      // Shape keywords for 3D objects
+      'cube', 'sphere', 'plane', 'cylinder', 'cone', 'torus', 'pyramid',
+      'box', 'mesh', 'model', 'object', 'light', 'camera',
+      // Additional scene keywords
+      'npc', 'player', 'entity', 'trigger', 'zone', 'portal', 'spatial_group',
+      'interactive', 'traits', 'on_interact', 'on_collision', 'on_enter', 'on_exit'
     ]);
   }
 
@@ -339,9 +397,12 @@ export class HoloScriptCodeParser {
       };
     }
 
-    // Security: Check for suspicious keywords
+    // Security: Check for suspicious keywords (only in actual code, not comments/strings)
+    const strippedCode = stripCommentsAndStrings(code).toLowerCase();
     for (const keyword of CODE_SECURITY_CONFIG.suspiciousKeywords) {
-      if (code.toLowerCase().includes(keyword)) {
+      // Use word boundary check to avoid false positives like "spawn" in "respawn"
+      const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+      if (regex.test(strippedCode)) {
         logger.warn('Suspicious keyword detected', { keyword });
         return {
           success: false,
