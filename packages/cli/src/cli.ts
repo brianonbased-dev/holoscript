@@ -6,6 +6,7 @@
 import { HoloScriptCLI } from './HoloScriptCLI';
 import { parseArgs, printHelp } from './args';
 import { startREPL } from './repl';
+import { add, remove, list } from './packageManager';
 
 const VERSION = '1.0.0-alpha.1';
 
@@ -33,6 +34,31 @@ async function main(): Promise<void> {
 
     case 'watch':
       await watchFile(options);
+      break;
+
+    case 'add': {
+      const success = await add(options.packages, {
+        dev: options.dev,
+        verbose: options.verbose,
+      });
+      process.exit(success ? 0 : 1);
+      break;
+    }
+
+    case 'remove': {
+      const success = await remove(options.packages, {
+        verbose: options.verbose,
+      });
+      process.exit(success ? 0 : 1);
+      break;
+    }
+
+    case 'list':
+      list({
+        verbose: options.verbose,
+        json: options.json,
+      });
+      process.exit(0);
       break;
 
     default:

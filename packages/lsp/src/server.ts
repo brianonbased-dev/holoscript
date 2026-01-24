@@ -52,6 +52,8 @@ import {
   type ValidationError,
 } from '@hololand/core';
 
+import { getTraitDoc, formatTraitDocCompact, getAllTraitNames, TRAIT_DOCS } from './traitDocs';
+
 // Create connection and document manager
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -262,6 +264,35 @@ connection.onHover((params: TextDocumentPositionParams): Hover | null => {
 
   const word = text.substring(wordRange.start, wordRange.end);
 
+  // Check if it's a trait annotation (starts with @)
+  const lineStart = text.lastIndexOf('\n', offset) + 1;
+  const lineText = text.substring(lineStart, text.indexOf('\n', offset) || text.length);
+  const atMatch = lineText.match(/@(\w+)/);
+  
+  if (atMatch) {
+    const traitName = atMatch[1];
+    const traitDoc = getTraitDoc(traitName);
+    if (traitDoc) {
+      return {
+        contents: {
+          kind: MarkupKind.Markdown,
+          value: formatTraitDocCompact(traitDoc),
+        },
+      };
+    }
+  }
+
+  // Check if word is a trait name (without @)
+  const traitDoc = getTraitDoc(word);
+  if (traitDoc) {
+    return {
+      contents: {
+        kind: MarkupKind.Markdown,
+        value: formatTraitDocCompact(traitDoc),
+      },
+    };
+  }
+
   // Check if it's a keyword
   const keywordDocs: Record<string, string> = {
     orb: '**orb** - A 3D object in the scene.\n\n```holoscript\norb my_cube {\n  position: [0, 1, 0]\n  scale: [1, 1, 1]\n}\n```',
@@ -270,8 +301,12 @@ connection.onHover((params: TextDocumentPositionParams): Hover | null => {
     rotation: '**rotation** - Euler angles in degrees [x, y, z]\n\nDefault: `[0, 0, 0]`',
     scale: '**scale** - Size multiplier [x, y, z]\n\nDefault: `[1, 1, 1]`',
     on_click: '**on_click** - Handler for click/tap events\n\n```holoscript\non_click: {\n  play_sound: "click.mp3"\n  animate: { scale: [1.2, 1.2, 1.2] }\n}\n```',
-    networked: '**networked** *(HSPlus)* - Enable multiplayer sync\n\nWhen `true`, this orb\'s state is synchronized across all connected clients.',
-    physics: '**physics** *(HSPlus)* - Enable physics simulation\n\n```holoscript\nphysics: {\n  type: "dynamic"  // or "static", "kinematic"\n  mass: 1.0\n  friction: 0.5\n}\n```',
+    networked: '**networked** *(HSPlus)* - Enable multiplayer sync\n\nWhen `true`, this orb\'s state is synchronized across all connected clients.\n\nSee also: `@networked` trait for advanced options.',
+    physics: '**physics** *(HSPlus)* - Enable physics simulation\n\n```holoscript\nphysics: {\n  type: "dynamic"  // or "static", "kinematic"\n  mass: 1.0\n  friction: 0.5\n}\n```\n\nSee also: `@rigidbody` trait for advanced options.',
+    traits: '**traits** - List of trait annotations applied to this object.\n\nAvailable traits: `@rigidbody`, `@trigger`, `@ik`, `@skeleton`, `@networked`, `@material`, `@lighting`, etc.',
+    template: '**template** - Define a reusable object template.\n\n```holoscript\ntemplate "Enemy" {\n  state { health: 100 }\n  action attack(target) { }\n}\n```',
+    composition: '**composition** - A scene composition containing objects and logic.\n\n```holoscript\ncomposition "BattleScene" {\n  // objects, templates, and logic here\n}\n```',
+    spatial_group: '**spatial_group** - A group of spatially-related objects.\n\n```holoscript\nspatial_group "Arena" {\n  object "Platform" { position: [0, 0, 0] }\n}\n```',
   };
 
   if (keywordDocs[word]) {

@@ -1,9 +1,14 @@
 {
   "name": "holoscript-vscode",
   "displayName": "HoloScript Enhanced",
-  "description": "Language support for HoloScript+ with AI integration and Spatial Profiling",
-  "version": "1.0.0",
+  "description": "Language support for HoloScript+ with AI integration, Spatial Profiling, and Live Preview",
+  "version": "1.1.0",
   "publisher": "holoscript",
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holoscript/holoscript"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -11,16 +16,42 @@
     "Programming Languages",
     "Visualization"
   ],
+  "keywords": [
+    "holoscript",
+    "vr",
+    "ar",
+    "spatial computing",
+    "3d",
+    "webxr"
+  ],
   "activationEvents": [
-    "onLanguage:holoscript"
+    "onLanguage:holoscript",
+    "onLanguage:holoscriptplus"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "languages": [
       {
         "id": "holoscript",
-        "aliases": ["HoloScript", "hosl"],
-        "extensions": [".holo", ".hs", ".hsplus"],
+        "aliases": [
+          "HoloScript",
+          "hosl"
+        ],
+        "extensions": [
+          ".holo"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "holoscriptplus",
+        "aliases": [
+          "HoloScript+",
+          "hsplus"
+        ],
+        "extensions": [
+          ".hsplus",
+          ".hs"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -29,12 +60,75 @@
         "language": "holoscript",
         "scopeName": "source.holoscript",
         "path": "./syntaxes/holoscript.tmLanguage.json"
+      },
+      {
+        "language": "holoscriptplus",
+        "scopeName": "source.holoscript",
+        "path": "./syntaxes/holoscript.tmLanguage.json"
       }
     ],
     "snippets": [
       {
         "language": "holoscript",
         "path": "./snippets/holoscript.json"
+      },
+      {
+        "language": "holoscriptplus",
+        "path": "./snippets/holoscript.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "holoscript.openPreview",
+        "title": "Open Preview",
+        "category": "HoloScript",
+        "icon": "$(preview)"
+      },
+      {
+        "command": "holoscript.openPreviewToSide",
+        "title": "Open Preview to the Side",
+        "category": "HoloScript",
+        "icon": "$(open-preview)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "holoscript.openPreviewToSide",
+          "when": "editorLangId == holoscript || editorLangId == holoscriptplus",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "holoscript.openPreview",
+          "when": "editorLangId == holoscript || editorLangId == holoscriptplus",
+          "group": "holoscript"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "holoscript.openPreview",
+          "when": "editorLangId == holoscript || editorLangId == holoscriptplus"
+        },
+        {
+          "command": "holoscript.openPreviewToSide",
+          "when": "editorLangId == holoscript || editorLangId == holoscriptplus"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "holoscript.openPreviewToSide",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v",
+        "when": "editorLangId == holoscript || editorLangId == holoscriptplus"
+      },
+      {
+        "command": "holoscript.openPreview",
+        "key": "ctrl+k v",
+        "mac": "cmd+k v",
+        "when": "editorLangId == holoscript || editorLangId == holoscriptplus"
       }
     ]
   },
@@ -42,14 +136,17 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "build": "npm run compile",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish": "vsce publish"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
     "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.32.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "vscode-languageclient": "^9.0.1"  
-  } 
+    "vscode-languageclient": "^9.0.1"
+  }
 }

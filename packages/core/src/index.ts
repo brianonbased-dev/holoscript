@@ -678,3 +678,29 @@ export function isHoloScriptSupported(): boolean {
     win.window.webkitGetUserMedia
   );
 }
+
+// Source Maps
+export {
+  SourceMapGenerator,
+  SourceMapConsumer,
+  combineSourceMaps,
+  type SourceMap,
+  type MappingSegment,
+  type LineMapping,
+} from './SourceMapGenerator';
+
+// Incremental Parsing
+export {
+  IncrementalParser,
+  createIncrementalParser,
+} from './IncrementalParser';
+
+// Tree Shaking
+export {
+  TreeShaker,
+  treeShake,
+  eliminateDeadCode,
+  type TreeShakeOptions,
+  type TreeShakeResult,
+} from './TreeShaker';
+
