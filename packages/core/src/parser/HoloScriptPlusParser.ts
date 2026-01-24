@@ -534,8 +534,6 @@ export class HoloScriptPlusParser {
     // Tokenize
     const lexer = new Lexer(source);
     this.tokens = lexer.tokenize();
-    try { require('fs').writeFileSync('tokens.log', JSON.stringify(this.tokens, null, 2)); } catch(e){}
-
 
     // Parse root node
     const root = this.parseDocument();
@@ -911,7 +909,16 @@ export class HoloScriptPlusParser {
 
     if (this.check('LPAREN')) {
       this.advance();
+      this.skipNewlines();
+      
       while (!this.check('RPAREN') && !this.check('EOF')) {
+        this.skipNewlines();
+        if (this.check('RPAREN') || this.check('EOF')) break;
+        if (!this.check('IDENTIFIER')) {
+          this.advance();
+          continue;
+        }
+        
         const key = this.expect('IDENTIFIER', 'Expected property name').value;
         if (this.check('COLON') || this.check('EQUALS')) {
           this.advance();
@@ -920,6 +927,7 @@ export class HoloScriptPlusParser {
           config[key] = true;
         }
         if (this.check('COMMA')) this.advance();
+        this.skipNewlines();
       }
       this.expect('RPAREN', 'Expected )');
     }
@@ -1087,9 +1095,23 @@ export class HoloScriptPlusParser {
   private parseArray(): unknown[] {
     const arr: unknown[] = [];
     this.expect('LBRACKET', 'Expected [');
+    this.skipNewlines();
 
     while (!this.check('RBRACKET') && !this.check('EOF')) {
-      arr.push(this.parseValue());
+      const beforePos = this.pos;
+      this.skipNewlines();
+      
+      // Prevent infinite loop - if we can't parse anything, skip the token
+      if (this.check('RBRACKET') || this.check('EOF')) break;
+      
+      const value = this.parseValue();
+      if (value !== null) {
+        arr.push(value);
+      } else if (this.pos === beforePos) {
+        // No progress made, skip this token to prevent infinite loop
+        this.advance();
+      }
+      
       if (this.check('COMMA')) this.advance();
       this.skipNewlines();
     }
@@ -1104,6 +1126,16 @@ export class HoloScriptPlusParser {
     this.skipNewlines();
 
     while (!this.check('RBRACE') && !this.check('EOF')) {
+      this.skipNewlines();
+      
+      // Prevent infinite loop - exit if we hit unexpected token
+      if (this.check('RBRACE') || this.check('EOF')) break;
+      if (!this.check('IDENTIFIER')) {
+        // Skip unexpected token
+        this.advance();
+        continue;
+      }
+      
       const key = this.expect('IDENTIFIER', 'Expected property name').value;
       if (this.check('COLON') || this.check('EQUALS')) {
         this.advance();
