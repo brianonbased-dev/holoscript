@@ -48,6 +48,27 @@ export * from './HoloScriptCodeParser';
 // HoloScript+ Parser (NEW)
 export { HoloScriptPlusParser, createParser, parse as parseHoloScriptPlus } from './parser/HoloScriptPlusParser';
 
+// .holo Composition Parser (NEW - Scene-centric declarative format)
+export { HoloCompositionParser, parseHolo, parseHoloStrict } from './parser/HoloCompositionParser';
+export type {
+  HoloComposition,
+  HoloEnvironment,
+  HoloState,
+  HoloTemplate,
+  HoloObjectDecl,
+  HoloSpatialGroup,
+  HoloLogic,
+  HoloAction,
+  HoloEventHandler,
+  HoloStatement,
+  HoloExpression,
+  HoloImport,
+  HoloParseResult,
+  HoloParseError,
+  HoloParserOptions,
+  HoloValue,
+} from './parser/HoloCompositionTypes';
+
 // HoloScript+ Enhanced Parser with Trait Annotations (NEW - Phase 3)
 export {
   HoloScriptPlusParser as HoloScriptTraitAnnotationParser,
