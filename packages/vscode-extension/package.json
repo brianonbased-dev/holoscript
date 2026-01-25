@@ -4,7 +4,7 @@
   "description": "Language support for HoloScript+ with AI integration, Spatial Profiling, and Live Preview",
   "version": "1.1.0",
   "publisher": "holoscript",
-  "icon": "images/icon.png",
+  "icon": "icons/holoscript-logo.svg",
   "repository": {
     "type": "git",
     "url": "https://github.com/holoscript/holoscript"
@@ -42,7 +42,11 @@
         "extensions": [
           ".holo"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/holoscript.svg",
+          "dark": "./icons/holoscript.svg"
+        }
       },
       {
         "id": "holoscriptplus",
@@ -54,7 +58,18 @@
           ".hsplus",
           ".hs"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/holoscript-plus.svg",
+          "dark": "./icons/holoscript-plus.svg"
+        }
+      }
+    ],
+    "iconThemes": [
+      {
+        "id": "holoscript-icons",
+        "label": "HoloScript Icons",
+        "path": "./icons/icon-theme.json"
       }
     ],
     "grammars": [
