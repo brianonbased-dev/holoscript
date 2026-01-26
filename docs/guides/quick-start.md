@@ -92,4 +92,5 @@ holoscript compile hello.holo --target vrchat
 
 - [VR Traits](./traits) - Add interactivity with @grabbable, @physics, @networked
 - [Compositions](./compositions) - Build complex multi-object scenes
+- [Best Practices](../best-practices.md) - Learn the 10 rules for great VR experiences
 - [AI Integration](./ai-agents) - Use MCP server with Claude, GPT, or Brittney
