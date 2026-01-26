@@ -2,12 +2,12 @@
   "name": "holoscript-vscode",
   "displayName": "HoloScript Enhanced",
   "description": "Language support for HoloScript+ with AI integration, Spatial Profiling, and Live Preview",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "publisher": "holoscript",
   "icon": "icons/holoscript-logo.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/holoscript/holoscript"
+    "url": "https://github.com/brianonbased-dev/holoscript"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -148,6 +148,12 @@
         "category": "HoloScript"
       },
       {
+        "command": "holoscript.createFirstScene",
+        "title": "Create First Scene",
+        "category": "HoloScript",
+        "icon": "$(new-file)"
+      },
+      {
         "command": "holoscript.openExamples",
         "title": "Open Examples",
         "category": "HoloScript",
@@ -223,7 +229,7 @@
           {
             "id": "createFile",
             "title": "Create Your First Scene",
-            "description": "Create a `.holo` file and write your first VR scene.\n\n[Create hello.holo](command:holoscript.agent.createFile)",
+            "description": "Create a `.holo` file and write your first VR scene.\n\n[Create Your First Scene](command:holoscript.createFirstScene)",
             "media": {
               "markdown": "walkthroughs/getting-started/02-first-scene.md"
             },

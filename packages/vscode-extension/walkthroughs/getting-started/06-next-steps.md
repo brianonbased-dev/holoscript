@@ -29,7 +29,7 @@ holoscript compile scene.holo --target vrchat
 ## Join the Community
 
 - 💬 [Discord](https://discord.gg/holoscript) - Get help, share creations
-- 🐙 [GitHub](https://github.com/holoscript/holoscript) - Report issues, contribute
+- 🐙 [GitHub](https://github.com/brianonbased-dev/holoscript) - Report issues, contribute
 - 📖 [Docs](https://holoscript.net/docs) - Full documentation
 
 ## Need Help?

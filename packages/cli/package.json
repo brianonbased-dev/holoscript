@@ -27,7 +27,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/holoscript/holoscript.git",
+    "url": "https://github.com/brianonbased-dev/holoscript.git",
     "directory": "packages/cli"
   },
   "dependencies": {
