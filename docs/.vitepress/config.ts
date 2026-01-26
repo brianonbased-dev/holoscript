@@ -85,7 +85,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/holoscript/holoscript' }
+      { icon: 'github', link: 'https://github.com/brianonbased-dev/Holoscript' }
     ],
 
     footer: {
@@ -98,7 +98,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/holoscript/holoscript/edit/main/docs/:path',
+      pattern: 'https://github.com/brianonbased-dev/Holoscript/edit/master/docs/:path',
       text: 'Edit this page on GitHub'
     }
   }
