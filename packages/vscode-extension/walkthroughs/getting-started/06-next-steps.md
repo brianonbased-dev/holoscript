@@ -9,10 +9,10 @@ Open the Command Palette (`Ctrl+Shift+P`) and type:
 
 ## Learn More
 
-- [Full Traits Reference](https://holoscript.net/docs/traits) - All 49 VR traits
-- [Composition Guide](https://holoscript.net/docs/compositions) - Complex scenes
-- [Best Practices](https://holoscript.net/docs/best-practices) - 10 rules for great VR
-- [API Reference](https://holoscript.net/docs/api) - Complete documentation
+- [Full Traits Reference](https://holoscript.net/api/traits) - All 49 VR traits
+- [Composition Guide](https://holoscript.net/guides/compositions) - Complex scenes
+- [Best Practices](https://holoscript.net/guides/best-practices) - 10 rules for great VR
+- [API Reference](https://holoscript.net/api/) - Complete documentation
 
 ## Compile to Platforms
 
@@ -30,7 +30,7 @@ holoscript compile scene.holo --target vrchat
 
 - 💬 [Discord](https://discord.gg/holoscript) - Get help, share creations
 - 🐙 [GitHub](https://github.com/brianonbased-dev/holoscript) - Report issues, contribute
-- 📖 [Docs](https://holoscript.net/docs) - Full documentation
+- 📖 [Docs](https://holoscript.net/guides/) - Full documentation
 
 ## Need Help?
 

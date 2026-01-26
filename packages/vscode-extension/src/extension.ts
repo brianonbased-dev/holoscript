@@ -92,7 +92,7 @@ export function activate(context: ExtensionContext) {
   // Register Open Documentation command
   context.subscriptions.push(
     commands.registerCommand('holoscript.openDocumentation', () => {
-      vscode.env.openExternal(vscode.Uri.parse('https://holoscript.net/docs'));
+      vscode.env.openExternal(vscode.Uri.parse('https://holoscript.net/guides/'));
     })
   );
 
