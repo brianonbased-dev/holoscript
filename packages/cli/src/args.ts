@@ -3,7 +3,7 @@
  */
 
 export interface CLIOptions {
-  command: 'parse' | 'run' | 'ast' | 'repl' | 'watch' | 'add' | 'remove' | 'list' | 'traits' | 'suggest' | 'generate' | 'templates' | 'help' | 'version';
+  command: 'parse' | 'run' | 'ast' | 'repl' | 'watch' | 'compile' | 'add' | 'remove' | 'list' | 'traits' | 'suggest' | 'generate' | 'templates' | 'help' | 'version';
   input?: string;
   output?: string;
   verbose: boolean;
@@ -15,6 +15,7 @@ export interface CLIOptions {
   dev: boolean;
   description?: string;
   brittneyUrl?: string;
+  target?: string;
 }
 
 const DEFAULT_OPTIONS: CLIOptions = {
@@ -38,7 +39,7 @@ export function parseArgs(args: string[]): CLIOptions {
 
     // Commands
     if (!arg.startsWith('-')) {
-      if (['parse', 'run', 'ast', 'repl', 'watch', 'add', 'remove', 'list', 'traits', 'suggest', 'generate', 'templates', 'help', 'version'].includes(arg)) {
+      if (['parse', 'run', 'ast', 'repl', 'watch', 'compile', 'add', 'remove', 'list', 'traits', 'suggest', 'generate', 'templates', 'help', 'version'].includes(arg)) {
         options.command = arg as CLIOptions['command'];
       } else if (['add', 'remove'].includes(options.command)) {
         // Collect package names for add/remove commands
@@ -91,6 +92,10 @@ export function parseArgs(args: string[]): CLIOptions {
       case '--brittney-url':
         options.brittneyUrl = args[++i];
         break;
+      case '-t':
+      case '--target':
+        options.target = args[++i];
+        break;
     }
     i++;
   }
@@ -107,6 +112,7 @@ Usage: holoscript <command> [options] [input]
 \x1b[1mCommands:\x1b[0m
   parse <file>      Parse a HoloScript file and validate syntax
   run <file>        Execute a HoloScript file
+  compile <file>    Compile to target platform (threejs, unity, vrchat)
   ast <file>        Output the AST as JSON
   repl              Start interactive REPL mode
   watch <file>      Watch file and re-execute on changes
@@ -129,6 +135,7 @@ Usage: holoscript <command> [options] [input]
   -v, --verbose       Enable verbose output
   -j, --json          Output results as JSON
   -o, --output        Write output to file
+  -t, --target        Compile target (threejs, unity, vrchat, babylon)
   --max-depth <n>     Max execution depth (default: 10)
   --timeout <ms>      Execution timeout in ms (default: 5000)
   --show-ast          Show AST during REPL execution
@@ -138,6 +145,8 @@ Usage: holoscript <command> [options] [input]
 \x1b[1mExamples:\x1b[0m
   holoscript parse world.hs
   holoscript run world.hs --verbose
+  holoscript compile world.holo --target threejs
+  holoscript compile world.holo --target unity -o output/
   holoscript ast world.hs -o ast.json
   holoscript repl
   holoscript watch world.hs
