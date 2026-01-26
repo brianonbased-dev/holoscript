@@ -221,7 +221,7 @@ For large files, validation may be slow. Try:
 
 Found a bug or have a feature request?
 
-1. Go to [GitHub Issues](https://github.com/holoscript/vscode-extension/issues)
+1. Go to [GitHub Issues](https://github.com/brianonbased-dev/holoscript/issues)
 2. Check if already reported
 3. Create new issue with:
    - VS Code version
