@@ -73,8 +73,16 @@ One component. Runs on **Web, VR, AR, iOS, Android, Desktop**. No rewrites.
 `@holoscript/streaming` — Progressive loading, LOD streaming, and smart caching for large VR worlds.
 
 ### 🤖 AI Integration
+- **Brittney MCP** — Full integration with Quantum MCP Mesh Orchestrator for high-fidelity generation.
 - **Claude Desktop/Code** — `.claude/settings.json` pre-configured
 - **GitHub Copilot** — `.github/copilot-instructions.md` with MCP guidance
+
+### ⚡ Unified Event System
+`@holoscript/events` — Global Event Bubbling and Physics-Haptics bridging.
+
+## 📚 Guides
+- **[Best Practices Guide](./docs/guides/best-practices.md)** — 10 Rules for Ergonomics & Performance (New!)
+- [VRChat Export](./docs/VRCHAT_EXPORT.md) — Export to Udon
 
 ## Install
 
