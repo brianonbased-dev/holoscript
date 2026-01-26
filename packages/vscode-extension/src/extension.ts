@@ -74,10 +74,10 @@ export function activate(context: ExtensionContext) {
           await commands.executeCommand('vscode.openFolder', uri, { forceNewWindow: false });
         } else {
           // Fallback: open examples on GitHub
-          vscode.env.openExternal(vscode.Uri.parse('https://github.com/holoscript/holoscript/tree/main/examples/quickstart'));
+          vscode.env.openExternal(vscode.Uri.parse('https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart'));
         }
       } catch {
-        vscode.env.openExternal(vscode.Uri.parse('https://github.com/holoscript/holoscript/tree/main/examples/quickstart'));
+        vscode.env.openExternal(vscode.Uri.parse('https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart'));
       }
     })
   );
@@ -93,6 +93,54 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     commands.registerCommand('holoscript.openDocumentation', () => {
       vscode.env.openExternal(vscode.Uri.parse('https://holoscript.net/docs'));
+    })
+  );
+
+  // Register interactive Create First Scene command (for walkthrough)
+  context.subscriptions.push(
+    commands.registerCommand('holoscript.createFirstScene', async () => {
+      const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+      if (!workspaceFolder) {
+        window.showWarningMessage('Open a folder first to create HoloScript files.');
+        return;
+      }
+
+      const filename = await window.showInputBox({
+        prompt: 'Enter a name for your first scene',
+        value: 'hello-world',
+        placeHolder: 'hello-world'
+      });
+
+      if (!filename) return;
+
+      const filePath = path.join(workspaceFolder.uri.fsPath, `${filename}.holo`);
+      
+      const defaultContent = `composition "My First Scene" {
+  environment {
+    skybox: "default"
+    ambient_light: 0.5
+  }
+
+  object "MyFirstCube" {
+    @grabbable
+    @collidable
+    
+    geometry: "cube"
+    position: [0, 1, 0]
+    scale: [0.5, 0.5, 0.5]
+    color: "#00ffff"
+  }
+}
+`;
+
+      try {
+        fs.writeFileSync(filePath, defaultContent, 'utf8');
+        const doc = await vscode.workspace.openTextDocument(filePath);
+        await window.showTextDocument(doc);
+        window.showInformationMessage(`Created ${filename}.holo! 🎉 Try adding more objects.`);
+      } catch (err) {
+        window.showErrorMessage(`Failed to create file: ${err}`);
+      }
     })
   );
 

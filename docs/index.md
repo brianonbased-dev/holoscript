@@ -14,7 +14,7 @@ hero:
       link: /guides/
     - theme: alt
       text: View on GitHub
-      link: https://github.com/holoscript/holoscript
+      link: https://github.com/brianonbased-dev/holoscript
     - theme: alt
       text: VS Code Extension
       link: https://marketplace.visualstudio.com/items?itemName=holoscript.holoscript-vscode
@@ -95,6 +95,6 @@ npm install @holoscript/mcp-server
 
 ## Join the Community
 
-- [GitHub Discussions](https://github.com/holoscript/holoscript/discussions)
+- [GitHub Discussions](https://github.com/brianonbased-dev/holoscript/discussions)
 - [Discord](https://discord.gg/holoscript)
 - [Twitter/X](https://x.com/holoscript)
