@@ -3,7 +3,7 @@
  */
 
 export interface CLIOptions {
-  command: 'parse' | 'run' | 'ast' | 'repl' | 'watch' | 'add' | 'remove' | 'list' | 'help' | 'version';
+  command: 'parse' | 'run' | 'ast' | 'repl' | 'watch' | 'add' | 'remove' | 'list' | 'traits' | 'suggest' | 'generate' | 'templates' | 'help' | 'version';
   input?: string;
   output?: string;
   verbose: boolean;
@@ -13,6 +13,8 @@ export interface CLIOptions {
   showAST: boolean;
   packages: string[];
   dev: boolean;
+  description?: string;
+  brittneyUrl?: string;
 }
 
 const DEFAULT_OPTIONS: CLIOptions = {
@@ -24,6 +26,7 @@ const DEFAULT_OPTIONS: CLIOptions = {
   showAST: false,
   packages: [],
   dev: false,
+  brittneyUrl: process.env.BRITTNEY_SERVICE_URL,
 };
 
 export function parseArgs(args: string[]): CLIOptions {
@@ -35,11 +38,14 @@ export function parseArgs(args: string[]): CLIOptions {
 
     // Commands
     if (!arg.startsWith('-')) {
-      if (['parse', 'run', 'ast', 'repl', 'watch', 'add', 'remove', 'list', 'help', 'version'].includes(arg)) {
+      if (['parse', 'run', 'ast', 'repl', 'watch', 'add', 'remove', 'list', 'traits', 'suggest', 'generate', 'templates', 'help', 'version'].includes(arg)) {
         options.command = arg as CLIOptions['command'];
       } else if (['add', 'remove'].includes(options.command)) {
         // Collect package names for add/remove commands
         options.packages.push(arg);
+      } else if (['suggest', 'generate'].includes(options.command) && !options.description) {
+        // Collect description for suggest/generate commands
+        options.description = arg;
       } else if (!options.input) {
         options.input = arg;
       }
@@ -82,6 +88,9 @@ export function parseArgs(args: string[]): CLIOptions {
       case '--version':
         options.command = 'version';
         break;
+      case '--brittney-url':
+        options.brittneyUrl = args[++i];
+        break;
     }
     i++;
   }
@@ -91,43 +100,64 @@ export function parseArgs(args: string[]): CLIOptions {
 
 export function printHelp(): void {
   console.log(`
-HoloScript CLI v1.0.0-alpha.1
+\x1b[36mHoloScript CLI v1.0.0-alpha.1\x1b[0m
 
 Usage: holoscript <command> [options] [input]
 
-Commands:
+\x1b[1mCommands:\x1b[0m
   parse <file>      Parse a HoloScript file and validate syntax
   run <file>        Execute a HoloScript file
   ast <file>        Output the AST as JSON
   repl              Start interactive REPL mode
   watch <file>      Watch file and re-execute on changes
+
+  \x1b[33mTraits & Generation:\x1b[0m
+  traits [name]     List all VR traits, or explain a specific trait
+  suggest <desc>    Suggest appropriate traits for an object
+  generate <desc>   Generate HoloScript from natural language
+  templates         List available object templates
+
+  \x1b[33mPackage Management:\x1b[0m
   add <pkg...>      Add HoloScript packages to current project
   remove <pkg...>   Remove HoloScript packages from current project
   list              List installed HoloScript packages
+
   help              Show this help message
   version           Show version information
 
-Options:
-  -v, --verbose     Enable verbose output
-  -j, --json        Output results as JSON
-  -o, --output      Write output to file
-  --max-depth <n>   Max execution depth (default: 10)
-  --timeout <ms>    Execution timeout in ms (default: 5000)
-  --show-ast        Show AST during REPL execution
-  -D, --dev         Install as dev dependency (for add command)
+\x1b[1mOptions:\x1b[0m
+  -v, --verbose       Enable verbose output
+  -j, --json          Output results as JSON
+  -o, --output        Write output to file
+  --max-depth <n>     Max execution depth (default: 10)
+  --timeout <ms>      Execution timeout in ms (default: 5000)
+  --show-ast          Show AST during REPL execution
+  -D, --dev           Install as dev dependency (for add command)
+  --brittney-url      Brittney AI service URL (optional, enhances generation)
 
-Examples:
+\x1b[1mExamples:\x1b[0m
   holoscript parse world.hs
   holoscript run world.hs --verbose
   holoscript ast world.hs -o ast.json
   holoscript repl
   holoscript watch world.hs
+
+  \x1b[2m# Traits & Generation\x1b[0m
+  holoscript traits                    # List all 49 VR traits
+  holoscript traits grabbable          # Explain @grabbable trait
+  holoscript suggest "glowing orb"     # Suggest traits for object
+  holoscript generate "red button"     # Generate HoloScript code
+  holoscript templates                 # List object templates
+
+  \x1b[2m# Package Management\x1b[0m
   holoscript add @holoscript/std @holoscript/network
   holoscript add @holoscript/test --dev
   holoscript remove @holoscript/network
   holoscript list
 
-Aliases:
+\x1b[1mAliases:\x1b[0m
   hs              Short alias for holoscript
+
+\x1b[2mBrittney AI: Set BRITTNEY_SERVICE_URL for enhanced generation.\x1b[0m
 `);
 }

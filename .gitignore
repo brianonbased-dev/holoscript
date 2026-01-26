@@ -28,6 +28,9 @@ pnpm-debug.log*
 # Test coverage
 coverage/
 
+# AI Workspace (Proprietary Research)
+.ai-workspace/
+
 # Package manager
 pnpm-lock.yaml
 package-lock.json

@@ -350,7 +350,7 @@ export class HoloScriptRuntime {
           result = await this.executeGeneric(node);
           break;
         case 'expression-statement':
-          result = await this.executeCall(node);
+          result = await this.executeExpressionStatement(node as any);
           break;
         case 'scale':
           result = await this.executeScale(node as ScaleNode);
@@ -417,9 +417,19 @@ export class HoloScriptRuntime {
     if (Array.isArray(nodes)) {
       const results = await this.executeProgram(nodes);
       const success = results.every(r => r.success);
+      
+      // Bubble up return result if present
+      const lastResult = results[results.length - 1];
+      let output: any = success ? `Program executed (${results.length} nodes)` : 'Program failed';
+      
+      if (lastResult && lastResult.success && lastResult.output !== undefined) {
+         // If evaluateExpression was used, it likely came from a return node or expression statement
+         output = lastResult.output;
+      }
+
       return {
         success,
-        output: success ? `Program executed (${results.length} nodes)` : 'Program failed',
+        output,
         error: results.find(r => !r.success)?.error
       };
     } else {
@@ -791,7 +801,15 @@ export class HoloScriptRuntime {
       logger.info('Gate evaluation', { condition: node.condition, result: condition });
 
       if (path.length > 0) {
-        await this.executeProgram(path, this.callStack.length + 1);
+        const subResults = await this.executeProgram(path, this.callStack.length + 1);
+        
+        // If the sub-program hit a return, bubble that up
+        const lastResult = subResults[subResults.length - 1];
+        if (lastResult && lastResult.success && lastResult.output !== undefined) {
+          // Check if the last executed node was a return
+          // This is a bit hacky but works given executeProgram's logic
+          return lastResult;
+        }
       }
 
       return {
@@ -830,6 +848,14 @@ export class HoloScriptRuntime {
       output: `Stream '${node.name}' processed ${Array.isArray(data) ? data.length : 1} item(s)`,
       hologram: node.hologram,
       spatialPosition: node.position,
+    };
+  }
+
+  private async executeExpressionStatement(node: { expression: string }): Promise<ExecutionResult> {
+    const value = this.evaluateExpression(node.expression);
+    return {
+      success: true,
+      output: value,
     };
   }
 
@@ -1200,8 +1226,9 @@ export class HoloScriptRuntime {
     };
   }
 
-  private async executeReturn(node: ASTNode & { value: unknown }): Promise<ExecutionResult> {
-    const value = this.evaluateExpression(String(node.value));
+  private async executeReturn(node: ASTNode & { value?: unknown; expression?: string }): Promise<ExecutionResult> {
+    const expr = String(node.value || node.expression || '');
+    const value = this.evaluateExpression(expr);
 
     return {
       success: true,

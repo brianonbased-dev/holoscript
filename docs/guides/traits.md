@@ -1,0 +1,174 @@
+# VR Traits
+
+HoloScript includes **55 built-in traits** that make objects spatial and interactive. Add traits with the `@` prefix.
+
+## Interaction Traits
+
+| Trait | Description |
+|-------|-------------|
+| `@grabbable` | Object can be picked up with hands/controllers |
+| `@throwable` | Object can be thrown after grabbing |
+| `@holdable` | Object stays in hand until released |
+| `@clickable` | Object responds to click/tap events |
+| `@hoverable` | Object responds to hover/gaze events |
+| `@draggable` | Object can be dragged in 2D/3D space |
+
+### Example
+
+```hsplus
+orb weapon {
+  @grabbable
+  @throwable
+  @holdable
+  
+  position: [0, 1, -2]
+  
+  on_grab: { play_sound("pickup") }
+  on_throw: { damage_on_impact(50) }
+}
+```
+
+## Physics Traits
+
+| Trait | Description |
+|-------|-------------|
+| `@collidable` | Object participates in collision detection |
+| `@physics` | Object has full physics simulation |
+| `@rigid` | Rigid body dynamics |
+| `@kinematic` | Scripted movement, affects other physics objects |
+| `@trigger` | Collision detection without physical response |
+| `@gravity` | Object affected by gravity |
+
+### Example
+
+```hsplus
+orb ball {
+  @physics
+  @gravity
+  @collidable
+  
+  mass: 1.0
+  bounciness: 0.8
+  friction: 0.3
+}
+```
+
+## Visual Traits
+
+| Trait | Description |
+|-------|-------------|
+| `@glowing` | Object emits light |
+| `@emissive` | Self-illuminating material |
+| `@transparent` | Object has transparency |
+| `@reflective` | Mirror-like surface |
+| `@animated` | Object has animation states |
+| `@billboard` | Always faces the camera |
+
+### Example
+
+```hsplus
+orb powerup {
+  @glowing
+  @animated
+  @billboard
+  
+  glow_color: "#ff00ff"
+  glow_intensity: 1.5
+  animation: "pulse"
+}
+```
+
+## Networking Traits
+
+| Trait | Description |
+|-------|-------------|
+| `@networked` | State syncs across network |
+| `@synced` | Specific properties sync |
+| `@persistent` | State persists between sessions |
+| `@owned` | Has network ownership |
+| `@host_only` | Only host can modify |
+
+### Example
+
+```hsplus
+orb shared_display {
+  @networked
+  @synced
+  @persistent
+  
+  sync_rate: 20hz
+  sync_properties: [position, rotation, state]
+}
+```
+
+## Behavior Traits
+
+| Trait | Description |
+|-------|-------------|
+| `@stackable` | Objects can stack on each other |
+| `@attachable` | Object can attach to other objects |
+| `@equippable` | Can be equipped to avatar slots |
+| `@consumable` | Object can be consumed/used up |
+| `@destructible` | Object can be destroyed |
+
+## Spatial Traits
+
+| Trait | Description |
+|-------|-------------|
+| `@anchor` | Fixed position in world space |
+| `@tracked` | Follows a tracked point |
+| `@world_locked` | Locked to world coordinates (AR) |
+| `@hand_tracked` | Follows hand position |
+| `@eye_tracked` | Responds to eye gaze |
+
+## Audio Traits
+
+| Trait | Description |
+|-------|-------------|
+| `@spatial_audio` | 3D positional audio |
+| `@ambient` | Background audio source |
+| `@voice_activated` | Responds to voice input |
+
+## State Traits
+
+| Trait | Description |
+|-------|-------------|
+| `@state` | Has reactive state |
+| `@reactive` | Automatically updates on state change |
+| `@observable` | State can be observed by other objects |
+| `@computed` | Derived state from other values |
+
+## Combining Traits
+
+Traits can be combined freely:
+
+```holo
+object "MagicSword" {
+  @grabbable
+  @throwable
+  @glowing
+  @physics
+  @spatial_audio
+  @networked
+  
+  position: [0, 1, -2]
+  glow_color: "#00ffff"
+  
+  on_grab: {
+    play_sound("sword_draw")
+    this.glow_intensity = 2.0
+  }
+}
+```
+
+## Custom Trait Parameters
+
+Some traits accept parameters:
+
+```hsplus
+orb ball {
+  @physics(mass: 2.0, drag: 0.1)
+  @glowing(color: "#ff0000", intensity: 1.5)
+  @networked(sync_rate: 30hz)
+}
+```

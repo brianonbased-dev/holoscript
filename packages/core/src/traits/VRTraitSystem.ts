@@ -1014,6 +1014,11 @@ function parseDuration(duration: string): number {
 // TRAIT REGISTRY
 // =============================================================================
 
+// Import new traits
+import { seatedHandler } from './SeatedTrait';
+import { hapticHandler } from './HapticTrait';
+import { eyeTrackedHandler } from './EyeTrackedTrait';
+
 export class VRTraitRegistry {
   private handlers: Map<VRTraitName, TraitHandler> = new Map();
 
@@ -1029,6 +1034,11 @@ export class VRTraitRegistry {
     this.register(snappableHandler);
     this.register(breakableHandler);
     this.register(proactiveHandler);
+    
+    // Register new VR accessibility traits
+    this.register(seatedHandler as TraitHandler);
+    this.register(hapticHandler as TraitHandler);
+    this.register(eyeTrackedHandler as TraitHandler);
   }
 
   register<T>(handler: TraitHandler<T>): void {
@@ -1113,4 +1123,7 @@ export {
   snappableHandler,
   breakableHandler,
   proactiveHandler,
+  seatedHandler,
+  hapticHandler,
+  eyeTrackedHandler,
 };

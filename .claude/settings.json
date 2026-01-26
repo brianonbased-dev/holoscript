@@ -1,5 +1,4 @@
 {
-  "$schema": "https://claude.ai/schemas/settings.json",
   "name": "HoloScript Development",
   "description": "HoloScript language with HoloScript MCP (this repo) and Brittney MCP (Hololand repo) - both usable by Brittney or cloud agents",
   

@@ -4,7 +4,7 @@
   "description": "Language support for HoloScript+ with AI integration, Spatial Profiling, and Live Preview",
   "version": "1.1.0",
   "publisher": "holoscript",
-  "icon": "icons/holoscript-logo.svg",
+  "icon": "icons/holoscript-logo.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/holoscript/holoscript"
@@ -24,12 +24,7 @@
     "3d",
     "webxr"
   ],
-  "activationEvents": [
-    "onLanguage:holoscript",
-    "onLanguage:holoscriptplus",
-    "onCommand:holoscript.openPreview",
-    "onCommand:holoscript.openPreviewToSide"
-  ],
+  "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "languages": [

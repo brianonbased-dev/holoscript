@@ -7,6 +7,8 @@ import { HoloScriptCLI } from './HoloScriptCLI';
 import { parseArgs, printHelp } from './args';
 import { startREPL } from './repl';
 import { add, remove, list } from './packageManager';
+import { TRAITS, formatTrait, formatAllTraits, suggestTraits } from './traits';
+import { generateObject, generateScene, listTemplates, getTemplate } from './generator';
 
 const VERSION = '1.0.0-alpha.1';
 
@@ -60,6 +62,119 @@ async function main(): Promise<void> {
       });
       process.exit(0);
       break;
+
+    // =========================================
+    // NEW: Traits & Generation Commands
+    // =========================================
+
+    case 'traits': {
+      if (options.input) {
+        // Explain specific trait
+        const trait = TRAITS[options.input];
+        if (trait) {
+          console.log('\n' + formatTrait(trait, true) + '\n');
+        } else {
+          console.error(`\x1b[31mUnknown trait: ${options.input}\x1b[0m`);
+          console.log('\nRun \x1b[36mholoscript traits\x1b[0m to see all available traits.');
+          process.exit(1);
+        }
+      } else {
+        // List all traits
+        console.log(formatAllTraits(options.verbose, options.json));
+      }
+      process.exit(0);
+      break;
+    }
+
+    case 'suggest': {
+      const description = options.description || options.input;
+      if (!description) {
+        console.error('\x1b[31mError: No description provided.\x1b[0m');
+        console.log('Usage: holoscript suggest "a glowing orb that can be grabbed"');
+        process.exit(1);
+      }
+
+      const suggested = suggestTraits(description);
+      
+      if (options.json) {
+        console.log(JSON.stringify(suggested, null, 2));
+      } else {
+        console.log(`\n\x1b[1mSuggested traits for:\x1b[0m "${description}"\n`);
+        if (suggested.length === 0) {
+          console.log('\x1b[2mNo specific traits suggested. Try adding more descriptive keywords.\x1b[0m');
+          console.log('Keywords: grab, throw, glow, click, physics, network, portal, etc.\n');
+        } else {
+          for (const trait of suggested) {
+            console.log(formatTrait(trait, options.verbose));
+          }
+          console.log('');
+        }
+      }
+      process.exit(0);
+      break;
+    }
+
+    case 'generate': {
+      const description = options.description || options.input;
+      if (!description) {
+        console.error('\x1b[31mError: No description provided.\x1b[0m');
+        console.log('Usage: holoscript generate "a red button that glows when hovered"');
+        process.exit(1);
+      }
+
+      const result = await generateObject(description, {
+        brittneyUrl: options.brittneyUrl,
+        verbose: options.verbose,
+        timeout: options.timeout,
+      });
+      
+      if (options.json) {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        console.log(`\n\x1b[1mGenerated HoloScript\x1b[0m \x1b[2m(${result.source})\x1b[0m\n`);
+        console.log('\x1b[36m' + result.code + '\x1b[0m\n');
+        if (result.traits.length > 0) {
+          console.log(`\x1b[33mTraits used:\x1b[0m ${result.traits.map(t => `@${t}`).join(', ')}\n`);
+        }
+        if (result.source === 'local') {
+          console.log('\x1b[2mTip: Set BRITTNEY_SERVICE_URL for AI-enhanced generation.\x1b[0m\n');
+        }
+      }
+      
+      // Write to file if output specified
+      if (options.output) {
+        const fs = await import('fs');
+        fs.writeFileSync(options.output, result.code);
+        console.log(`\x1b[32m✓ Written to ${options.output}\x1b[0m\n`);
+      }
+      
+      process.exit(0);
+      break;
+    }
+
+    case 'templates': {
+      const templates = listTemplates();
+      
+      if (options.json) {
+        const details: Record<string, any> = {};
+        for (const t of templates) {
+          details[t] = getTemplate(t);
+        }
+        console.log(JSON.stringify(details, null, 2));
+      } else {
+        console.log('\n\x1b[1mAvailable Object Templates\x1b[0m\n');
+        for (const t of templates) {
+          const info = getTemplate(t);
+          if (info) {
+            console.log(`  \x1b[36m${t}\x1b[0m`);
+            console.log(`    Traits: ${info.traits.map(tr => `@${tr}`).join(', ')}`);
+          }
+        }
+        console.log('\n\x1b[2mUse: holoscript generate "a <template> called myObject"\x1b[0m\n');
+      }
+      process.exit(0);
+      break;
+    }
 
     default:
       const cli = new HoloScriptCLI(options);

@@ -127,7 +127,7 @@ const CODE_SECURITY_CONFIG = {
   maxBlocks: 100,
   maxNestingDepth: 10,
   suspiciousKeywords: [
-    'process', 'require', 'eval', 'import', 'constructor',
+    'process', 'require', 'eval', 'constructor',
     'prototype', '__proto__', 'fs', 'child_process', 'exec', 'spawn',
   ],
 };
@@ -654,6 +654,8 @@ export class HoloScriptCodeParser {
         case 'gate':
         case 'if':
           return this.parseGate();
+        case 'return':
+          return this.parseReturn();
         case 'stream':
           return this.parseStream();
         case 'nexus':
@@ -707,8 +709,7 @@ export class HoloScriptCodeParser {
         case 'chat':
           return this.parseChat();
         default:
-          this.advance();
-          return null;
+          return this.parseExpressionStatement();
       }
     }
 
@@ -869,7 +870,19 @@ export class HoloScriptCodeParser {
     let modulePath = '';
     let defaultImport: string | undefined;
 
-    // Check for default import or named imports
+    // Check for bare import (string) or default/named imports
+    const current = this.currentToken();
+    if (current?.type === 'string') {
+      modulePath = current.value;
+      this.advance();
+      return {
+        type: 'import',
+        imports: [],
+        modulePath,
+        position: { x: 0, y: 0, z: 0 },
+      };
+    }
+
     if (this.check('punctuation', '{')) {
       this.advance();
       while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
@@ -955,36 +968,52 @@ export class HoloScriptCodeParser {
       dataType = this.expectIdentifier() || undefined;
     }
 
-    let value: HoloScriptValue;
-    if (this.check('punctuation', '=')) {
-      this.advance();
-      const valueToken = this.currentToken();
-      if (valueToken?.type === 'string') {
-        value = valueToken.value;
-        this.advance();
-      } else if (valueToken?.type === 'number') {
-        value = parseFloat(valueToken.value);
-        this.advance();
-      } else if (valueToken?.type === 'identifier') {
-        if (valueToken.value === 'true') value = true;
-        else if (valueToken.value === 'false') value = false;
-        else value = valueToken.value;
-        this.advance();
-      } else if (this.check('punctuation', '[')) {
-        value = this.parseArray() as HoloScriptValue;
-      } else if (this.check('punctuation', '{')) {
-        value = this.parseObject() as HoloScriptValue;
-      }
-    }
-
-    return {
+    const result: VariableDeclarationNode = {
       type: 'variable-declaration',
       kind,
       name,
       dataType,
-      value,
+      value: undefined,
       position: { x: 0, y: 0, z: 0 },
     };
+
+    if (this.check('punctuation', '=')) {
+      this.advance();
+      
+      const valueToken = this.currentToken();
+      if (valueToken?.type === 'string') {
+        result.value = valueToken.value;
+        this.advance();
+      } else if (valueToken?.type === 'number') {
+        result.value = parseFloat(valueToken.value);
+        this.advance();
+      } else if (valueToken?.type === 'identifier') {
+        if (valueToken.value === 'true') {
+          result.value = true;
+          this.advance();
+        } else if (valueToken.value === 'false') {
+          result.value = false;
+          this.advance();
+        } else if (this.check('punctuation', '[')) {
+          result.value = this.parseArray() as HoloScriptValue;
+        } else if (this.check('punctuation', '{')) {
+          result.value = this.parseObject() as HoloScriptValue;
+        } else {
+          // It's an expression (assignment from variable or call)
+          let expression = '';
+          while (this.position < this.tokens.length) {
+            const t = this.currentToken();
+            if (!t || t.type === 'newline' || (t.type === 'punctuation' && t.value === ';')) break;
+            expression += t.value + ' ';
+            this.advance();
+          }
+          result.value = expression.trim();
+          result.isExpression = true;
+        }
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -1368,8 +1397,13 @@ export class HoloScriptCodeParser {
    * Parse gate (conditional)
    */
   private parseGate(): GateNode | null {
-    this.expect('keyword', 'gate');
-    this.expectIdentifier(); // Gate name (consumed but not currently stored)
+    const isIf = this.check('keyword', 'if');
+    if (isIf) {
+      this.advance();
+    } else {
+      this.expect('keyword', 'gate');
+      this.expectIdentifier(); // Gate name (consumed but not currently stored)
+    }
 
     let condition = '';
     if (this.check('punctuation', '(')) {
@@ -1384,24 +1418,126 @@ export class HoloScriptCodeParser {
     }
 
     // Parse body if present
+    const truePath: ASTNode[] = [];
     if (this.check('punctuation', '{')) {
+      this.advance(); // {
+      
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+         const node = this.parseDeclaration();
+         if (node) truePath.push(node);
+         else this.advance();
+      }
+      
+      this.expect('punctuation', '}');
+    }
+
+    // Parse else body if present
+    const falsePath: ASTNode[] = [];
+    if (this.check('keyword', 'else')) {
       this.advance();
-      let depth = 1;
-      while (depth > 0 && this.position < this.tokens.length) {
-        if (this.check('punctuation', '{')) depth++;
-        if (this.check('punctuation', '}')) depth--;
+      if (this.check('punctuation', '{')) {
         this.advance();
+        while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+           const node = this.parseDeclaration();
+           if (node) falsePath.push(node);
+           else this.advance();
+        }
+        this.expect('punctuation', '}');
+      } else {
+        // Single statement else
+        const node = this.parseDeclaration();
+        if (node) falsePath.push(node);
       }
     }
 
     return {
       type: 'gate',
       condition: condition.trim(),
-      truePath: [],
-      falsePath: [],
+      truePath: truePath,
+      falsePath: falsePath,
       position: { x: 0, y: 0, z: 0 },
       hologram: { shape: 'pyramid', color: '#4ecdc4', size: 1, glow: true, interactive: true },
     };
+  }
+
+  /**
+   * Parse return statement
+   */
+  private parseReturn(): ASTNode | null {
+    this.expect('keyword', 'return');
+    
+    let expression = '';
+    let parenDepth = 0;
+    let braceDepth = 0;
+    let bracketDepth = 0;
+
+    // Collect until end of statement, respecting nesting
+    while (this.position < this.tokens.length) {
+      const t = this.currentToken();
+      if (!t) break;
+
+      if (t.type === 'newline' && parenDepth === 0 && braceDepth === 0 && bracketDepth === 0) break;
+      if (t.type === 'punctuation' && t.value === ';' && parenDepth === 0 && braceDepth === 0 && bracketDepth === 0) break;
+
+      if (t.type === 'punctuation') {
+        if (t.value === '(') parenDepth++;
+        else if (t.value === ')') parenDepth--;
+        else if (t.value === '{') braceDepth++;
+        else if (t.value === '}') braceDepth--;
+        else if (t.value === '[') bracketDepth++;
+        else if (t.value === ']') bracketDepth--;
+      }
+
+      expression += t.value + ' ';
+      this.advance();
+    }
+
+    return {
+      type: 'return',
+      value: expression.trim(), // Use 'value' to match runtime's executeReturn
+      position: { x: 0, y: 0, z: 0 },
+    } as any;
+  }
+
+  /**
+   * Parse generic expression statement (e.g. function call or assignment)
+   */
+  private parseExpressionStatement(): ASTNode | null {
+    let expression = '';
+    let parenDepth = 0;
+    let braceDepth = 0;
+    let bracketDepth = 0;
+
+    while (this.position < this.tokens.length) {
+      const t = this.currentToken();
+      if (!t) break;
+
+      if (t.type === 'newline' && parenDepth === 0 && braceDepth === 0 && bracketDepth === 0) break;
+      if (t.type === 'punctuation' && t.value === ';' && parenDepth === 0 && braceDepth === 0 && bracketDepth === 0) break;
+
+      if (t.type === 'punctuation') {
+        if (t.value === '(') parenDepth++;
+        else if (t.value === ')') parenDepth--;
+        else if (t.value === '{') braceDepth++;
+        else if (t.value === '}') braceDepth--;
+        else if (t.value === '[') bracketDepth++;
+        else if (t.value === ']') bracketDepth--;
+      }
+
+      expression += t.value + ' ';
+      this.advance();
+    }
+    
+    if (expression.trim().length === 0) {
+      this.advance(); // Skip empty line/unknown
+      return null;
+    }
+
+    return {
+      type: 'expression-statement',
+      expression: expression.trim(),
+      position: { x: 0, y: 0, z: 0 },
+    } as any;
   }
 
   /**
