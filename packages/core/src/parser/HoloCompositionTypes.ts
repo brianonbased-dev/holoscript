@@ -41,7 +41,14 @@ export type HoloValue =
   | boolean
   | null
   | HoloValue[]
-  | HoloObject;
+  | HoloObject
+  | HoloBindValue;
+
+export interface HoloBindValue {
+  __bind: true;
+  source: string;       // e.g., "state.score"
+  transform?: string;   // optional transform function name
+}
 
 export interface HoloObject {
   [key: string]: HoloValue;
@@ -65,8 +72,18 @@ export interface HoloComposition extends HoloNode {
   templates: HoloTemplate[];
   objects: HoloObjectDecl[];
   spatialGroups: HoloSpatialGroup[];
+  lights: HoloLight[];
+  effects?: HoloEffects;
+  camera?: HoloCamera;
   logic?: HoloLogic;
   imports: HoloImport[];
+  timelines: HoloTimeline[];
+  audio: HoloAudio[];
+  zones: HoloZone[];
+  ui?: HoloUI;
+  transitions: HoloTransition[];
+  conditionals: HoloConditionalBlock[];
+  iterators: HoloForEachBlock[];
 }
 
 // =============================================================================
@@ -96,6 +113,172 @@ export interface HoloLighting extends HoloNode {
 }
 
 // =============================================================================
+// LIGHT (first-class light block)
+// =============================================================================
+
+export interface HoloLight extends HoloNode {
+  type: 'Light';
+  name: string;
+  lightType: 'directional' | 'point' | 'spot' | 'hemisphere' | 'ambient' | 'area';
+  properties: HoloLightProperty[];
+}
+
+export interface HoloLightProperty extends HoloNode {
+  type: 'LightProperty';
+  key: string;
+  value: HoloValue;
+}
+
+// =============================================================================
+// EFFECTS (post-processing block)
+// =============================================================================
+
+export interface HoloEffects extends HoloNode {
+  type: 'Effects';
+  effects: HoloEffect[];
+}
+
+export interface HoloEffect extends HoloNode {
+  type: 'Effect';
+  effectType: string; // bloom, ssao, vignette, dof, etc.
+  properties: Record<string, HoloValue>;
+}
+
+// =============================================================================
+// CAMERA
+// =============================================================================
+
+export interface HoloCamera extends HoloNode {
+  type: 'Camera';
+  cameraType: 'perspective' | 'orthographic' | 'cinematic';
+  properties: HoloCameraProperty[];
+}
+
+export interface HoloCameraProperty extends HoloNode {
+  type: 'CameraProperty';
+  key: string;
+  value: HoloValue;
+}
+
+// =============================================================================
+// TIMELINE (sequenced animation choreography)
+// =============================================================================
+
+export interface HoloTimeline extends HoloNode {
+  type: 'Timeline';
+  name: string;
+  autoplay?: boolean;
+  loop?: boolean;
+  entries: HoloTimelineEntry[];
+}
+
+export interface HoloTimelineEntry extends HoloNode {
+  type: 'TimelineEntry';
+  time: number;
+  action: HoloTimelineAction;
+}
+
+export type HoloTimelineAction =
+  | { kind: 'animate'; target: string; properties: Record<string, HoloValue> }
+  | { kind: 'emit'; event: string; data?: HoloValue }
+  | { kind: 'call'; method: string; args?: HoloValue[] };
+
+// =============================================================================
+// AUDIO (first-class spatial/global audio)
+// =============================================================================
+
+export interface HoloAudio extends HoloNode {
+  type: 'Audio';
+  name: string;
+  properties: HoloAudioProperty[];
+}
+
+export interface HoloAudioProperty extends HoloNode {
+  type: 'AudioProperty';
+  key: string;
+  value: HoloValue;
+}
+
+// =============================================================================
+// ZONE (interaction/trigger volumes)
+// =============================================================================
+
+export interface HoloZone extends HoloNode {
+  type: 'Zone';
+  name: string;
+  properties: HoloZoneProperty[];
+  handlers: HoloEventHandler[];
+}
+
+export interface HoloZoneProperty extends HoloNode {
+  type: 'ZoneProperty';
+  key: string;
+  value: HoloValue;
+}
+
+// =============================================================================
+// UI (HUD/overlay layer)
+// =============================================================================
+
+export interface HoloUI extends HoloNode {
+  type: 'UI';
+  elements: HoloUIElement[];
+}
+
+export interface HoloUIElement extends HoloNode {
+  type: 'UIElement';
+  name: string;
+  properties: HoloUIProperty[];
+}
+
+export interface HoloUIProperty extends HoloNode {
+  type: 'UIProperty';
+  key: string;
+  value: HoloValue;
+}
+
+// =============================================================================
+// TRANSITION (scene-to-scene navigation effects)
+// =============================================================================
+
+export interface HoloTransition extends HoloNode {
+  type: 'Transition';
+  name: string;
+  properties: HoloTransitionProperty[];
+}
+
+export interface HoloTransitionProperty extends HoloNode {
+  type: 'TransitionProperty';
+  key: string;
+  value: HoloValue;
+}
+
+// =============================================================================
+// CONDITIONAL BLOCK (scene-level if/else wrapping objects)
+// =============================================================================
+
+export interface HoloConditionalBlock extends HoloNode {
+  type: 'ConditionalBlock';
+  condition: string;
+  objects: HoloObjectDecl[];
+  spatialGroups?: HoloSpatialGroup[];
+  elseObjects?: HoloObjectDecl[];
+  elseSpatialGroups?: HoloSpatialGroup[];
+}
+
+// =============================================================================
+// FOR-EACH BLOCK (scene-level iteration)
+// =============================================================================
+
+export interface HoloForEachBlock extends HoloNode {
+  type: 'ForEachBlock';
+  variable: string;
+  iterable: string;
+  objects: HoloObjectDecl[];
+  spatialGroups?: HoloSpatialGroup[];
+}
+
+// =============================================================================
 // STATE
 // =============================================================================
 
@@ -121,6 +304,7 @@ export interface HoloTemplate extends HoloNode {
   properties: HoloTemplateProperty[];
   state?: HoloState;
   actions: HoloAction[];
+  traits: HoloObjectTrait[];
 }
 
 export interface HoloTemplateProperty extends HoloNode {
@@ -287,7 +471,8 @@ export type HoloExpression =
   | HoloMemberExpression
   | HoloCallExpression
   | HoloArrayExpression
-  | HoloObjectExpression;
+  | HoloObjectExpression
+  | HoloBindExpression;
 
 export interface HoloLiteral extends HoloNode {
   type: 'Literal';
@@ -333,6 +518,12 @@ export interface HoloArrayExpression extends HoloNode {
 export interface HoloObjectExpression extends HoloNode {
   type: 'ObjectExpression';
   properties: { key: string; value: HoloExpression }[];
+}
+
+export interface HoloBindExpression extends HoloNode {
+  type: 'BindExpression';
+  source: string;       // e.g., "state.score"
+  transform?: string;   // optional transform function name
 }
 
 // =============================================================================

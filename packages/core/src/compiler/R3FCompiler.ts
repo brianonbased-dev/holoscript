@@ -175,23 +175,93 @@ export class R3FCompiler {
       traits: new Map(),
     };
 
+    // Build template map for trait merging
+    const templateMap = new Map<string, any>();
+    if (composition.templates) {
+      for (const tmpl of composition.templates) {
+        templateMap.set(tmpl.name, tmpl);
+      }
+    }
+
     if (composition.environment) {
       root.children!.push(...this.compileEnvironmentBlock(composition.environment));
     }
 
+    // Compile first-class light blocks
+    if (composition.lights) {
+      for (const light of composition.lights) {
+        root.children!.push(this.compileLightBlock(light));
+      }
+    }
+
     if (composition.objects) {
       for (const obj of composition.objects) {
-        root.children!.push(this.compileObjectDecl(obj));
+        root.children!.push(this.compileObjectDecl(obj, templateMap));
       }
     }
 
     if (composition.spatialGroups) {
       for (const group of composition.spatialGroups) {
-        root.children!.push(this.compileSpatialGroup(group));
+        root.children!.push(this.compileSpatialGroup(group, templateMap));
       }
     }
 
-    if (this.hasPostProcessing(root)) {
+    // Compile timelines
+    if (composition.timelines) {
+      for (const timeline of composition.timelines) {
+        root.children!.push(this.compileTimelineBlock(timeline));
+      }
+    }
+
+    // Compile audio blocks
+    if (composition.audio) {
+      for (const audio of composition.audio) {
+        root.children!.push(this.compileAudioBlock(audio));
+      }
+    }
+
+    // Compile zones
+    if (composition.zones) {
+      for (const zone of composition.zones) {
+        root.children!.push(this.compileZoneBlock(zone));
+      }
+    }
+
+    // Compile UI overlay
+    if (composition.ui) {
+      root.children!.push(this.compileUIBlock(composition.ui));
+    }
+
+    // Compile transitions
+    if (composition.transitions) {
+      for (const transition of composition.transitions) {
+        root.children!.push(this.compileTransitionBlock(transition));
+      }
+    }
+
+    // Compile conditional blocks
+    if (composition.conditionals) {
+      for (const cond of composition.conditionals) {
+        root.children!.push(this.compileConditionalBlock(cond, templateMap));
+      }
+    }
+
+    // Compile for-each blocks
+    if (composition.iterators) {
+      for (const iter of composition.iterators) {
+        root.children!.push(this.compileForEachBlock(iter, templateMap));
+      }
+    }
+
+    // Compile first-class camera block
+    if (composition.camera) {
+      root.children!.push(this.compileCameraBlock(composition.camera));
+    }
+
+    // Compile first-class effects block OR auto-detect post-processing
+    if (composition.effects) {
+      root.children!.unshift(this.compileEffectsBlock(composition.effects));
+    } else if (this.hasPostProcessing(root)) {
       root.children!.unshift({
         type: 'EffectComposer',
         props: {},
@@ -201,6 +271,62 @@ export class R3FCompiler {
 
     this.injectDefaultLighting(root);
     return root;
+  }
+
+  private compileLightBlock(light: any): R3FNode {
+    const lightMapping: Record<string, string> = {
+      'directional': 'directionalLight', 'point': 'pointLight', 'spot': 'spotLight',
+      'hemisphere': 'hemisphereLight', 'ambient': 'ambientLight', 'area': 'rectAreaLight',
+    };
+    const type = lightMapping[light.lightType] || 'directionalLight';
+    const props: Record<string, any> = {};
+
+    if (light.properties) {
+      for (const prop of light.properties) {
+        const key = prop.key;
+        const value = prop.value;
+        if (key === 'cast_shadow' || key === 'castShadow') { props.castShadow = value; }
+        else if (key === 'ground_color' || key === 'groundColor') { props.groundColor = value; }
+        else if (key === 'shadow_map_size') { props['shadow-mapSize'] = Array.isArray(value) ? value : [value, value]; }
+        else { props[key] = value; }
+      }
+    }
+
+    // Default castShadow for directional/spot
+    if ((light.lightType === 'directional' || light.lightType === 'spot') && props.castShadow === undefined) {
+      props.castShadow = true;
+    }
+
+    return { type, id: light.name, props };
+  }
+
+  private compileEffectsBlock(effects: any): R3FNode {
+    const children: R3FNode[] = [];
+    if (effects.effects) {
+      for (const effect of effects.effects) {
+        const effectMapping: Record<string, string> = {
+          bloom: 'Bloom', ssao: 'SSAO', vignette: 'Vignette',
+          dof: 'DepthOfField', chromatic_aberration: 'ChromaticAberration',
+          tone_mapping: 'ToneMapping', noise: 'Noise',
+        };
+        const type = effectMapping[effect.effectType] || effect.effectType;
+        children.push({ type, props: { ...effect.properties } });
+      }
+    }
+    return { type: 'EffectComposer', props: {}, children };
+  }
+
+  private compileCameraBlock(camera: any): R3FNode {
+    const props: Record<string, any> = {};
+    if (camera.properties) {
+      for (const prop of camera.properties) {
+        if (prop.key === 'field_of_view' || prop.key === 'fov') { props.fov = prop.value; }
+        else if (prop.key === 'look_at' || prop.key === 'lookAt') { props.lookAt = prop.value; }
+        else { props[prop.key] = prop.value; }
+      }
+    }
+    props.cameraType = camera.cameraType;
+    return { type: 'Camera', id: '__camera', props };
   }
 
   private compileEnvironmentBlock(env: any): R3FNode[] {
@@ -260,9 +386,32 @@ export class R3FCompiler {
     return nodes;
   }
 
-  private compileObjectDecl(obj: any): R3FNode {
+  private compileObjectDecl(obj: any, templateMap?: Map<string, any>): R3FNode {
     const props: Record<string, any> = {};
     let geometryType = 'cube';
+
+    // Merge template traits onto the object if it uses a template
+    if (obj.template && templateMap) {
+      const tmpl = templateMap.get(obj.template);
+      if (tmpl) {
+        // Merge template traits (object's own traits take precedence)
+        if (tmpl.traits && Array.isArray(tmpl.traits)) {
+          const existingTraitNames = new Set((obj.traits || []).map((t: any) => t.name));
+          obj.traits = [
+            ...tmpl.traits.filter((t: any) => !existingTraitNames.has(t.name)),
+            ...(obj.traits || []),
+          ];
+        }
+        // Merge template properties (object's own properties take precedence)
+        if (tmpl.properties && Array.isArray(tmpl.properties)) {
+          const existingKeys = new Set((obj.properties || []).map((p: any) => p.key));
+          const mergedProps = tmpl.properties
+            .filter((p: any) => !existingKeys.has(p.key))
+            .map((p: any) => ({ type: 'ObjectProperty', key: p.key, value: p.value }));
+          obj.properties = [...mergedProps, ...(obj.properties || [])];
+        }
+      }
+    }
 
     if (obj.properties) {
       for (const prop of obj.properties) {
@@ -288,7 +437,7 @@ export class R3FCompiler {
         else if (key === 'scale') { props.scale = Array.isArray(value) ? value : [value, value, value]; }
         else if (key === 'color') { props.color = value; }
         else if (key === 'src' || key === 'model') { props.src = value; geometryType = 'model'; }
-        else if (key === 'text') { props.children = value; }
+        else if (key === 'text') { props.children = this.resolveValue(value); props.text = this.resolveValue(value); }
         else if (key === 'font_size') { props.fontSize = value; }
         else if (key === 'material') {
           if (typeof value === 'string' && MATERIAL_PRESETS[value]) {
@@ -325,7 +474,7 @@ export class R3FCompiler {
         else if (key === 'cast_shadow' || key === 'castShadow') { props.castShadow = value; }
         else if (key === 'receiveShadow' || key === 'receive_shadow') { props.receiveShadow = value; }
         else if (key === 'visible') { props[key] = value; }
-        else { props[key] = value; }
+        else { props[key] = this.resolveValue(value); }
       }
     }
 
@@ -374,6 +523,173 @@ export class R3FCompiler {
         else if (name === 'portal') {
           props.portal = trait.config || true;
         }
+        else if (name === 'attach') {
+          props.attach = trait.config || true;
+        }
+        else if (name === 'orbit') {
+          props.orbit = trait.config || true;
+        }
+        else if (name === 'look_at') {
+          props.lookAtTarget = trait.config || true;
+        }
+        else if (name === 'follow') {
+          props.follow = trait.config || true;
+        }
+        // ── Environment Understanding ─────────────────────────────
+        else if (name === 'plane_detection') {
+          props.planeDetection = trait.config || { mode: 'all' };
+        }
+        else if (name === 'mesh_detection') {
+          props.meshDetection = trait.config || { classification: true };
+        }
+        else if (name === 'anchor') {
+          props.anchor = trait.config || { type: 'spatial' };
+        }
+        else if (name === 'persistent_anchor') {
+          props.persistentAnchor = trait.config || { storage: 'local' };
+        }
+        else if (name === 'shared_anchor') {
+          props.sharedAnchor = trait.config || { authority: 'creator' };
+        }
+        else if (name === 'occlusion') {
+          props.occlusionMode = trait.config?.mode || 'environment';
+          props.occlusion = trait.config || true;
+        }
+        else if (name === 'light_estimation') {
+          props.lightEstimation = trait.config || { auto_apply: true };
+        }
+        else if (name === 'geospatial') {
+          props.geospatial = trait.config || true;
+        }
+        // ── Gaussian Splatting & Volumetric ───────────────────────
+        else if (name === 'gaussian_splat') {
+          props.gaussianSplat = trait.config || true;
+        }
+        else if (name === 'nerf') {
+          props.nerf = trait.config || true;
+        }
+        else if (name === 'volumetric_video') {
+          props.volumetricVideo = trait.config || true;
+        }
+        else if (name === 'point_cloud') {
+          props.pointCloud = trait.config || true;
+        }
+        else if (name === 'photogrammetry') {
+          props.photogrammetry = trait.config || true;
+        }
+        // ── Physics Expansion ─────────────────────────────────────
+        else if (name === 'cloth') {
+          props.cloth = trait.config || { stiffness: 0.8 };
+          if (!props.rigidBody) props.rigidBody = { type: 'dynamic' };
+        }
+        else if (name === 'fluid') {
+          props.fluid = trait.config || { viscosity: 0.01 };
+        }
+        else if (name === 'soft_body') {
+          props.softBody = trait.config || { elasticity: 0.5 };
+          if (!props.rigidBody) props.rigidBody = { type: 'dynamic' };
+        }
+        else if (name === 'rope') {
+          props.rope = trait.config || { segments: 20 };
+        }
+        else if (name === 'chain') {
+          props.chain = trait.config || { link_count: 20 };
+        }
+        else if (name === 'wind') {
+          props.wind = trait.config || { strength: 5.0 };
+        }
+        else if (name === 'buoyancy') {
+          props.buoyancy = trait.config || { water_level: 0 };
+        }
+        else if (name === 'destruction') {
+          props.destruction = trait.config || { health: 100 };
+          if (!props.rigidBody) props.rigidBody = { type: 'dynamic' };
+          if (!props.collider) props.collider = { type: 'auto' };
+        }
+        // ── Advanced Spatial Audio ────────────────────────────────
+        else if (name === 'ambisonics') {
+          props.ambisonics = trait.config || { order: 1 };
+          props.spatial = true;
+        }
+        else if (name === 'hrtf') {
+          props.hrtf = trait.config || true;
+          props.spatial = true;
+        }
+        else if (name === 'reverb_zone') {
+          props.reverbZone = trait.config || { preset: 'room' };
+        }
+        else if (name === 'audio_occlusion') {
+          props.audioOcclusion = trait.config || true;
+        }
+        else if (name === 'audio_portal') {
+          props.audioPortal = trait.config || true;
+        }
+        else if (name === 'head_tracked_audio') {
+          props.headTrackedAudio = trait.config || true;
+          props.spatial = true;
+        }
+        // ── Accessibility ─────────────────────────────────────────
+        else if (name === 'accessible') {
+          props.accessible = trait.config || { role: 'generic' };
+        }
+        else if (name === 'alt_text') {
+          props.altText = trait.config?.text || '';
+        }
+        else if (name === 'magnifiable') {
+          props.magnifiable = trait.config || { max_scale: 3.0 };
+        }
+        else if (name === 'high_contrast') {
+          props.highContrast = trait.config || { mode: 'outline' };
+        }
+        else if (name === 'motion_reduced') {
+          props.motionReduced = trait.config || true;
+          if (props.animated) props.animated = false;
+        }
+        // ── WebGPU Compute ────────────────────────────────────────
+        else if (name === 'compute') {
+          props.compute = trait.config || true;
+        }
+        else if (name === 'gpu_particle') {
+          props.gpuParticle = trait.config || { count: 10000 };
+        }
+        else if (name === 'gpu_physics') {
+          props.gpuPhysics = trait.config || true;
+        }
+        // ── Digital Twin & IoT ────────────────────────────────────
+        else if (name === 'digital_twin') {
+          props.digitalTwin = trait.config || true;
+        }
+        else if (name === 'sensor') {
+          props.sensor = trait.config || true;
+        }
+        else if (name === 'data_binding') {
+          props.dataBinding = trait.config || true;
+        }
+        // ── Autonomous Agents ─────────────────────────────────────
+        else if (name === 'behavior_tree') {
+          props.behaviorTree = trait.config || true;
+        }
+        else if (name === 'llm_agent') {
+          props.llmAgent = trait.config || true;
+        }
+        else if (name === 'perception') {
+          props.perception = trait.config || { sight_range: 20 };
+        }
+        else if (name === 'patrol') {
+          props.patrol = trait.config || true;
+        }
+        // ── Co-Presence ───────────────────────────────────────────
+        else if (name === 'co_located') {
+          props.coLocated = trait.config || true;
+        }
+        else if (name === 'shared_world') {
+          props.sharedWorld = trait.config || true;
+        }
+        else if (name === 'voice_proximity') {
+          props.voiceProximity = trait.config || { max_distance: 20 };
+          props.spatial = true;
+        }
+        // ── Catch-all for remaining traits ────────────────────────
         else { props[name] = trait.config || true; }
       }
     }
@@ -416,7 +732,7 @@ export class R3FCompiler {
     return r3fNode;
   }
 
-  private compileSpatialGroup(group: any): R3FNode {
+  private compileSpatialGroup(group: any, templateMap?: Map<string, any>): R3FNode {
     const props: Record<string, any> = {};
     if (group.properties) {
       for (const prop of group.properties) {
@@ -429,13 +745,147 @@ export class R3FCompiler {
     const node: R3FNode = { type: 'group', id: group.name, props, children: [], traits: new Map() };
 
     if (group.objects) {
-      for (const obj of group.objects) node.children!.push(this.compileObjectDecl(obj));
+      for (const obj of group.objects) node.children!.push(this.compileObjectDecl(obj, templateMap));
     }
     if (group.groups) {
-      for (const sub of group.groups) node.children!.push(this.compileSpatialGroup(sub));
+      for (const sub of group.groups) node.children!.push(this.compileSpatialGroup(sub, templateMap));
     }
 
     return node;
+  }
+
+  private compileTimelineBlock(timeline: any): R3FNode {
+    const entries: R3FNode[] = [];
+    if (timeline.entries) {
+      for (const entry of timeline.entries) {
+        const action = entry.action;
+        const entryProps: Record<string, any> = { time: entry.time, actionKind: action.kind };
+        if (action.kind === 'animate') {
+          entryProps.target = action.target;
+          entryProps.properties = action.properties;
+        } else if (action.kind === 'emit') {
+          entryProps.event = action.event;
+          if (action.data !== undefined) entryProps.data = action.data;
+        } else if (action.kind === 'call') {
+          entryProps.method = action.method;
+          if (action.args) entryProps.args = action.args;
+        }
+        entries.push({ type: 'TimelineEntry', props: entryProps });
+      }
+    }
+    return {
+      type: 'Timeline',
+      id: timeline.name,
+      props: { autoplay: timeline.autoplay, loop: timeline.loop },
+      children: entries,
+    };
+  }
+
+  private compileAudioBlock(audio: any): R3FNode {
+    const props: Record<string, any> = {};
+    if (audio.properties) {
+      for (const prop of audio.properties) {
+        if (prop.key === 'src' || prop.key === 'source') { props.src = prop.value; }
+        else if (prop.key === 'rolloff') { props.rolloffFactor = prop.value; }
+        else { props[prop.key] = prop.value; }
+      }
+    }
+    return { type: 'Audio', id: audio.name, props };
+  }
+
+  private compileZoneBlock(zone: any): R3FNode {
+    const props: Record<string, any> = {};
+    if (zone.properties) {
+      for (const prop of zone.properties) {
+        props[prop.key] = prop.value;
+      }
+    }
+    // Attach handlers as props
+    if (zone.handlers && zone.handlers.length > 0) {
+      props.handlers = zone.handlers.map((h: any) => ({
+        event: h.event,
+        parameters: h.parameters,
+        body: h.body,
+      }));
+    }
+    return { type: 'Zone', id: zone.name, props };
+  }
+
+  private compileUIBlock(ui: any): R3FNode {
+    const children: R3FNode[] = [];
+    if (ui.elements) {
+      for (const el of ui.elements) {
+        const elProps: Record<string, any> = {};
+        if (el.properties) {
+          for (const prop of el.properties) {
+            if (prop.key === 'font_size') { elProps.fontSize = prop.value; }
+            else { elProps[prop.key] = this.resolveValue(prop.value); }
+          }
+        }
+        children.push({ type: 'UIElement', id: el.name, props: elProps });
+      }
+    }
+    return { type: 'UI', id: '__ui', props: {}, children };
+  }
+
+  private compileTransitionBlock(transition: any): R3FNode {
+    const props: Record<string, any> = {};
+    if (transition.properties) {
+      for (const prop of transition.properties) {
+        props[prop.key] = prop.value;
+      }
+    }
+    return { type: 'Transition', id: transition.name, props };
+  }
+
+  private compileConditionalBlock(cond: any, templateMap?: Map<string, any>): R3FNode {
+    const children: R3FNode[] = [];
+    if (cond.objects) {
+      for (const obj of cond.objects) children.push(this.compileObjectDecl(obj, templateMap));
+    }
+    if (cond.spatialGroups) {
+      for (const g of cond.spatialGroups) children.push(this.compileSpatialGroup(g, templateMap));
+    }
+
+    const elseChildren: R3FNode[] = [];
+    if (cond.elseObjects) {
+      for (const obj of cond.elseObjects) elseChildren.push(this.compileObjectDecl(obj, templateMap));
+    }
+    if (cond.elseSpatialGroups) {
+      for (const g of cond.elseSpatialGroups) elseChildren.push(this.compileSpatialGroup(g, templateMap));
+    }
+
+    return {
+      type: 'ConditionalGroup',
+      props: { condition: cond.condition, elseChildren: elseChildren.length > 0 ? elseChildren : undefined },
+      children,
+    };
+  }
+
+  private compileForEachBlock(iter: any, templateMap?: Map<string, any>): R3FNode {
+    const templateChildren: R3FNode[] = [];
+    if (iter.objects) {
+      for (const obj of iter.objects) templateChildren.push(this.compileObjectDecl(obj, templateMap));
+    }
+    if (iter.spatialGroups) {
+      for (const g of iter.spatialGroups) templateChildren.push(this.compileSpatialGroup(g, templateMap));
+    }
+
+    return {
+      type: 'ForEachGroup',
+      props: { variable: iter.variable, iterable: iter.iterable },
+      children: templateChildren,
+    };
+  }
+
+  /**
+   * Resolve a property value, converting bind expressions into runtime-reactive markers.
+   */
+  private resolveValue(value: any): any {
+    if (value && typeof value === 'object' && value.__bind) {
+      return { __bind: true, source: value.source, transform: value.transform };
+    }
+    return value;
   }
 
   // ─── Shared Helpers ───────────────────────────────────────────────────

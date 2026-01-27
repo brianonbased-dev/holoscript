@@ -33,6 +33,27 @@ import type {
   HoloParseWarning,
   HoloParserOptions,
   HoloValue,
+  HoloBindValue,
+  HoloLight,
+  HoloLightProperty,
+  HoloEffects,
+  HoloEffect,
+  HoloCamera,
+  HoloCameraProperty,
+  HoloTimeline,
+  HoloTimelineEntry,
+  HoloTimelineAction,
+  HoloAudio,
+  HoloAudioProperty,
+  HoloZone,
+  HoloZoneProperty,
+  HoloUI,
+  HoloUIElement,
+  HoloUIProperty,
+  HoloTransition,
+  HoloTransitionProperty,
+  HoloConditionalBlock,
+  HoloForEachBlock,
   SourceLocation,
 } from './HoloCompositionTypes';
 
@@ -99,7 +120,17 @@ type TokenType =
   | 'USING'
   | 'IMPORT'
   | 'FROM'
-  | 'PARTICLE_SYSTEM';
+  | 'PARTICLE_SYSTEM'
+  | 'LIGHT'
+  | 'EFFECTS'
+  | 'CAMERA'
+  | 'BIND'
+  | 'TIMELINE'
+  | 'AUDIO'
+  | 'ZONE'
+  | 'UI'
+  | 'TRANSITION'
+  | 'ELEMENT';
 
 interface Token {
   type: TokenType;
@@ -134,6 +165,16 @@ const KEYWORDS: Record<string, TokenType> = {
   import: 'IMPORT',
   from: 'FROM',
   particle_system: 'PARTICLE_SYSTEM',
+  light: 'LIGHT',
+  effects: 'EFFECTS',
+  camera: 'CAMERA',
+  bind: 'BIND',
+  timeline: 'TIMELINE',
+  audio: 'AUDIO',
+  zone: 'ZONE',
+  ui: 'UI',
+  transition: 'TRANSITION',
+  element: 'ELEMENT',
   true: 'BOOLEAN',
   false: 'BOOLEAN',
   null: 'NULL',
@@ -528,7 +569,14 @@ export class HoloCompositionParser {
       templates: [],
       objects: [],
       spatialGroups: [],
+      lights: [],
       imports: [],
+      timelines: [],
+      audio: [],
+      zones: [],
+      transitions: [],
+      conditionals: [],
+      iterators: [],
     };
 
     while (!this.check('RBRACE') && !this.isAtEnd()) {
@@ -547,8 +595,28 @@ export class HoloCompositionParser {
         composition.objects.push(this.parseObject());
       } else if (this.check('SPATIAL_GROUP')) {
         composition.spatialGroups.push(this.parseSpatialGroup());
+      } else if (this.check('LIGHT')) {
+        composition.lights.push(this.parseLight());
+      } else if (this.check('EFFECTS')) {
+        composition.effects = this.parseEffects();
+      } else if (this.check('CAMERA')) {
+        composition.camera = this.parseCamera();
       } else if (this.check('LOGIC')) {
         composition.logic = this.parseLogic();
+      } else if (this.check('TIMELINE')) {
+        composition.timelines.push(this.parseTimeline());
+      } else if (this.check('AUDIO')) {
+        composition.audio.push(this.parseAudio());
+      } else if (this.check('ZONE')) {
+        composition.zones.push(this.parseZone());
+      } else if (this.check('UI')) {
+        composition.ui = this.parseUI();
+      } else if (this.check('TRANSITION')) {
+        composition.transitions.push(this.parseTransition());
+      } else if (this.check('IF')) {
+        composition.conditionals.push(this.parseConditionalBlock());
+      } else if (this.check('FOR')) {
+        composition.iterators.push(this.parseForEachBlock());
       } else {
         this.error(`Unexpected token: ${this.current().type}`);
         this.advance();
@@ -644,6 +712,483 @@ export class HoloCompositionParser {
   }
 
   // ===========================================================================
+  // LIGHT (first-class block)
+  // ===========================================================================
+
+  private parseLight(): HoloLight {
+    this.expect('LIGHT');
+    const name = this.expectString();
+
+    // Determine light type — either from explicit type property or the name
+    let lightType: HoloLight['lightType'] = 'directional';
+    const lightTypeNames: Record<string, HoloLight['lightType']> = {
+      directional: 'directional', point: 'point', spot: 'spot',
+      hemisphere: 'hemisphere', ambient: 'ambient', area: 'area',
+    };
+
+    // Check for inline type: light "sun" directional { ... }
+    if (this.check('IDENTIFIER')) {
+      const typeName = this.current().value.toLowerCase();
+      if (lightTypeNames[typeName]) {
+        lightType = lightTypeNames[typeName]!;
+        this.advance();
+      }
+    }
+
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const properties: HoloLightProperty[] = [];
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      const key = this.expectIdentifier();
+      this.expect('COLON');
+      const value = this.parseValue();
+
+      // Override light type if declared as property
+      if (key === 'type' && typeof value === 'string' && lightTypeNames[value]) {
+        lightType = lightTypeNames[value]!;
+      } else {
+        properties.push({ type: 'LightProperty', key, value });
+      }
+      this.skipNewlines();
+    }
+
+    this.expect('RBRACE');
+    return { type: 'Light', name, lightType, properties };
+  }
+
+  // ===========================================================================
+  // EFFECTS (post-processing block)
+  // ===========================================================================
+
+  private parseEffects(): HoloEffects {
+    this.expect('EFFECTS');
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const effects: HoloEffect[] = [];
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      const effectType = this.expectIdentifier();
+      this.expect('LBRACE');
+      this.skipNewlines();
+
+      const properties: Record<string, HoloValue> = {};
+      while (!this.check('RBRACE') && !this.isAtEnd()) {
+        this.skipNewlines();
+        if (this.check('RBRACE')) break;
+        const key = this.expectIdentifier();
+        this.expect('COLON');
+        properties[key] = this.parseValue();
+        this.skipNewlines();
+      }
+      this.expect('RBRACE');
+
+      effects.push({ type: 'Effect', effectType, properties });
+      this.skipNewlines();
+    }
+
+    this.expect('RBRACE');
+    return { type: 'Effects', effects };
+  }
+
+  // ===========================================================================
+  // CAMERA
+  // ===========================================================================
+
+  private parseCamera(): HoloCamera {
+    this.expect('CAMERA');
+
+    let cameraType: HoloCamera['cameraType'] = 'perspective';
+    const cameraTypes: Record<string, HoloCamera['cameraType']> = {
+      perspective: 'perspective', orthographic: 'orthographic', cinematic: 'cinematic',
+    };
+
+    // Inline type: camera perspective { ... }
+    if (this.check('IDENTIFIER')) {
+      const typeName = this.current().value.toLowerCase();
+      if (cameraTypes[typeName]) {
+        cameraType = cameraTypes[typeName]!;
+        this.advance();
+      }
+    }
+
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const properties: HoloCameraProperty[] = [];
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      const key = this.expectIdentifier();
+      this.expect('COLON');
+      const value = this.parseValue();
+
+      if (key === 'type' && typeof value === 'string' && cameraTypes[value]) {
+        cameraType = cameraTypes[value]!;
+      } else {
+        properties.push({ type: 'CameraProperty', key, value });
+      }
+      this.skipNewlines();
+    }
+
+    this.expect('RBRACE');
+    return { type: 'Camera', cameraType, properties };
+  }
+
+  // ===========================================================================
+  // TIMELINE
+  // ===========================================================================
+
+  private parseTimeline(): HoloTimeline {
+    this.expect('TIMELINE');
+    const name = this.expectString();
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const entries: HoloTimelineEntry[] = [];
+    let autoplay: boolean | undefined;
+    let loop: boolean | undefined;
+
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      // Check for timeline properties (autoplay, loop) vs entries (number: ...)
+      if (this.check('IDENTIFIER') && (this.current().value === 'autoplay' || this.current().value === 'loop')) {
+        const key = this.advance().value;
+        this.expect('COLON');
+        const val = this.parseValue();
+        if (key === 'autoplay') autoplay = val as boolean;
+        if (key === 'loop') loop = val as boolean;
+      } else if (this.check('NUMBER')) {
+        const time = parseFloat(this.advance().value);
+        this.expect('COLON');
+
+        // Parse action: animate "target" { ... }, emit "event", or call method(...)
+        const action = this.parseTimelineAction();
+        entries.push({ type: 'TimelineEntry', time, action });
+      } else {
+        this.error(`Unexpected token in timeline: ${this.current().type}`);
+        this.advance();
+      }
+      this.skipNewlines();
+    }
+
+    this.expect('RBRACE');
+    return { type: 'Timeline', name, autoplay, loop, entries };
+  }
+
+  private parseTimelineAction(): HoloTimelineAction {
+    if (this.check('ANIMATE')) {
+      this.advance();
+      const target = this.expectString();
+      this.expect('LBRACE');
+      this.skipNewlines();
+      const properties: Record<string, HoloValue> = {};
+      while (!this.check('RBRACE') && !this.isAtEnd()) {
+        this.skipNewlines();
+        if (this.check('RBRACE')) break;
+        const key = this.expectIdentifier();
+        this.expect('COLON');
+        properties[key] = this.parseValue();
+        this.skipNewlines();
+      }
+      this.expect('RBRACE');
+      return { kind: 'animate', target, properties };
+    }
+
+    if (this.check('EMIT')) {
+      this.advance();
+      const event = this.expectString();
+      let data: HoloValue | undefined;
+      if (this.check('LBRACE') || this.check('STRING') || this.check('NUMBER')) {
+        data = this.parseValue();
+      }
+      return { kind: 'emit', event, data };
+    }
+
+    // Default: treat as a method call — identifier(args)
+    const method = this.expectIdentifier();
+    let args: HoloValue[] | undefined;
+    if (this.check('LPAREN')) {
+      this.advance();
+      args = [];
+      while (!this.check('RPAREN') && !this.isAtEnd()) {
+        this.skipNewlines();
+        args.push(this.parseValue());
+        if (!this.match('COMMA')) break;
+        this.skipNewlines();
+      }
+      this.expect('RPAREN');
+    }
+    return { kind: 'call', method, args };
+  }
+
+  // ===========================================================================
+  // AUDIO
+  // ===========================================================================
+
+  private parseAudio(): HoloAudio {
+    this.expect('AUDIO');
+    const name = this.expectString();
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const properties: HoloAudioProperty[] = [];
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      const key = this.expectIdentifier();
+      this.expect('COLON');
+      const value = this.parseValue();
+      properties.push({ type: 'AudioProperty', key, value });
+      this.skipNewlines();
+    }
+
+    this.expect('RBRACE');
+    return { type: 'Audio', name, properties };
+  }
+
+  // ===========================================================================
+  // ZONE (trigger/interaction volume)
+  // ===========================================================================
+
+  private parseZone(): HoloZone {
+    this.expect('ZONE');
+    const name = this.expectString();
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const properties: HoloZoneProperty[] = [];
+    const handlers: HoloEventHandler[] = [];
+
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      // Check for event handlers (on_enter, on_exit, on_stay)
+      if (this.check('IDENTIFIER') && this.current().value.startsWith('on_')) {
+        const event = this.advance().value;
+        let parameters: HoloParameter[] = [];
+        if (this.check('LPAREN')) {
+          parameters = this.parseParameterList();
+        }
+        this.expect('LBRACE');
+        this.skipNewlines();
+        const body = this.parseStatementBlock();
+        this.expect('RBRACE');
+        handlers.push({ type: 'EventHandler', event, parameters, body } as HoloEventHandler);
+      } else {
+        const key = this.expectIdentifier();
+        this.expect('COLON');
+        const value = this.parseValue();
+        properties.push({ type: 'ZoneProperty', key, value });
+      }
+      this.skipNewlines();
+    }
+
+    this.expect('RBRACE');
+    return { type: 'Zone', name, properties, handlers };
+  }
+
+  // ===========================================================================
+  // UI (HUD overlay)
+  // ===========================================================================
+
+  private parseUI(): HoloUI {
+    this.expect('UI');
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const elements: HoloUIElement[] = [];
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      if (this.check('ELEMENT')) {
+        elements.push(this.parseUIElement());
+      } else {
+        this.error(`Expected 'element' in ui block, got ${this.current().type}`);
+        this.advance();
+      }
+      this.skipNewlines();
+    }
+
+    this.expect('RBRACE');
+    return { type: 'UI', elements };
+  }
+
+  private parseUIElement(): HoloUIElement {
+    this.expect('ELEMENT');
+    const name = this.expectString();
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const properties: HoloUIProperty[] = [];
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      const key = this.expectIdentifier();
+      this.expect('COLON');
+      const value = this.parseValue();
+      properties.push({ type: 'UIProperty', key, value });
+      this.skipNewlines();
+    }
+
+    this.expect('RBRACE');
+    return { type: 'UIElement', name, properties };
+  }
+
+  // ===========================================================================
+  // TRANSITION
+  // ===========================================================================
+
+  private parseTransition(): HoloTransition {
+    this.expect('TRANSITION');
+    const name = this.expectString();
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const properties: HoloTransitionProperty[] = [];
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      const key = this.expectIdentifier();
+      this.expect('COLON');
+      const value = this.parseValue();
+      properties.push({ type: 'TransitionProperty', key, value });
+      this.skipNewlines();
+    }
+
+    this.expect('RBRACE');
+    return { type: 'Transition', name, properties };
+  }
+
+  // ===========================================================================
+  // CONDITIONAL BLOCK (scene-level if/else)
+  // ===========================================================================
+
+  private parseConditionalBlock(): HoloConditionalBlock {
+    this.expect('IF');
+
+    // Parse condition as an expression, then convert to string
+    const condExpr = this.parseExpression();
+    const condition = this.expressionToString(condExpr);
+
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const objects: HoloObjectDecl[] = [];
+    const spatialGroups: HoloSpatialGroup[] = [];
+
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      if (this.check('OBJECT')) {
+        objects.push(this.parseObject());
+      } else if (this.check('SPATIAL_GROUP')) {
+        spatialGroups.push(this.parseSpatialGroup());
+      } else {
+        this.error(`Expected object or spatial_group in conditional block, got ${this.current().type}`);
+        this.advance();
+      }
+      this.skipNewlines();
+    }
+    this.expect('RBRACE');
+
+    let elseObjects: HoloObjectDecl[] | undefined;
+    let elseSpatialGroups: HoloSpatialGroup[] | undefined;
+
+    this.skipNewlines();
+    if (this.match('ELSE')) {
+      this.expect('LBRACE');
+      this.skipNewlines();
+      elseObjects = [];
+      elseSpatialGroups = [];
+
+      while (!this.check('RBRACE') && !this.isAtEnd()) {
+        this.skipNewlines();
+        if (this.check('RBRACE')) break;
+
+        if (this.check('OBJECT')) {
+          elseObjects.push(this.parseObject());
+        } else if (this.check('SPATIAL_GROUP')) {
+          elseSpatialGroups.push(this.parseSpatialGroup());
+        } else {
+          this.error(`Expected object or spatial_group in else block, got ${this.current().type}`);
+          this.advance();
+        }
+        this.skipNewlines();
+      }
+      this.expect('RBRACE');
+    }
+
+    return {
+      type: 'ConditionalBlock',
+      condition,
+      objects,
+      spatialGroups: spatialGroups.length > 0 ? spatialGroups : undefined,
+      elseObjects,
+      elseSpatialGroups: elseSpatialGroups && elseSpatialGroups.length > 0 ? elseSpatialGroups : undefined,
+    };
+  }
+
+  // ===========================================================================
+  // FOR-EACH BLOCK (scene-level iteration)
+  // ===========================================================================
+
+  private parseForEachBlock(): HoloForEachBlock {
+    this.expect('FOR');
+    const variable = this.expectIdentifier();
+    this.expect('IN');
+
+    // Parse iterable as expression, convert to string
+    const iterExpr = this.parseExpression();
+    const iterable = this.expressionToString(iterExpr);
+
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const objects: HoloObjectDecl[] = [];
+    const spatialGroups: HoloSpatialGroup[] = [];
+
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+
+      if (this.check('OBJECT')) {
+        objects.push(this.parseObject());
+      } else if (this.check('SPATIAL_GROUP')) {
+        spatialGroups.push(this.parseSpatialGroup());
+      } else {
+        this.error(`Expected object or spatial_group in for-each block, got ${this.current().type}`);
+        this.advance();
+      }
+      this.skipNewlines();
+    }
+    this.expect('RBRACE');
+
+    return {
+      type: 'ForEachBlock',
+      variable,
+      iterable,
+      objects,
+      spatialGroups: spatialGroups.length > 0 ? spatialGroups : undefined,
+    };
+  }
+
+  // ===========================================================================
   // STATE
   // ===========================================================================
 
@@ -683,6 +1228,7 @@ export class HoloCompositionParser {
       name,
       properties: [],
       actions: [],
+      traits: [],
     };
 
     while (!this.check('RBRACE') && !this.isAtEnd()) {
@@ -693,6 +1239,15 @@ export class HoloCompositionParser {
         template.state = this.parseState();
       } else if (this.check('ACTION') || this.check('ASYNC')) {
         template.actions.push(this.parseAction());
+      } else if (this.check('AT' as any)) {
+        // @trait support in templates
+        this.advance(); // consume @
+        const traitName = this.expectIdentifier();
+        let config: Record<string, HoloValue> = {};
+        if (this.check('LPAREN')) {
+          config = this.parseTraitConfig();
+        }
+        template.traits.push({ type: 'ObjectTrait', name: traitName, config } as HoloObjectTrait);
       } else {
         const key = this.expectIdentifier();
         this.expect('COLON');
@@ -801,10 +1356,19 @@ export class HoloCompositionParser {
   private parseSpatialGroup(): HoloSpatialGroup {
     this.expect('SPATIAL_GROUP');
     const name = this.expectString();
+
+    const properties: HoloGroupProperty[] = [];
+
+    // Optional "at [x, y, z]" shorthand for position
+    if (this.check('IDENTIFIER') && this.current().value === 'at') {
+      this.advance(); // consume 'at'
+      const position = this.parseValue();
+      properties.push({ type: 'GroupProperty', key: 'position', value: position });
+    }
+
     this.expect('LBRACE');
     this.skipNewlines();
 
-    const properties: HoloGroupProperty[] = [];
     const objects: HoloObjectDecl[] = [];
     const groups: HoloSpatialGroup[] = [];
 
@@ -1210,7 +1774,9 @@ export class HoloCompositionParser {
   private isKeywordAsIdentifier(): boolean {
     const keywordsAsIdentifiers: TokenType[] = [
       'STATE', 'OBJECT', 'TEMPLATE', 'ENVIRONMENT', 'LOGIC',
-      'ACTION', 'EMIT', 'ANIMATE', 'RETURN'
+      'ACTION', 'EMIT', 'ANIMATE', 'RETURN',
+      'LIGHT', 'EFFECTS', 'CAMERA', 'BIND',
+      'TIMELINE', 'AUDIO', 'ZONE', 'UI', 'TRANSITION', 'ELEMENT',
     ];
     if (keywordsAsIdentifiers.includes(this.current().type)) {
       this.advance();
@@ -1277,6 +1843,10 @@ export class HoloCompositionParser {
     if (this.match('NULL')) {
       return null;
     }
+    // bind() reactive expression: bind(state.score) or bind(state.score, "formatPercent")
+    if (this.check('BIND')) {
+      return this.parseBindValue();
+    }
     if (this.match('IDENTIFIER')) {
       return this.previous().value;
     }
@@ -1290,6 +1860,32 @@ export class HoloCompositionParser {
     this.error(`Expected value, got ${this.current().type}`);
     this.advance(); // CRITICAL: Advance to prevent infinite loop
     return null;
+  }
+
+  private parseBindValue(): HoloBindValue {
+    this.expect('BIND');
+    this.expect('LPAREN');
+
+    // Parse the source path: e.g., state.score or state.health
+    let source = '';
+    if (this.check('IDENTIFIER') || this.check('STATE')) {
+      source = this.advance().value;
+      while (this.match('DOT')) {
+        source += '.' + this.expectIdentifier();
+      }
+    } else {
+      source = this.expectString();
+    }
+
+    // Optional transform function name
+    let transform: string | undefined;
+    if (this.match('COMMA')) {
+      this.skipNewlines();
+      transform = this.expectString();
+    }
+
+    this.expect('RPAREN');
+    return { __bind: true, source, transform };
   }
 
   private parseArrayValue(): HoloValue[] {

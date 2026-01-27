@@ -1014,10 +1014,119 @@ function parseDuration(duration: string): number {
 // TRAIT REGISTRY
 // =============================================================================
 
-// Import new traits
+// Import existing traits
 import { seatedHandler } from './SeatedTrait';
 import { hapticHandler } from './HapticTrait';
 import { eyeTrackedHandler } from './EyeTrackedTrait';
+
+// Phase 1: Environment Understanding
+import { planeDetectionHandler } from './PlaneDetectionTrait';
+import { meshDetectionHandler } from './MeshDetectionTrait';
+import { anchorHandler } from './AnchorTrait';
+import { persistentAnchorHandler } from './PersistentAnchorTrait';
+import { sharedAnchorHandler } from './SharedAnchorTrait';
+import { geospatialEnvHandler } from './GeospatialEnvTrait';
+import { occlusionHandler } from './OcclusionTrait';
+import { lightEstimationHandler } from './LightEstimationTrait';
+
+// Phase 2: Input Modalities
+import { handTrackingHandler } from './HandTrackingTrait';
+import { controllerInputHandler } from './ControllerInputTrait';
+import { bodyTrackingHandler } from './BodyTrackingTrait';
+import { faceTrackingHandler } from './FaceTrackingTrait';
+import { spatialAccessoryHandler } from './SpatialAccessoryTrait';
+
+// Phase 3: Accessibility
+import { accessibleHandler } from './AccessibleTrait';
+import { altTextHandler } from './AltTextTrait';
+import { spatialAudioCueHandler } from './SpatialAudioCueTrait';
+import { sonificationHandler } from './SonificationTrait';
+import { hapticCueHandler } from './HapticCueTrait';
+import { magnifiableHandler } from './MagnifiableTrait';
+import { highContrastHandler } from './HighContrastTrait';
+import { motionReducedHandler } from './MotionReducedTrait';
+import { subtitleHandler } from './SubtitleTrait';
+import { screenReaderHandler } from './ScreenReaderTrait';
+
+// Phase 4: Gaussian Splatting & Volumetric
+import { gaussianSplatHandler } from './GaussianSplatTrait';
+import { nerfHandler } from './NerfTrait';
+import { volumetricVideoHandler } from './VolumetricVideoTrait';
+import { pointCloudHandler } from './PointCloudTrait';
+import { photogrammetryHandler } from './PhotogrammetryTrait';
+
+// Phase 5: WebGPU Compute
+import { computeHandler } from './ComputeTrait';
+import { gpuParticleHandler } from './GPUParticleTrait';
+import { gpuPhysicsHandler } from './GPUPhysicsTrait';
+import { gpuBufferHandler } from './GPUBufferTrait';
+
+// Phase 6: Digital Twin & IoT
+import { sensorHandler } from './SensorTrait';
+import { digitalTwinHandler } from './DigitalTwinTrait';
+import { dataBindingHandler } from './DataBindingTrait';
+import { alertHandler } from './AlertTrait';
+import { heatmap3dHandler } from './Heatmap3DTrait';
+
+// Phase 7: Autonomous Agents
+import { behaviorTreeHandler } from './BehaviorTreeTrait';
+import { goalOrientedHandler } from './GoalOrientedTrait';
+import { llmAgentHandler } from './LLMAgentTrait';
+import { memoryHandler } from './MemoryTrait';
+import { perceptionHandler } from './PerceptionTrait';
+import { emotionHandler } from './EmotionTrait';
+import { dialogueHandler } from './DialogueTrait';
+import { factionHandler } from './FactionTrait';
+import { patrolHandler } from './PatrolTrait';
+
+// Phase 8: Advanced Spatial Audio
+import { ambisonicsHandler } from './AmbisonicsTrait';
+import { hrtfHandler } from './HRTFTrait';
+import { reverbZoneHandler } from './ReverbZoneTrait';
+import { audioOcclusionHandler } from './AudioOcclusionTrait';
+import { audioPortalHandler } from './AudioPortalTrait';
+import { audioMaterialHandler } from './AudioMaterialTrait';
+import { headTrackedAudioHandler } from './HeadTrackedAudioTrait';
+
+// Phase 9: OpenUSD & Interoperability
+import { usdHandler } from './USDTrait';
+import { gltfHandler } from './GLTFTrait';
+import { fbxHandler } from './FBXTrait';
+import { materialXHandler } from './MaterialXTrait';
+import { sceneGraphHandler } from './SceneGraphTrait';
+
+// Phase 10: Co-Presence & Shared Experiences
+import { coLocatedHandler } from './CoLocatedTrait';
+import { remotePresenceHandler } from './RemotePresenceTrait';
+import { sharedWorldHandler } from './SharedWorldTrait';
+import { voiceProximityHandler } from './VoiceProximityTrait';
+import { avatarEmbodimentHandler } from './AvatarEmbodimentTrait';
+import { spectatorHandler } from './SpectatorTrait';
+import { roleHandler } from './RoleTrait';
+
+// Phase 11: Geospatial & AR Cloud
+import { geospatialAnchorHandler } from './GeospatialAnchorTrait';
+import { terrainAnchorHandler } from './TerrainAnchorTrait';
+import { rooftopAnchorHandler } from './RooftopAnchorTrait';
+import { vpsHandler } from './VPSTrait';
+import { poiHandler } from './POITrait';
+
+// Phase 12: Web3 & Ownership
+import { nftHandler } from './NFTTrait';
+import { tokenGatedHandler } from './TokenGatedTrait';
+import { walletHandler } from './WalletTrait';
+import { marketplaceHandler } from './MarketplaceTrait';
+import { portableHandler } from './PortableTrait';
+
+// Phase 13: Physics Expansion
+import { clothHandler } from './ClothTrait';
+import { fluidHandler } from './FluidTrait';
+import { softBodyHandler } from './SoftBodyTrait';
+import { ropeHandler } from './RopeTrait';
+import { chainHandler } from './ChainTrait';
+import { windHandler } from './WindTrait';
+import { buoyancyHandler } from './BuoyancyTrait';
+import { destructionHandler } from './DestructionTrait';
 
 export class VRTraitRegistry {
   private handlers: Map<VRTraitName, TraitHandler> = new Map();
@@ -1035,10 +1144,119 @@ export class VRTraitRegistry {
     this.register(breakableHandler);
     this.register(proactiveHandler);
     
-    // Register new VR accessibility traits
+    // Register VR accessibility traits
     this.register(seatedHandler as TraitHandler);
     this.register(hapticHandler as TraitHandler);
     this.register(eyeTrackedHandler as TraitHandler);
+
+    // Phase 1: Environment Understanding
+    this.register(planeDetectionHandler as TraitHandler);
+    this.register(meshDetectionHandler as TraitHandler);
+    this.register(anchorHandler as TraitHandler);
+    this.register(persistentAnchorHandler as TraitHandler);
+    this.register(sharedAnchorHandler as TraitHandler);
+    this.register(geospatialEnvHandler as TraitHandler);
+    this.register(occlusionHandler as TraitHandler);
+    this.register(lightEstimationHandler as TraitHandler);
+
+    // Phase 2: Input Modalities
+    this.register(handTrackingHandler as TraitHandler);
+    this.register(controllerInputHandler as TraitHandler);
+    this.register(bodyTrackingHandler as TraitHandler);
+    this.register(faceTrackingHandler as TraitHandler);
+    this.register(spatialAccessoryHandler as TraitHandler);
+
+    // Phase 3: Accessibility
+    this.register(accessibleHandler as TraitHandler);
+    this.register(altTextHandler as TraitHandler);
+    this.register(spatialAudioCueHandler as TraitHandler);
+    this.register(sonificationHandler as TraitHandler);
+    this.register(hapticCueHandler as TraitHandler);
+    this.register(magnifiableHandler as TraitHandler);
+    this.register(highContrastHandler as TraitHandler);
+    this.register(motionReducedHandler as TraitHandler);
+    this.register(subtitleHandler as TraitHandler);
+    this.register(screenReaderHandler as TraitHandler);
+
+    // Phase 4: Gaussian Splatting & Volumetric
+    this.register(gaussianSplatHandler as TraitHandler);
+    this.register(nerfHandler as TraitHandler);
+    this.register(volumetricVideoHandler as TraitHandler);
+    this.register(pointCloudHandler as TraitHandler);
+    this.register(photogrammetryHandler as TraitHandler);
+
+    // Phase 5: WebGPU Compute
+    this.register(computeHandler as TraitHandler);
+    this.register(gpuParticleHandler as TraitHandler);
+    this.register(gpuPhysicsHandler as TraitHandler);
+    this.register(gpuBufferHandler as TraitHandler);
+
+    // Phase 6: Digital Twin & IoT
+    this.register(sensorHandler as TraitHandler);
+    this.register(digitalTwinHandler as TraitHandler);
+    this.register(dataBindingHandler as TraitHandler);
+    this.register(alertHandler as TraitHandler);
+    this.register(heatmap3dHandler as TraitHandler);
+
+    // Phase 7: Autonomous Agents
+    this.register(behaviorTreeHandler as TraitHandler);
+    this.register(goalOrientedHandler as TraitHandler);
+    this.register(llmAgentHandler as TraitHandler);
+    this.register(memoryHandler as TraitHandler);
+    this.register(perceptionHandler as TraitHandler);
+    this.register(emotionHandler as TraitHandler);
+    this.register(dialogueHandler as TraitHandler);
+    this.register(factionHandler as TraitHandler);
+    this.register(patrolHandler as TraitHandler);
+
+    // Phase 8: Advanced Spatial Audio
+    this.register(ambisonicsHandler as TraitHandler);
+    this.register(hrtfHandler as TraitHandler);
+    this.register(reverbZoneHandler as TraitHandler);
+    this.register(audioOcclusionHandler as TraitHandler);
+    this.register(audioPortalHandler as TraitHandler);
+    this.register(audioMaterialHandler as TraitHandler);
+    this.register(headTrackedAudioHandler as TraitHandler);
+
+    // Phase 9: OpenUSD & Interoperability
+    this.register(usdHandler as TraitHandler);
+    this.register(gltfHandler as TraitHandler);
+    this.register(fbxHandler as TraitHandler);
+    this.register(materialXHandler as TraitHandler);
+    this.register(sceneGraphHandler as TraitHandler);
+
+    // Phase 10: Co-Presence & Shared Experiences
+    this.register(coLocatedHandler as TraitHandler);
+    this.register(remotePresenceHandler as TraitHandler);
+    this.register(sharedWorldHandler as TraitHandler);
+    this.register(voiceProximityHandler as TraitHandler);
+    this.register(avatarEmbodimentHandler as TraitHandler);
+    this.register(spectatorHandler as TraitHandler);
+    this.register(roleHandler as TraitHandler);
+
+    // Phase 11: Geospatial & AR Cloud
+    this.register(geospatialAnchorHandler as TraitHandler);
+    this.register(terrainAnchorHandler as TraitHandler);
+    this.register(rooftopAnchorHandler as TraitHandler);
+    this.register(vpsHandler as TraitHandler);
+    this.register(poiHandler as TraitHandler);
+
+    // Phase 12: Web3 & Ownership
+    this.register(nftHandler as TraitHandler);
+    this.register(tokenGatedHandler as TraitHandler);
+    this.register(walletHandler as TraitHandler);
+    this.register(marketplaceHandler as TraitHandler);
+    this.register(portableHandler as TraitHandler);
+
+    // Phase 13: Physics Expansion
+    this.register(clothHandler as TraitHandler);
+    this.register(fluidHandler as TraitHandler);
+    this.register(softBodyHandler as TraitHandler);
+    this.register(ropeHandler as TraitHandler);
+    this.register(chainHandler as TraitHandler);
+    this.register(windHandler as TraitHandler);
+    this.register(buoyancyHandler as TraitHandler);
+    this.register(destructionHandler as TraitHandler);
   }
 
   register<T>(handler: TraitHandler<T>): void {
@@ -1125,6 +1343,7 @@ export class VRTraitRegistry {
 export const vrTraitRegistry = new VRTraitRegistry();
 
 export {
+  // Core VR
   grabbableHandler,
   throwableHandler,
   pointableHandler,
@@ -1138,4 +1357,100 @@ export {
   seatedHandler,
   hapticHandler,
   eyeTrackedHandler,
+  // Phase 1: Environment Understanding
+  planeDetectionHandler,
+  meshDetectionHandler,
+  anchorHandler,
+  persistentAnchorHandler,
+  sharedAnchorHandler,
+  geospatialEnvHandler,
+  occlusionHandler,
+  lightEstimationHandler,
+  // Phase 2: Input Modalities
+  handTrackingHandler,
+  controllerInputHandler,
+  bodyTrackingHandler,
+  faceTrackingHandler,
+  spatialAccessoryHandler,
+  // Phase 3: Accessibility
+  accessibleHandler,
+  altTextHandler,
+  spatialAudioCueHandler,
+  sonificationHandler,
+  hapticCueHandler,
+  magnifiableHandler,
+  highContrastHandler,
+  motionReducedHandler,
+  subtitleHandler,
+  screenReaderHandler,
+  // Phase 4: Gaussian Splatting & Volumetric
+  gaussianSplatHandler,
+  nerfHandler,
+  volumetricVideoHandler,
+  pointCloudHandler,
+  photogrammetryHandler,
+  // Phase 5: WebGPU Compute
+  computeHandler,
+  gpuParticleHandler,
+  gpuPhysicsHandler,
+  gpuBufferHandler,
+  // Phase 6: Digital Twin & IoT
+  sensorHandler,
+  digitalTwinHandler,
+  dataBindingHandler,
+  alertHandler,
+  heatmap3dHandler,
+  // Phase 7: Autonomous Agents
+  behaviorTreeHandler,
+  goalOrientedHandler,
+  llmAgentHandler,
+  memoryHandler,
+  perceptionHandler,
+  emotionHandler,
+  dialogueHandler,
+  factionHandler,
+  patrolHandler,
+  // Phase 8: Advanced Spatial Audio
+  ambisonicsHandler,
+  hrtfHandler,
+  reverbZoneHandler,
+  audioOcclusionHandler,
+  audioPortalHandler,
+  audioMaterialHandler,
+  headTrackedAudioHandler,
+  // Phase 9: OpenUSD & Interoperability
+  usdHandler,
+  gltfHandler,
+  fbxHandler,
+  materialXHandler,
+  sceneGraphHandler,
+  // Phase 10: Co-Presence & Shared Experiences
+  coLocatedHandler,
+  remotePresenceHandler,
+  sharedWorldHandler,
+  voiceProximityHandler,
+  avatarEmbodimentHandler,
+  spectatorHandler,
+  roleHandler,
+  // Phase 11: Geospatial & AR Cloud
+  geospatialAnchorHandler,
+  terrainAnchorHandler,
+  rooftopAnchorHandler,
+  vpsHandler,
+  poiHandler,
+  // Phase 12: Web3 & Ownership
+  nftHandler,
+  tokenGatedHandler,
+  walletHandler,
+  marketplaceHandler,
+  portableHandler,
+  // Phase 13: Physics Expansion
+  clothHandler,
+  fluidHandler,
+  softBodyHandler,
+  ropeHandler,
+  chainHandler,
+  windHandler,
+  buoyancyHandler,
+  destructionHandler,
 };

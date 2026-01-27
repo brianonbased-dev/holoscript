@@ -56,17 +56,40 @@ export type {
   HoloState,
   HoloTemplate,
   HoloObjectDecl,
+  HoloObjectTrait,
   HoloSpatialGroup,
+  HoloLight,
+  HoloLightProperty,
+  HoloEffects,
+  HoloEffect,
+  HoloCamera,
+  HoloCameraProperty,
   HoloLogic,
   HoloAction,
   HoloEventHandler,
   HoloStatement,
   HoloExpression,
+  HoloBindExpression,
   HoloImport,
   HoloParseResult,
   HoloParseError,
   HoloParserOptions,
   HoloValue,
+  HoloBindValue,
+  HoloTimeline,
+  HoloTimelineEntry,
+  HoloTimelineAction,
+  HoloAudio,
+  HoloAudioProperty,
+  HoloZone,
+  HoloZoneProperty,
+  HoloUI,
+  HoloUIElement,
+  HoloUIProperty,
+  HoloTransition,
+  HoloTransitionProperty,
+  HoloConditionalBlock,
+  HoloForEachBlock,
 } from './parser/HoloCompositionTypes';
 
 // HoloScript+ Enhanced Parser with Trait Annotations (NEW - Phase 3)
@@ -103,8 +126,150 @@ export type { HSPlusAST, VRTraitName } from './types';
 // HoloScript R3F Compiler (NEW)
 export { R3FCompiler, type R3FNode, ENVIRONMENT_PRESETS } from './compiler/R3FCompiler';
 
+// HoloScript Optimization Pass (NEW - Auto-optimization)
+export {
+  OptimizationPass,
+  type OptimizationCategory,
+  type OptimizationSeverity,
+  type OptimizationHint,
+  type LODTier,
+  type LODRecommendation,
+  type BatchGroup,
+  type OptimizationReport,
+  type SceneStats,
+  type OptimizationOptions,
+} from './compiler/OptimizationPass';
+
+// HoloScript Multi-Target Compilers (NEW - Cross-platform)
+export { UnityCompiler, type UnityCompilerOptions } from './compiler/UnityCompiler';
+export { GodotCompiler, type GodotCompilerOptions } from './compiler/GodotCompiler';
+export { VisionOSCompiler, type VisionOSCompilerOptions } from './compiler/VisionOSCompiler';
+
+// HoloScript New Platform Compilers (NEW - Phase 14)
+export { WebGPUCompiler, type WebGPUCompilerOptions } from './compiler/WebGPUCompiler';
+export { BabylonCompiler, type BabylonCompilerOptions } from './compiler/BabylonCompiler';
+export { AndroidXRCompiler, type AndroidXRCompilerOptions } from './compiler/AndroidXRCompiler';
+export { OpenXRCompiler, type OpenXRCompilerOptions } from './compiler/OpenXRCompiler';
+
+// HoloScript LSP Service (NEW - IDE integration)
+export {
+  HoloScriptLSP,
+  type LSPDiagnostic,
+  type LSPRange,
+  type LSPPosition,
+  type LSPCompletionItem,
+  type CompletionItemKind,
+  type LSPHoverResult,
+  type LSPDefinitionResult,
+  type LSPDocumentSymbol,
+  type SymbolKind,
+  type LSPSemanticToken,
+  type SemanticTokenType,
+  type SemanticTokenModifier,
+} from './lsp/HoloScriptLSP';
+
 // HoloScript+ VR Traits (NEW)
 export { VRTraitRegistry, vrTraitRegistry } from './traits/VRTraitSystem';
+
+// HoloScript+ Expanded Trait Handlers (Phases 1-13)
+export {
+  // Phase 1: Environment Understanding
+  planeDetectionHandler,
+  meshDetectionHandler,
+  anchorHandler,
+  persistentAnchorHandler,
+  sharedAnchorHandler,
+  geospatialEnvHandler,
+  occlusionHandler,
+  lightEstimationHandler,
+  // Phase 2: Input Modalities
+  handTrackingHandler,
+  controllerInputHandler,
+  bodyTrackingHandler,
+  faceTrackingHandler,
+  spatialAccessoryHandler,
+  // Phase 3: Accessibility
+  accessibleHandler,
+  altTextHandler,
+  spatialAudioCueHandler,
+  sonificationHandler,
+  hapticCueHandler,
+  magnifiableHandler,
+  highContrastHandler,
+  motionReducedHandler,
+  subtitleHandler,
+  screenReaderHandler,
+  // Phase 4: Gaussian Splatting & Volumetric
+  gaussianSplatHandler,
+  nerfHandler,
+  volumetricVideoHandler,
+  pointCloudHandler,
+  photogrammetryHandler,
+  // Phase 5: WebGPU Compute
+  computeHandler,
+  gpuParticleHandler,
+  gpuPhysicsHandler,
+  gpuBufferHandler,
+  // Phase 6: Digital Twin & IoT
+  sensorHandler,
+  digitalTwinHandler,
+  dataBindingHandler,
+  alertHandler,
+  heatmap3dHandler,
+  // Phase 7: Autonomous Agents
+  behaviorTreeHandler,
+  goalOrientedHandler,
+  llmAgentHandler,
+  memoryHandler,
+  perceptionHandler,
+  emotionHandler,
+  dialogueHandler,
+  factionHandler,
+  patrolHandler,
+  // Phase 8: Advanced Spatial Audio
+  ambisonicsHandler,
+  hrtfHandler,
+  reverbZoneHandler,
+  audioOcclusionHandler,
+  audioPortalHandler,
+  audioMaterialHandler,
+  headTrackedAudioHandler,
+  // Phase 9: OpenUSD & Interoperability
+  usdHandler,
+  gltfHandler,
+  fbxHandler,
+  materialXHandler,
+  sceneGraphHandler,
+  // Phase 10: Co-Presence & Shared Experiences
+  coLocatedHandler,
+  remotePresenceHandler,
+  sharedWorldHandler,
+  voiceProximityHandler,
+  avatarEmbodimentHandler,
+  spectatorHandler,
+  roleHandler,
+  // Phase 11: Geospatial & AR Cloud
+  geospatialAnchorHandler,
+  terrainAnchorHandler,
+  rooftopAnchorHandler,
+  vpsHandler,
+  poiHandler,
+  // Phase 12: Web3 & Ownership
+  nftHandler,
+  tokenGatedHandler,
+  walletHandler,
+  marketplaceHandler,
+  portableHandler,
+  // Phase 13: Physics Expansion
+  clothHandler,
+  fluidHandler,
+  softBodyHandler,
+  ropeHandler,
+  chainHandler,
+  windHandler,
+  buoyancyHandler,
+  destructionHandler,
+} from './traits/VRTraitSystem';
 
 // HoloScript+ Voice Input Trait (NEW - Phase 1)
 export {
@@ -514,6 +679,116 @@ export type {
   TimelineTrait,
   ChoreographyTrait,
 
+  // Environment Understanding Traits
+  PlaneDetectionTrait,
+  MeshDetectionTrait,
+  AnchorTrait,
+  PersistentAnchorTrait,
+  SharedAnchorTrait,
+  GeospatialTrait,
+  OcclusionTrait,
+  LightEstimationTrait,
+
+  // Input Modality Traits
+  EyeTrackingTrait,
+  HandTrackingTrait,
+  ControllerTrait,
+  SpatialAccessoryTrait,
+  BodyTrackingTrait,
+  FaceTrackingTrait,
+
+  // Accessibility Traits
+  AccessibleTrait,
+  AltTextTrait,
+  SpatialAudioCueTrait,
+  SonificationTrait,
+  HapticCueTrait,
+  MagnifiableTrait,
+  HighContrastTrait,
+  MotionReducedTrait,
+  SubtitleTrait,
+  ScreenReaderTrait,
+
+  // Gaussian Splatting & Volumetric Content Traits
+  GaussianSplatTrait,
+  NerfTrait,
+  VolumetricVideoTrait,
+  PointCloudTrait,
+  PhotogrammetryTrait,
+
+  // WebGPU Compute Traits
+  ComputeTrait,
+  GPUParticleTrait,
+  GPUPhysicsTrait,
+  GPUBufferTrait,
+
+  // Digital Twin & IoT Traits
+  SensorTrait,
+  DigitalTwinTrait,
+  DataBindingTrait,
+  AlertTrait,
+  Heatmap3DTrait,
+
+  // Autonomous Agent Traits
+  BehaviorTreeTrait,
+  GoalOrientedTrait,
+  LLMAgentTrait,
+  MemoryTrait,
+  PerceptionTrait,
+  EmotionTrait,
+  DialogueTrait,
+  FactionTrait,
+  PatrolTrait,
+
+  // Advanced Spatial Audio Traits
+  AmbisonicsTrait,
+  HRTFTrait,
+  ReverbZoneTrait,
+  AudioOcclusionTrait,
+  AudioPortalTrait,
+  AudioMaterialTrait,
+  HeadTrackedAudioTrait,
+
+  // OpenUSD & Interoperability Traits
+  USDTrait,
+  GLTFTrait,
+  FBXTrait,
+  MaterialXTrait,
+  SceneGraphTrait,
+
+  // Co-Presence & Shared Experience Traits
+  CoLocatedTrait,
+  RemotePresenceTrait,
+  SharedWorldTrait,
+  VoiceProximityTrait,
+  AvatarEmbodimentTrait,
+  SpectatorTrait,
+  RoleTrait,
+
+  // Geospatial & AR Cloud Traits
+  GeospatialAnchorTrait,
+  TerrainAnchorTrait,
+  RooftopAnchorTrait,
+  VPSTrait,
+  POITrait,
+
+  // Web3 & Ownership Traits
+  NFTTrait,
+  TokenGatedTrait,
+  WalletTrait,
+  MarketplaceTrait,
+  PortableTrait,
+
+  // Physics Expansion Traits
+  ClothTrait,
+  FluidTrait,
+  SoftBodyTrait,
+  RopeTrait,
+  ChainTrait,
+  WindTrait,
+  BuoyancyTrait,
+  DestructionTrait,
+
   // Lifecycle Hooks
   AllLifecycleHooks,
   MediaLifecycleHook,
@@ -523,6 +798,21 @@ export type {
   AudioLifecycleHook,
   AILifecycleHook,
   TimelineLifecycleHook,
+
+  // Expanded Lifecycle Hooks
+  EnvironmentLifecycleHook,
+  InputModalityLifecycleHook,
+  AccessibilityLifecycleHook,
+  VolumetricLifecycleHook,
+  ComputeLifecycleHook,
+  DigitalTwinLifecycleHook,
+  AgentLifecycleHook,
+  SpatialAudioLifecycleHook,
+  InteropLifecycleHook,
+  CoPresenceLifecycleHook,
+  GeospatialLifecycleHook,
+  Web3LifecycleHook,
+  PhysicsExpansionLifecycleHook,
 
   // Builtin Types
   RecordingClip,
