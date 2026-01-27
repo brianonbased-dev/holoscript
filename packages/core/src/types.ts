@@ -119,7 +119,104 @@ export type VRTraitName =
   | 'snappable'
   | 'breakable'
   | 'haptic'
-  | 'networked';
+  | 'networked'
+  // Environment Understanding
+  | 'plane_detection'
+  | 'mesh_detection'
+  | 'anchor'
+  | 'persistent_anchor'
+  | 'shared_anchor'
+  | 'geospatial'
+  | 'occlusion'
+  | 'light_estimation'
+  // Input Modalities
+  | 'eye_tracking'
+  | 'hand_tracking'
+  | 'controller'
+  | 'spatial_accessory'
+  | 'body_tracking'
+  | 'face_tracking'
+  // Accessibility
+  | 'accessible'
+  | 'alt_text'
+  | 'spatial_audio_cue'
+  | 'sonification'
+  | 'haptic_cue'
+  | 'magnifiable'
+  | 'high_contrast'
+  | 'motion_reduced'
+  | 'subtitle'
+  | 'screen_reader'
+  // Gaussian Splatting & Volumetric
+  | 'gaussian_splat'
+  | 'nerf'
+  | 'volumetric_video'
+  | 'point_cloud'
+  | 'photogrammetry'
+  // WebGPU Compute
+  | 'compute'
+  | 'gpu_particle'
+  | 'gpu_physics'
+  | 'gpu_buffer'
+  // Digital Twin & IoT
+  | 'sensor'
+  | 'digital_twin'
+  | 'data_binding'
+  | 'alert'
+  | 'heatmap_3d'
+  // Autonomous Agents
+  | 'behavior_tree'
+  | 'goal_oriented'
+  | 'llm_agent'
+  | 'memory'
+  | 'perception'
+  | 'emotion'
+  | 'dialogue'
+  | 'faction'
+  | 'patrol'
+  // Advanced Spatial Audio
+  | 'ambisonics'
+  | 'hrtf'
+  | 'reverb_zone'
+  | 'audio_occlusion'
+  | 'audio_portal'
+  | 'audio_material'
+  | 'head_tracked_audio'
+  // OpenUSD & Interoperability
+  | 'usd'
+  | 'gltf'
+  | 'fbx'
+  | 'material_x'
+  | 'scene_graph'
+  // Co-Presence & Shared Experiences
+  | 'co_located'
+  | 'remote_presence'
+  | 'shared_world'
+  | 'voice_proximity'
+  | 'avatar_embodiment'
+  | 'spectator'
+  | 'role'
+  // Geospatial & AR Cloud
+  | 'geospatial_anchor'
+  | 'terrain_anchor'
+  | 'rooftop_anchor'
+  | 'vps'
+  | 'poi'
+  // Web3 & Ownership
+  | 'nft'
+  | 'token_gated'
+  | 'wallet'
+  | 'marketplace'
+  | 'portable'
+  // Physics Expansion
+  | 'cloth'
+  | 'fluid'
+  | 'soft_body'
+  | 'rope'
+  | 'chain'
+  | 'wind'
+  | 'buoyancy'
+  | 'destruction';
 
 export type LifecycleHook =
   | 'on_mount'
@@ -147,12 +244,136 @@ export type ControllerHook =
   | 'on_grip_hold'
   | 'on_grip_release';
 
+export type EnvironmentHook =
+  | 'on_plane_detected'
+  | 'on_plane_lost'
+  | 'on_plane_updated'
+  | 'on_mesh_detected'
+  | 'on_mesh_updated'
+  | 'on_anchor_created'
+  | 'on_anchor_resolved'
+  | 'on_anchor_lost'
+  | 'on_anchor_shared'
+  | 'on_light_estimated'
+  | 'on_occlusion_updated';
+
+export type InputModalityHook =
+  | 'on_gaze_enter'
+  | 'on_gaze_exit'
+  | 'on_gaze_dwell'
+  | 'on_hand_gesture'
+  | 'on_hand_pinch'
+  | 'on_hand_lost'
+  | 'on_body_pose_update'
+  | 'on_face_expression'
+  | 'on_controller_vibrate'
+  | 'on_accessory_input';
+
+export type AccessibilityHook =
+  | 'on_accessibility_announce'
+  | 'on_subtitle_display'
+  | 'on_magnify'
+  | 'on_contrast_change'
+  | 'on_motion_reduce'
+  | 'on_screen_reader_focus'
+  | 'on_sonification_update';
+
+export type VolumetricHook =
+  | 'on_splat_loaded'
+  | 'on_nerf_ready'
+  | 'on_volume_frame'
+  | 'on_point_cloud_loaded'
+  | 'on_capture_complete';
+
+export type ComputeHook =
+  | 'on_compute_complete'
+  | 'on_buffer_ready'
+  | 'on_gpu_error';
+
+export type DigitalTwinHook =
+  | 'on_sensor_update'
+  | 'on_data_change'
+  | 'on_alert_triggered'
+  | 'on_twin_sync'
+  | 'on_heatmap_update';
+
+export type AgentHook =
+  | 'on_goal_completed'
+  | 'on_goal_failed'
+  | 'on_perception_change'
+  | 'on_emotion_shift'
+  | 'on_faction_change'
+  | 'on_patrol_waypoint'
+  | 'on_llm_response'
+  | 'on_memory_recalled'
+  | 'on_dialogue_start'
+  | 'on_dialogue_end';
+
+export type SpatialAudioHook =
+  | 'on_reverb_enter'
+  | 'on_reverb_exit'
+  | 'on_audio_occluded'
+  | 'on_audio_portal_enter';
+
+export type InteropHook =
+  | 'on_asset_loaded'
+  | 'on_format_converted'
+  | 'on_scene_composed';
+
+export type CoPresenceHook =
+  | 'on_co_presence_joined'
+  | 'on_co_presence_left'
+  | 'on_voice_proximity_change'
+  | 'on_role_change'
+  | 'on_spectator_join'
+  | 'on_avatar_sync';
+
+export type GeospatialHook =
+  | 'on_vps_localized'
+  | 'on_poi_proximity'
+  | 'on_terrain_resolved'
+  | 'on_rooftop_resolved';
+
+export type Web3Hook =
+  | 'on_wallet_connected'
+  | 'on_token_verified'
+  | 'on_nft_transferred'
+  | 'on_purchase_complete'
+  | 'on_asset_ported';
+
+export type PhysicsExpansionHook =
+  | 'on_cloth_tear'
+  | 'on_fluid_splash'
+  | 'on_soft_body_deform'
+  | 'on_rope_snap'
+  | 'on_wind_change'
+  | 'on_submerge'
+  | 'on_destruction_complete';
+
+export type AllExpandedHooks =
+  | LifecycleHook
+  | VRLifecycleHook
+  | ControllerHook
+  | EnvironmentHook
+  | InputModalityHook
+  | AccessibilityHook
+  | VolumetricHook
+  | ComputeHook
+  | DigitalTwinHook
+  | AgentHook
+  | SpatialAudioHook
+  | InteropHook
+  | CoPresenceHook
+  | GeospatialHook
+  | Web3Hook
+  | PhysicsExpansionHook;
+
 export type HSPlusDirective =
   | { type: 'state'; body: Record<string, HoloScriptValue> }
   | { type: 'for'; variable: string; iterable: string; body: ASTNode[] }
   | { type: 'if'; condition: string; body: ASTNode[]; else?: ASTNode[] }
   | { type: 'import'; path: string; alias: string }
-  | { type: 'lifecycle'; hook: LifecycleHook | VRLifecycleHook | ControllerHook; params?: string[]; body: string }
+  | { type: 'lifecycle'; hook: AllExpandedHooks; params?: string[]; body: string }
   | { type: 'trait'; name: VRTraitName; config: Record<string, HoloScriptValue> };
 
 export interface HSPlusAST {
@@ -640,6 +861,117 @@ export type {
   TimelineTrait,
   ChoreographyTrait,
 
+  // Environment Understanding Traits
+  PlaneDetectionTrait,
+  MeshDetectionTrait,
+  AnchorTrait,
+  PersistentAnchorTrait,
+  SharedAnchorTrait,
+  GeospatialTrait,
+  OcclusionTrait,
+  LightEstimationTrait,
+
+  // Input Modality Traits
+  EyeTrackingTrait,
+  HandTrackingTrait,
+  ControllerTrait,
+  SpatialAccessoryTrait,
+  BodyTrackingTrait,
+  FaceTrackingTrait,
+  HapticTrait,
+
+  // Accessibility Traits
+  AccessibleTrait,
+  AltTextTrait,
+  SpatialAudioCueTrait,
+  SonificationTrait,
+  HapticCueTrait,
+  MagnifiableTrait,
+  HighContrastTrait,
+  MotionReducedTrait,
+  SubtitleTrait,
+  ScreenReaderTrait,
+
+  // Gaussian Splatting & Volumetric Content Traits
+  GaussianSplatTrait,
+  NerfTrait,
+  VolumetricVideoTrait,
+  PointCloudTrait,
+  PhotogrammetryTrait,
+
+  // WebGPU Compute Traits
+  ComputeTrait,
+  GPUParticleTrait,
+  GPUPhysicsTrait,
+  GPUBufferTrait,
+
+  // Digital Twin & IoT Traits
+  SensorTrait,
+  DigitalTwinTrait,
+  DataBindingTrait,
+  AlertTrait,
+  Heatmap3DTrait,
+
+  // Autonomous Agent Traits
+  BehaviorTreeTrait,
+  GoalOrientedTrait,
+  LLMAgentTrait,
+  MemoryTrait,
+  PerceptionTrait,
+  EmotionTrait,
+  DialogueTrait,
+  FactionTrait,
+  PatrolTrait,
+
+  // Advanced Spatial Audio Traits
+  AmbisonicsTrait,
+  HRTFTrait,
+  ReverbZoneTrait,
+  AudioOcclusionTrait,
+  AudioPortalTrait,
+  AudioMaterialTrait,
+  HeadTrackedAudioTrait,
+
+  // OpenUSD & Interoperability Traits
+  USDTrait,
+  GLTFTrait,
+  FBXTrait,
+  MaterialXTrait,
+  SceneGraphTrait,
+
+  // Co-Presence & Shared Experience Traits
+  CoLocatedTrait,
+  RemotePresenceTrait,
+  SharedWorldTrait,
+  VoiceProximityTrait,
+  AvatarEmbodimentTrait,
+  SpectatorTrait,
+  RoleTrait,
+
+  // Geospatial & AR Cloud Traits
+  GeospatialAnchorTrait,
+  TerrainAnchorTrait,
+  RooftopAnchorTrait,
+  VPSTrait,
+  POITrait,
+
+  // Web3 & Ownership Traits
+  NFTTrait,
+  TokenGatedTrait,
+  WalletTrait,
+  MarketplaceTrait,
+  PortableTrait,
+
+  // Physics Expansion Traits
+  ClothTrait,
+  FluidTrait,
+  SoftBodyTrait,
+  RopeTrait,
+  ChainTrait,
+  WindTrait,
+  BuoyancyTrait,
+  DestructionTrait,
+
   // Lifecycle Hooks
   AllLifecycleHooks,
   MediaLifecycleHook,
@@ -649,6 +981,21 @@ export type {
   AudioLifecycleHook,
   AILifecycleHook,
   TimelineLifecycleHook,
+
+  // Expanded Lifecycle Hooks
+  EnvironmentLifecycleHook,
+  InputModalityLifecycleHook,
+  AccessibilityLifecycleHook,
+  VolumetricLifecycleHook,
+  ComputeLifecycleHook,
+  DigitalTwinLifecycleHook,
+  AgentLifecycleHook,
+  SpatialAudioLifecycleHook,
+  InteropLifecycleHook,
+  CoPresenceLifecycleHook,
+  GeospatialLifecycleHook,
+  Web3LifecycleHook,
+  PhysicsExpansionLifecycleHook,
 
   // Builtin Types
   RecordingClip,
