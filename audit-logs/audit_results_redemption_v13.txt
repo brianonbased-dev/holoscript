@@ -1,0 +1,98 @@
+﻿Auditing: C:/Users/josep/Documents/GitHub/HoloScript/test_redemption.jsonl (Sample size: 500)
+Results for C:/Users/josep/Documents/GitHub/HoloScript/test_redemption.jsonl:
+  - Total Sampled: 3
+  - Valid (Raw): 3 (100.0%)
+  - Valid (Standardized): 3 (100.0%)
+-----------------------------------
+Auditing: C:/Users/josep/Documents/GitHub/AI_Workspace/Brittney/training/cloud-training-redeemed.jsonl (Sample size: 500)
+[DEBUG] Failure Sample (cloud-training-redeemed.jsonl):
+  Code: "object "PatrolNPC" {
+  state : {
+    path: [[0,0,0] [10,0,0] [10,0,10] [0,0,10]],
+    currentWaypoint: 0,
+    speed: 2,
+    greeting: "Hello, traveler!",
+    greetCooldown: 0,
+  }
+logic {
+  function e..."
+[ERROR] Parser Crash: result is not defined
+[DEBUG] Failure Sample (cloud-training-redeemed.jsonl):
+  Code: "object "HealthPickup" {
+  state : {
+    healAmount: 25,
+    collected: false,
+    respawnTime: 10000,
+  }
+  visual : {
+    shape: "orb",
+    color: "#33333344",
+    pulse: !this.collected,
+    size: 0..."
+[ERROR] Parser Crash: result is not defined
+[DEBUG] Failure Sample (cloud-training-redeemed.jsonl):
+  Code: "object "LockedDoor" {
+  state : {
+    locked: true,
+    requiredKey: "golden_key",
+    open: false,
+    openSpeed: 90  // degrees per second,
+  }
+  visual : {
+    model: "door_ornate",
+    rotation: t..."
+Results for C:/Users/josep/Documents/GitHub/AI_Workspace/Brittney/training/cloud-training-redeemed.jsonl:
+  - Total Sampled: 500
+  - Valid (Raw): 300 (60.0%)
+  - Valid (Standardized): 300 (60.0%)
+-----------------------------------
+Auditing: C:/Users/josep/Documents/GitHub/AI_Workspace/Brittney/training/brittney-v4-cloud-training-final.jsonl (Sample size: 500)
+[DEBUG] Cloud Standardization - Before:
+composition "BattleSystem" {
+
+  template "Entity" {
+    state {
+      health: 100
+      maxHealth: 100
+      damage: 10
+      alive: true
+    }
+
+    action attack(target) {
+      if (!this.alive || !t
+[DEBUG] Cloud Standardization - After:
+composition "BattleSystem" {
+
+  template "Entity" {
+    state {
+      health: 100
+      maxHealth: 100
+      damage: 10
+      alive: true
+    }
+function attack target {
+      if !this alive || !target
+[DEBUG] Error: HSP001: Unexpected token PIPE "|" in node body at 11:21
+Results for C:/Users/josep/Documents/GitHub/AI_Workspace/Brittney/training/brittney-v4-cloud-training-final.jsonl:
+  - Total Sampled: 500
+  - Valid (Raw): 0 (0.0%)
+  - Valid (Standardized): 0 (0.0%)
+-----------------------------------
+Auditing: C:/Users/josep/Documents/GitHub/AI_Workspace/uAA2/training/holoscript-advanced-train.jsonl (Sample size: 500)
+Results for C:/Users/josep/Documents/GitHub/AI_Workspace/uAA2/training/holoscript-advanced-train.jsonl:
+  - Total Sampled: 500
+  - Valid (Raw): 0 (0.0%)
+  - Valid (Standardized): 0 (0.0%)
+-----------------------------------
+Auditing: C:/Users/josep/Documents/GitHub/AI_Workspace/_archive/2026-01-cleanup/redundant-datasets/brittney-v4-OMNISCIENT.jsonl (Sample size: 500)
+Results for C:/Users/josep/Documents/GitHub/AI_Workspace/_archive/2026-01-cleanup/redundant-datasets/brittney-v4-OMNISCIENT.jsonl:
+  - Total Sampled: 500
+  - Valid (Raw): 376 (75.2%)
+  - Valid (Standardized): 53 (10.6%)
+-----------------------------------
+Auditing: C:/Users/josep/Documents/GitHub/AI_Workspace/_archive/2026-01-cleanup/redundant-datasets/brittney-v4-FINAL-SUPREME.jsonl (Sample size: 500)
+Results for C:/Users/josep/Documents/GitHub/AI_Workspace/_archive/2026-01-cleanup/redundant-datasets/brittney-v4-FINAL-SUPREME.jsonl:
+  - Total Sampled: 500
+  - Valid (Raw): 376 (75.2%)
+  - Valid (Standardized): 53 (10.6%)
+-----------------------------------
