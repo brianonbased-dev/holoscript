@@ -1,0 +1,3 @@
+{"completion": "npc \"ValidOne\" { type: \"warrior\" }"}
+{"completion": "object \"ObjectTest\" { state: { alive: true } }"}
+{"completion": "composition \"CompTest\" { template \"Temp\" { state: { alive: true } } }"}

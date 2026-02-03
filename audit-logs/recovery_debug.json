@@ -1,0 +1,106 @@
+{
+  "success": true,
+  "ast": {
+    "type": "Program",
+    "id": "root",
+    "properties": {},
+    "directives": [],
+    "children": [
+      {
+        "type": "object",
+        "name": "Test",
+        "id": "Test",
+        "properties": {
+          "color": true,
+          "size": 10
+        },
+        "directives": [],
+        "children": [],
+        "traits": {},
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 5
+          },
+          "end": {
+            "line": 5,
+            "column": 6
+          }
+        }
+      }
+    ],
+    "traits": {},
+    "loc": {
+      "start": {
+        "line": 2,
+        "column": 5
+      },
+      "end": {
+        "line": 5,
+        "column": 6
+      }
+    },
+    "body": [
+      {
+        "type": "object",
+        "name": "Test",
+        "id": "Test",
+        "properties": {
+          "color": true,
+          "size": 10
+        },
+        "directives": [],
+        "children": [],
+        "traits": {},
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 5
+          },
+          "end": {
+            "line": 5,
+            "column": 6
+          }
+        }
+      }
+    ],
+    "version": "1.0",
+    "root": {
+      "type": "object",
+      "name": "Test",
+      "id": "Test",
+      "properties": {
+        "color": true,
+        "size": 10
+      },
+      "directives": [],
+      "children": [],
+      "traits": {},
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 5
+        },
+        "end": {
+          "line": 5,
+          "column": 6
+        }
+      }
+    },
+    "imports": [],
+    "hasState": false,
+    "hasVRTraits": false,
+    "hasControlFlow": false
+  },
+  "compiledExpressions": {},
+  "requiredCompanions": [],
+  "features": {
+    "state": false,
+    "vrTraits": false,
+    "loops": false,
+    "conditionals": false,
+    "lifecycleHooks": false
+  },
+  "warnings": [],
+  "errors": []
+}
