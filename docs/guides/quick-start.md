@@ -47,11 +47,11 @@ Open the Command Palette (`Ctrl+Shift+P`) and type **"HoloScript: Open Examples"
 
 | # | Example | What You'll Learn |
 |---|---------|-------------------|
-| 1 | hello.holo | Basic scene structure |
-| 2 | 2-interactive.holo | VR traits, grabbing, physics |
-| 3 | 3-physics-playground.holo | Physics, spatial audio, templates |
-| 4 | 4-multiplayer-room.holo | Networking, player tracking |
-| 5 | 5-escape-room.holo | Full game with puzzles and UI |
+| 1 | 1-floating-cyan-orb.holo | Basic scene structure with @grabbable and @glowing |
+| 2 | 2-red-cube-teal-button.holo | VR traits: @throwable, @physics, @clickable |
+| 3 | 3-ball-ramp-with-bouncy-spheres.holo | Physics simulation with @physics and @collidable |
+| 4 | 4-networked-spheres.holo | Multiplayer with @networked and state sync |
+| 5 | 5-color-button-panel.holo | Interactive UI with multiple clickable buttons |
 
 ## 5. Compile to Target Platform
 

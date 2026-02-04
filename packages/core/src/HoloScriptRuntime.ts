@@ -40,10 +40,17 @@ import type {
   CompositionNode,
   TemplateNode,
   HoloScriptValue,
-  ServerNode,
-  DatabaseNode,
   FetchNode,
   ExecuteNode,
+  StateMachineNode,
+  ServerNode,
+  DatabaseNode,
+  SystemNode,
+  CoreConfigNode,
+  NarrativeNode,
+  QuestNode,
+  DialogueNode,
+  VisualMetadataNode,
 } from './types';
 import type { ImportLoader } from './types';
 
@@ -311,7 +318,20 @@ export class HoloScriptRuntime {
 
       switch (node.type) {
         case 'orb':
+        case 'object':
           result = await this.executeOrb(node as OrbNode);
+          break;
+        case 'narrative':
+          result = await this.executeNarrative(node as NarrativeNode);
+          break;
+        case 'quest':
+          result = await this.executeQuest(node as QuestNode);
+          break;
+        case 'dialogue':
+          result = await this.executeDialogue(node as DialogueNode);
+          break;
+        case 'visual_metadata':
+          result = await this.executeVisualMetadata(node as VisualMetadataNode);
           break;
         case 'method':
         case 'function':
@@ -387,6 +407,12 @@ export class HoloScriptRuntime {
         case 'state-machine':
           result = await this.executeStateMachine(node as StateMachineNode);
           break;
+        case 'system':
+          result = await this.executeSystem(node as any);
+          break;
+        case 'core_config':
+          result = await this.executeCoreConfig(node as any);
+          break;
         default:
           result = {
             success: false,
@@ -419,6 +445,9 @@ export class HoloScriptRuntime {
    * Execute multiple nodes or a single node (unified entry point)
    */
   async execute(nodes: ASTNode | ASTNode[]): Promise<ExecutionResult> {
+    this.startTime = Date.now();
+    this.nodeCount = 0;
+
     if (Array.isArray(nodes)) {
       const results = await this.executeProgram(nodes);
       const success = results.every(r => r.success);
@@ -1269,7 +1298,7 @@ export class HoloScriptRuntime {
   // Condition Evaluation
   // ============================================================================
 
-  private evaluateCondition(condition: string): boolean {
+  private evaluateCondition(condition: any): boolean {
     if (!condition) return false;
 
     const suspiciousKeywords = ['eval', 'process', 'require', '__proto__', 'constructor'];
@@ -1886,6 +1915,9 @@ export class HoloScriptRuntime {
       state: createState({}),
       // Phase 13: State Machines
       stateMachines: new Map(),
+      // Narrative & Story State
+      quests: new Map(),
+      completedQuests: new Set(),
     };
   }
 
@@ -1929,10 +1961,134 @@ export class HoloScriptRuntime {
   }
 
   private async executeComposition(node: CompositionNode): Promise<ExecutionResult> {
+    if (node.body) {
+      // Execute systems first
+      const systemResults = await this.executeProgram(node.body.systems, this.context.executionStack.length);
+      // Execute configs
+      const configResults = await this.executeProgram(node.body.configs, this.context.executionStack.length);
+      // Execute children
+      const childrenResults = await this.executeProgram(node.body.children, this.context.executionStack.length);
+      
+      const allResults = [...systemResults, ...configResults, ...childrenResults];
+      return {
+        success: allResults.every(r => r.success),
+        output: `Composition ${node.name} executed with specialized blocks`
+      };
+    }
+
     return { 
       success: (await this.executeProgram(node.children, this.context.executionStack.length)).every(r => r.success), 
       output: `Composition ${node.name} executed` 
     };
+  }
+
+  private async executeSystem(node: SystemNode): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    const systemId = node.id;
+    const properties = node.properties;
+
+    logger.info(`[Zero-Config] Provisioning system: ${systemId}`, properties);
+
+    switch (systemId) {
+      case 'Networking':
+        return this.setupNetworking(node);
+      case 'Physics':
+        return this.setupPhysics(node);
+      default:
+        logger.warn(`[Zero-Config] Unknown system: ${systemId}`);
+        return { 
+          success: true, 
+          output: `System ${systemId} not recognized, skipping provisioning`, 
+          executionTime: Date.now() - startTime 
+        };
+    }
+  }
+
+  private async executeCoreConfig(node: CoreConfigNode): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    logger.info('[Zero-Config] Applying core configuration', node.properties);
+    
+    // Merge into environment context
+    for (const [key, value] of Object.entries(node.properties)) {
+      this.context.environment[key] = value;
+    }
+
+    return { 
+      success: true, 
+      output: 'Core configuration applied', 
+      executionTime: Date.now() - startTime 
+    };
+  }
+
+  private async executeNarrative(node: NarrativeNode): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    logger.info(`[Narrative] Initializing narrative: ${node.id}`);
+    
+    // Register all quests in the narrative
+    for (const quest of node.quests) {
+      this.context.quests.set(quest.id, quest);
+    }
+    
+    // Auto-start the narrative if startNode is provided
+    if (node.startNode) {
+      logger.info(`[Narrative] Auto-starting at node: ${node.startNode}`);
+    }
+    
+    return { 
+      success: true, 
+      output: `Narrative ${node.id} initialized with ${node.quests.length} quests`,
+      executionTime: Date.now() - startTime
+    };
+  }
+
+  private async executeQuest(node: QuestNode): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    logger.info(`[Narrative] Starting quest: ${node.title}`, { questId: node.id });
+    
+    this.context.activeQuestId = node.id;
+    this.context.quests.set(node.id, node);
+    
+    return { 
+      success: true, 
+      output: `Quest ${node.id} started`,
+      executionTime: Date.now() - startTime
+    };
+  }
+
+  private async executeDialogue(node: DialogueNode): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    logger.info(`[Narrative] Dialogue: ${node.speaker} says "${node.text}"`);
+    
+    // Update dialogue state
+    this.context.dialogueState = {
+      currentNodeId: node.id,
+      speaker: node.speaker
+    };
+    
+    return { 
+      success: true, 
+      output: `Dialogue node ${node.id} executed`,
+      executionTime: Date.now() - startTime
+    };
+  }
+
+  private async executeVisualMetadata(node: VisualMetadataNode): Promise<ExecutionResult> {
+    logger.info(`[Metadata] Visual metadata processed`, node.properties);
+    return { success: true, output: 'Visual metadata applied' };
+  }
+
+  private async setupNetworking(node: SystemNode): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    // Logic for initializing NetworkingService would go here
+    logger.info('[Networking] Initializing multiplayer fabric...', node.properties);
+    return { success: true, output: 'Networking system provisioned', executionTime: Date.now() - startTime };
+  }
+
+  private async setupPhysics(node: SystemNode): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    // Logic for initializing PhysicsEngine would go here
+    logger.info('[Physics] Initializing spatial simulation engine...', node.properties);
+    return { success: true, output: 'Physics system provisioned', executionTime: Date.now() - startTime };
   }
 
   private async executeTemplate(node: TemplateNode): Promise<ExecutionResult> {
@@ -2032,7 +2188,7 @@ export class HoloScriptRuntime {
            this.emit('show-chat', d.config);
         }
       } else if (d.type === 'state') {
-        this.context.state.update(d.body);
+        this.context.state.update(d.body as any);
       } else if (d.type === 'lifecycle') {
         if (d.hook === 'on_mount') {
           this.evaluateExpression(d.body);

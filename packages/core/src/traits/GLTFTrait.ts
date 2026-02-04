@@ -7,7 +7,7 @@
  * @version 2.0.0
  */
 
-import type { TraitHandler, TraitContext } from './VRTraitSystem';
+import type { TraitHandler, TraitContext } from './TraitTypes';
 import type { HSPlusNode, Vector3 } from '../types/HoloScriptPlus';
 
 // =============================================================================
@@ -569,9 +569,9 @@ function calculateCameraDistance(
   const nodePos = (node as any).position || [0, 0, 0];
   const cameraPos = context.vr.headset.position;
 
-  const dx = nodePos[0] - cameraPos[0];
-  const dy = nodePos[1] - cameraPos[1];
-  const dz = nodePos[2] - cameraPos[2];
+  const dx = (nodePos as any)[0] - (cameraPos as any)[0];
+  const dy = (nodePos as any)[1] - (cameraPos as any)[1];
+  const dz = (nodePos as any)[2] - (cameraPos as any)[2];
 
   return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }

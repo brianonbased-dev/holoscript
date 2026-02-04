@@ -65,30 +65,120 @@ HoloScript stands alone as a purpose-built language for spatial computing, rathe
 
 [**Read the full vision: Why HoloScript?**](./docs/WHY_HOLOSCRIPT.md)
 
-## 🚀 What's New (January 2026)
+## 🚀 What's New (February 2026)
 
-### 🔊 Spatial Audio
-`@holoscript/spatial-audio` — 3D positional audio with HRTF and room acoustics. Perfect for immersive VR experiences.
+### 🧠 Language & Parser (HoloScript Core)
 
-### 🔄 State Sync
-`@holoscript/state-sync` — CRDTs for multiplayer. Conflict-free data structures that automatically merge across peers.
+#### ⚡ Syntax Evolved (v2.1)
+New parser capabilities for "Wild HoloScript" support: arrow functions, raw TypeScript blocks, and natural language connections.
+[**Read the Syntax Extensions Guide**](./docs/language/SYNTAX_EXTENSIONS.md)
 
-### 📦 Asset Streaming
-`@holoscript/streaming` — Progressive loading, LOD streaming, and smart caching for large VR worlds.
+#### ✨ Spatial Content Support
+HoloScript now supports high-fidelity spatial captures as declarative traits:
+- **Gaussian Splatting**: `@gaussian_splat` for `.splat` files
+- **NeRFs**: `@nerf` trait for Luma AI photorealistic captures
+- **Humanoid Avatars**: `@skeleton` trait with enhanced skeletal animation support
+- **Volumetric Video**: `@volumetric_video` for immersive video content
 
-### 🤖 AI Integration
+#### 🎮 Game Content Generation
+New language constructs for RPG and game content generation:
+- **NPCs**: `npc` entities with behavior trees and dialogue
+- **Quests**: Quest definitions with objectives and rewards
+- **Dialogue Trees**: Branching dialogue with conditional paths
+- **Abilities**: Spell and ability systems with class requirements
+- **Achievements**: Achievement tracking and progression
+- **Talent Trees**: Class-based talent progression systems
+
+### 🚀 Runtime & Platform Features (Hololand)
+
+> **Note**: The following runtime and platform features have been migrated to [Hololand](https://github.com/brianonbased-dev/Hololand) to keep HoloScript focused on language design. Access them via `@hololand/*` packages.
+
+#### 🔊 Spatial Audio
+[`@hololand/audio`](https://github.com/brianonbased-dev/Hololand) — 3D positional audio with HRTF and room acoustics. Perfect for immersive VR experiences.
+
+#### 🔄 State Sync
+[`@hololand/network`](https://github.com/brianonbased-dev/Hololand) — CRDTs for multiplayer. Conflict-free data structures that automatically merge across peers.
+
+#### 📦 Asset Streaming
+[`@hololand/streaming`](https://github.com/brianonbased-dev/Hololand) — Progressive loading, LOD streaming, and smart caching for large VR worlds.
+
+#### ⚡ Unified Event System
+[`@hololand/events`](https://github.com/brianonbased-dev/Hololand) — Global Event Bubbling and Physics-Haptics bridging.
+
+> **Need Spatial Audio, State Sync, or Streaming?** See our [Feature Migration Guide](./docs/guides/FEATURE_MIGRATION.md) for integration instructions.
+
+### 🤖 AI Integration (HoloScript-Powered)
 - **Brittney MCP** — Full integration with Quantum MCP Mesh Orchestrator for high-fidelity generation.
 - **Claude Desktop/Code** — `.claude/settings.json` pre-configured
 - **GitHub Copilot** — `.github/copilot-instructions.md` with MCP guidance
 
-### 🧠 Run Locally (GGUF)
+### 🧠 Run Brittney Locally (GGUF)
 To run Brittney locally for free inference:
-1.  Download the **[.GGUF Model](https://huggingface.co/brianonbased-dev/brittney-v4-expert)**.
-2.  Load into Ollama: `ollama run brittney-v4-expert`
-3.  Configure `HoloScript MCP` to use local endpoint.
 
-### ⚡ Unified Event System
-`@holoscript/events` — Global Event Bubbling and Physics-Haptics bridging.
+```bash
+# Full precision (7.7GB) - Best quality
+ollama run brittney-v4:latest
+
+# Quantized Q8 (4.1GB) - Smaller, faster
+ollama run brittney-v4-q8:latest
+```
+
+Configure `HoloScript MCP` to use local endpoint (`http://localhost:11434`).
+New language constructs for RPG and game content generation:
+
+```hsplus
+composition "RPG Scene" {
+  // NPCs with behavior trees
+  npc "Elder Aldric" {
+    npc_type: "quest_giver"
+    dialogue_tree: "elder_intro"
+  }
+
+  // Quest definitions with objectives and rewards
+  quest "Goblin Menace" {
+    giver: "Elder Aldric"
+    level: 1
+    type: "defeat"
+    objectives: [
+      { id: "defeat_goblins", type: "defeat", target: "goblin", count: 10 }
+    ]
+    rewards: { experience: 500, gold: 100 }
+  }
+
+  // Dialogue trees with branching options
+  dialogue "elder_intro" {
+    character: "Elder Aldric"
+    emotion: "friendly"
+    content: "Welcome, traveler!"
+    options: [
+      { text: "What troubles the village?", next: "elder_troubles" }
+    ]
+  }
+
+  // Abilities and spells
+  ability "Fireball" {
+    type: "spell"
+    class: "mage"
+    level: 5
+  }
+
+  // Achievement system
+  achievement "Village Hero" {
+    description: "Complete the Goblin Menace quest"
+    points: 50
+  }
+
+  // Talent trees with dependencies
+  talent_tree "warrior_combat" {
+    class: "warrior"
+    rows: [
+      { tier: 1, nodes: [{ id: "power_strike", name: "Power Strike", points: 1 }] }
+    ]
+  }
+}
+```
+
+**7 new constructs:** `npc`, `quest`, `ability`, `dialogue`, `state_machine`, `achievement`, `talent_tree`
 
 ## 📚 Guides
 - **[Best Practices Guide](./docs/guides/best-practices.md)** — 10 Rules for Ergonomics & Performance (New!)
@@ -122,7 +212,8 @@ const result = parser.parse(`
 |--------|----------------|
 | **Interaction** | `@grabbable`, `@throwable`, `@pointable`, `@stretchable`, `@moldable`, `@haptic` |
 | **Humanoid/Avatar** | `@skeleton`, `@body`, `@face`, `@expressive`, `@hair`, `@clothing`, `@hands` |
-| **Spatial** | `@plane_detection`, `@mesh_detection`, `@anchor`, `@persistent_anchor`, `@geospatial`, `@occlusion` |
+| **Spatial Content** | `@gaussian_splat`, `@nerf`, `@volumetric_video`, `@photogrammetry` |
+| **Spatial Environment** | `@plane_detection`, `@mesh_detection`, `@anchor`, `@persistent_anchor` |
 | **Input Modality** | `@eye_tracking`, `@hand_tracking`, `@controller`, `@spatial_accessory` |
 | **Accessibility** | `@accessible`, `@alt_text`, `@spatial_audio_cue`, `@sonification`, `@subtitle` |
 | **Compute & GPU** | `@compute`, `@gpu_particle`, `@gpu_physics`, `@gpu_buffer` |

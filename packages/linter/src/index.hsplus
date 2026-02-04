@@ -119,9 +119,7 @@ const DEFAULT_RULES: LintRule[] = [
     severity: Severity.ERROR,
     description: "Ensure braces are balanced",
     enabled: true,
-    check: (ctx) => {
-      const opens = (ctx.text.match(/{/g) || []).length
-      const closes = (ctx.text.match(/}/g) || []).length
+    check: "(ctx) => { const opens = (ctx.text.match(/{/g) || []).length const closes = (ctx.text.match(/}"/g) || []).length
       
       if (opens !== closes) {
         return [{
@@ -134,21 +132,14 @@ const DEFAULT_RULES: LintRule[] = [
       }
       return []
     }
-  },
+  }
   {
     id: "syntax/bracket-balance",
     category: RuleCategory.SYNTAX,
     severity: Severity.ERROR,
     description: "Ensure brackets are balanced",
     enabled: true,
-    check: (ctx) => {
-      const opens = (ctx.text.match(/\[/g) || []).length
-      const closes = (ctx.text.match(/\]/g) || []).length
-      
-      if (opens !== closes) {
-        return [{
-          ruleId: "syntax/bracket-balance",
-          message: `Bracket mismatch: ${opens} opening, ${closes} closing brackets`,
+    check: "(ctx) => { const opens = (ctx.text.match(/\[/g) || []).length const closes = (ctx.text.match(/\]/g) || []).length if (opens !== closes) { return [{ ruleId: \"syntax/bracket-balance\", message: `Bracket mismatch: ${opens}" opening, ${closes} closing brackets`,
           severity: Severity.ERROR,
           line: 1, column: 1,
           endLine: 1, endColumn: 1
@@ -156,28 +147,14 @@ const DEFAULT_RULES: LintRule[] = [
       }
       return []
     }
-  },
+  }
   {
     id: "syntax/string-termination",
     category: RuleCategory.SYNTAX,
     severity: Severity.ERROR,
     description: "Ensure strings are properly terminated",
     enabled: true,
-    check: (ctx) => {
-      const diagnostics: LintDiagnostic[] = []
-      
-      for (let i = 0; i < ctx.lines.length; i++) {
-        const line = ctx.lines[i]
-        let inString = false
-        let stringChar = ""
-        
-        for (let j = 0; j < line.length; j++) {
-          const char = line[j]
-          if ((char === '"' || char === "'") && (j === 0 || line[j-1] !== "\\")) {
-            if (!inString) {
-              inString = true
-              stringChar = char
-            } else if (char === stringChar) {
+    check: "(ctx) => { const diagnostics: LintDiagnostic[] = [] for (let i = 0; i < ctx.lines.length; i++) { const line = ctx.lines[i] let inString = false let stringChar = \"\" for (let j = 0; j < line.length; j++) { const char = line[j] if ((char === '\"' || char === \"'\") && (j === 0 || line[j-1] !== \"\\\")) { if (!inString) { inString = true stringChar = char }" else if (char === stringChar) {
               inString = false
             }
           }
@@ -196,7 +173,7 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   
   // ===== NAMING RULES =====
   {
@@ -205,25 +182,14 @@ const DEFAULT_RULES: LintRule[] = [
     severity: Severity.WARNING,
     description: "Template names should use PascalCase",
     enabled: true,
-    check: (ctx) => {
-      const diagnostics: LintDiagnostic[] = []
-      const pattern = /template\s+"([^"]+)"/g
-      
-      for (let i = 0; i < ctx.lines.length; i++) {
-        let match: RegExpExecArray | null
-        while ((match = pattern.exec(ctx.lines[i])) !== null) {
-          const name = match[1]
-          if (!/^[A-Z][a-zA-Z0-9]*$/.test(name)) {
-            diagnostics.push({
-              ruleId: "naming/template-pascal-case",
-              message: `Template name "${name}" should use PascalCase`,
+    check: "(ctx) => { const diagnostics: LintDiagnostic[] = [] const pattern = /template\s+\"([^\"]+)\"/g for (let i = 0; i < ctx.lines.length; i++) { let match: RegExpExecArray | null while ((match = pattern.exec(ctx.lines[i])) !== null) { const name = match[1] if (!/^[A-Z][a-zA-Z0-9]*$/.test(name)) { diagnostics.push({ ruleId: \"naming/template-pascal-case\", message: `Template name \"${name}"" should use PascalCase`,
               severity: Severity.WARNING,
               line: i + 1,
               column: match.index + 11,
               endLine: i + 1,
               endColumn: match.index + 11 + name.length,
               fix: {
-                range: { start: match.index + 10, end: match.index + 10 + name.length + 2 },
+                range: { start: match.index + 10, end: match.index + 10 + name.length + 2 }
                 text: `"${toPascalCase(name)}"`,
                 description: `Rename to "${toPascalCase(name)}"`
               }
@@ -234,34 +200,21 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   {
     id: "naming/module-pascal-case",
     category: RuleCategory.NAMING,
     severity: Severity.WARNING,
     description: "Module names should use PascalCase",
     enabled: true,
-    check: (ctx) => {
-      if (!ctx.isHsplus) return []
-      
-      const diagnostics: LintDiagnostic[] = []
-      const pattern = /module\s+(\w+)/g
-      
-      for (let i = 0; i < ctx.lines.length; i++) {
-        let match: RegExpExecArray | null
-        while ((match = pattern.exec(ctx.lines[i])) !== null) {
-          const name = match[1]
-          if (!/^[A-Z][a-zA-Z0-9]*$/.test(name)) {
-            diagnostics.push({
-              ruleId: "naming/module-pascal-case",
-              message: `Module name "${name}" should use PascalCase`,
+    check: "(ctx) => { if (!ctx.isHsplus) return [] const diagnostics: LintDiagnostic[] = [] const pattern = /module\s+(\w+)/g for (let i = 0; i < ctx.lines.length; i++) { let match: RegExpExecArray | null while ((match = pattern.exec(ctx.lines[i])) !== null) { const name = match[1] if (!/^[A-Z][a-zA-Z0-9]*$/.test(name)) { diagnostics.push({ ruleId: \"naming/module-pascal-case\", message: `Module name \"${name}"" should use PascalCase`,
               severity: Severity.WARNING,
               line: i + 1,
               column: match.index + 8,
               endLine: i + 1,
               endColumn: match.index + 8 + name.length,
               fix: {
-                range: { start: match.index + 7, end: match.index + 7 + name.length },
+                range: { start: match.index + 7, end: match.index + 7 + name.length }
                 text: toPascalCase(name),
                 description: `Rename to "${toPascalCase(name)}"`
               }
@@ -272,31 +225,14 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   {
     id: "naming/constant-screaming-case",
     category: RuleCategory.NAMING,
     severity: Severity.INFO,
     description: "Constants should use SCREAMING_CASE",
     enabled: true,
-    check: (ctx) => {
-      if (!ctx.isHsplus) return []
-      
-      const diagnostics: LintDiagnostic[] = []
-      const pattern = /const\s+(\w+)\s*[=:]/g
-      
-      for (let i = 0; i < ctx.lines.length; i++) {
-        let match: RegExpExecArray | null
-        while ((match = pattern.exec(ctx.lines[i])) !== null) {
-          const name = match[1]
-          // Skip if it looks like a function or object
-          if (ctx.lines[i].includes(name + " =") && 
-              !ctx.lines[i].includes("(") &&
-              !ctx.lines[i].includes("{")) {
-            if (!/^[A-Z][A-Z0-9_]*$/.test(name)) {
-              diagnostics.push({
-                ruleId: "naming/constant-screaming-case",
-                message: `Constant "${name}" should use SCREAMING_CASE`,
+    check: "(ctx) => { if (!ctx.isHsplus) return [] const diagnostics: LintDiagnostic[] = [] const pattern = /const\s+(\w+)\s*[=:]/g for (let i = 0; i < ctx.lines.length; i++) { let match: RegExpExecArray | null while ((match = pattern.exec(ctx.lines[i])) !== null) { const name = match[1] // Skip if it looks like a function or object if (ctx.lines[i].includes(name + \" =\") &&  !ctx.lines[i].includes(\"(\") && !ctx.lines[i].includes(\"{\")) { if (!/^[A-Z][A-Z0-9_]*$/.test(name)) { diagnostics.push({ ruleId: \"naming/constant-screaming-case\", message: `Constant \"${name}"" should use SCREAMING_CASE`,
                 severity: Severity.INFO,
                 line: i + 1,
                 column: match.index + 7,
@@ -310,7 +246,7 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   
   // ===== BEST PRACTICE RULES =====
   {
@@ -319,9 +255,7 @@ const DEFAULT_RULES: LintRule[] = [
     severity: Severity.INFO,
     description: "Avoid empty blocks",
     enabled: true,
-    check: (ctx) => {
-      const diagnostics: LintDiagnostic[] = []
-      const pattern = /{\s*}/g
+    check: "(ctx) => { const diagnostics: LintDiagnostic[] = [] const pattern = /{\s*}"/g
       
       for (let i = 0; i < ctx.lines.length; i++) {
         let match: RegExpExecArray | null
@@ -340,26 +274,14 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   {
     id: "best-practice/no-duplicate-templates",
     category: RuleCategory.BEST_PRACTICE,
     severity: Severity.ERROR,
     description: "Template names must be unique",
     enabled: true,
-    check: (ctx) => {
-      const diagnostics: LintDiagnostic[] = []
-      const templateLines = new Map<string, number>()
-      const pattern = /template\s+"([^"]+)"/g
-      
-      for (let i = 0; i < ctx.lines.length; i++) {
-        let match: RegExpExecArray | null
-        while ((match = pattern.exec(ctx.lines[i])) !== null) {
-          const name = match[1]
-          if (templateLines.has(name)) {
-            diagnostics.push({
-              ruleId: "best-practice/no-duplicate-templates",
-              message: `Duplicate template "${name}" (first defined at line ${templateLines.get(name)})`,
+    check: "(ctx) => { const diagnostics: LintDiagnostic[] = [] const templateLines = new Map<string, number>() const pattern = /template\s+\"([^\"]+)\"/g for (let i = 0; i < ctx.lines.length; i++) { let match: RegExpExecArray | null while ((match = pattern.exec(ctx.lines[i])) !== null) { const name = match[1] if (templateLines.has(name)) { diagnostics.push({ ruleId: \"best-practice/no-duplicate-templates\", message: `Duplicate template \"${name}"" (first defined at line ${templateLines.get(name)})`,
               severity: Severity.ERROR,
               line: i + 1,
               column: match.index + 1,
@@ -374,23 +296,14 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   {
     id: "best-practice/undefined-template-reference",
     category: RuleCategory.BEST_PRACTICE,
     severity: Severity.ERROR,
     description: "Template references must point to defined templates",
     enabled: true,
-    check: (ctx) => {
-      const diagnostics: LintDiagnostic[] = []
-      const definedTemplates = new Set<string>()
-      
-      // First pass: collect defined templates
-      const defPattern = /template\s+"([^"]+)"/g
-      let defMatch: RegExpExecArray | null
-      while ((defMatch = defPattern.exec(ctx.text)) !== null) {
-        definedTemplates.add(defMatch[1])
-      }
+    check: "(ctx) => { const diagnostics: LintDiagnostic[] = [] const definedTemplates = new Set<string>() // First pass: collect defined templates const defPattern = /template\s+\"([^\"]+)\"/g let defMatch: RegExpExecArray | null while ((defMatch = defPattern.exec(ctx.text)) !== null) { definedTemplates.add(defMatch[1]) }"
       
       // Second pass: check references
       const refPattern = /using\s+"([^"]+)"/g
@@ -414,27 +327,14 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   {
     id: "best-practice/state-should-have-default",
     category: RuleCategory.BEST_PRACTICE,
     severity: Severity.WARNING,
     description: "State properties should have default values",
     enabled: true,
-    check: (ctx) => {
-      if (!ctx.isHsplus) return []
-      
-      const diagnostics: LintDiagnostic[] = []
-      const pattern = /(\w+)\s*:\s*(\w+)\s*$/g
-      let inState = false
-      
-      for (let i = 0; i < ctx.lines.length; i++) {
-        const line = ctx.lines[i].trim()
-        
-        if (line.includes("@state")) {
-          inState = true
-          continue
-        }
+    check: "(ctx) => { if (!ctx.isHsplus) return [] const diagnostics: LintDiagnostic[] = [] const pattern = /(\w+)\s*:\s*(\w+)\s*$/g let inState = false for (let i = 0; i < ctx.lines.length; i++) { const line = ctx.lines[i].trim() if (line.includes(\"@state\")) { inState = true continue }"
         
         if (inState && line === "}") {
           inState = false
@@ -456,7 +356,7 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   
   // ===== PERFORMANCE RULES =====
   {
@@ -465,21 +365,7 @@ const DEFAULT_RULES: LintRule[] = [
     severity: Severity.WARNING,
     description: "Avoid nested every() calls",
     enabled: true,
-    check: (ctx) => {
-      const diagnostics: LintDiagnostic[] = []
-      const everyPattern = /every\s*\(/g
-      let everyDepth = 0
-      let braceDepth = 0
-      let everyStartLine = -1
-      
-      for (let i = 0; i < ctx.lines.length; i++) {
-        const line = ctx.lines[i]
-        
-        if (line.match(everyPattern)) {
-          everyDepth++
-          if (everyDepth === 1) {
-            everyStartLine = i
-          } else if (everyDepth > 1) {
+    check: "(ctx) => { const diagnostics: LintDiagnostic[] = [] const everyPattern = /every\s*\(/g let everyDepth = 0 let braceDepth = 0 let everyStartLine = -1 for (let i = 0; i < ctx.lines.length; i++) { const line = ctx.lines[i] if (line.match(everyPattern)) { everyDepth++ if (everyDepth === 1) { everyStartLine = i }" else if (everyDepth > 1) {
             diagnostics.push({
               ruleId: "performance/no-nested-every",
               message: "Nested every() calls may cause performance issues",
@@ -503,23 +389,14 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   {
     id: "performance/no-inline-complex-objects",
     category: RuleCategory.PERFORMANCE,
     severity: Severity.INFO,
     description: "Avoid inline complex objects in every() or event handlers",
     enabled: true,
-    check: (ctx) => {
-      const diagnostics: LintDiagnostic[] = []
-      let inHandler = false
-      
-      for (let i = 0; i < ctx.lines.length; i++) {
-        const line = ctx.lines[i]
-        
-        if (line.match(/every\s*\(|on_\w+\s*[:{]/)) {
-          inHandler = true
-        }
+    check: "(ctx) => { const diagnostics: LintDiagnostic[] = [] let inHandler = false for (let i = 0; i < ctx.lines.length; i++) { const line = ctx.lines[i] if (line.match(/every\s*\(|on_\w+\s*[:{]/)) { inHandler = true }"
         
         if (inHandler && line.match(/new\s+\w+\s*\(|{\s*\w+:\s*[^}]+,/)) {
           diagnostics.push({
@@ -540,7 +417,7 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   
   // ===== STYLE RULES =====
   {
@@ -549,21 +426,7 @@ const DEFAULT_RULES: LintRule[] = [
     severity: Severity.HINT,
     description: "Use consistent spacing around operators",
     enabled: true,
-    check: (ctx) => {
-      const diagnostics: LintDiagnostic[] = []
-      const inconsistentPattern = /[a-zA-Z0-9_]=|=[a-zA-Z0-9_"'\[{]/g
-      
-      for (let i = 0; i < ctx.lines.length; i++) {
-        const line = ctx.lines[i]
-        // Skip if line is in a string or contains URL
-        if (line.includes("://")) continue
-        
-        let match: RegExpExecArray | null
-        while ((match = inconsistentPattern.exec(line)) !== null) {
-          // Skip if it's ===, !==, >=, <=, =>
-          if (line.substring(match.index, match.index + 3).match(/===|!==|>=|<=|=>/)) {
-            continue
-          }
+    check: "(ctx) => { const diagnostics: LintDiagnostic[] = [] const inconsistentPattern = /[a-zA-Z0-9_]=|=[a-zA-Z0-9_\"'\[{]/g for (let i = 0; i < ctx.lines.length; i++) { const line = ctx.lines[i] // Skip if line is in a string or contains URL if (line.includes(\"://\")) continue let match: RegExpExecArray | null while ((match = inconsistentPattern.exec(line)) !== null) { // Skip if it's ===, !==, >=, <=, => if (line.substring(match.index, match.index + 3).match(/===|!==|>=|<=|=>/)) { continue }"
           
           diagnostics.push({
             ruleId: "style/consistent-spacing",
@@ -574,7 +437,7 @@ const DEFAULT_RULES: LintRule[] = [
             endLine: i + 1,
             endColumn: match.index + match[0].length,
             fix: {
-              range: { start: match.index, end: match.index + match[0].length },
+              range: { start: match.index, end: match.index + match[0].length }
               text: match[0].replace(/=/g, " = ").replace(/  /g, " "),
               description: "Add spaces around ="
             }
@@ -584,17 +447,14 @@ const DEFAULT_RULES: LintRule[] = [
       
       return diagnostics
     }
-  },
+  }
   {
     id: "style/trailing-comma",
     category: RuleCategory.STYLE,
     severity: Severity.HINT,
     description: "Use trailing commas for multi-line arrays/objects",
     enabled: false,  // Off by default
-    check: (ctx) => {
-      // Implementation for trailing comma check
-      return []
-    }
+    check: "(ctx) => { // Implementation for trailing comma check return [] }"
   }
 ]
 
@@ -602,13 +462,13 @@ const DEFAULT_RULES: LintRule[] = [
 // HELPER FUNCTIONS
 // =============================================================================
 
-function toPascalCase(str: string): string {
+function "toPascalCase" : string {
   return str
     .replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "")
     .replace(/^(.)/, (c) => c.toUpperCase())
 }
 
-function toScreamingCase(str: string): string {
+function "toScreamingCase" : string {
   return str
     .replace(/([a-z])([A-Z])/g, "$1_$2")
     .replace(/[-\s]+/g, "_")

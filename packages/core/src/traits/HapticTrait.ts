@@ -11,7 +11,7 @@
  */
 
 import type { Vector3 } from '../types';
-import type { TraitHandler, TraitContext } from './VRTraitSystem';
+import type { TraitHandler, TraitContext } from './TraitTypes';
 
 // =============================================================================
 // TYPES
@@ -104,7 +104,7 @@ export const hapticHandler: TraitHandler<HapticTrait> = {
     duration: 100,
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, config, _context) {
     const state: HapticState = {
       isPlaying: false,
       currentPattern: null,
@@ -124,16 +124,16 @@ export const hapticHandler: TraitHandler<HapticTrait> = {
     if (!state) return;
 
     // Handle proximity haptics
-    if (config.proximity_enabled) {
-      const nodePos = (node.properties.position as Vector3) || [0, 0, 0];
+    if (config.proximity_enabled && node.properties) {
+      const pos = (node.properties as any).position || [0, 0, 0];
       const dominantHand = context.vr.getDominantHand();
       
       if (dominantHand) {
         const handPos = dominantHand.position;
         const distance = Math.sqrt(
-          Math.pow(handPos[0] - nodePos[0], 2) +
-          Math.pow(handPos[1] - nodePos[1], 2) +
-          Math.pow(handPos[2] - nodePos[2], 2)
+          Math.pow((handPos as any)[0] - (pos as any)[0], 2) +
+          Math.pow((handPos as any)[1] - (pos as any)[1], 2) +
+          Math.pow((handPos as any)[2] - (pos as any)[2], 2)
         );
 
         const maxDist = config.proximity_distance * context.getScaleMultiplier();
@@ -195,7 +195,7 @@ export const hapticHandler: TraitHandler<HapticTrait> = {
     }
 
     // Handle grab haptics
-    if (event.type === 'grab_start') {
+    if ((event as any).type === 'grab_start') {
       pulseHands(config.hands, config.intensity * 0.7, context, 50);
     }
 
@@ -238,7 +238,7 @@ function pulseHands(
     case 'dominant':
       const dominant = context.vr.getDominantHand();
       if (dominant) {
-        context.haptics.pulse(dominant.id as 'left' | 'right', clampedIntensity, duration);
+        context.haptics.pulse((dominant as any).id as 'left' | 'right', clampedIntensity, duration);
       }
       break;
     case 'both':

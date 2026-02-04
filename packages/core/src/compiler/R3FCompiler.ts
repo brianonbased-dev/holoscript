@@ -102,8 +102,87 @@ export const ENVIRONMENT_PRESETS: Record<string, any> = {
 // Geometry types that compile to <mesh> with a specific child geometry
 const MESH_TYPES = new Set([
   'orb', 'sphere', 'cube', 'box', 'cylinder', 'pyramid', 'cone',
-  'plane', 'torus', 'ring', 'capsule', 'object',
+  'plane', 'torus', 'ring', 'capsule', 'object', 'avatar', 'dna',
+  'gaussian_splat', 'splat', 'nerf', 'volumetric_video',
 ]);
+
+/**
+ * UI Component presets for @react-three/uikit mapping.
+ * Maps HoloScript UI components to uikit component configurations.
+ */
+export const UI_COMPONENT_PRESETS: Record<string, { component: string; defaultProps: Record<string, any> }> = {
+  'UIPanel': {
+    component: 'Container',  // @react-three/uikit Container
+    defaultProps: {
+      flexDirection: 'column',
+      padding: 16,
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      borderRadius: 8,
+    },
+  },
+  'UIText': {
+    component: 'Text',  // @react-three/uikit Text
+    defaultProps: {
+      fontSize: 16,
+      color: 'white',
+    },
+  },
+  'UIButton': {
+    component: 'Button',  // Custom button using Container with hover
+    defaultProps: {
+      padding: 12,
+      paddingX: 24,
+      backgroundColor: '#4a90d9',
+      borderRadius: 4,
+      cursor: 'pointer',
+    },
+  },
+  'UISlider': {
+    component: 'Slider',  // Custom slider implementation
+    defaultProps: {
+      width: 200,
+      height: 20,
+      trackColor: '#333',
+      fillColor: '#4a90d9',
+      thumbSize: 16,
+    },
+  },
+  'UIInput': {
+    component: 'Input',  // @react-three/uikit Input
+    defaultProps: {
+      width: 200,
+      padding: 8,
+      backgroundColor: '#222',
+      borderColor: '#444',
+      borderWidth: 1,
+      borderRadius: 4,
+      color: 'white',
+    },
+  },
+  'UIImage': {
+    component: 'Image',  // @react-three/uikit Image
+    defaultProps: {
+      objectFit: 'contain',
+    },
+  },
+  'UIChart': {
+    component: 'Chart',  // Custom chart component
+    defaultProps: {
+      width: 300,
+      height: 200,
+      backgroundColor: '#1a1a2e',
+    },
+  },
+  'UIGauge': {
+    component: 'Gauge',  // Custom gauge component
+    defaultProps: {
+      size: 100,
+      strokeWidth: 8,
+      trackColor: '#333',
+      fillColor: '#4a90d9',
+    },
+  },
+};
 
 /**
  * R3FCompiler
@@ -147,7 +226,7 @@ export class R3FCompiler {
     if (node.directives) {
       for (const directive of node.directives) {
         if (directive.type === 'trait') {
-          r3fNode.traits?.set(directive.name, directive.config);
+          r3fNode.traits?.set(directive.name as any, directive.config);
         }
       }
     }
@@ -158,7 +237,7 @@ export class R3FCompiler {
     }
 
     if (enhanced.children && Array.isArray(enhanced.children)) {
-      r3fNode.children = enhanced.children.map((child: ASTNode) => this.compileNode(child));
+      r3fNode.children = enhanced.children.map((child: any) => this.compileNode(child as ASTNode));
     }
 
     return r3fNode;
@@ -963,12 +1042,22 @@ export class R3FCompiler {
       'spatial_container': 'group',
       'ui_panel': 'UIPanel',
       'ui_text': 'UIText',
+      'ui_button': 'UIButton',
+      'ui_slider': 'UISlider',
+      'ui_input': 'UIInput',
+      'ui_image': 'UIImage',
       'ui_chart': 'UIChart',
       'ui_gauge': 'UIGauge',
       'ui_value': 'UIValue',
       'ui_status_indicator': 'UIStatusIndicator',
       'tool_slot': 'ToolSlot',
       'behavior': 'group',
+      'avatar': 'Avatar',
+      'dna': 'DNA',
+      'gaussian_splat': 'GaussianSplat',
+      'splat': 'GaussianSplat',
+      'nerf': 'NeRF',
+      'volumetric_video': 'VolumetricVideo',
     };
     return mapping[type] || type;
   }
@@ -1029,6 +1118,11 @@ export class R3FCompiler {
           else if (d.name === 'stt' as any) { props.stt = d.config || true; }
           else if (d.name === 'tts' as any) { props.tts = d.config || true; }
           else if (d.name === 'generate' as any) { props.generate = d.config; }
+          else if (d.name === 'skeleton') { props.skeleton = d.config || true; }
+          else if (d.name === 'body') { props.body = d.config || true; }
+          else if (d.name === 'gaussian_splat') { props.gaussianSplat = d.config || true; }
+          else if (d.name === 'nerf') { props.nerf = d.config || true; }
+          else if (d.name === 'volumetric_video') { props.volumetricVideo = d.config || true; }
         }
       }
     }

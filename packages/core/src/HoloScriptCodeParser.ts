@@ -33,8 +33,11 @@ import type {
   FocusNode,
   EnvironmentNode,
   TemplateNode,
+  MigrationNode,
   HoloScriptValue,
   HSPlusDirective,
+  ZoneNode,
+  HologramShape,
 } from './types';
 type CompositionNode = any;
 type TransformationNode = any;
@@ -249,7 +252,7 @@ export class HoloScriptCodeParser {
       'try', 'catch', 'finally', 'throw',
       'const', 'let', 'var',
       'animate', 'modify', 'pulse', 'move', 'show', 'hide',
-      'scale', 'focus', 'environment', 'composition', 'template', 'settings', 'chat',
+      'scale', 'focus', 'environment', 'composition', 'template', 'settings', 'chat', 'migrate',
       // Shape keywords for 3D objects
       'cube', 'sphere', 'plane', 'cylinder', 'cone', 'torus', 'pyramid',
       'box', 'mesh', 'model', 'object', 'light', 'camera',
@@ -577,6 +580,7 @@ export class HoloScriptCodeParser {
       column++;
     }
 
+    console.log(`[HoloScriptCodeParser] Tokenization complete. Tokens: ${tokens.length}`);
     return tokens;
   }
 
@@ -704,10 +708,28 @@ export class HoloScriptCodeParser {
           return this.parseComposition();
         case 'template':
           return this.parseTemplate();
+        case 'migrate':
+          return this.parseMigration();
         case 'settings':
           return this.parseSettings();
         case 'chat':
           return this.parseChat();
+        // Primitive 3D shapes (Phase 55)
+        case 'cube':
+        case 'sphere':
+        case 'plane':
+        case 'cylinder':
+        case 'cone':
+        case 'torus':
+        case 'pyramid':
+        case 'box':
+        case 'mesh':
+        case 'model':
+        case 'light':
+        case 'camera':
+          return this.parsePrimitive();
+        case 'zone':
+          return this.parseZone();
         default:
           return this.parseExpressionStatement();
       }
@@ -987,6 +1009,10 @@ export class HoloScriptCodeParser {
       } else if (valueToken?.type === 'number') {
         result.value = parseFloat(valueToken.value);
         this.advance();
+      } else if (this.check('punctuation', '[')) {
+        result.value = this.parseArray() as HoloScriptValue;
+      } else if (this.check('punctuation', '{')) {
+        result.value = this.parseObject() as HoloScriptValue;
       } else if (valueToken?.type === 'identifier') {
         if (valueToken.value === 'true') {
           result.value = true;
@@ -994,10 +1020,6 @@ export class HoloScriptCodeParser {
         } else if (valueToken.value === 'false') {
           result.value = false;
           this.advance();
-        } else if (this.check('punctuation', '[')) {
-          result.value = this.parseArray() as HoloScriptValue;
-        } else if (this.check('punctuation', '{')) {
-          result.value = this.parseObject() as HoloScriptValue;
         } else {
           // It's an expression (assignment from variable or call)
           let expression = '';
@@ -1050,6 +1072,11 @@ export class HoloScriptCodeParser {
         this.skipNewlines();
         if (this.check('punctuation', '}')) break;
 
+        if (this.check('punctuation', ',') || this.check('punctuation', ';')) {
+          this.advance();
+          continue;
+        }
+
         const token = this.currentToken();
         if (token?.type === 'punctuation' && token.value === '@') {
           const directive = this.parseDirective();
@@ -1068,6 +1095,9 @@ export class HoloScriptCodeParser {
             } else {
               properties[prop.key] = prop.value;
             }
+          } else {
+            // Fix: Advance if parseProperty failed to consume anything
+            this.advance();
           }
         }
 
@@ -1083,8 +1113,9 @@ export class HoloScriptCodeParser {
       position: position || { x: 0, y: 0, z: 0 },
       hologram: hologram || { shape: 'orb', color: '#00ffff', size: 0.5, glow: true, interactive: true },
       properties,
-      directives: directives,
+      directives: directives as any,
       methods: [],
+      children: [],
       line: startToken?.line || 0,
     };
   }
@@ -1100,7 +1131,13 @@ export class HoloScriptCodeParser {
     // Handle @state { ... }
     if (name === 'state') {
       const body = this.parseObject() as Record<string, HoloScriptValue>;
-      return { type: 'state', body };
+      return { type: 'state', body } as any;
+    }
+
+    // Handle @bindings { ... }
+    if (name === 'bindings') {
+      const bindings = this.parseBindingsBlock();
+      return { type: 'bindings', bindings } as any;
     }
 
     // Handle @on_... hooks
@@ -1113,14 +1150,17 @@ export class HoloScriptCodeParser {
           const t = this.advance()!;
           if (t.value === '{') braceDepth++;
           if (t.value === '}') braceDepth--;
-          if (braceDepth > 0) body += t.value + ' ';
+          if (braceDepth > 0) {
+            const val = t.type === 'string' ? JSON.stringify(t.value) : t.value;
+            body += val + ' ';
+          }
           else if (braceDepth < 0) break; // Should not happen with valid syntax
         }
       } else {
         const t = this.advance();
         if (t) body = t.value;
       }
-      return { type: 'lifecycle', hook: name as any, body };
+      return { type: 'lifecycle', hook: name as any, body } as any;
     }
 
     // Default: handle as trait
@@ -1141,7 +1181,72 @@ export class HoloScriptCodeParser {
       config = this.parseObject() as Record<string, HoloScriptValue>;
     }
 
-    return { type: 'trait', name: name as any, config };
+    return { type: 'trait', name: name as any, config } as any;
+  }
+
+  /**
+   * Parse @bindings { bind(expr) -> target.prop, ... }
+   */
+  private parseBindingsBlock(): Array<{ expression: string; target: string; property: string }> {
+    const bindings: Array<{ expression: string; target: string; property: string }> = [];
+
+    if (!this.check('punctuation', '{')) {
+      return bindings;
+    }
+    this.advance(); // {
+
+    while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+      this.skipNewlines();
+
+      // Expect 'bind' keyword
+      if (this.check('identifier') && this.currentToken()?.value === 'bind') {
+        this.advance(); // bind
+
+        // Parse expression in parentheses
+        let expression = '';
+        if (this.check('punctuation', '(')) {
+          this.advance(); // (
+          let parenDepth = 1;
+          while (parenDepth > 0 && this.position < this.tokens.length) {
+            const t = this.advance()!;
+            if (t.value === '(') parenDepth++;
+            if (t.value === ')') parenDepth--;
+            if (parenDepth > 0) {
+              expression += t.value + ' ';
+            }
+          }
+          expression = expression.trim();
+        }
+
+        // Expect '->' arrow
+        if (this.check('punctuation', '-')) {
+          this.advance(); // -
+          if (this.check('punctuation', '>')) {
+            this.advance(); // >
+          }
+        }
+
+        // Parse target.property
+        const target = this.expectIdentifier() || '';
+        let property = '';
+        if (this.check('punctuation', '.')) {
+          this.advance(); // .
+          property = this.expectIdentifier() || '';
+        }
+
+        if (expression && target && property) {
+          bindings.push({ expression, target, property });
+        }
+      } else {
+        // Skip unknown token
+        this.advance();
+      }
+
+      this.skipNewlines();
+    }
+
+    this.expect('punctuation', '}');
+    return bindings;
   }
 
   /**
@@ -1309,23 +1414,200 @@ export class HoloScriptCodeParser {
 
   /**
    * Parse environment declaration
+   * Supports: environment { ... } or environment #id { ... }
    */
   private parseEnvironment(): EnvironmentNode | null {
     this.expect('keyword', 'environment');
     const settings: Record<string, HoloScriptValue> = {};
-    
-    // Parse settings until newline or }
-    while (this.position < this.tokens.length && 
-           this.currentToken()?.type !== 'newline' && 
-           !this.check('punctuation', '}')) {
-      const key = this.expectIdentifier();
-      if (!key) break;
-      settings[key] = this.parseLiteral() as HoloScriptValue;
+    let envId: string | undefined;
+
+    // Check for #id syntax: environment #mainEnv { ... }
+    if (this.check('punctuation', '#')) {
+      this.advance(); // consume #
+      envId = this.expectIdentifier() || undefined;
+    }
+
+    // Parse settings block { ... }
+    if (this.check('punctuation', '{')) {
+      this.advance(); // consume {
+
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+        this.skipNewlines();
+        if (this.check('punctuation', '}')) break;
+
+        // Handle @directive syntax
+        if (this.check('punctuation', '@')) {
+          const directive = this.parseDirective();
+          if (directive) {
+            settings[`@${directive.type}`] = directive.args as HoloScriptValue;
+          }
+          continue;
+        }
+
+        const prop = this.parseProperty();
+        if (prop) {
+          settings[prop.key] = prop.value;
+        }
+        this.skipNewlines();
+      }
+
+      this.expect('punctuation', '}');
+    } else {
+      // Legacy inline syntax: environment key value
+      while (this.position < this.tokens.length &&
+             this.currentToken()?.type !== 'newline' &&
+             !this.check('punctuation', '}')) {
+        const key = this.expectIdentifier();
+        if (!key) break;
+        settings[key] = this.parseLiteral() as HoloScriptValue;
+      }
+    }
+
+    if (envId) {
+      settings['id'] = envId;
     }
 
     return {
       type: 'environment',
       settings
+    };
+  }
+
+  /**
+   * Parse primitive 3D shape declaration
+   * Supports: cylinder #id { ... }, sphere "name" { ... }, etc.
+   */
+  private parsePrimitive(): OrbNode | null {
+    const startToken = this.currentToken();
+    const primitiveType = startToken?.value || 'object';
+    this.advance(); // consume the primitive keyword
+
+    let name = '';
+    let elementId: string | undefined;
+
+    // Check for #id syntax: cylinder #platform { ... }
+    if (this.check('punctuation', '#')) {
+      this.advance(); // consume #
+      elementId = this.expectIdentifier() || undefined;
+      name = elementId || `${primitiveType}_${Date.now()}`;
+    } else {
+      // Check for string name: sphere "Ball" { ... }
+      name = this.expectName() || `${primitiveType}_${Date.now()}`;
+    }
+
+    const properties: Record<string, HoloScriptValue> = {};
+    const directives: HSPlusDirective[] = [];
+    let position: SpatialPosition | undefined;
+
+    // Parse properties block { ... }
+    if (this.check('punctuation', '{')) {
+      this.advance(); // consume {
+
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+        this.skipNewlines();
+        if (this.check('punctuation', '}')) break;
+
+        if (this.check('punctuation', ',') || this.check('punctuation', ';')) {
+          this.advance();
+          continue;
+        }
+
+        const token = this.currentToken();
+        if (token?.type === 'punctuation' && token.value === '@') {
+          const directive = this.parseDirective();
+          if (directive) directives.push(directive);
+        } else {
+          const prop = this.parseProperty();
+          if (prop) {
+            if (prop.key === 'position' || prop.key === 'at') {
+              position = this.parsePosition(prop.value);
+            } else {
+              properties[prop.key] = prop.value;
+            }
+          } else {
+            this.advance(); // skip unrecognized token
+          }
+        }
+
+        this.skipNewlines();
+      }
+
+      this.expect('punctuation', '}');
+    }
+
+    // Store primitive type in properties
+    properties['_primitiveType'] = primitiveType;
+    if (elementId) {
+      properties['id'] = elementId;
+    }
+
+    return {
+      type: 'orb',
+      name,
+      position: position || { x: 0, y: 0, z: 0 },
+      hologram: { shape: primitiveType as HologramShape, color: '#00d4ff', size: 1, glow: false, interactive: true },
+      properties,
+      directives: directives as any,
+      methods: [],
+      children: [],
+      line: startToken?.line || 0,
+    };
+  }
+
+  /**
+   * Parse zone declaration: zone "Name" { ... } or zone #id { ... }
+   */
+  private parseZone(): ZoneNode | null {
+    this.expect('keyword', 'zone');
+    
+    let name = '';
+    let zoneId: string | undefined;
+
+    if (this.check('punctuation', '#')) {
+      this.advance();
+      zoneId = this.expectIdentifier() || undefined;
+      name = zoneId || `zone_${Date.now()}`;
+    } else {
+      name = this.expectName() || `zone_${Date.now()}`;
+    }
+
+    const properties: Record<string, HoloScriptValue> = {};
+    let position: SpatialPosition | undefined;
+
+    if (this.check('punctuation', '{')) {
+      this.advance();
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+        this.skipNewlines();
+        if (this.check('punctuation', '}')) break;
+        
+        const prop = this.parseProperty();
+        if (prop) {
+          if (prop.key === 'position') {
+            position = this.parsePosition(prop.value);
+            // Also store in properties
+            properties['position'] = prop.value;
+          } else {
+            properties[prop.key] = prop.value;
+          }
+        } else {
+             // Fix: Advance if parseProperty failed to consume anything
+             const token = this.currentToken();
+             this.addError(this.createError('HS004', `Unexpected token in zone: ${token?.type || 'unknown'}`, token));
+             this.advance();
+        }
+        
+        this.skipNewlines();
+      }
+      this.expect('punctuation', '}');
+    }
+
+    return {
+      type: 'zone',
+      name,
+      id: zoneId,
+      position,
+      events: {}, // Events are stored in properties for now
+      properties
     };
   }
 
@@ -1362,6 +1644,7 @@ export class HoloScriptCodeParser {
     this.expect('keyword', 'template');
     const name = this.expectName() || 'template';
     
+    let version: number | undefined;
     const params: string[] = [];
     if (this.check('punctuation', '(')) {
       this.advance();
@@ -1373,14 +1656,45 @@ export class HoloScriptCodeParser {
       this.expect('punctuation', ')');
     }
 
-    const body: ASTNode[] = [];
+    const children: ASTNode[] = [];
+    const migrations: MigrationNode[] = [];
+
     if (this.check('punctuation', '{')) {
       this.advance();
       while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
         this.skipNewlines();
+        
+        // Check for @version(n)
+        const token = this.currentToken();
+        if (token?.type === 'punctuation' && token.value === '@') {
+          this.advance(); // @
+          const dir = this.expectIdentifier();
+          if (dir === 'version') {
+            this.expect('punctuation', '(');
+            const vStr = this.currentToken();
+            if (vStr?.type === 'number') {
+              version = parseInt(vStr.value, 10);
+              this.advance();
+            }
+            this.expect('punctuation', ')');
+            this.skipNewlines();
+            continue;
+          } else {
+            // Handle other directives (if any)
+            this.position--; // Backtrack @
+          }
+        }
+
         const node = this.parseDeclaration();
-        if (node) body.push(node);
+        if (node) {
+          if (node.type === 'migration') {
+            migrations.push(node as MigrationNode);
+          } else {
+            children.push(node);
+          }
+        }
         this.skipNewlines();
+        console.log(`[Parser] Template "${name}" item parsed, current position: ${this.position}/${this.tokens.length}`);
       }
       this.expect('punctuation', '}');
     }
@@ -1389,7 +1703,51 @@ export class HoloScriptCodeParser {
       type: 'template',
       name,
       parameters: params,
-      body
+      children,
+      version,
+      migrations
+    };
+  }
+
+  /**
+   * Parse migration block: migrate from(n) { body }
+   */
+  private parseMigration(): MigrationNode | null {
+    this.expect('keyword', 'migrate');
+    this.expect('keyword', 'from');
+    this.expect('punctuation', '(');
+    
+    let fromVersion = 0;
+    const vStr = this.currentToken();
+    if (vStr?.type === 'number') {
+      fromVersion = parseInt(vStr.value, 10);
+      this.advance();
+    }
+    this.expect('punctuation', ')');
+
+    let body = '';
+    if (this.check('punctuation', '{')) {
+      this.advance(); // {
+      let braceDepth = 1;
+      const startPos = this.position;
+      
+      while (braceDepth > 0 && this.position < this.tokens.length) {
+        const t = this.advance()!;
+        if (t.value === '{') braceDepth++;
+        if (t.value === '}') braceDepth--;
+        if (braceDepth > 0) {
+          const val = t.type === 'string' ? JSON.stringify(t.value) : t.value;
+          body += val + ' ';
+        }
+      }
+      // Note: closing } is consumed
+    }
+
+    return {
+      type: 'migration',
+      fromVersion,
+      body: body.trim(),
+      position: { x: 0, y: 0, z: 0 }
     };
   }
 

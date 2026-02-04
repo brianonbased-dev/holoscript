@@ -211,7 +211,9 @@ export interface GraphicsConfiguration {
 
 export interface EnhancedOrbNode extends OrbNode {
   graphics?: GraphicsConfiguration;
-  traits?: AnyTraitAnnotation[];
+  traits?: any;
+  eventHandlers?: Map<string, string>;
+  isCompanion?: boolean;
 }
 
 // ============================================================================
@@ -231,7 +233,7 @@ export class HoloScriptPlusParser {
   parse(code: string): ASTNode[] {
     // First, parse with base parser
     const baseResult = this.baseParser.parse(code);
-    const ast = (Array.isArray(baseResult) ? baseResult : [baseResult]) as ASTNode[];
+    const ast = baseResult.ast as ASTNode[];
 
     // Then enhance with trait annotations
     return this.enhanceWithTraits(ast, code);

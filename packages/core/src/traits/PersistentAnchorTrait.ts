@@ -6,7 +6,7 @@
  * @version 1.0.0
  */
 
-import type { TraitHandler } from './VRTraitSystem';
+import type { TraitHandler } from './TraitTypes';
 
 // =============================================================================
 // TYPES

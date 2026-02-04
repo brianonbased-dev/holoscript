@@ -43,7 +43,7 @@
 /**
  * Lip sync analysis method
  */
-export type LipSyncMethod = 'fft' | 'timestamps' | 'external' | 'audio2face';
+export type LipSyncMethod = 'fft' | 'timestamps' | 'external' | 'audio2face' | 'phoneme';
 
 /**
  * Standard blend shape sets
@@ -88,6 +88,23 @@ export interface VisemeTimestamp {
 }
 
 /**
+ * Phoneme timestamp with duration
+ */
+export interface PhonemeTimestamp {
+  /** Phoneme identifier (IPA or ARPAbet) */
+  phoneme: string;
+  
+  /** Start time in seconds from audio start */
+  time: number;
+  
+  /** Duration in seconds */
+  duration: number;
+  
+  /** Intensity (0-1) */
+  weight?: number;
+}
+
+/**
  * FFT frequency band configuration
  */
 export interface FrequencyBand {
@@ -119,6 +136,9 @@ export interface LipSyncSession {
 
   /** Viseme timestamp data (for timestamp method) */
   visemeData?: VisemeTimestamp[];
+
+  /** Phoneme timestamp data (for phoneme method) */
+  phonemeData?: PhonemeTimestamp[];
 
   /** Current playback time */
   currentTime: number;
@@ -299,6 +319,9 @@ export class LipSyncTrait {
   private autoResetTimer: ReturnType<typeof setTimeout> | null = null;
   private isSpeaking: boolean = false;
   private sessionCounter: number = 0;
+  
+  // Phoneme tracking state
+  private currentPhonemeIndex: number = -1;
 
   // FFT analysis state
   private analyserNode: AnalyserNode | null = null;
@@ -386,6 +409,7 @@ export class LipSyncTrait {
   public startSession(options?: {
     audioSource?: unknown;
     visemeData?: VisemeTimestamp[];
+    phonemeData?: PhonemeTimestamp[];
   }): string {
     const id = `lipsync_${++this.sessionCounter}`;
 
@@ -393,6 +417,7 @@ export class LipSyncTrait {
       id,
       audioSource: options?.audioSource,
       visemeData: options?.visemeData,
+      phonemeData: options?.phonemeData,
       currentTime: 0,
       active: true,
       startedAt: Date.now(),
@@ -419,6 +444,7 @@ export class LipSyncTrait {
     this.activeSession.active = false;
     this.activeSession = null;
     this.isSpeaking = false;
+    this.currentPhonemeIndex = -1;
 
     // Reset to silence
     this.transitionToSilence();
@@ -464,7 +490,7 @@ export class LipSyncTrait {
       return {};
     }
 
-    this.analyserNode.getByteFrequencyData(this.frequencyData);
+    (this.analyserNode as any).getByteFrequencyData(this.frequencyData);
 
     const sampleRate = this.audioContext.sampleRate;
     const binCount = this.analyserNode.frequencyBinCount;
@@ -594,6 +620,106 @@ export class LipSyncTrait {
   }
 
   // ============================================================================
+  // Phoneme-Based Lip Sync
+  // ============================================================================
+
+  /**
+   * Set phoneme data (from SpeechRecognizer)
+   */
+  public setPhonemeData(data: PhonemeTimestamp[]): void {
+    if (this.activeSession) {
+      this.activeSession.phonemeData = data;
+      this.currentPhonemeIndex = -1;
+    }
+  }
+
+  /**
+   * Sample phoneme at a given time and map it to a viseme
+   */
+  public samplePhonemeAtTime(time: number, data?: PhonemeTimestamp[]): {
+    viseme: string;
+    weight: number;
+  } {
+    const phonemeData = data ?? this.activeSession?.phonemeData;
+    if (!phonemeData || phonemeData.length === 0) {
+      return { viseme: 'sil', weight: 0 };
+    }
+
+    // Binary search for the current phoneme
+    let low = 0;
+    let high = phonemeData.length - 1;
+    let foundIndex = -1;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const p = phonemeData[mid];
+      
+      if (time >= p.time && time < p.time + p.duration) {
+        foundIndex = mid;
+        break;
+      } else if (time < p.time) {
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    if (foundIndex === -1) {
+      return { viseme: 'sil', weight: 0 };
+    }
+
+    const current = phonemeData[foundIndex];
+    this.currentPhonemeIndex = foundIndex;
+
+    // TODO: Phase 16 - Implement phoneme-to-viseme mapping table
+    // For now, assume phoneme identifier matches viseme or use fallback
+    const viseme = this.mapPhonemeToViseme(current.phoneme);
+    
+    // Smooth blending within the phoneme duration
+    let weight = Math.min(current.weight ?? 1.0, this.config.maxWeight ?? 0.85);
+    const progress = (time - current.time) / current.duration;
+    
+    // Fade in/out slightly at boundaries (co-articulation)
+    if (progress < 0.1) {
+      weight *= (progress / 0.1);
+    } else if (progress > 0.9) {
+      weight *= ((1.0 - progress) / 0.1);
+    }
+
+    return {
+      viseme,
+      weight,
+    };
+  }
+
+  /**
+   * Map IPA/ARPAbet phoneme to Oculus viseme
+   */
+  private mapPhonemeToViseme(phoneme: string): string {
+    const p = phoneme.toLowerCase();
+    
+    // Core vowels
+    if (['aa', 'ah', 'ax'].includes(p)) return 'aa';
+    if (['ae', 'eh', 'ey'].includes(p)) return 'E';
+    if (['ih', 'iy'].includes(p)) return 'I';
+    if (['ao', 'ow', 'oy'].includes(p)) return 'O';
+    if (['uh', 'uw'].includes(p)) return 'U';
+    
+    // Consonants
+    if (['p', 'b', 'm'].includes(p)) return 'PP';
+    if (['f', 'v'].includes(p)) return 'FF';
+    if (['th', 'dh'].includes(p)) return 'TH';
+    if (['t', 'd', 'n'].includes(p)) return 'DD';
+    if (['k', 'g', 'ng', 'h'].includes(p)) return 'kk';
+    if (['ch', 'jh', 'sh', 'zh'].includes(p)) return 'CH';
+    if (['s', 'z'].includes(p)) return 'SS';
+    if (['r', 'er'].includes(p)) return 'RR';
+    if (['l', 'el'].includes(p)) return 'nn';
+    
+    return 'sil';
+  }
+
+  // ============================================================================
   // External Viseme Input
   // ============================================================================
 
@@ -653,6 +779,11 @@ export class LipSyncTrait {
     const lerpFactor = 1 - Math.pow(smoothing, deltaTime * 60);
     const result: Record<string, number> = {};
 
+    // Update session time first (Phase 16 fix)
+    if (this.activeSession?.active) {
+      this.activeSession.currentTime += deltaTime;
+    }
+
     if (this.config.method === 'fft' && this.activeSession?.active) {
       // FFT method: analyze audio and set targets
       const fftWeights = this.analyzeFFT();
@@ -675,6 +806,10 @@ export class LipSyncTrait {
       // Timestamp method: sample viseme at current time
       const sample = this.sampleVisemeAtTime(this.activeSession.currentTime);
       this.applyVisemeToTargets(sample.viseme, sample.weight);
+    } else if (this.config.method === 'phoneme' && this.activeSession?.active) {
+      // Phoneme method (Phase 16): Sample phoneme and map to viseme
+      const sample = this.samplePhonemeAtTime(this.activeSession.currentTime);
+      this.applyVisemeToTargets(sample.viseme, sample.weight);
     }
 
     // Smooth interpolation for all morph targets
@@ -689,11 +824,6 @@ export class LipSyncTrait {
       if (state.current > 0) {
         result[name] = state.current;
       }
-    }
-
-    // Update session time
-    if (this.activeSession?.active) {
-      this.activeSession.currentTime += deltaTime;
     }
 
     return result;

@@ -8,15 +8,18 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./path": {
       "types": "./dist/path.d.ts",
-      "import": "./dist/path.js"
+      "import": "./dist/path.js",
+      "default": "./dist/path.js"
     },
     "./watch": {
       "types": "./dist/watch.d.ts",
-      "import": "./dist/watch.js"
+      "import": "./dist/watch.js",
+      "default": "./dist/watch.js"
     }
   },
   "files": [

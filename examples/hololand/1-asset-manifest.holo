@@ -5,10 +5,10 @@ composition "Asset Gallery" {
   // Asset manifest declaration
   @manifest("gallery-assets") {
     assets: [
-      { id: "hero-model", path: "models/hero.glb", type: "model", tags: ["character", "player"] },
-      { id: "hero-texture", path: "textures/hero_diffuse.png", type: "texture", tags: ["character"] },
-      { id: "environment", path: "models/environment.glb", type: "model", tags: ["scene"] },
-      { id: "skybox-hdri", path: "textures/studio.hdr", type: "texture", tags: ["environment"] },
+      { id: "hero-model", path: "models/hero.glb", type: "model", tags: ["character", "player"] }
+      { id: "hero-texture", path: "textures/hero_diffuse.png", type: "texture", tags: ["character"] }
+      { id: "environment", path: "models/environment.glb", type: "model", tags: ["scene"] }
+      { id: "skybox-hdri", path: "textures/studio.hdr", type: "texture", tags: ["environment"] }
       { id: "footstep-audio", path: "audio/footsteps.mp3", type: "audio", tags: ["sfx", "character"] }
     ]
 
@@ -127,7 +127,7 @@ composition "Asset Gallery" {
       })
     }
 
-    function cycle_asset(direction) {
+    function "cycle_asset" {
       let assets = @manifest.get_assets("gallery-assets")
       let models = assets.filter(a => a.type == "model")
 

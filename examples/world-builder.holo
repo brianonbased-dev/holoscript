@@ -108,7 +108,7 @@ composition "World Builder Sandbox" {
   }
 
   logic {
-    function spawn_block(shape) {
+    function "spawn_block" {
       let block = spawn "BuildBlock" at SpawnPoint.position
       block.model = "primitives/${shape}.glb"
       block.base_color = random_color()

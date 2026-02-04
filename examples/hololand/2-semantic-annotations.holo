@@ -184,14 +184,14 @@ composition "Character Stats Demo" {
 
   logic {
     // Color mapping function for health
-    function health_to_color(health, max_health) {
+    function "health_to_color" {
       let ratio = health / max_health
       if (ratio > 0.5) return "#4ecdc4"      // Cyan - healthy
       if (ratio > 0.25) return "#ffe66d"     // Yellow - warning
       return "#ff6b6b"                         // Red - critical
     }
 
-    function take_damage(amount) {
+    function "take_damage" {
       @state.player_health = max(0, @state.player_health - amount)
       @state.damage_taken += amount
 
@@ -204,7 +204,7 @@ composition "Character Stats Demo" {
       }
     }
 
-    function heal(amount) {
+    function "heal" {
       if (!@state.is_alive) return
 
       @state.player_health = min(@state.player_max_health, @state.player_health + amount)
@@ -212,7 +212,7 @@ composition "Character Stats Demo" {
       play_sound("heal.wav")
     }
 
-    function use_energy(amount) {
+    function "use_energy" {
       if (@state.player_energy >= amount) {
         @state.player_energy -= amount
         spawn_particles("energy_burst", PlayerModel.position)
@@ -220,7 +220,7 @@ composition "Character Stats Demo" {
       }
     }
 
-    function respawn() {
+    function "respawn" {
       @state.player_health = @state.player_max_health
       @state.player_energy = @state.player_max_energy
       @state.is_alive = true

@@ -294,7 +294,7 @@ export class HoloScriptParser {
         glow: true,
         interactive: true,
       },
-    };
+    } as any;
   }
 
   private createStreamNode(name: string, params: string[], position?: SpatialPosition): StreamNode {
@@ -508,7 +508,7 @@ export class HoloScriptParser {
       type: 'template',
       name,
       parameters,
-      body: []
+      children: []
     }];
   }
 

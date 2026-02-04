@@ -2,13 +2,13 @@
 // Create an immersive virtual reality environment
 
 // Environment setup
-orb skybox {
+object "skybox" {
   type: "environment"
   texture: "sunset_sky.hdr"
   rotation: { x: 0, y: 45, z: 0 }
 }
 
-orb ground {
+object "ground" {
   type: "plane"
   size: { width: 100, depth: 100 }
   material: "grass"
@@ -16,7 +16,7 @@ orb ground {
 }
 
 // Lighting
-orb sunLight {
+object "sunLight" {
   type: "directional"
   color: "#fff5e6"
   intensity: 1.2
@@ -24,14 +24,14 @@ orb sunLight {
   castShadow: true
 }
 
-orb ambientLight {
+object "ambientLight" {
   type: "ambient"
   color: "#404080"
   intensity: 0.3
 }
 
 // Interactive objects
-orb interactiveOrb {
+object "interactiveOrb" {
   name: "DataOrb"
   color: "#00ffff"
   glow: true
@@ -42,7 +42,7 @@ orb interactiveOrb {
   onGrab: showDetails
 }
 
-orb controlPanel {
+object "controlPanel" {
   type: "panel"
   position: { x: -2, y: 1.2, z: -1 }
   rotation: { x: 0, y: 30, z: 0 }
@@ -71,7 +71,7 @@ slider volumeSlider {
 }
 
 // Spatial audio
-orb audioSource {
+object "audioSource" {
   type: "audio"
   source: "ambient_forest.mp3"
   position: { x: 5, y: 1, z: 5 }
@@ -81,7 +81,7 @@ orb audioSource {
 }
 
 // Animation and behavior
-function startExperience() {
+function "startExperience" {
   animate interactiveOrb with {
     property: "position.y"
     from: 1.5
@@ -96,23 +96,23 @@ function startExperience() {
   pulse interactiveOrb with duration 1000
 }
 
-function showDetails() {
+function "showDetails" {
   spawn infoPanel at interactiveOrb.position
   display "Data visualization loaded"
 }
 
-function updateVolume(value: number) {
+function "updateVolume" {
   set audioSource.volume to value / 100
 }
 
 // Teleportation system
 gate canTeleport {
-  condition: userPointing at ground
+  condition: "userPointing at ground"
   onTrue: showTeleportMarker
   onFalse: hideTeleportMarker
 }
 
-function showTeleportMarker() {
+function "showTeleportMarker" {
   show teleportIndicator at pointerPosition
   pulse teleportIndicator with color "#00ff00"
 }

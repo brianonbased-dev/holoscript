@@ -167,13 +167,13 @@ scene {
             min: 1,
             max: 5,
             labels: ["Poor", "Fair", "Good", "Great", "Amazing"]
-          },
+          }
           {
             id: "favorite_feature",
             type: "multiple_choice",
             text: "Which feature did you enjoy most?",
             options: ["Recording", "Effects", "Collaboration", "AI Narrator"]
-          },
+          }
           {
             id: "feedback",
             type: "voice",
@@ -198,10 +198,10 @@ scene {
       @abtest(
         experiment_id: "button_color_test",
         variants: {
-          A: { button_color: "#ff0000", button_size: 1.0 },
-          B: { button_color: "#00ff00", button_size: 1.2 },
+          A: { button_color: "#ff0000", button_size: 1.0 }
+          B: { button_color: "#00ff00", button_size: 1.2 }
           C: { button_color: "#0000ff", button_size: 0.8 }
-        },
+        }
         distribution: [0.33, 0.33, 0.34],
         metric: "click_rate"
       )
@@ -295,7 +295,7 @@ scene {
       scale: [2, 1.5, 0.1]
       @embeddable(
         allowed_domains: ["*"],
-        size: { width: 800, height: 600 },
+        size: { width: 800, height: 600 }
         interactive: true,
         autoplay: false,
         show_controls: true
@@ -351,9 +351,9 @@ scene {
         type: "confetti",
         rate: 50,
         lifetime: 3s,
-        velocity: { min: [−1, 2, −1], max: [1, 5, 1] },
+        velocity: { min: [−1, 2, −1], max: [1, 5, 1] }
         colors: ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"],
-        size: { start: 0.1, end: 0 },
+        size: { start: 0.1, end: 0 }
         gravity: -2,
         collision: true
       )
@@ -441,7 +441,7 @@ scene {
           "share to twitter": () => share_to_platform("twitter"),
           "add effect": () => trigger_random_effect(),
           "play music": () => play_spatial_audio("spatialSpeaker")
-        },
+        }
         continuous: true,
         language: "en-US",
         wake_word: "hey holo"
@@ -487,7 +487,7 @@ scene {
           on_idle_30s: "Need help? Just ask me anything about creating content!",
           on_first_recording: "Great job on your first recording! The export will be ready in moments.",
           on_share: "Awesome! Your content is going viral!"
-        },
+        }
         interruption_behavior: "pause_and_respond"
       )
       @responsive(
@@ -515,11 +515,11 @@ scene {
       position: [3, 0, 0]
       @procedural(
         algorithm: "l_system",
-        seed: ${Date.now()},
+        seed: ${Date.now()}
         rules: {
           axiom: "F",
           F: "F[+F]F[-F]F"
-        },
+        }
         iterations: 4,
         angle: 25,
         length: 0.3,
@@ -559,28 +559,28 @@ scene {
             type: "transform",
             target: "mainCamera",
             keyframes: [
-              { time: 0, position: [0, 2, -3], rotation: [15, 0, 0] },
-              { time: 10s, position: [5, 3, 0], rotation: [20, -45, 0] },
-              { time: 20s, position: [0, 5, 5], rotation: [45, 180, 0] },
+              { time: 0, position: [0, 2, -3], rotation: [15, 0, 0] }
+              { time: 10s, position: [5, 3, 0], rotation: [20, -45, 0] }
+              { time: 20s, position: [0, 5, 5], rotation: [45, 180, 0] }
               { time: 30s, position: [-5, 2, 0], rotation: [10, 90, 0] }
             ]
-          },
+          }
           {
             name: "Lighting",
             type: "property",
             target: "studioLight",
             keyframes: [
-              { time: 0, intensity: 1, color: "#ffffff" },
-              { time: 15s, intensity: 0.5, color: "#ff6b6b" },
+              { time: 0, intensity: 1, color: "#ffffff" }
+              { time: 15s, intensity: 0.5, color: "#ff6b6b" }
               { time: 30s, intensity: 1.5, color: "#6b6bff" }
             ]
-          },
+          }
           {
             name: "Effects",
             type: "event",
             keyframes: [
-              { time: 5s, event: "emit_particles", args: { type: "confetti" } },
-              { time: 15s, event: "play_sound", args: { src: "whoosh.wav" } },
+              { time: 5s, event: "emit_particles", args: { type: "confetti" } }
+              { time: 15s, event: "play_sound", args: { src: "whoosh.wav" } }
               { time: 25s, event: "trigger_transition", args: { type: "flash" } }
             ]
           }
@@ -602,10 +602,10 @@ scene {
         music_sync: "spatialSpeaker",
         bpm: 120,
         moves: [
-          { beat: 0, move: "idle" },
-          { beat: 4, move: "wave" },
-          { beat: 8, move: "spin" },
-          { beat: 12, move: "jump" },
+          { beat: 0, move: "idle" }
+          { beat: 4, move: "wave" }
+          { beat: 8, move: "spin" }
+          { beat: 12, move: "jump" }
           { beat: 16, move: "pose_1" }
         ],
         blend_time: 0.3s,

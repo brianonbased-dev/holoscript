@@ -7,6 +7,7 @@
 
 import { AssetMetadata } from './AssetMetadata';
 import { AssetRegistry, getAssetRegistry } from './AssetRegistry';
+import { resolveAssetAlias } from './AssetAliases';
 
 // ============================================================================
 // Loader Configuration
@@ -50,6 +51,9 @@ export interface LoaderConfig {
 
   /** Timeout in milliseconds */
   timeout: number;
+
+  /** Injectable model parser */
+  modelParser?: <T>(buffer: ArrayBuffer, metadata: AssetMetadata) => Promise<T>;
 }
 
 // ============================================================================
@@ -163,9 +167,14 @@ export class SmartAssetLoader {
   async load<T = unknown>(request: LoadRequest): Promise<LoadResult<T>> {
     const startTime = performance.now();
 
+    // Resolve asset name/alias
+    const assetKey = typeof request.asset === 'string' 
+      ? resolveAssetAlias(request.asset) 
+      : request.asset.id;
+
     // Resolve asset metadata
     const metadata = typeof request.asset === 'string'
-      ? this.registry.getAsset(request.asset) ?? this.registry.getAssetByPath(request.asset)
+      ? this.registry.getAsset(assetKey) ?? this.registry.getAssetByPath(assetKey)
       : request.asset;
 
     if (!metadata) {
@@ -371,6 +380,9 @@ export class SmartAssetLoader {
         return this.parseTexture(buffer, metadata) as T;
       case 'model':
       case 'scene':
+        if (this.config.modelParser) {
+          return this.config.modelParser<T>(buffer, metadata) as unknown as T;
+        }
         return buffer as T;
       case 'audio':
         return buffer as T;
@@ -614,6 +626,13 @@ export class SmartAssetLoader {
    */
   setQuality(quality: Quality): void {
     this.config.quality = quality;
+  }
+
+  /**
+   * Inject a model parser
+   */
+  setModelParser(parser: <T>(buffer: ArrayBuffer, metadata: AssetMetadata) => Promise<T>): void {
+    this.config.modelParser = parser;
   }
 }
 

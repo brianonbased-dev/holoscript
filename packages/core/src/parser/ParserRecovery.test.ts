@@ -86,4 +86,85 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
     expect(node.children!.length).toBeGreaterThan(0);
     expect(node.children![0].name).toBe('Child');
   });
+
+  it('Recovers from multiple consecutive property errors', () => {
+    const source = `
+    object "Test" {
+      prop1: ???
+      prop2: ***
+      prop3: 42
+    }`;
+    const result = parser.parse(source);
+
+    expect(result.success).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+    
+    const node = result.ast.children?.[0] || (result.ast.root as any);
+    
+    // Should still parse the valid property despite preceding errors
+    expect(node.properties.prop3).toBe(42);
+  });
+
+  it('Recovers from errors in deeply nested structures', () => {
+    const source = `
+    object "Outer" {
+      object "Middle" {
+        object "Inner" {
+          broken: &&&
+          working: true
+        }
+      }
+    }`;
+    const result = parser.parse(source);
+
+    expect(result.success).toBe(false);
+    
+    const outer = result.ast.children?.[0] || (result.ast.root as any);
+    const middle = outer.children?.[0];
+    const inner = middle?.children?.[0];
+    
+    expect(inner).toBeDefined();
+    expect(inner?.properties.working).toBe(true);
+  });
+
+  it('Recovers from errors in array/list values', () => {
+    const source = `
+    object "Test" {
+      items: [1, ???, 3]
+      color: "blue"
+    }`;
+    const result = parser.parse(source);
+
+    expect(result.success).toBe(false);
+    
+    const node = result.ast.children?.[0] || (result.ast.root as any);
+    
+    // Should still parse the valid property even though array had an error
+    expect(node.properties.color).toBe('blue');
+  });
+
+  it('Recovers from errors in property names (malformed identifiers)', () => {
+    const source = `
+    object "Test" {
+      123invalid: 10
+      validProp: 20
+    }`;
+    const result = parser.parse(source);
+
+    // This may or may not process the first line, but valid prop should parse
+    const node = result.ast.children?.[0] || (result.ast.root as any);
+    expect(node.properties.validProp).toBe(20);
+  });
+
+  it('Recovers from errors in mixed property and method syntax', () => {
+    const source = `
+    object "Test" {
+      invalid_method: ()
+      size: 5
+    }`;
+    const result = parser.parse(source);
+
+    const node = result.ast.children?.[0] || (result.ast.root as any);
+    expect(node.properties.size).toBe(5);
+  });
 });

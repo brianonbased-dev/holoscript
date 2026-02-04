@@ -98,7 +98,7 @@ composition "Battle Arena" {
       tags: ["safe", "spawn", "no-pvp"]
 
       triggers: [
-        { type: "enter", action: "disable_pvp", filter: "player" },
+        { type: "enter", action: "disable_pvp", filter: "player" }
         { type: "exit", action: "enable_pvp", filter: "player" }
       ]
 
@@ -119,7 +119,7 @@ composition "Battle Arena" {
       tags: ["pvp", "combat"]
 
       triggers: [
-        { type: "enter", action: "start_combat_music", filter: "player" },
+        { type: "enter", action: "start_combat_music", filter: "player" }
         { type: "stay", action: "tick_combat", cooldown: 1.0, filter: "player" }
       ]
     }
@@ -279,13 +279,13 @@ composition "Battle Arena" {
   }
 
   logic {
-    function format_time(seconds) {
+    function "format_time" {
       let mins = floor(seconds / 60)
       let secs = seconds % 60
       return "${mins}:${secs < 10 ? '0' : ''}${secs}"
     }
 
-    function spawn_powerup(type, position) {
+    function "spawn_powerup" {
       if (!@state.match_started) return
 
       let powerup = spawn "PowerUpItem" at [position.x, position.y + 1, position.z]
@@ -293,7 +293,7 @@ composition "Battle Arena" {
       powerup.color = get_powerup_color(type)
     }
 
-    function get_powerup_color(type) {
+    function "get_powerup_color" {
       match type {
         "health" => "#ff6b6b"
         "speed" => "#4ecdc4"
@@ -314,7 +314,7 @@ composition "Battle Arena" {
       }
     }
 
-    function end_match() {
+    function "end_match" {
       @state.match_started = false
       let winner = @state.team_a_score > @state.team_b_score ? "Team A" : "Team B"
       broadcast_message("Match Over! ${winner} wins!")

@@ -7,7 +7,7 @@
  * @version 2.0.0
  */
 
-import type { TraitHandler, TraitContext } from './VRTraitSystem';
+import type { TraitHandler, TraitContext } from './TraitTypes';
 import type { HSPlusNode, Vector3 } from '../types/HoloScriptPlus';
 
 // =============================================================================
@@ -286,7 +286,7 @@ export function applyFBXAxisConversion(
 ): Vector3 {
   // Convert from FBX coordinate system to HoloScript (Y-up, -Z forward)
   if (config.up_axis === 'z') {
-    return [position[0], position[2], -position[1]];
+    return [(position as any)[0], (position as any)[2], -(position as any)[1]];
   }
   return position;
 }

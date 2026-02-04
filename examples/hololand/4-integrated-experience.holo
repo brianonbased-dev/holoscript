@@ -57,26 +57,26 @@ composition "Virtual Art Gallery" {
   @manifest("gallery-manifest") {
     assets: [
       // Environment assets
-      { id: "gallery-hall", path: "models/gallery_hall.glb", type: "model", tags: ["environment", "main"] },
-      { id: "skybox-museum", path: "textures/museum_hdri.hdr", type: "texture", tags: ["environment"] },
+      { id: "gallery-hall", path: "models/gallery_hall.glb", type: "model", tags: ["environment", "main"] }
+      { id: "skybox-museum", path: "textures/museum_hdri.hdr", type: "texture", tags: ["environment"] }
 
       // Artwork assets
-      { id: "painting-starry", path: "textures/starry_night.jpg", type: "texture", tags: ["artwork", "painting"] },
-      { id: "painting-mona", path: "textures/mona_lisa.jpg", type: "texture", tags: ["artwork", "painting"] },
-      { id: "sculpture-thinker", path: "models/the_thinker.glb", type: "model", tags: ["artwork", "sculpture"] },
-      { id: "sculpture-david", path: "models/david.glb", type: "model", tags: ["artwork", "sculpture"] },
+      { id: "painting-starry", path: "textures/starry_night.jpg", type: "texture", tags: ["artwork", "painting"] }
+      { id: "painting-mona", path: "textures/mona_lisa.jpg", type: "texture", tags: ["artwork", "painting"] }
+      { id: "sculpture-thinker", path: "models/the_thinker.glb", type: "model", tags: ["artwork", "sculpture"] }
+      { id: "sculpture-david", path: "models/david.glb", type: "model", tags: ["artwork", "sculpture"] }
 
       // UI assets
-      { id: "info-panel-prefab", path: "prefabs/info_panel.glb", type: "model", tags: ["ui"] },
-      { id: "audio-guide", path: "audio/gallery_guide.mp3", type: "audio", tags: ["narration"] },
+      { id: "info-panel-prefab", path: "prefabs/info_panel.glb", type: "model", tags: ["ui"] }
+      { id: "audio-guide", path: "audio/gallery_guide.mp3", type: "audio", tags: ["narration"] }
 
       // Avatar assets
-      { id: "visitor-avatar", path: "models/visitor.glb", type: "model", tags: ["avatar", "character"] },
+      { id: "visitor-avatar", path: "models/visitor.glb", type: "model", tags: ["avatar", "character"] }
       { id: "guide-avatar", path: "models/ai_guide.glb", type: "model", tags: ["avatar", "npc"] }
     ]
 
     dependencies: [
-      { parent: "gallery-hall", children: ["skybox-museum"] },
+      { parent: "gallery-hall", children: ["skybox-museum"] }
       { parent: "visitor-avatar", children: ["info-panel-prefab"] }
     ]
 
@@ -97,11 +97,11 @@ composition "Virtual Art Gallery" {
     type: "artwork"
 
     schema: {
-      title: { type: "string", required: true },
-      artist: { type: "string", required: true },
-      year: { type: "number" },
-      description: { type: "string" },
-      audio_guide_id: { type: "string" },
+      title: { type: "string", required: true }
+      artist: { type: "string", required: true }
+      year: { type: "number" }
+      description: { type: "string" }
+      audio_guide_id: { type: "string" }
       interaction_type: { type: "enum", values: ["view", "inspect", "interact"] }
     }
   }
@@ -175,7 +175,7 @@ composition "Virtual Art Gallery" {
       priority: 5
       tags: ["exhibit", "sculpture", "outdoor"]
       environment: {
-        skybox: { type: "procedural", turbidity: 8 },
+        skybox: { type: "procedural", turbidity: 8 }
         ambient_light: { intensity: 0.6 }
       }
       triggers: [
@@ -421,7 +421,7 @@ composition "Virtual Art Gallery" {
   // LOGIC
   // ─────────────────────────────────────────────────────────────────────────────
   logic {
-    function show_artwork_info(artwork) {
+    function "show_artwork_info" {
       let metadata = artwork.artwork_metadata
 
       @state.current_artwork_title = metadata.title
@@ -439,7 +439,7 @@ composition "Virtual Art Gallery" {
       }
     }
 
-    function toggle_audio_guide() {
+    function "toggle_audio_guide" {
       @state.audio_playing = !@state.audio_playing
 
       if (@state.audio_playing) {
@@ -449,7 +449,7 @@ composition "Virtual Art Gallery" {
       }
     }
 
-    function start_guided_tour() {
+    function "start_guided_tour" {
       @state.tour_in_progress = true
       AIGuide.animation = "walking"
 

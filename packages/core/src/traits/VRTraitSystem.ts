@@ -30,102 +30,130 @@ import type {
   StackableTrait,
   SnappableTrait,
   BreakableTrait,
+  SkeletonTrait,
+  BodyTrait,
+  GaussianSplatTrait,
+  NerfTrait,
+  VolumetricVideoTrait,
   ProactiveTrait,
   HSPlusNode,
 } from '../types/HoloScriptPlus';
 
-// =============================================================================
-// TRAIT HANDLER TYPES
-// =============================================================================
+import {
+  TraitHandler,
+  TraitContext,
+  AccessibilityContext,
+  VRContext,
+  PhysicsContext,
+  AudioContext,
+  HapticsContext,
+  TraitEvent,
+  RaycastHit,
+} from './TraitTypes';
 
-export interface TraitHandler<TConfig = unknown> {
-  name: VRTraitName;
-  defaultConfig: TConfig;
-  onAttach?: (node: HSPlusNode, config: TConfig, context: TraitContext) => void;
-  onDetach?: (node: HSPlusNode, config: TConfig, context: TraitContext) => void;
-  onUpdate?: (node: HSPlusNode, config: TConfig, context: TraitContext, delta: number) => void;
-  onEvent?: (node: HSPlusNode, config: TConfig, context: TraitContext, event: TraitEvent) => void;
-}
+export type {
+  TraitHandler,
+  TraitContext,
+  AccessibilityContext,
+  VRContext,
+  PhysicsContext,
+  AudioContext,
+  HapticsContext,
+  TraitEvent,
+  RaycastHit,
+};
 
-export interface TraitContext {
-  vr: VRContext;
-  physics: PhysicsContext;
-  audio: AudioContext;
-  haptics: HapticsContext;
-  accessibility?: AccessibilityContext;
-  emit: (event: string, payload?: unknown) => void;
-  getState: () => Record<string, unknown>;
-  setState: (updates: Record<string, unknown>) => void;
-  getScaleMultiplier: () => number;
-  setScaleContext: (magnitude: string) => void;
-}
-
-export interface AccessibilityContext {
-  announce: (text: string) => void;
-  setScreenReaderFocus: (nodeId: string) => void;
-  setAltText: (nodeId: string, text: string) => void;
-  setHighContrast: (enabled: boolean) => void;
-}
-
-export interface VRContext {
-  hands: {
-    left: VRHand | null;
-    right: VRHand | null;
-  };
-  headset: {
-    position: Vector3;
-    rotation: Vector3;
-  };
-  getPointerRay: (hand: 'left' | 'right') => { origin: Vector3; direction: Vector3 } | null;
-  getDominantHand: () => VRHand | null;
-}
-
-export interface PhysicsContext {
-  applyVelocity: (node: HSPlusNode, velocity: Vector3) => void;
-  applyAngularVelocity: (node: HSPlusNode, angularVelocity: Vector3) => void;
-  setKinematic: (node: HSPlusNode, kinematic: boolean) => void;
-  raycast: (origin: Vector3, direction: Vector3, maxDistance: number) => RaycastHit | null;
-}
-
-export interface RaycastHit {
-  node: HSPlusNode;
-  point: Vector3;
-  normal: Vector3;
-  distance: number;
-}
-
-export interface AudioContext {
-  playSound: (source: string, options?: { position?: Vector3; volume?: number; spatial?: boolean }) => void;
-  updateSpatialSource?: (nodeId: string, options: { hrtfProfile?: string; occlusion?: number; reverbWet?: number }) => void;
-  registerAmbisonicSource?: (nodeId: string, order: number) => void;
-  setAudioPortal?: (portalId: string, targetZone: string, openingSize: number) => void;
-  updateAudioMaterial?: (nodeId: string, absorption: number, reflection: number) => void;
-}
-
-export interface HapticsContext {
-  pulse: (hand: 'left' | 'right', intensity: number, duration?: number) => void;
-  rumble: (hand: 'left' | 'right', intensity: number) => void;
-}
-
-export type TraitEvent =
-  | { type: 'grab_start'; hand: VRHand }
-  | { type: 'grab_end'; hand: VRHand; velocity: ThrowVelocity }
-  | { type: 'hover_enter'; hand: VRHand }
-  | { type: 'hover_exit'; hand: VRHand }
-  | { type: 'point_enter'; hand: VRHand }
-  | { type: 'point_exit'; hand: VRHand }
-  | { type: 'collision'; data: CollisionEvent }
-  | { type: 'trigger_enter'; other: HSPlusNode }
-  | { type: 'trigger_exit'; other: HSPlusNode }
-  | { type: 'click'; hand: VRHand }
-  | { type: 'scale_start'; hands: { left: VRHand; right: VRHand } }
-  | { type: 'scale_update'; scale: number }
-  | { type: 'scale_end'; finalScale: number }
-  | { type: 'rotate_start'; hand: VRHand }
-  | { type: 'rotate_update'; rotation: Vector3 }
-  | { type: 'rotate_end'; finalRotation: Vector3 }
-  | { type: 'neural_link_execute'; data?: { prompt?: string } }
-  | { type: 'neural_link_response'; data?: { text?: string; generationTime?: number } };
+// Import all trait handlers here at the top
+import { seatedHandler } from './SeatedTrait';
+import { hapticHandler } from './HapticTrait';
+import { eyeTrackedHandler } from './EyeTrackedTrait';
+import { planeDetectionHandler } from './PlaneDetectionTrait';
+import { meshDetectionHandler } from './MeshDetectionTrait';
+import { anchorHandler } from './AnchorTrait';
+import { persistentAnchorHandler } from './PersistentAnchorTrait';
+import { sharedAnchorHandler } from './SharedAnchorTrait';
+import { geospatialEnvHandler } from './GeospatialEnvTrait';
+import { occlusionHandler } from './OcclusionTrait';
+import { lightEstimationHandler } from './LightEstimationTrait';
+import { handTrackingHandler } from './HandTrackingTrait';
+import { controllerInputHandler } from './ControllerInputTrait';
+import { bodyTrackingHandler } from './BodyTrackingTrait';
+import { faceTrackingHandler } from './FaceTrackingTrait';
+import { spatialAccessoryHandler } from './SpatialAccessoryTrait';
+import { accessibleHandler } from './AccessibleTrait';
+import { altTextHandler } from './AltTextTrait';
+import { spatialAudioCueHandler } from './SpatialAudioCueTrait';
+import { sonificationHandler } from './SonificationTrait';
+import { hapticCueHandler } from './HapticCueTrait';
+import { magnifiableHandler } from './MagnifiableTrait';
+import { highContrastHandler } from './HighContrastTrait';
+import { motionReducedHandler } from './MotionReducedTrait';
+import { subtitleHandler } from './SubtitleTrait';
+import { screenReaderHandler } from './ScreenReaderTrait';
+import { gaussianSplatHandler } from './GaussianSplatTrait';
+import { nerfHandler } from './NerfTrait';
+import { volumetricVideoHandler } from './VolumetricVideoTrait';
+import { pointCloudHandler } from './PointCloudTrait';
+import { photogrammetryHandler } from './PhotogrammetryTrait';
+import { computeHandler } from './ComputeTrait';
+import { gpuParticleHandler } from './GPUParticleTrait';
+import { gpuPhysicsHandler } from './GPUPhysicsTrait';
+import { gpuBufferHandler } from './GPUBufferTrait';
+import { sensorHandler } from './SensorTrait';
+import { digitalTwinHandler } from './DigitalTwinTrait';
+import { dataBindingHandler } from './DataBindingTrait';
+import { alertHandler } from './AlertTrait';
+import { heatmap3dHandler } from './Heatmap3DTrait';
+import { behaviorTreeHandler } from './BehaviorTreeTrait';
+import { goalOrientedHandler } from './GoalOrientedTrait';
+import { llmAgentHandler } from './LLMAgentTrait';
+import { neuralLinkHandler } from './NeuralLinkTrait';
+import { memoryHandler } from './MemoryTrait';
+import { perceptionHandler } from './PerceptionTrait';
+import { emotionHandler } from './EmotionTrait';
+import { dialogueHandler } from './DialogueTrait';
+import { factionHandler } from './FactionTrait';
+import { patrolHandler } from './PatrolTrait';
+import { ambisonicsHandler } from './AmbisonicsTrait';
+import { hrtfHandler } from './HRTFTrait';
+import { reverbZoneHandler } from './ReverbZoneTrait';
+import { audioOcclusionHandler } from './AudioOcclusionTrait';
+import { audioPortalHandler } from './AudioPortalTrait';
+import { audioMaterialHandler } from './AudioMaterialTrait';
+import { headTrackedAudioHandler } from './HeadTrackedAudioTrait';
+import { usdHandler } from './USDTrait';
+import { gltfHandler } from './GLTFTrait';
+import { fbxHandler } from './FBXTrait';
+import { materialXHandler } from './MaterialXTrait';
+import { sceneGraphHandler } from './SceneGraphTrait';
+import { coLocatedHandler } from './CoLocatedTrait';
+import { remotePresenceHandler } from './RemotePresenceTrait';
+import { sharedWorldHandler } from './SharedWorldTrait';
+import { voiceProximityHandler } from './VoiceProximityTrait';
+import { avatarEmbodimentHandler } from './AvatarEmbodimentTrait';
+import { spectatorHandler } from './SpectatorTrait';
+import { roleHandler } from './RoleTrait';
+import { geospatialAnchorHandler } from './GeospatialAnchorTrait';
+import { terrainAnchorHandler } from './TerrainAnchorTrait';
+import { rooftopAnchorHandler } from './RooftopAnchorTrait';
+import { vpsHandler } from './VPSTrait';
+import { poiHandler } from './POITrait';
+import { nftHandler } from './NFTTrait';
+import { tokenGatedHandler } from './TokenGatedTrait';
+import { walletHandler } from './WalletTrait';
+import { marketplaceHandler } from './MarketplaceTrait';
+import { portableHandler } from './PortableTrait';
+import { clothHandler } from './ClothTrait';
+import { fluidHandler } from './FluidTrait';
+import { softBodyHandler } from './SoftBodyTrait';
+import { ropeHandler } from './RopeTrait';
+import { chainHandler } from './ChainTrait';
+import { windHandler } from './WindTrait';
+import { buoyancyHandler } from './BuoyancyTrait';
+import { destructionHandler } from './DestructionTrait';
+import { userMonitorHandler } from './UserMonitorTrait';
+import { emotionalVoiceHandler } from './EmotionalVoiceTrait';
+import { flowFieldHandler } from './FlowFieldTrait';
 
 // =============================================================================
 // TRAIT STATE
@@ -212,16 +240,18 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
     const newPosition: Vector3 = config.snap_to_hand
       ? hand.position
       : [
-          hand.position[0] + state.grabOffset[0],
-          hand.position[1] + state.grabOffset[1],
-          hand.position[2] + state.grabOffset[2],
+          (hand.position as any)[0] + (state.grabOffset as any)[0],
+          (hand.position as any)[1] + (state.grabOffset as any)[1],
+          (hand.position as any)[2] + (state.grabOffset as any)[2],
         ];
 
     // Update position
-    node.properties.position = newPosition;
+    if (node.properties) {
+      node.properties.position = newPosition;
+    }
 
     // Track velocity for throw
-    state.previousHandPositions.push([...hand.position]);
+    state.previousHandPositions.push(Array.isArray(hand.position) ? [...hand.position] : { ...hand.position });
     state.previousHandTimes.push(Date.now());
 
     // Keep last 10 frames
@@ -231,7 +261,7 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
     }
 
     // Update rotation if not preserving
-    if (!config.preserve_rotation) {
+    if (!config.preserve_rotation && node.properties) {
       node.properties.rotation = hand.rotation;
     }
   },
@@ -243,11 +273,11 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
       // Check distance for distance grab
       if (!config.distance_grab) {
         const handPos = event.hand.position;
-        const nodePos = node.properties.position as Vector3 || [0, 0, 0];
+        const nodePos = node.properties?.position as Vector3 || [0, 0, 0];
         const distance = Math.sqrt(
-          Math.pow(handPos[0] - nodePos[0], 2) +
-          Math.pow(handPos[1] - nodePos[1], 2) +
-          Math.pow(handPos[2] - nodePos[2], 2)
+          Math.pow((handPos as any)[0] - (nodePos as any)[0], 2) +
+          Math.pow((handPos as any)[1] - (nodePos as any)[1], 2) +
+          Math.pow((handPos as any)[2] - (nodePos as any)[2], 2)
         );
         const maxDist = (config.max_grab_distance || 3) * context.getScaleMultiplier();
         if (distance > maxDist) return;
@@ -257,11 +287,11 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
       state.grabbingHand = event.hand;
 
       // Calculate grab offset
-      const nodePos = node.properties.position as Vector3 || [0, 0, 0];
+      const nodePos = node.properties?.position as Vector3 || [0, 0, 0];
       state.grabOffset = [
-        nodePos[0] - event.hand.position[0],
-        nodePos[1] - event.hand.position[1],
-        nodePos[2] - event.hand.position[2],
+        (nodePos as any)[0] - (event.hand.position as any)[0],
+        (nodePos as any)[1] - (event.hand.position as any)[1],
+        (nodePos as any)[2] - (event.hand.position as any)[2],
       ];
 
       // Haptic feedback
@@ -289,19 +319,19 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
         const dt = (state.previousHandTimes[len - 1] - state.previousHandTimes[0]) / 1000;
         if (dt > 0) {
           const velocity: Vector3 = [
-            (state.previousHandPositions[len - 1][0] - state.previousHandPositions[0][0]) / dt,
-            (state.previousHandPositions[len - 1][1] - state.previousHandPositions[0][1]) / dt,
-            (state.previousHandPositions[len - 1][2] - state.previousHandPositions[0][2]) / dt,
+            ((state.previousHandPositions[len - 1] as any)[0] - (state.previousHandPositions[0] as any)[0]) / dt,
+            ((state.previousHandPositions[len - 1] as any)[1] - (state.previousHandPositions[0] as any)[1]) / dt,
+            ((state.previousHandPositions[len - 1] as any)[2] - (state.previousHandPositions[0] as any)[2]) / dt,
           ];
 
           // Apply velocity if throwable trait exists
-          if (node.traits.has('throwable')) {
+          if (node.traits?.has('throwable')) {
             const throwConfig = node.traits.get('throwable') as ThrowableTrait;
             const multiplier = (throwConfig.velocity_multiplier || 1) * context.getScaleMultiplier();
             context.physics.applyVelocity(node, [
-              velocity[0] * multiplier,
-              velocity[1] * multiplier,
-              velocity[2] * multiplier,
+              (velocity as any)[0] * multiplier,
+              (velocity as any)[1] * multiplier,
+              (velocity as any)[2] * multiplier,
             ]);
           }
         }
@@ -345,11 +375,11 @@ const throwableHandler: TraitHandler<ThrowableTrait> = {
       // Reflect velocity
       const velocity = collision.relativeVelocity;
       const normal = collision.normal;
-      const dot = velocity[0] * normal[0] + velocity[1] * normal[1] + velocity[2] * normal[2];
+      const dot = (velocity as any)[0] * (normal as any)[0] + (velocity as any)[1] * (normal as any)[1] + (velocity as any)[2] * (normal as any)[2];
       const reflected: Vector3 = [
-        (velocity[0] - 2 * dot * normal[0]) * bounceFactor,
-        (velocity[1] - 2 * dot * normal[1]) * bounceFactor,
-        (velocity[2] - 2 * dot * normal[2]) * bounceFactor,
+        ((velocity as any)[0] - 2 * dot * (normal as any)[0]) * bounceFactor,
+        ((velocity as any)[1] - 2 * dot * (normal as any)[1]) * bounceFactor,
+        ((velocity as any)[2] - 2 * dot * (normal as any)[2]) * bounceFactor,
       ];
 
       context.physics.applyVelocity(node, reflected);
@@ -389,7 +419,7 @@ const pointableHandler: TraitHandler<PointableTrait> = {
       state.isPointed = true;
       state.pointingHand = event.hand;
 
-      if (config.highlight_on_point) {
+      if (config.highlight_on_point && node.properties) {
         node.properties.__originalEmissive = node.properties.emissive;
         node.properties.emissive = config.highlight_color;
       }
@@ -401,7 +431,7 @@ const pointableHandler: TraitHandler<PointableTrait> = {
       state.isPointed = false;
       state.pointingHand = null;
 
-      if (config.highlight_on_point) {
+      if (config.highlight_on_point && node.properties) {
         node.properties.emissive = node.properties.__originalEmissive || null;
         delete node.properties.__originalEmissive;
       }
@@ -435,7 +465,7 @@ const hoverableHandler: TraitHandler<HoverableTrait> = {
     const state: HoverState = {
       isHovered: false,
       hoveringHand: null,
-      originalScale: typeof node.properties.scale === 'number' ? node.properties.scale : 1,
+      originalScale: typeof node.properties?.scale === 'number' ? node.properties.scale : 1,
       originalColor: null,
     };
     (node as unknown as { __hoverState: HoverState }).__hoverState = state;
@@ -453,13 +483,13 @@ const hoverableHandler: TraitHandler<HoverableTrait> = {
       state.hoveringHand = event.hand;
 
       // Scale up
-      if (config.scale_on_hover && config.scale_on_hover !== 1) {
+      if (config.scale_on_hover && config.scale_on_hover !== 1 && node.properties) {
         state.originalScale = typeof node.properties.scale === 'number' ? node.properties.scale : 1;
         node.properties.scale = state.originalScale * config.scale_on_hover;
       }
 
       // Glow effect
-      if (config.glow) {
+      if (config.glow && node.properties) {
         state.originalColor = (node.properties.emissive as string) || null;
         node.properties.emissive = config.highlight_color;
         node.properties.emissiveIntensity = config.glow_intensity;
@@ -469,7 +499,7 @@ const hoverableHandler: TraitHandler<HoverableTrait> = {
       if (config.show_tooltip) {
         const tooltipText = typeof config.show_tooltip === 'string'
           ? config.show_tooltip
-          : node.properties.tooltip || node.id || node.type;
+          : node.properties?.tooltip || node.id || node.type;
         context.emit('show_tooltip', {
           node,
           text: tooltipText,
@@ -485,12 +515,12 @@ const hoverableHandler: TraitHandler<HoverableTrait> = {
       state.hoveringHand = null;
 
       // Restore scale
-      if (config.scale_on_hover && config.scale_on_hover !== 1) {
+      if (config.scale_on_hover && config.scale_on_hover !== 1 && node.properties) {
         node.properties.scale = state.originalScale;
       }
 
       // Remove glow
-      if (config.glow) {
+      if (config.glow && node.properties) {
         node.properties.emissive = state.originalColor;
         delete node.properties.emissiveIntensity;
       }
@@ -541,9 +571,9 @@ const scalableHandler: TraitHandler<ScalableTrait> = {
 
     // Calculate current distance between hands
     const currentDistance = Math.sqrt(
-      Math.pow(hands.right.position[0] - hands.left.position[0], 2) +
-      Math.pow(hands.right.position[1] - hands.left.position[1], 2) +
-      Math.pow(hands.right.position[2] - hands.left.position[2], 2)
+      Math.pow((hands.right.position as any)[0] - (hands.left.position as any)[0], 2) +
+      Math.pow((hands.right.position as any)[1] - (hands.left.position as any)[1], 2) +
+      Math.pow((hands.right.position as any)[2] - (hands.left.position as any)[2], 2)
     );
 
     // Calculate scale factor
@@ -571,7 +601,9 @@ const scalableHandler: TraitHandler<ScalableTrait> = {
       newScale *= 1000000;
     }
 
-    node.properties.scale = newScale;
+    if (node.properties) {
+      node.properties.scale = newScale;
+    }
 
     context.emit('scale_update', { node, scale: newScale });
   },
@@ -581,14 +613,14 @@ const scalableHandler: TraitHandler<ScalableTrait> = {
 
     if (event.type === 'scale_start') {
       state.isScaling = true;
-      state.initialScale = typeof node.properties.scale === 'number' ? node.properties.scale : 1;
+      state.initialScale = typeof node.properties?.scale === 'number' ? node.properties.scale : 1;
 
       // Calculate initial distance between hands
       const { left, right } = event.hands;
       state.initialDistance = Math.sqrt(
-        Math.pow(right.position[0] - left.position[0], 2) +
-        Math.pow(right.position[1] - left.position[1], 2) +
-        Math.pow(right.position[2] - left.position[2], 2)
+        Math.pow((right.position as any)[0] - (left.position as any)[0], 2) +
+        Math.pow((right.position as any)[1] - (left.position as any)[1], 2) +
+        Math.pow((right.position as any)[2] - (left.position as any)[2], 2)
       );
 
       context.emit('scale_start', { node });
@@ -596,7 +628,7 @@ const scalableHandler: TraitHandler<ScalableTrait> = {
 
     if (event.type === 'scale_end') {
       state.isScaling = false;
-      context.emit('scale_end', { node, finalScale: node.properties.scale });
+      context.emit('scale_end', { node, finalScale: node.properties?.scale });
     }
   },
 };
@@ -636,9 +668,9 @@ const rotatableHandler: TraitHandler<RotatableTrait> = {
 
     // Calculate rotation delta
     const deltaRotation: Vector3 = [
-      (hand.rotation[0] - state.initialHandRotation[0]) * (config.speed || 1),
-      (hand.rotation[1] - state.initialHandRotation[1]) * (config.speed || 1),
-      (hand.rotation[2] - state.initialHandRotation[2]) * (config.speed || 1),
+      ((hand.rotation as any)[0] - (state.initialHandRotation as any)[0]) * (config.speed || 1),
+      ((hand.rotation as any)[1] - (state.initialHandRotation as any)[1]) * (config.speed || 1),
+      ((hand.rotation as any)[2] - (state.initialHandRotation as any)[2]) * (config.speed || 1),
     ];
 
     // Apply axis constraint
@@ -646,30 +678,30 @@ const rotatableHandler: TraitHandler<RotatableTrait> = {
     switch (config.axis) {
       case 'x':
         newRotation = [
-          state.initialObjectRotation[0] + deltaRotation[0],
-          state.initialObjectRotation[1],
-          state.initialObjectRotation[2],
+          ((state.initialObjectRotation as any)[0] + (deltaRotation as any)[0]) as any,
+          (state.initialObjectRotation as any)[1],
+          (state.initialObjectRotation as any)[2],
         ];
         break;
       case 'y':
         newRotation = [
-          state.initialObjectRotation[0],
-          state.initialObjectRotation[1] + deltaRotation[1],
-          state.initialObjectRotation[2],
+          (state.initialObjectRotation as any)[0],
+          ((state.initialObjectRotation as any)[1] + (deltaRotation as any)[1]) as any,
+          (state.initialObjectRotation as any)[2],
         ];
         break;
       case 'z':
         newRotation = [
-          state.initialObjectRotation[0],
-          state.initialObjectRotation[1],
-          state.initialObjectRotation[2] + deltaRotation[2],
+          (state.initialObjectRotation as any)[0],
+          (state.initialObjectRotation as any)[1],
+          (state.initialObjectRotation as any)[2] + (deltaRotation as any)[2],
         ];
         break;
       default:
         newRotation = [
-          state.initialObjectRotation[0] + deltaRotation[0],
-          state.initialObjectRotation[1] + deltaRotation[1],
-          state.initialObjectRotation[2] + deltaRotation[2],
+          (state.initialObjectRotation as any)[0] + (deltaRotation as any)[0],
+          (state.initialObjectRotation as any)[1] + (deltaRotation as any)[1],
+          (state.initialObjectRotation as any)[2] + (deltaRotation as any)[2],
         ];
     }
 
@@ -690,7 +722,9 @@ const rotatableHandler: TraitHandler<RotatableTrait> = {
       }) as Vector3;
     }
 
-    node.properties.rotation = newRotation;
+    if (node.properties) {
+      node.properties.rotation = newRotation;
+    }
     context.emit('rotate_update', { node, rotation: newRotation });
   },
 
@@ -699,19 +733,20 @@ const rotatableHandler: TraitHandler<RotatableTrait> = {
 
     if (event.type === 'rotate_start') {
       state.isRotating = true;
-      state.initialHandRotation = [...event.hand.rotation];
-      state.initialObjectRotation = (node.properties.rotation as Vector3) || [0, 0, 0];
+      state.initialHandRotation = Array.isArray(event.hand.rotation) ? [...event.hand.rotation] : { ...event.hand.rotation };
+      state.initialObjectRotation = (node.properties?.rotation as Vector3) || [0, 0, 0];
 
       context.emit('rotate_start', { node });
     }
 
     if (event.type === 'rotate_end') {
       state.isRotating = false;
-      context.emit('rotate_end', { node, finalRotation: node.properties.rotation });
+      context.emit('rotate_end', { node, finalRotation: node.properties?.rotation });
     }
   },
 };
 
+// =============================================================================
 // =============================================================================
 // STACKABLE TRAIT
 // =============================================================================
@@ -756,7 +791,7 @@ const stackableHandler: TraitHandler<StackableTrait> = {
       const other = event.type === 'collision' ? event.data.target : (event as { other: HSPlusNode }).other;
 
       // Check if other is stackable
-      if (!other.traits.has('stackable')) return;
+      if (!other.traits?.has('stackable')) return;
 
       const otherState = (other as unknown as { __stackState: StackState }).__stackState;
       if (!otherState) return;
@@ -765,8 +800,8 @@ const stackableHandler: TraitHandler<StackableTrait> = {
       if (state.stackedItems.length >= (config.max_stack || 10)) return;
 
       // Check if close enough
-      const nodePos = node.properties.position as Vector3 || [0, 0, 0];
-      const otherPos = other.properties.position as Vector3 || [0, 0, 0];
+      const nodePos = node.properties?.position as Vector3 || [0, 0, 0];
+      const otherPos = other.properties?.position as Vector3 || [0, 0, 0];
 
       const axisIndex = config.stack_axis === 'x' ? 0 : config.stack_axis === 'z' ? 2 : 1;
       const otherAxes = [0, 1, 2].filter((i) => i !== axisIndex);
@@ -774,23 +809,25 @@ const stackableHandler: TraitHandler<StackableTrait> = {
       // Check alignment on other axes
       let aligned = true;
       for (const axis of otherAxes) {
-        if (Math.abs(nodePos[axis] - otherPos[axis]) > (config.snap_distance || 0.5)) {
+        if (Math.abs((nodePos as any)[axis] - (otherPos as any)[axis]) > (config.snap_distance || 0.5)) {
           aligned = false;
           break;
         }
       }
 
-      if (aligned && otherPos[axisIndex] > nodePos[axisIndex]) {
+      if (aligned && (otherPos as any)[axisIndex] > (nodePos as any)[axisIndex]) {
         // Other is above - add to stack
         state.stackedItems.push(other);
         otherState.stackParent = node;
 
         // Snap position
         const stackOffset = config.stack_offset || 0;
-        const newPos: Vector3 = [...nodePos];
-        newPos[axisIndex] = nodePos[axisIndex] + stackOffset;
+        const newPos: Vector3 = [...(nodePos as any)] as any as Vector3;
+        (newPos as any)[axisIndex] = (nodePos as any)[axisIndex] + stackOffset;
 
-        other.properties.position = newPos;
+        if (other.properties) {
+          other.properties.position = newPos;
+        }
 
         context.emit('stack', { parent: node, child: other });
       }
@@ -816,7 +853,7 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
     if (!config.snap_points || config.snap_points.length === 0) return;
     if (!config.magnetic) return;
 
-    const nodePos = node.properties.position as Vector3 || [0, 0, 0];
+    const nodePos = node.properties?.position as Vector3 || [0, 0, 0];
 
     // Find closest snap point
     let closestPoint: Vector3 | null = null;
@@ -824,9 +861,9 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
 
     for (const snapPoint of config.snap_points) {
       const distance = Math.sqrt(
-        Math.pow(nodePos[0] - snapPoint[0], 2) +
-        Math.pow(nodePos[1] - snapPoint[1], 2) +
-        Math.pow(nodePos[2] - snapPoint[2], 2)
+        Math.pow((nodePos as any)[0] - (snapPoint as any)[0], 2) +
+        Math.pow((nodePos as any)[1] - (snapPoint as any)[1], 2) +
+        Math.pow((nodePos as any)[2] - (snapPoint as any)[2], 2)
       );
 
       if (distance < closestDistance) {
@@ -836,12 +873,12 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
     }
 
     // Apply magnetic pull
-    if (closestPoint) {
+    if (closestPoint && node.properties) {
       const pullStrength = 0.1;
-      node.properties.position = [
-        nodePos[0] + (closestPoint[0] - nodePos[0]) * pullStrength,
-        nodePos[1] + (closestPoint[1] - nodePos[1]) * pullStrength,
-        nodePos[2] + (closestPoint[2] - nodePos[2]) * pullStrength,
+      (node.properties as any).position = [
+        (nodePos as any)[0] + ((closestPoint as any)[0] - (nodePos as any)[0]) * pullStrength,
+        (nodePos as any)[1] + ((closestPoint as any)[1] - (nodePos as any)[1]) * pullStrength,
+        (nodePos as any)[2] + ((closestPoint as any)[2] - (nodePos as any)[2]) * pullStrength,
       ];
     }
   },
@@ -850,7 +887,7 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
     if (event.type !== 'grab_end') return;
     if (!config.snap_points || config.snap_points.length === 0) return;
 
-    const nodePos = node.properties.position as Vector3 || [0, 0, 0];
+    const nodePos = node.properties?.position as Vector3 || [0, 0, 0];
 
     // Find closest snap point
     let closestPoint: Vector3 | null = null;
@@ -858,9 +895,9 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
 
     for (const snapPoint of config.snap_points) {
       const distance = Math.sqrt(
-        Math.pow(nodePos[0] - snapPoint[0], 2) +
-        Math.pow(nodePos[1] - snapPoint[1], 2) +
-        Math.pow(nodePos[2] - snapPoint[2], 2)
+        Math.pow((nodePos as any)[0] - (snapPoint as any)[0], 2) +
+        Math.pow((nodePos as any)[1] - (snapPoint as any)[1], 2) +
+        Math.pow((nodePos as any)[2] - (snapPoint as any)[2], 2)
       );
 
       if (distance < closestDistance) {
@@ -870,7 +907,7 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
     }
 
     // Snap to closest point
-    if (closestPoint) {
+    if (closestPoint && node.properties) {
       node.properties.position = closestPoint;
       context.emit('snap', { node, point: closestPoint });
 
@@ -945,7 +982,34 @@ const breakableHandler: TraitHandler<BreakableTrait> = {
     }
 
     // Mark for destruction
-    node.properties.__destroyed = true;
+    if (node.properties) {
+      node.properties.__destroyed = true;
+    }
+  },
+};
+
+// =============================================================================
+// HUMANOID TRAITS
+// =============================================================================
+
+const skeletonHandler: TraitHandler<SkeletonTrait> = {
+  name: 'skeleton',
+  defaultConfig: {
+    bones: [],
+  },
+  onAttach(node, config, context) {
+    context.emit('skeleton_attach', { node, config });
+  },
+};
+
+const bodyHandler: TraitHandler<BodyTrait> = {
+  name: 'body',
+  defaultConfig: {
+    height: 1.8,
+    proportions: {},
+  },
+  onAttach(node, config, context) {
+    context.emit('body_attach', { node, config });
   },
 };
 
@@ -980,12 +1044,12 @@ const proactiveHandler: TraitHandler<ProactiveTrait> = {
 
     // Observe proximity to user (hands or headset)
     const vr = context.vr;
-    const pos = node.properties.position as Vector3;
+    const pos = node.properties?.position as Vector3;
     if (!pos || !vr.headset.position) return;
 
-    const dx = pos[0] - vr.headset.position[0];
-    const dy = pos[1] - vr.headset.position[1];
-    const dz = pos[2] - vr.headset.position[2];
+    const dx = (pos as any)[0] - (vr.headset.position as any)[0];
+    const dy = (pos as any)[1] - (vr.headset.position as any)[1];
+    const dz = (pos as any)[2] - (vr.headset.position as any)[2];
     const distanceToHead = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
     if (distanceToHead < (config.observation_range || 5)) {
@@ -1028,120 +1092,9 @@ function parseDuration(duration: string): number {
 // TRAIT REGISTRY
 // =============================================================================
 
-// Import existing traits
-import { seatedHandler } from './SeatedTrait';
-import { hapticHandler } from './HapticTrait';
-import { eyeTrackedHandler } from './EyeTrackedTrait';
-
-// Phase 1: Environment Understanding
-import { planeDetectionHandler } from './PlaneDetectionTrait';
-import { meshDetectionHandler } from './MeshDetectionTrait';
-import { anchorHandler } from './AnchorTrait';
-import { persistentAnchorHandler } from './PersistentAnchorTrait';
-import { sharedAnchorHandler } from './SharedAnchorTrait';
-import { geospatialEnvHandler } from './GeospatialEnvTrait';
-import { occlusionHandler } from './OcclusionTrait';
-import { lightEstimationHandler } from './LightEstimationTrait';
-
-// Phase 2: Input Modalities
-import { handTrackingHandler } from './HandTrackingTrait';
-import { controllerInputHandler } from './ControllerInputTrait';
-import { bodyTrackingHandler } from './BodyTrackingTrait';
-import { faceTrackingHandler } from './FaceTrackingTrait';
-import { spatialAccessoryHandler } from './SpatialAccessoryTrait';
-
-// Phase 3: Accessibility
-import { accessibleHandler } from './AccessibleTrait';
-import { altTextHandler } from './AltTextTrait';
-import { spatialAudioCueHandler } from './SpatialAudioCueTrait';
-import { sonificationHandler } from './SonificationTrait';
-import { hapticCueHandler } from './HapticCueTrait';
-import { magnifiableHandler } from './MagnifiableTrait';
-import { highContrastHandler } from './HighContrastTrait';
-import { motionReducedHandler } from './MotionReducedTrait';
-import { subtitleHandler } from './SubtitleTrait';
-import { screenReaderHandler } from './ScreenReaderTrait';
-
-// Phase 4: Gaussian Splatting & Volumetric
-import { gaussianSplatHandler } from './GaussianSplatTrait';
-import { nerfHandler } from './NerfTrait';
-import { volumetricVideoHandler } from './VolumetricVideoTrait';
-import { pointCloudHandler } from './PointCloudTrait';
-import { photogrammetryHandler } from './PhotogrammetryTrait';
-
-// Phase 5: WebGPU Compute
-import { computeHandler } from './ComputeTrait';
-import { gpuParticleHandler } from './GPUParticleTrait';
-import { gpuPhysicsHandler } from './GPUPhysicsTrait';
-import { gpuBufferHandler } from './GPUBufferTrait';
-
-// Phase 6: Digital Twin & IoT
-import { sensorHandler } from './SensorTrait';
-import { digitalTwinHandler } from './DigitalTwinTrait';
-import { dataBindingHandler } from './DataBindingTrait';
-import { alertHandler } from './AlertTrait';
-import { heatmap3dHandler } from './Heatmap3DTrait';
-
-// Phase 7: Autonomous Agents
-import { behaviorTreeHandler } from './BehaviorTreeTrait';
-import { goalOrientedHandler } from './GoalOrientedTrait';
-import { llmAgentHandler } from './LLMAgentTrait';
-import { neuralLinkHandler } from './NeuralLinkTrait';
-import { memoryHandler } from './MemoryTrait';
-import { perceptionHandler } from './PerceptionTrait';
-import { emotionHandler } from './EmotionTrait';
-import { dialogueHandler } from './DialogueTrait';
-import { factionHandler } from './FactionTrait';
-import { patrolHandler } from './PatrolTrait';
-
-// Phase 8: Advanced Spatial Audio
-import { ambisonicsHandler } from './AmbisonicsTrait';
-import { hrtfHandler } from './HRTFTrait';
-import { reverbZoneHandler } from './ReverbZoneTrait';
-import { audioOcclusionHandler } from './AudioOcclusionTrait';
-import { audioPortalHandler } from './AudioPortalTrait';
-import { audioMaterialHandler } from './AudioMaterialTrait';
-import { headTrackedAudioHandler } from './HeadTrackedAudioTrait';
-
-// Phase 9: OpenUSD & Interoperability
-import { usdHandler } from './USDTrait';
-import { gltfHandler } from './GLTFTrait';
-import { fbxHandler } from './FBXTrait';
-import { materialXHandler } from './MaterialXTrait';
-import { sceneGraphHandler } from './SceneGraphTrait';
-
-// Phase 10: Co-Presence & Shared Experiences
-import { coLocatedHandler } from './CoLocatedTrait';
-import { remotePresenceHandler } from './RemotePresenceTrait';
-import { sharedWorldHandler } from './SharedWorldTrait';
-import { voiceProximityHandler } from './VoiceProximityTrait';
-import { avatarEmbodimentHandler } from './AvatarEmbodimentTrait';
-import { spectatorHandler } from './SpectatorTrait';
-import { roleHandler } from './RoleTrait';
-
-// Phase 11: Geospatial & AR Cloud
-import { geospatialAnchorHandler } from './GeospatialAnchorTrait';
-import { terrainAnchorHandler } from './TerrainAnchorTrait';
-import { rooftopAnchorHandler } from './RooftopAnchorTrait';
-import { vpsHandler } from './VPSTrait';
-import { poiHandler } from './POITrait';
-
-// Phase 12: Web3 & Ownership
-import { nftHandler } from './NFTTrait';
-import { tokenGatedHandler } from './TokenGatedTrait';
-import { walletHandler } from './WalletTrait';
-import { marketplaceHandler } from './MarketplaceTrait';
-import { portableHandler } from './PortableTrait';
-
-// Phase 13: Physics Expansion
-import { clothHandler } from './ClothTrait';
-import { fluidHandler } from './FluidTrait';
-import { softBodyHandler } from './SoftBodyTrait';
-import { ropeHandler } from './RopeTrait';
-import { chainHandler } from './ChainTrait';
-import { windHandler } from './WindTrait';
-import { buoyancyHandler } from './BuoyancyTrait';
-import { destructionHandler } from './DestructionTrait';
+// =============================================================================
+// TRAIT REGISTRY
+// =============================================================================
 
 export class VRTraitRegistry {
   private handlers: Map<VRTraitName, TraitHandler> = new Map();
@@ -1157,6 +1110,8 @@ export class VRTraitRegistry {
     this.register(stackableHandler);
     this.register(snappableHandler);
     this.register(breakableHandler);
+    this.register(skeletonHandler);
+    this.register(bodyHandler);
     this.register(proactiveHandler);
     
     // Register VR accessibility traits
@@ -1273,6 +1228,9 @@ export class VRTraitRegistry {
     this.register(windHandler as TraitHandler);
     this.register(buoyancyHandler as TraitHandler);
     this.register(destructionHandler as TraitHandler);
+    this.register(userMonitorHandler as TraitHandler);
+    this.register(emotionalVoiceHandler as TraitHandler);
+    this.register(flowFieldHandler as TraitHandler);
   }
 
   register<T>(handler: TraitHandler<T>): void {
@@ -1288,7 +1246,10 @@ export class VRTraitRegistry {
     if (!handler) return;
 
     const mergedConfig = { ...(handler.defaultConfig as object), ...(config as object) };
-    node.traits.set(traitName, mergedConfig);
+    if (!node.traits) {
+      (node as any).traits = new Map();
+    }
+    node.traits!.set(traitName, mergedConfig);
 
     if (handler.onAttach) {
       handler.onAttach(node, mergedConfig, context);
@@ -1299,19 +1260,19 @@ export class VRTraitRegistry {
     const handler = this.handlers.get(traitName);
     if (!handler) return;
 
-    const config = node.traits.get(traitName);
+    const config = node.traits?.get(traitName);
     if (config && handler.onDetach) {
       handler.onDetach(node, config, context);
     }
 
-    node.traits.delete(traitName);
+    node.traits?.delete(traitName);
   }
 
   updateTrait(node: HSPlusNode, traitName: VRTraitName, context: TraitContext, delta: number): void {
     const handler = this.handlers.get(traitName);
     if (!handler || !handler.onUpdate) return;
 
-    const config = node.traits.get(traitName);
+    const config = node.traits?.get(traitName);
     if (config) {
       handler.onUpdate(node, config, context, delta);
     }
@@ -1321,24 +1282,27 @@ export class VRTraitRegistry {
     const handler = this.handlers.get(traitName);
     if (!handler || !handler.onEvent) return;
 
-    const config = node.traits.get(traitName);
+    const config = node.traits?.get(traitName);
     if (config) {
       handler.onEvent(node, config, context, event);
     }
   }
 
   updateAllTraits(node: HSPlusNode, context: TraitContext, delta: number): void {
+    if (!node.traits) return;
     for (const traitName of node.traits.keys()) {
       this.updateTrait(node, traitName, context, delta);
     }
   }
 
   handleEventForAllTraits(node: HSPlusNode, context: TraitContext, event: TraitEvent): void {
+    const eventType = typeof event === 'string' ? event : event.type;
+    
     // Physics ↔ Haptics Bridge (P0 Pattern)
     // Automatically trigger light haptic feedback on physical interactions if no haptic trait override exists
-    if (event.type === 'collision' || event.type === 'trigger_enter') {
-      if (!node.traits.has('haptic')) {
-        const intensity = event.type === 'collision' ? 0.35 : 0.15;
+    if (eventType === 'collision' || eventType === 'trigger_enter') {
+      if (!node.traits?.has('haptic')) {
+        const intensity = eventType === 'collision' ? 0.35 : 0.15;
         const dominant = context.vr.getDominantHand();
         if (dominant) {
           context.haptics.pulse(dominant.id as 'left' | 'right', intensity, 40);
@@ -1346,6 +1310,7 @@ export class VRTraitRegistry {
       }
     }
 
+    if (!node.traits) return;
     for (const traitName of node.traits.keys()) {
       this.handleEvent(node, traitName, context, event);
     }
@@ -1369,6 +1334,11 @@ export {
   stackableHandler,
   snappableHandler,
   breakableHandler,
+  skeletonHandler,
+  bodyHandler,
+  gaussianSplatHandler,
+  nerfHandler,
+  volumetricVideoHandler,
   proactiveHandler,
   seatedHandler,
   hapticHandler,
@@ -1400,9 +1370,6 @@ export {
   subtitleHandler,
   screenReaderHandler,
   // Phase 4: Gaussian Splatting & Volumetric
-  gaussianSplatHandler,
-  nerfHandler,
-  volumetricVideoHandler,
   pointCloudHandler,
   photogrammetryHandler,
   // Phase 5: WebGPU Compute
@@ -1470,4 +1437,7 @@ export {
   windHandler,
   buoyancyHandler,
   destructionHandler,
+  userMonitorHandler,
+  emotionalVoiceHandler,
+  flowFieldHandler,
 };

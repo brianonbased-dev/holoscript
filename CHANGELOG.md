@@ -1,3 +1,72 @@
+## [2.2.0] - 2026-01-31
+
+### 🎮 Brittney AI Game Generation Features
+
+Major addition of game development constructs for Brittney AI content generation:
+
+### Added
+- **7 New Language Constructs** - RPG and game content definition blocks:
+  - `npc "name" { }` - NPC Behavior Trees with types, models, and dialogue references
+  - `quest "name" { }` - Quest Definition System with objectives, rewards, and branching
+  - `ability "name" { }` - Ability/Spell definitions with class requirements and levels
+  - `dialogue "id" { }` - Dialogue Trees with character, emotion, content, and options
+  - `state_machine "name" { }` - State Machines for boss phases and complex behaviors
+  - `achievement "name" { }` - Achievement System with points and hidden unlocks
+  - `talent_tree "name" { }` - Talent Trees with tiers, nodes, and dependency chains
+
+- **New AST Types** - Full type definitions for all game constructs:
+  - `HoloNPC`, `HoloBehavior`, `HoloBehaviorAction`
+  - `HoloQuest`, `HoloQuestObjective`, `HoloQuestRewards`, `HoloQuestBranch`
+  - `HoloAbility`, `HoloAbilityStats`
+  - `HoloDialogue`, `HoloDialogueOption`
+  - `HoloStateMachine`, `HoloState_Machine`
+  - `HoloAchievement`
+  - `HoloTalentTree`, `HoloTalentRow`, `HoloTalentNode`
+
+- **Brittney Training Data** - Examples for AI fine-tuning:
+  - `brittney-features-examples.hsplus` - 8 comprehensive HoloScript examples
+  - `brittney-features-training.jsonl` - 20 prompt/completion pairs
+
+### Changed
+- Parser now supports 46 tests (12 new Brittney feature tests)
+- HoloComposition interface extended with: `npcs`, `quests`, `abilities`, `dialogues`, `stateMachines`, `achievements`, `talentTrees` arrays
+
+### Example
+```hsplus
+composition "Starting Village" {
+  npc "Elder Aldric" {
+    npc_type: "quest_giver"
+    dialogue_tree: "elder_intro"
+  }
+
+  quest "Goblin Menace" {
+    giver: "Elder Aldric"
+    level: 1
+    type: "defeat"
+    objectives: [
+      { id: "defeat_goblins", type: "defeat", target: "goblin", count: 10 }
+    ]
+    rewards: { experience: 500, gold: 100 }
+  }
+
+  dialogue "elder_intro" {
+    character: "Elder Aldric"
+    emotion: "friendly"
+    content: "Welcome, traveler. These are troubling times..."
+    options: [
+      { text: "What troubles the village?", next: "elder_troubles" }
+    ]
+  }
+
+  achievement "Village Hero" {
+    description: "Complete the Goblin Menace quest"
+    points: 50
+  }
+}
+```
+
+---
+
 ## [2.1.1] - 2026-01-28
 
 ### 🔧 Parser Enhancements

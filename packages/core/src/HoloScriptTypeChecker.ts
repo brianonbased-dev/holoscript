@@ -24,7 +24,6 @@ import type {
   HoloScriptValue,
 } from './types';
 import { BUILTIN_CONSTRAINTS } from './traits/traitConstraints';
-import fs from 'fs';
 
 // Type system types
 export type HoloScriptType =
@@ -41,7 +40,14 @@ export type HoloScriptType =
   | 'orb'
   | 'stream'
   | 'connection'
-  | 'gate';
+  | 'gate'
+  | 'vec2'
+  | 'vec3'
+  | 'vec4'
+  | 'color'
+  | 'euler'
+  | 'quat'
+  | 'mat4';
 
 export interface TypeInfo {
   type: HoloScriptType;
@@ -167,19 +173,18 @@ export class HoloScriptTypeChecker {
     const properties = new Map<string, TypeInfo>();
 
     // Add default orb properties
-    properties.set('position', { type: 'object', properties: new Map([
-      ['x', { type: 'number' }],
-      ['y', { type: 'number' }],
-      ['z', { type: 'number' }],
-    ])});
-    properties.set('color', { type: 'string' });
+    properties.set('position', { type: 'vec3' });
+    properties.set('rotation', { type: 'euler' });
+    properties.set('scale', { type: 'vec3' });
+    properties.set('color', { type: 'color' });
     properties.set('glow', { type: 'boolean' });
     properties.set('interactive', { type: 'boolean' });
     properties.set('visible', { type: 'boolean' });
 
     // Add user-defined properties
     for (const [key, value] of Object.entries(node.properties)) {
-      properties.set(key, this.inferType(value));
+      const expectedType = properties.get(key);
+      properties.set(key, this.inferTypeWithContext(value, expectedType));
     }
 
     this.typeMap.set(node.name, {
@@ -204,15 +209,19 @@ export class HoloScriptTypeChecker {
   }
 
   private collectVariableDeclaration(node: VariableDeclarationNode): void {
-    let type: HoloScriptType = 'any';
+    let typeInfo: TypeInfo = { type: 'any' };
 
     if (node.dataType) {
-      type = this.parseTypeString(node.dataType);
+      typeInfo = { type: this.parseTypeString(node.dataType) };
+      if (node.value !== undefined) {
+        // Narrow the value type based on explicit dataType
+        this.inferTypeWithContext(node.value, typeInfo);
+      }
     } else if (node.value !== undefined) {
-      type = this.inferType(node.value).type;
+      typeInfo = this.inferType(node.value);
     }
 
-    this.typeMap.set(node.name, { type });
+    this.typeMap.set(node.name, typeInfo);
   }
 
   private collectStreamDeclaration(node: StreamNode): void {
@@ -265,11 +274,11 @@ export class HoloScriptTypeChecker {
         break;
       case 'orb':
         this.validateTraitConstraints(node);
-        this.checkBlock((node as OrbNode).children);
+        this.checkBlock((node as OrbNode).children || []);
         break;
       case 'template':
         this.validateTraitConstraints(node);
-        this.checkBlock((node as TemplateNode).children); // Matches updated types.ts
+        this.checkBlock((node as TemplateNode).children || []); // Matches updated types.ts
         break;
       case 'spread':
         this.checkSpread(node as SpreadExpression);
@@ -305,6 +314,25 @@ export class HoloScriptTypeChecker {
     }
   }
 
+  /**
+   * Check if two types are compatible
+   */
+  private isCompatible(source: TypeInfo, target: TypeInfo): boolean {
+    // console.log(`[DEBUG] Comparing ${source.type} to ${target.type}`);
+    if (source.type === 'any' || target.type === 'any') return true;
+    if (source.type === target.type) return true;
+
+    // Spatial compatibility
+    if (target.type === 'vec3' && source.type === 'euler') return true;
+    if (target.type === 'euler' && source.type === 'vec3') return true;
+    if (target.type === 'vec4' && source.type === 'quat') return true;
+    if (target.type === 'quat' && source.type === 'vec4') return true;
+
+    // Array/Object structural check could go here if needed
+
+    return false;
+  }
+
   private checkConnection(node: ConnectionNode): void {
     const fromType = this.typeMap.get(node.from);
     const toType = this.typeMap.get(node.to);
@@ -319,8 +347,7 @@ export class HoloScriptTypeChecker {
 
     // Check if types are compatible
     if (fromType && toType && node.dataType !== 'any') {
-      // Warn if connecting incompatible types
-      if (fromType.type !== toType.type && fromType.type !== 'any' && toType.type !== 'any') {
+      if (!this.isCompatible(fromType, toType)) {
         this.addDiagnostic('warning',
           `Connection from '${node.from}' (${fromType.type}) to '${node.to}' (${toType.type}) may be incompatible`,
           'W001',
@@ -378,6 +405,20 @@ export class HoloScriptTypeChecker {
   }
 
   private checkVariableDeclaration(node: VariableDeclarationNode): void {
+    const typeInfo = this.typeMap.get(node.name);
+    
+    if (typeInfo && node.value !== undefined && !node.isExpression) {
+      const inferredValueType = this.inferTypeWithContext(node.value, typeInfo);
+      
+      // Use isCompatible to check if the value matches the declared/inferred type
+      if (!this.isCompatible(inferredValueType, typeInfo)) {
+        this.addDiagnostic('error', 
+          `Type mismatch: cannot assign ${inferredValueType.type} to ${typeInfo.type}`, 
+          'E102'
+        );
+      }
+    }
+
     if (node.isExpression && typeof node.value === 'string') {
       const vars = this.extractVariables(node.value);
       for (const v of vars) {
@@ -493,6 +534,10 @@ export class HoloScriptTypeChecker {
     }
 
     if (typeof value === 'string') {
+      // Hex color?
+      if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(value)) return { type: 'color' };
+      // rgb/rgba?
+      if (/^rgba?\s*\(/.test(value)) return { type: 'color' };
       return { type: 'string' };
     }
 
@@ -501,11 +546,21 @@ export class HoloScriptTypeChecker {
     }
 
     if (Array.isArray(value)) {
+      if (value.length === 2 && value.every(v => typeof v === 'number')) return { type: 'vec2' };
+      if (value.length === 3 && value.every(v => typeof v === 'number')) return { type: 'vec3' };
+      if (value.length === 4 && value.every(v => typeof v === 'number')) return { type: 'vec4' };
+      
       const elementType = value.length > 0 ? this.inferType(value[0]).type : 'any';
       return { type: 'array', elementType };
     }
 
     if (typeof value === 'object') {
+      // Check for position-like object
+      if ('x' in value && 'y' in value) {
+        if ('z' in value) return { type: 'vec3' };
+        return { type: 'vec2' };
+      }
+
       const properties = new Map<string, TypeInfo>();
       for (const [key, val] of Object.entries(value)) {
         properties.set(key, this.inferType(val));
@@ -517,6 +572,34 @@ export class HoloScriptTypeChecker {
   }
 
   /**
+   * Infer type with context
+   */
+  public inferTypeWithContext(value: HoloScriptValue, expectedType?: TypeInfo): TypeInfo {
+    if (!expectedType) return this.inferType(value);
+
+    const baseInferred = this.inferType(value);
+
+    // Contextual narrowing
+    if (expectedType.type === 'color' && typeof value === 'string') {
+      return { type: 'color' };
+    }
+
+    if (expectedType.type === 'euler' && Array.isArray(value) && value.length === 3) {
+      return { type: 'euler' };
+    }
+
+    if (expectedType.type === 'quat' && Array.isArray(value) && value.length === 4) {
+      return { type: 'quat' };
+    }
+
+    if (expectedType.type === 'vec3' && Array.isArray(value) && value.length === 3) {
+      return { type: 'vec3' };
+    }
+
+    return baseInferred;
+  }
+
+  /**
    * Parse type string to HoloScriptType
    */
   private parseTypeString(typeStr: string): HoloScriptType {
@@ -524,7 +607,8 @@ export class HoloScriptTypeChecker {
     const validTypes: HoloScriptType[] = [
       'number', 'string', 'boolean', 'array', 'object',
       'function', 'void', 'any', 'unknown', 'never',
-      'orb', 'stream', 'connection', 'gate'
+      'orb', 'stream', 'connection', 'gate',
+      'vec2', 'vec3', 'vec4', 'color', 'euler', 'quat', 'mat4'
     ];
 
     if (validTypes.includes(normalized as HoloScriptType)) {
@@ -558,15 +642,12 @@ export class HoloScriptTypeChecker {
   }
 
   private validateTraitConstraints(node: ASTNode): void {
-    fs.appendFileSync('call_log.txt', `validateTraitConstraints called for ${node.type}\n`);
     const traitsMap = node.traits;
     if (!traitsMap || traitsMap.size === 0) {
-      fs.appendFileSync('validator_debug.log', `Node ${node.type} has NO traits\n`);
       return;
     }
 
     const traitNames = Array.from(traitsMap.keys());
-    fs.appendFileSync('validator_debug.log', `Node ${node.type} has traits: ${JSON.stringify(traitNames)}\n`);
 
     for (const constraint of BUILTIN_CONSTRAINTS) {
       if (constraint.type === 'requires') {

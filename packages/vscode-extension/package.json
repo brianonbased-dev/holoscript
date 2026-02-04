@@ -349,7 +349,27 @@
           }
         ]
       }
-    ]
+    ],
+    "configuration": {
+      "title": "HoloScript",
+      "properties": {
+        "holoscript.formatOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable auto-formatting on save."
+        },
+        "holoscript.formatOnSaveTimeout": {
+          "type": "number",
+          "default": 1000,
+          "description": "Timeout for formatting on save in milliseconds."
+        },
+        "holoscript.ai.enableAutoSuggest": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable AI auto-suggestions while typing."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --production",

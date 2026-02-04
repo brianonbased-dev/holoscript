@@ -168,7 +168,7 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
       completionProvider: {
         resolveProvider: true,
         triggerCharacters: [".", ":", "{", "[", '"', "'", " ", "@", "/"]
-      },
+      }
       hoverProvider: true,
       definitionProvider: true,
       referencesProvider: true,
@@ -177,17 +177,17 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
         legend,
         full: true,
         range: true
-      },
+      }
       codeActionProvider: {
         codeActionKinds: [
           CodeActionKind.QuickFix,
           CodeActionKind.Refactor,
           CodeActionKind.Source
         ]
-      },
+      }
       signatureHelpProvider: {
         triggerCharacters: ["(", ","]
-      },
+      }
       documentFormattingProvider: true,
       documentRangeFormattingProvider: true
     }
@@ -224,9 +224,9 @@ module DocumentValidator {
           ? DiagnosticSeverity.Warning 
           : DiagnosticSeverity.Error,
         range: {
-          start: { line: error.line - 1, character: error.column - 1 },
+          start: { line: error.line - 1, character: error.column - 1 }
           end: { line: error.line - 1, character: error.column + 10 }
-        },
+        }
         message: error.message,
         source: "holoscript"
       })
@@ -422,9 +422,9 @@ module DocumentValidator {
           diagnostics.push({
             severity: DiagnosticSeverity.Error,
             range: {
-              start: { line: i, character: match.index },
+              start: { line: i, character: match.index }
               end: { line: i, character: match.index + match[0].length }
-            },
+            }
             message: `Template "${templateName}" is not defined`,
             source: "holoscript"
           })
@@ -438,9 +438,9 @@ module DocumentValidator {
         diagnostics.push({
           severity: DiagnosticSeverity.Information,
           range: {
-            start: { line: i, character: 0 },
+            start: { line: i, character: 0 }
             end: { line: i, character: lines[i].length }
-          },
+          }
           message: "Empty block - consider adding content or removing it",
           source: "holoscript"
         })
@@ -455,9 +455,9 @@ module DocumentValidator {
           diagnostics.push({
             severity: DiagnosticSeverity.Warning,
             range: {
-              start: { line: i, character: 0 },
+              start: { line: i, character: 0 }
               end: { line: i, character: lines[i].length }
-            },
+            }
             message: "Empty @state block",
             source: "holoscript"
           })
@@ -469,7 +469,7 @@ module DocumentValidator {
   }
 }
 
-async function validateDocument(document: TextDocument): Promise<void> {
+async function "validateDocument" : Promise<void> {
   await DocumentValidator.validate(document)
 }
 
@@ -524,35 +524,35 @@ module CompletionProvider {
         insertText: 'composition "${1:Scene Name}" {\n\t$0\n}',
         insertTextFormat: InsertTextFormat.Snippet,
         documentation: "Create a scene composition"
-      },
+      }
       {
         label: "template",
         kind: CompletionItemKind.Class,
         insertText: 'template "${1:Name}" {\n\tstate { $2 }\n\taction ${3:name}($4) { $5 }\n}',
         insertTextFormat: InsertTextFormat.Snippet,
         documentation: "Define a reusable template"
-      },
+      }
       {
         label: "spatial_group",
         kind: CompletionItemKind.Module,
         insertText: 'spatial_group "${1:name}" {\n\t$0\n}',
         insertTextFormat: InsertTextFormat.Snippet,
         documentation: "Create a spatial group"
-      },
+      }
       {
         label: "logic",
         kind: CompletionItemKind.Event,
         insertText: "logic {\n\t$0\n}",
         insertTextFormat: InsertTextFormat.Snippet,
         documentation: "Define scene logic"
-      },
+      }
       {
         label: "orb",
         kind: CompletionItemKind.Class,
         insertText: "orb ${1:name} {\n\tposition: [${2:0}, ${3:0}, ${4:0}]\n\t$0\n}",
         insertTextFormat: InsertTextFormat.Snippet,
         documentation: "Create a 3D object"
-      },
+      }
       {
         label: "world",
         kind: CompletionItemKind.Module,
@@ -570,28 +570,28 @@ module CompletionProvider {
           insertText: "module ${1:Name} {\n\t@state {\n\t\t$2\n\t}\n\t\n\t@method ${3:name}($4): ${5:void} {\n\t\t$0\n\t}\n}",
           insertTextFormat: InsertTextFormat.Snippet,
           documentation: "Define a module"
-        },
+        }
         {
           label: "struct",
           kind: CompletionItemKind.Struct,
           insertText: "struct ${1:Name} {\n\t${2:field}: ${3:type}\n}",
           insertTextFormat: InsertTextFormat.Snippet,
           documentation: "Define a struct"
-        },
+        }
         {
           label: "enum",
           kind: CompletionItemKind.Enum,
           insertText: "enum ${1:Name} {\n\t${2:VALUE_ONE},\n\t${3:VALUE_TWO}\n}",
           insertTextFormat: InsertTextFormat.Snippet,
           documentation: "Define an enum"
-        },
+        }
         {
           label: "import",
           kind: CompletionItemKind.Keyword,
           insertText: 'import { $1 } from "${2:module}"',
           insertTextFormat: InsertTextFormat.Snippet,
           documentation: "Import from module"
-        },
+        }
         {
           label: "export",
           kind: CompletionItemKind.Keyword,
@@ -608,38 +608,38 @@ module CompletionProvider {
   @method getPropertyCompletions(isHsplus: boolean): CompletionItem[] {
     const items: CompletionItem[] = [
       // Common properties
-      { label: "position", kind: CompletionItemKind.Property, insertText: "position: [${1:0}, ${2:0}, ${3:0}]", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "rotation", kind: CompletionItemKind.Property, insertText: "rotation: [${1:0}, ${2:0}, ${3:0}]", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "scale", kind: CompletionItemKind.Property, insertText: "scale: [${1:1}, ${2:1}, ${3:1}]", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "color", kind: CompletionItemKind.Property, insertText: 'color: "${1:#ffffff}"', insertTextFormat: InsertTextFormat.Snippet },
-      { label: "opacity", kind: CompletionItemKind.Property, insertText: "opacity: ${1:1.0}", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "visible", kind: CompletionItemKind.Property, insertText: "visible: ${1:true}", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "interactive", kind: CompletionItemKind.Property, insertText: "interactive: ${1:true}", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "model", kind: CompletionItemKind.Property, insertText: 'model: "${1:path/to/model.glb}"', insertTextFormat: InsertTextFormat.Snippet },
-      { label: "traits", kind: CompletionItemKind.Property, insertText: 'traits: ["${1:talkable}", "${2:patrol}"]', insertTextFormat: InsertTextFormat.Snippet },
-      { label: "state", kind: CompletionItemKind.Property, insertText: "state { ${1:property}: ${2:value} }", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "using", kind: CompletionItemKind.Reference, insertText: 'using "${1:Template}"', insertTextFormat: InsertTextFormat.Snippet },
+      { label: "position", kind: CompletionItemKind.Property, insertText: "position: [${1:0}, ${2:0}, ${3:0}]", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "rotation", kind: CompletionItemKind.Property, insertText: "rotation: [${1:0}, ${2:0}, ${3:0}]", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "scale", kind: CompletionItemKind.Property, insertText: "scale: [${1:1}, ${2:1}, ${3:1}]", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "color", kind: CompletionItemKind.Property, insertText: 'color: "${1:#ffffff}"', insertTextFormat: InsertTextFormat.Snippet }
+      { label: "opacity", kind: CompletionItemKind.Property, insertText: "opacity: ${1:1.0}", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "visible", kind: CompletionItemKind.Property, insertText: "visible: ${1:true}", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "interactive", kind: CompletionItemKind.Property, insertText: "interactive: ${1:true}", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "model", kind: CompletionItemKind.Property, insertText: 'model: "${1:path/to/model.glb}"', insertTextFormat: InsertTextFormat.Snippet }
+      { label: "traits", kind: CompletionItemKind.Property, insertText: 'traits: ["${1:talkable}", "${2:patrol}"]', insertTextFormat: InsertTextFormat.Snippet }
+      { label: "state", kind: CompletionItemKind.Property, insertText: "state { ${1:property}: ${2:value} }", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "using", kind: CompletionItemKind.Reference, insertText: 'using "${1:Template}"', insertTextFormat: InsertTextFormat.Snippet }
       
       // Events
-      { label: "on_click", kind: CompletionItemKind.Event, insertText: "on_click: {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "on_hover", kind: CompletionItemKind.Event, insertText: "on_hover: {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "on_enter", kind: CompletionItemKind.Event, insertText: "on_enter: {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "on_exit", kind: CompletionItemKind.Event, insertText: "on_exit: {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "on_interact", kind: CompletionItemKind.Event, insertText: "on_interact($1) {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet },
-      { label: "on_collision", kind: CompletionItemKind.Event, insertText: "on_collision($1) {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet },
+      { label: "on_click", kind: CompletionItemKind.Event, insertText: "on_click: {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "on_hover", kind: CompletionItemKind.Event, insertText: "on_hover: {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "on_enter", kind: CompletionItemKind.Event, insertText: "on_enter: {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "on_exit", kind: CompletionItemKind.Event, insertText: "on_exit: {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "on_interact", kind: CompletionItemKind.Event, insertText: "on_interact($1) {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet }
+      { label: "on_collision", kind: CompletionItemKind.Event, insertText: "on_collision($1) {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet }
       
       // Object definitions
-      { label: "object", kind: CompletionItemKind.Class, insertText: 'object "${1:name}" using "${2:Template}" {\n\tposition: [${3:0}, ${4:0}, ${5:0}]\n}', insertTextFormat: InsertTextFormat.Snippet },
+      { label: "object", kind: CompletionItemKind.Class, insertText: 'object "${1:name}" using "${2:Template}" {\n\tposition: [${3:0}, ${4:0}, ${5:0}]\n}', insertTextFormat: InsertTextFormat.Snippet }
       { label: "action", kind: CompletionItemKind.Function, insertText: "action ${1:name}($2) {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet }
     ]
     
     if (isHsplus) {
       items.push(
         // HSPlus features
-        { label: "networked", kind: CompletionItemKind.Property, insertText: "networked: ${1:true}", insertTextFormat: InsertTextFormat.Snippet },
-        { label: "physics", kind: CompletionItemKind.Property, insertText: 'physics: {\n\ttype: "${1|dynamic,static,kinematic|}"\n\tmass: ${2:1.0}\n}', insertTextFormat: InsertTextFormat.Snippet },
-        { label: "every", kind: CompletionItemKind.Keyword, insertText: "every(${1:1000}) {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet },
-        { label: "constraint", kind: CompletionItemKind.Class, insertText: "constraint ${1:name} {\n\ttype: ${2|hinge,slider,spring,ball,fixed|}\n\tbody_a: ${3}\n\tbody_b: ${4}\n}", insertTextFormat: InsertTextFormat.Snippet },
+        { label: "networked", kind: CompletionItemKind.Property, insertText: "networked: ${1:true}", insertTextFormat: InsertTextFormat.Snippet }
+        { label: "physics", kind: CompletionItemKind.Property, insertText: 'physics: {\n\ttype: "${1|dynamic,static,kinematic|}"\n\tmass: ${2:1.0}\n}', insertTextFormat: InsertTextFormat.Snippet }
+        { label: "every", kind: CompletionItemKind.Keyword, insertText: "every(${1:1000}) {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet }
+        { label: "constraint", kind: CompletionItemKind.Class, insertText: "constraint ${1:name} {\n\ttype: ${2|hinge,slider,spring,ball,fixed|}\n\tbody_a: ${3}\n\tbody_b: ${4}\n}", insertTextFormat: InsertTextFormat.Snippet }
         { label: "terrain", kind: CompletionItemKind.Class, insertText: "terrain ${1:name} {\n\tgenerator: ${2|perlin,simplex,voronoi|}\n\tsize: [${3:100}, ${4:100}]\n}", insertTextFormat: InsertTextFormat.Snippet }
       )
     }
@@ -649,10 +649,10 @@ module CompletionProvider {
   
   @method getDecoratorCompletions(): CompletionItem[] {
     return [
-      { label: "@state", kind: CompletionItemKind.Keyword, insertText: "@state {\n\t${1:property}: ${2:type} = ${3:default}\n}", insertTextFormat: InsertTextFormat.Snippet, documentation: "Reactive state" },
-      { label: "@action", kind: CompletionItemKind.Keyword, insertText: "@action ${1:name}($2): ${3:void} {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet, documentation: "State-modifying action" },
-      { label: "@method", kind: CompletionItemKind.Keyword, insertText: "@method ${1:name}($2): ${3:void} {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet, documentation: "Instance method" },
-      { label: "@computed", kind: CompletionItemKind.Keyword, insertText: "@computed get ${1:name}(): ${2:type} {\n\treturn $0\n}", insertTextFormat: InsertTextFormat.Snippet, documentation: "Derived value" },
+      { label: "@state", kind: CompletionItemKind.Keyword, insertText: "@state {\n\t${1:property}: ${2:type} = ${3:default}\n}", insertTextFormat: InsertTextFormat.Snippet, documentation: "Reactive state" }
+      { label: "@action", kind: CompletionItemKind.Keyword, insertText: "@action ${1:name}($2): ${3:void} {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet, documentation: "State-modifying action" }
+      { label: "@method", kind: CompletionItemKind.Keyword, insertText: "@method ${1:name}($2): ${3:void} {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet, documentation: "Instance method" }
+      { label: "@computed", kind: CompletionItemKind.Keyword, insertText: "@computed get ${1:name}(): ${2:type} {\n\treturn $0\n}", insertTextFormat: InsertTextFormat.Snippet, documentation: "Derived value" }
       { label: "@async", kind: CompletionItemKind.Keyword, insertText: "@async ${1:name}($2): Promise<${3:void}> {\n\t$0\n}", insertTextFormat: InsertTextFormat.Snippet, documentation: "Async method" }
     ]
   }
@@ -676,12 +676,12 @@ module CompletionProvider {
   
   @method getImportPathCompletions(): CompletionItem[] {
     return [
-      { label: "@holoscript/core", kind: CompletionItemKind.Module },
-      { label: "@holoscript/network", kind: CompletionItemKind.Module },
-      { label: "@holoscript/std", kind: CompletionItemKind.Module },
-      { label: "@holoscript/fs", kind: CompletionItemKind.Module },
-      { label: "@holoscript/commerce", kind: CompletionItemKind.Module },
-      { label: "@holoscript/llm", kind: CompletionItemKind.Module },
+      { label: "@holoscript/core", kind: CompletionItemKind.Module }
+      { label: "@holoscript/network", kind: CompletionItemKind.Module }
+      { label: "@holoscript/std", kind: CompletionItemKind.Module }
+      { label: "@holoscript/fs", kind: CompletionItemKind.Module }
+      { label: "@holoscript/commerce", kind: CompletionItemKind.Module }
+      { label: "@holoscript/llm", kind: CompletionItemKind.Module }
       { label: "./", kind: CompletionItemKind.Folder }
     ]
   }
@@ -829,7 +829,7 @@ module DefinitionProvider {
       return {
         uri: params.textDocument.uri,
         range: {
-          start: { line: symbol.line - 1, character: symbol.column - 1 },
+          start: { line: symbol.line - 1, character: symbol.column - 1 }
           end: { line: symbol.line - 1, character: symbol.column - 1 + word.length }
         }
       }
@@ -904,11 +904,11 @@ module DocumentSymbolProvider {
         name,
         kind,
         range: {
-          start: { line: info.line - 1, character: 0 },
+          start: { line: info.line - 1, character: 0 }
           end: { line: info.line - 1, character: 100 }
-        },
+        }
         selectionRange: {
-          start: { line: info.line - 1, character: info.column - 1 },
+          start: { line: info.line - 1, character: info.column - 1 }
           end: { line: info.line - 1, character: info.column - 1 + name.length }
         }
       })
@@ -1021,7 +1021,7 @@ module CodeActionProvider {
             edit: {
               changes: {
                 [params.textDocument.uri]: [{
-                  range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+                  range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }
                   newText: `template "${templateName}" {\n  state { }\n  action init() { }\n}\n\n`
                 }]
               }
@@ -1050,15 +1050,15 @@ module SignatureHelpProvider {
         parameters: [
           { label: "milliseconds", documentation: "Interval in milliseconds" }
         ]
-      },
+      }
       action: {
         label: "action name(params)",
         documentation: "Define an action that modifies state",
         parameters: [
-          { label: "name", documentation: "Action name" },
+          { label: "name", documentation: "Action name" }
           { label: "params", documentation: "Action parameters" }
         ]
-      },
+      }
       on_interact: {
         label: "on_interact(target)",
         documentation: "Handler for interaction events",

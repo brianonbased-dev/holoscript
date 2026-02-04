@@ -5,6 +5,27 @@
  */
 
 // ============================================================================
+// HS+ Consolidated Types (Imported from AdvancedTypeSystem and HoloScriptPlus)
+// ============================================================================
+
+import type { 
+  HSPlusDirective,
+  HSPlusAST,
+  ASTProgram,
+  HSPlusCompileResult
+} from './types/AdvancedTypeSystem';
+
+import type { HSPlusNode } from './types/HoloScriptPlus';
+
+export type { 
+  HSPlusDirective,
+  HSPlusAST,
+  ASTProgram,
+  HSPlusCompileResult,
+  HSPlusNode
+};
+
+// ============================================================================
 // Spatial Types
 // ============================================================================
 
@@ -88,6 +109,7 @@ export type HoloScriptValue =
   // We can include ASTNode if values can be nodes (e.g. templates)
   | ASTNode
   | SpreadExpression
+  | NullCoalescingAssignment
   | Function
   | SpatialPosition
   | HologramProperties
@@ -95,6 +117,7 @@ export type HoloScriptValue =
 
 export interface ASTNode {
   type: string;
+  id?: string;
   position?: SpatialPosition;
   hologram?: HologramProperties;
   /** Source line number (1-indexed) */
@@ -121,7 +144,12 @@ export type VRTraitName =
   | 'stackable'
   | 'snappable'
   | 'breakable'
+  | 'skeleton'
+  | 'body'
   | 'haptic'
+  | 'gaussian_splat'
+  | 'nerf'
+  | 'volumetric_video'
   | 'networked'
   // Environment Understanding
   | 'plane_detection'
@@ -219,7 +247,10 @@ export type VRTraitName =
   | 'chain'
   | 'wind'
   | 'buoyancy'
-  | 'destruction';
+  | 'destruction'
+  | 'proactive';
+
+export { VRHand } from './types/HoloScriptPlus';
 
 export interface TraitConstraint {
   type: 'requires' | 'conflicts' | 'oneof';
@@ -378,30 +409,15 @@ export type AllExpandedHooks =
   | Web3Hook
   | PhysicsExpansionHook;
 
-export type HSPlusDirective =
-  | { type: 'state'; body: Record<string, HoloScriptValue> }
-  | { type: 'for'; variable: string; iterable: string; body: ASTNode[] }
-  | { type: 'if'; condition: string; body: ASTNode[]; else?: ASTNode[] }
-  | { type: 'import'; path: string; alias: string }
-  | { type: 'lifecycle'; hook: AllExpandedHooks; params?: string[]; body: string }
-  | { type: 'trait'; name: VRTraitName; config: Record<string, HoloScriptValue> };
-
-export interface HSPlusAST {
-  version: string;
-  root: ASTNode;
-  imports: Array<{ path: string; alias: string }>;
-  hasState: boolean;
-  hasVRTraits: boolean;
-  hasControlFlow: boolean;
-}
+// HS+ Directive and AST types are now imported from AdvancedTypeSystem
 
 
 export interface OrbNode extends ASTNode {
   type: 'orb';
   name: string;
   properties: Record<string, HoloScriptValue>;
-  methods: MethodNode[];
-  children: ASTNode[];
+  methods?: MethodNode[];
+  children?: ASTNode[];
 }
 
 export interface MethodNode extends ASTNode {
@@ -483,6 +499,16 @@ export interface VisualizeNode extends ASTNode {
   target: string;
 }
 
+export interface ZoneNode extends ASTNode {
+  type: 'zone';
+  name: string;
+  id?: string;
+  position?: SpatialPosition;
+  bounds?: { type: string; size: HoloScriptValue }; // box, sphere
+  events: Record<string, string>; // on_enter, on_exit -> code
+  properties: Record<string, HoloScriptValue>;
+}
+
 
 // ============================================================================
 // Phase 2: Loop Types
@@ -534,6 +560,22 @@ export interface CompositionNode extends ASTNode {
   type: 'composition';
   name: string;
   children: ASTNode[];
+  body?: {
+    systems: ASTNode[];
+    configs: ASTNode[];
+    children: ASTNode[];
+  };
+}
+
+export interface SystemNode extends ASTNode {
+  type: 'system';
+  id: string;
+  properties: Record<string, HoloScriptValue>;
+}
+
+export interface CoreConfigNode extends ASTNode {
+  type: 'core_config';
+  properties: Record<string, HoloScriptValue>;
 }
 
 export interface EnvironmentNode extends ASTNode {
@@ -546,6 +588,63 @@ export interface TemplateNode extends ASTNode {
   name: string;
   parameters: string[];
   children: ASTNode[];
+  version?: string | number;
+  migrations?: MigrationNode[];
+}
+
+export interface MigrationNode extends ASTNode {
+  type: 'migration';
+  fromVersion: number;
+  body: string; // Captured source code for runtime execution
+}
+
+// ============================================================================
+// Narrative & Metadata Types
+// ============================================================================
+
+export interface NarrativeNode extends ASTNode {
+  type: 'narrative';
+  id: string;
+  startNode?: string;
+  quests: QuestNode[];
+  dialogueNodes?: DialogueNode[];
+}
+
+export interface QuestNode extends ASTNode {
+  type: 'quest';
+  id: string;
+  title: string;
+  description: string;
+  objectives: ObjectiveNode[];
+  onComplete?: string;
+}
+
+export interface ObjectiveNode extends ASTNode {
+  type: 'objective';
+  id: string;
+  description: string;
+  targetCount?: number;
+  currentCount?: number;
+}
+
+export interface DialogueNode extends ASTNode {
+  type: 'dialogue';
+  id: string;
+  speaker: string;
+  text: string;
+  choices?: DialogueChoice[];
+}
+
+export interface DialogueChoice extends ASTNode {
+  type: 'dialogue-choice';
+  text: string;
+  nextNode?: string;
+  action?: string;
+}
+
+export interface VisualMetadataNode extends ASTNode {
+  type: 'visual_metadata';
+  properties: Record<string, HoloScriptValue>;
 }
 
 export interface GlobalHandlerNode extends ASTNode {
@@ -604,10 +703,31 @@ export interface TypeGuardExpression extends ASTNode {
 // ============================================================================
 // Spread Expression (...)
 // ============================================================================
+// Supports spreading objects, arrays, and template properties
+// Example: { ...Base, override: value }, [...array, ...other]
 
 export interface SpreadExpression extends ASTNode {
   type: 'spread';
-  target: string; // The identifier being spread (e.g. "BaseTemplate")
+  argument: unknown; // The identifier, reference, or expression being spread
+  target?: string; // Alternative: direct target name for backward compatibility
+  // Validation fields (populated during type checking)
+  isValid?: boolean;
+  targetType?: 'object' | 'array' | 'template' | 'unknown';
+}
+
+// ============================================================================
+// Null Coalescing Assignment (??=)
+// ============================================================================
+// Short-circuit assignment if left side is null/undefined
+// Example: x ??= defaultValue  →  x = x ?? defaultValue
+// Only assigns if x is null or undefined
+
+export interface NullCoalescingAssignment extends ASTNode {
+  type: 'nullCoalescingAssignment';
+  target: string | unknown; // Identifier or member expression being assigned
+  value: unknown; // Right-hand side expression
+  isValid?: boolean;
+  targetType?: 'variable' | 'member' | 'unknown';
 }
 
 // ============================================================================
@@ -692,6 +812,7 @@ export interface RuntimeContext {
   spatialMemory: Map<string, SpatialPosition>;
   hologramState: Map<string, HologramProperties>;
   executionStack: ASTNode[];
+  stateMachines: Map<string, StateMachineNode>;
   mode?: 'public' | 'secure';
 
   // Scaling & Context
@@ -703,8 +824,23 @@ export interface RuntimeContext {
   environment: Record<string, HoloScriptValue>;
   templates: Map<string, TemplateNode>;
 
+  // Narrative & Story State
+  quests: Map<string, QuestNode>;
+  activeQuestId?: string;
+  completedQuests: Set<string>;
+  dialogueState?: {
+    currentNodeId?: string;
+    speaker?: string;
+  };
+
   // HS+ State
   state: ReactiveState;
+}
+
+export interface QuestState {
+  id: string;
+  objectives: Record<string, { current: number, target: number, complete: boolean }>;
+  status: 'active' | 'completed' | 'failed';
 }
 
 export interface ReactiveState {
@@ -784,7 +920,7 @@ export interface ASTTransform {
   scale: SpatialVector3;
 }
 
-export type VRHand = 'left' | 'right' | 'both';
+export type VRHandSide = 'left' | 'right' | 'both';
 
 export interface ThrowVelocity {
   magnitude: number;
@@ -1052,4 +1188,17 @@ export type {
   Vector3,
   Transform,
   Vector3Tuple,
-} from './types/HoloScriptPlus.js';
+} from './types/HoloScriptPlus';
+export interface AnyTraitAnnotation {
+  type: string;
+  config: any;
+  line?: number;
+  column?: number;
+}
+
+export interface EnhancedOrbNode extends OrbNode {
+  graphics?: any;
+  traits?: any;
+  eventHandlers?: Map<string, string>;
+  isCompanion?: boolean;
+}

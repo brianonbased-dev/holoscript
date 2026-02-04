@@ -56,14 +56,17 @@ export class CompanionLoader {
       loaded: [],
     };
 
-    for (const imp of ast.imports) {
+    for (const imp of ast.imports || []) {
       try {
-        const module = await this.loadModule(imp.path);
-        result.companions[imp.alias] = module;
-        result.loaded.push(imp.path);
+        const modulePath = (imp as any).path || imp.source;
+        const alias = (imp as any).alias || imp.source;
+        const module = await this.loadModule(modulePath);
+        result.companions[alias] = module;
+        result.loaded.push(modulePath);
       } catch (error) {
+        const errorPath = (imp as any).path || imp.source;
         result.errors.push({
-          path: imp.path,
+          path: errorPath,
           error: error instanceof Error ? error : new Error(String(error)),
         });
       }

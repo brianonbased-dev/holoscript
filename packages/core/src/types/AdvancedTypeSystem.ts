@@ -3,8 +3,18 @@
  *
  * Union types, generics, type inference, exhaustiveness checking
  */
-import type { HSPlusNode } from './HoloScriptPlus.js';
-export type { HSPlusNode };
+import {
+  Vector3,
+  Color,
+  VRHand,
+  HSPlusBuiltins,
+  HSPlusRuntime,
+  HSPlusNode,
+} from './HoloScriptPlus';
+import {
+  VRTraitName,
+} from '../types';
+export type { HSPlusNode, VRTraitName };
 
 export type HoloScriptType =
   | PrimitiveType
@@ -373,7 +383,7 @@ export class AdvancedTypeChecker {
 export interface ASTProgram extends HSPlusNode {
   type: 'Program';
   body: HSPlusNode[];
-  version: string;
+  version: string | number;
   root: HSPlusNode;
   imports: Array<{ path: string; alias: string }>;
   hasState: boolean;
@@ -381,12 +391,78 @@ export interface ASTProgram extends HSPlusNode {
   hasControlFlow: boolean;
 }
 
-export interface HSPlusDirective extends HSPlusNode {
-  type: 'directive' | 'trait' | 'lifecycle' | 'state' | 'for' | 'forEach' | 'while' | 'if' | 'import' | 'fragment' | 'external_api' | 'generate';
+export type HSPlusAST = ASTProgram;
+
+export type HSPlusDirective =
+  | HSPlusBaseDirective
+  | HSPlusTraitDirective
+  | HSPlusLifecycleDirective
+  | HSPlusStateDirective
+  | HSPlusForDirective
+  | HSPlusForEachDirective
+  | HSPlusWhileDirective
+  | HSPlusIfDirective
+  | HSPlusImportDirective;
+
+export interface HSPlusBaseDirective extends HSPlusNode {
+  type: 'directive' | 'fragment' | 'external_api' | 'generate';
   name: string;
   args: string[];
-  enableTypeScriptImports?: boolean;
-  enableVRTraits?: boolean;
+}
+
+export interface HSPlusTraitDirective extends HSPlusNode {
+  type: 'trait';
+  name: string;
+  args?: any[];
+  config?: any;
+}
+
+export interface HSPlusLifecycleDirective extends HSPlusNode {
+  type: 'lifecycle';
+  name?: string;
+  hook: string;
+  params?: string[];
+  body: string;
+}
+
+export interface HSPlusStateDirective extends HSPlusNode {
+  type: 'state';
+  name: string;
+  body?: Record<string, any>;
+  initial?: any;
+}
+
+export interface HSPlusForDirective extends HSPlusNode {
+  type: 'for';
+  variable: string;
+  range?: [number, number];
+  iterable?: any;
+  body: HSPlusNode[];
+}
+
+export interface HSPlusForEachDirective extends HSPlusNode {
+  type: 'forEach';
+  variable: string;
+  collection: string;
+  body: HSPlusNode[];
+}
+
+export interface HSPlusWhileDirective extends HSPlusNode {
+  type: 'while';
+  condition: string;
+  body: HSPlusNode[];
+}
+
+export interface HSPlusIfDirective extends HSPlusNode {
+  type: 'if';
+  condition: string;
+  body: HSPlusNode[];
+}
+
+export interface HSPlusImportDirective extends HSPlusNode {
+  type: 'import';
+  source: string;
+  specifiers: string[];
 }
 
 export interface HSPlusCompileResult {
@@ -409,21 +485,7 @@ export interface HSPlusParserOptions {
   enableVRTraits?: boolean;
 }
 
-export type VRTraitName =
-  | 'grabbable'
-  | 'throwable'
-  | 'pointable'
-  | 'scalable'
-  | 'draggable'
-  | 'rotatable'
-  | 'clickable'
-  | 'hoverable'
-  | 'pressable'
-  | 'stackable'
-  | 'snappable'
-  | 'breakable'
-  | 'networked'
-  | 'proactive';
+// VRTraitName is imported from ../types.ts
 
 export interface StateDeclaration {
   name: string;
@@ -447,70 +509,7 @@ export interface ControllerHook {
   handler: string;
 }
 
-/**
- * Vector3 type for AST representation
- */
-export interface ASTVector3 {
-  x: number;
-  y: number;
-  z: number;
-}
-
-/**
- * Color type for AST representation
- */
-export interface ASTColor {
-  r: number;
-  g: number;
-  b: number;
-  a?: number;
-}
-
-/**
- * VR Hand representation
- */
-export interface VRHand {
-  position: ASTVector3;
-  rotation: ASTVector3;
-  pinch: number;
-  grip: number;
-  pointing: boolean;
-}
-
-/**
- * HoloScript+ Runtime built-in functions
- */
-export interface HSPlusBuiltins {
-  log: (...args: any[]) => void;
-  warn: (...args: any[]) => void;
-  error: (...args: any[]) => void;
-  setTimeout: (fn: () => void, ms: number) => number;
-  clearTimeout: (id: number) => void;
-  setInterval: (fn: () => void, ms: number) => number;
-  clearInterval: (id: number) => void;
-  fetch: (url: string, options?: any) => Promise<any>;
-  emit: (event: string, data?: any) => void;
-  on: (event: string, handler: (data: any) => void) => void;
-  off: (event: string, handler?: (data: any) => void) => void;
-  showSettings: () => void;
-  openChat: (config?: any) => void;
-  assistant_generate: (prompt: string, context?: string) => void;
-  [key: string]: any;
-}
-
-/**
- * HoloScript+ Runtime interface
- */
-export interface HSPlusRuntime {
-  state: Record<string, any>;
-  props: Record<string, any>;
-  refs: Record<string, any>;
-  execute: (ast: ASTProgram) => any;
-  callMethod: (name: string, args: any[]) => any;
-  setState: (key: string, value: any) => void;
-  getState: (key: string) => any;
-  destroy: () => void;
-}
+// Redundant interfaces removed, using definitions from HoloScriptPlus.ts
 
 // ============================================================================
 // Optional Chaining Support

@@ -38,6 +38,9 @@ import { HoloScriptRuntime } from './HoloScriptRuntime';
 // Constants (New)
 export * from './constants';
 
+// Performance Tracking System
+export * from './performance';
+
 // Parser
 export { HoloScriptParser } from './HoloScriptParser';
 export { HoloScript2DParser } from './HoloScript2DParser';
@@ -131,6 +134,80 @@ export { HoloScriptRuntime } from './HoloScriptRuntime';
 // HoloScript+ Runtime (NEW)
 export { HoloScriptPlusRuntimeImpl, createRuntime } from './runtime/HoloScriptPlusRuntime';
 export type { RuntimeOptions, Renderer, NodeInstance } from './runtime/HoloScriptPlusRuntime';
+
+// HoloScript+ Speech Recognition (NEW - Phase 16)
+export { 
+  speechRecognizerRegistry, 
+  registerSpeechRecognizer, 
+  getSpeechRecognizer,
+  type SpeechRecognizer,
+  type SpeechRecognizerConfig,
+  type TranscriptionSegment,
+} from './runtime/SpeechRecognizer';
+
+// HoloScript+ Physics (NEW - Phase 17)
+export {
+  physicsEngineRegistry,
+  registerPhysicsEngine,
+  getPhysicsEngine,
+  type PhysicsConfig,
+  type BodyProps,
+  type BodyState,
+  type PhysicsEngine,
+} from './runtime/PhysicsEngine';
+
+export { IslandDetector, type BodyConnection } from './physics/IslandDetector';
+
+// HoloScript+ Navigation (NEW - Phase 18)
+export {
+  navigationEngineRegistry,
+  registerNavigationEngine,
+  getNavigationEngine,
+  type NavigationConfig,
+  type NavDestination,
+  type NavigationEngine,
+} from './runtime/NavigationEngine';
+
+export { flowFieldHandler, type FlowFieldConfig } from './traits/FlowFieldTrait';
+
+// HoloScript+ Streaming (NEW - Phase 19)
+export {
+  assetStreamerRegistry,
+  registerAssetStreamer,
+  getAssetStreamer,
+  StreamPriority,
+  type AssetStreamRequest,
+  type StreamStatus,
+  type AssetStreamer,
+} from './runtime/AssetStreamer';
+
+export { MovementPredictor, type PredictiveWindow } from './runtime/MovementPredictor';
+
+// HoloScript+ Synthesis (NEW - Phase 20)
+export {
+  voiceSynthesizerRegistry,
+  registerVoiceSynthesizer,
+  getVoiceSynthesizer,
+  type VoiceConfig,
+  type VoiceRequest,
+  type VoiceInfo,
+  type VoiceSynthesizer,
+} from './runtime/VoiceSynthesizer';
+
+export { emotionalVoiceHandler, type EmotionalVoiceConfig } from './traits/EmotionalVoiceTrait';
+
+// HoloScript+ Affective Computing (NEW - Phase 21)
+export {
+  emotionDetectorRegistry,
+  registerEmotionDetector,
+  getEmotionDetector,
+  type EmotionConfig,
+  type EmotionSignals,
+  type EmotionInference,
+  type EmotionDetector,
+} from './runtime/EmotionDetector';
+
+export { userMonitorHandler, type UserMonitorConfig } from './traits/UserMonitorTrait';
 
 // HoloScript+ State Management (NEW)
 export { ReactiveState, createState, reactive, effect, computed, bind } from './state/ReactiveState';
@@ -533,6 +610,7 @@ export {
   type OculusViseme,
   type ARKitViseme,
   type VisemeTimestamp,
+  type PhonemeTimestamp,
   type FrequencyBand,
   type LipSyncSession,
   type LipSyncEventType,

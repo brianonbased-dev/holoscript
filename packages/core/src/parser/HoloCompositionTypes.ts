@@ -35,19 +35,12 @@ export interface HoloNode {
 // VALUE TYPES
 // =============================================================================
 
-export type HoloValue =
-  | string
-  | number
-  | boolean
-  | null
-  | HoloValue[]
-  | HoloObject
-  | HoloBindValue;
+export type HoloValue = string | number | boolean | null | HoloValue[] | HoloObject | HoloBindValue;
 
 export interface HoloBindValue {
   __bind: true;
-  source: string;       // e.g., "state.score"
-  transform?: string;   // optional transform function name
+  source: string; // e.g., "state.score"
+  transform?: string; // optional transform function name
 }
 
 export interface HoloObject {
@@ -84,6 +77,15 @@ export interface HoloComposition extends HoloNode {
   transitions: HoloTransition[];
   conditionals: HoloConditionalBlock[];
   iterators: HoloForEachBlock[];
+  // Brittney AI Features
+  npcs: HoloNPC[];
+  quests: HoloQuest[];
+  abilities: HoloAbility[];
+  dialogues: HoloDialogue[];
+  stateMachines: HoloStateMachine[];
+  achievements: HoloAchievement[];
+  talentTrees: HoloTalentTree[];
+  shapes: HoloShape[];
 }
 
 // =============================================================================
@@ -340,6 +342,23 @@ export interface HoloObjectProperty extends HoloNode {
 }
 
 // =============================================================================
+// SHAPE (custom geometry/mesh block)
+// =============================================================================
+
+export interface HoloShape extends HoloNode {
+  type: 'Shape';
+  name: string;
+  shapeType: string; // box, sphere, cylinder, mesh, model, splat, nerf
+  properties: HoloShapeProperty[];
+}
+
+export interface HoloShapeProperty extends HoloNode {
+  type: 'ShapeProperty';
+  key: string;
+  value: HoloValue;
+}
+
+// =============================================================================
 // SPATIAL GROUP
 // =============================================================================
 
@@ -522,8 +541,8 @@ export interface HoloObjectExpression extends HoloNode {
 
 export interface HoloBindExpression extends HoloNode {
   type: 'BindExpression';
-  source: string;       // e.g., "state.score"
-  transform?: string;   // optional transform function name
+  source: string; // e.g., "state.score"
+  transform?: string; // optional transform function name
 }
 
 // =============================================================================
@@ -557,12 +576,303 @@ export interface HoloParseError {
   message: string;
   loc?: SourceLocation;
   code?: string;
+  suggestion?: string; // Helpful suggestion for fixing the error
+  severity?: 'error' | 'warning';
 }
 
 export interface HoloParseWarning {
   message: string;
   loc?: SourceLocation;
   code?: string;
+}
+
+// =============================================================================
+// NPC BEHAVIOR TREES (Brittney AI Feature)
+// =============================================================================
+
+export interface HoloNPC extends HoloNode {
+  type: 'NPC';
+  name: string;
+  npcType?: string;
+  model?: string;
+  properties: HoloNPCProperty[];
+  behaviors: HoloBehavior[];
+  state?: HoloState;
+  dialogueTree?: string; // Reference to dialogue ID
+}
+
+export interface HoloNPCProperty extends HoloNode {
+  type: 'NPCProperty';
+  key: string;
+  value: HoloValue;
+}
+
+export interface HoloBehavior extends HoloNode {
+  type: 'Behavior';
+  name: string;
+  trigger: string;
+  condition?: HoloExpression;
+  actions: HoloBehaviorAction[];
+  timeout?: number;
+  priority?: number;
+}
+
+export interface HoloBehaviorAction extends HoloNode {
+  type: 'BehaviorAction';
+  actionType: 'move' | 'animate' | 'face' | 'damage' | 'heal' | 'spawn' | 'emit' | 'wait' | 'call';
+  config: Record<string, HoloValue>;
+}
+
+// =============================================================================
+// QUEST DEFINITION SYSTEM (Brittney AI Feature)
+// =============================================================================
+
+export interface HoloQuest extends HoloNode {
+  type: 'Quest';
+  name: string;
+  giver?: string;
+  level?: number;
+  questType?: 'fetch' | 'defeat' | 'discover' | 'escort' | 'deliver' | 'custom';
+  objectives: HoloQuestObjective[];
+  rewards: HoloQuestRewards;
+  branches?: HoloQuestBranch[];
+  prerequisites?: string[];
+}
+
+export interface HoloQuestObjective extends HoloNode {
+  type: 'QuestObjective';
+  id: string;
+  description: string;
+  objectiveType: 'discover' | 'defeat' | 'collect' | 'deliver' | 'interact' | 'survive';
+  target: string | HoloExpression;
+  count?: number;
+  optional?: boolean;
+}
+
+export interface HoloQuestRewards extends HoloNode {
+  type: 'QuestRewards';
+  experience?: number;
+  gold?: number;
+  items?: HoloQuestRewardItem[];
+  reputation?: Record<string, number>;
+  unlocks?: string[];
+}
+
+export interface HoloQuestRewardItem extends HoloNode {
+  type: 'QuestRewardItem';
+  id: string;
+  count?: number;
+  rarity?: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+}
+
+export interface HoloQuestBranch extends HoloNode {
+  type: 'QuestBranch';
+  condition: HoloExpression;
+  text?: string;
+  rewardMultiplier?: number;
+  nextQuest?: string;
+}
+
+// =============================================================================
+// ABILITY/SPELL DEFINITION (Brittney AI Feature)
+// =============================================================================
+
+export interface HoloAbility extends HoloNode {
+  type: 'Ability';
+  name: string;
+  abilityType: 'spell' | 'skill' | 'passive' | 'ultimate';
+  class?: string;
+  level?: number;
+  stats: HoloAbilityStats;
+  scaling?: HoloAbilityScaling;
+  effects: HoloAbilityEffects;
+  projectile?: HoloAbilityProjectile;
+}
+
+export interface HoloAbilityStats extends HoloNode {
+  type: 'AbilityStats';
+  manaCost?: number;
+  staminaCost?: number;
+  cooldown?: number;
+  castTime?: number;
+  range?: number;
+  radius?: number;
+  duration?: number;
+}
+
+export interface HoloAbilityScaling extends HoloNode {
+  type: 'AbilityScaling';
+  baseDamage?: number;
+  spellPower?: number;
+  attackPower?: number;
+  levelScale?: number;
+}
+
+export interface HoloAbilityEffects extends HoloNode {
+  type: 'AbilityEffects';
+  impact?: HoloAbilityImpact;
+  damage?: HoloAbilityDamage;
+  buff?: HoloAbilityBuff;
+  debuff?: HoloAbilityDebuff;
+}
+
+export interface HoloAbilityImpact extends HoloNode {
+  type: 'AbilityImpact';
+  animation?: string;
+  particle?: string;
+  sound?: string;
+  shake?: { intensity: number; duration: number };
+}
+
+export interface HoloAbilityDamage extends HoloNode {
+  type: 'AbilityDamage';
+  damageType: 'physical' | 'fire' | 'ice' | 'lightning' | 'arcane' | 'holy' | 'shadow';
+  canCrit?: boolean;
+  critMultiplier?: number;
+}
+
+export interface HoloAbilityBuff extends HoloNode {
+  type: 'AbilityBuff';
+  stat: string;
+  amount: number;
+  duration: number;
+  stacks?: number;
+}
+
+export interface HoloAbilityDebuff extends HoloNode {
+  type: 'AbilityDebuff';
+  effect: 'slow' | 'stun' | 'silence' | 'root' | 'burn' | 'freeze' | 'poison';
+  duration: number;
+  magnitude?: number;
+}
+
+export interface HoloAbilityProjectile extends HoloNode {
+  type: 'AbilityProjectile';
+  model?: string;
+  speed?: number;
+  lifetime?: number;
+  trail?: string;
+  homing?: boolean;
+}
+
+// =============================================================================
+// ENHANCED DIALOGUE TREES (Brittney AI Feature)
+// =============================================================================
+
+export interface HoloDialogue extends HoloNode {
+  type: 'Dialogue';
+  id: string;
+  character?: string;
+  emotion?: 'friendly' | 'angry' | 'sad' | 'neutral' | 'excited' | 'mysterious';
+  content: string | HoloLocalizedText;
+  options: HoloDialogueOption[];
+  condition?: HoloExpression;
+  nextDialogue?: string;
+}
+
+export interface HoloDialogueOption extends HoloNode {
+  type: 'DialogueOption';
+  text: string | HoloLocalizedText;
+  action?: HoloStatement[];
+  unlocked?: HoloExpression;
+  emotion?: string;
+  next?: string; // Next dialogue ID
+}
+
+export interface HoloLocalizedText extends HoloNode {
+  type: 'LocalizedText';
+  id: string;
+  translations: Record<string, string>; // { "en": "Hello", "es": "Hola" }
+  fallback?: string;
+}
+
+// =============================================================================
+// STATE MACHINES (Brittney AI Feature)
+// =============================================================================
+
+export interface HoloStateMachine extends HoloNode {
+  type: 'StateMachine';
+  name: string;
+  initialState: string;
+  states: Record<string, HoloState_Machine>;
+}
+
+export interface HoloState_Machine extends HoloNode {
+  type: 'State_Machine';
+  name: string;
+  entry?: HoloStatement[];
+  exit?: HoloStatement[];
+  actions: HoloBehaviorAction[];
+  transitions: HoloStateTransition[];
+  onDamage?: HoloStatement[];
+  timeout?: number;
+  onTimeout?: HoloStatement[];
+}
+
+export interface HoloStateTransition extends HoloNode {
+  type: 'StateTransition';
+  target: string;
+  condition?: HoloExpression;
+  event?: string;
+}
+
+// =============================================================================
+// ACHIEVEMENTS (Brittney AI Feature)
+// =============================================================================
+
+export interface HoloAchievement extends HoloNode {
+  type: 'Achievement';
+  name: string;
+  description: string;
+  points?: number;
+  condition: HoloExpression;
+  reward?: HoloAchievementReward;
+  progress?: HoloExpression;
+  hidden?: boolean;
+}
+
+export interface HoloAchievementReward extends HoloNode {
+  type: 'AchievementReward';
+  title?: string;
+  badge?: string;
+  bonus?: Record<string, number>;
+  unlocks?: string[];
+}
+
+// =============================================================================
+// TALENT TREES (Brittney AI Feature)
+// =============================================================================
+
+export interface HoloTalentTree extends HoloNode {
+  type: 'TalentTree';
+  name: string;
+  class?: string;
+  rows: HoloTalentRow[];
+}
+
+export interface HoloTalentRow extends HoloNode {
+  type: 'TalentRow';
+  tier: number;
+  nodes: HoloTalentNode[];
+}
+
+export interface HoloTalentNode extends HoloNode {
+  type: 'TalentNode';
+  id: string;
+  name: string;
+  description?: string;
+  points: number;
+  maxPoints?: number;
+  requires?: string[];
+  effect: HoloTalentEffect;
+  icon?: string;
+}
+
+export interface HoloTalentEffect extends HoloNode {
+  type: 'TalentEffect';
+  effectType: 'spell' | 'upgrade' | 'passive' | 'unlock';
+  target?: string;
+  bonus?: Record<string, number>;
 }
 
 // =============================================================================

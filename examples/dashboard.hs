@@ -179,14 +179,14 @@ stream metricsStream {
   to: updateDashboard
 }
 
-function refreshData() {
+function "refreshData" {
   show loader
   fetch metricsStream
   animate charts with transition "smooth"
   hide loader
 }
 
-function updateDashboard(data: object) {
+function "updateDashboard" {
   update visitorsValue with data.visitors
   update revenueValue with data.revenue
   redraw charts with data.timeSeries

@@ -68,7 +68,7 @@
       "patterns": [
         {
           "name": "entity.name.function.decorator.vr-trait.holoscript",
-          "match": "@(grabbable|throwable|pointable|hoverable|scalable|rotatable|stackable|snappable|breakable|stretchable|moldable|skeleton|body|face|expressive|hair|clothing|hands|character_voice|locomotion|poseable|morph|networked|proactive|recordable|streamable|camera|video|trackable|survey|abtest|heatmap|shareable|embeddable|qr|collaborative|particle|transition|filter|trail|spatial_audio|voice|reactive_audio|narrator|responsive|procedural|captioned|timeline|choreography)\\b"
+          "match": "@(grabbable|throwable|pointable|hoverable|scalable|rotatable|stackable|snappable|breakable|stretchable|moldable|skeleton|body|face|expressive|hair|clothing|hands|character_voice|locomotion|poseable|morph|networked|proactive|recordable|streamable|camera|video|trackable|survey|abtest|heatmap|shareable|embeddable|qr|collaborative|particle|transition|filter|trail|spatial_audio|voice|reactive_audio|narrator|responsive|procedural|captioned|timeline|choreography|gaussian_splat|nerf|volumetric_video)\\b"
         },
         {
           "name": "entity.name.function.decorator.holoscript",
@@ -96,7 +96,7 @@
       "patterns": [
         {
           "name": "support.type.primitive.holoscript",
-          "match": "\\b(orb|sphere|cube|box|cylinder|cone|plane|mesh|avatar|light|camera|scene|group|text|panel|button|slider|zone)\\b"
+          "match": "\\b(orb|sphere|cube|box|cylinder|cone|plane|mesh|avatar|dna|splat|nerf|volumetric_video|light|camera|scene|group|text|panel|button|slider|zone)\\b"
         }
       ]
     },

@@ -8,7 +8,7 @@
  * @version 2.0.0
  */
 
-import type { TraitHandler, TraitContext } from './VRTraitSystem';
+import type { TraitHandler, TraitContext } from './TraitTypes';
 import type { HSPlusNode, Vector3 } from '../types/HoloScriptPlus';
 
 // =============================================================================
@@ -299,7 +299,7 @@ function isUSDZFile(source: string): boolean {
 /** @internal */
 export function applyUSDAxisConversion(upAxis: 'y' | 'z', position: Vector3): Vector3 {
   if (upAxis === 'z') {
-    return [position[0], position[2], -position[1]];
+    return [(position as any)[0], (position as any)[2], -(position as any)[1]];
   }
   return position;
 }

@@ -17,6 +17,7 @@ export interface CLIOptions {
   brittneyUrl?: string;
   target?: string;
   watch: boolean;
+  split: boolean;
 }
 
 const DEFAULT_OPTIONS: CLIOptions = {
@@ -30,6 +31,7 @@ const DEFAULT_OPTIONS: CLIOptions = {
   dev: false,
   brittneyUrl: process.env.BRITTNEY_SERVICE_URL,
   watch: false,
+  split: false,
 };
 
 export function parseArgs(args: string[]): CLIOptions {
@@ -101,6 +103,9 @@ export function parseArgs(args: string[]): CLIOptions {
       case '-w':
       case '--watch':
         options.watch = true;
+        break;
+      case '--split':
+        options.split = true;
         break;
     }
     i++;

@@ -63,8 +63,8 @@ scene QuantumArena {
       animation pulse {
         property: 'material.emissiveIntensity'
         keyframes: [
-          { time: 0, value: 0.2 },
-          { time: 500, value: 0.5 },
+          { time: 0, value: 0.2 }
+          { time: 500, value: 0.5 }
           { time: 1000, value: 0.2 }
         ]
         loop: infinite
@@ -165,9 +165,7 @@ scene QuantumArena {
         dashCooldown: 2000
         dashDistance: 5
 
-        validation: (target) => {
-          return physics.raycast(this.position, target).hit?.tag !== 'outOfBounds'
-        }
+        validation: "(target) => { return physics.raycast(this.position, target).hit?.tag !== 'outOfBounds' }"
       }
 
       health HealthSystem {
@@ -256,11 +254,11 @@ scene QuantumArena {
           type: 'shader'
           shader: 'shield_fresnel'
           uniforms: {
-            shieldStrength: () => this.shield / 50
+            shieldStrength: "() => this.shield / 50"
             color: '#3b82f6'
           }
         }
-        visible: () => this.shield > 0
+        visible: "() => this.shield > 0"
       }
 
       ui HealthBar {
@@ -271,7 +269,7 @@ scene QuantumArena {
         bar: {
           width: 0.5
           height: 0.06
-          current: () => this.health
+          current: "() => this.health"
           max: 100
           colors: {
             high: '#22c55e'
@@ -284,9 +282,9 @@ scene QuantumArena {
       text PlayerName {
         position: [0, 2.4, 0]
         billboard: true
-        content: () => this.displayName
+        content: "() => this.displayName"
         fontSize: 0.08
-        color: () => teams[this.team]?.color || '#ffffff'
+        color: "() => teams[this.team]?.color || '#ffffff'"
       }
     }
   }
@@ -325,17 +323,17 @@ scene QuantumArena {
         }
         firing: {
           enter: { this.onFire() }
-          after: () => this.fireRate -> 'cooldown'
+          after: "() => this.fireRate -> 'cooldown'"
         }
         cooldown: {
-          after: () => this.cooldownTime -> 'idle'
+          after: "() => this.cooldownTime -> 'idle'"
         }
         reloading: {
           enter: {
             audio.play3d('reload', this.position)
             haptics.pattern(this.owner.hand, 'reload')
           }
-          after: () => this.reloadTime -> 'idle'
+          after: "() => this.reloadTime -> 'idle'"
         }
       }
     }
@@ -390,10 +388,10 @@ scene QuantumArena {
     }
 
     animation fireFlash {
-      trigger: 'onFire'
+      trigger: "'onFire'"
       property: 'MuzzleGlow.intensity'
       keyframes: [
-        { time: 0, value: 2 },
+        { time: 0, value: 2 }
         { time: 50, value: 0 }
       ]
     }
@@ -466,7 +464,7 @@ scene QuantumArena {
       particles ChargeEffect {
         emitter: 'point'
         position: [0, 0.08, 0.5]
-        emission: { rate: () => this.chargeLevel * 100 }
+        emission: { rate: "() => this.chargeLevel * 100 "}
         particle: {
           texture: 'quantum_particle'
           size: [0.02, 0.05]
@@ -728,7 +726,7 @@ scene QuantumArena {
             this.timeRemaining -= deltaTime
           }
           transitions: {
-            timeUp: { when: () => this.timeRemaining <= 0, to: 'starting' }
+            timeUp: { when: "() => this.timeRemaining <= 0", to: 'starting' }
           }
         }
 
@@ -752,8 +750,8 @@ scene QuantumArena {
             this.checkWinCondition()
           }
           transitions: {
-            timeUp: { when: () => this.timeRemaining <= 0, to: 'roundEnd' }
-            scoreReached: { when: () => this.checkScoreWin(), to: 'roundEnd' }
+            timeUp: { when: "() => this.timeRemaining <= 0", to: 'roundEnd' }
+            scoreReached: { when: "() => this.checkScoreWin()", to: 'roundEnd' }
           }
         }
 
@@ -847,7 +845,7 @@ scene QuantumArena {
   // === UI OVERLAYS ===
   ui GameHUD {
     anchor: 'screen'
-    visible: () => game.state === 'playing'
+    visible: "() => game.state === 'playing'"
 
     children: {
       group TopBar {
@@ -855,7 +853,7 @@ scene QuantumArena {
         anchor: 'top-center'
 
         text Timer {
-          content: () => formatTime(game.timeRemaining)
+          content: "() => formatTime(game.timeRemaining)"
           fontSize: 32
           color: '#ffffff'
           font: 'monospace'
@@ -866,14 +864,14 @@ scene QuantumArena {
 
           text AlphaScore {
             position: [-0.15, 0, 0]
-            content: () => `ALPHA: ${game.scores.alpha}`
+            content: "() => `ALPHA: $"{game.scores.alpha}`
             fontSize: 24
             color: '#ef4444'
           }
 
           text BetaScore {
             position: [0.15, 0, 0]
-            content: () => `BETA: ${game.scores.beta}`
+            content: "() => `BETA: $"{game.scores.beta}`
             fontSize: 24
             color: '#3b82f6'
           }
@@ -887,7 +885,7 @@ scene QuantumArena {
         bar HealthBar {
           width: 200
           height: 20
-          current: () => player.health
+          current: "() => player.health"
           max: 100
           color: '#22c55e'
           background: '#1f2937'
@@ -898,7 +896,7 @@ scene QuantumArena {
           position: [0, 25, 0]
           width: 200
           height: 12
-          current: () => player.shield
+          current: "() => player.shield"
           max: 100
           color: '#3b82f6'
           background: '#1f2937'
@@ -907,7 +905,7 @@ scene QuantumArena {
 
         text AmmoCount {
           position: [120, 10, 0]
-          content: () => player.equipped ? `${player.equipped.ammo}` : '--'
+          content: "() => player.equipped ? `$"{player.equipped.ammo}` : '--'
           fontSize: 28
           color: '#ffffff'
         }
@@ -932,7 +930,7 @@ scene QuantumArena {
 }
 
 // === HELPER FUNCTIONS ===
-function formatTime(ms) {
+function "formatTime" {
   let seconds = Math.floor(ms / 1000)
   let minutes = Math.floor(seconds / 60)
   seconds = seconds % 60

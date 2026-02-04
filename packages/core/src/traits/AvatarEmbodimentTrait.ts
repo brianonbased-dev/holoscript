@@ -24,7 +24,7 @@
  * @version 2.0.0
  */
 
-import type { TraitHandler } from './VRTraitSystem';
+import type { TraitHandler } from './TraitTypes';
 import type { LipSyncConfig } from './LipSyncTrait';
 import type { EmotionDirectiveConfig, EmotionTaggedResponse } from './EmotionDirectiveTrait';
 import type { VoiceOutputConfig } from './VoiceOutputTrait';
@@ -215,14 +215,16 @@ export const avatarEmbodimentHandler: TraitHandler<any> = {
     const state = (node as any).__avatarEmbodimentState as AvatarEmbodimentState | undefined;
     if (!state) return;
 
+    const eventType = typeof event === 'string' ? event : event.type;
+
     // Handle pipeline events
-    if (event === 'embody') {
+    if (eventType === 'embody') {
       state.isEmbodied = true;
       context.emit('on_avatar_embodied', { node });
-    } else if (event === 'disembody') {
+    } else if (eventType === 'disembody') {
       state.isEmbodied = false;
       context.emit('on_avatar_disembodied', { node });
-    } else if (event === 'calibrate') {
+    } else if (eventType === 'calibrate') {
       state.calibrated = true;
       context.emit('on_avatar_calibrated', { node });
     }

@@ -5,6 +5,10 @@
  * supporting unit tests, scene tests, and VR/AR component testing.
  */
 
+export { VisualTestRunner, type VisualTestConfig } from './VisualTestRunner';
+export { SceneTester, type SceneTestOptions } from './SceneTester';
+export * from './visual'; // Export visual testing framework
+
 // ============================================================================
 // Types
 // ============================================================================

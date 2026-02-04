@@ -10,7 +10,7 @@
  * @version 1.0.0
  */
 
-import type { TraitHandler } from './VRTraitSystem';
+import type { TraitHandler } from './TraitTypes';
 
 // =============================================================================
 // TYPES
@@ -68,22 +68,22 @@ export const neuralLinkHandler: TraitHandler<NeuralLinkConfig> = {
     const state = (node as any).__neuralLinkState;
     if (!state) return;
 
-    if (event.type === 'neural_link_execute') {
+    if ((event as any).type === 'neural_link_execute') {
       state.neural_status = 'inferring';
       context.emit('on_neural_inference_start', {
         nodeId: (node as any).id,
         model: config.model,
-        prompt: event.data?.prompt,
+        prompt: (event as any).data?.prompt,
       });
     }
 
-    if (event.type === 'neural_link_response') {
+    if ((event as any).type === 'neural_link_response') {
       state.neural_status = 'idle';
-      state.last_response = event.data?.text;
-      state.last_inference_time = event.data?.generationTime ?? 0;
+      state.last_response = (event as any).data?.text;
+      state.last_inference_time = (event as any).data?.generationTime ?? 0;
       context.emit('on_neural_response', {
         nodeId: (node as any).id,
-        text: event.data?.text,
+        text: (event as any).data?.text,
       });
     }
   },

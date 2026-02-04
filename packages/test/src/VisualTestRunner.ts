@@ -45,12 +45,23 @@ export class VisualTestRunner {
     const page = await this.browser.newPage();
     await page.setViewport({ width: this.config.width, height: this.config.height });
     
+    // Log console errors from the page
+    page.on('console', msg => {
+      if (msg.type() === 'error') console.error('PAGE ERROR:', msg.text());
+    });
+    
     // Set content and wait for "networkidle0" to ensure assets load
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     
-    // Wait slightly more for any WebGL initialization if needed (mocked here)
-    // In a real WebGL app, we might check for a canvas ready event
-    await new Promise(r => setTimeout(r, 100));
+    // Wait for the custom rendered signal or timeout
+    try {
+      await page.waitForFunction('window.HOLO_RENDERED === true', { timeout: 2000 });
+    } catch (e) {
+      console.warn('Timeout waiting for HOLO_RENDERED signal. Taking screenshot anyway.');
+    }
+    
+    // Final wait for WebGL frames to finish
+    await new Promise(r => setTimeout(r, 200));
 
     const screenshot = await page.screenshot({ type: 'png' });
     await page.close();

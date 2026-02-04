@@ -482,6 +482,10 @@
           const glowMatch = props.match(/glow\s*:\s*true/i);
           const matType = matMatch ? matMatch[1].toLowerCase() : 'standard';
 
+          // Parse texture
+          const textureMatch = props.match(/texture\s*:\s*["']([^"']+)["']/);
+          const textureUrl = textureMatch ? textureMatch[1] : null;
+
           let material;
           switch (matType) {
             case 'glass':
@@ -517,6 +521,29 @@
                 emissive: glowMatch ? color : 0x000000,
                 emissiveIntensity: glowMatch ? 0.3 : 0
               });
+          }
+
+          // Load texture if specified
+          if (textureUrl) {
+            // Parse texture repeat and offset
+            const repeatMatch = props.match(/textureRepeat\s*:\s*\[([^\]]+)\]/);
+            const offsetMatch = props.match(/textureOffset\s*:\s*\[([^\]]+)\]/);
+            const repeat = repeatMatch ? repeatMatch[1].split(',').map(n => parseFloat(n.trim()) || 1) : [1, 1];
+            const offset = offsetMatch ? offsetMatch[1].split(',').map(n => parseFloat(n.trim()) || 0) : [0, 0];
+
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.crossOrigin = 'anonymous';
+            textureLoader.load(textureUrl, (texture) => {
+              texture.wrapS = THREE.RepeatWrapping;
+              texture.wrapT = THREE.RepeatWrapping;
+              texture.repeat.set(repeat[0], repeat[1]);
+              texture.offset.set(offset[0], offset[1]);
+              material.map = texture;
+              material.needsUpdate = true;
+              console.log('Loaded texture:', textureUrl, 'repeat:', repeat, 'offset:', offset);
+            }, undefined, (err) => {
+              console.warn('Failed to load texture:', textureUrl, err);
+            });
           }
 
           const mesh = new THREE.Mesh(geometry, material);

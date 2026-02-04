@@ -139,7 +139,7 @@ export class BuiltinRegistry {
       description: 'Speech-to-text recognition',
       backends: ['whisper.cpp', 'browser', 'auto'],
       create: async (config) => {
-        const { SpeechRecognizer } = await import('@holoscript/voice');
+        const { SpeechRecognizer } = await import('@hololand/voice');
         const recognizer = new SpeechRecognizer({
           backend: config.backend as 'whisper' | 'browser' | 'auto' || 'auto',
         });
@@ -153,7 +153,7 @@ export class BuiltinRegistry {
       description: 'Text-to-speech synthesis',
       backends: ['browser', 'elevenlabs', 'azure'],
       create: async (config) => {
-        const { TextToSpeech } = await import('@holoscript/voice');
+        const { TextToSpeech } = await import('@hololand/voice');
         return new TextToSpeech({
           backend: config.backend as 'browser' | 'elevenlabs' | 'azure' || 'browser',
           apiKey: config.apiKey as string,
@@ -167,7 +167,7 @@ export class BuiltinRegistry {
       backends: ['cpu', 'gpu'],
       create: async (config) => {
         if (config.backend === 'gpu') {
-          const { FlowFieldCompute } = await import('@holoscript/gpu');
+          const { FlowFieldCompute } = await import('@hololand/gpu');
           const ff = new FlowFieldCompute({
             width: config.width as number || 64,
             height: config.height as number || 64,
@@ -176,7 +176,7 @@ export class BuiltinRegistry {
           await ff.initialize();
           return ff;
         } else {
-          const { FlowFieldGenerator } = await import('@holoscript/navigation');
+          const { FlowFieldGenerator } = await import('@hololand/navigation');
           return new FlowFieldGenerator({
             width: config.width as number || 64,
             height: config.height as number || 64,
@@ -191,7 +191,7 @@ export class BuiltinRegistry {
       description: 'VR frustration detection',
       backends: ['heuristic'],
       create: async (config) => {
-        const { FrustrationEstimator } = await import('@holoscript/gestures');
+        const { FrustrationEstimator } = await import('@hololand/gestures');
         return new FrustrationEstimator({
           frustrationThreshold: config.threshold as number || 0.6,
         });
@@ -203,7 +203,7 @@ export class BuiltinRegistry {
       description: 'WebGPU compute context',
       backends: ['webgpu'],
       create: async (config) => {
-        const { GPUContext } = await import('@holoscript/gpu');
+        const { GPUContext } = await import('@hololand/gpu');
         const ctx = new GPUContext({
           powerPreference: config.powerPreference as 'low-power' | 'high-performance' || 'high-performance',
         });

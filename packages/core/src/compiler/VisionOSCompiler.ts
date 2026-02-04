@@ -28,6 +28,7 @@ import type {
   HoloEffects,
   HoloValue,
 } from '../parser/HoloCompositionTypes';
+import { generateTraitCode, getRequiredImports, getMinVisionOSVersion } from './VisionOSTraitMap';
 
 export interface VisionOSCompilerOptions {
   structName?: string;
@@ -59,7 +60,22 @@ export class VisionOSCompiler {
     this.emit('import SwiftUI');
     this.emit('import RealityKit');
     this.emit('import RealityKitContent');
-    if (composition.audio?.length) this.emit('import AVFoundation');
+
+    // Dynamic imports based on traits used
+    const allTraits = this.collectAllTraits(composition);
+    const requiredImports = getRequiredImports(allTraits);
+    for (const imp of requiredImports) {
+      this.emit(`import ${imp}`);
+    }
+    if (composition.audio?.length && !requiredImports.includes('AVFoundation')) {
+      this.emit('import AVFoundation');
+    }
+
+    // Check minimum visionOS version
+    const minVersion = getMinVisionOSVersion(allTraits);
+    if (minVersion !== '1.0') {
+      this.emit(`// Requires visionOS ${minVersion}+`);
+    }
     this.emit('');
 
     // State class
@@ -251,6 +267,12 @@ export class VisionOSCompiler {
   }
 
   private compileObject(obj: HoloObjectDecl, parentVar: string): void {
+    // Check if this is a UI component
+    if (this.isUIComponent(obj)) {
+      this.compileUIComponent(obj, parentVar);
+      return;
+    }
+
     const varName = this.sanitizeName(obj.name);
     const meshType = this.findObjProp(obj, 'mesh') || this.findObjProp(obj, 'type') || 'cube';
     const isText = meshType === 'text';
@@ -336,77 +358,29 @@ export class VisionOSCompiler {
 
       this.emit(`${varName}.name = "${obj.name}"`);
 
-      // Physics
+      // Compile traits using VisionOSTraitMap
       if (obj.traits) {
         for (const trait of obj.traits) {
-          if (trait.name === 'collidable') {
-            this.emit(`${varName}.components.set(CollisionComponent(shapes: [.generateConvex(from: ${varName}Mesh)]))`);
-          } else if (trait.name === 'physics' || trait.name === 'grabbable') {
-            this.emit(`${varName}.components.set(CollisionComponent(shapes: [.generateConvex(from: ${varName}Mesh)]))`);
-            const mass = trait.config?.mass || 1.0;
-            this.emit(`${varName}.components.set(PhysicsBodyComponent(massProperties: .init(mass: ${mass}), mode: .dynamic))`);
-          }
-          if (trait.name === 'grabbable') {
-            this.emit(`${varName}.components.set(InputTargetComponent())`);
-          }
-          // Environment Understanding
-          if (trait.name === 'anchor') {
-            this.emit(`// @anchor — AnchorEntity with AnchoringComponent`);
-            this.emit(`${varName}.components.set(AnchoringComponent(.init(target: .${trait.config?.anchor_type || 'plane'})))`);
-          } else if (trait.name === 'plane_detection') {
-            this.emit(`// @plane_detection — ARKit PlaneDetectionProvider`);
-          } else if (trait.name === 'mesh_detection') {
-            this.emit(`// @mesh_detection — ARKit SceneReconstructionProvider`);
-          } else if (trait.name === 'hand_tracking') {
-            this.emit(`// @hand_tracking — HandTrackingProvider`);
-          } else if (trait.name === 'eye_tracking') {
-            this.emit(`// @eye_tracking — gaze input via ARKit`);
-          } else if (trait.name === 'occlusion') {
-            this.emit(`// @occlusion — RealityKit automatic occlusion`);
-          } else if (trait.name === 'light_estimation') {
-            this.emit(`// @light_estimation — ARKit environmental lighting`);
-          }
-          // Spatial Audio
-          else if (trait.name === 'ambisonics' || trait.name === 'hrtf' || trait.name === 'reverb_zone') {
-            this.emit(`// @${trait.name} — RealityKit SpatialAudioComponent`);
-            this.emit(`${varName}.components.set(SpatialAudioComponent())`);
-          } else if (trait.name === 'audio_occlusion' || trait.name === 'audio_portal' || trait.name === 'audio_material' || trait.name === 'head_tracked_audio') {
-            this.emit(`// @${trait.name} — RealityKit spatial audio: ${JSON.stringify(trait.config || {})}`);
-          }
-          // Volumetric Content
-          else if (trait.name === 'gaussian_splat' || trait.name === 'nerf' || trait.name === 'volumetric_video' || trait.name === 'point_cloud') {
-            this.emit(`// @${trait.name} — custom Metal renderer: ${JSON.stringify(trait.config || {})}`);
-          } else if (trait.name === 'photogrammetry') {
-            this.emit(`// @photogrammetry — Object Capture API`);
-          }
-          // Accessibility
-          else if (trait.name === 'accessible') {
-            this.emit(`${varName}.components.set(AccessibilityComponent())`);
-            if (trait.config?.label) this.emit(`// accessibilityLabel: "${trait.config.label}"`);
-          } else if (trait.name === 'alt_text' || trait.name === 'screen_reader' || trait.name === 'high_contrast' || trait.name === 'motion_reduced' || trait.name === 'magnifiable') {
-            this.emit(`// @${trait.name} — SwiftUI accessibility: ${JSON.stringify(trait.config || {})}`);
-          }
-          // Geospatial
-          else if (trait.name === 'geospatial' || trait.name === 'geospatial_anchor' || trait.name === 'terrain_anchor' || trait.name === 'rooftop_anchor') {
-            this.emit(`// @${trait.name} — ARKit world tracking with location anchors`);
-          }
-          // Physics Expansion
-          else if (trait.name === 'cloth' || trait.name === 'fluid' || trait.name === 'soft_body' || trait.name === 'destruction') {
-            this.emit(`// @${trait.name} — custom Metal compute physics: ${JSON.stringify(trait.config || {})}`);
-          } else if (trait.name === 'wind') {
-            this.emit(`// @wind — PhysicsSimulationComponent with wind forces`);
-          }
-          // Catch-all
-          else if (trait.name !== 'collidable' && trait.name !== 'physics' && trait.name !== 'grabbable') {
-            this.emit(`// @${trait.name}: ${JSON.stringify(trait.config || {})}`);
+          const config = trait.config || {};
+          const traitCode = generateTraitCode(trait.name, varName, config);
+          for (const line of traitCode) {
+            if (line) this.emit(line);
           }
         }
       }
     }
 
-    // Position, scale
+    // Position, rotation, scale
     const pos = this.findObjProp(obj, 'position');
     if (pos) this.emit(`${varName}.position = ${this.toSIMD3(pos as any)}`);
+    const rot = this.findObjProp(obj, 'rotation');
+    if (rot && Array.isArray(rot)) {
+      // Convert degrees to radians for RealityKit
+      const radX = ((rot[0] as number) * Math.PI) / 180;
+      const radY = ((rot[1] as number) * Math.PI) / 180;
+      const radZ = ((rot[2] as number) * Math.PI) / 180;
+      this.emit(`${varName}.orientation = simd_quatf(angle: ${radX.toFixed(4)}, axis: SIMD3<Float>(1, 0, 0)) * simd_quatf(angle: ${radY.toFixed(4)}, axis: SIMD3<Float>(0, 1, 0)) * simd_quatf(angle: ${radZ.toFixed(4)}, axis: SIMD3<Float>(0, 0, 1))`);
+    }
     const scale = this.findObjProp(obj, 'scale');
     if (scale) this.emit(`${varName}.scale = ${this.toSIMD3(scale as any)}`);
 
@@ -556,6 +530,201 @@ export class VisionOSCompiler {
     for (const effect of effects.effects) {
       this.emit(`// Effect: ${effect.effectType} — ${JSON.stringify(effect.properties)}`);
     }
+  }
+
+  /**
+   * Compile UI component to SwiftUI attachment
+   */
+  private compileUIComponent(obj: HoloObjectDecl, parentVar: string): void {
+    const varName = this.sanitizeName(obj.name);
+    const uiType = this.findObjProp(obj, 'type') as string || 'panel';
+
+    this.emit('');
+    this.emit(`// UI Component: ${obj.name}`);
+
+    switch (uiType) {
+      case 'ui_panel':
+        this.compileUIPanel(obj, varName, parentVar);
+        break;
+      case 'ui_button':
+        this.compileUIButton(obj, varName, parentVar);
+        break;
+      case 'ui_text':
+        this.compileUIText(obj, varName, parentVar);
+        break;
+      case 'ui_slider':
+        this.compileUISlider(obj, varName, parentVar);
+        break;
+      case 'ui_input':
+        this.compileUIInput(obj, varName, parentVar);
+        break;
+      case 'ui_image':
+        this.compileUIImage(obj, varName, parentVar);
+        break;
+      default:
+        this.emit(`// Unknown UI component type: ${uiType}`);
+    }
+  }
+
+  private compileUIPanel(obj: HoloObjectDecl, varName: string, parentVar: string): void {
+    const width = this.findObjProp(obj, 'width') || 400;
+    const height = this.findObjProp(obj, 'height') || 300;
+    const pos = this.findObjProp(obj, 'position') as number[] | undefined;
+
+    this.emit(`// SwiftUI Panel attachment for "${obj.name}"`);
+    this.emit(`let ${varName} = Entity()`);
+    this.emit(`${varName}.name = "${obj.name}"`);
+
+    if (pos) {
+      this.emit(`${varName}.position = ${this.toSIMD3(pos)}`);
+    }
+
+    this.emit(`// Attach SwiftUI view via ViewAttachmentComponent`);
+    this.emit(`// ${varName}.components.set(ViewAttachmentComponent {`);
+    this.emit(`//     VStack {`);
+
+    // Compile children
+    if (obj.children) {
+      for (const child of obj.children) {
+        this.emit(`//         // Child: ${child.name}`);
+      }
+    }
+
+    this.emit(`//     }`);
+    this.emit(`//     .frame(width: ${width}, height: ${height})`);
+    this.emit(`// })`);
+    this.emit(`${parentVar}.addChild(${varName})`);
+  }
+
+  private compileUIButton(obj: HoloObjectDecl, varName: string, parentVar: string): void {
+    const text = this.findObjProp(obj, 'text') || 'Button';
+    const pos = this.findObjProp(obj, 'position') as number[] | undefined;
+
+    this.emit(`let ${varName} = Entity()`);
+    this.emit(`${varName}.name = "${obj.name}"`);
+
+    if (pos) {
+      this.emit(`${varName}.position = ${this.toSIMD3(pos)}`);
+    }
+
+    this.emit(`// SwiftUI Button: "${text}"`);
+    this.emit(`// Implement via ViewAttachmentComponent with Button { Text("${text}") }`);
+    this.emit(`${varName}.components.set(InputTargetComponent())`);
+    this.emit(`${varName}.components.set(CollisionComponent(shapes: [.generateBox(size: SIMD3<Float>(0.2, 0.08, 0.01))]))`);
+    this.emit(`${parentVar}.addChild(${varName})`);
+  }
+
+  private compileUIText(obj: HoloObjectDecl, varName: string, parentVar: string): void {
+    const content = this.findObjProp(obj, 'content') || this.findObjProp(obj, 'text') || '';
+    const fontSize = this.findObjProp(obj, 'fontSize') || 16;
+    const color = this.findObjProp(obj, 'color') || '#ffffff';
+
+    this.emit(`let ${varName}Mesh = MeshResource.generateText("${content}",`);
+    this.emit(`    extrusionDepth: 0.001,`);
+    this.emit(`    font: .systemFont(ofSize: ${fontSize}),`);
+    this.emit(`    containerFrame: .zero,`);
+    this.emit(`    alignment: .center,`);
+    this.emit(`    lineBreakMode: .byWordWrapping)`);
+    this.emit(`let ${varName} = ModelEntity(mesh: ${varName}Mesh, materials: [SimpleMaterial(color: ${this.toUIColor(color)}, isMetallic: false)])`);
+    this.emit(`${varName}.name = "${obj.name}"`);
+    this.emit(`${parentVar}.addChild(${varName})`);
+  }
+
+  private compileUISlider(obj: HoloObjectDecl, varName: string, parentVar: string): void {
+    const min = this.findObjProp(obj, 'min') ?? 0;
+    const max = this.findObjProp(obj, 'max') ?? 100;
+    const value = this.findObjProp(obj, 'value') ?? 50;
+    const pos = this.findObjProp(obj, 'position') as number[] | undefined;
+
+    this.emit(`let ${varName} = Entity()`);
+    this.emit(`${varName}.name = "${obj.name}"`);
+
+    if (pos) {
+      this.emit(`${varName}.position = ${this.toSIMD3(pos)}`);
+    }
+
+    this.emit(`// SwiftUI Slider: min=${min}, max=${max}, value=${value}`);
+    this.emit(`// Implement via ViewAttachmentComponent with Slider(value: $value, in: ${min}...${max})`);
+    this.emit(`${varName}.components.set(InputTargetComponent())`);
+    this.emit(`${parentVar}.addChild(${varName})`);
+  }
+
+  private compileUIInput(obj: HoloObjectDecl, varName: string, parentVar: string): void {
+    const placeholder = this.findObjProp(obj, 'placeholder') || '';
+    const pos = this.findObjProp(obj, 'position') as number[] | undefined;
+
+    this.emit(`let ${varName} = Entity()`);
+    this.emit(`${varName}.name = "${obj.name}"`);
+
+    if (pos) {
+      this.emit(`${varName}.position = ${this.toSIMD3(pos)}`);
+    }
+
+    this.emit(`// SwiftUI TextField with placeholder: "${placeholder}"`);
+    this.emit(`// Implement via ViewAttachmentComponent with TextField("${placeholder}", text: $text)`);
+    this.emit(`${varName}.components.set(InputTargetComponent())`);
+    this.emit(`${parentVar}.addChild(${varName})`);
+  }
+
+  private compileUIImage(obj: HoloObjectDecl, varName: string, parentVar: string): void {
+    const src = this.findObjProp(obj, 'src') || '';
+    const width = this.findObjProp(obj, 'width') || 100;
+    const height = this.findObjProp(obj, 'height') || 100;
+    const pos = this.findObjProp(obj, 'position') as number[] | undefined;
+
+    this.emit(`let ${varName} = Entity()`);
+    this.emit(`${varName}.name = "${obj.name}"`);
+
+    if (pos) {
+      this.emit(`${varName}.position = ${this.toSIMD3(pos)}`);
+    }
+
+    this.emit(`// Image: ${src} (${width}x${height})`);
+    this.emit(`let ${varName}Mesh = MeshResource.generatePlane(width: ${(width as number) / 1000}, depth: ${(height as number) / 1000})`);
+    this.emit(`if let texture = try? await TextureResource(named: "${src}") {`);
+    this.indentLevel++;
+    this.emit(`var ${varName}Material = UnlitMaterial()`);
+    this.emit(`${varName}Material.color = .init(texture: .init(texture))`);
+    this.emit(`${varName}.components.set(ModelComponent(mesh: ${varName}Mesh, materials: [${varName}Material]))`);
+    this.indentLevel--;
+    this.emit(`}`);
+    this.emit(`${parentVar}.addChild(${varName})`);
+  }
+
+  /**
+   * Check if object is a UI component
+   */
+  private isUIComponent(obj: HoloObjectDecl): boolean {
+    const type = this.findObjProp(obj, 'type') as string | undefined;
+    const uiTypes = ['ui_panel', 'ui_button', 'ui_text', 'ui_slider', 'ui_input', 'ui_image'];
+    return uiTypes.includes(type || '');
+  }
+
+  /**
+   * Get all traits used in composition for imports
+   */
+  private collectAllTraits(composition: HoloComposition): string[] {
+    const traits: string[] = [];
+
+    const collectFromObject = (obj: HoloObjectDecl) => {
+      if (obj.traits) {
+        for (const trait of obj.traits) {
+          if (!traits.includes(trait.name)) {
+            traits.push(trait.name);
+          }
+        }
+      }
+      if (obj.children) {
+        obj.children.forEach(collectFromObject);
+      }
+    };
+
+    composition.objects?.forEach(collectFromObject);
+    composition.spatialGroups?.forEach((group) => {
+      group.objects.forEach(collectFromObject);
+    });
+
+    return traits;
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────

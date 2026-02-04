@@ -1,7 +1,7 @@
 // HoloScript AI Agent Example
 // Define an intelligent AI assistant with spatial presence
 
-orb agentCore {
+object "agentCore" {
   name: "Assistant"
   personality: "helpful"
   capabilities: ["conversation", "problem_solving", "learning", "code_generation"]
@@ -11,14 +11,14 @@ orb agentCore {
   position: { x: 0, y: 1.6, z: -1.5 }
 }
 
-orb memoryStore {
+object "memoryStore" {
   type: "long_term"
   capacity: 10000
   color: "#9c27b0"
   position: { x: -1, y: 1, z: -1 }
 }
 
-orb contextWindow {
+object "contextWindow" {
   type: "short_term"
   tokens: 8192
   color: "#ff9800"
@@ -26,11 +26,11 @@ orb contextWindow {
 }
 
 // Connect agent components
-connect memoryStore to agentCore as "knowledge"
-connect contextWindow to agentCore as "context"
+connection { from: "memoryStore", to: "agentCore", type: "knowledge" }
+connection { from: "contextWindow", to: "agentCore", type: "context" }
 
 // Agent functions
-function processQuery(query: string): string {
+function "processQuery" : string {
   analyze query
   retrieve_context from memoryStore
   generate response
@@ -38,7 +38,7 @@ function processQuery(query: string): string {
   return response
 }
 
-function learn(interaction: object) {
+function "learn" {
   extract_patterns from interaction
   update memoryStore
   adjust agentCore.personality
@@ -59,19 +59,19 @@ stream agentResponse {
 
 // Conditional behavior
 gate shouldHelp {
-  condition: userIntent == "request_help"
+  condition: "userIntent ==""request_help"
   onTrue: provideAssistance
   onFalse: continueLearning
 }
 
-function provideAssistance() {
+function "provideAssistance" {
   focus agentCore
   pulse agentCore with color "#4caf50"
   speak "How can I help you today?"
 }
 
 // Idle behavior
-function continueLearning() {
+function "continueLearning" {
   dim agentCore to 0.5
   process_background_tasks
   optimize memoryStore

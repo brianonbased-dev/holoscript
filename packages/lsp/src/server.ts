@@ -52,6 +52,8 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
   HoloScriptPlusParser,
   HoloScriptValidator,
+  createTypeChecker,
+  HoloScriptTypeChecker,
   getDefaultAIAdapter,
   registerAIAdapter,
   useGemini,
@@ -81,6 +83,7 @@ const documentCache = new Map<string, {
   ast: ASTProgram;
   version: number;
   symbols: Map<string, { node: HSPlusNode; line: number; column: number }>;
+  typeChecker: HoloScriptTypeChecker;
 }>();
 
 // Semantic token types and modifiers
@@ -175,10 +178,26 @@ async function validateDocument(document: TextDocument): Promise<void> {
 
     if (parseResult.ast) {
       const ast = parseResult.ast;
+      const typeChecker = createTypeChecker();
+      
+      // Run type checker on the AST body
+      const typeCheckResult = typeChecker.check(ast.children || []);
+      
+      // Merge type diagnostics
+      for (const diag of typeCheckResult.diagnostics) {
+        diagnostics.push({
+          severity: diag.severity === 'error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+          range: {
+            start: { line: (diag.line || 1) - 1, character: (diag.column || 0) },
+            end: { line: (diag.line || 1) - 1, character: (diag.column || 0) + 20 },
+          },
+          message: diag.message,
+          source: 'holoscript-type',
+          code: diag.code,
+        });
+      }
       
       // Build symbol table from all nodes in the program
-      const allNodes = [ast, ...(ast.children || [])];
-      
       const findSymbols = (nodes: HSPlusNode[]) => {
         for (const node of nodes) {
           if (node.id) {
@@ -194,11 +213,12 @@ async function validateDocument(document: TextDocument): Promise<void> {
 
       findSymbols(ast.children || []);
 
-      // Cache the parsed result
+      // Cache the parsed result including the type checker
       documentCache.set(document.uri, {
         ast: parseResult.ast,
         version: document.version,
         symbols,
+        typeChecker,
       });
     }
 
@@ -392,19 +412,40 @@ connection.onHover((params: TextDocumentPositionParams): Hover | null => {
     };
   }
 
-  // Check if it's a symbol
+  // Check if it's a symbol or variable with type information
   const cached = documentCache.get(params.textDocument.uri);
-  if (cached && cached.symbols.has(word)) {
-    const symbol = cached.symbols.get(word)!;
-    const orbNode = symbol.node;
-    const props = orbNode.properties ? Object.keys(orbNode.properties).join(', ') : 'none';
+  if (cached) {
+    if (cached.symbols.has(word)) {
+      const symbol = cached.symbols.get(word)!;
+      const orbNode = symbol.node;
+      const props = orbNode.properties ? Object.keys(orbNode.properties).join(', ') : 'none';
+      
+      const typeInfo = cached.typeChecker.getType(word);
+      const typeDisplay = typeInfo ? ` : \`${typeInfo.type}\`` : '';
 
-    return {
-      contents: {
-        kind: MarkupKind.Markdown,
-        value: `**${word}** (${orbNode.type})\n\nProperties: ${props}\n\nDefined at line ${symbol.line}`,
-      },
-    };
+      return {
+        contents: {
+          kind: MarkupKind.Markdown,
+          value: `**${word}** (${orbNode.type})${typeDisplay}\n\nProperties: ${props}\n\nDefined at line ${symbol.line}`,
+        },
+      };
+    }
+
+    // Check for inferred variable type
+    const typeInfo = cached.typeChecker.getType(word);
+    if (typeInfo) {
+      let typeDisplay = `\`${typeInfo.type}\``;
+      if (typeInfo.elementType) {
+        typeDisplay += `<${typeInfo.elementType}>`;
+      }
+
+      return {
+        contents: {
+          kind: MarkupKind.Markdown,
+          value: `**${word}** (inferred)${typeDisplay ? ` : ${typeDisplay}` : ''}`,
+        },
+      };
+    }
   }
 
   return null;

@@ -10,7 +10,7 @@ environment {
 // === CREATIVE GEOMETRIES ===
 
 // Floating heart with pulse animation
-orb loveHeart {
+object "loveHeart" {
   geometry: "heart"
   color: "rose"
   material: "shiny"
@@ -21,7 +21,7 @@ orb loveHeart {
 }
 
 // Glass crystal with light refraction
-orb glassCrystal {
+object "glassCrystal" {
   geometry: "crystal"
   color: "ice"
   material: "glass"
@@ -31,7 +31,7 @@ orb glassCrystal {
 }
 
 // Holographic spinning gear
-orb holoGear {
+object "holoGear" {
   geometry: "gear"
   color: "hologram"
   material: "hologram"
@@ -41,7 +41,7 @@ orb holoGear {
 }
 
 // Neon lightning bolt
-orb neonBolt {
+object "neonBolt" {
   geometry: "lightning"
   color: "energy"
   material: "neon"
@@ -50,7 +50,7 @@ orb neonBolt {
 }
 
 // Chrome torusknot sculpture
-orb chromeSculpture {
+object "chromeSculpture" {
   geometry: "torusknot"
   color: "white"
   material: "chrome"
@@ -62,7 +62,7 @@ orb chromeSculpture {
 // === ANIMATED OBJECTS ===
 
 // Floating diamond
-orb floatDiamond {
+object "floatDiamond" {
   geometry: "diamond"
   color: "plasma"
   material: "glass"
@@ -74,7 +74,7 @@ orb floatDiamond {
 }
 
 // Orbiting sphere
-orb orbitingSphere {
+object "orbitingSphere" {
   geometry: "sphere"
   color: "neon"
   material: "neon"
@@ -86,7 +86,7 @@ orb orbitingSphere {
 }
 
 // Rainbow color-cycling orb
-orb rainbowOrb {
+object "rainbowOrb" {
   geometry: "sphere"
   color: "white"
   material: "standard"
@@ -96,7 +96,7 @@ orb rainbowOrb {
 }
 
 // Swaying spring coil
-orb springCoil {
+object "springCoil" {
   geometry: "spring"
   color: "copper"
   material: "metal"
@@ -108,7 +108,7 @@ orb springCoil {
 // === MATERIAL SHOWCASE ===
 
 // Toon/cartoon style sphere
-orb toonBall {
+object "toonBall" {
   geometry: "sphere"
   color: "orange"
   material: "toon"
@@ -116,7 +116,7 @@ orb toonBall {
 }
 
 // Matte velvet cube
-orb velvetCube {
+object "velvetCube" {
   geometry: "cube"
   color: "purple"
   material: "velvet"
@@ -124,7 +124,7 @@ orb velvetCube {
 }
 
 // X-ray transparent sphere
-orb xraySphere {
+object "xraySphere" {
   geometry: "sphere"
   color: "cyan"
   material: "xray"
@@ -132,7 +132,7 @@ orb xraySphere {
 }
 
 // Gradient material
-orb gradientCone {
+object "gradientCone" {
   geometry: "cone"
   color: "magenta"
   material: "gradient"
@@ -140,7 +140,7 @@ orb gradientCone {
 }
 
 // Wireframe structure
-orb wireframeDodeca {
+object "wireframeDodeca" {
   geometry: "dodecahedron"
   color: "lime"
   material: "wireframe"
@@ -150,7 +150,7 @@ orb wireframeDodeca {
 // === ORGANIC / NATURE ===
 
 // Water droplet
-orb waterDrop {
+object "waterDrop" {
   geometry: "droplet"
   color: "aqua"
   material: "glass"
@@ -159,7 +159,7 @@ orb waterDrop {
 }
 
 // Decorative vase
-orb decorVase {
+object "decorVase" {
   geometry: "vase"
   color: "terracotta"
   material: "matte"
@@ -167,7 +167,7 @@ orb decorVase {
 }
 
 // Snowflake
-orb snowflake {
+object "snowflake" {
   geometry: "snowflake"
   color: "white"
   material: "shiny"
@@ -178,7 +178,7 @@ orb snowflake {
 }
 
 // Explosion burst
-orb explosionBurst {
+object "explosionBurst" {
   geometry: "explosion"
   color: "lava"
   material: "neon"
@@ -191,7 +191,7 @@ orb explosionBurst {
 // === ARCHITECTURAL ===
 
 // Spiral staircase-like
-orb spiralDeco {
+object "spiralDeco" {
   geometry: "spiral"
   color: "gold"
   material: "metal"
@@ -200,7 +200,7 @@ orb spiralDeco {
 }
 
 // Crescent moon
-orb crescentMoon {
+object "crescentMoon" {
   geometry: "moon"
   color: "silver"
   material: "shiny"
@@ -210,7 +210,7 @@ orb crescentMoon {
 }
 
 // Arrow pointer
-orb arrowSign {
+object "arrowSign" {
   geometry: "arrow"
   color: "warning"
   material: "matte"
@@ -219,7 +219,7 @@ orb arrowSign {
 }
 
 // Bowl/cup
-orb decorBowl {
+object "decorBowl" {
   geometry: "bowl"
   color: "brass"
   material: "metal"
@@ -229,7 +229,7 @@ orb decorBowl {
 // === CENTER PLATFORM ===
 
 // Hexagonal platform base
-orb hexPlatform {
+object "hexPlatform" {
   geometry: "hexagon"
   color: "slate"
   metallic: 0.6
@@ -241,7 +241,7 @@ orb hexPlatform {
 // === 3D TEXT ===
 
 // Floating title text
-orb titleText {
+object "titleText" {
   text: "HOLOSCRIPT"
   color: "hologram"
   material: "hologram"
@@ -250,7 +250,7 @@ orb titleText {
 }
 
 // Subtitle text
-orb subtitleText {
+object "subtitleText" {
   text: "PREVIEW"
   color: "cyan"
   material: "neon"
@@ -262,7 +262,7 @@ orb subtitleText {
 // === PARTICLE SYSTEMS ===
 
 // Floating sparkles
-orb sparkleParticles {
+object "sparkleParticles" {
   type: "particles"
   count: 100
   color: "gold"
@@ -271,7 +271,7 @@ orb sparkleParticles {
 }
 
 // Fire emitter
-orb fireEmitter {
+object "fireEmitter" {
   type: "particles"
   count: 50
   color: "lava"
@@ -280,7 +280,7 @@ orb fireEmitter {
 }
 
 // Ice particles
-orb iceParticles {
+object "iceParticles" {
   type: "particles"
   count: 75
   color: "ice"
@@ -293,7 +293,7 @@ orb iceParticles {
 // A placeholder shows while loading
 
 // Example model reference (uncomment when you have a model)
-// orb robotModel {
+// object "robotModel" {
 //   model: "models/robot.glb"
 //   position: { x: 0, y: 0, z: -8 }
 //   scale: { x: 1, y: 1, z: 1 }

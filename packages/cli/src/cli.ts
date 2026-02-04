@@ -11,6 +11,7 @@ import { TRAITS, formatTrait, formatAllTraits, suggestTraits } from './traits';
 import { generateObject, generateScene, listTemplates, getTemplate } from './generator';
 import { packAsset, unpackAsset, inspectAsset } from './smartAssets';
 import { WatchService } from './WatchService';
+import { generateTargetCode } from './build/generators';
 
 const VERSION = '1.0.0-alpha.1';
 
@@ -484,8 +485,6 @@ async function main(): Promise<void> {
         process.exit(1);
       }
 
-      }
-      
       const executeBuild = async () => {
         const stats = fs.statSync(inputPath);
         if (stats.isFile()) {
@@ -496,6 +495,8 @@ async function main(): Promise<void> {
           try {
             const isHolo = options.input.endsWith('.holo');
             let ast: any;
+            let composition: any = null;
+            
             if (isHolo) {
               const { HoloCompositionParser } = await import('@holoscript/core');
               const result = new HoloCompositionParser().parse(content);
@@ -503,7 +504,14 @@ async function main(): Promise<void> {
                 console.error('\x1b[31mError parsing composition\x1b[0m');
                 return;
               }
-              ast = { orbs: result.ast?.objects?.map((obj: any) => ({ name: obj.name, properties: Object.fromEntries(obj.properties.map((p: any) => [p.key, p.value])), traits: obj.traits || [] })) || [] };
+              composition = result.ast;
+              ast = { 
+                orbs: result.ast?.objects?.map((obj: any) => ({ 
+                  name: obj.name, 
+                  properties: Object.fromEntries(obj.properties.map((p: any) => [p.key, p.value])), 
+                  traits: obj.traits || [] 
+                })) || [] 
+              };
             } else {
               const { HoloScriptCodeParser } = await import('@holoscript/core');
               const result = new HoloScriptCodeParser().parse(content);
@@ -514,12 +522,47 @@ async function main(): Promise<void> {
               ast = { orbs: result.ast.filter((n: any) => n.type === 'orb') };
             }
             
-            const outputCode = generateTargetCode(ast, target, options.verbose);
-            if (options.output) {
-              fs.writeFileSync(path.resolve(options.output), outputCode);
-              console.log(`\x1b[32m✓ Compiled to ${options.output}\x1b[0m`);
+            // Handle Code Splitting
+            if (options.split || (composition && composition.zones && composition.zones.length > 0)) {
+              console.log('\x1b[33mCode splitting enabled/detected...\x1b[0m');
+              const { SceneSplitter } = await import('./build/splitter');
+              const { ManifestGenerator } = await import('./build/manifest');
+              
+              const splitter = new SceneSplitter();
+              const chunks = splitter.split(composition);
+              
+              const outputDir = options.output ? path.dirname(path.resolve(options.output)) : path.resolve('./dist');
+              if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+              
+              const chunksDir = path.join(outputDir, 'chunks');
+              if (!fs.existsSync(chunksDir)) fs.mkdirSync(chunksDir, { recursive: true });
+              
+              for (const chunk of chunks) {
+                const chunkAst = { orbs: chunk.objects };
+                const chunkCode = generateTargetCode(chunkAst, target, options.verbose);
+                // For chunks, we'll wrap in JSON or a module format
+                const chunkFile = path.join(chunksDir, `${chunk.id}.chunk.js`);
+                fs.writeFileSync(chunkFile, JSON.stringify({ 
+                  id: chunk.id, 
+                  objects: chunk.objects,
+                  code: chunkCode 
+                }, null, 2));
+                
+                if (options.verbose) console.log(`  \x1b[2mChunk ${chunk.id} written (${chunk.objects.length} objects)\x1b[0m`);
+              }
+              
+              const generator = new ManifestGenerator();
+              const manifest = generator.generate(chunks, outputDir);
+              fs.writeFileSync(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+              console.log(`\x1b[32m✓ Built ${chunks.length} chunks and manifest.json\x1b[0m`);
             } else {
-              console.log(outputCode);
+              const outputCode = generateTargetCode(ast, target, options.verbose);
+              if (options.output) {
+                fs.writeFileSync(path.resolve(options.output), outputCode);
+                console.log(`\x1b[32m✓ Compiled to ${options.output}\x1b[0m`);
+              } else {
+                console.log(outputCode);
+              }
             }
           } catch (e: any) {
             console.error(`\x1b[31mBuild error: ${e.message}\x1b[0m`);
@@ -622,324 +665,7 @@ async function watchFile(options: ReturnType<typeof parseArgs>): Promise<void> {
   await new Promise(() => {});
 }
 
-/**
- * Generate target-specific code from AST
- */
-function generateTargetCode(ast: any, target: string, verbose: boolean): string {
-  const orbs = ast.orbs || [];
-  const functions = ast.functions || [];
-  
-  switch (target) {
-    case 'threejs':
-      return generateThreeJS(orbs, functions, verbose);
-    case 'unity':
-      return generateUnity(orbs, functions, verbose);
-    case 'vrchat':
-      return generateVRChat(orbs, functions, verbose);
-    case 'babylon':
-      return generateBabylon(orbs, functions, verbose);
-    case 'aframe':
-      return generateAFrame(orbs, functions, verbose);
-    case 'webxr':
-      return generateWebXR(orbs, functions, verbose);
-    default:
-      return generateThreeJS(orbs, functions, verbose);
-  }
-}
 
-function generateThreeJS(orbs: any[], functions: any[], verbose: boolean): string {
-  let code = `// Generated by HoloScript Compiler
-// Target: Three.js
-import * as THREE from 'three';
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
-
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-`;
-
-  for (const orb of orbs) {
-    const name = orb.name || 'object';
-    const props = orb.properties || {};
-    const traits = orb.traits || [];
-    
-    // Position handling (array or object)
-    const pos = props.position;
-    let px = 0, py = 0, pz = 0;
-    if (Array.isArray(pos)) { [px, py, pz] = pos; }
-    else if (pos) { px = pos.x || 0; py = pos.y || 0; pz = pos.z || 0; }
-    
-    // Scale handling
-    const scale = props.scale;
-    let sx = 1, sy = 1, sz = 1;
-    if (Array.isArray(scale)) { [sx, sy, sz] = scale; }
-    else if (scale) { sx = scale.x || 1; sy = scale.y || 1; sz = scale.z || 1; }
-
-    const color = props.color || '#ffffff';
-    const geometry = props.geometry || 'sphere';
-    
-    code += `// ${name}\n`;
-    if (geometry === 'cube' || geometry === 'box') {
-      code += `const ${name}_geometry = new THREE.BoxGeometry(${sx}, ${sy}, ${sz});\n`;
-    } else {
-      code += `const ${name}_geometry = new THREE.SphereGeometry(${sx/2}, 32, 32);\n`;
-    }
-    
-    // Material
-    const isGlowing = traits.some((t: any) => t.name === 'glowing' || t.name === 'emissive');
-    if (isGlowing) {
-      code += `const ${name}_material = new THREE.MeshStandardMaterial({ color: '${color}', emissive: '${color}', emissiveIntensity: 1.0 });\n`;
-    } else {
-      code += `const ${name}_material = new THREE.MeshStandardMaterial({ color: '${color}' });\n`;
-    }
-    
-    code += `const ${name} = new THREE.Mesh(${name}_geometry, ${name}_material);\n`;
-    code += `${name}.position.set(${px}, ${py}, ${pz});\n`;
-    
-    // Physics Placeholder
-    const hasPhysics = traits.some((t: any) => t.name === 'physics' || t.name === 'rigid' || t.name === 'collidable');
-    if (hasPhysics) {
-      code += `// Physics enabled for ${name} (@physics)\n`;
-    }
-    
-    code += `scene.add(${name});\n\n`;
-  }
-
-  code += `camera.position.z = 5;\n\n`;
-
-  // Logic Handlers
-  if (functions.length > 0) {
-    code += `// Logic Handlers\n`;
-    for (const func of functions) {
-      code += `function ${func.name}(...args) {\n`;
-      code += `  console.log('[HoloScript] Triggered logic: ${func.name}', args);\n`;
-      code += `}\n\n`;
-    }
-  }
-
-  code += `function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
-animate();
-`;
-
-  return code;
-}
-
-function generateUnity(orbs: any[], functions: any[], verbose: boolean): string {
-  let code = `// Generated by HoloScript Compiler
-// Target: Unity C#
-using UnityEngine;
-
-public class HoloScriptScene : MonoBehaviour
-{
-    void Start()
-    {
-`;
-
-  for (const orb of orbs) {
-    const name = orb.name || 'object';
-    const pos = orb.properties?.position || { x: 0, y: 0, z: 0 };
-    const traits = orb.traits || [];
-    
-    code += `        // Create ${name}
-        GameObject ${name} = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        ${name}.name = "${name}";
-        ${name}.transform.position = new Vector3(${pos.x || 0}f, ${pos.y || 0}f, ${pos.z || 0}f);
-
-`;
-
-    const hasPhysics = traits.some((t: any) => t.name === 'physics' || t.name === 'throwable' || t.name === 'grabbable');
-    if (hasPhysics) {
-      code += `        // Add Physics
-        Rigidbody ${name}_rb = ${name}.AddComponent<Rigidbody>();
-`;
-    }
-
-    for (const trait of traits) {
-      code += `        // Trait: @${trait.name}\n`;
-      if (trait.name === 'grabbable') {
-        code += `        // TODO: Map to XR Grab Interactable or similar\n`;
-      }
-    }
-    
-    code += `\n`;
-  }
-
-  code += `    }
-}
-`;
-
-  return code;
-}
-
-function generateVRChat(orbs: any[], functions: any[], verbose: boolean): string {
-  let code = `// Generated by HoloScript Compiler
-// Target: VRChat Udon#
-using UdonSharp;
-using UnityEngine;
-using VRC.SDKBase;
-
-public class HoloScriptWorld : UdonSharpBehaviour
-{
-    void Start()
-    {
-`;
-
-  for (const orb of orbs) {
-    const name = orb.name || 'object';
-    const pos = orb.properties?.position || { x: 0, y: 0, z: 0 }; // VRChat also uses position
-    const traits = orb.traits || [];
-
-    code += `        // Create ${name}
-        GameObject ${name} = VRC.SDKBase.VRCInstantiate.Instantiate(VRC.SDKBase.VRC_SceneDescriptor.GetDefaultSpawnPoint()); // Placeholder for actual object creation
-        ${name}.name = "${name}";
-        ${name}.transform.position = new Vector3(${pos.x || 0}f, ${pos.y || 0}f, ${pos.z || 0}f);
-        Debug.Log("[HoloScript] Initialized ${name}");
-
-`;
-
-    const hasPhysics = traits.some((t: any) => t.name === 'physics' || t.name === 'throwable' || t.name === 'grabbable');
-    if (hasPhysics) {
-      code += `        // Add Physics (Rigidbody)
-        Rigidbody ${name}_rb = ${name}.AddComponent<Rigidbody>();
-`;
-    }
-
-    for (const trait of traits) {
-      code += `        // Trait: @${trait.name}\n`;
-      if (trait.name === 'grabbable') {
-        code += `        // TODO: Add VRC_Grabbable or similar UdonSharp component\n`;
-      }
-      if (trait.name === 'throwable') {
-        code += `        // TODO: Configure VRC_Grabbable for throwable behavior\n`;
-      }
-    }
-    
-    code += `\n`;
-  }
-
-  code += `    }
-}
-`;
-
-  return code;
-}
-
-function generateBabylon(orbs: any[], functions: any[], verbose: boolean): string {
-  let code = `// Generated by HoloScript Compiler
-// Target: Babylon.js
-const canvas = document.getElementById("renderCanvas");
-const engine = new BABYLON.Engine(canvas, true);
-
-const createScene = function () {
-    const scene = new BABYLON.Scene(engine);
-    const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 3, new BABYLON.Vector3(0, 0, 0), scene);
-    camera.attachControl(canvas, true);
-    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-
-`;
-
-  for (const orb of orbs) {
-    const name = orb.name || 'object';
-    const pos = orb.properties?.position || { x: 0, y: 0, z: 0 };
-    
-    code += `    const ${name} = BABYLON.MeshBuilder.CreateSphere("${name}", {diameter: 1}, scene);
-    ${name}.position = new BABYLON.Vector3(${pos.x || 0}, ${pos.y || 0}, ${pos.z || 0});
-
-`;
-  }
-
-  code += `    return scene;
-};
-
-const scene = createScene();
-engine.runRenderLoop(function () {
-    scene.render();
-});
-`;
-
-  return code;
-}
-
-function generateAFrame(orbs: any[], functions: any[], verbose: boolean): string {
-  let code = `<!-- Generated by HoloScript Compiler -->
-<!-- Target: A-Frame -->
-<!DOCTYPE html>
-<html>
-<head>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-</head>
-<body>
-    <a-scene>
-`;
-
-  for (const orb of orbs) {
-    const name = orb.name || 'object';
-    const pos = orb.properties?.position || { x: 0, y: 0, z: 0 };
-    const color = orb.properties?.color || '#EF2D5E';
-    
-    code += `        <a-sphere id="${name}" position="${pos.x || 0} ${pos.y || 0} ${pos.z || 0}" radius="0.5" color="${color}"></a-sphere>
-`;
-  }
-
-  code += `        <a-sky color="#ECECEC"></a-sky>
-    </a-scene>
-</body>
-</html>
-`;
-
-  return code;
-}
-
-function generateWebXR(orbs: any[], functions: any[], verbose: boolean): string {
-  let code = `// Generated by HoloScript Compiler
-// Target: WebXR (Three.js + WebXR)
-import * as THREE from 'three';
-import { VRButton } from 'three/addons/webxr/VRButton.js';
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.xr.enabled = true;
-document.body.appendChild(renderer.domElement);
-document.body.appendChild(VRButton.createButton(renderer));
-
-`;
-
-  for (const orb of orbs) {
-    const name = orb.name || 'object';
-    const pos = orb.properties?.position || { x: 0, y: 0, z: 0 };
-    const color = orb.properties?.color || '#ffffff';
-    
-    code += `const ${name} = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 32, 32),
-    new THREE.MeshStandardMaterial({ color: '${color}' })
-);
-${name}.position.set(${pos.x || 0}, ${pos.y || 0}, ${pos.z || 0});
-scene.add(${name});
-
-`;
-  }
-
-  code += `const light = new THREE.HemisphericLight(0xffffff, 0x444444, 1);
-scene.add(light);
-
-camera.position.z = 5;
-
-renderer.setAnimationLoop(function () {
-    renderer.render(scene, camera);
-});
-`;
-
-  return code;
-}
 
 main().catch((error) => {
   console.error('Fatal error:', error.message);

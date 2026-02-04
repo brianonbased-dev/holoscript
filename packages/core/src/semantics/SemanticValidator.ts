@@ -173,8 +173,7 @@ export class SemanticValidator {
   }
 
   private formatType(type: HoloScriptType): string {
-    // @ts-expect-error - using private method from typeChecker or re-implementing
-    return this.typeChecker.formatType(type);
+    return (this.typeChecker as any).formatType(type);
   }
 
   private findMethod(node: HSPlusNode, name: string): any {
@@ -184,7 +183,7 @@ export class SemanticValidator {
 
   private addError(node: HSPlusNode, message: string, severity: 'error' | 'warning'): void {
     this.errors.push({
-      nodeId: node.id,
+      nodeId: node.id || 'anonymous',
       message,
       severity,
       line: node.loc?.start.line || 0,

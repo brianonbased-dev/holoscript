@@ -35,9 +35,20 @@ describe('HoloScriptTypeChecker', () => {
     });
 
     it('should infer array type', () => {
-      const result = typeChecker.inferType([1, 2, 3]);
+      // Use 5+ elements to avoid vec2/vec3/vec4 inference
+      const result = typeChecker.inferType([1, 2, 3, 4, 5]);
       expect(result.type).toBe('array');
       expect(result.elementType).toBe('number');
+    });
+
+    it('should infer vec3 type for 3-element number arrays', () => {
+      const result = typeChecker.inferType([1, 2, 3]);
+      expect(result.type).toBe('vec3');
+    });
+
+    it('should infer vec2 type for 2-element number arrays', () => {
+      const result = typeChecker.inferType([1, 2]);
+      expect(result.type).toBe('vec2');
     });
 
     it('should infer object type', () => {

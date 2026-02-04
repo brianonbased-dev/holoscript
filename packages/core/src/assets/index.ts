@@ -71,6 +71,12 @@ export {
   smartLoad,
 } from './SmartAssetLoader';
 
+// Asset Aliases
+export {
+  DEFAULT_ASSET_ALIASES,
+  resolveAssetAlias,
+} from './AssetAliases';
+
 // Asset Dependency Graph
 export {
   AssetDependencyGraph,
@@ -80,3 +86,23 @@ export {
   buildDependencyGraph,
   getOptimalLoadOrder,
 } from './AssetDependencyGraph';
+
+// Humanoid Avatar Loader (VRM & Ready Player Me)
+export {
+  HumanoidLoader,
+  HumanoidConfig,
+  HumanoidState,
+  HumanoidLoadResult,
+  HumanoidLoaderEvent,
+  HumanoidEventCallback,
+  AvatarFormat,
+  VRMBoneName,
+  VRMExpressionName,
+  VRMMetadata,
+  RPMMetadata,
+  SkeletonPose,
+  BoneTransform,
+  getHumanoidLoader,
+  createHumanoidLoader,
+  loadHumanoid,
+} from './HumanoidLoader';

@@ -6,8 +6,8 @@ import { Vector3, Color } from "holoscript-math"
 import DataProcessor from "data-utils"
 
 // Export functions for other modules to use
-export function createInteractiveOrb(name: string, position: object) {
-  orb dynamicOrb {
+export function "createInteractiveOrb" {
+  object "dynamicOrb" {
     name: name
     position: position
     color: "#00ffff"
@@ -18,7 +18,7 @@ export function createInteractiveOrb(name: string, position: object) {
   return dynamicOrb
 }
 
-export function handleClick() {
+export function "handleClick" {
   pulse this with {
     color: "#ff0000"
     duration: 500
@@ -27,7 +27,7 @@ export function handleClick() {
 }
 
 // Private helper (not exported)
-function validatePosition(pos: object): boolean {
+function "validatePosition" : boolean {
   return pos.x != null && pos.y != null && pos.z != null
 }
 
@@ -44,12 +44,12 @@ export building InteractiveScene {
   orbs: []
   connections: []
 
-  function addOrb(config: object) {
+  function "addOrb" {
     const newOrb = createInteractiveOrb(config.name, config.position)
     push this.orbs with newOrb
   }
 
-  function connectAll() {
+  function "connectAll" {
     for (i = 0; i < length(this.orbs) - 1; i++) {
       connect this.orbs[i] to this.orbs[i + 1] as "data"
     }

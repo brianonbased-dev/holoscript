@@ -290,28 +290,61 @@ export function activate(context: ExtensionContext) {
       vscode.languages.registerDocumentFormattingEditProvider(
         ['holoscript', 'holoscriptplus'],
         {
-          provideDocumentFormattingEdits(document: vscode.TextDocument): vscode.TextEdit[] {
-            try {
-              const text = document.getText();
-              const config = loadConfig ? loadConfig(document.fileName) : {};
-              const result = formatter.format(text, document.languageId === 'holoscriptplus' ? 'hsplus' : 'holo');
-              
-              if (result.errors.length > 0) {
-                console.warn('Formatter errors:', result.errors);
+          provideDocumentFormattingEdits(document: vscode.TextDocument): vscode.ProviderResult<vscode.TextEdit[]> {
+            const config = vscode.workspace.getConfiguration('holoscript');
+            // Note: VS Code handles formatOnSave via editor.formatOnSave. 
+            // We can check our setting here but manual format should always work.
+            const timeout = config.get<number>('formatOnSaveTimeout', 1000);
+
+            return new Promise((resolve) => {
+              const timer = setTimeout(() => {
+                console.warn('HoloScript: Formatting timed out');
+                resolve([]);
+              }, timeout);
+
+              const runFormat = () => {
+                try {
+                  const options = loadConfig(document.fileName);
+                  const fmtr = formatter.createFormatter(options);
+                  
+                  const text = document.getText();
+                  const result = fmtr.format(text, document.languageId === 'holoscriptplus' ? 'hsplus' : 'holo');
+                  clearTimeout(timer);
+                  
+                  if (result.errors.length > 0) {
+                    console.warn('HoloScript: Formatter errors:', result.errors);
+                  }
+
+                  if (!result.changed) {
+                    resolve([]);
+                    return;
+                  }
+
+                  const fullRange = new vscode.Range(
+                    document.positionAt(0),
+                    document.positionAt(text.length)
+                  );
+                  
+                  resolve([vscode.TextEdit.replace(fullRange, result.formatted)]);
+                } catch (err) {
+                  console.error('HoloScript: Formatting failed:', err);
+                  clearTimeout(timer);
+                  resolve([]);
+                }
+              };
+
+              if (document.lineCount > 1000) {
+                vscode.window.withProgress({
+                  location: vscode.ProgressLocation.Notification,
+                  title: "Formatting HoloScript...",
+                  cancellable: false
+                }, async () => {
+                  runFormat();
+                });
+              } else {
+                runFormat();
               }
-
-              if (!result.changed) return [];
-
-              const fullRange = new vscode.Range(
-                document.positionAt(0),
-                document.positionAt(text.length)
-              );
-              
-              return [vscode.TextEdit.replace(fullRange, result.formatted)];
-            } catch (err) {
-              console.error('Formatting failed:', err);
-              return [];
-            }
+            });
           }
         }
       ),
@@ -320,27 +353,24 @@ export function activate(context: ExtensionContext) {
         {
           provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range): vscode.TextEdit[] {
             try {
-              const text = document.getText();
-              const config = loadConfig ? loadConfig(document.fileName) : {};
+              const options = loadConfig(document.fileName);
+              const fmtr = formatter.createFormatter(options);
               
-              if (typeof formatter.formatRange !== 'function') {
-                console.warn('HoloScript: formatter.formatRange not available (update package)');
-                return [];
-              }
-
-              // VS Code ranges are 0-based
-              const formatRange = {
+              const text = document.getText();
+              const fileType = document.languageId === 'holoscriptplus' ? 'hsplus' : 'holo';
+              
+              const rangeParams = {
                 startLine: range.start.line,
                 endLine: range.end.line
               };
 
-              const result = formatter.formatRange(text, formatRange, document.languageId === 'holoscriptplus' ? 'hsplus' : 'holo');
+              const result = fmtr.formatRange(text, rangeParams, fileType);
               
               if (!result.changed) return [];
 
               return [vscode.TextEdit.replace(range, result.formatted)];
             } catch (err) {
-              console.error('Range formatting failed:', err);
+              console.error('HoloScript: Range formatting failed:', err);
               return [];
             }
           }

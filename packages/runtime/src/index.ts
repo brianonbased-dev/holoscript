@@ -124,6 +124,16 @@ export {
   type NavigateCallback,
 } from './navigation.js';
 
+// DOM 2D Renderer - for rendering HoloScript to HTML
+export {
+  DOM2DRenderer,
+  createDOM2DRenderer,
+  transformASTToHSNode,
+  type HSNode,
+  type RenderedElement,
+  type DOM2DRendererOptions,
+} from './browser/DOM2DRenderer.js';
+
 // Import modules for runtime object
 import { eventBus, emit, on, once, off } from './events.js';
 import { storage, get, set, remove } from './storage.js';

@@ -80,24 +80,24 @@ text forgotPassword {
 }
 
 // Event handlers
-function handleLogin() {
+function "handleLogin" {
   validate usernameInput
   validate passwordInput
 
   gate isValid {
-    condition: validationPassed
+    condition: "validationPassed"
     onTrue: submitCredentials
     onFalse: showError
   }
 }
 
-function submitCredentials() {
+function "submitCredentials" {
   show loader
   authenticate usernameInput.value passwordInput.value
   navigate to dashboard
 }
 
-function showError() {
+function "showError" {
   shake loginPanel
   highlight errors with color "red"
 }

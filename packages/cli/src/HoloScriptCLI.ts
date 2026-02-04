@@ -8,11 +8,14 @@ import { formatAST, formatResult, formatError } from './formatters';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
+import { ConfigLoader } from './config/loader';
+import { HoloScriptConfig } from './config/schema';
 
 export class HoloScriptCLI {
   private parser: HoloScriptParser;
   private runtime: HoloScriptRuntime;
   private options: CLIOptions;
+  private config: HoloScriptConfig | null = null;
 
   constructor(options: CLIOptions) {
     this.options = options;
@@ -26,6 +29,16 @@ export class HoloScriptCLI {
 
   async run(): Promise<number> {
     try {
+      // Load configuration from file if it exists
+      this.config = await ConfigLoader.findAndLoad();
+      
+      if (this.options.verbose && this.config) {
+        console.log(`\x1b[2m[TRACE] Loaded configuration from holoscript.config.json\x1b[0m`);
+        if (this.config.extends) {
+          console.log(`\x1b[2m[TRACE] Configuration extends: ${JSON.stringify(this.config.extends)}\x1b[0m`);
+        }
+      }
+
       switch (this.options.command) {
         case 'parse':
           return this.parseCommand();

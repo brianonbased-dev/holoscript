@@ -10,7 +10,7 @@
  */
 
 import type { Vector3 } from '../types';
-import type { TraitHandler } from './VRTraitSystem';
+import type { TraitHandler } from './TraitTypes';
 
 // =============================================================================
 // TYPES
@@ -58,14 +58,14 @@ export const seatedHandler: TraitHandler<SeatedTrait> = {
     const state: SeatedState = {
       isCalibrated: false,
       calibratedHeight: 1.2, // Default seated height
-      originalPosition: (node.properties.position as Vector3) || [0, 0, 0],
+      originalPosition: (node.properties?.position as any) || [0, 0, 0],
       currentReach: 0,
     };
     (node as any).__seatedState = state;
 
     // Auto-calibrate on attach
     if (config.auto_calibrate) {
-      state.calibratedHeight = context.vr.headset.position[1];
+      state.calibratedHeight = (context.vr.headset.position as any)[1];
       state.isCalibrated = true;
     }
   },
@@ -78,11 +78,12 @@ export const seatedHandler: TraitHandler<SeatedTrait> = {
     const state = (node as any).__seatedState as SeatedState;
     if (!state) return;
 
-    const headPos = context.vr.headset.position;
+    const headPos = context.vr.headset.position as any;
+    const origin = state.originalPosition as any;
     
     // Calculate reach distance from center
-    const dx = headPos[0] - state.originalPosition[0];
-    const dz = headPos[2] - state.originalPosition[2];
+    const dx = headPos[0] - origin[0];
+    const dz = headPos[2] - origin[2];
     state.currentReach = Math.sqrt(dx * dx + dz * dz);
 
     // Clamp within play bounds
@@ -96,13 +97,13 @@ export const seatedHandler: TraitHandler<SeatedTrait> = {
     }
 
     // Apply height offset
-    if (node.properties.position) {
-      const pos = node.properties.position as Vector3;
+    if (node.properties?.position) {
+      const pos = node.properties.position as any;
       node.properties.position = [
         pos[0],
         state.calibratedHeight + config.height_offset,
         pos[2],
-      ];
+      ] as any;
     }
   },
 
@@ -112,7 +113,7 @@ export const seatedHandler: TraitHandler<SeatedTrait> = {
 
     // Handle recalibration request
     if ((event as any).type === 'recalibrate') {
-      state.calibratedHeight = context.vr.headset.position[1];
+      state.calibratedHeight = (context.vr.headset.position as any)[1];
       state.isCalibrated = true;
       context.emit('seated_calibrated', { height: state.calibratedHeight });
     }
@@ -121,9 +122,9 @@ export const seatedHandler: TraitHandler<SeatedTrait> = {
     if ((event as any).type === 'turn_left' || (event as any).type === 'turn_right') {
       const angle = config.snap_turn_angle || 45;
       const direction = (event as any).type === 'turn_left' ? -1 : 1;
-      const currentRot = (node.properties.rotation as Vector3) || [0, 0, 0];
+      const currentRot = (node.properties?.rotation as any) || [0, 0, 0];
       
-      node.properties.rotation = [
+      (node.properties as any).rotation = [
         currentRot[0],
         currentRot[1] + (angle * direction),
         currentRot[2],

@@ -3,7 +3,7 @@
 // Agents are orbs, messages are pulses along curved connections.
 
 // Council agents - primary command nodes
-orb ceo {
+object "ceo" {
   geometry: octahedron
   size: 4
   color: "#00ffff"
@@ -16,7 +16,7 @@ orb ceo {
   @trait(neural_link, model="brittney-v4.gguf", temperature=0.7)
 }
 
-orb builder {
+object "builder" {
   geometry: octahedron
   size: 4
   color: "#00ffff"
@@ -28,7 +28,7 @@ orb builder {
   @trait(hoverable, highlight_intensity=2.0)
 }
 
-orb futurist {
+object "futurist" {
   geometry: octahedron
   size: 4
   color: "#00ffff"
@@ -40,7 +40,7 @@ orb futurist {
   @trait(hoverable, highlight_intensity=2.0)
 }
 
-orb vision {
+object "vision" {
   geometry: octahedron
   size: 4
   color: "#00ffff"
@@ -53,7 +53,7 @@ orb vision {
 }
 
 // Shield spheres around council nodes
-orb ceoShield {
+object "ceoShield" {
   geometry: sphere
   size: 8
   color: "#00ffff"
@@ -62,11 +62,11 @@ orb ceoShield {
 }
 
 // Mesh connections between council agents
-connect ceo to builder as "command_channel"
-connect ceo to futurist as "strategy_channel"
-connect ceo to vision as "perception_channel"
-connect builder to futurist as "sync_channel"
-connect vision to builder as "insight_channel"
+connection { from: "ceo", to: "builder", type: "command_channel" }
+connection { from: "ceo", to: "futurist", type: "strategy_channel" }
+connection { from: "ceo", to: "vision", type: "perception_channel" }
+connection { from: "builder", to: "futurist", type: "sync_channel" }
+connection { from: "vision", to: "builder", type: "insight_channel" }
 
 // Spatial event pulse stream
 stream spatialEvents {
@@ -76,11 +76,11 @@ stream spatialEvents {
   to: renderPulse
 }
 
-function filterEvents(events: array): array {
+function "filterEvents" : array {
   return events.slice(-20)
 }
 
-function mapToPulse(event: object): object {
+function "mapToPulse" : object {
   return {
     start: ceo.position,
     end: event.position,
@@ -88,7 +88,7 @@ function mapToPulse(event: object): object {
   }
 }
 
-function renderPulse(pulse: object) {
+function "renderPulse" {
   animate pulse along curve from pulse.start to pulse.end
   duration: 0.5
   color: "#00ffff"

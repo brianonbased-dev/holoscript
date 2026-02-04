@@ -1,28 +1,28 @@
 // HoloScript Neural Network Visualization
 // Visualize a simple neural network with connections
 
-orb inputLayer {
+object "inputLayer" {
   neurons: 784
   color: "#4CAF50"
   position: { x: -3, y: 2, z: 0 }
   label: "Input Layer (28x28 pixels)"
 }
 
-orb hiddenLayer1 {
+object "hiddenLayer1" {
   neurons: 256
   color: "#2196F3"
   position: { x: -1, y: 2, z: 0 }
   label: "Hidden Layer 1"
 }
 
-orb hiddenLayer2 {
+object "hiddenLayer2" {
   neurons: 128
   color: "#9C27B0"
   position: { x: 1, y: 2, z: 0 }
   label: "Hidden Layer 2"
 }
 
-orb outputLayer {
+object "outputLayer" {
   neurons: 10
   color: "#FF5722"
   position: { x: 3, y: 2, z: 0 }
@@ -30,11 +30,11 @@ orb outputLayer {
 }
 
 // Connect layers with weighted connections
-connect inputLayer to hiddenLayer1 as "weights_1"
-connect hiddenLayer1 to hiddenLayer2 as "weights_2"
-connect hiddenLayer2 to outputLayer as "weights_3"
+connection { from: "inputLayer", to: "hiddenLayer1", type: "weights_1" }
+connection { from: "hiddenLayer1", to: "hiddenLayer2", type: "weights_2" }
+connection { from: "hiddenLayer2", to: "outputLayer", type: "weights_3" }
 
-function trainNetwork(data: array): object {
+function "trainNetwork" : object {
   forward_pass data
   calculate_loss
   backward_pass
@@ -42,7 +42,7 @@ function trainNetwork(data: array): object {
   return metrics
 }
 
-function visualizeActivations(layer: orb) {
+function "visualizeActivations" {
   highlight layer with color "gold"
   show layer.neurons as particles
 }

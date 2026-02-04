@@ -14,7 +14,6 @@
 import type {
   HSPlusAST,
   HSPlusNode,
-  HSPlusDirective,
   HSPlusRuntime,
   HSPlusBuiltins,
   StateDeclaration,
@@ -22,9 +21,11 @@ import type {
   Vector3,
   Color,
 } from '../types/HoloScriptPlus';
+import type { HSPlusDirective } from '../types';
 import { ReactiveState, createState, ExpressionEvaluator } from '../state/ReactiveState';
 import { VRTraitRegistry, vrTraitRegistry, TraitContext, TraitEvent } from '../traits/VRTraitSystem';
 import { eventBus } from './EventBus'; // Added
+import { ChunkLoader } from './loader'; // Integration
 
 // MOCK: StateSync (to resolve cross-repo dependency for visualization)
 class StateSync {
@@ -38,22 +39,27 @@ class StateSync {
 
 type LifecycleHandler = (...args: unknown[]) => void;
 
-interface NodeInstance {
+export interface NodeInstance {
   node: HSPlusNode;
+  properties: Record<string, any>; 
   renderedNode: unknown; // Actual 3D object from renderer
   lifecycleHandlers: Map<string, LifecycleHandler[]>;
   children: NodeInstance[];
   parent: NodeInstance | null;
   destroyed: boolean;
+  templateName?: string;
+  templateVersion?: number;
 }
 
-interface RuntimeOptions {
+export interface RuntimeOptions {
   renderer?: Renderer;
   vrEnabled?: boolean;
   companions?: Record<string, Record<string, (...args: unknown[]) => unknown>>;
+  manifestUrl?: string; // Code Splitting
+  baseUrl?: string;     // Code Splitting
 }
 
-interface Renderer {
+export interface Renderer {
   createElement(type: string, properties: Record<string, unknown>): unknown;
   updateElement(element: unknown, properties: Record<string, unknown>): void;
   appendChild(parent: unknown, child: unknown): void;
@@ -70,7 +76,7 @@ interface Renderer {
 class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   private ast: HSPlusAST;
   private options: RuntimeOptions;
-  private state: ReactiveState<StateDeclaration>;
+  public state: ReactiveState<StateDeclaration>;
   private evaluator: ExpressionEvaluator;
   private builtins: HSPlusBuiltins;
   private traitRegistry: VRTraitRegistry;
@@ -83,6 +89,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   private networkSync: StateSync;
   private mounted: boolean = false;
   private scaleMultiplier: number = 1;
+  private chunkLoader: ChunkLoader | null = null;
 
   // VR context
   public vrContext: {
@@ -109,10 +116,10 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
     this.options = options;
     
     // Check for sync intent (P3 Pattern)
-    const isNetworked = ast.root.traits?.has('networked') || ast.root.directives?.some((d: any) => d.type === 'sync' || d.type === 'networked');
+    const isNetworked = ast.root.traits?.has('networked' as any) || ast.root.directives?.some((d: any) => d.type === 'sync' || d.type === 'networked');
     const syncId = isNetworked ? (ast.root.id || 'global_session') : undefined;
     
-    this.state = createState({}, syncId);
+    this.state = createState({} as any, syncId);
     this.traitRegistry = vrTraitRegistry;
     this.companions = options.companions || {};
     this.builtins = createBuiltins(this);
@@ -129,6 +136,15 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
 
     // Load imports
     this.loadImports();
+
+    // Initialize ChunkLoader if manifest provided
+    if (this.options.manifestUrl) {
+      this.chunkLoader = new ChunkLoader(this, {
+        manifestUrl: this.options.manifestUrl,
+        baseUrl: this.options.baseUrl
+      });
+      this.chunkLoader.init();
+    }
   }
 
   // ==========================================================================
@@ -136,20 +152,21 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   // ==========================================================================
 
   private initializeState(): void {
-    const stateDirective = this.ast.root.directives.find((d: HSPlusDirective) => d.type === 'state');
+    const stateDirective = (this.ast.root.directives || []).find((d: HSPlusDirective) => d.type === 'state');
     if (stateDirective && stateDirective.type === 'state') {
-      this.state.update(stateDirective.body);
+      this.state.update(stateDirective.body as any);
     }
   }
 
   private loadImports(): void {
-    for (const imp of this.ast.imports) {
+    for (const imp of this.ast.imports || []) {
+      const alias = imp.alias || imp.source;
       // Companions should be provided via options
-      if (this.companions[imp.alias]) {
+      if (this.companions[alias]) {
         // Already loaded
         continue;
       }
-      console.warn(`Import ${imp.path} not found. Provide via companions option.`);
+      console.warn(`Import ${imp.path || imp.source} not found. Provide via companions option.`);
     }
   }
 
@@ -196,6 +213,24 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
     this.mounted = false;
   }
 
+  /**
+   * Dynamically mount a new object into the scene (e.g. from a lazy-loaded chunk)
+   */
+  public mountObject(node: HSPlusNode, parent: NodeInstance | null = null): NodeInstance {
+    const targetParent = parent || this.rootInstance;
+    const instance = this.instantiateNode(node, targetParent);
+    
+    if (targetParent) {
+      targetParent.children.push(instance);
+      if (this.options.renderer && targetParent.renderedNode && instance.renderedNode) {
+        this.options.renderer.appendChild(targetParent.renderedNode, instance.renderedNode);
+      }
+    }
+    
+    this.callLifecycle(instance, 'on_mount');
+    return instance;
+  }
+
   // ==========================================================================
   // NODE INSTANTIATION
   // ==========================================================================
@@ -203,6 +238,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   private instantiateNode(node: HSPlusNode, parent: NodeInstance | null): NodeInstance {
     const instance: NodeInstance = {
       node,
+      get properties() { return (this.node as any).properties || {}; },
       renderedNode: null,
       lifecycleHandlers: new Map(),
       children: [],
@@ -215,17 +251,20 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
 
     // Create rendered element
     if (this.options.renderer) {
-      const properties = this.evaluateProperties(node.properties);
+      const properties = node.properties ? this.evaluateProperties(node.properties) : {};
       instance.renderedNode = this.options.renderer.createElement(node.type, properties);
     }
 
     // Attach VR traits
-    for (const [traitName, config] of node.traits) {
-      this.traitRegistry.attachTrait(node, traitName, config, this.createTraitContext(instance));
+    if (node.traits) {
+      for (const [traitName, config] of node.traits) {
+        this.traitRegistry.attachTrait(node, traitName, config, this.createTraitContext(instance));
+      }
     }
 
     // Process children with control flow
-    const children = this.processControlFlow(node.children, node.directives);
+    const childrenNodes = node.children || (node as any).body || [];
+    const children = this.processControlFlow(childrenNodes, node.directives || []);
     for (const childNode of children) {
       const childInstance = this.instantiateNode(childNode, instance);
       instance.children.push(childInstance);
@@ -239,6 +278,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   }
 
   private processDirectives(instance: NodeInstance): void {
+    if (!instance.node.directives) return;
     for (const directive of instance.node.directives) {
       if (directive.type === 'lifecycle') {
         this.registerLifecycleHandler(instance, directive);
@@ -331,11 +371,11 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
         }
       } else if (directive.type === 'forEach') {
         // @forEach item in collection { ... }
-        const items = this.evaluateExpression(directive.collection);
+        const items = this.evaluateExpression((directive as any).collection);
         if (Array.isArray(items)) {
           items.forEach((item, index) => {
             const iterContext = {
-              [directive.variable]: item,
+              [(directive as any).variable]: item,
               index,
               first: index === 0,
               last: index === items.length - 1,
@@ -343,7 +383,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
               odd: index % 2 !== 0,
             };
 
-            for (const bodyNode of directive.body) {
+            for (const bodyNode of (directive as any).body) {
               const cloned = this.cloneNodeWithContext(bodyNode, iterContext);
               result.push(cloned);
             }
@@ -357,7 +397,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
         let iterations = 0;
 
         while (iterations < MAX_ITERATIONS) {
-          const condition = this.evaluateExpression(directive.condition);
+          const condition = this.evaluateExpression((directive as any).condition);
           if (!condition) break;
 
           const iterContext = {
@@ -365,7 +405,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
             index: iterations,
           };
 
-          for (const bodyNode of directive.body) {
+          for (const bodyNode of (directive as any).body) {
             const cloned = this.cloneNodeWithContext(bodyNode, iterContext);
             result.push(cloned);
           }
@@ -377,11 +417,11 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
           console.warn('@while loop hit maximum iteration limit (1000)');
         }
       } else if (directive.type === 'if') {
-        const condition = this.evaluateExpression(directive.condition);
+        const condition = this.evaluateExpression((directive as any).condition);
         if (condition) {
-          result.push(...directive.body);
-        } else if (directive.else) {
-          result.push(...directive.else);
+          result.push(...(directive as any).body);
+        } else if ((directive as any).else) {
+          result.push(...(directive as any).else);
         }
       }
     }
@@ -397,10 +437,10 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
     const cloned: HSPlusNode = {
       type: node.type,
       id: node.id ? this.interpolateString(node.id, context) : undefined,
-      properties: this.interpolateProperties(node.properties, context),
-      directives: [...node.directives],
-      children: node.children.map((child: HSPlusNode) => this.cloneNodeWithContext(child, context)),
-      traits: new Map(node.traits),
+      properties: node.properties ? this.interpolateProperties(node.properties, context) : {},
+      directives: node.directives ? [...node.directives] : [],
+      children: (node.children || []).map((child: HSPlusNode) => this.cloneNodeWithContext(child, context)),
+      traits: node.traits ? new Map(node.traits) : new Map(),
       loc: node.loc,
     };
 
@@ -494,24 +534,32 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   // ==========================================================================
 
   private startUpdateLoop(): void {
+    const raf = typeof requestAnimationFrame !== 'undefined' 
+      ? requestAnimationFrame 
+      : (cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 16);
+    
     this.lastUpdateTime = performance.now();
 
     const update = () => {
       const now = performance.now();
-      const delta = (now - this.lastUpdateTime) / 1000; // Convert to seconds
+      const delta = (now - this.lastUpdateTime) / 1000;
       this.lastUpdateTime = now;
 
       this.update(delta);
 
-      this.updateLoopId = requestAnimationFrame(update);
+      this.updateLoopId = raf(update) as any;
     };
 
-    this.updateLoopId = requestAnimationFrame(update);
+    this.updateLoopId = raf(update) as any;
   }
 
   private stopUpdateLoop(): void {
     if (this.updateLoopId !== null) {
-      cancelAnimationFrame(this.updateLoopId);
+      if (typeof cancelAnimationFrame !== 'undefined') {
+        cancelAnimationFrame(this.updateLoopId as any);
+      } else {
+        clearTimeout(this.updateLoopId as any);
+      }
       this.updateLoopId = null;
     }
   }
@@ -524,6 +572,11 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
 
     // Call update lifecycle
     this.callLifecycle(this.rootInstance, 'on_update', delta);
+
+    // Update ChunkLoader
+    if (this.chunkLoader) {
+      this.chunkLoader.update();
+    }
   }
 
   private updateInstance(instance: NodeInstance, delta: number): void {
@@ -539,21 +592,21 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
     }
 
     // Apply Networking Sync
-    if (instance.node.traits.has('networked')) {
+    if (instance.node.traits?.has('networked' as any)) {
       const interpolated = this.networkSync.getInterpolatedState(instance.node.id || '') as any;
-      if (interpolated) {
+      if (interpolated && instance.node.properties) {
         if (interpolated.position) {
-          instance.node.properties.position = [interpolated.position.x, interpolated.position.y, interpolated.position.z];
+          (instance.node.properties as any).position = [interpolated.position.x, interpolated.position.y, interpolated.position.z];
         }
         if (interpolated.rotation) {
-          instance.node.properties.rotation = [interpolated.rotation.x, interpolated.rotation.y, interpolated.rotation.z];
+          (instance.node.properties as any).rotation = [interpolated.rotation.x, interpolated.rotation.y, interpolated.rotation.z];
         }
       }
     }
 
     // Update rendered element if properties changed
     if (this.options.renderer && instance.renderedNode) {
-      const properties = this.evaluateProperties(instance.node.properties);
+      const properties = this.evaluateProperties(instance.node.properties || {});
       this.options.renderer.updateElement(instance.renderedNode, properties);
     }
 
@@ -574,28 +627,27 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
     const vrHead = this.vrContext.headset;
 
     // Local player avatar sync
-    if (instance.node.id === 'local_player') {
-      instance.node.properties.position = vrHead.position;
-      instance.node.properties.rotation = vrHead.rotation;
+    if (instance.node.id === 'local_player' && instance.node.properties) {
+      (instance.node.properties as any).position = vrHead.position;
+      (instance.node.properties as any).rotation = vrHead.rotation;
       
       // Update children (hands)
       instance.children.forEach(child => {
-        if (child.node.id === 'left_hand' && vrHands.left) {
-          child.node.properties.position = vrHands.left.position;
-          child.node.properties.rotation = vrHands.left.rotation;
-        } else if (child.node.id === 'right_hand' && vrHands.right) {
-          child.node.properties.position = vrHands.right.position;
-          child.node.properties.rotation = vrHands.right.rotation;
+        if (child.node.id === 'left_hand' && vrHands.left && child.node.properties) {
+          (child.node.properties as any).position = vrHands.left.position;
+          (child.node.properties as any).rotation = vrHands.left.rotation;
+        } else if (child.node.id === 'right_hand' && vrHands.right && child.node.properties) {
+          (child.node.properties as any).position = vrHands.right.position;
+          (child.node.properties as any).rotation = vrHands.right.rotation;
         }
       });
 
       // Broadcast if networked
-      if (instance.node.traits.has('networked')) {
+      if (instance.node.traits?.has('networked' as any)) {
         (this as any).emit('network_snapshot', {
           objectId: instance.node.id,
-          position: { x: vrHead.position[0], y: vrHead.position[1], z: vrHead.position[2] },
-          rotation: { x: vrHead.rotation[0], y: vrHead.rotation[1], z: vrHead.rotation[2] },
-          timestamp: Date.now()
+          position: [((instance.node.properties as any).position as any)[0], ((instance.node.properties as any).position as any)[1], ((instance.node.properties as any).position as any)[2]],
+          rotation: [((instance.node.properties as any).rotation as any)[0], ((instance.node.properties as any).rotation as any)[1], ((instance.node.properties as any).rotation as any)[2]],
         });
       }
     }
@@ -604,6 +656,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   private generatedNodes: Set<string> = new Set();
 
   private processGenerateDirectives(instance: NodeInstance): void {
+    if (!instance.node.directives) return;
     const generateDirectives = instance.node.directives.filter(d => d.type === 'generate');
     
     for (const d of generateDirectives) {
@@ -630,6 +683,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   private apiPollingTimers: Map<NodeInstance, number> = new Map();
 
   private updateExternalApis(instance: NodeInstance, _delta: number): void {
+    if (!instance.node.directives) return;
     const apiDirectives = instance.node.directives.filter(d => d.type === 'external_api');
     
     for (const d of apiDirectives) {
@@ -762,8 +816,10 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
 
     // Detach traits
     const traitContext = this.createTraitContext(instance);
-    for (const traitName of instance.node.traits.keys()) {
-      this.traitRegistry.detachTrait(instance.node, traitName, traitContext);
+    if (instance.node.traits) {
+      for (const traitName of instance.node.traits.keys()) {
+        this.traitRegistry.detachTrait(instance.node, traitName, traitContext);
+      }
     }
 
     // Destroy rendered element
@@ -807,7 +863,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
     const hologramState = new Map<string, any>();
 
     const traverse = (instance: NodeInstance) => {
-      if (instance.node.id) {
+      if (instance.node.id && instance.node.properties) {
         spatialMemory.set(instance.node.id, instance.node.properties.position || { x: 0, y: 0, z: 0 });
         hologramState.set(instance.node.id, {
           shape: instance.node.properties.shape || instance.node.type,
@@ -833,7 +889,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
 
   reset(): void {
     this.unmount();
-    this.state = createState({});
+    this.state = createState({} as any);
     this.mounted = false;
   }
 
@@ -902,6 +958,114 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   }
 
   // ==========================================================================
+  // HOT-RELOAD & MIGRATION
+  // ==========================================================================
+
+  public hotReload(newAst: HSPlusAST): void {
+    console.log('[Hot-Reload] Starting hot-reload...');
+    const oldTemplates = new Map(this.templates);
+    this.ast = newAst;
+
+    // Re-register templates from new AST body
+    this.ast.body.forEach((node) => {
+      if (node.type === 'template' && node.name) {
+        this.registerTemplate(node.name, node);
+      }
+    });
+
+    // Find templates with version changes
+    console.log(`[Hot-Reload] Checking ${this.templates.size} templates for changes...`);
+    for (const [name, newTemplate] of this.templates) {
+      const oldTemplate = oldTemplates.get(name);
+      if (oldTemplate && newTemplate.version !== oldTemplate.version) {
+        console.log(
+          `[Hot-Reload] Template "${name}" version changed: ${oldTemplate.version || 0} -> ${
+            newTemplate.version || 0
+          }`
+        );
+        this.migrateInstancesOfTemplate(name, (oldTemplate.version as any) || 0, newTemplate);
+      }
+    }
+
+    // Refresh root instance if needed (or assume root is stable)
+    // In many cases, hot-reload is primarily for templates.
+  }
+
+  private migrateInstancesOfTemplate(name: string, oldVersion: string | number, newTemplate: HSPlusNode): void {
+    const instances = this.findAllInstancesOfTemplate(name);
+    for (const instance of instances) {
+      this.migrateInstance(instance, oldVersion, newTemplate);
+    }
+  }
+
+  private findAllInstancesOfTemplate(name: string, root: NodeInstance | null = this.rootInstance): NodeInstance[] {
+    if (!root) return [];
+    const results: NodeInstance[] = [];
+    if (root.templateName === name) {
+      results.push(root);
+    }
+    for (const child of root.children) {
+      results.push(...this.findAllInstancesOfTemplate(name, child));
+    }
+    return results;
+  }
+
+  private migrateInstance(instance: NodeInstance, oldVersion: string | number, newTemplate: HSPlusNode): void {
+    const context = this.createTraitContext(instance);
+    
+    // 1. Preserve existing properties/state
+    const currentProperties = { ...(instance.node.properties || {}) };
+
+    // 2. Update node definition in-place
+    const newNode = this.cloneNodeWithContext(newTemplate, { position: currentProperties.position });
+    const oldNode = instance.node;
+    Object.keys(oldNode).forEach(key => delete (oldNode as any)[key]);
+    Object.assign(oldNode, newNode);
+    
+    // Merge preserved properties back
+    oldNode.properties = { ...(oldNode.properties || {}), ...currentProperties };
+    instance.templateVersion = newTemplate.version as any;
+    
+    // 3. Run migration code AFTER property merge
+    const migrations = (newTemplate as any).migrations || [];
+    const migration = migrations.find((m: any) => m.fromVersion === oldVersion);
+    if (migration && (migration as any).body) {
+      this.executeMigrationCode(instance, (migration as any).body);
+    }
+
+    // 4. Update rendered element
+    if (this.options.renderer && instance.renderedNode) {
+      const properties = this.evaluateProperties(instance.node.properties || {});
+      this.options.renderer.updateElement(instance.renderedNode, properties);
+    }
+
+    // 5. Re-synchronize traits (simplified: just log intent for now or implement full diff)
+  }
+
+  private executeMigrationCode(instance: NodeInstance, code: string): void {
+    const sandbox = {
+      ...this.builtins,
+      state: this.state,
+      node: instance.node,
+      self: instance.node,
+      props: instance.node.properties || {},
+      renameProperty: (oldName: string, newName: string) => {
+        if (instance.node.properties && instance.node.properties[oldName] !== undefined) {
+          instance.node.properties[newName] = instance.node.properties[oldName];
+          delete instance.node.properties[oldName];
+        }
+      },
+    };
+
+    try {
+      const fn = new Function(...Object.keys(sandbox), code);
+      fn(...Object.values(sandbox));
+    } catch (error) {
+      console.error(`Status check - Migration error in "${instance.templateName}":`, error);
+    }
+  }
+
+  // ==========================================================================
   // VR INTEGRATION
   // ==========================================================================
 
@@ -966,11 +1130,14 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
 
     // Clone template
     const cloned = this.cloneNodeWithContext(template, { position });
+    if (!cloned.properties) cloned.properties = {};
     cloned.properties.position = position;
 
     // Instantiate
     if (this.rootInstance) {
       const instance = this.instantiateNode(cloned, this.rootInstance);
+      instance.templateName = name;
+      instance.templateVersion = typeof template.version === 'number' ? template.version : parseInt(template.version as string || '0');
       this.rootInstance.children.push(instance);
 
       if (this.options.renderer && this.rootInstance.renderedNode) {
@@ -1007,23 +1174,13 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
   }
 }
 
-// =============================================================================
-// FACTORY FUNCTION
-// =============================================================================
-
-export function createRuntime(
-  ast: HSPlusAST,
-  options?: RuntimeOptions
-): HSPlusRuntime {
-  return new HoloScriptPlusRuntimeImpl(ast, options);
-}
+// Replaced by exported createRuntime above
 
 // =============================================================================
 // EXPORTS
 // =============================================================================
 
-export { HoloScriptPlusRuntimeImpl };
-export type { RuntimeOptions, Renderer, NodeInstance };
+// export type { RuntimeOptions, Renderer, NodeInstance };
 
 // =============================================================================
 // BUILT-IN FUNCTIONS
@@ -1031,6 +1188,9 @@ export type { RuntimeOptions, Renderer, NodeInstance };
 
 function createBuiltins(runtime: HoloScriptPlusRuntimeImpl): HSPlusBuiltins {
   return {
+    log: (...args: any[]) => console.log('[HoloScript]', ...args),
+    warn: (...args: any[]) => console.warn('[HoloScript]', ...args),
+    error: (...args: any[]) => console.error('[HoloScript]', ...args),
     Math,
 
     range: (start: number, end: number, step: number = 1): number[] => {
@@ -1047,7 +1207,7 @@ function createBuiltins(runtime: HoloScriptPlusRuntimeImpl): HSPlusBuiltins {
       return result;
     },
 
-    interpolate_color: (t: number, from: Color, to: Color): Color => {
+    interpolate_color: (t: number, from: any, to: any): any => {
       // Parse hex colors
       const parseHex = (hex: string): [number, number, number] => {
         const clean = hex.replace('#', '');
@@ -1063,22 +1223,22 @@ function createBuiltins(runtime: HoloScriptPlusRuntimeImpl): HSPlusBuiltins {
         return `#${clamp(r).toString(16).padStart(2, '0')}${clamp(g).toString(16).padStart(2, '0')}${clamp(b).toString(16).padStart(2, '0')}`;
       };
 
-      const [r1, g1, b1] = parseHex(from);
-      const [r2, g2, b2] = parseHex(to);
+      const [r1, g1, b1] = typeof from === 'string' ? parseHex(from) : [from.r || 0, from.g || 0, from.b || 0];
+      const [r2, g2, b2] = typeof to === 'string' ? parseHex(to) : [to.r || 0, to.g || 0, to.b || 0];
 
       return toHex(
         r1 + (r2 - r1) * t,
         g1 + (g2 - g1) * t,
         b1 + (b2 - b1) * t
-      );
+      ) as any;
     },
 
     distance_to: (point: Vector3): number => {
       const viewer = runtime.vrContext.headset.position;
       return Math.sqrt(
-        Math.pow(point[0] - viewer[0], 2) +
-        Math.pow(point[1] - viewer[1], 2) +
-        Math.pow(point[2] - viewer[2], 2)
+        Math.pow((point as any)[0] - (viewer as any)[0], 2) +
+        Math.pow((point as any)[1] - (viewer as any)[1], 2) +
+        Math.pow((point as any)[2] - (viewer as any)[2], 2)
       );
     },
 
@@ -1175,7 +1335,9 @@ function createBuiltins(runtime: HoloScriptPlusRuntimeImpl): HSPlusBuiltins {
       }
       
       // Local animation (mock/bridge)
-      Object.assign(node.properties, properties);
+      if (node.properties) {
+        Object.assign(node.properties, properties);
+      }
       runtime.emit('animate', { node, properties, options });
     },
 
@@ -1189,3 +1351,20 @@ function createBuiltins(runtime: HoloScriptPlusRuntimeImpl): HSPlusBuiltins {
     },
   };
 }
+
+// =============================================================================
+// EXPORTS
+// =============================================================================
+
+/**
+ * Create a new HoloScript+ runtime instance
+ */
+export function createRuntime(
+  ast: HSPlusAST,
+  options: RuntimeOptions = {}
+): HSPlusRuntime {
+  return new HoloScriptPlusRuntimeImpl(ast, options);
+}
+
+export { HoloScriptPlusRuntimeImpl };
+// export type { NodeInstance, RuntimeOptions, Renderer };
