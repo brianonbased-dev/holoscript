@@ -13,6 +13,7 @@ import { HoloScriptPreviewPanel } from './previewPanel';
 import { SmartAssetEditorProvider } from './smartAssetEditor';
 import { agentAPI } from './agentApi';
 import { HoloScriptCompletionItemProvider } from './completionProvider';
+import { McpOrchestratorClient } from './services/McpOrchestratorClient';
 
 let client: LanguageClient | undefined;
 
@@ -64,6 +65,22 @@ export function activate(context: ExtensionContext) {
   // Initialize AI Agent API - enables Brittney, Claude, Copilot to control extension
   agentAPI.initialize(context);
   console.log('HoloScript: AI Agent API initialized. Agents can use holoscript.agent.* commands.');
+
+  // Register with MCP Orchestrator for IDE agent integration
+  const mcpClient = new McpOrchestratorClient();
+  mcpClient.start(context);
+
+  // MCP status command
+  context.subscriptions.push(
+    commands.registerCommand('holoscript.mcp.status', async () => {
+      const status = await mcpClient.getStatus();
+      if (status.ok) {
+        window.showInformationMessage(`MCP: ${status.message}`);
+      } else {
+        window.showWarningMessage(`MCP: ${status.message}`);
+      }
+    })
+  );
 
   // Register Open Examples command
   context.subscriptions.push(

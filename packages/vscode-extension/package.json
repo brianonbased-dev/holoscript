@@ -27,9 +27,50 @@
     "3d",
     "webxr"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished",
+    "onLanguage:holoscript",
+    "onLanguage:holoscriptplus"
+  ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "HoloScript MCP",
+      "properties": {
+        "holoscript.mcp.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable MCP orchestrator integration for IDE agents."
+        },
+        "holoscript.mcp.orchestratorUrl": {
+          "type": "string",
+          "default": "http://localhost:5567",
+          "description": "MCP orchestrator base URL."
+        },
+        "holoscript.mcp.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "MCP API key for registration and heartbeats."
+        },
+        "holoscript.mcp.heartbeatSeconds": {
+          "type": "number",
+          "default": 20,
+          "minimum": 10,
+          "description": "Heartbeat interval in seconds."
+        },
+        "holoscript.mcp.visibility": {
+          "type": "string",
+          "enum": ["public", "private"],
+          "default": "public",
+          "description": "Visibility of this IDE agent in the orchestrator registry."
+        },
+        "holoscript.mcp.workspaceId": {
+          "type": "string",
+          "default": "holoscript",
+          "description": "Workspace ID to register under."
+        }
+      }
+    },
     "viewsContainers": {
       "activitybar": [
         {
@@ -165,6 +206,11 @@
       {
         "command": "holoscript.agent.status",
         "title": "Agent: Get Extension Status",
+        "category": "HoloScript"
+      },
+      {
+        "command": "holoscript.mcp.status",
+        "title": "MCP: Show Connectivity Status",
         "category": "HoloScript"
       },
       {
