@@ -15,7 +15,7 @@ const __dirname = new URL('.', import.meta.url).pathname;
 const smallSource = readFileSync(resolve(__dirname, '../fixtures/small.hsplus'), 'utf-8');
 const mediumSource = readFileSync(resolve(__dirname, '../fixtures/medium.hsplus'), 'utf-8');
 
-const bench = new Bench({ name: 'Type Checker Benchmarks', time: 1000 });
+const bench = new Bench({ time: 1000 });
 
 const parser = new HoloScriptPlusParser();
 const typeChecker = new HoloScriptTypeChecker();

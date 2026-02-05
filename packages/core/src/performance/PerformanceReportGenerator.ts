@@ -120,13 +120,13 @@ export class PerformanceReportGenerator {
    * Extract category from metric name
    */
   private extractCategory(name: string): string {
-    // Try to match common patterns
+    // Try to match common patterns (order matters - check specific before general)
+    if (name.includes('Scalability')) return 'Scalability';
+    if (name.includes('Memory')) return 'Memory';
     if (name.includes('Parse')) return 'Parser';
     if (name.includes('Compile') || name.includes('Generate')) return 'Compiler';
     if (name.includes('Reduction') || name.includes('LOC')) return 'Code Metrics';
-    if (name.includes('Memory')) return 'Memory';
     if (name.includes('Pipeline')) return 'Pipeline';
-    if (name.includes('Scalability')) return 'Scalability';
     return 'Other';
   }
 

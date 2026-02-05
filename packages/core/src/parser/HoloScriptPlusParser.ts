@@ -3077,7 +3077,7 @@ export class HoloScriptPlusParser {
     }
 
     // Common mistake: Using semicolon (JavaScript habit)
-    if (current.type === 'SEMICOLON' || current.value === ';') {
+    if (current.value === ';') {
       return {
         message: 'Unexpected semicolon',
         suggestion: 'HoloScript does not require semicolons. Remove the semicolon to continue.',
@@ -3106,7 +3106,7 @@ export class HoloScriptPlusParser {
     }
 
     // Common mistake: Using 'function' keyword instead of arrow function
-    if (current.type === 'FUNCTION' && prev?.type === 'COLON') {
+    if (current.value === 'function' && prev?.type === 'COLON') {
       return {
         message: "Unexpected 'function' keyword",
         suggestion: 'Use arrow function syntax: handler: (args) => { ... }',

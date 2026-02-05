@@ -9,6 +9,13 @@
  */
 
 import type { HoloComposition, HoloObjectDecl, HoloObjectProperty } from '../parser/HoloCompositionTypes';
+import {
+  TraitDependencyGraph,
+  globalTraitGraph,
+  type TraitUsage,
+  type TraitChangeInfo,
+  type ObjectTraitInfo,
+} from './TraitDependencyGraph';
 
 /**
  * Types of changes detected during AST diff
@@ -79,7 +86,7 @@ export interface IncrementalCompileResult {
 }
 
 /**
- * Simple hash function for content comparison
+ * Simple hash function for content comparison (DJB2)
  */
 function hashContent(content: string): string {
   let hash = 0;
@@ -89,6 +96,29 @@ function hashContent(content: string): string {
     hash = hash & hash;
   }
   return hash.toString(36);
+}
+
+/**
+ * Hash a config object for trait comparison
+ * Uses stable JSON serialization with sorted keys
+ */
+function hashConfig(config: Record<string, unknown>): string {
+  const keys = Object.keys(config).sort();
+  const parts: string[] = [];
+
+  for (const key of keys) {
+    const value = config[key];
+    parts.push(`${key}:${JSON.stringify(value)}`);
+  }
+
+  const str = parts.join('|');
+
+  // DJB2 hash
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(36);
 }
 
 /**
@@ -119,8 +149,11 @@ export class IncrementalCompiler {
   private previousAST: HoloComposition | null = null;
   private stateSnapshot: StateSnapshot | null = null;
   private dependencyGraph: Map<string, Set<string>> = new Map();
+  private traitGraph: TraitDependencyGraph;
 
-  constructor() {}
+  constructor(traitGraph?: TraitDependencyGraph) {
+    this.traitGraph = traitGraph || globalTraitGraph;
+  }
 
   /**
    * Diff two ASTs and return the changes
@@ -257,38 +290,50 @@ export class IncrementalCompiler {
       }
     }
 
-    // Compare traits (handle both string arrays and trait objects with .name property)
-    const oldTraits = new Set((oldObj.traits || []).map(t => {
-      if (typeof t === 'string') return t;
-      if (t && typeof t === 'object' && 'name' in t) return (t as any).name;
-      return String(t);
-    }));
-    const newTraits = new Set((newObj.traits || []).map(t => {
-      if (typeof t === 'string') return t;
-      if (t && typeof t === 'object' && 'name' in t) return (t as any).name;
-      return String(t);
-    }));
+    // Compare traits with config-aware detection
+    const oldTraitUsages = this.extractTraitUsages(oldObj.traits || []);
+    const newTraitUsages = this.extractTraitUsages(newObj.traits || []);
 
-    for (const trait of newTraits) {
-      if (!oldTraits.has(trait)) {
+    const oldTraitMap = new Map(oldTraitUsages.map(t => [t.name, t]));
+    const newTraitMap = new Map(newTraitUsages.map(t => [t.name, t]));
+
+    // Check for added traits
+    for (const [name, newTrait] of newTraitMap) {
+      if (!oldTraitMap.has(name)) {
         changes.push({
           type: 'added',
-          path: [...path, '@' + trait],
-          nodeName: trait,
+          path: [...path, '@' + name],
+          nodeName: name,
           nodeType: 'trait',
-          newValue: trait,
+          newValue: newTrait,
         });
       }
     }
 
-    for (const trait of oldTraits) {
-      if (!newTraits.has(trait)) {
+    // Check for removed traits
+    for (const [name, oldTrait] of oldTraitMap) {
+      if (!newTraitMap.has(name)) {
         changes.push({
           type: 'removed',
-          path: [...path, '@' + trait],
-          nodeName: trait,
+          path: [...path, '@' + name],
+          nodeName: name,
           nodeType: 'trait',
-          oldValue: trait,
+          oldValue: oldTrait,
+        });
+      }
+    }
+
+    // Check for config changes (trait exists in both but config differs)
+    for (const [name, newTrait] of newTraitMap) {
+      const oldTrait = oldTraitMap.get(name);
+      if (oldTrait && oldTrait.configHash !== newTrait.configHash) {
+        changes.push({
+          type: 'modified',
+          path: [...path, '@' + name],
+          nodeName: name,
+          nodeType: 'trait',
+          oldValue: oldTrait,
+          newValue: newTrait,
         });
       }
     }
@@ -337,6 +382,61 @@ export class IncrementalCompiler {
     }
 
     return changes;
+  }
+
+  /**
+   * Extract trait usages with config hashes from trait array
+   * Handles both string traits and trait objects with config
+   */
+  private extractTraitUsages(traits: unknown[]): TraitUsage[] {
+    return traits.map(t => {
+      if (typeof t === 'string') {
+        // Simple string trait: "@physics" → { name: "physics", config: {}, configHash: "..." }
+        return {
+          name: t,
+          config: {},
+          configHash: hashConfig({}),
+        };
+      }
+
+      if (t && typeof t === 'object') {
+        const traitObj = t as Record<string, unknown>;
+        // Trait with name property: { name: "physics", mass: 2.0 }
+        if ('name' in traitObj) {
+          const name = String(traitObj.name);
+          // Extract config (everything except 'name')
+          const config: Record<string, unknown> = {};
+          for (const [key, value] of Object.entries(traitObj)) {
+            if (key !== 'name') {
+              config[key] = value;
+            }
+          }
+          return {
+            name,
+            config,
+            configHash: hashConfig(config),
+          };
+        }
+        // Single key object: { physics: { mass: 2.0 } }
+        const keys = Object.keys(traitObj);
+        if (keys.length === 1) {
+          const name = keys[0];
+          const config = (traitObj[name] as Record<string, unknown>) || {};
+          return {
+            name,
+            config: typeof config === 'object' ? config : {},
+            configHash: hashConfig(typeof config === 'object' ? config : {}),
+          };
+        }
+      }
+
+      // Fallback: stringify unknown format
+      return {
+        name: String(t),
+        config: {},
+        configHash: hashConfig({}),
+      };
+    });
   }
 
   /**
@@ -471,11 +571,12 @@ export class IncrementalCompiler {
 
   /**
    * Get all objects that need recompilation due to a change
+   * Enhanced with trait-aware dependency tracking
    */
   getRecompilationSet(changedObjects: string[]): Set<string> {
     const toRecompile = new Set<string>(changedObjects);
 
-    // Add all dependents transitively
+    // Add all dependents transitively (object dependencies)
     const queue = [...changedObjects];
     while (queue.length > 0) {
       const current = queue.shift()!;
@@ -488,7 +589,28 @@ export class IncrementalCompiler {
       }
     }
 
+    // Also use trait graph for template inheritance tracking
+    const traitRecompileSet = this.traitGraph.calculateRecompilationSet(changedObjects);
+    for (const obj of traitRecompileSet) {
+      toRecompile.add(obj);
+    }
+
     return toRecompile;
+  }
+
+  /**
+   * Get trait changes for specific objects
+   * Used for fine-grained trait config change detection
+   */
+  getTraitChanges(objectName: string, newTraits: TraitUsage[]): TraitChangeInfo[] {
+    return this.traitGraph.detectTraitChanges(objectName, newTraits);
+  }
+
+  /**
+   * Get the trait dependency graph for external access
+   */
+  getTraitGraph(): TraitDependencyGraph {
+    return this.traitGraph;
   }
 
   /**
@@ -530,6 +652,15 @@ export class IncrementalCompiler {
 
     for (const [name, obj] of allObjects) {
       const hash = hashContent(serializeObject(obj));
+
+      // Register object with trait graph for dependency tracking
+      const traitUsages = this.extractTraitUsages(obj.traits || []);
+      this.traitGraph.registerObject({
+        objectName: name,
+        sourceId: newAST.name || 'default',
+        traits: traitUsages,
+        template: (obj as any).template,
+      });
 
       if (skipUnchanged && !recompileSet.has(name)) {
         const cached = this.getCached(name, hash);
@@ -573,12 +704,18 @@ export class IncrementalCompiler {
   }
 
   /**
-   * Get cache statistics
+   * Get cache statistics including trait graph info
    */
   getStats(): {
     cacheSize: number;
     objectsCached: string[];
     dependencyEdges: number;
+    traitGraphStats: {
+      traitCount: number;
+      objectCount: number;
+      sourceCount: number;
+      dependencyEdges: number;
+    };
   } {
     let dependencyEdges = 0;
     for (const deps of this.dependencyGraph.values()) {
@@ -589,6 +726,7 @@ export class IncrementalCompiler {
       cacheSize: this.cache.size,
       objectsCached: Array.from(this.cache.keys()),
       dependencyEdges,
+      traitGraphStats: this.traitGraph.getStats(),
     };
   }
 }

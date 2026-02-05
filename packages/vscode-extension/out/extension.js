@@ -6685,8 +6685,8 @@ var require_protocolCodeAction = __commonJS({
   "../../node_modules/.pnpm/vscode-languageclient@9.0.1/node_modules/vscode-languageclient/lib/common/protocolCodeAction.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var vscode8 = require("vscode");
-    var ProtocolCodeAction = class extends vscode8.CodeAction {
+    var vscode9 = require("vscode");
+    var ProtocolCodeAction = class extends vscode9.CodeAction {
       constructor(title, data) {
         super(title);
         this.data = data;
@@ -6702,7 +6702,7 @@ var require_protocolDiagnostic = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ProtocolDiagnostic = exports2.DiagnosticCode = void 0;
-    var vscode8 = require("vscode");
+    var vscode9 = require("vscode");
     var Is = require_is();
     var DiagnosticCode;
     (function(DiagnosticCode2) {
@@ -6712,7 +6712,7 @@ var require_protocolDiagnostic = __commonJS({
       }
       DiagnosticCode2.is = is;
     })(DiagnosticCode || (exports2.DiagnosticCode = DiagnosticCode = {}));
-    var ProtocolDiagnostic = class extends vscode8.Diagnostic {
+    var ProtocolDiagnostic = class extends vscode9.Diagnostic {
       constructor(range, message, severity, data) {
         super(range, message, severity);
         this.data = data;
@@ -10716,7 +10716,7 @@ var require_notebook = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NotebookDocumentSyncFeature = void 0;
-    var vscode8 = require("vscode");
+    var vscode9 = require("vscode");
     var minimatch = require_minimatch();
     var proto = require_main3();
     var UUID = require_uuid();
@@ -10771,9 +10771,9 @@ var require_notebook = __commonJS({
         c2p2.asNotebookCell = asNotebookCell;
         function asNotebookCellKind(kind) {
           switch (kind) {
-            case vscode8.NotebookCellKind.Markup:
+            case vscode9.NotebookCellKind.Markup:
               return proto.NotebookCellKind.Markup;
-            case vscode8.NotebookCellKind.Code:
+            case vscode9.NotebookCellKind.Code:
               return proto.NotebookCellKind.Code;
           }
         }
@@ -11024,25 +11024,25 @@ var require_notebook = __commonJS({
         this.notebookDidOpen = /* @__PURE__ */ new Set();
         this.disposables = [];
         this.selector = client2.protocol2CodeConverter.asDocumentSelector($NotebookDocumentSyncOptions.asDocumentSelector(options));
-        vscode8.workspace.onDidOpenNotebookDocument((notebookDocument) => {
+        vscode9.workspace.onDidOpenNotebookDocument((notebookDocument) => {
           this.notebookDidOpen.add(notebookDocument.uri.toString());
           this.didOpen(notebookDocument);
         }, void 0, this.disposables);
-        for (const notebookDocument of vscode8.workspace.notebookDocuments) {
+        for (const notebookDocument of vscode9.workspace.notebookDocuments) {
           this.notebookDidOpen.add(notebookDocument.uri.toString());
           this.didOpen(notebookDocument);
         }
-        vscode8.workspace.onDidChangeNotebookDocument((event) => this.didChangeNotebookDocument(event), void 0, this.disposables);
+        vscode9.workspace.onDidChangeNotebookDocument((event) => this.didChangeNotebookDocument(event), void 0, this.disposables);
         if (this.options.save === true) {
-          vscode8.workspace.onDidSaveNotebookDocument((notebookDocument) => this.didSave(notebookDocument), void 0, this.disposables);
+          vscode9.workspace.onDidSaveNotebookDocument((notebookDocument) => this.didSave(notebookDocument), void 0, this.disposables);
         }
-        vscode8.workspace.onDidCloseNotebookDocument((notebookDocument) => {
+        vscode9.workspace.onDidCloseNotebookDocument((notebookDocument) => {
           this.didClose(notebookDocument);
           this.notebookDidOpen.delete(notebookDocument.uri.toString());
         }, void 0, this.disposables);
       }
       getState() {
-        for (const notebook of vscode8.workspace.notebookDocuments) {
+        for (const notebook of vscode9.workspace.notebookDocuments) {
           const matchingCells = this.getMatchingCells(notebook);
           if (matchingCells !== void 0) {
             return { kind: "document", id: "$internal", registrations: true, matches: true };
@@ -11054,10 +11054,10 @@ var require_notebook = __commonJS({
         return "notebook";
       }
       handles(textDocument) {
-        return vscode8.languages.match(this.selector, textDocument) > 0;
+        return vscode9.languages.match(this.selector, textDocument) > 0;
       }
       didOpenNotebookCellTextDocument(notebookDocument, cell) {
-        if (vscode8.languages.match(this.selector, cell.document) === 0) {
+        if (vscode9.languages.match(this.selector, cell.document) === 0) {
           return;
         }
         if (!this.notebookDidOpen.has(notebookDocument.uri.toString())) {
@@ -11088,7 +11088,7 @@ var require_notebook = __commonJS({
         }
       }
       didChangeNotebookCellTextDocument(notebookDocument, event) {
-        if (vscode8.languages.match(this.selector, event.document) === 0) {
+        if (vscode9.languages.match(this.selector, event.document) === 0) {
           return;
         }
         this.doSendChange({
@@ -11361,7 +11361,7 @@ var require_notebook = __commonJS({
         this.client = client2;
         this.registrations = /* @__PURE__ */ new Map();
         this.registrationType = proto.NotebookDocumentSyncRegistrationType.type;
-        vscode8.workspace.onDidOpenTextDocument((textDocument) => {
+        vscode9.workspace.onDidOpenTextDocument((textDocument) => {
           if (textDocument.uri.scheme !== _NotebookDocumentSyncFeature.CellScheme) {
             return;
           }
@@ -11375,7 +11375,7 @@ var require_notebook = __commonJS({
             }
           }
         });
-        vscode8.workspace.onDidChangeTextDocument((event) => {
+        vscode9.workspace.onDidChangeTextDocument((event) => {
           if (event.contentChanges.length === 0) {
             return;
           }
@@ -11393,7 +11393,7 @@ var require_notebook = __commonJS({
             }
           }
         });
-        vscode8.workspace.onDidCloseTextDocument((textDocument) => {
+        vscode9.workspace.onDidCloseTextDocument((textDocument) => {
           if (textDocument.uri.scheme !== _NotebookDocumentSyncFeature.CellScheme) {
             return;
           }
@@ -11458,7 +11458,7 @@ var require_notebook = __commonJS({
         if (textDocument.uri.scheme !== _NotebookDocumentSyncFeature.CellScheme) {
           return false;
         }
-        if (this.dedicatedChannel !== void 0 && vscode8.languages.match(this.dedicatedChannel, textDocument) > 0) {
+        if (this.dedicatedChannel !== void 0 && vscode9.languages.match(this.dedicatedChannel, textDocument) > 0) {
           return true;
         }
         for (const provider of this.registrations.values()) {
@@ -11478,7 +11478,7 @@ var require_notebook = __commonJS({
       }
       findNotebookDocumentAndCell(textDocument) {
         const uri = textDocument.uri.toString();
-        for (const notebookDocument of vscode8.workspace.notebookDocuments) {
+        for (const notebookDocument of vscode9.workspace.notebookDocuments) {
           for (const cell of notebookDocument.getCells()) {
             if (cell.document.uri.toString() === uri) {
               return [notebookDocument, cell];
@@ -13994,7 +13994,7 @@ var require_semanticTokens = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.SemanticTokensFeature = void 0;
-    var vscode8 = require("vscode");
+    var vscode9 = require("vscode");
     var vscode_languageserver_protocol_1 = require_main3();
     var features_1 = require_features();
     var Is = require_is();
@@ -14072,7 +14072,7 @@ var require_semanticTokens = __commonJS({
         const selector = options.documentSelector;
         const fullProvider = Is.boolean(options.full) ? options.full : options.full !== void 0;
         const hasEditProvider = options.full !== void 0 && typeof options.full !== "boolean" && options.full.delta === true;
-        const eventEmitter = new vscode8.EventEmitter();
+        const eventEmitter = new vscode9.EventEmitter();
         const documentProvider = fullProvider ? {
           onDidChangeSemanticTokens: eventEmitter.event,
           provideDocumentSemanticTokens: (document, token) => {
@@ -14144,12 +14144,12 @@ var require_semanticTokens = __commonJS({
         const legend = client2.protocol2CodeConverter.asSemanticTokensLegend(options.legend);
         const documentSelector = client2.protocol2CodeConverter.asDocumentSelector(selector);
         if (documentProvider !== void 0) {
-          disposables.push(vscode8.languages.registerDocumentSemanticTokensProvider(documentSelector, documentProvider, legend));
+          disposables.push(vscode9.languages.registerDocumentSemanticTokensProvider(documentSelector, documentProvider, legend));
         }
         if (rangeProvider !== void 0) {
-          disposables.push(vscode8.languages.registerDocumentRangeSemanticTokensProvider(documentSelector, rangeProvider, legend));
+          disposables.push(vscode9.languages.registerDocumentRangeSemanticTokensProvider(documentSelector, rangeProvider, legend));
         }
-        return [new vscode8.Disposable(() => disposables.forEach((item) => item.dispose())), { range: rangeProvider, full: documentProvider, onDidChangeSemanticTokensEmitter: eventEmitter }];
+        return [new vscode9.Disposable(() => disposables.forEach((item) => item.dispose())), { range: rangeProvider, full: documentProvider, onDidChangeSemanticTokensEmitter: eventEmitter }];
       }
     };
     exports2.SemanticTokensFeature = SemanticTokensFeature;
@@ -17648,8 +17648,8 @@ var require_main4 = __commonJS({
         }
       }
       createMessageTransports(encoding) {
-        function getEnvironment(env2, fork) {
-          if (!env2 && !fork) {
+        function getEnvironment(env3, fork) {
+          if (!env3 && !fork) {
             return void 0;
           }
           const result = /* @__PURE__ */ Object.create(null);
@@ -17658,8 +17658,8 @@ var require_main4 = __commonJS({
             result["ELECTRON_RUN_AS_NODE"] = "1";
             result["ELECTRON_NO_ASAR"] = "1";
           }
-          if (env2) {
-            Object.keys(env2).forEach((key) => result[key] = env2[key]);
+          if (env3) {
+            Object.keys(env3).forEach((key) => result[key] = env3[key]);
           }
           return result;
         }
@@ -21043,7 +21043,7 @@ __export(extension_exports, {
 module.exports = __toCommonJS(extension_exports);
 var path4 = __toESM(require("path"));
 var fs3 = __toESM(require("fs"));
-var vscode7 = __toESM(require("vscode"));
+var vscode8 = __toESM(require("vscode"));
 var import_vscode = require("vscode");
 var import_node = __toESM(require_node3());
 
@@ -28120,6 +28120,147 @@ var HoloScriptCompletionItemProvider = class {
   }
 };
 
+// src/services/McpOrchestratorClient.ts
+var vscode7 = __toESM(require("vscode"));
+var McpOrchestratorClient = class {
+  constructor() {
+    this.output = vscode7.window.createOutputChannel("HoloScript MCP");
+    this.heartbeatTimer = null;
+  }
+  start(context) {
+    const config = this.getConfig();
+    if (!config.enabled) {
+      this.log("MCP integration disabled by settings.");
+      return;
+    }
+    if (!config.apiKey || !config.url) {
+      this.log("Missing MCP API configuration. Set holoscript.mcpOrchestratorUrl and holoscript.mcpApiKey.");
+      return;
+    }
+    this.register(config).catch((err) => this.log(`Register failed: ${err}`));
+    this.startHeartbeat(config);
+    context.subscriptions.push({ dispose: () => this.stopHeartbeat() });
+    vscode7.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration("holoscript.mcp")) {
+        this.stopHeartbeat();
+        const next = this.getConfig();
+        if (next.enabled && next.apiKey && next.url) {
+          this.register(next).catch((err) => this.log(`Register failed: ${err}`));
+          this.startHeartbeat(next);
+        }
+      }
+    });
+  }
+  getConfig() {
+    const cfg = vscode7.workspace.getConfiguration("holoscript.mcp");
+    const url = cfg.get("orchestratorUrl") || "";
+    let apiKey = cfg.get("apiKey") || "";
+    const enabled = cfg.get("enabled", true);
+    const heartbeatSeconds = cfg.get("heartbeatSeconds", 20);
+    const visibility = cfg.get("visibility", "public");
+    const workspace7 = cfg.get("workspaceId", "holoscript");
+    if (!apiKey || apiKey.includes("${env:")) {
+      apiKey = process.env.MCP_API_KEY || "";
+    }
+    return { url, apiKey, enabled, heartbeatSeconds, visibility, workspace: workspace7 };
+  }
+  buildRegistrationPayload(config) {
+    const machineId = vscode7.env.machineId?.slice(0, 8) || "local";
+    const id = `holoscript-vscode-${machineId}`;
+    return {
+      id,
+      name: "HoloScript VS Code Extension",
+      command: "vscode",
+      args: [],
+      workspace: config.workspace,
+      status: "active",
+      visibility: config.visibility,
+      tools: [
+        "holoscript.agent.createFile",
+        "holoscript.agent.generateObject",
+        "holoscript.agent.analyzeScene",
+        "holoscript.agent.insertCode",
+        "holoscript.agent.openPreview",
+        "holoscript.agent.addTrait",
+        "holoscript.agent.listTraits",
+        "holoscript.agent.validate",
+        "holoscript.agent.status",
+        "holoscript.openPreview",
+        "holoscript.openPreviewToSide",
+        "holoscript.validate"
+      ]
+    };
+  }
+  async register(config) {
+    const payload = this.buildRegistrationPayload(config);
+    await fetch(`${config.url}/servers/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-mcp-api-key": config.apiKey
+      },
+      body: JSON.stringify(payload)
+    });
+    this.log("Registered with MCP orchestrator.");
+  }
+  startHeartbeat(config) {
+    const payload = this.buildRegistrationPayload(config);
+    const intervalMs = Math.max(10, config.heartbeatSeconds) * 1e3;
+    this.heartbeatTimer = setInterval(async () => {
+      try {
+        await fetch(`${config.url}/servers/${payload.id}/heartbeat`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-mcp-api-key": config.apiKey
+          },
+          body: JSON.stringify({ status: "active", tools: payload.tools })
+        });
+      } catch (err) {
+        this.log(`Heartbeat failed: ${err}`);
+      }
+    }, intervalMs);
+    this.log(`Heartbeat started (${config.heartbeatSeconds}s).`);
+  }
+  stopHeartbeat() {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+      this.log("Heartbeat stopped.");
+    }
+  }
+  log(message) {
+    this.output.appendLine(`[MCP] ${message}`);
+  }
+  async getStatus() {
+    const config = this.getConfig();
+    if (!config.enabled) {
+      return { ok: false, message: "Integration disabled (holoscript.mcp.enabled=false)" };
+    }
+    if (!config.url) {
+      return { ok: false, message: "Missing orchestrator URL (holoscript.mcp.orchestratorUrl)" };
+    }
+    if (!config.apiKey) {
+      return { ok: false, message: "Missing MCP API key (holoscript.mcp.apiKey)" };
+    }
+    try {
+      const health = await fetch(`${config.url}/health`);
+      if (!health.ok) {
+        return { ok: false, message: `Health check failed (${health.status})` };
+      }
+      const servers = await fetch(`${config.url}/servers`, {
+        headers: { "x-mcp-api-key": config.apiKey }
+      });
+      if (!servers.ok) {
+        return { ok: false, message: `Auth failed (${servers.status})` };
+      }
+      return { ok: true, message: `Connected to ${config.url}` };
+    } catch (error) {
+      return { ok: false, message: `Connection failed: ${error?.message || error}` };
+    }
+  }
+};
+
 // src/extension.ts
 var client;
 function activate(context) {
@@ -28161,18 +28302,30 @@ function activate(context) {
   }
   agentAPI.initialize(context);
   console.log("HoloScript: AI Agent API initialized. Agents can use holoscript.agent.* commands.");
+  const mcpClient = new McpOrchestratorClient();
+  mcpClient.start(context);
+  context.subscriptions.push(
+    import_vscode.commands.registerCommand("holoscript.mcp.status", async () => {
+      const status = await mcpClient.getStatus();
+      if (status.ok) {
+        import_vscode.window.showInformationMessage(`MCP: ${status.message}`);
+      } else {
+        import_vscode.window.showWarningMessage(`MCP: ${status.message}`);
+      }
+    })
+  );
   context.subscriptions.push(
     import_vscode.commands.registerCommand("holoscript.openExamples", async () => {
       const examplesPath = path4.join(context.extensionPath, "..", "..", "examples", "quickstart");
-      const uri = vscode7.Uri.file(examplesPath);
+      const uri = vscode8.Uri.file(examplesPath);
       try {
         if (fs3.existsSync(examplesPath)) {
           await import_vscode.commands.executeCommand("vscode.openFolder", uri, { forceNewWindow: false });
         } else {
-          vscode7.env.openExternal(vscode7.Uri.parse("https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart"));
+          vscode8.env.openExternal(vscode8.Uri.parse("https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart"));
         }
       } catch {
-        vscode7.env.openExternal(vscode7.Uri.parse("https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart"));
+        vscode8.env.openExternal(vscode8.Uri.parse("https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart"));
       }
     })
   );
@@ -28183,7 +28336,7 @@ function activate(context) {
   );
   context.subscriptions.push(
     import_vscode.commands.registerCommand("holoscript.openDocumentation", () => {
-      vscode7.env.openExternal(vscode7.Uri.parse("https://holoscript.net/guides/"));
+      vscode8.env.openExternal(vscode8.Uri.parse("https://holoscript.net/guides/"));
     })
   );
   context.subscriptions.push(
@@ -28220,7 +28373,7 @@ function activate(context) {
   );
   context.subscriptions.push(
     import_vscode.commands.registerCommand("holoscript.createFirstScene", async () => {
-      const workspaceFolder = vscode7.workspace.workspaceFolders?.[0];
+      const workspaceFolder = vscode8.workspace.workspaceFolders?.[0];
       if (!workspaceFolder) {
         import_vscode.window.showWarningMessage("Open a folder first to create HoloScript files.");
         return;
@@ -28251,7 +28404,7 @@ function activate(context) {
 `;
       try {
         fs3.writeFileSync(filePath, defaultContent, "utf8");
-        const doc = await vscode7.workspace.openTextDocument(filePath);
+        const doc = await vscode8.workspace.openTextDocument(filePath);
         await import_vscode.window.showTextDocument(doc);
         import_vscode.window.showInformationMessage(`Created ${filename}.holo! \u{1F389} Try adding more objects.`);
       } catch (err) {
@@ -28322,7 +28475,7 @@ function activate(context) {
   });
   context.subscriptions.push(SmartAssetEditorProvider.register(context));
   const holohubProvider = new HoloHubTreeDataProvider();
-  vscode7.window.registerTreeDataProvider("holohub.assets", holohubProvider);
+  vscode8.window.registerTreeDataProvider("holohub.assets", holohubProvider);
   context.subscriptions.push(
     import_vscode.commands.registerCommand("holoscript.holohub.importAsset", async (item) => {
       const assetName = item?.label || "Asset";
@@ -28335,11 +28488,11 @@ function activate(context) {
     const formatter = (init_dist(), __toCommonJS(dist_exports));
     const { loadConfig: loadConfig2 } = formatter;
     context.subscriptions.push(
-      vscode7.languages.registerDocumentFormattingEditProvider(
+      vscode8.languages.registerDocumentFormattingEditProvider(
         ["holoscript", "holoscriptplus"],
         {
           provideDocumentFormattingEdits(document) {
-            const config = vscode7.workspace.getConfiguration("holoscript");
+            const config = vscode8.workspace.getConfiguration("holoscript");
             const timeout = config.get("formatOnSaveTimeout", 1e3);
             return new Promise((resolve) => {
               const timer = setTimeout(() => {
@@ -28360,11 +28513,11 @@ function activate(context) {
                     resolve([]);
                     return;
                   }
-                  const fullRange = new vscode7.Range(
+                  const fullRange = new vscode8.Range(
                     document.positionAt(0),
                     document.positionAt(text.length)
                   );
-                  resolve([vscode7.TextEdit.replace(fullRange, result.formatted)]);
+                  resolve([vscode8.TextEdit.replace(fullRange, result.formatted)]);
                 } catch (err) {
                   console.error("HoloScript: Formatting failed:", err);
                   clearTimeout(timer);
@@ -28372,8 +28525,8 @@ function activate(context) {
                 }
               };
               if (document.lineCount > 1e3) {
-                vscode7.window.withProgress({
-                  location: vscode7.ProgressLocation.Notification,
+                vscode8.window.withProgress({
+                  location: vscode8.ProgressLocation.Notification,
                   title: "Formatting HoloScript...",
                   cancellable: false
                 }, async () => {
@@ -28386,7 +28539,7 @@ function activate(context) {
           }
         }
       ),
-      vscode7.languages.registerDocumentRangeFormattingEditProvider(
+      vscode8.languages.registerDocumentRangeFormattingEditProvider(
         ["holoscript", "holoscriptplus"],
         {
           provideDocumentRangeFormattingEdits(document, range) {
@@ -28401,7 +28554,7 @@ function activate(context) {
               };
               const result = fmtr.formatRange(text, rangeParams, fileType);
               if (!result.changed) return [];
-              return [vscode7.TextEdit.replace(range, result.formatted)];
+              return [vscode8.TextEdit.replace(range, result.formatted)];
             } catch (err) {
               console.error("HoloScript: Range formatting failed:", err);
               return [];
@@ -28415,7 +28568,7 @@ function activate(context) {
     console.warn("HoloScript: Formatter package not found or failed to load:", err);
   }
   context.subscriptions.push(
-    vscode7.languages.registerCompletionItemProvider(
+    vscode8.languages.registerCompletionItemProvider(
       ["holoscript", "holoscriptplus"],
       new HoloScriptCompletionItemProvider(),
       "@"

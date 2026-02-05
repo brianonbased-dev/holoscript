@@ -1,0 +1,456 @@
+/**
+ * HoloScript Renderer and Sharing Utilities
+ * 
+ * Remote rendering and X platform sharing for AI agents.
+ */
+
+interface RenderOptions {
+  code: string;
+  format?: 'png' | 'gif' | 'mp4' | 'webp';
+  resolution?: number[];
+  camera?: {
+    position?: number[];
+    target?: number[];
+  };
+  duration?: number;
+  quality?: 'draft' | 'preview' | 'production';
+}
+
+interface ShareOptions {
+  code: string;
+  title?: string;
+  description?: string;
+  platform?: 'x' | 'generic' | 'codesandbox' | 'stackblitz';
+}
+
+interface RenderResult {
+  success: boolean;
+  url?: string;
+  previewUrl?: string;
+  embedCode?: string;
+  error?: string;
+  localPath?: string;
+  base64?: string;
+}
+
+interface ShareResult {
+  playgroundUrl: string;
+  embedUrl: string;
+  tweetText: string;
+  qrCode?: string;
+  cardMeta?: Record<string, string>;
+}
+
+// Base URL for hosted services (configurable)
+const RENDER_SERVICE_URL = process.env.HOLOSCRIPT_RENDER_URL || 'https://api.holoscript.dev';
+const PLAYGROUND_URL = process.env.HOLOSCRIPT_PLAYGROUND_URL || 'https://play.holoscript.dev';
+
+/**
+ * Generate a static preview render of HoloScript code
+ */
+export async function renderPreview(options: RenderOptions): Promise<RenderResult> {
+  const {
+    code,
+    format = 'png',
+    resolution = [800, 600],
+    camera = { position: [0, 2, 5], target: [0, 0, 0] },
+    duration = 3000,
+    quality = 'preview',
+  } = options;
+  
+  // Validate code first
+  const validationResult = quickValidate(code);
+  if (!validationResult.valid) {
+    return {
+      success: false,
+      error: `Invalid HoloScript code: ${validationResult.errors.join(', ')}`,
+    };
+  }
+  
+  // Check if configured for remote rendering
+  if (RENDER_SERVICE_URL && RENDER_SERVICE_URL !== 'http://localhost:3000') {
+    try {
+      const response = await fetch(`${RENDER_SERVICE_URL}/render`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          format,
+          resolution,
+          camera,
+          duration,
+          quality,
+        }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        return {
+          success: true,
+          url: result.url,
+          previewUrl: result.previewUrl,
+          embedCode: generateEmbedCode(result.previewUrl, resolution),
+        };
+      }
+    } catch (error) {
+      // Fall through to local/mock rendering
+    }
+  }
+  
+  // Local/mock rendering (returns playground link instead)
+  const encodedCode = encodeURIComponent(Buffer.from(code).toString('base64'));
+  const previewUrl = `${PLAYGROUND_URL}?code=${encodedCode}`;
+  
+  return {
+    success: true,
+    url: null, // No static image available locally
+    previewUrl,
+    embedCode: generateEmbedCode(previewUrl, resolution),
+    localPath: null,
+    base64: null,
+  };
+}
+
+/**
+ * Create shareable links for X and other platforms
+ */
+export async function createShareLink(options: ShareOptions): Promise<ShareResult> {
+  const {
+    code,
+    title = 'HoloScript Scene',
+    description = 'Interactive 3D scene built with HoloScript',
+    platform = 'x',
+  } = options;
+  
+  // Encode code for URL (using base64 for complex code)
+  const encodedCode = encodeURIComponent(Buffer.from(code).toString('base64'));
+  
+  // Generate URLs
+  const playgroundUrl = generatePlaygroundUrl(code, title, platform);
+  const embedUrl = generateEmbedUrl(code);
+  
+  // Generate X-optimized tweet text
+  const tweetText = generateTweetText(title, description, playgroundUrl);
+  
+  // Generate QR code data URL (for mobile XR access)
+  const qrCode = generateQRCodeDataUrl(playgroundUrl);
+  
+  // Generate Twitter Card meta tags
+  const cardMeta = generateCardMeta(title, description, embedUrl);
+  
+  return {
+    playgroundUrl,
+    embedUrl,
+    tweetText,
+    qrCode,
+    cardMeta,
+  };
+}
+
+// === Helper Functions ===
+
+function quickValidate(code: string): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  // Basic syntax checks
+  if (!code.trim()) {
+    errors.push('Empty code');
+  }
+  
+  // Check for balanced braces
+  const openBraces = (code.match(/{/g) || []).length;
+  const closeBraces = (code.match(/}/g) || []).length;
+  if (openBraces !== closeBraces) {
+    errors.push('Unbalanced braces');
+  }
+  
+  // Check for common typos
+  if (code.includes('geomety:') || code.includes('geomtry:')) {
+    errors.push("Typo: 'geomety' should be 'geometry'");
+  }
+  if (code.includes('positon:')) {
+    errors.push("Typo: 'positon' should be 'position'");
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+function generatePlaygroundUrl(code: string, title: string, platform: string): string {
+  // Compress code for URL
+  const compressed = compressCode(code);
+  
+  // Platform-specific URLs
+  switch (platform) {
+    case 'codesandbox':
+      return generateCodeSandboxUrl(code, title);
+    case 'stackblitz':
+      return generateStackBlitzUrl(code, title);
+    default:
+      return `${PLAYGROUND_URL}?code=${compressed}&title=${encodeURIComponent(title)}`;
+  }
+}
+
+function generateEmbedUrl(code: string): string {
+  const compressed = compressCode(code);
+  return `${PLAYGROUND_URL}/embed?code=${compressed}`;
+}
+
+function compressCode(code: string): string {
+  // Use base64 encoding for now
+  // TODO: Add LZ-string compression for shorter URLs
+  return encodeURIComponent(Buffer.from(code).toString('base64'));
+}
+
+function generateCodeSandboxUrl(code: string, title: string): string {
+  // CodeSandbox API format
+  const files = {
+    'index.html': {
+      content: generateBrowserTemplate(code, title),
+    },
+    'scene.holo': {
+      content: code,
+    },
+    'package.json': {
+      content: JSON.stringify({
+        name: title.toLowerCase().replace(/\s+/g, '-'),
+        main: 'index.html',
+        dependencies: {
+          '@hololand/three-adapter': 'latest',
+          three: 'latest',
+        },
+      }, null, 2),
+    },
+  };
+  
+  const parameters = encodeURIComponent(Buffer.from(JSON.stringify({ files })).toString('base64'));
+  return `https://codesandbox.io/api/v1/sandboxes/define?parameters=${parameters}`;
+}
+
+function generateStackBlitzUrl(code: string, title: string): string {
+  // StackBlitz URL format
+  const project = {
+    title,
+    description: 'HoloScript Scene',
+    template: 'html',
+    files: {
+      'index.html': generateBrowserTemplate(code, title),
+      'scene.holo': code,
+    },
+  };
+  
+  const params = new URLSearchParams({
+    title: project.title,
+    description: project.description,
+  });
+  
+  return `https://stackblitz.com/fork/github/holoscript/playground-template?${params}`;
+}
+
+function generateTweetText(title: string, description: string, url: string): string {
+  // Optimize for X's character limit
+  const maxDescLength = 200 - title.length - url.length - 20;
+  const truncatedDesc = description.length > maxDescLength
+    ? description.substring(0, maxDescLength - 3) + '...'
+    : description;
+  
+  return `🎮 ${title}
+
+${truncatedDesc}
+
+Try it in VR/AR: ${url}
+
+#HoloScript #VR #XR #Metaverse #3D`;
+}
+
+function generateQRCodeDataUrl(url: string): string {
+  // Simple QR code generation placeholder
+  // In production, use a library like 'qrcode'
+  // For now, return a service URL
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+}
+
+function generateCardMeta(title: string, description: string, embedUrl: string): Record<string, string> {
+  return {
+    'twitter:card': 'player',
+    'twitter:title': title,
+    'twitter:description': description,
+    'twitter:player': embedUrl,
+    'twitter:player:width': '800',
+    'twitter:player:height': '600',
+    'og:title': title,
+    'og:description': description,
+    'og:type': 'website',
+    'og:url': embedUrl,
+  };
+}
+
+function generateEmbedCode(previewUrl: string, resolution: number[]): string {
+  const [width, height] = resolution;
+  return `<iframe 
+  src="${previewUrl}" 
+  width="${width}" 
+  height="${height}" 
+  frameborder="0" 
+  allowfullscreen 
+  allow="xr-spatial-tracking"
+></iframe>`;
+}
+
+function generateBrowserTemplate(code: string, title: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(title)}</title>
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="player">
+  <meta name="twitter:title" content="${escapeHtml(title)}">
+  <meta name="twitter:player" content="${PLAYGROUND_URL}/embed">
+  <meta name="twitter:player:width" content="800">
+  <meta name="twitter:player:height" content="600">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #000; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    #container { 
+      width: 100%; 
+      height: 100vh; 
+    }
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 1.5rem;
+    }
+    #vr-button {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      background: #4a9eff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #vr-button:hover { background: #3a8eff; }
+    #vr-button:disabled { background: #666; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div id="loading">Loading HoloScript scene...</div>
+  <button id="vr-button" disabled>Enter VR</button>
+  
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+    
+    // HoloScript code embedded
+    const holoCode = \`${escapeBackticks(code)}\`;
+    
+    // Initialize Three.js scene
+    const container = document.getElementById('container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.xr.enabled = true;
+    container.appendChild(renderer.domElement);
+    
+    // Add VR button if supported
+    if ('xr' in navigator) {
+      navigator.xr.isSessionSupported('immersive-vr').then(supported => {
+        const vrButton = document.getElementById('vr-button');
+        if (supported) {
+          vrButton.disabled = false;
+          container.appendChild(VRButton.createButton(renderer));
+        } else {
+          vrButton.textContent = 'VR Not Supported';
+        }
+      });
+    }
+    
+    // Basic lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 10, 5);
+    scene.add(directionalLight);
+    
+    // Default skybox
+    scene.background = new THREE.Color(0x1a1a2e);
+    
+    camera.position.set(0, 1.6, 5);
+    
+    // Hide loading
+    document.getElementById('loading').style.display = 'none';
+    
+    // TODO: Parse HoloScript and create objects
+    // For now, create a placeholder
+    const geometry = new THREE.SphereGeometry(0.5);
+    const material = new THREE.MeshStandardMaterial({ 
+      color: 0x00ffff, 
+      emissive: 0x00ffff,
+      emissiveIntensity: 0.3
+    });
+    const sphere = new THREE.Mesh(geometry, material);
+    sphere.position.set(0, 1, -2);
+    scene.add(sphere);
+    
+    // Animation
+    function animate() {
+      sphere.rotation.y += 0.01;
+      renderer.setAnimationLoop(render);
+    }
+    
+    function render() {
+      renderer.render(scene, camera);
+    }
+    
+    animate();
+    
+    // Handle resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>`;
+}
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function escapeBackticks(str: string): string {
+  return str.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+}

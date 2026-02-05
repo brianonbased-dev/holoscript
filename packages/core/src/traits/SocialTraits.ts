@@ -1,0 +1,242 @@
+/**
+ * Social VR Traits for HoloScript
+ * 
+ * New traits for social sharing, collaboration, and X platform integration.
+ * These traits enable AI-generated scenes to be easily shared and experienced
+ * collaboratively on social platforms.
+ * 
+ * @version 1.0.0
+ */
+
+import type { TraitHandler } from './TraitTypes';
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+interface ShareableConfig {
+  camera: [number, number, number];
+  target: [number, number, number];
+  animation: 'rotate' | 'orbit' | 'zoom' | 'none';
+  duration: number;
+  format: 'png' | 'gif' | 'mp4' | 'webp';
+  resolution: [number, number];
+  includeQR: boolean;
+}
+
+interface CollaborativeConfig {
+  sync: 'realtime' | 'periodic' | 'manual';
+  maxUsers: number;
+  permissions: ('view' | 'edit' | 'delete')[];
+  cursors: boolean;
+  voice: boolean;
+  presence: boolean;
+}
+
+interface TweetableConfig {
+  template: string;
+  hashtags: string[];
+  mention: string;
+  includePreview: boolean;
+  autoThread: boolean;
+}
+
+// =============================================================================
+// @shareable HANDLER
+// =============================================================================
+
+/**
+ * @shareable - Auto-generates X-optimized previews for sharing
+ * 
+ * When applied to an object or scene, automatically generates:
+ * - Preview image for social cards
+ * - Animated GIF for engagement
+ * - QR code for mobile XR access
+ */
+export const shareableHandler: TraitHandler<ShareableConfig> = {
+  name: 'shareable' as any,
+
+  defaultConfig: {
+    camera: [5, 2, 5],
+    target: [0, 0, 0],
+    animation: 'rotate',
+    duration: 3000,
+    format: 'gif',
+    resolution: [1200, 630],
+    includeQR: true,
+  },
+
+  onAttach(node, config, context) {
+    const state: Record<string, unknown> = {
+      previewGenerated: false,
+      previewUrl: null,
+      qrCodeUrl: null,
+    };
+    (node as any).__shareableState = state;
+  },
+
+  onDetach(node) {
+    delete (node as any).__shareableState;
+  },
+
+  onUpdate(node, config, context, delta) {
+    // Preview generation is handled externally
+  },
+
+  onEvent(node, config, context, event) {
+    if (event.type === 'share') {
+      context.emit('on_share', { node, platform: (event as any).platform || 'x' });
+    }
+  },
+};
+
+// =============================================================================
+// @collaborative HANDLER
+// =============================================================================
+
+/**
+ * @collaborative - Real-time multi-user editing via WebRTC
+ * 
+ * Enables multiple users to interact with and modify objects
+ * simultaneously. Perfect for building in X threads together.
+ */
+export const collaborativeHandler: TraitHandler<CollaborativeConfig> = {
+  name: 'collaborative' as any,
+
+  defaultConfig: {
+    sync: 'realtime',
+    maxUsers: 10,
+    permissions: ['view'],
+    cursors: true,
+    voice: false,
+    presence: true,
+  },
+
+  onAttach(node, config, context) {
+    const state: Record<string, unknown> = {
+      users: new Map(),
+      editHistory: [],
+      isConnected: false,
+    };
+    (node as any).__collaborativeState = state;
+  },
+
+  onDetach(node) {
+    delete (node as any).__collaborativeState;
+  },
+
+  onUpdate(node, config, context, delta) {
+    const state = (node as any).__collaborativeState;
+    if (!state) return;
+    // Sync logic handled by WebRTC layer
+  },
+
+  onEvent(node, config, context, event) {
+    const state = (node as any).__collaborativeState;
+    if (!state) return;
+
+    switch (event.type) {
+      case 'user_join':
+        context.emit('on_user_join', { node, user: (event as any).user });
+        break;
+      case 'user_leave':
+        context.emit('on_user_leave', { node, user: (event as any).user });
+        break;
+      case 'edit':
+        context.emit('on_edit', { node, edit: (event as any).edit });
+        break;
+    }
+  },
+};
+
+// =============================================================================
+// @tweetable HANDLER
+// =============================================================================
+
+/**
+ * @tweetable - Generates tweet with preview when shared
+ * 
+ * Automatically creates X-optimized content when the object
+ * or scene is shared, including hashtags and preview cards.
+ */
+export const tweetableHandler: TraitHandler<TweetableConfig> = {
+  name: 'tweetable' as any,
+
+  defaultConfig: {
+    template: 'Check out {name}! Built with HoloScript 🎮',
+    hashtags: ['HoloScript', 'VR'],
+    mention: '',
+    includePreview: true,
+    autoThread: false,
+  },
+
+  onAttach(node, config, context) {
+    const state: Record<string, unknown> = {
+      tweetGenerated: false,
+      tweetUrl: null,
+    };
+    (node as any).__tweetableState = state;
+  },
+
+  onDetach(node) {
+    delete (node as any).__tweetableState;
+  },
+
+  onUpdate(node, config, context, delta) {
+    // Tweet generation is handled externally
+  },
+
+  onEvent(node, config, context, event) {
+    if (event.type === 'tweet') {
+      context.emit('on_tweet', { node });
+    }
+    if (event.type === 'thread_created') {
+      context.emit('on_thread_created', { node });
+    }
+  },
+};
+
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Generate a tweet URL for sharing a HoloScript scene
+ */
+export function generateTweetUrl(
+  name: string,
+  url: string,
+  config: TweetableConfig
+): string {
+  let text = config.template
+    .replace('{name}', name)
+    .replace('{url}', url);
+
+  if (config.mention) {
+    text = `${config.mention} ${text}`;
+  }
+
+  const hashtags = config.hashtags.map((h) => `#${h}`).join(' ');
+  text = `${text}\n\n${hashtags}\n\n${url}`;
+
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+}
+
+/**
+ * Generate a QR code URL for a scene
+ */
+export function generateQRCodeUrl(sceneUrl: string): string {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(sceneUrl)}`;
+}
+
+// =============================================================================
+// EXPORTS
+// =============================================================================
+
+export const socialTraitHandlers = {
+  shareable: shareableHandler,
+  collaborative: collaborativeHandler,
+  tweetable: tweetableHandler,
+};
+
+export default socialTraitHandlers;

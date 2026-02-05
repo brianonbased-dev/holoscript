@@ -16,7 +16,7 @@ const smallSource = readFileSync(resolve(__dirname, '../fixtures/small.hsplus'),
 const mediumSource = readFileSync(resolve(__dirname, '../fixtures/medium.hsplus'), 'utf-8');
 const largeSource = readFileSync(resolve(__dirname, '../fixtures/large.hsplus'), 'utf-8');
 
-const bench = new Bench({ name: 'Formatter Benchmarks', time: 1000 });
+const bench = new Bench({ time: 1000 });
 
 const formatter = new HoloScriptFormatter(DEFAULT_CONFIG);
 

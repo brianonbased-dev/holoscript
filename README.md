@@ -67,7 +67,21 @@ HoloScript stands alone as a purpose-built language for spatial computing, rathe
 
 ## 🚀 What's New (February 2026)
 
-### 🧠 Language & Parser (HoloScript Core)
+### � Grok/X Integration (v2.2.1)
+Grok can now build, validate, and share VR scenes directly in X conversations!
+
+```bash
+pip install holoscript              # Python bindings
+npm i @holoscript/mcp-server         # MCP server for AI agents
+```
+
+- **16 MCP Tools** for parsing, generation, validation, and sharing
+- **Python Package** for Grok's runtime environment  
+- **Render Service** for preview images and X share links
+
+[**Read the Grok/X Integration Guide**](./docs/GROK_X_IMPLEMENTATION_SUMMARY.md)
+
+### �🧠 Language & Parser (HoloScript Core)
 
 #### ⚡ Syntax Evolved (v2.1)
 New parser capabilities for "Wild HoloScript" support: arrow functions, raw TypeScript blocks, and natural language connections.

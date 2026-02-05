@@ -1,0 +1,52 @@
+{
+  "name": "@holoscript/mcp-server",
+  "version": "1.0.1",
+  "description": "Model Context Protocol server for HoloScript - enables AI agents to parse, validate, and generate HoloScript code",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "holoscript-mcp": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@holoscript/core": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsup": "^8.0.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "@holoscript/core": ">=2.0.0"
+  },
+  "keywords": [
+    "holoscript",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "vr",
+    "3d",
+    "xr"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brianonbased-dev/Holoscript.git",
+    "directory": "packages/mcp-server"
+  },
+  "author": "Brian X Base Team"
+}

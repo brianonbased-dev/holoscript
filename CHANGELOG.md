@@ -1,3 +1,43 @@
+## [2.2.1] - 2026-02-05
+
+### 🤖 Grok/X Integration
+
+Enable Grok (xAI) to build, validate, and share HoloScript VR scenes directly in X conversations.
+
+### Added
+- **MCP Server** (`@holoscript/mcp-server@1.0.1`) - Full Model Context Protocol server with 16 tools for AI agents
+- **Python Bindings** (`pip install holoscript`) - Python package for Grok's execution environment
+- **Render Service** (`services/render-service/`) - Preview generation and X sharing endpoints
+- **Browser Templates** (`examples/browser-templates/`) - Pre-built HTML templates for instant scene rendering
+- **Social Traits** - 3 new traits: `@shareable`, `@collaborative`, `@tweetable`
+
+### MCP Tools
+| Tool | Purpose |
+|------|---------|  
+| `parse_hs` / `parse_holo` | Parse HoloScript files |
+| `validate_holoscript` | AI-friendly validation |
+| `generate_object` / `generate_scene` | Natural language → code |
+| `list_traits` / `explain_trait` | Trait documentation |
+| `render_preview` | Generate preview images |
+| `create_share_link` | X-optimized share links |
+
+### Python Usage
+```python
+from holoscript import HoloScript
+
+hs = HoloScript()
+scene = hs.generate("forest with glowing mushrooms")
+share = hs.share(scene.code, platform="x")
+print(share.playground_url)
+```
+
+### Links
+- npm: https://www.npmjs.com/package/@holoscript/mcp-server
+- PyPI: https://pypi.org/project/holoscript/
+- Docs: [Grok/X Integration Guide](./docs/GROK_X_IMPLEMENTATION_SUMMARY.md)
+
+---
+
 ## [2.2.0] - 2026-01-31
 
 ### 🎮 Brittney AI Game Generation Features

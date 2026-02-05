@@ -22,6 +22,45 @@ A declarative language with tooling that compiles to multiple platforms. This ro
 
 ---
 
+## 🚀 Sprint 2: Core Stability & Developer Experience (February 2026)
+
+**Target Version:** 2.2.0
+**Full Plan:** [SPRINT_2_IMPLEMENTATION_PLAN.md](./docs/SPRINT_2_IMPLEMENTATION_PLAN.md)
+
+### Priority Stack (Ordered by Dependencies)
+
+| #  | Priority                         | Agent            | Status         | Blocks   |
+|----|----------------------------------|------------------|----------------|----------|
+| 1  | Advanced Spread Operator Support | Architect        | 🔴 Not Started | 2, 5, 10 |
+| 2  | Enhanced Error Recovery          | Architect        | 🔴 Not Started | 7        |
+| 3  | Trait Change Detection           | Architect        | 🔴 Not Started | 5        |
+| 4  | Stabilize Visual Test Runner     | QA               | 🔴 Not Started | 9        |
+| 5  | Performance Benchmarking         | Tooling          | 🔴 Not Started | -        |
+| 6  | Formatter Optimizations          | Tooling          | 🔴 Not Started | -        |
+| 7  | VS Code Extension Enhancements   | IDE              | 🔴 Not Started | -        |
+| 8  | Visual Diff Tools                | Tooling + QA     | 🔴 Not Started | -        |
+| 9  | Snapshot Coverage                | QA               | 🔴 Not Started | -        |
+| 10 | Ecosystem Expansion              | Architect + Docs | 🔴 Not Started | 1-9      |
+
+### Critical Path
+
+```text
+Priority 1 (Spread) → Priority 2 (Errors) → Priority 4 (Tests)
+     ↓                                            ↓
+Priority 5 (Benchmarks) ←────────────────────────┘
+     ↓
+Priority 10 (Ecosystem) [GATE: Requires 1-9 complete]
+```
+
+### Success Metrics
+
+- Parser syntax coverage: 85% → **95%**
+- Visual tests: 6/9 → **9/9**
+- Build time (10K lines): 500ms → **200ms**
+- Community: 0 stars → **50+ stars**
+
+---
+
 ## File Extensions & Layer Architecture
 
 HoloScript uses three file extensions, each serving distinct purposes at different layers of the spatial computing stack:
