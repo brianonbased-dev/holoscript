@@ -6,6 +6,16 @@ This is a major release bringing WASM compilation, certified packages, partner S
 
 ### Added
 
+#### Embedded Runtime & Game Engine Adapters (Sprint 9-10)
+- **HoloScriptRuntime** - Embeddable runtime for partner applications
+  - Scene loading and management
+  - Plugin system for custom extensions
+  - Event-driven architecture
+- **UnityAdapter** - Generate C# scripts and prefabs for Unity
+- **UnrealAdapter** - Generate C++ actors and Blueprints for Unreal Engine
+- **GodotAdapter** - Generate GDScript and .tscn scenes for Godot
+- **BrandingKit** - Partner branding assets (badges, colors, typography)
+
 #### WASM Compilation (Sprint 3)
 - **WebAssembly Target** - Compile HoloScript to WAT format
 - JavaScript bindings generation with TypeScript types
@@ -113,6 +123,10 @@ This is a major release bringing WASM compilation, certified packages, partner S
 - LSP crash on malformed input
 - MQTT reconnection handling
 - Workspace permission inheritance
+- HeadlessRuntime state provider timing race condition
+- WorkspaceRepository type signature for partial settings updates
+- Visual regression tests gracefully skip when browser unavailable
+- holoscript package test script runs in CI mode (not watch mode)
 
 ---
 

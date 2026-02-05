@@ -1,6 +1,6 @@
 {
   "name": "holoscript-network-server",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "type": "module",
   "description": "Example signaling server for HoloScript multiplayer",
   "main": "server.js",

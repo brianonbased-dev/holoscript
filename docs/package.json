@@ -1,6 +1,6 @@
 {
   "name": "holoscript-docs",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "HoloScript documentation site - holoscript.net",
   "type": "module",
   "scripts": {

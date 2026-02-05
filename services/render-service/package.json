@@ -1,6 +1,6 @@
 {
   "name": "@holoscript/render-service",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Render service for HoloScript previews - enables sharing on X/Twitter",
   "license": "MIT",
   "type": "module",
