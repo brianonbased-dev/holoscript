@@ -335,9 +335,9 @@ export function publishToMQTTSink(
 
   const nodeState = (node as any).__mqttSinkConfig as MQTTSinkConfig | undefined;
   const finalTopic = topic || resolveTopic(nodeState?.topic || '', node);
-  const finalPayload = payload !== undefined ? payload : {};
+  const finalPayload = payload !== undefined && payload !== null ? payload : {};
 
-  return state.client.publish(finalTopic, finalPayload, {
+  return state.client.publish(finalTopic, finalPayload as string | Buffer | object, {
     retain: nodeState?.retain || false,
     qos: nodeState?.qos || 0,
   });
