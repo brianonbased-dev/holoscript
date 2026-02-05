@@ -1337,3 +1337,46 @@ export {
   type WoTThingConfig as WoTThingTraitConfig,
   type WoTThingState,
 } from './traits/WoTThingTrait';
+
+// =============================================================================
+// MQTT Protocol Bindings (Sprint 3 - Priority 2)
+// =============================================================================
+
+export {
+  MQTTClient,
+  createMQTTClient,
+  registerMQTTClient,
+  getMQTTClient,
+  unregisterMQTTClient,
+  type QoS,
+  type MQTTVersion,
+  type MQTTClientConfig,
+  type MQTTMessage,
+  type MQTTSubscription,
+  type MQTTPublishOptions,
+  type MQTTClientState,
+  type MQTTClientEvents,
+} from './runtime/protocols';
+
+// MQTT Source Trait Handler
+export {
+  mqttSourceHandler,
+  hasMQTTSourceTrait,
+  getMQTTSourceState,
+  getMQTTSourceClient,
+  isMQTTSourceConnected,
+  type MQTTSourceConfig,
+  type MQTTSourceState,
+} from './traits/MQTTSourceTrait';
+
+// MQTT Sink Trait Handler
+export {
+  mqttSinkHandler,
+  hasMQTTSinkTrait,
+  getMQTTSinkState,
+  getMQTTSinkClient,
+  isMQTTSinkConnected,
+  publishToMQTTSink,
+  type MQTTSinkConfig,
+  type MQTTSinkState,
+} from './traits/MQTTSinkTrait';

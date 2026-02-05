@@ -2,6 +2,8 @@
 
 HTTP service for rendering HoloScript previews and enabling social sharing on X (Twitter).
 
+**Live Deployment:** https://holoscript-render.onrender.com
+
 ## Features
 
 - **Share Endpoint** - Create shareable scene links

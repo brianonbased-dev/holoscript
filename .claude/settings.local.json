@@ -93,7 +93,8 @@
       "WebFetch(domain:azure.github.io)",
       "WebFetch(domain:openusd.org)",
       "Bash(git status:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git check-ignore:*)"
     ]
   }
 }
