@@ -2,8 +2,10 @@
  * CLI argument parsing
  */
 
+export type RuntimeProfileName = 'headless' | 'minimal' | 'standard' | 'vr';
+
 export interface CLIOptions {
-  command: 'parse' | 'validate' | 'run' | 'ast' | 'repl' | 'watch' | 'compile' | 'build' | 'add' | 'remove' | 'list' | 'traits' | 'suggest' | 'generate' | 'templates' | 'pack' | 'unpack' | 'inspect' | 'diff' | 'wot-export' | 'help' | 'version';
+  command: 'parse' | 'validate' | 'run' | 'ast' | 'repl' | 'watch' | 'compile' | 'build' | 'add' | 'remove' | 'list' | 'traits' | 'suggest' | 'generate' | 'templates' | 'pack' | 'unpack' | 'inspect' | 'diff' | 'wot-export' | 'headless' | 'help' | 'version';
   input?: string;
   output?: string;
   verbose: boolean;
@@ -18,6 +20,12 @@ export interface CLIOptions {
   target?: string;
   watch: boolean;
   split: boolean;
+  /** Runtime profile (headless, minimal, standard, vr) */
+  profile?: RuntimeProfileName;
+  /** Tick rate for headless runtime (Hz) */
+  tickRate?: number;
+  /** Duration to run headless runtime (ms), 0 = indefinite */
+  duration?: number;
 }
 
 const DEFAULT_OPTIONS: CLIOptions = {
@@ -32,6 +40,8 @@ const DEFAULT_OPTIONS: CLIOptions = {
   brittneyUrl: process.env.BRITTNEY_SERVICE_URL,
   watch: false,
   split: false,
+  tickRate: 10,
+  duration: 0,
 };
 
 export function parseArgs(args: string[]): CLIOptions {
@@ -43,7 +53,7 @@ export function parseArgs(args: string[]): CLIOptions {
 
     // Commands
     if (!arg.startsWith('-')) {
-      if (['parse', 'validate', 'run', 'ast', 'repl', 'watch', 'compile', 'build', 'add', 'remove', 'list', 'traits', 'suggest', 'generate', 'templates', 'pack', 'unpack', 'inspect', 'diff', 'wot-export', 'help', 'version'].includes(arg)) {
+      if (['parse', 'validate', 'run', 'ast', 'repl', 'watch', 'compile', 'build', 'add', 'remove', 'list', 'traits', 'suggest', 'generate', 'templates', 'pack', 'unpack', 'inspect', 'diff', 'wot-export', 'headless', 'help', 'version'].includes(arg)) {
         options.command = arg as CLIOptions['command'];
       } else if (['add', 'remove'].includes(options.command)) {
         // Collect package names for add/remove commands
@@ -107,6 +117,16 @@ export function parseArgs(args: string[]): CLIOptions {
       case '--split':
         options.split = true;
         break;
+      case '-p':
+      case '--profile':
+        options.profile = args[++i] as RuntimeProfileName;
+        break;
+      case '--tick-rate':
+        options.tickRate = parseInt(args[++i], 10) || 10;
+        break;
+      case '--duration':
+        options.duration = parseInt(args[++i], 10) || 0;
+        break;
     }
     i++;
   }
@@ -148,6 +168,9 @@ Usage: holoscript <command> [options] [input]
   \x1b[33mIoT & Ecosystem:\x1b[0m
   wot-export <file> Generate W3C Thing Description from @wot_thing objects
                     Use --json for JSON output, -o for output file
+  headless <file>   Run HoloScript in headless mode (no rendering)
+                    Ideal for IoT, edge computing, testing
+                    Use --profile to select runtime profile
 
   help              Show this help message
   version           Show version information
@@ -157,6 +180,9 @@ Usage: holoscript <command> [options] [input]
   -j, --json          Output results as JSON
   -o, --output        Write output to file
   -t, --target        Compile target (threejs, unity, vrchat, babylon)
+  -p, --profile       Runtime profile (headless, minimal, standard, vr)
+  --tick-rate <hz>    Tick rate for headless runtime (default: 10)
+  --duration <ms>     Duration to run headless (0 = indefinite)
   --max-depth <n>     Max execution depth (default: 10)
   --timeout <ms>      Execution timeout in ms (default: 5000)
   --show-ast          Show AST during REPL execution
@@ -196,6 +222,12 @@ Usage: holoscript <command> [options] [input]
   \x1b[2m# IoT & WoT Integration\x1b[0m
   holoscript wot-export scene.holo        # Generate W3C Thing Descriptions
   holoscript wot-export scene.holo -o td/ # Output to directory
+
+  \x1b[2m# Headless Runtime (IoT, Edge, Testing)\x1b[0m
+  holoscript headless device.holo              # Run without rendering
+  holoscript headless device.holo --tick-rate 60  # 60Hz update rate
+  holoscript headless device.holo --duration 5000 # Run for 5 seconds
+  holoscript run scene.holo --profile minimal     # Use minimal profile
 
 \x1b[1mAliases:\x1b[0m
   hs              Short alias for holoscript

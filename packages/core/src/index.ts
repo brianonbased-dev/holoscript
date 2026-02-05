@@ -243,6 +243,24 @@ export { BabylonCompiler, type BabylonCompilerOptions } from './compiler/Babylon
 export { AndroidXRCompiler, type AndroidXRCompilerOptions } from './compiler/AndroidXRCompiler';
 export { OpenXRCompiler, type OpenXRCompilerOptions } from './compiler/OpenXRCompiler';
 
+// HoloScript Robotics & IoT Compilers (Sprint 3)
+export { URDFCompiler, type URDFCompilerOptions } from './compiler/URDFCompiler';
+export { SDFCompiler, type SDFCompilerOptions } from './compiler/SDFCompiler';
+export { DTDLCompiler, type DTDLCompilerOptions, DTDL_TRAIT_COMPONENTS } from './compiler/DTDLCompiler';
+
+// WASM Compiler (Sprint 3 - High-performance edge execution)
+export {
+  WASMCompiler,
+  createWASMCompiler,
+  compileToWASM,
+  compileASTToWASM,
+  type WASMCompilerOptions,
+  type WASMCompileResult,
+  type MemoryLayout,
+  type WASMExport,
+  type WASMImport,
+} from './compiler/WASMCompiler';
+
 // Incremental Compiler (Sprint 2 - Hot Reload & Trait Detection)
 export {
   IncrementalCompiler,
@@ -1380,3 +1398,35 @@ export {
   type MQTTSinkConfig,
   type MQTTSinkState,
 } from './traits/MQTTSinkTrait';
+
+// =============================================================================
+// Runtime Profiles (Sprint 3 - Priority 3)
+// =============================================================================
+
+export {
+  // Profile types
+  type RuntimeProfile,
+  type RuntimeProfileName,
+  type RenderingConfig,
+  type PhysicsConfig as ProfilePhysicsConfig,
+  type AudioConfig as ProfileAudioConfig,
+  type NetworkConfig as ProfileNetworkConfig,
+  type InputConfig as ProfileInputConfig,
+  type ProtocolConfig,
+  // Predefined profiles
+  HEADLESS_PROFILE,
+  MINIMAL_PROFILE,
+  STANDARD_PROFILE,
+  VR_PROFILE,
+  // Profile utilities
+  getProfile,
+  registerProfile,
+  getAvailableProfiles,
+  createCustomProfile,
+  // Headless runtime
+  HeadlessRuntime,
+  createHeadlessRuntime,
+  type HeadlessRuntimeOptions,
+  type HeadlessRuntimeStats,
+  type HeadlessNodeInstance,
+} from './runtime/profiles';

@@ -511,6 +511,168 @@ async function main(): Promise<void> {
       }
     }
 
+    case 'headless': {
+      if (!options.input) {
+        console.error('\x1b[31mError: No input file specified.\x1b[0m');
+        console.log('Usage: holoscript headless <file.holo> [--tick-rate <hz>] [--duration <ms>]');
+        process.exit(1);
+      }
+
+      try {
+        const fs = await import('fs');
+        const path = await import('path');
+        const { HoloCompositionParser, HoloScriptPlusParser } = await import('@holoscript/core');
+        const {
+          createHeadlessRuntime,
+          HEADLESS_PROFILE,
+          getProfile,
+        } = await import('@holoscript/core/runtime/profiles');
+
+        const filePath = path.resolve(options.input);
+        if (!fs.existsSync(filePath)) {
+          console.error(`\x1b[31mError: File not found: ${filePath}\x1b[0m`);
+          process.exit(1);
+        }
+
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const isHolo = options.input.endsWith('.holo');
+
+        console.log(`\n\x1b[36mStarting headless runtime: ${options.input}\x1b[0m`);
+
+        let ast: any;
+
+        if (isHolo) {
+          const parser = new HoloCompositionParser();
+          const parseResult = parser.parse(content);
+
+          if (!parseResult.success) {
+            console.error('\x1b[31mParse errors:\x1b[0m');
+            for (const error of parseResult.errors) {
+              console.error(`  Line ${error.loc?.line || '?'}: ${error.message}`);
+            }
+            process.exit(1);
+          }
+
+          // Convert HoloComposition to HSPlusAST format
+          const objects = parseResult.ast?.objects || [];
+          ast = {
+            root: {
+              type: 'scene',
+              id: 'root',
+              children: objects.map((obj: any) => ({
+                type: obj.type || 'object',
+                id: obj.name,
+                properties: Object.fromEntries(obj.properties?.map((p: any) => [p.key, p.value]) || []),
+                traits: new Map(obj.traits?.map((t: any) => [t.name, t.config || {}]) || []),
+                directives: obj.directives || [],
+                children: obj.children || [],
+              })),
+              directives: parseResult.ast?.state ? [{
+                type: 'state',
+                body: parseResult.ast.state.declarations || {},
+              }] : [],
+            },
+            imports: parseResult.ast?.imports || [],
+            body: [],
+          };
+        } else {
+          // Use HoloScript+ parser
+          const parser = new HoloScriptPlusParser();
+          const parseResult = parser.parse(content);
+
+          if (parseResult.errors.length > 0) {
+            console.error('\x1b[31mParse errors:\x1b[0m');
+            for (const error of parseResult.errors) {
+              console.error(`  Line ${error.line}: ${error.message}`);
+            }
+            process.exit(1);
+          }
+
+          ast = parseResult.ast;
+        }
+
+        // Get profile
+        const profileName = options.profile || 'headless';
+        let profile;
+        try {
+          profile = getProfile(profileName as any);
+        } catch {
+          profile = HEADLESS_PROFILE;
+        }
+
+        // Create headless runtime
+        const runtime = createHeadlessRuntime(ast, {
+          profile,
+          tickRate: options.tickRate || 10,
+          debug: options.verbose,
+        });
+
+        // Track stats for output
+        let shutdownRequested = false;
+
+        // Handle graceful shutdown
+        const shutdown = () => {
+          if (shutdownRequested) return;
+          shutdownRequested = true;
+
+          console.log('\n\x1b[33mShutting down headless runtime...\x1b[0m');
+          runtime.stop();
+
+          const stats = runtime.getStats();
+          console.log('\n\x1b[1mRuntime Statistics:\x1b[0m');
+          console.log(`  Uptime: ${stats.uptime}ms`);
+          console.log(`  Updates: ${stats.updateCount}`);
+          console.log(`  Events: ${stats.eventCount}`);
+          console.log(`  Instances: ${stats.instanceCount}`);
+          console.log(`  Avg tick: ${stats.avgTickDuration.toFixed(2)}ms`);
+          console.log(`  Memory: ~${Math.round(stats.memoryEstimate / 1024)}KB`);
+          console.log('');
+
+          process.exit(0);
+        };
+
+        process.on('SIGINT', shutdown);
+        process.on('SIGTERM', shutdown);
+
+        // Log events if verbose
+        if (options.verbose) {
+          runtime.on('runtime_started', () => {
+            console.log('\x1b[32m✓ Runtime started\x1b[0m');
+          });
+
+          runtime.on('runtime_stopped', (payload: any) => {
+            console.log(`\x1b[33mRuntime stopped after ${payload.uptime}ms\x1b[0m`);
+          });
+        }
+
+        // Start the runtime
+        console.log(`  Profile: ${profile.name}`);
+        console.log(`  Tick rate: ${options.tickRate || 10}Hz`);
+        if (options.duration && options.duration > 0) {
+          console.log(`  Duration: ${options.duration}ms`);
+        }
+        console.log('\x1b[2mPress Ctrl+C to stop\x1b[0m\n');
+
+        runtime.start();
+
+        // If duration specified, stop after that time
+        if (options.duration && options.duration > 0) {
+          setTimeout(() => {
+            shutdown();
+          }, options.duration);
+        }
+
+        // Keep process alive
+        await new Promise(() => {});
+      } catch (err: any) {
+        console.error(`\x1b[31mHeadless runtime error: ${err.message}\x1b[0m`);
+        if (options.verbose) {
+          console.error(err.stack);
+        }
+        process.exit(1);
+      }
+    }
+
     case 'traits': {
       if (options.input) {
         // Explain specific trait
@@ -628,8 +790,8 @@ async function main(): Promise<void> {
       }
 
       const target = options.target || 'threejs';
-      const validTargets = ['threejs', 'unity', 'vrchat', 'babylon', 'aframe', 'webxr'];
-      
+      const validTargets = ['threejs', 'unity', 'vrchat', 'babylon', 'aframe', 'webxr', 'urdf', 'sdf', 'dtdl', 'wasm'];
+
       if (!validTargets.includes(target)) {
         console.error(`\x1b[31mError: Unknown target "${target}".\x1b[0m`);
         console.log(`Valid targets: ${validTargets.join(', ')}`);
@@ -702,11 +864,63 @@ async function main(): Promise<void> {
           console.log(`\x1b[2mParsed ${ast.orbs?.length || 0} orbs, ${ast.functions?.length || 0} functions\x1b[0m`);
         }
 
+        // Special handling for WASM target - needs full HoloComposition
+        if (target === 'wasm') {
+          if (!isHolo) {
+            console.error(`\x1b[31mError: WASM compilation requires .holo files.\x1b[0m`);
+            process.exit(1);
+          }
+
+          const { HoloCompositionParser, compileToWASM } = await import('@holoscript/core');
+          const compositionParser = new HoloCompositionParser();
+          const parseResult = compositionParser.parse(content);
+
+          if (!parseResult.success || !parseResult.ast) {
+            console.error(`\x1b[31mError parsing for WASM:\x1b[0m`);
+            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            process.exit(1);
+          }
+
+          console.log(`\x1b[2m[DEBUG] Compiling to WebAssembly...\x1b[0m`);
+          const wasmResult = compileToWASM(parseResult.ast, {
+            debug: options.verbose,
+            generateBindings: true,
+          });
+
+          console.log(`\x1b[32m✓ WASM compilation successful!\x1b[0m`);
+          console.log(`\x1b[2m  Memory layout: ${wasmResult.memoryLayout.totalSize} bytes\x1b[0m`);
+          console.log(`\x1b[2m  Exports: ${wasmResult.exports.length}\x1b[0m`);
+          console.log(`\x1b[2m  Imports: ${wasmResult.imports.length}\x1b[0m`);
+
+          if (options.output) {
+            const outputPath = path.resolve(options.output);
+            const watPath = outputPath.endsWith('.wat') ? outputPath : outputPath + '.wat';
+            const bindingsPath = outputPath.replace(/\.wat$/, '') + '.bindings.ts';
+
+            fs.writeFileSync(watPath, wasmResult.wat);
+            console.log(`\x1b[32m✓ WAT written to ${watPath}\x1b[0m`);
+
+            if (wasmResult.bindings) {
+              fs.writeFileSync(bindingsPath, wasmResult.bindings);
+              console.log(`\x1b[32m✓ Bindings written to ${bindingsPath}\x1b[0m`);
+            }
+          } else {
+            console.log('\n--- WAT Output ---\n');
+            console.log(wasmResult.wat);
+            if (wasmResult.bindings) {
+              console.log('\n--- JavaScript Bindings ---\n');
+              console.log(wasmResult.bindings);
+            }
+          }
+
+          process.exit(0);
+        }
+
         console.log(`\x1b[2m[DEBUG] Starting code generation for target: ${target}...\x1b[0m`);
         // Generate output based on target
         const outputCode = generateTargetCode(ast, target, options.verbose);
         console.log(`\x1b[2m[DEBUG] Code generation complete. Length: ${outputCode.length}\x1b[0m`);
-        
+
         if (options.output) {
           const outputPath = path.resolve(options.output);
           fs.writeFileSync(outputPath, outputCode);
