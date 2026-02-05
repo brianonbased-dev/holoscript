@@ -125,7 +125,65 @@ export class BundleSplitter {
    * Generates a manifest of chunks based on identified split points.
    */
   public generateManifest(): BundleChunk[] {
-      // Todo: grouping logic
-      return Array.from(this.chunks.values());
+    // Create main chunk for non-dynamic code
+    const mainChunk: BundleChunk = {
+      id: 'main',
+      files: [],
+      entryPoint: 'index.holo',
+      isDynamic: false,
+    };
+    this.chunks.set('main', mainChunk);
+    
+    // Group split points by target module to create dynamic chunks
+    const moduleToSplitPoints = new Map<string, SplitPoint[]>();
+    
+    for (const sp of this.splitPoints) {
+      const existing = moduleToSplitPoints.get(sp.targetModule);
+      if (existing) {
+        existing.push(sp);
+      } else {
+        moduleToSplitPoints.set(sp.targetModule, [sp]);
+      }
+    }
+    
+    // Create a chunk for each unique dynamically imported module
+    let chunkIndex = 0;
+    for (const [modulePath, points] of moduleToSplitPoints) {
+      const chunkId = `chunk_${chunkIndex++}`;
+      const chunk: BundleChunk = {
+        id: chunkId,
+        files: [modulePath],
+        isDynamic: true,
+        parentChunkId: 'main',
+        size: 0, // Would be calculated during actual bundling
+      };
+      this.chunks.set(chunkId, chunk);
+      
+      // Track which files reference this chunk
+      for (const sp of points) {
+        if (sp.sourceFile && sp.sourceFile !== 'unknown') {
+          // Add source file to main chunk if not already tracked
+          if (!mainChunk.files.includes(sp.sourceFile)) {
+            mainChunk.files.push(sp.sourceFile);
+          }
+        }
+      }
+    }
+    
+    return Array.from(this.chunks.values());
   }
-}
+  
+  /**
+   * Get split points (for debugging/analysis)
+   */
+  public getSplitPoints(): SplitPoint[] {
+    return this.splitPoints;
+  }
+  
+  /**
+   * Clear all chunks and split points (for reanalysis)
+   */
+  public clear(): void {
+    this.chunks.clear();
+    this.splitPoints = [];
+  }}

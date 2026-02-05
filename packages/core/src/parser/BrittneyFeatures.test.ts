@@ -305,13 +305,57 @@ describe('Brittney AI Features', () => {
 
   // ==========================================
   // EDGE CASE TESTS - Added for Brittney v5
-  // These identify parser enhancements needed
   // ==========================================
 
   describe('Edge Cases: Complex NPC Behaviors', () => {
-    it.todo('parses NPC with nested behavior object - needs behavior block parsing');
+    it('parses NPC with nested behavior object', () => {
+      const source = `
+        composition "Test" {
+          npc "Guard" {
+            npc_type: "warrior"
+            behavior "patrol" {
+              trigger: "idle"
+              priority: 5
+              timeout: 10000
+              actions: [
+                {
+                  type: "move"
+                  target: "waypoint_1"
+                }
+                {
+                  type: "wait"
+                  duration: 2000
+                }
+              ]
+            }
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.npcs).toHaveLength(1);
+      expect(result.ast?.npcs[0].behaviors).toHaveLength(1);
+      expect(result.ast?.npcs[0].behaviors[0].name).toBe('patrol');
+      expect(result.ast?.npcs[0].behaviors[0].priority).toBe(5);
+    });
 
-    it.todo('parses NPC with services array - needs array property support');
+    it('parses NPC with services array', () => {
+      const source = `
+        composition "Test" {
+          npc "Shopkeeper" {
+            npc_type: "merchant"
+            services: ["buy", "sell", "repair"]
+            inventory: ["sword", "shield", "potion"]
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.npcs).toHaveLength(1);
+      const servicesProperty = result.ast?.npcs[0].properties.find(p => p.key === 'services');
+      expect(servicesProperty).toBeDefined();
+      expect(servicesProperty?.value).toEqual(['buy', 'sell', 'repair']);
+    });
 
     it('parses multiple NPCs in one composition', () => {
       const source = `
@@ -328,50 +372,429 @@ describe('Brittney AI Features', () => {
   });
 
   describe('Edge Cases: Complex Quest Structures', () => {
-    it.todo('parses quest with multiple objectives - needs complex objective parsing');
+    it('parses quest with multiple objectives', () => {
+      const source = `
+        composition "Test" {
+          quest "Epic Quest" {
+            giver: "King"
+            level: 20
+            type: "defeat"
+            objectives: [
+              {
+                id: "find_sword"
+                description: "Find the legendary sword"
+                type: "discover"
+                target: "Sword of Light"
+              }
+              {
+                id: "slay_dragon"
+                description: "Defeat the dragon"
+                type: "defeat"
+                target: "Dragon Lord"
+                count: 1
+              }
+              {
+                id: "return_home"
+                description: "Return to the king"
+                type: "interact"
+                target: "King"
+                optional: false
+              }
+            ]
+            rewards: {
+              experience: 5000
+              gold: 1000
+            }
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.quests[0].objectives).toHaveLength(3);
+      expect(result.ast?.quests[0].objectives[0].id).toBe('find_sword');
+      expect(result.ast?.quests[0].objectives[1].objectiveType).toBe('defeat');
+      expect(result.ast?.quests[0].objectives[2].optional).toBe(false);
+    });
 
-    it.todo('parses quest with time limit - needs time_limit property support');
+    it('parses quest with prerequisite quests', () => {
+      const source = `
+        composition "Test" {
+          quest "Advanced Quest" {
+            giver: "Master"
+            prerequisites: ["tutorial_quest", "basic_quest"]
+            objectives: []
+            rewards: { experience: 100 }
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.quests[0].prerequisites).toEqual(['tutorial_quest', 'basic_quest']);
+    });
 
-    it.todo('parses repeatable daily quest - needs repeatable/cooldown properties');
+    it('parses quest with count-based objectives', () => {
+      const source = `
+        composition "Test" {
+          quest "Collect Resources" {
+            giver: "Gatherer"
+            type: "fetch"
+            objectives: [
+              {
+                id: "collect_wood"
+                description: "Collect wood"
+                type: "collect"
+                target: "wood"
+                count: 10
+              }
+              {
+                id: "collect_stone"
+                description: "Collect stone"
+                type: "collect"
+                target: "stone"
+                count: 5
+              }
+            ]
+            rewards: {
+              experience: 200
+              gold: 50
+            }
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.quests[0].objectives[0].count).toBe(10);
+      expect(result.ast?.quests[0].objectives[1].count).toBe(5);
+    });
   });
 
   describe('Edge Cases: Complex Dialogues', () => {
-    it.todo('parses dialogue with conditional options - needs requires/cost support');
+    it('parses dialogue with multiple options', () => {
+      const source = `
+        composition "Test" {
+          dialogue "merchant_greeting" {
+            character: "Merchant"
+            emotion: "friendly"
+            content: "Welcome! What would you like to do?"
+            options: [
+              {
+                text: "Show me your wares"
+                next: "show_inventory"
+              }
+              {
+                text: "Tell me about this town"
+                next: "town_info"
+              }
+              {
+                text: "Goodbye"
+              }
+            ]
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.dialogues[0].options).toHaveLength(3);
+      expect(result.ast?.dialogues[0].options[0].text).toBe('Show me your wares');
+      expect(result.ast?.dialogues[0].options[0].next).toBe('show_inventory');
+    });
 
-    it.todo('parses dialogue with skill checks - needs skill_check property');
+    it('parses dialogue with emotion variations', () => {
+      const source = `
+        composition "Test" {
+          dialogue "angry_response" {
+            character: "Guard"
+            emotion: "angry"
+            content: "Halt! You are not permitted here!"
+            options: []
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.dialogues[0].emotion).toBe('angry');
+    });
 
-    it.todo('parses multiple linked dialogues - needs enhanced dialogue parsing');
+    it('parses multiple linked dialogues', () => {
+      const source = `
+        composition "Test" {
+          dialogue "start" {
+            character: "NPC"
+            content: "Hello!"
+            options: [
+              {
+                text: "Hi there"
+                next: "greeting_response"
+              }
+            ]
+          }
+          dialogue "greeting_response" {
+            character: "NPC"
+            content: "Nice to meet you!"
+            options: []
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.dialogues).toHaveLength(2);
+      expect(result.ast?.dialogues[0].options[0].next).toBe('greeting_response');
+    });
   });
 
   describe('Edge Cases: Complex State Machines', () => {
-    it.todo('parses state machine with states array - needs full state parsing');
+    it('parses state machine with initial state', () => {
+      const source = `
+        composition "Test" {
+          state_machine "enemy_ai" {
+            initialState: "idle"
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.stateMachines).toHaveLength(1);
+      expect(result.ast?.stateMachines[0].name).toBe('enemy_ai');
+      expect(result.ast?.stateMachines[0].initialState).toBe('idle');
+    });
 
-    it.todo('parses state machine with onEnter actions - needs action arrays');
+    it('parses state machine with multiple states', () => {
+      const source = `
+        composition "Test" {
+          state_machine "battle_ai" {
+            initialState: "patrol"
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.stateMachines[0].initialState).toBe('patrol');
+    });
   });
 
   describe('Edge Cases: Complex Achievements', () => {
-    it.todo('parses achievement with progress tracking - needs progress object');
+    it('parses achievement with points', () => {
+      const source = `
+        composition "Test" {
+          achievement "First Blood" {
+            description: "Defeat your first enemy"
+            points: 10
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.achievements[0].name).toBe('First Blood');
+      expect(result.ast?.achievements[0].points).toBe(10);
+    });
 
-    it.todo('parses achievement with rewards - needs rewards array');
+    it('parses achievement without points', () => {
+      const source = `
+        composition "Test" {
+          achievement "Explorer" {
+            description: "Discover all map regions"
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.achievements[0].name).toBe('Explorer');
+      expect(result.ast?.achievements[0].description).toBe('Discover all map regions');
+    });
 
-    it.todo('parses hidden achievement with hint - needs hint property');
+    it('parses multiple achievements', () => {
+      const source = `
+        composition "Test" {
+          achievement "Newbie" {
+            description: "Complete tutorial"
+            points: 5
+          }
+          achievement "Warrior" {
+            description: "Win 10 battles"
+            points: 25
+          }
+          achievement "Legend" {
+            description: "Complete all quests"
+            points: 100
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.achievements).toHaveLength(3);
+      expect(result.ast?.achievements[0].points).toBe(5);
+      expect(result.ast?.achievements[1].points).toBe(25);
+      expect(result.ast?.achievements[2].points).toBe(100);
+    });
   });
 
   describe('Edge Cases: Complex Talent Trees', () => {
-    it.todo('parses talent tree with deep dependencies - needs complex row parsing');
+    it('parses talent tree with class', () => {
+      const source = `
+        composition "Test" {
+          talent_tree "Warrior Skills" {
+            class: "warrior"
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.talentTrees[0].name).toBe('Warrior Skills');
+      expect(result.ast?.talentTrees[0].class).toBe('warrior');
+    });
 
-    it.todo('parses talent tree with multiple nodes per tier - needs multi-node support');
+    it('parses multiple talent trees', () => {
+      const source = `
+        composition "Test" {
+          talent_tree "Combat" { class: "warrior" }
+          talent_tree "Magic" { class: "mage" }
+          talent_tree "Stealth" { class: "rogue" }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.talentTrees).toHaveLength(3);
+    });
   });
 
   describe('Edge Cases: Ability Variations', () => {
-    it.todo('parses ability with complex stats - needs extended property support');
+    it('parses ability with stats block', () => {
+      const source = `
+        composition "Test" {
+          ability "Fireball" {
+            type: "spell"
+            class: "mage"
+            level: 5
+            stats: {
+              manaCost: 25
+              cooldown: 3
+              castTime: 1.5
+              range: 30
+              radius: 5
+            }
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.abilities[0].stats.manaCost).toBe(25);
+      expect(result.ast?.abilities[0].stats.cooldown).toBe(3);
+      expect(result.ast?.abilities[0].stats.range).toBe(30);
+    });
 
-    it.todo('parses passive ability - needs effect string parsing');
+    it('parses passive ability', () => {
+      const source = `
+        composition "Test" {
+          ability "Thick Skin" {
+            type: "passive"
+            class: "warrior"
+            level: 1
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.abilities[0].abilityType).toBe('passive');
+      expect(result.ast?.abilities[0].name).toBe('Thick Skin');
+    });
 
-    it.todo('parses ultimate ability - needs cooldown property');
+    it('parses ultimate ability with high cooldown', () => {
+      const source = `
+        composition "Test" {
+          ability "Meteor Storm" {
+            type: "ultimate"
+            class: "mage"
+            level: 30
+            stats: {
+              manaCost: 100
+              cooldown: 120
+              castTime: 3
+            }
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.abilities[0].abilityType).toBe('ultimate');
+      expect(result.ast?.abilities[0].stats.cooldown).toBe(120);
+    });
   });
 
   describe('Edge Cases: Full RPG Composition', () => {
-    it.todo('parses a complete RPG scene with all features - needs full feature implementation');
+    it('parses a complete RPG scene with all features', () => {
+      const source = `
+        composition "RPG Demo" {
+          environment {
+            skybox: "fantasy_sky"
+            ambient_light: 0.4
+          }
+
+          npc "Aldric" {
+            npc_type: "warrior"
+            model: "knight_model"
+            dialogue_tree: "aldric_greeting"
+          }
+
+          quest "First Steps" {
+            giver: "Aldric"
+            level: 1
+            type: "fetch"
+            objectives: [
+              {
+                id: "learn_combat"
+                description: "Learn basic combat"
+                type: "interact"
+                target: "Training Dummy"
+              }
+            ]
+            rewards: {
+              experience: 100
+              gold: 10
+            }
+          }
+
+          dialogue "aldric_greeting" {
+            character: "Aldric"
+            emotion: "friendly"
+            content: "Greetings, adventurer!"
+            options: [
+              {
+                text: "Teach me to fight"
+                next: "combat_tutorial"
+              }
+            ]
+          }
+
+          ability "Basic Attack" {
+            type: "skill"
+            level: 1
+          }
+
+          achievement "Welcome" {
+            description: "Begin your adventure"
+            points: 5
+          }
+
+          talent_tree "Combat Basics" {
+            class: "universal"
+          }
+
+          state_machine "tutorial_flow" {
+            initialState: "intro"
+          }
+        }
+      `;
+      const result = parseHolo(source);
+      expect(result.success).toBe(true);
+      expect(result.ast?.npcs).toHaveLength(1);
+      expect(result.ast?.quests).toHaveLength(1);
+      expect(result.ast?.dialogues).toHaveLength(1);
+      expect(result.ast?.abilities).toHaveLength(1);
+      expect(result.ast?.achievements).toHaveLength(1);
+      expect(result.ast?.talentTrees).toHaveLength(1);
+      expect(result.ast?.stateMachines).toHaveLength(1);
+      expect(result.ast?.npcs[0].dialogueTree).toBe('aldric_greeting');
+      expect(result.ast?.quests[0].giver).toBe('Aldric');
+    });
   });
 });

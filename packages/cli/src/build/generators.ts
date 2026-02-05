@@ -149,16 +149,25 @@ public class HoloScriptScene : MonoBehaviour
     for (const trait of traits) {
       code += `        // Trait: @${trait.name}\n`;
       if (trait.name === 'grabbable') {
-        code += `        // TODO: Map to XR Grab Interactable or similar\n`;
+        code += `        // XR Grab Interactable setup\n`;
+        code += `        var ${name}_grabInteractable = ${name}.AddComponent<UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable>();\n`;
+        code += `        ${name}_grabInteractable.movementType = UnityEngine.XR.Interaction.Toolkit.XRBaseInteractable.MovementType.VelocityTracking;\n`;
+      }
+      if (trait.name === 'throwable') {
+        code += `        // Configure for throwing\n`;
+        code += `        ${name}_rb.useGravity = true;\n`;
+        code += `        ${name}_rb.drag = 0.1f;\n`;
+      }
+      if (trait.name === 'collidable') {
+        code += `        // Collider is added by CreatePrimitive, ensure trigger is off\n`;
+        code += `        ${name}.GetComponent<Collider>().isTrigger = false;\n`;
       }
     }
     
     code += `\n`;
   }
 
-  code += `    }
-}
-`;
+  code += `    }\n}\n`;
 
   return code;
 }
@@ -199,19 +208,27 @@ public class HoloScriptWorld : UdonSharpBehaviour
     for (const trait of traits) {
       code += `        // Trait: @${trait.name}\n`;
       if (trait.name === 'grabbable') {
-        code += `        // TODO: Add VRC_Grabbable or similar UdonSharp component\n`;
+        code += `        // VRC Pickup setup for grabbable objects\n`;
+        code += `        VRC.SDK3.Components.VRCPickup ${name}_pickup = ${name}.AddComponent<VRC.SDK3.Components.VRCPickup>();\n`;
+        code += `        ${name}_pickup.pickupable = true;\n`;
+        code += `        ${name}_pickup.AutoHold = VRC.SDK3.Components.VRCPickup.AutoHoldMode.Yes;\n`;
       }
       if (trait.name === 'throwable') {
-        code += `        // TODO: Configure VRC_Grabbable for throwable behavior\n`;
+        code += `        // Configure VRCPickup for throwable behavior\n`;
+        code += `        ${name}_pickup.allowManipulationWhenEquipped = true;\n`;
+        code += `        ${name}_pickup.ThrowVelocityBoostScale = 1.5f;\n`;
+        code += `        ${name}_rb.useGravity = true;\n`;
+      }
+      if (trait.name === 'collidable') {
+        code += `        // Add collider for physical interactions\n`;
+        code += `        ${name}.AddComponent<SphereCollider>();\n`;
       }
     }
     
     code += `\n`;
   }
 
-  code += `    }
-}
-`;
+  code += `    }\n}\n`;
 
   return code;
 }
