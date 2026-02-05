@@ -39,14 +39,15 @@ export interface HSPlusRuntime {
   mount(container: unknown): void;
   unmount(): void;
   update(delta: number): void;
-  on(event: string, handler: (payload: unknown) => void): void;
+  on(event: string, handler: (payload: unknown) => void): () => void;
   emit(event: string, payload?: unknown): void;
   getHologramStates(): Map<string, any>;
   setState(updates: Record<string, unknown>): void;
+  // State access
+  getState(): Record<string, any>;
   // Methods from AdvancedTypeSystem's version
   execute?(ast: any): any;
   callMethod?(name: string, args: any[]): any;
-  getState?(key: string): any;
   destroy?(): void;
   state?: Record<string, any>;
   props?: Record<string, any>;
