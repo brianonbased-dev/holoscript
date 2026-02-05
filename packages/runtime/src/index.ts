@@ -160,7 +160,7 @@ import { navigate, goBack, goForward, getCurrentPath, initBrowserHistory } from 
  */
 export const runtime = {
   // Version
-  version: '2.1.0',
+  version: '3.0.0',
 
   // Events
   emit,

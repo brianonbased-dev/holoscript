@@ -1,63 +1,109 @@
 # Hololand Integration Guide
 
-Complete guide for integrating HoloScript with the Hololand runtime platform, covering asset management, semantic annotations, world definitions, and real-time streaming.
+This guide covers how to build worlds for the **Hololand VR Platform** using HoloScript.
+
+> **Important:** HoloScript is a complete language with its own runtime. Hololand is a first-party VR social platform APPLICATION that uses HoloScript—think "Roblox for VR" or "Steam for spatial computing."
 
 ---
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Asset System](#asset-system)
-3. [Semantic Framework](#semantic-framework)
-4. [World Definition](#world-definition)
-5. [Runtime Integration](#runtime-integration)
-6. [Streaming Protocol](#streaming-protocol)
-7. [Quick Start Examples](#quick-start-examples)
+2. [Architecture](#architecture)
+3. [Asset System](#asset-system)
+4. [Semantic Framework](#semantic-framework)
+5. [World Definition](#world-definition)
+6. [Runtime Integration](#runtime-integration)
+7. [Streaming Protocol](#streaming-protocol)
+8. [Quick Start Examples](#quick-start-examples)
 
 ---
 
 ## Overview
 
-The Hololand integration provides:
+### What is HoloScript?
+
+HoloScript is a **complete programming language** for spatial computing with:
+
+- **Full Language Runtime**: `@holoscript/runtime` provides `BrowserRuntime`, `HeadlessRuntime`, `PhysicsWorld`, and `TraitSystem`
+- **Parser & Compiler**: Complete language toolchain in `@holoscript/core`
+- **Trait System**: Composable behaviors like `@physics`, `@grabbable`, `@networked`
+- **Multi-Target Compilation**: Outputs to Unity, Unreal, Godot, WASM, and more
+
+### What is Hololand?
+
+Hololand is a **VR social platform** that uses HoloScript:
+
+- **World Hosting**: Upload and share HoloScript worlds
+- **Multiplayer**: Server infrastructure for real-time sessions
+- **Discovery**: Find and explore community-created worlds
+- **Social**: Friends, avatars, voice chat, parties
+- **Monetization**: Creators earn from their worlds
+
+### What This Guide Covers
+
+This guide covers the **HoloScript features** used by Hololand:
 
 - **Asset Management**: Manifests, metadata, smart loading, and dependency resolution
 - **Semantic Annotations**: Type-safe property annotations and data binding
 - **World Definitions**: Comprehensive schemas for VR/AR worlds
-- **Runtime Client**: Connection management and runtime services
+- **Hololand Client**: Connection management and runtime services
 - **Streaming Protocol**: Real-time entity synchronization
 
-### Architecture
+---
+
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                       HoloScript Application                        │
+│                         HOLOSCRIPT                                   │
+│                    (Complete Language + Runtime)                     │
 ├─────────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐ │
-│  │  Asset System   │  │ Semantic System │  │  World Definition   │ │
-│  │                 │  │                 │  │                     │ │
-│  │ - Manifest      │  │ - Annotations   │  │ - Metadata          │ │
-│  │ - Metadata      │  │ - Bindings      │  │ - Config            │ │
-│  │ - Loader        │  │ - Capabilities  │  │ - Environment       │ │
-│  │ - Dependencies  │  │ - Registry      │  │ - Zones             │ │
-│  └────────┬────────┘  └────────┬────────┘  └──────────┬──────────┘ │
-│           │                    │                      │            │
-│           └────────────────────┼──────────────────────┘            │
-│                                ↓                                    │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │                    HololandClient                            │  │
-│  │  - Connection Management                                     │  │
-│  │  - World Registration                                        │  │
-│  │  - Runtime Services (Assets, Networking, Audio, Physics)     │  │
-│  └────────────────────────────────────────────────────────────┬─┘  │
-│                                                               │    │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │                   StreamProtocol                            │  │
-│  │  - WebSocket/WebRTC Transport                               │  │
-│  │  - Entity Synchronization                                   │  │
-│  │  - State Delta Compression                                  │  │
-│  └──────────────────────────────────────────────────────────────┘  │
+│  @holoscript/core        │  @holoscript/runtime                     │
+│  ├── Parser              │  ├── BrowserRuntime                      │
+│  ├── Compiler            │  ├── HeadlessRuntime                     │
+│  ├── Type System         │  ├── PhysicsWorld                        │
+│  ├── WASM Target         │  ├── TraitSystem                         │
+│  └── Traits              │  └── Events/Storage/Device               │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  HOLOLAND VR PLATFORM (Application using HoloScript)                 │
+│                                                                      │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐  │
+│  │  Asset System   │  │ Semantic System │  │  World Definition   │  │
+│  │                 │  │                 │  │                     │  │
+│  │ - Manifest      │  │ - Annotations   │  │ - Metadata          │  │
+│  │ - Metadata      │  │ - Bindings      │  │ - Config            │  │
+│  │ - Loader        │  │ - Capabilities  │  │ - Environment       │  │
+│  │ - Dependencies  │  │ - Registry      │  │ - Zones             │  │
+│  └────────┬────────┘  └────────┬────────┘  └──────────┬──────────┘  │
+│           │                    │                      │             │
+│           └────────────────────┼──────────────────────┘             │
+│                                ↓                                     │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │                    HololandClient                             │  │
+│  │  - Connection Management (to Hololand servers)                │  │
+│  │  - World Registration/Discovery                               │  │
+│  │  - Hololand-specific Services (friends, voice, store)         │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                      │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │                   StreamProtocol                              │  │
+│  │  - WebSocket/WebRTC Transport                                 │  │
+│  │  - Entity Synchronization                                     │  │
+│  │  - State Delta Compression                                    │  │
+│  └───────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+### Key Distinction
+
+| Component | What It Is | Repository |
+|-----------|------------|------------|
+| **HoloScript** | Complete language + runtime | `github.com/brianonbased-dev/HoloScript` |
+| **Hololand** | VR social platform app | `github.com/brianonbased-dev/Hololand` (separate) |
+
+Hololand is built *with* HoloScript, similar to how Unity games are built with C#.
 
 ---
 

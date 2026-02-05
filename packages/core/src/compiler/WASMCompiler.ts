@@ -220,22 +220,47 @@ export class WASMCompiler {
   // ===========================================================================
 
   private analyzeState(state?: HoloState): void {
-    if (!state?.declarations) return;
+    if (!state) return;
 
     let offset = 0;
-    for (const [name, value] of Object.entries(state.declarations)) {
-      const type = this.inferWASMType(value);
-      const size = this.getTypeSize(type);
 
-      this.stateVars.push({
-        name,
-        type,
-        offset,
-        size,
-        initialValue: this.valueToWASM(value, type),
-      });
+    // Support both property array format and declarations object format
+    // (declarations format for backwards compatibility with tests)
+    const stateAny = state as unknown as {
+      properties?: { key: string; value: unknown }[];
+      declarations?: Record<string, unknown>;
+    };
 
-      offset += size;
+    if (stateAny.properties) {
+      for (const prop of stateAny.properties) {
+        const type = this.inferWASMType(prop.value);
+        const size = this.getTypeSize(type);
+
+        this.stateVars.push({
+          name: prop.key,
+          type,
+          offset,
+          size,
+          initialValue: this.valueToWASM(prop.value, type),
+        });
+
+        offset += size;
+      }
+    } else if (stateAny.declarations) {
+      for (const [name, value] of Object.entries(stateAny.declarations)) {
+        const type = this.inferWASMType(value);
+        const size = this.getTypeSize(type);
+
+        this.stateVars.push({
+          name,
+          type,
+          offset,
+          size,
+          initialValue: this.valueToWASM(value, type),
+        });
+
+        offset += size;
+      }
     }
 
     this.memoryLayout.stateSize = offset;
@@ -817,8 +842,35 @@ export class WASMCompiler {
     lines.push('    if (!eventName) return;');
     lines.push('    const handlers = this.eventHandlers.get(eventName);');
     lines.push('    if (handlers) {');
-    lines.push('      // TODO: Decode payload from memory');
-    lines.push('      handlers.forEach(h => h({ ptr: payloadPtr }));');
+    lines.push('      const payload = this.decodePayload(payloadPtr);');
+    lines.push('      handlers.forEach(h => h(payload));');
+    lines.push('    }');
+    lines.push('  }');
+    lines.push('');
+    lines.push('  private decodePayload(ptr: number): any {');
+    lines.push('    if (!this.instance || ptr === 0) return {};');
+    lines.push('    const memory = this.instance.exports.memory as WebAssembly.Memory;');
+    lines.push('    const view = new DataView(memory.buffer);');
+    lines.push('    // Read payload header: [type:u8][length:u32]');
+    lines.push('    const payloadType = view.getUint8(ptr);');
+    lines.push('    const length = view.getUint32(ptr + 1, true);');
+    lines.push('    const dataPtr = ptr + 5;');
+    lines.push('    switch (payloadType) {');
+    lines.push('      case 0: return null; // Null');
+    lines.push('      case 1: return view.getFloat64(dataPtr, true); // Number');
+    lines.push('      case 2: return view.getUint8(dataPtr) !== 0; // Boolean');
+    lines.push('      case 3: { // String');
+    lines.push('        const bytes = new Uint8Array(memory.buffer, dataPtr, length);');
+    lines.push('        return new TextDecoder().decode(bytes);');
+    lines.push('      }');
+    lines.push('      case 4: { // Object (JSON)');
+    lines.push('        const bytes = new Uint8Array(memory.buffer, dataPtr, length);');
+    lines.push('        return JSON.parse(new TextDecoder().decode(bytes));');
+    lines.push('      }');
+    lines.push('      case 5: { // Float32Array');
+    lines.push('        return new Float32Array(memory.buffer, dataPtr, length / 4);');
+    lines.push('      }');
+    lines.push('      default: return { ptr, type: payloadType, length };');
     lines.push('    }');
     lines.push('  }');
     lines.push('');
@@ -849,11 +901,31 @@ export class WASMCompiler {
 
   private generateBindingsFromAST(ast: HSPlusAST): string {
     // Same as generateBindings but for AST input
-    return this.generateBindings({
+    // Create a minimal HoloComposition for bindings generation
+    const minimalComposition: Partial<HoloComposition> = {
+      type: 'Composition',
       name: ast.root.id || 'scene',
       objects: [],
-      state: undefined,
-    } as HoloComposition);
+      templates: [],
+      spatialGroups: [],
+      lights: [],
+      imports: [],
+      timelines: [],
+      audio: [],
+      zones: [],
+      transitions: [],
+      conditionals: [],
+      iterators: [],
+      npcs: [],
+      quests: [],
+      abilities: [],
+      dialogues: [],
+      stateMachines: [],
+      achievements: [],
+      talentTrees: [],
+      shapes: [],
+    };
+    return this.generateBindings(minimalComposition as HoloComposition);
   }
 
   // ===========================================================================

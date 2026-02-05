@@ -373,6 +373,14 @@ class BrowserRuntime implements HoloScriptRuntime {
   private traitSystem: TraitSystem;
   private inputManager: InputManager;
   
+  // FPS tracking
+  private frameCount: number = 0;
+  private lastFpsTime: number = 0;
+  private currentFps: number = 60;
+  
+  // Reactive bindings: stateKey -> Set of component IDs
+  private reactiveBindings: Map<string, Set<string>> = new Map();
+  
   constructor(config: RuntimeConfig) {
     this.config = {
       container: config.container as HTMLElement, // Force cast, validated later if needed
@@ -664,14 +672,43 @@ class BrowserRuntime implements HoloScriptRuntime {
       'sunset': 0xff7f50,
       'night': 0x0a0a1a,
       'dev-gradient': 0x0f0f1a,
+      'space': 0x000011,
+      'forest': 0x1a3a1a,
+      'ocean': 0x1a3a5a,
     };
     
     if (skybox in presets) {
       this.scene.background = new THREE.Color(presets[skybox]);
     } else if (skybox.startsWith('#')) {
       this.scene.background = new THREE.Color(skybox);
+    } else if (skybox.includes('.') || skybox.startsWith('http')) {
+      // Load texture URL (HDR or image)
+      if (skybox.endsWith('.hdr')) {
+        // For HDR, would need RGBELoader - fallback to color for now
+        console.log('[HoloScript] HDR skybox loading requires RGBELoader, using fallback');
+        this.scene.background = new THREE.Color(0x1a1a2e);
+      } else {
+        // Load standard image texture as equirectangular
+        const loader = new THREE.TextureLoader();
+        loader.load(
+          skybox,
+          (texture) => {
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            this.scene.background = texture;
+            this.scene.environment = texture;
+          },
+          undefined,
+          (error) => {
+            console.warn('[HoloScript] Failed to load skybox texture:', error);
+            this.scene.background = new THREE.Color(0x1a1a2e);
+          }
+        );
+      }
+    } else {
+      // Unknown skybox, use default
+      console.log('[HoloScript] Unknown skybox preset:', skybox);
+      this.scene.background = new THREE.Color(0x1a1a2e);
     }
-    // TODO: Load actual skybox textures
   }
   
   private buildScene(): void {
@@ -1487,13 +1524,83 @@ class BrowserRuntime implements HoloScriptRuntime {
       render_to_preview: (viewportId: string, ast: any) => {
         const viewport = this.uiComponents.get(viewportId);
         if (viewport && viewport.type === '3d-viewport') {
-          // Clear and rebuild preview scene
-          // TODO: Implement
+          // Clear existing preview objects
+          const previewGroup = viewport.previewGroup as THREE.Group;
+          if (previewGroup) {
+            while (previewGroup.children.length > 0) {
+              previewGroup.remove(previewGroup.children[0]);
+            }
+            // Rebuild from AST - create simple preview meshes
+            if (ast?.objects) {
+              for (const obj of ast.objects) {
+                const geometry = this.createGeometryForType(obj.type || 'sphere');
+                const material = new THREE.MeshStandardMaterial({ color: 0x00ffff });
+                const mesh = new THREE.Mesh(geometry, material);
+                if (obj.position) mesh.position.set(...obj.position);
+                previewGroup.add(mesh);
+              }
+            }
+          }
         }
       },
-      format_holoscript: (code: string) => code, // TODO: Use formatter
-      lint_holoscript: (code: string) => [], // TODO: Use linter
-      get_fps: () => 60, // TODO: Actual FPS
+      format_holoscript: (code: string) => {
+        // Basic formatting: normalize whitespace and indentation
+        const lines = code.split('\n');
+        const formatted: string[] = [];
+        let indent = 0;
+        
+        for (let line of lines) {
+          line = line.trim();
+          if (!line) {
+            formatted.push('');
+            continue;
+          }
+          
+          // Decrease indent for closing braces
+          if (line.startsWith('}')) indent = Math.max(0, indent - 1);
+          
+          formatted.push('  '.repeat(indent) + line);
+          
+          // Increase indent for opening braces
+          if (line.endsWith('{')) indent++;
+        }
+        
+        return formatted.join('\n');
+      },
+      lint_holoscript: (code: string) => {
+        // Basic linting checks
+        const issues: { line: number; message: string; severity: string }[] = [];
+        const lines = code.split('\n');
+        
+        let braceCount = 0;
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          
+          // Check brace balance
+          braceCount += (line.match(/\{/g) || []).length;
+          braceCount -= (line.match(/\}/g) || []).length;
+          
+          // Check for common typos
+          if (/\bspher\b/.test(line)) {
+            issues.push({ line: i + 1, message: "Typo: 'spher' should be 'sphere'", severity: 'error' });
+          }
+          if (/\bpostition\b/i.test(line)) {
+            issues.push({ line: i + 1, message: "Typo: 'postition' should be 'position'", severity: 'error' });
+          }
+          
+          // Check for empty blocks
+          if (/\{\s*\}/.test(line)) {
+            issues.push({ line: i + 1, message: 'Empty block detected', severity: 'warning' });
+          }
+        }
+        
+        if (braceCount !== 0) {
+          issues.push({ line: lines.length, message: 'Unbalanced braces', severity: 'error' });
+        }
+        
+        return issues;
+      },
+      get_fps: () => this.currentFps,
       get_entities: () => Array.from(this.objectMap.keys()),
       now: () => performance.now(),
     };
@@ -1510,12 +1617,62 @@ class BrowserRuntime implements HoloScriptRuntime {
   
   private updateReactiveBindings(changedKey: string): void {
     // Update UI components bound to this state key
-    this.uiComponents.forEach((component, id) => {
+    const boundComponents = this.reactiveBindings.get(changedKey);
+    if (!boundComponents) return;
+    
+    const newValue = this.state[changedKey];
+    
+    boundComponents.forEach(componentId => {
+      const component = this.uiComponents.get(componentId);
+      if (!component) return;
+      
       if (component.type === 'text') {
-        // Re-render text if bound to changed state
-        // TODO: Implement reactive binding system
+        // Update text content with new state value
+        if (component.element && component.binding === changedKey) {
+          component.element.textContent = String(newValue ?? '');
+        }
+      } else if (component.type === 'progress-bar') {
+        // Update progress bar value
+        const progressElement = component.element?.querySelector('.progress-fill') as HTMLElement;
+        if (progressElement && typeof newValue === 'number') {
+          progressElement.style.width = `${Math.min(100, Math.max(0, newValue))}%`;
+        }
+      } else if (component.type === 'input') {
+        // Update input value
+        const input = component.element as HTMLInputElement;
+        if (input && input.value !== String(newValue)) {
+          input.value = String(newValue ?? '');
+        }
       }
     });
+    
+    // Emit state change event for external listeners
+    emit('state:changed', { key: changedKey, value: newValue });
+  }
+  
+  /**
+   * Register a reactive binding between a state key and a UI component
+   */
+  private registerBinding(stateKey: string, componentId: string): void {
+    if (!this.reactiveBindings.has(stateKey)) {
+      this.reactiveBindings.set(stateKey, new Set());
+    }
+    this.reactiveBindings.get(stateKey)!.add(componentId);
+  }
+  
+  /**
+   * Helper to create geometry for preview rendering
+   */
+  private createGeometryForType(type: string): THREE.BufferGeometry {
+    switch (type?.toLowerCase()) {
+      case 'sphere': case 'orb': return new THREE.SphereGeometry(0.5, 16, 16);
+      case 'cube': case 'box': return new THREE.BoxGeometry(1, 1, 1);
+      case 'plane': return new THREE.PlaneGeometry(2, 2);
+      case 'cylinder': return new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
+      case 'cone': return new THREE.ConeGeometry(0.5, 1, 16);
+      case 'torus': return new THREE.TorusGeometry(0.4, 0.15, 8, 24);
+      default: return new THREE.SphereGeometry(0.5, 16, 16);
+    }
   }
   
   private handleResize(): void {
@@ -1777,6 +1934,15 @@ class BrowserRuntime implements HoloScriptRuntime {
     if (this.config.mode === 'manual') return; 
 
     this.animationId = requestAnimationFrame(this.renderLoop);
+    
+    // FPS tracking
+    this.frameCount++;
+    const now = performance.now();
+    if (now - this.lastFpsTime >= 1000) {
+      this.currentFps = Math.round(this.frameCount * 1000 / (now - this.lastFpsTime));
+      this.frameCount = 0;
+      this.lastFpsTime = now;
+    }
     
     const delta = this.clock.getDelta();
     this.update(delta);

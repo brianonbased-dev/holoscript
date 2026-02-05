@@ -89,6 +89,8 @@ export class AssetRegistry {
   private loading: Map<string, Promise<unknown>> = new Map();
   private listeners: Map<AssetEventType, Set<AssetEventListener>> = new Map();
   private currentCacheSize = 0;
+  private cacheHits = 0;
+  private cacheMisses = 0;
 
   private constructor(config: Partial<RegistryConfig> = {}) {
     this.config = {
@@ -386,17 +388,22 @@ export class AssetRegistry {
    */
   getCached<T>(assetId: string): T | undefined {
     const entry = this.cache.get(assetId);
-    if (!entry) return undefined;
+    if (!entry) {
+      this.cacheMisses++;
+      return undefined;
+    }
 
     // Check TTL
     if (entry.ttl && Date.now() - entry.loadedAt > entry.ttl) {
       this.evictFromCache(assetId);
+      this.cacheMisses++;
       return undefined;
     }
 
     // Update access stats
     entry.lastAccessedAt = Date.now();
     entry.accessCount++;
+    this.cacheHits++;
 
     return entry.data as T;
   }
@@ -500,12 +507,17 @@ export class AssetRegistry {
     maxSize: number;
     entryCount: number;
     hitRate: number;
+    hits: number;
+    misses: number;
   } {
+    const totalRequests = this.cacheHits + this.cacheMisses;
     return {
       size: this.currentCacheSize,
       maxSize: this.config.maxCacheSize,
       entryCount: this.cache.size,
-      hitRate: 0, // TODO: Track hits/misses
+      hitRate: totalRequests > 0 ? this.cacheHits / totalRequests : 0,
+      hits: this.cacheHits,
+      misses: this.cacheMisses,
     };
   }
 

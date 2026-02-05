@@ -1,8 +1,10 @@
 # Hololand Graphics System Integration Guide
 
+> **Architecture Note:** HoloScript is a complete language with its own runtime (`@holoscript/runtime`). Hololand is a VR social platform APPLICATION built with HoloScript. This guide covers how Hololand uses HoloScript's graphics traits.
+
 ## Overview
 
-This guide explains how to integrate HoloScript's graphics traits (MaterialTrait, LightingTrait, RenderingTrait) into Hololand's rendering pipeline to achieve realistic 3D visuals.
+This guide explains how to use HoloScript's graphics traits (MaterialTrait, LightingTrait, RenderingTrait) in Hololand worlds to achieve realistic 3D visuals.
 
 ---
 
@@ -463,11 +465,11 @@ export class SceneRenderer {
 
 ---
 
-## HoloScript DSL Integration
+## HoloScript Language Integration
 
 ### Trait Annotation Syntax
 
-HoloScript+ will support trait annotations directly in the DSL:
+HoloScript supports trait annotations directly in the language:
 
 ```holoscript
 // Basic material specification
@@ -492,9 +494,9 @@ orb#sphere {
 }
 ```
 
-### DSL Parser Extension
+### Parser Extension
 
-Update `packages/core/src/HoloScriptPlusParser.ts`:
+Update `packages/core/src/parser/HoloScriptPlusParser.ts`:
 
 ```typescript
 export class HoloScriptPlusParser {

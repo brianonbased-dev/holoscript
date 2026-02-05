@@ -193,13 +193,78 @@ export class DeployService {
    * Compile to vanilla web (HTML/JS)
    */
   private compileToWeb(holoScript: string, _options?: DeployConfig['options']): string {
-    // Placeholder - actual implementation would transform AST to vanilla JS
-    return `// Generated from HoloScript
-// Source: ${holoScript.substring(0, 100)}...
+    // Parse the HoloScript to extract objects and scene structure
+    const objects = this.extractObjectsFromCode(holoScript);
+    
+    const objectCreationCode = objects.map(obj => {
+      const geometryCode = this.getGeometryCode(obj.type || 'sphere');
+      const colorHex = this.colorToHex(obj.color || '#00ffff');
+      const position = obj.position || [0, 0, 0];
+      const scale = obj.scale || [1, 1, 1];
+      
+      return `  // Object: ${obj.name}
+  const ${this.sanitizeName(obj.name)}Geometry = ${geometryCode};
+  const ${this.sanitizeName(obj.name)}Material = new THREE.MeshStandardMaterial({ 
+    color: ${colorHex},
+    emissive: ${colorHex},
+    emissiveIntensity: 0.2
+  });
+  const ${this.sanitizeName(obj.name)} = new THREE.Mesh(${this.sanitizeName(obj.name)}Geometry, ${this.sanitizeName(obj.name)}Material);
+  ${this.sanitizeName(obj.name)}.position.set(${position.join(', ')});
+  ${this.sanitizeName(obj.name)}.scale.set(${scale.join(', ')});
+  scene.add(${this.sanitizeName(obj.name)});`;
+    }).join('\n\n');
 
-export function createScene() {
-  // TODO: Implement scene generation from HoloScript AST
-  console.log('HoloScript scene initialized');
+    return `// Generated from HoloScript
+// Auto-generated Three.js scene
+
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+export function createScene(container) {
+  // Scene setup
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1a1a2e);
+  
+  const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+  camera.position.set(0, 2, 5);
+  
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  container.appendChild(renderer.domElement);
+  
+  // Controls
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+  
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(5, 10, 5);
+  scene.add(directionalLight);
+  
+  // Objects from HoloScript
+${objectCreationCode}
+  
+  // Animation loop
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+  
+  // Handle resize
+  window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  });
+  
+  return { scene, camera, renderer };
 }
 `;
   }
@@ -208,23 +273,137 @@ export function createScene() {
    * Compile to React Three Fiber
    */
   private compileToR3F(holoScript: string, _options?: DeployConfig['options']): string {
-    // Placeholder - actual implementation would transform AST to R3F components
+    // Parse the HoloScript to extract objects
+    const objects = this.extractObjectsFromCode(holoScript);
+    
+    const componentCode = objects.map(obj => {
+      const geometryComponent = this.getR3FGeometry(obj.type || 'sphere');
+      const color = obj.color || 'cyan';
+      const position = obj.position || [0, 0, 0];
+      const scale = obj.scale || [1, 1, 1];
+      
+      return `      {/* ${obj.name} */}
+      <mesh position={[${position.join(', ')}]} scale={[${scale.join(', ')}]}>
+        ${geometryComponent}
+        <meshStandardMaterial color="${color}" emissive="${color}" emissiveIntensity={0.2} />
+      </mesh>`;
+    }).join('\n');
+
     return `// Generated React Three Fiber from HoloScript
 import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Environment } from '@react-three/drei';
+
+function SceneContent() {
+  return (
+    <>
+      {/* Lighting */}
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[5, 10, 5]} intensity={1} />
+      
+      {/* Objects from HoloScript */}
+${componentCode}
+      
+      {/* Controls */}
+      <OrbitControls enableDamping />
+    </>
+  );
+}
 
 export function Scene() {
-  // TODO: Generate scene from HoloScript
   return (
-    <Canvas>
-      <ambientLight />
-      <mesh>
-        <boxGeometry />
-        <meshStandardMaterial color="orange" />
-      </mesh>
+    <Canvas camera={{ position: [0, 2, 5], fov: 75 }}>
+      <color attach="background" args={['#1a1a2e']} />
+      <SceneContent />
     </Canvas>
   );
 }
 `;
+  }
+
+  /**
+   * Helper: Extract objects from HoloScript code
+   */
+  private extractObjectsFromCode(code: string): Array<{name: string; type?: string; color?: string; position?: number[]; scale?: number[]}> {
+    const objects: Array<{name: string; type?: string; color?: string; position?: number[]; scale?: number[]}> = [];
+    
+    // Match object definitions
+    const objectRegex = /(?:object|orb|cube|sphere|box|plane)\s+["']?([\\w-]+)["']?\s*[^{]*\{([^}]*)\}/gi;
+    let match;
+    
+    while ((match = objectRegex.exec(code)) !== null) {
+      const name = match[1];
+      const propsStr = match[2] || '';
+      
+      const obj: {name: string; type?: string; color?: string; position?: number[]; scale?: number[]} = { name };
+      
+      // Extract geometry
+      const geoMatch = propsStr.match(/geometry:\s*["']?(\w+)["']?/i);
+      obj.type = geoMatch ? geoMatch[1] : 'sphere';
+      
+      // Extract position
+      const posMatch = propsStr.match(/position:\s*\[([^\]]+)\]/i);
+      if (posMatch) {
+        obj.position = posMatch[1].split(',').map(n => parseFloat(n.trim()));
+      }
+      
+      // Extract color
+      const colorMatch = propsStr.match(/color:\s*["']?([#\w]+)["']?/i);
+      if (colorMatch) obj.color = colorMatch[1];
+      
+      // Extract scale
+      const scaleMatch = propsStr.match(/scale:\s*([\d.]+|\[[^\]]+\])/i);
+      if (scaleMatch) {
+        const val = scaleMatch[1];
+        if (val.startsWith('[')) {
+          obj.scale = val.slice(1, -1).split(',').map(n => parseFloat(n.trim()));
+        } else {
+          const s = parseFloat(val);
+          obj.scale = [s, s, s];
+        }
+      }
+      
+      objects.push(obj);
+    }
+    
+    return objects;
+  }
+  
+  private getGeometryCode(type: string): string {
+    switch (type?.toLowerCase()) {
+      case 'sphere': case 'orb': return 'new THREE.SphereGeometry(0.5, 32, 32)';
+      case 'cube': case 'box': return 'new THREE.BoxGeometry(1, 1, 1)';
+      case 'plane': return 'new THREE.PlaneGeometry(2, 2)';
+      case 'cylinder': return 'new THREE.CylinderGeometry(0.5, 0.5, 1, 32)';
+      case 'cone': return 'new THREE.ConeGeometry(0.5, 1, 32)';
+      case 'torus': return 'new THREE.TorusGeometry(0.4, 0.15, 16, 48)';
+      default: return 'new THREE.SphereGeometry(0.5, 32, 32)';
+    }
+  }
+  
+  private getR3FGeometry(type: string): string {
+    switch (type?.toLowerCase()) {
+      case 'sphere': case 'orb': return '<sphereGeometry args={[0.5, 32, 32]} />';
+      case 'cube': case 'box': return '<boxGeometry args={[1, 1, 1]} />';
+      case 'plane': return '<planeGeometry args={[2, 2]} />';
+      case 'cylinder': return '<cylinderGeometry args={[0.5, 0.5, 1, 32]} />';
+      case 'cone': return '<coneGeometry args={[0.5, 1, 32]} />';
+      case 'torus': return '<torusGeometry args={[0.4, 0.15, 16, 48]} />';
+      default: return '<sphereGeometry args={[0.5, 32, 32]} />';
+    }
+  }
+  
+  private colorToHex(color: string): string {
+    if (color.startsWith('#')) return `0x${color.slice(1)}`;
+    const colors: Record<string, string> = {
+      red: '0xff0000', green: '0x00ff00', blue: '0x0000ff', yellow: '0xffff00',
+      cyan: '0x00ffff', magenta: '0xff00ff', white: '0xffffff', black: '0x000000',
+      orange: '0xffa500', purple: '0x800080', pink: '0xffc0cb',
+    };
+    return colors[color.toLowerCase()] || '0x00ffff';
+  }
+  
+  private sanitizeName(name: string): string {
+    return name.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^[0-9]/, '_$&');
   }
 
   /**

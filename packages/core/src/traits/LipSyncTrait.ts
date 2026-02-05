@@ -671,8 +671,7 @@ export class LipSyncTrait {
     const current = phonemeData[foundIndex];
     this.currentPhonemeIndex = foundIndex;
 
-    // TODO: Phase 16 - Implement phoneme-to-viseme mapping table
-    // For now, assume phoneme identifier matches viseme or use fallback
+    // Map phoneme to Oculus-compatible viseme using IPA/ARPAbet mapping
     const viseme = this.mapPhonemeToViseme(current.phoneme);
     
     // Smooth blending within the phoneme duration

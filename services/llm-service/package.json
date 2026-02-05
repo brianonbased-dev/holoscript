@@ -1,6 +1,6 @@
 {
   "name": "holoscript-llm-service",
-  "version": "1.0.0-alpha.1",
+  "version": "3.0.0",
   "description": "Standalone local LLM service for HoloScript - users log in and build",
   "private": true,
   "type": "module",

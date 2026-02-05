@@ -1,19 +1,13 @@
 /**
  * MCP Tool Handlers for HoloScript
- * 
+ *
  * Implements the logic for each MCP tool.
  */
 
 import {
-  HoloScriptParser,
   HoloScriptPlusParser,
-  HoloCompositionParser,
-  HoloScriptValidator,
-  parseHoloScriptPlus,
   parseHolo,
   parseHoloStrict,
-  formatRichError,
-  formatRichErrors,
 } from '@holoscript/core';
 
 import { generateObject, generateScene, suggestTraits } from './generators';
@@ -363,14 +357,170 @@ async function handleConvertFormat(args: Record<string, unknown>) {
   const from = args.from as string;
   const to = args.to as string;
   
-  // TODO: Implement full conversion logic
-  return {
-    success: true,
-    original: from,
-    target: to,
-    code: code, // Placeholder - actual conversion logic needed
-    note: 'Format conversion is a best-effort process',
-  };
+  try {
+    const convertedCode = convertFormat(code, from, to);
+    return {
+      success: true,
+      original: from,
+      target: to,
+      code: convertedCode,
+      note: 'Format conversion is a best-effort process. Manual review recommended.',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      original: from,
+      target: to,
+      code: code,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+/**
+ * Convert between HoloScript formats (hs, hsplus, holo)
+ */
+function convertFormat(code: string, from: string, to: string): string {
+  // First, parse the source format
+  let ast: any;
+  
+  if (from === 'holo') {
+    ast = parseHolo(code);
+  } else {
+    // HoloScriptPlusParser handles both .hs and .hsplus formats
+    const parser = new HoloScriptPlusParser();
+    const result = parser.parse(code);
+    ast = result.ast;
+  }
+  
+  // Convert AST to target format
+  if (to === 'holo') {
+    return convertToHolo(ast, from);
+  } else if (to === 'hsplus') {
+    return convertToHsPlus(ast, from);
+  } else {
+    return convertToHs(ast, from);
+  }
+}
+
+function convertToHolo(ast: any, from: string): string {
+  const lines: string[] = [];
+  lines.push('composition "Converted Scene" {');
+  
+  // Add environment block
+  lines.push('  environment {');
+  lines.push('    skybox: "nebula"');
+  lines.push('    ambient_light: 0.4');
+  lines.push('  }');
+  lines.push('');
+  
+  // Extract objects from AST
+  const objects = extractObjects(ast);
+  
+  for (const obj of objects) {
+    const traits = obj.traits?.length ? obj.traits.map((t: string) => `@${t.replace('@', '')}`).join(' ') : '';
+    lines.push(`  object "${obj.name || 'obj'}" ${traits} {`.trim() + ' {');
+    lines.push(`    geometry: "${obj.type || 'cube'}"`);    
+    if (obj.position) {
+      lines.push(`    position: [${obj.position.join(', ')}]`);
+    }
+    if (obj.color) {
+      lines.push(`    color: "${obj.color}"`);
+    }
+    lines.push('  }');
+  }
+  
+  lines.push('}');
+  return lines.join('\n');
+}
+
+function convertToHsPlus(ast: any, from: string): string {
+  const lines: string[] = [];
+  const objects = extractObjects(ast);
+  
+  for (const obj of objects) {
+    const traits = obj.traits?.length ? obj.traits.map((t: string) => `  @${t.replace('@', '')}`).join('\n') : '';
+    lines.push(`${obj.type || 'object'} ${obj.name || 'obj'} {`);
+    if (traits) lines.push(traits);
+    if (obj.position) {
+      lines.push(`  position: [${obj.position.join(', ')}]`);
+    }
+    if (obj.color) {
+      lines.push(`  color: "${obj.color}"`);
+    }
+    lines.push('}');
+    lines.push('');
+  }
+  
+  return lines.join('\n').trim();
+}
+
+function convertToHs(ast: any, from: string): string {
+  const lines: string[] = [];
+  const objects = extractObjects(ast);
+  
+  for (const obj of objects) {
+    lines.push(`${obj.type || 'orb'} ${obj.name || 'obj'} {`);
+    if (obj.position) {
+      lines.push(`  position: { x: ${obj.position[0] || 0}, y: ${obj.position[1] || 0}, z: ${obj.position[2] || 0} }`);
+    }
+    if (obj.color) {
+      lines.push(`  color: "${obj.color}"`);
+    }
+    lines.push('}');
+    lines.push('');
+  }
+  
+  return lines.join('\n').trim();
+}
+
+function extractObjects(ast: any): any[] {
+  const objects: any[] = [];
+  
+  if (!ast) return objects;
+  
+  // Handle .holo composition format
+  if (ast.objects && Array.isArray(ast.objects)) {
+    for (const obj of ast.objects) {
+      objects.push({
+        name: obj.name || obj.id,
+        type: obj.type || obj.geometry || 'cube',
+        position: obj.position,
+        color: obj.color,
+        traits: obj.traits || [],
+      });
+    }
+  }
+  
+  // Handle .hsplus or .hs format
+  if (ast.nodes && Array.isArray(ast.nodes)) {
+    for (const node of ast.nodes) {
+      if (node.type === 'object' || node.nodeType === 'object') {
+        objects.push({
+          name: node.name || node.id,
+          type: node.objectType || node.geometry || 'cube',
+          position: node.props?.position || node.position,
+          color: node.props?.color || node.color,
+          traits: node.traits || [],
+        });
+      }
+    }
+  }
+  
+  // Handle flat declaration list
+  if (ast.declarations && Array.isArray(ast.declarations)) {
+    for (const decl of ast.declarations) {
+      objects.push({
+        name: decl.name,
+        type: decl.type || 'orb',
+        position: decl.props?.position,
+        color: decl.props?.color,
+        traits: [],
+      });
+    }
+  }
+  
+  return objects;
 }
 
 // === HELPER FUNCTIONS ===
@@ -496,10 +646,109 @@ function findSimilarTraits(trait: string): string[] {
 }
 
 function generateExplanation(parsed: unknown, detail: string): string {
-  // TODO: Generate actual explanation from AST
-  // This is a placeholder
-  return 'This HoloScript code defines a 3D scene with objects, traits, and behavior. ' +
-    'See the parsed AST for detailed structure.';
+  const ast = parsed as any;
+  const sections: string[] = [];
+  
+  // Overview section
+  sections.push('## Overview');
+  
+  // Detect format and describe structure
+  if (ast?.composition || ast?.type === 'composition') {
+    sections.push('This is a **.holo** declarative composition file.');
+    if (ast.name) {
+      sections.push(`Composition name: **${ast.name}**`);
+    }
+  } else if (ast?.nodes || ast?.ast?.nodes) {
+    const nodes = ast.nodes || ast.ast.nodes;
+    sections.push('This is a **.hsplus** (HoloScript Plus) file with VR traits.');
+    sections.push(`Contains **${nodes?.length || 0}** top-level declarations.`);
+  } else {
+    sections.push('This is a **.hs** (Classic HoloScript) file.');
+  }
+  
+  // Environment description
+  if (ast?.environment) {
+    sections.push('');
+    sections.push('### Environment');
+    const env = ast.environment;
+    if (env.skybox) sections.push(`- Skybox: **${env.skybox}**`);
+    if (env.ambient_light !== undefined) sections.push(`- Ambient light: **${env.ambient_light}**`);
+    if (env.theme) sections.push(`- Theme: **${env.theme}**`);
+  }
+  
+  // Objects description
+  const objects = extractObjectsForExplanation(ast);
+  if (objects.length > 0) {
+    sections.push('');
+    sections.push('### Objects');
+    
+    if (detail === 'brief') {
+      sections.push(`Contains **${objects.length}** objects.`);
+    } else {
+      for (const obj of objects.slice(0, 10)) {
+        let desc = `- **${obj.name}**`;
+        if (obj.type) desc += ` (${obj.type})`;
+        if (obj.traits?.length) desc += ` with traits: ${obj.traits.join(', ')}`;
+        sections.push(desc);
+      }
+      if (objects.length > 10) {
+        sections.push(`... and **${objects.length - 10}** more objects.`);
+      }
+    }
+  }
+  
+  // Traits summary
+  const allTraits = new Set<string>();
+  for (const obj of objects) {
+    for (const trait of obj.traits || []) {
+      allTraits.add(trait);
+    }
+  }
+  if (allTraits.size > 0) {
+    sections.push('');
+    sections.push('### VR Traits Used');
+    sections.push(Array.from(allTraits).join(', '));
+  }
+  
+  // Logic/behavior summary
+  if (ast?.logic || ast?.actions) {
+    sections.push('');
+    sections.push('### Behavior');
+    sections.push('Contains event handlers and/or action definitions for interactivity.');
+  }
+  
+  return sections.join('\n');
+}
+
+function extractObjectsForExplanation(ast: any): any[] {
+  const objects: any[] = [];
+  
+  if (!ast) return objects;
+  
+  // Handle .holo format
+  if (ast.objects && Array.isArray(ast.objects)) {
+    for (const obj of ast.objects) {
+      objects.push({
+        name: obj.name || obj.id || 'unnamed',
+        type: obj.type || obj.geometry,
+        traits: obj.traits || [],
+      });
+    }
+  }
+  
+  // Handle .hsplus/.hs format
+  const nodes = ast.nodes || ast.ast?.nodes || [];
+  for (const node of nodes) {
+    if (node.type === 'object' || node.nodeType === 'object') {
+      objects.push({
+        name: node.name || node.id || 'unnamed',
+        type: node.objectType || node.geometry,
+        traits: node.traits || [],
+      });
+    }
+  }
+  
+  return objects;
 }
 
 function analyzeAST(parsed: unknown, code: string) {

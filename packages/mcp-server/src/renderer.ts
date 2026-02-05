@@ -228,8 +228,9 @@ function generateEmbedUrl(code: string): string {
 }
 
 function compressCode(code: string): string {
-  // Use base64 encoding for now
-  // TODO: Add LZ-string compression for shorter URLs
+  // Base64 encoding is sufficient for most use cases
+  // LZ-string compression could reduce URL length by ~50% but adds dependency
+  // For very large scenes, consider using stored scene IDs instead
   return encodeURIComponent(Buffer.from(code).toString('base64'));
 }
 
@@ -434,21 +435,124 @@ function generateBrowserTemplate(code: string, title: string): string {
     // Hide loading
     document.getElementById('loading').style.display = 'none';
     
-    // TODO: Parse HoloScript and create objects
-    // For now, create a placeholder
-    const geometry = new THREE.SphereGeometry(0.5);
-    const material = new THREE.MeshStandardMaterial({ 
-      color: 0x00ffff, 
-      emissive: 0x00ffff,
-      emissiveIntensity: 0.3
-    });
-    const sphere = new THREE.Mesh(geometry, material);
-    sphere.position.set(0, 1, -2);
-    scene.add(sphere);
+    // Parse HoloScript and create objects
+    const sceneObjects = [];
     
-    // Animation
+    function parseHoloCode(code) {
+      const objects = [];
+      // Match object definitions: object "name" @traits { ... }
+      const objectRegex = /(?:object|orb|cube|sphere|box|plane)\\s+["']?([\\w-]+)["']?\\s*([^{]*)\\{([^}]*)\\}/gi;
+      let match;
+      
+      while ((match = objectRegex.exec(code)) !== null) {
+        const name = match[1];
+        const traitsStr = match[2] || '';
+        const propsStr = match[3] || '';
+        
+        const obj = { name, traits: [], props: {} };
+        
+        // Extract traits (@grabbable, @collidable, etc.)
+        const traitMatches = traitsStr.match(/@\\w+/g);
+        if (traitMatches) obj.traits = traitMatches;
+        
+        // Extract geometry
+        const geoMatch = propsStr.match(/geometry:\\s*["']?(\\w+)["']?/i);
+        obj.props.geometry = geoMatch ? geoMatch[1] : 'sphere';
+        
+        // Extract position
+        const posMatch = propsStr.match(/position:\\s*\\[([^\\]]+)\\]/i);
+        if (posMatch) {
+          obj.props.position = posMatch[1].split(',').map(n => parseFloat(n.trim()));
+        }
+        
+        // Extract color
+        const colorMatch = propsStr.match(/color:\\s*["']?([#\\w]+)["']?/i);
+        if (colorMatch) obj.props.color = colorMatch[1];
+        
+        // Extract scale
+        const scaleMatch = propsStr.match(/scale:\\s*([\\d.]+|\\[[^\\]]+\\])/i);
+        if (scaleMatch) {
+          const val = scaleMatch[1];
+          if (val.startsWith('[')) {
+            obj.props.scale = val.slice(1, -1).split(',').map(n => parseFloat(n.trim()));
+          } else {
+            const s = parseFloat(val);
+            obj.props.scale = [s, s, s];
+          }
+        }
+        
+        objects.push(obj);
+      }
+      
+      return objects;
+    }
+    
+    function createGeometry(type) {
+      switch (type?.toLowerCase()) {
+        case 'sphere': case 'orb': return new THREE.SphereGeometry(0.5, 32, 32);
+        case 'cube': case 'box': return new THREE.BoxGeometry(1, 1, 1);
+        case 'plane': return new THREE.PlaneGeometry(2, 2);
+        case 'cylinder': return new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
+        case 'cone': return new THREE.ConeGeometry(0.5, 1, 32);
+        case 'torus': return new THREE.TorusGeometry(0.4, 0.15, 16, 48);
+        default: return new THREE.SphereGeometry(0.5, 32, 32);
+      }
+    }
+    
+    function colorToHex(color) {
+      if (!color) return 0x00ffff;
+      if (typeof color === 'number') return color;
+      if (color.startsWith('#')) return parseInt(color.slice(1), 16);
+      const colors = { red: 0xff0000, green: 0x00ff00, blue: 0x0000ff, yellow: 0xffff00, 
+                       cyan: 0x00ffff, magenta: 0xff00ff, white: 0xffffff, black: 0x000000,
+                       orange: 0xffa500, purple: 0x800080, pink: 0xffc0cb };
+      return colors[color.toLowerCase()] || 0x00ffff;
+    }
+    
+    // Parse and create objects from HoloScript
+    const parsedObjects = parseHoloCode(holoCode);
+    
+    for (const obj of parsedObjects) {
+      const geometry = createGeometry(obj.props.geometry);
+      const color = colorToHex(obj.props.color);
+      const material = new THREE.MeshStandardMaterial({ 
+        color: color,
+        emissive: color,
+        emissiveIntensity: 0.2
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.name = obj.name;
+      
+      if (obj.props.position) {
+        mesh.position.set(...obj.props.position);
+      }
+      if (obj.props.scale) {
+        mesh.scale.set(...obj.props.scale);
+      }
+      
+      scene.add(mesh);
+      sceneObjects.push(mesh);
+    }
+    
+    // If no objects parsed, create default placeholder
+    if (sceneObjects.length === 0) {
+      const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+      const material = new THREE.MeshStandardMaterial({ 
+        color: 0x00ffff, 
+        emissive: 0x00ffff,
+        emissiveIntensity: 0.3
+      });
+      const sphere = new THREE.Mesh(geometry, material);
+      sphere.position.set(0, 1, -2);
+      scene.add(sphere);
+      sceneObjects.push(sphere);
+    }
+    
+    // Animation - rotate all objects gently
     function animate() {
-      sphere.rotation.y += 0.01;
+      for (const obj of sceneObjects) {
+        obj.rotation.y += 0.005;
+      }
       renderer.setAnimationLoop(render);
     }
     
