@@ -49,11 +49,17 @@ export class McpOrchestratorClient {
   private getConfig() {
     const cfg = vscode.workspace.getConfiguration('holoscript.mcp');
     const url = cfg.get<string>('orchestratorUrl') || '';
-    const apiKey = cfg.get<string>('apiKey') || '';
+    let apiKey = cfg.get<string>('apiKey') || '';
     const enabled = cfg.get<boolean>('enabled', true);
     const heartbeatSeconds = cfg.get<number>('heartbeatSeconds', 20);
     const visibility = cfg.get<'public' | 'private'>('visibility', 'public');
     const workspace = cfg.get<string>('workspaceId', 'holoscript');
+    
+    // Resolve environment variable reference or fallback to process.env
+    if (!apiKey || apiKey.includes('${env:')) {
+      apiKey = process.env.MCP_API_KEY || '';
+    }
+    
     return { url, apiKey, enabled, heartbeatSeconds, visibility, workspace };
   }
 
