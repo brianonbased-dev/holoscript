@@ -15,8 +15,7 @@
     "cors": "^2.8.5",
     "compression": "^1.7.4",
     "helmet": "^7.1.0",
-    "qrcode": "^1.5.3",
-    "puppeteer": "^21.0.0"
+    "qrcode": "^1.5.3"
   },
   "engines": {
     "node": ">=18.0.0"
