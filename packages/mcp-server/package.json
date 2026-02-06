@@ -20,7 +20,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@holoscript/core": "^2.1.0",
+    "@holoscript/core": "workspace:^",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "zod": "^3.24.0"
   },
@@ -32,7 +32,7 @@
     "vitest": "^4.0.18"
   },
   "peerDependencies": {
-    "@holoscript/core": ">=2.0.0"
+    "@holoscript/core": ">=3.0.0"
   },
   "keywords": [
     "holoscript",
