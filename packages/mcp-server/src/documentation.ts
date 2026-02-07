@@ -660,6 +660,258 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@state', '@reactive'],
   },
+
+  // Extended Interaction Traits
+  '@rotatable': {
+    name: '@rotatable',
+    category: 'interaction',
+    description: 'Object can be rotated by the user or auto-rotates on an axis.',
+    parameters: [
+      { name: 'speed', type: 'number', default: '1.0', description: 'Rotation speed multiplier' },
+      { name: 'axis', type: 'string', default: 'y', description: 'Rotation axis: x, y, z' },
+      { name: 'snap_angle', type: 'number', default: '0', description: 'Snap to angle increments in degrees (0 = free rotation)' },
+      { name: 'auto_rotate', type: 'boolean', default: 'false', description: 'Enable continuous auto-rotation' },
+    ],
+    events: ['onRotateStart', 'onRotate', 'onRotateEnd'],
+    example: `orb Turntable @rotatable(axis: "y", auto_rotate: true, speed: 0.5) {
+  geometry: "cylinder"
+  scale: [1, 0.1, 1]
+}`,
+    relatedTraits: ['@grabbable', '@draggable'],
+  },
+
+  '@snappable': {
+    name: '@snappable',
+    category: 'interaction',
+    description: 'Object snaps to grid positions or predefined snap points when moved.',
+    parameters: [
+      { name: 'grid_size', type: 'number', default: '0.5', description: 'Grid cell size for snapping' },
+      { name: 'snap_points', type: 'array', description: 'Custom [x,y,z] snap point positions' },
+      { name: 'snap_distance', type: 'number', default: '0.3', description: 'Distance threshold to trigger snapping' },
+      { name: 'snap_rotation', type: 'boolean', default: 'false', description: 'Also snap rotation to increments' },
+      { name: 'rotation_snap', type: 'number', default: '45', description: 'Rotation snap increment in degrees' },
+    ],
+    events: ['onSnap', 'onUnsnap'],
+    example: `orb BuildingBlock @grabbable @snappable(grid_size: 1, snap_rotation: true) {
+  geometry: "cube"
+  color: "#44aaff"
+}`,
+    relatedTraits: ['@grabbable', '@stackable', '@draggable'],
+  },
+
+  // Extended Behavior Traits
+  '@breakable': {
+    name: '@breakable',
+    category: 'behavior',
+    description: 'Object shatters into fragments on impact when velocity exceeds the break force threshold.',
+    parameters: [
+      { name: 'break_force', type: 'number', default: '5', description: 'Minimum velocity to trigger breaking' },
+      { name: 'fragments', type: 'number', default: '6', description: 'Number of debris fragments to spawn' },
+      { name: 'fragment_lifetime', type: 'number', default: '4', description: 'Seconds before fragments fade away' },
+    ],
+    events: ['onBreak'],
+    example: `orb GlassPane @physics @breakable(break_force: 3, fragments: 10) {
+  geometry: "cube"
+  scale: [1, 1, 0.05]
+  color: "#aaddff"
+  @transparent(opacity: 0.5)
+}`,
+    relatedTraits: ['@physics', '@collidable', '@destructible'],
+  },
+
+  '@character': {
+    name: '@character',
+    category: 'behavior',
+    description: 'Adds a basic character controller with keyboard movement (WASD), jumping, and gravity.',
+    parameters: [
+      { name: 'speed', type: 'number', default: '3', description: 'Movement speed in m/s' },
+      { name: 'jump_force', type: 'number', default: '5', description: 'Jump impulse force' },
+      { name: 'gravity', type: 'number', default: '-9.81', description: 'Gravity acceleration' },
+      { name: 'ground_level', type: 'number', default: '0', description: 'Y position of the ground plane' },
+    ],
+    events: ['onJump', 'onLand', 'onMove'],
+    example: `orb Player @character(speed: 5, jump_force: 6) @collidable {
+  geometry: "model/player.glb"
+  position: [0, 0, 0]
+}`,
+    relatedTraits: ['@collidable', '@physics', '@tracked'],
+  },
+
+  // Advanced Traits
+  '@teleport': {
+    name: '@teleport',
+    category: 'advanced',
+    description: 'Parabolic arc teleportation with visual indicator ring. When activated via userData.teleporting, draws a parabolic arc from the object and shows a ground target ring at the landing point.',
+    parameters: [
+      { name: 'arcColor', type: 'string', default: '0x00aaff', description: 'Color of the teleport arc line' },
+      { name: 'ringColor', type: 'string', default: '0x00ff88', description: 'Color of the ground target ring' },
+    ],
+    events: ['onTeleportStart', 'onTeleportConfirm', 'onTeleportCancel'],
+    example: `orb VRController @teleport {
+  geometry: "model/controller.glb"
+  // Activate: userData.teleporting = true
+  // Confirm:  userData.confirmTeleport = true
+}`,
+    relatedTraits: ['@pointable', '@portal'],
+  },
+
+  '@ui_panel': {
+    name: '@ui_panel',
+    category: 'advanced',
+    description: 'Creates a floating 2D UI panel in 3D space using HTML canvas rendering. Supports dynamic text updates via userData.uiText and userData.uiDirty.',
+    parameters: [
+      { name: 'width', type: 'number', default: '512', description: 'Canvas pixel width' },
+      { name: 'height', type: 'number', default: '256', description: 'Canvas pixel height' },
+      { name: 'text', type: 'string', default: '""', description: 'Initial text content' },
+      { name: 'backgroundColor', type: 'string', default: '#222', description: 'Panel background color' },
+      { name: 'textColor', type: 'string', default: '#fff', description: 'Text color' },
+      { name: 'fontSize', type: 'number', default: '24', description: 'Font size in pixels' },
+    ],
+    events: ['onTextChange'],
+    example: `orb ScoreBoard @ui_panel(width: 512, height: 128, text: "Score: 0", backgroundColor: "#111", textColor: "#0f0", fontSize: 32) @billboard {
+  position: [0, 3, -5]
+}`,
+    relatedTraits: ['@billboard', '@tracked'],
+  },
+
+  '@particle_system': {
+    name: '@particle_system',
+    category: 'advanced',
+    description: 'GPU-friendly particle effects such as smoke, fire, and sparks. Particles emit from the object origin and respawn when their lifetime expires.',
+    parameters: [
+      { name: 'count', type: 'number', default: '500', description: 'Number of particles' },
+      { name: 'color', type: 'string', default: '0xffaa00', description: 'Particle color' },
+      { name: 'size', type: 'number', default: '0.05', description: 'Particle size' },
+      { name: 'speed', type: 'number', default: '1', description: 'Upward emission speed' },
+      { name: 'spread', type: 'number', default: '1', description: 'Horizontal emission spread radius' },
+      { name: 'lifetime', type: 'number', default: '3', description: 'Particle lifetime in seconds before respawn' },
+    ],
+    events: [],
+    example: `orb Campfire @particle_system(count: 300, color: "#ff4400", size: 0.04, speed: 2, spread: 0.5) @emissive(intensity: 1.5) {
+  geometry: "model/campfire.glb"
+  position: [0, 0, -3]
+}`,
+    relatedTraits: ['@emissive', '@glowing'],
+  },
+
+  '@weather': {
+    name: '@weather',
+    category: 'advanced',
+    description: 'Dynamic weather effects including rain, snow, and fog. Rain and snow use particle systems while fog modifies the scene fog settings.',
+    parameters: [
+      { name: 'type', type: 'string', default: 'rain', description: "Weather type: 'rain', 'snow', or 'fog'" },
+      { name: 'count', type: 'number', default: '2000', description: 'Number of particles (rain/snow only)' },
+      { name: 'area', type: 'number', default: '30', description: 'Area size in meters' },
+      { name: 'intensity', type: 'number', default: '1', description: 'Effect intensity multiplier' },
+    ],
+    events: ['onWeatherChange'],
+    example: `orb SnowEffect @weather(type: "snow", count: 3000, area: 40) {
+  position: [0, 10, 0]
+}`,
+    relatedTraits: ['@day_night'],
+  },
+
+  '@day_night': {
+    name: '@day_night',
+    category: 'advanced',
+    description: 'Automated sun cycle with realistic color temperature changes. Creates a directional sun light and ambient light that orbit and change color from warm sunrise to cool moonlight over the configured cycle duration.',
+    parameters: [
+      { name: 'cycleDuration', type: 'number', default: '120', description: 'Full day/night cycle duration in seconds' },
+      { name: 'startTime', type: 'number', default: '0', description: 'Starting time as fraction of day (0 = midnight, 0.5 = noon)' },
+    ],
+    events: ['onSunrise', 'onSunset', 'onNoon', 'onMidnight'],
+    example: `orb WorldClock @day_night(cycleDuration: 300, startTime: 0.25) {
+  position: [0, 0, 0]
+  // Exposes: userData.dayNightPhase ("day"|"night")
+  // Exposes: userData.dayNightProgress (0-1)
+}`,
+    relatedTraits: ['@weather', '@emissive'],
+  },
+
+  '@lod': {
+    name: '@lod',
+    category: 'advanced',
+    description: 'Level of Detail optimization that auto-simplifies distant objects. Creates three detail levels: full mesh (near), wireframe (medium), and point cloud (far). Automatically switches based on camera distance.',
+    parameters: [
+      { name: 'distances', type: 'array', default: '[0, 15, 30]', description: 'Distance thresholds [near, medium, far] in meters' },
+    ],
+    events: ['onLODChange'],
+    example: `orb DetailedTree @lod(distances: [0, 20, 50]) {
+  geometry: "model/tree_detailed.glb"
+  position: [10, 0, -15]
+}`,
+    relatedTraits: ['@billboard'],
+  },
+
+  '@hand_tracking': {
+    name: '@hand_tracking',
+    category: 'advanced',
+    description: 'WebXR hand joint tracking with pinch detection. Renders fingertip spheres and a wrist indicator. Exposes pinch state via userData.pinching and userData.pinchDistance.',
+    parameters: [
+      { name: 'hand', type: 'string', default: 'right', description: "Which hand to track: 'left' or 'right'" },
+      { name: 'sphereRadius', type: 'number', default: '0.008', description: 'Radius of fingertip indicator spheres' },
+      { name: 'pinchThreshold', type: 'number', default: '0.02', description: 'Distance threshold for pinch detection (meters)' },
+    ],
+    events: ['onPinchStart', 'onPinchEnd', 'onHandFound', 'onHandLost'],
+    example: `orb LeftHand @hand_tracking(hand: "left") {
+  position: [0, 0, 0]
+  // Exposes: userData.pinching (boolean)
+  // Exposes: userData.handTracked (boolean)
+}`,
+    relatedTraits: ['@hand_tracked', '@tracked'],
+  },
+
+  '@haptic': {
+    name: '@haptic',
+    category: 'advanced',
+    description: 'VR controller vibration feedback. Triggers a haptic pulse on the specified controller when userData.triggerHaptic is set to true. Supports both standard Gamepad Haptic API and dual-rumble vibration.',
+    parameters: [
+      { name: 'intensity', type: 'number', default: '0.5', description: 'Vibration intensity (0-1)' },
+      { name: 'duration', type: 'number', default: '100', description: 'Vibration duration in milliseconds' },
+      { name: 'hand', type: 'string', default: 'right', description: "Target controller: 'left', 'right', or 'both'" },
+      { name: 'cooldown', type: 'number', default: '50', description: 'Minimum ms between consecutive pulses' },
+    ],
+    events: ['onHapticPulse'],
+    example: `orb VRController @haptic(intensity: 0.7, duration: 150, hand: "right") {
+  geometry: "model/controller.glb"
+  // Trigger feedback: userData.triggerHaptic = true
+}`,
+    relatedTraits: ['@hand_tracking', '@grabbable'],
+  },
+
+  '@portal': {
+    name: '@portal',
+    category: 'advanced',
+    description: 'Teleportation gateway with glowing torus ring and semi-transparent surface. Objects tagged as teleportable or isPlayer that enter the activation distance are instantly moved to the destination coordinates.',
+    parameters: [
+      { name: 'destination', type: 'array', default: '[0, 0, 0]', description: 'Target [x, y, z] teleport coordinates' },
+      { name: 'color', type: 'string', default: '#8800ff', description: 'Portal glow color' },
+      { name: 'activationDistance', type: 'number', default: '1', description: 'Distance in meters to trigger teleportation' },
+      { name: 'radius', type: 'number', default: '1.2', description: 'Portal ring radius' },
+    ],
+    events: ['onPortalEnter', 'onPortalExit'],
+    example: `orb DungeonPortal @portal(destination: [50, 0, 50], color: "#ff00ff", activationDistance: 1.5) @spatial_audio {
+  position: [0, 1.5, -5]
+  audio: { src: "portal-hum.mp3", loop: true }
+}`,
+    relatedTraits: ['@teleport', '@trigger', '@glowing'],
+  },
+
+  '@mirror': {
+    name: '@mirror',
+    category: 'advanced',
+    description: 'Reflective surface with metallic material and a subtle frame. Creates a highly reflective plane with configurable tint and orientation. Supports vertical, horizontal, or camera-facing modes.',
+    parameters: [
+      { name: 'size', type: 'number', default: '2', description: 'Mirror plane size in meters' },
+      { name: 'tint', type: 'string', default: '#ffffff', description: 'Reflection tint color' },
+      { name: 'orientation', type: 'string', default: 'vertical', description: "Mirror orientation: 'vertical', 'horizontal', or 'face_camera'" },
+    ],
+    events: [],
+    example: `orb WallMirror @mirror(size: 3, tint: "#f0f0ff", orientation: "vertical") {
+  position: [0, 1.5, -4]
+}`,
+    relatedTraits: ['@reflective', '@billboard'],
+  },
 };
 
 interface TraitDoc {

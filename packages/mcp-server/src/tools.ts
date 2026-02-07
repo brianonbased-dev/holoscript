@@ -85,13 +85,13 @@ export const tools: Tool[] = [
   // === TRAITS ===
   {
     name: 'list_traits',
-    description: 'List all 49 VR traits available in HoloScript with their categories.',
+    description: 'List all 56 VR traits available in HoloScript with their categories.',
     inputSchema: {
       type: 'object',
       properties: {
         category: {
           type: 'string',
-          enum: ['interaction', 'physics', 'visual', 'networking', 'behavior', 'spatial', 'audio', 'state', 'all'],
+          enum: ['interaction', 'physics', 'visual', 'networking', 'behavior', 'spatial', 'audio', 'state', 'advanced', 'all'],
           description: 'Filter by category. Defaults to all.',
         },
       },

@@ -69,12 +69,25 @@ const KEYWORDS = new Set([
   'true', 'false', 'null', 'let', 'const', 'function',
 ]);
 
-/** Built-in traits */
+/** Built-in traits - all 56 registered runtime traits */
 const BUILTIN_TRAITS = new Set([
-  'physics', 'static', 'kinematic', 'collidable', 'grabbable',
-  'throwable', 'draggable', 'visible', 'invisible', 'audio',
-  'spatial_audio', 'climbable', 'interactable', 'glowing',
-  'animated', 'billboard', 'occluder', 'navmesh', 'trigger',
+  // Interaction (11)
+  'grabbable', 'throwable', 'collidable', 'physics', 'gravity',
+  'trigger', 'pointable', 'hoverable', 'clickable', 'draggable', 'scalable',
+  // Visual (10)
+  'glowing', 'transparent', 'spinning', 'floating', 'billboard',
+  'pulse', 'animated', 'look_at', 'outline', 'proximity',
+  // AI/Behavior (5)
+  'behavior_tree', 'emotion', 'goal_oriented', 'perception', 'memory',
+  // Physics (9)
+  'cloth', 'soft_body', 'fluid', 'buoyancy', 'rope',
+  'wind', 'joint', 'rigidbody', 'destruction',
+  // Extended (11)
+  'rotatable', 'stackable', 'snappable', 'breakable', 'character',
+  'patrol', 'networked', 'anchor', 'spatial_audio', 'reverb_zone', 'voice_proximity',
+  // Advanced (10)
+  'teleport', 'ui_panel', 'particle_system', 'weather', 'day_night',
+  'lod', 'hand_tracking', 'haptic', 'portal', 'mirror',
 ]);
 
 /** Event handlers */

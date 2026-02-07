@@ -16,14 +16,15 @@ import { TRAIT_DOCS, SYNTAX_DOCS, EXAMPLES } from './documentation';
 
 // Trait categories mapping
 const TRAIT_CATEGORIES: Record<string, string[]> = {
-  interaction: ['@grabbable', '@throwable', '@holdable', '@clickable', '@hoverable', '@draggable', '@pointable', '@scalable'],
+  interaction: ['@grabbable', '@throwable', '@holdable', '@clickable', '@hoverable', '@draggable', '@pointable', '@scalable', '@rotatable', '@snappable'],
   physics: ['@collidable', '@physics', '@rigid', '@kinematic', '@trigger', '@gravity'],
   visual: ['@glowing', '@emissive', '@transparent', '@reflective', '@animated', '@billboard'],
   networking: ['@networked', '@synced', '@persistent', '@owned', '@host_only'],
-  behavior: ['@stackable', '@attachable', '@equippable', '@consumable', '@destructible'],
+  behavior: ['@stackable', '@attachable', '@equippable', '@consumable', '@destructible', '@breakable', '@character'],
   spatial: ['@anchor', '@tracked', '@world_locked', '@hand_tracked', '@eye_tracked'],
   audio: ['@spatial_audio', '@ambient', '@voice_activated'],
   state: ['@state', '@reactive', '@observable', '@computed'],
+  advanced: ['@teleport', '@ui_panel', '@particle_system', '@weather', '@day_night', '@lod', '@hand_tracking', '@haptic', '@portal', '@mirror'],
 };
 
 const ALL_TRAITS = Object.values(TRAIT_CATEGORIES).flat();

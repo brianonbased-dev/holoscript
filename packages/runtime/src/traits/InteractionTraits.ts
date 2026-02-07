@@ -386,3 +386,332 @@ export const ScalableTrait: TraitHandler = {
     context.object.userData.scalable = false;
   }
 };
+
+// ============================================================================
+// Glowing Trait (emissive material effect)
+// ============================================================================
+
+export const GlowingTrait: TraitHandler = {
+  name: 'glowing',
+  onApply: (context: TraitContext) => {
+    const mesh = context.object as THREE.Mesh;
+    context.data.intensity = context.config.intensity ?? 0.5;
+    context.data.color = context.config.color || null;
+    context.data.pulse = context.config.pulse ?? false;
+    context.data.pulseSpeed = context.config.pulseSpeed ?? 2;
+    context.data.originalEmissive = null;
+    context.data.originalIntensity = 0;
+    context.data.time = 0;
+
+    if (mesh.material && 'emissive' in mesh.material) {
+      const mat = mesh.material as THREE.MeshStandardMaterial;
+      context.data.originalEmissive = mat.emissive.clone();
+      context.data.originalIntensity = mat.emissiveIntensity;
+
+      if (context.data.color) {
+        mat.emissive = new THREE.Color(context.data.color);
+      } else {
+        mat.emissive = mat.color.clone();
+      }
+      mat.emissiveIntensity = context.data.intensity;
+    }
+  },
+  onUpdate: (context: TraitContext, delta: number) => {
+    if (!context.data.pulse) return;
+
+    const mesh = context.object as THREE.Mesh;
+    if (mesh.material && 'emissiveIntensity' in mesh.material) {
+      const mat = mesh.material as THREE.MeshStandardMaterial;
+      context.data.time += delta * context.data.pulseSpeed;
+      const pulse = (Math.sin(context.data.time) + 1) / 2;
+      mat.emissiveIntensity = context.data.intensity * (0.5 + pulse * 0.5);
+    }
+  },
+  onRemove: (context: TraitContext) => {
+    const mesh = context.object as THREE.Mesh;
+    if (mesh.material && 'emissive' in mesh.material) {
+      const mat = mesh.material as THREE.MeshStandardMaterial;
+      if (context.data.originalEmissive) {
+        mat.emissive = context.data.originalEmissive;
+        mat.emissiveIntensity = context.data.originalIntensity;
+      }
+    }
+  }
+};
+
+// ============================================================================
+// Transparent Trait (adjustable opacity)
+// ============================================================================
+
+export const TransparentTrait: TraitHandler = {
+  name: 'transparent',
+  onApply: (context: TraitContext) => {
+    const mesh = context.object as THREE.Mesh;
+    context.data.opacity = context.config.opacity ?? 0.5;
+    context.data.fadeIn = context.config.fadeIn ?? false;
+    context.data.fadeOut = context.config.fadeOut ?? false;
+    context.data.fadeDuration = context.config.fadeDuration ?? 1;
+    context.data.fadeProgress = 0;
+    context.data.originalOpacity = 1;
+
+    if (mesh.material && 'opacity' in mesh.material) {
+      const mat = mesh.material as THREE.MeshStandardMaterial;
+      context.data.originalOpacity = mat.opacity;
+      mat.transparent = true;
+      mat.opacity = context.data.fadeIn ? 0 : context.data.opacity;
+    }
+  },
+  onUpdate: (context: TraitContext, delta: number) => {
+    const mesh = context.object as THREE.Mesh;
+    if (!mesh.material || !('opacity' in mesh.material)) return;
+
+    const mat = mesh.material as THREE.MeshStandardMaterial;
+
+    if (context.data.fadeIn && context.data.fadeProgress < 1) {
+      context.data.fadeProgress += delta / context.data.fadeDuration;
+      mat.opacity = THREE.MathUtils.lerp(0, context.data.opacity, context.data.fadeProgress);
+    }
+  },
+  onRemove: (context: TraitContext) => {
+    const mesh = context.object as THREE.Mesh;
+    if (mesh.material && 'opacity' in mesh.material) {
+      const mat = mesh.material as THREE.MeshStandardMaterial;
+      mat.opacity = context.data.originalOpacity;
+    }
+  }
+};
+
+// ============================================================================
+// Spinning Trait (continuous rotation)
+// ============================================================================
+
+export const SpinningTrait: TraitHandler = {
+  name: 'spinning',
+  onApply: (context: TraitContext) => {
+    context.data.axis = context.config.axis || 'y';
+    context.data.speed = context.config.speed ?? 1; // Radians per second
+    context.data.oscillate = context.config.oscillate ?? false;
+    context.data.angle = context.config.angle ?? Math.PI / 4;
+    context.data.time = 0;
+  },
+  onUpdate: (context: TraitContext, delta: number) => {
+    const obj = context.object;
+    const axis = context.data.axis;
+
+    if (context.data.oscillate) {
+      context.data.time += delta * context.data.speed;
+      const rotation = Math.sin(context.data.time) * context.data.angle;
+      if (axis === 'x') obj.rotation.x = rotation;
+      else if (axis === 'y') obj.rotation.y = rotation;
+      else if (axis === 'z') obj.rotation.z = rotation;
+    } else {
+      const rotAmount = delta * context.data.speed;
+      if (axis === 'x') obj.rotation.x += rotAmount;
+      else if (axis === 'y') obj.rotation.y += rotAmount;
+      else if (axis === 'z') obj.rotation.z += rotAmount;
+    }
+  },
+  onRemove: () => {}
+};
+
+// ============================================================================
+// Floating Trait (bobbing up and down)
+// ============================================================================
+
+export const FloatingTrait: TraitHandler = {
+  name: 'floating',
+  onApply: (context: TraitContext) => {
+    context.data.amplitude = context.config.amplitude ?? 0.2;
+    context.data.speed = context.config.speed ?? 1;
+    context.data.time = context.config.offset ?? Math.random() * Math.PI * 2;
+    context.data.baseY = context.object.position.y;
+  },
+  onUpdate: (context: TraitContext, delta: number) => {
+    context.data.time += delta * context.data.speed;
+    const offset = Math.sin(context.data.time) * context.data.amplitude;
+    context.object.position.y = context.data.baseY + offset;
+  },
+  onRemove: (context: TraitContext) => {
+    context.object.position.y = context.data.baseY;
+  }
+};
+
+// ============================================================================
+// Billboard Trait (always faces camera)
+// ============================================================================
+
+export const BillboardTrait: TraitHandler = {
+  name: 'billboard',
+  onApply: (context: TraitContext) => {
+    context.data.lockY = context.config.lockY ?? true; // Lock vertical axis
+    context.object.userData.billboard = true;
+  },
+  onUpdate: (context: TraitContext, delta: number) => {
+    // Billboard update handled by InputManager camera reference
+    // This is a marker trait - actual billboarding done in render loop
+  },
+  onRemove: (context: TraitContext) => {
+    context.object.userData.billboard = false;
+  }
+};
+
+// ============================================================================
+// Pulse Trait (scale pulsing)
+// ============================================================================
+
+export const PulseTrait: TraitHandler = {
+  name: 'pulse',
+  onApply: (context: TraitContext) => {
+    context.data.minScale = context.config.minScale ?? 0.9;
+    context.data.maxScale = context.config.maxScale ?? 1.1;
+    context.data.speed = context.config.speed ?? 2;
+    context.data.time = 0;
+    context.data.originalScale = context.object.scale.clone();
+  },
+  onUpdate: (context: TraitContext, delta: number) => {
+    context.data.time += delta * context.data.speed;
+    const t = (Math.sin(context.data.time) + 1) / 2;
+    const scale = THREE.MathUtils.lerp(context.data.minScale, context.data.maxScale, t);
+    const orig = context.data.originalScale;
+    context.object.scale.set(orig.x * scale, orig.y * scale, orig.z * scale);
+  },
+  onRemove: (context: TraitContext) => {
+    const orig = context.data.originalScale;
+    if (orig) context.object.scale.copy(orig);
+  }
+};
+
+// ============================================================================
+// Animated Trait (plays model animations)
+// ============================================================================
+
+export const AnimatedTrait: TraitHandler = {
+  name: 'animated',
+  onApply: (context: TraitContext) => {
+    context.data.clip = context.config.clip || 'idle';
+    context.data.loop = context.config.loop ?? true;
+    context.data.speed = context.config.speed ?? 1;
+    context.data.crossFade = context.config.crossFade ?? 0.3;
+    context.data.mixer = null;
+    context.data.action = null;
+
+    // Animation mixer is set by loader when model is loaded
+    context.object.userData.animatedConfig = {
+      clip: context.data.clip,
+      loop: context.data.loop,
+      speed: context.data.speed,
+    };
+  },
+  onUpdate: (context: TraitContext, delta: number) => {
+    // Mixer update is handled in BrowserRuntime's animation loop
+    // This trait just marks the object and stores config
+  },
+  onRemove: (context: TraitContext) => {
+    if (context.data.action) {
+      context.data.action.stop();
+    }
+  }
+};
+
+// ============================================================================
+// LookAt Trait (object looks at target)
+// ============================================================================
+
+export const LookAtTrait: TraitHandler = {
+  name: 'look_at',
+  onApply: (context: TraitContext) => {
+    context.data.target = context.config.target || null;
+    context.data.smoothing = context.config.smoothing ?? 5;
+    context.data.lockY = context.config.lockY ?? true;
+    context.object.userData.lookAtTarget = context.data.target;
+  },
+  onUpdate: (context: TraitContext, delta: number) => {
+    const target = context.data.target;
+    if (!target) return;
+
+    // Find target object by name in scene
+    const scene = context.object.parent;
+    if (!scene) return;
+
+    let targetObj: THREE.Object3D | undefined;
+    scene.traverse((child) => {
+      if (child.name === target) targetObj = child;
+    });
+
+    if (targetObj) {
+      const targetPos = (targetObj as THREE.Object3D).position.clone();
+      if (context.data.lockY) {
+        targetPos.y = context.object.position.y;
+      }
+
+      // Smooth look at
+      const targetQuat = new THREE.Quaternion();
+      const lookMatrix = new THREE.Matrix4().lookAt(
+        context.object.position,
+        targetPos,
+        new THREE.Vector3(0, 1, 0)
+      );
+      targetQuat.setFromRotationMatrix(lookMatrix);
+      context.object.quaternion.slerp(targetQuat, delta * context.data.smoothing);
+    }
+  },
+  onRemove: (context: TraitContext) => {
+    context.object.userData.lookAtTarget = null;
+  }
+};
+
+// ============================================================================
+// Outline Trait (highlighted outline effect)
+// ============================================================================
+
+export const OutlineTrait: TraitHandler = {
+  name: 'outline',
+  onApply: (context: TraitContext) => {
+    context.data.color = context.config.color || 0x00ffff;
+    context.data.thickness = context.config.thickness ?? 0.03;
+    context.data.visible = context.config.visible ?? true;
+    context.object.userData.outline = {
+      color: context.data.color,
+      thickness: context.data.thickness,
+      visible: context.data.visible,
+    };
+    // Actual outline rendering handled by post-processing in BrowserRuntime
+  },
+  onRemove: (context: TraitContext) => {
+    context.object.userData.outline = null;
+  }
+};
+
+// ============================================================================
+// Proximity Trait (trigger events when player is near)
+// ============================================================================
+
+export const ProximityTrait: TraitHandler = {
+  name: 'proximity',
+  onApply: (context: TraitContext) => {
+    context.data.radius = context.config.radius ?? 3;
+    context.data.onEnter = context.config.onEnter || null;
+    context.data.onExit = context.config.onExit || null;
+    context.data.playerInside = false;
+    context.object.userData.proximityRadius = context.data.radius;
+  },
+  onUpdate: (context: TraitContext, delta: number) => {
+    // Proximity check handled by InputManager with camera position
+    const isInside = context.object.userData.playerNearby ?? false;
+
+    if (isInside && !context.data.playerInside) {
+      context.data.playerInside = true;
+      if (context.data.onEnter) {
+        context.object.dispatchEvent({ type: 'proximityEnter' } as any);
+      }
+    } else if (!isInside && context.data.playerInside) {
+      context.data.playerInside = false;
+      if (context.data.onExit) {
+        context.object.dispatchEvent({ type: 'proximityExit' } as any);
+      }
+    }
+  },
+  onRemove: (context: TraitContext) => {
+    context.object.userData.proximityRadius = null;
+  }
+};

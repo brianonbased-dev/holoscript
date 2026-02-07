@@ -67,12 +67,44 @@
     "traits": {
       "patterns": [
         {
-          "name": "entity.name.function.decorator.vr-trait.holoscript",
-          "match": "@(grabbable|throwable|pointable|hoverable|scalable|rotatable|stackable|snappable|breakable|stretchable|moldable|skeleton|body|face|expressive|hair|clothing|hands|character_voice|locomotion|poseable|morph|networked|proactive|recordable|streamable|camera|video|trackable|survey|abtest|heatmap|shareable|embeddable|qr|collaborative|particle|transition|filter|trail|spatial_audio|voice|reactive_audio|narrator|responsive|procedural|captioned|timeline|choreography|gaussian_splat|nerf|volumetric_video)\\b"
+          "comment": "Interaction traits (11)",
+          "name": "entity.name.function.decorator.interaction.holoscript",
+          "match": "@(grabbable|throwable|collidable|physics|gravity|trigger|pointable|hoverable|clickable|draggable|scalable)\\b"
         },
         {
+          "comment": "Visual traits (10)",
+          "name": "entity.name.function.decorator.visual.holoscript",
+          "match": "@(glowing|transparent|spinning|floating|billboard|pulse|animated|look_at|outline|proximity)\\b"
+        },
+        {
+          "comment": "AI/Behavior traits (5)",
+          "name": "entity.name.function.decorator.ai.holoscript",
+          "match": "@(behavior_tree|emotion|goal_oriented|perception|memory)\\b"
+        },
+        {
+          "comment": "Physics traits (9)",
+          "name": "entity.name.function.decorator.physics.holoscript",
+          "match": "@(cloth|soft_body|fluid|buoyancy|rope|wind|joint|rigidbody|destruction)\\b"
+        },
+        {
+          "comment": "Extended traits (11)",
+          "name": "entity.name.function.decorator.extended.holoscript",
+          "match": "@(rotatable|stackable|snappable|breakable|character|patrol|networked|anchor|spatial_audio|reverb_zone|voice_proximity)\\b"
+        },
+        {
+          "comment": "Advanced traits (10)",
+          "name": "entity.name.function.decorator.advanced.holoscript",
+          "match": "@(teleport|ui_panel|particle_system|weather|day_night|lod|hand_tracking|haptic|portal|mirror)\\b"
+        },
+        {
+          "comment": "Other decorator traits (state, import, etc.)",
           "name": "entity.name.function.decorator.holoscript",
           "match": "@(state|import|export|external_api|generate|npc|dialog)\\b"
+        },
+        {
+          "comment": "Catch-all for unknown traits (future-proofing)",
+          "name": "entity.name.function.decorator.custom.holoscript",
+          "match": "@[a-zA-Z_][a-zA-Z0-9_]*\\b"
         }
       ]
     },

@@ -6,13 +6,23 @@ export default defineConfig({
   
   // Ignore dead links for now - many docs reference planned pages
   ignoreDeadLinks: true,
+
+  // Exclude knowledge files that contain Vue-incompatible syntax
+  srcExclude: ['knowledge/**'],
   
   head: [
     ['link', { rel: 'icon', href: '/logo.svg' }],
     ['meta', { name: 'theme-color', content: '#00ffff' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: 'HoloScript' }],
-    ['meta', { property: 'og:description', content: 'One source → 9 platforms. Built for humans and AI.' }],
+    ['meta', { property: 'og:url', content: 'https://www.holoscript.net' }],
+    ['meta', { property: 'og:title', content: 'HoloScript - Create VR Worlds Without the Complexity' }],
+    ['meta', { property: 'og:description', content: 'Open-source declarative language for building VR/AR experiences. 56 built-in traits, deploy to 9 platforms from a single source.' }],
+    ['meta', { property: 'og:image', content: 'https://www.holoscript.net/og-image.png' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:site', content: '@holoscript' }],
+    ['meta', { name: 'twitter:title', content: 'HoloScript - Create VR Worlds Without the Complexity' }],
+    ['meta', { name: 'twitter:description', content: 'Open-source declarative language for building VR/AR experiences. 56 built-in traits, deploy to 9 platforms.' }],
+    ['meta', { name: 'twitter:image', content: 'https://www.holoscript.net/og-image.png' }],
   ],
 
   themeConfig: {

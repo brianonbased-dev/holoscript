@@ -16,9 +16,9 @@ import { device, isVRCapable } from '../device.js';
 import { createLoop, nextFrame } from '../timing.js';
 import { PhysicsWorld, type CollisionEvent, type RigidbodyConfig } from '../physics/PhysicsWorld';
 import { TraitSystem } from '../traits/TraitSystem';
-import { 
-  GrabbableTrait, 
-  ThrowableTrait, 
+import {
+  GrabbableTrait,
+  ThrowableTrait,
   CollidableTrait,
   PhysicsTrait,
   GravityTrait,
@@ -28,8 +28,61 @@ import {
   ClickableTrait,
   DraggableTrait,
   ScalableTrait,
+  GlowingTrait,
+  TransparentTrait,
+  SpinningTrait,
+  FloatingTrait,
+  BillboardTrait,
+  PulseTrait,
+  AnimatedTrait,
+  LookAtTrait,
+  OutlineTrait,
+  ProximityTrait,
   calculateThrowVelocity
 } from '../traits/InteractionTraits';
+import {
+  BehaviorTreeTrait,
+  EmotionTrait,
+  GoalOrientedTrait,
+  PerceptionTrait,
+  MemoryTrait,
+} from '../traits/BehaviorTraits';
+import {
+  ClothTrait,
+  SoftBodyTrait,
+  FluidTrait,
+  BuoyancyTrait,
+  RopeTrait,
+  WindTrait,
+  JointTrait,
+  RigidbodyTrait,
+  DestructionTrait,
+} from '../traits/PhysicsTraits';
+import {
+  RotatableTrait,
+  StackableTrait,
+  SnappableTrait,
+  BreakableTrait,
+  CharacterTrait,
+  PatrolTrait,
+  NetworkedTrait,
+  AnchorTrait,
+  SpatialAudioTrait,
+  ReverbZoneTrait,
+  VoiceProximityTrait,
+} from '../traits/ExtendedTraits';
+import {
+  TeleportTrait,
+  UIPanelTrait,
+  ParticleSystemTrait,
+  WeatherTrait,
+  DayNightTrait,
+  LODTrait,
+  HandTrackingTrait,
+  HapticTrait,
+  PortalTrait,
+  MirrorTrait,
+} from '../traits/AdvancedTraits';
 import { InputManager } from '../input/InputManager';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -71,11 +124,17 @@ interface ModuleImport {
   specifiers: Array<{ imported: string; local?: string }>;
 }
 
+// Trait with optional configuration (e.g., @physics(mass: 2))
+interface ParsedTrait {
+  name: string;
+  config: Record<string, unknown>;
+}
+
 interface ParsedTemplate {
   name: string;
   geometry?: string;
   color?: string;
-  traits: string[];
+  traits: ParsedTrait[];
   state?: Record<string, unknown>;
   properties: Map<string, unknown>;
 }
@@ -87,7 +146,7 @@ interface ParsedObject {
   scale: { x: number; y: number; z: number };
   color?: string;
   model?: string;
-  traits: string[];
+  traits: ParsedTrait[];
   metadata: Record<string, unknown>;
   // Animation properties
   animation?: string;
@@ -148,48 +207,136 @@ function extractFromHoloAST(ast: HoloComposition): LoadedComposition {
   const objects: ParsedObject[] = [];
   const state: Record<string, unknown> = {};
   const environment: EnvironmentConfig = {};
-  
+
   console.log('[HoloScript] Extracting from AST:', ast);
   console.log('[HoloScript] AST objects:', ast.objects);
-  
+
   // Extract state
   if (ast.state?.properties) {
     for (const prop of ast.state.properties) {
       state[prop.key] = prop.value;
     }
   }
-  
+
   // Extract environment
   if (ast.environment?.properties) {
     for (const prop of ast.environment.properties) {
       (environment as Record<string, unknown>)[prop.key] = prop.value;
     }
   }
-  
-  // Extract objects
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // EXTRACT TEMPLATES FIRST (so objects can inherit from them)
+  // ═══════════════════════════════════════════════════════════════════════════
+  const templates = new Map<string, ParsedTemplate>();
+  for (const template of ast.templates || []) {
+    const properties = new Map<string, unknown>();
+    if (template.properties) {
+      for (const prop of template.properties) {
+        properties.set(prop.key, prop.value);
+      }
+    }
+
+    const geometry = template.properties?.find((p: { key: string }) => p.key === 'geometry')?.value as string | undefined;
+    const color = template.properties?.find((p: { key: string }) => p.key === 'color')?.value as string | undefined;
+
+    // Extract traits with their configs (preserve @physics(mass: 2) style configs)
+    const extractedTraits: ParsedTrait[] = (template.traits || []).map((t: unknown) => {
+      if (typeof t === 'string') {
+        return { name: t, config: {} };
+      }
+      const traitObj = t as { name?: string; config?: Record<string, unknown> };
+      return {
+        name: traitObj.name || String(t),
+        config: traitObj.config || {}
+      };
+    });
+
+    templates.set(template.name, {
+      name: template.name,
+      geometry,
+      color,
+      traits: extractedTraits,
+      state: (template as any).state,
+      properties,
+    });
+  }
+  console.log('[HoloScript] Extracted templates:', Array.from(templates.keys()));
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // EXTRACT OBJECTS (inheriting from templates via "using" clause)
+  // ═══════════════════════════════════════════════════════════════════════════
   for (const obj of ast.objects || []) {
     console.log('[HoloScript] Processing object:', obj.name, obj);
-    const position = extractPosition(obj.properties?.find((p: { key: string }) => p.key === 'position')?.value);
-    const scale = extractScale(obj.properties?.find((p: { key: string }) => p.key === 'scale')?.value);
-    const color = obj.properties?.find((p: { key: string }) => p.key === 'color')?.value as string | undefined;
-    const geometry = obj.properties?.find((p: { key: string }) => p.key === 'geometry')?.value as string | undefined;
-    const objType = obj.properties?.find((p: { key: string }) => p.key === 'type')?.value as string | undefined;
-    const model = obj.properties?.find((p: { key: string }) => p.key === 'model')?.value as string | undefined;
-    
+
+    // Check if object uses a template (modern composition pattern)
+    const templateRef = (obj as any).template as string | undefined;
+    const parentTemplate = templateRef ? templates.get(templateRef) : undefined;
+
+    if (templateRef && !parentTemplate) {
+      console.warn(`[HoloScript] Object "${obj.name}" uses unknown template "${templateRef}"`);
+    }
+
+    // Helper to get property from object or fallback to template
+    const getProperty = (key: string): unknown => {
+      const objProp = obj.properties?.find((p: { key: string }) => p.key === key)?.value;
+      if (objProp !== undefined) return objProp;
+      return parentTemplate?.properties.get(key);
+    };
+
+    const position = extractPosition(getProperty('position'));
+    const scale = extractScale(getProperty('scale'));
+
+    // Object color/geometry override template color/geometry
+    const color = (getProperty('color') as string | undefined) || parentTemplate?.color;
+    const geometry = (getProperty('geometry') as string | undefined) || parentTemplate?.geometry;
+    const objType = getProperty('type') as string | undefined;
+    const model = getProperty('model') as string | undefined;
+
     // Extract animation properties
-    const animation = obj.properties?.find((p: { key: string }) => p.key === 'animation')?.value as string | undefined;
-    const animationLoop = obj.properties?.find((p: { key: string }) => p.key === 'animationLoop')?.value as boolean | undefined;
-    const skeleton = obj.properties?.find((p: { key: string }) => p.key === 'skeleton')?.value as string | undefined;
-    const patrol = obj.properties?.find((p: { key: string }) => p.key === 'patrol')?.value as number[][] | undefined;
-    const patrolSpeed = obj.properties?.find((p: { key: string }) => p.key === 'patrolSpeed')?.value as number | undefined;
-    
+    const animation = getProperty('animation') as string | undefined;
+    const animationLoop = getProperty('animationLoop') as boolean | undefined;
+    const skeleton = getProperty('skeleton') as string | undefined;
+    const patrol = getProperty('patrol') as number[][] | undefined;
+    const patrolSpeed = getProperty('patrolSpeed') as number | undefined;
+
     // Extract directive properties
-    const directive = obj.properties?.find((p: { key: string }) => p.key === 'directive')?.value as string | undefined;
-    const actions = obj.properties?.find((p: { key: string }) => p.key === 'actions')?.value as DirectiveAction[] | undefined;
-    const directiveLoop = obj.properties?.find((p: { key: string }) => p.key === 'directiveLoop')?.value as boolean | undefined;
-    const reps = obj.properties?.find((p: { key: string }) => p.key === 'reps')?.value as number | undefined;
-    const restTime = obj.properties?.find((p: { key: string }) => p.key === 'restTime')?.value as number | undefined;
-    
+    const directive = getProperty('directive') as string | undefined;
+    const actions = getProperty('actions') as DirectiveAction[] | undefined;
+    const directiveLoop = getProperty('directiveLoop') as boolean | undefined;
+    const reps = getProperty('reps') as number | undefined;
+    const restTime = getProperty('restTime') as number | undefined;
+
+    // Merge traits: template traits + object traits (object configs override template)
+    const objectTraits: ParsedTrait[] = ((obj as any).traits || []).map((t: unknown) => {
+      if (typeof t === 'string') return { name: t, config: {} };
+      const traitObj = t as { name?: string; config?: Record<string, unknown> };
+      return { name: traitObj.name || String(t), config: traitObj.config || {} };
+    });
+    const templateTraits = parentTemplate?.traits || [];
+
+    // Merge: start with template traits, then add/override with object traits
+    const traitMap = new Map<string, ParsedTrait>();
+    for (const t of templateTraits) {
+      traitMap.set(t.name, { ...t }); // Copy to avoid mutating template
+    }
+    for (const t of objectTraits) {
+      if (traitMap.has(t.name)) {
+        // Merge configs - object config overrides template config
+        const existing = traitMap.get(t.name)!;
+        traitMap.set(t.name, { name: t.name, config: { ...existing.config, ...t.config } });
+      } else {
+        traitMap.set(t.name, t);
+      }
+    }
+    const allTraits = Array.from(traitMap.values());
+
+    if (allTraits.length > 0) {
+      console.log(`[HoloScript] Object "${obj.name}" has traits:`, allTraits.map(t =>
+        Object.keys(t.config).length > 0 ? `${t.name}(${JSON.stringify(t.config)})` : t.name
+      ));
+    }
+
     objects.push({
       id: obj.name,
       type: geometry || objType || 'box',
@@ -197,7 +344,7 @@ function extractFromHoloAST(ast: HoloComposition): LoadedComposition {
       scale,
       color,
       model,
-      traits: [],
+      traits: allTraits,
       metadata: {},
       animation,
       animationLoop,
@@ -212,30 +359,64 @@ function extractFromHoloAST(ast: HoloComposition): LoadedComposition {
     });
   }
   
-  // Extract from spatial groups
+  // Extract from spatial groups (also with template inheritance)
   for (const group of ast.spatialGroups || []) {
     for (const obj of group.objects || []) {
-      const position = extractPosition(obj.properties?.find((p: { key: string }) => p.key === 'position')?.value);
-      const scale = extractScale(obj.properties?.find((p: { key: string }) => p.key === 'scale')?.value);
-      const color = obj.properties?.find((p: { key: string }) => p.key === 'color')?.value as string | undefined;
-      const geometry = obj.properties?.find((p: { key: string }) => p.key === 'geometry')?.value as string | undefined;
-      const objType = obj.properties?.find((p: { key: string }) => p.key === 'type')?.value as string | undefined;
-      const model = obj.properties?.find((p: { key: string }) => p.key === 'model')?.value as string | undefined;
-      
+      // Check if object uses a template
+      const templateRef = (obj as any).template as string | undefined;
+      const parentTemplate = templateRef ? templates.get(templateRef) : undefined;
+
+      // Helper to get property from object or fallback to template
+      const getProperty = (key: string): unknown => {
+        const objProp = obj.properties?.find((p: { key: string }) => p.key === key)?.value;
+        if (objProp !== undefined) return objProp;
+        return parentTemplate?.properties.get(key);
+      };
+
+      const position = extractPosition(getProperty('position'));
+      const scale = extractScale(getProperty('scale'));
+      const color = (getProperty('color') as string | undefined) || parentTemplate?.color;
+      const geometry = (getProperty('geometry') as string | undefined) || parentTemplate?.geometry;
+      const objType = getProperty('type') as string | undefined;
+      const model = getProperty('model') as string | undefined;
+
       // Extract animation properties for spatial group objects
-      const animation = obj.properties?.find((p: { key: string }) => p.key === 'animation')?.value as string | undefined;
-      const animationLoop = obj.properties?.find((p: { key: string }) => p.key === 'animationLoop')?.value as boolean | undefined;
-      const skeleton = obj.properties?.find((p: { key: string }) => p.key === 'skeleton')?.value as string | undefined;
-      const patrol = obj.properties?.find((p: { key: string }) => p.key === 'patrol')?.value as number[][] | undefined;
-      const patrolSpeed = obj.properties?.find((p: { key: string }) => p.key === 'patrolSpeed')?.value as number | undefined;
-      
+      const animation = getProperty('animation') as string | undefined;
+      const animationLoop = getProperty('animationLoop') as boolean | undefined;
+      const skeleton = getProperty('skeleton') as string | undefined;
+      const patrol = getProperty('patrol') as number[][] | undefined;
+      const patrolSpeed = getProperty('patrolSpeed') as number | undefined;
+
       // Extract directive properties for spatial group objects
-      const directive = obj.properties?.find((p: { key: string }) => p.key === 'directive')?.value as string | undefined;
-      const actions = obj.properties?.find((p: { key: string }) => p.key === 'actions')?.value as DirectiveAction[] | undefined;
-      const directiveLoop = obj.properties?.find((p: { key: string }) => p.key === 'directiveLoop')?.value as boolean | undefined;
-      const reps = obj.properties?.find((p: { key: string }) => p.key === 'reps')?.value as number | undefined;
-      const restTime = obj.properties?.find((p: { key: string }) => p.key === 'restTime')?.value as number | undefined;
-      
+      const directive = getProperty('directive') as string | undefined;
+      const actions = getProperty('actions') as DirectiveAction[] | undefined;
+      const directiveLoop = getProperty('directiveLoop') as boolean | undefined;
+      const reps = getProperty('reps') as number | undefined;
+      const restTime = getProperty('restTime') as number | undefined;
+
+      // Merge traits: template traits + object traits (object configs override template)
+      const objectTraits: ParsedTrait[] = ((obj as any).traits || []).map((t: unknown) => {
+        if (typeof t === 'string') return { name: t, config: {} };
+        const traitObj = t as { name?: string; config?: Record<string, unknown> };
+        return { name: traitObj.name || String(t), config: traitObj.config || {} };
+      });
+      const templateTraits = parentTemplate?.traits || [];
+
+      // Merge using same logic as regular objects
+      const traitMap = new Map<string, ParsedTrait>();
+      for (const t of templateTraits) {
+        traitMap.set(t.name, { ...t });
+      }
+      for (const t of objectTraits) {
+        if (traitMap.has(t.name)) {
+          const existing = traitMap.get(t.name)!;
+          traitMap.set(t.name, { name: t.name, config: { ...existing.config, ...t.config } });
+        } else {
+          traitMap.set(t.name, t);
+        }
+      }
+      const allTraits = Array.from(traitMap.values());
+
       objects.push({
         id: obj.name,
         type: geometry || objType || 'box',
@@ -243,7 +424,7 @@ function extractFromHoloAST(ast: HoloComposition): LoadedComposition {
         scale,
         color,
         model,
-        traits: [],
+        traits: allTraits,
         metadata: {},
         animation,
         animationLoop,
@@ -271,34 +452,8 @@ function extractFromHoloAST(ast: HoloComposition): LoadedComposition {
     });
   }
   
-  // Extract templates
-  const templates = new Map<string, ParsedTemplate>();
-  for (const template of ast.templates || []) {
-    const properties = new Map<string, unknown>();
-    if (template.properties) {
-      for (const prop of template.properties) {
-        properties.set(prop.key, prop.value);
-      }
-    }
-    
-    const geometry = template.properties?.find((p: { key: string }) => p.key === 'geometry')?.value as string | undefined;
-    const color = template.properties?.find((p: { key: string }) => p.key === 'color')?.value as string | undefined;
-    
-    // Extract trait names (may be objects or strings)
-    const traitNames: string[] = (template.traits || []).map((t: unknown) => 
-      typeof t === 'string' ? t : (t as { name?: string })?.name || String(t)
-    );
-    
-    templates.set(template.name, {
-      name: template.name,
-      geometry,
-      color,
-      traits: traitNames,
-      state: (template as any).state,
-      properties,
-    });
-  }
-  
+  // Note: templates already extracted above for object inheritance
+
   return {
     state,
     environment,
@@ -359,17 +514,24 @@ function extractLogicFromAST(ast: HoloComposition): CompositionLogic {
 
 function extractFromHsPlusAST(ast: unknown): LoadedComposition {
   const objects: ParsedObject[] = [];
-  const astAny = ast as { body?: Array<{ type: string; name: string; props?: Record<string, unknown>; traits?: string[] }> };
-  
+  const astAny = ast as { body?: Array<{ type: string; name: string; props?: Record<string, unknown>; traits?: unknown[] }> };
+
   for (const d of astAny.body || []) {
     if (d.type === 'orb' || d.type === 'object') {
+      // Convert traits to ParsedTrait format
+      const traits: ParsedTrait[] = (d.traits || []).map((t: unknown) => {
+        if (typeof t === 'string') return { name: t, config: {} };
+        const traitObj = t as { name?: string; config?: Record<string, unknown> };
+        return { name: traitObj.name || String(t), config: traitObj.config || {} };
+      });
+
       objects.push({
         id: d.name,
         type: d.type === 'orb' ? 'sphere' : 'box',
         position: extractPosition(d.props?.position),
         scale: extractScale(d.props?.scale),
         color: d.props?.color as string | undefined,
-        traits: d.traits || [],
+        traits,
         metadata: d.props || {},
       });
     }
@@ -747,6 +909,7 @@ class BrowserRuntime implements HoloScriptRuntime {
     
     // Traits - register all interaction traits
     this.traitSystem = new TraitSystem(this.physicsWorld);
+    // Interaction traits
     this.traitSystem.register(GrabbableTrait);
     this.traitSystem.register(ThrowableTrait);
     this.traitSystem.register(CollidableTrait);
@@ -758,7 +921,58 @@ class BrowserRuntime implements HoloScriptRuntime {
     this.traitSystem.register(ClickableTrait);
     this.traitSystem.register(DraggableTrait);
     this.traitSystem.register(ScalableTrait);
-    
+    // Visual traits
+    this.traitSystem.register(GlowingTrait);
+    this.traitSystem.register(TransparentTrait);
+    this.traitSystem.register(SpinningTrait);
+    this.traitSystem.register(FloatingTrait);
+    this.traitSystem.register(BillboardTrait);
+    this.traitSystem.register(PulseTrait);
+    this.traitSystem.register(AnimatedTrait);
+    this.traitSystem.register(LookAtTrait);
+    this.traitSystem.register(OutlineTrait);
+    this.traitSystem.register(ProximityTrait);
+    // AI/Behavior traits
+    this.traitSystem.register(BehaviorTreeTrait);
+    this.traitSystem.register(EmotionTrait);
+    this.traitSystem.register(GoalOrientedTrait);
+    this.traitSystem.register(PerceptionTrait);
+    this.traitSystem.register(MemoryTrait);
+    // Physics traits (9)
+    this.traitSystem.register(ClothTrait);
+    this.traitSystem.register(SoftBodyTrait);
+    this.traitSystem.register(FluidTrait);
+    this.traitSystem.register(BuoyancyTrait);
+    this.traitSystem.register(RopeTrait);
+    this.traitSystem.register(WindTrait);
+    this.traitSystem.register(JointTrait);
+    this.traitSystem.register(RigidbodyTrait);
+    this.traitSystem.register(DestructionTrait);
+    // Extended traits (11)
+    this.traitSystem.register(RotatableTrait);
+    this.traitSystem.register(StackableTrait);
+    this.traitSystem.register(SnappableTrait);
+    this.traitSystem.register(BreakableTrait);
+    this.traitSystem.register(CharacterTrait);
+    this.traitSystem.register(PatrolTrait);
+    this.traitSystem.register(NetworkedTrait);
+    this.traitSystem.register(AnchorTrait);
+    this.traitSystem.register(SpatialAudioTrait);
+    this.traitSystem.register(ReverbZoneTrait);
+    this.traitSystem.register(VoiceProximityTrait);
+
+    // Advanced traits (VR interaction, environment, effects)
+    this.traitSystem.register(TeleportTrait);
+    this.traitSystem.register(UIPanelTrait);
+    this.traitSystem.register(ParticleSystemTrait);
+    this.traitSystem.register(WeatherTrait);
+    this.traitSystem.register(DayNightTrait);
+    this.traitSystem.register(LODTrait);
+    this.traitSystem.register(HandTrackingTrait);
+    this.traitSystem.register(HapticTrait);
+    this.traitSystem.register(PortalTrait);
+    this.traitSystem.register(MirrorTrait);
+
     // Input
     this.inputManager = new InputManager(this.scene, this.camera, this.renderer.domElement);
 
@@ -1110,21 +1324,27 @@ class BrowserRuntime implements HoloScriptRuntime {
     
     // Material - check both color and properties.color for compatibility
     const color = obj.color || obj.properties?.color || '#00d4ff';
+    // Helper to check if object has a trait by name
+    const hasTrait = (name: string) => obj.traits?.some((t: ParsedTrait) => t.name === name);
+    const getTraitConfig = (name: string) => obj.traits?.find((t: ParsedTrait) => t.name === name)?.config || {};
+
     const material = new THREE.MeshStandardMaterial({
       color: new THREE.Color(color),
       metalness: 0.3,
       roughness: 0.7,
     });
-    
-    // Apply traits
-    if (obj.traits?.includes('glowing') || obj.traits?.includes('emissive')) {
+
+    // Apply visual traits to material
+    if (hasTrait('glowing') || hasTrait('emissive')) {
+      const glowConfig = getTraitConfig('glowing') || getTraitConfig('emissive');
       material.emissive = new THREE.Color(color);
-      material.emissiveIntensity = 0.5;
+      material.emissiveIntensity = (glowConfig.intensity as number) ?? 0.5;
     }
-    
-    if (obj.traits?.includes('transparent')) {
+
+    if (hasTrait('transparent')) {
+      const transparentConfig = getTraitConfig('transparent');
       material.transparent = true;
-      material.opacity = obj.properties?.opacity ?? 0.7;
+      material.opacity = (transparentConfig.opacity as number) ?? obj.properties?.opacity ?? 0.7;
     }
     
     const mesh = new THREE.Mesh(geometry, material);
@@ -1140,22 +1360,21 @@ class BrowserRuntime implements HoloScriptRuntime {
     this.scene.add(mesh);
     this.objectMap.set(obj.id, mesh);
 
-    // Physics integration
-    if (obj.traits?.includes('physics') || obj.traits?.includes('gravity')) {
-       // Determine shape based on type
+    // Legacy physics integration (for basic physics without TraitSystem)
+    // Note: PhysicsTrait handler will override this with proper config if registered
+    if (hasTrait('physics') || hasTrait('gravity')) {
        const shapeType = (type === 'sphere' || type === 'orb') ? 'sphere' :
                          (type === 'plane' || type === 'floor') ? 'plane' : 'box';
-       
-       const mass = (obj.traits?.includes('static') || type === 'plane' || type === 'floor') ? 0 : 1;
-       
+       const mass = (hasTrait('static') || type === 'plane' || type === 'floor') ? 0 : 1;
        this.physicsWorld.addBody(obj.id, mesh, shapeType, mass);
     }
-    
-    // Apply traits via system
+
+    // Apply traits via TraitSystem with proper configs
     if (obj.traits && Array.isArray(obj.traits)) {
-      for (const trait of obj.traits) {
-        // config is usually in metadata or directives, for now pass empty or slice
-        this.traitSystem.apply(mesh, trait, {});
+      for (const trait of obj.traits as ParsedTrait[]) {
+        // Pass the trait's config to the handler
+        this.traitSystem.apply(mesh, trait.name, trait.config);
+        console.log(`[HoloScript] Applied trait "${trait.name}" with config:`, trait.config);
       }
     }
   }

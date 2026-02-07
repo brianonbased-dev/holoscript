@@ -248,6 +248,12 @@ export { URDFCompiler, type URDFCompilerOptions } from './compiler/URDFCompiler'
 export { SDFCompiler, type SDFCompilerOptions } from './compiler/SDFCompiler';
 export { DTDLCompiler, type DTDLCompilerOptions, DTDL_TRAIT_COMPONENTS } from './compiler/DTDLCompiler';
 
+// Native Platform Compilers (Full Platform Coverage)
+export { VRChatCompiler, compileToVRChat, type VRChatCompilerOptions, type VRChatCompileResult } from './compiler/VRChatCompiler';
+export { UnrealCompiler, compileToUnreal, type UnrealCompilerOptions, type UnrealCompileResult } from './compiler/UnrealCompiler';
+export { IOSCompiler, compileToIOS, type IOSCompilerOptions, type IOSCompileResult } from './compiler/IOSCompiler';
+export { AndroidCompiler, compileToAndroid, type AndroidCompilerOptions, type AndroidCompileResult } from './compiler/AndroidCompiler';
+
 // WASM Compiler (Sprint 3 - High-performance edge execution)
 export {
   WASMCompiler,

@@ -13,6 +13,7 @@ import { HoloScriptPreviewPanel } from './previewPanel';
 import { SmartAssetEditorProvider } from './smartAssetEditor';
 import { agentAPI } from './agentApi';
 import { HoloScriptCompletionItemProvider } from './completionProvider';
+import { HoloScriptHoverProvider } from './hoverProvider';
 import { McpOrchestratorClient } from './services/McpOrchestratorClient';
 import {
   HoloScriptSemanticTokensProvider,
@@ -412,6 +413,15 @@ export function activate(context: ExtensionContext) {
         '@' // Trigger character
     )
   );
+
+  // Register Hover Provider for trait documentation
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider(
+      ['holoscript', 'holoscriptplus'],
+      new HoloScriptHoverProvider()
+    )
+  );
+  console.log('HoloScript: Hover provider registered for trait documentation.');
 
   // Register Semantic Tokens Provider for trait-aware highlighting
   context.subscriptions.push(
