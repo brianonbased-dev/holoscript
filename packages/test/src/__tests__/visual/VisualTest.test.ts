@@ -1,4 +1,3 @@
-
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -8,7 +7,10 @@ const TEST_DIR = path.resolve(__dirname, '../../temp/visual-test');
 const BASELINE_DIR = path.join(TEST_DIR, 'baselines');
 const OUTPUT_DIR = path.join(TEST_DIR, 'output');
 
-describe('Visual Testing Framework', () => {
+// Skip visual tests in CI environments where Chrome isn't installed
+const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+
+describe.skipIf(isCI)('Visual Testing Framework', () => {
   beforeAll(async () => {
     // Clean up previous run
     if (fs.existsSync(TEST_DIR)) {
@@ -35,7 +37,7 @@ describe('Visual Testing Framework', () => {
       name: 'red-box',
       htmlContent: html,
       baselineDir: BASELINE_DIR,
-      outputDir: OUTPUT_DIR
+      outputDir: OUTPUT_DIR,
     });
 
     // Verify baseline created
@@ -57,7 +59,7 @@ describe('Visual Testing Framework', () => {
       name: 'red-box',
       htmlContent: html,
       baselineDir: BASELINE_DIR,
-      outputDir: OUTPUT_DIR
+      outputDir: OUTPUT_DIR,
     });
   });
 
@@ -76,14 +78,14 @@ describe('Visual Testing Framework', () => {
         name: 'red-box', // Reusing red-box baseline
         htmlContent: html,
         baselineDir: BASELINE_DIR,
-        outputDir: OUTPUT_DIR
+        outputDir: OUTPUT_DIR,
       });
       // Should fail
-      expect(true).toBe(false); 
+      expect(true).toBe(false);
     } catch (e) {
       expect((e as Error).message).toContain('failed with');
     }
-    
+
     // Check if diff was generated
     expect(fs.existsSync(path.join(OUTPUT_DIR, 'red-box_diff.png'))).toBe(true);
   });

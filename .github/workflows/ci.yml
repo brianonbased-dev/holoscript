@@ -152,6 +152,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
 
       - name: Build packages
         run: pnpm build
@@ -244,6 +250,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
 
       - name: Build packages
         run: pnpm build
