@@ -791,7 +791,12 @@ async function main(): Promise<void> {
       }
 
       const target = options.target || 'threejs';
-      const validTargets = ['threejs', 'unity', 'vrchat', 'babylon', 'aframe', 'webxr', 'urdf', 'sdf', 'dtdl', 'wasm'];
+      const validTargets = [
+        'threejs', 'unity', 'vrchat', 'babylon', 'aframe', 'webxr', 
+        'urdf', 'sdf', 'dtdl', 'wasm',
+        // New compilers
+        'unreal', 'ios', 'android', 'godot', 'visionos', 'openxr', 'androidxr', 'webgpu'
+      ];
 
       if (!validTargets.includes(target)) {
         console.error(`\x1b[31mError: Unknown target "${target}".\x1b[0m`);
@@ -1047,6 +1052,358 @@ async function main(): Promise<void> {
           } else {
             console.log('\n--- DTDL Output ---\n');
             console.log(dtdlOutput);
+          }
+
+          process.exit(0);
+        }
+
+        // Special handling for Unreal target
+        if (target === 'unreal') {
+          if (!isHolo) {
+            console.error(`\x1b[31mError: Unreal compilation requires .holo files.\x1b[0m`);
+            process.exit(1);
+          }
+
+          const { HoloCompositionParser, UnrealCompiler } = await import('@holoscript/core');
+          const compositionParser = new HoloCompositionParser();
+          const parseResult = compositionParser.parse(content);
+
+          if (!parseResult.success || !parseResult.ast) {
+            console.error(`\x1b[31mError parsing for Unreal:\x1b[0m`);
+            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            process.exit(1);
+          }
+
+          console.log(`\x1b[2m[DEBUG] Compiling to Unreal Engine C++...\x1b[0m`);
+          const compiler = new UnrealCompiler({
+            projectName: parseResult.ast.name || 'HoloScriptProject',
+            useNanite: true,
+            useLumen: true,
+            useMetaSounds: false,
+          });
+          const result = compiler.compile(parseResult.ast);
+
+          console.log(`\x1b[32m✓ Unreal compilation successful!\x1b[0m`);
+          console.log(`\x1b[2m  Generated ${result.files.length} files\x1b[0m`);
+          console.log(`\x1b[2m  Actors: ${parseResult.ast.objects?.length || 0}\x1b[0m`);
+
+          if (options.output) {
+            const outputDir = path.resolve(options.output);
+            if (!fs.existsSync(outputDir)) {
+              fs.mkdirSync(outputDir, { recursive: true });
+            }
+            for (const file of result.files) {
+              const filePath = path.join(outputDir, file.filename);
+              fs.writeFileSync(filePath, file.content);
+              console.log(`\x1b[32m✓ Written ${file.filename}\x1b[0m`);
+            }
+          } else {
+            console.log('\n--- Unreal Output ---\n');
+            console.log(result.files.map(f => `// ${f.filename}\n${f.content}`).join('\n\n'));
+          }
+
+          process.exit(0);
+        }
+
+        // Special handling for iOS target
+        if (target === 'ios') {
+          if (!isHolo) {
+            console.error(`\x1b[31mError: iOS compilation requires .holo files.\x1b[0m`);
+            process.exit(1);
+          }
+
+          const { HoloCompositionParser, IOSCompiler } = await import('@holoscript/core');
+          const compositionParser = new HoloCompositionParser();
+          const parseResult = compositionParser.parse(content);
+
+          if (!parseResult.success || !parseResult.ast) {
+            console.error(`\x1b[31mError parsing for iOS:\x1b[0m`);
+            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            process.exit(1);
+          }
+
+          console.log(`\x1b[2m[DEBUG] Compiling to iOS Swift/SwiftUI...\x1b[0m`);
+          const compiler = new IOSCompiler({
+            projectName: parseResult.ast.name || 'HoloScriptApp',
+            useRealityKit: true,
+            useARKit: true,
+            minimumIOSVersion: '17.0',
+          });
+          const result = compiler.compile(parseResult.ast);
+
+          console.log(`\x1b[32m✓ iOS compilation successful!\x1b[0m`);
+          console.log(`\x1b[2m  Generated ${result.files.length} files\x1b[0m`);
+          console.log(`\x1b[2m  Scenes: ${parseResult.ast.objects?.length || 0}\x1b[0m`);
+
+          if (options.output) {
+            const outputDir = path.resolve(options.output);
+            if (!fs.existsSync(outputDir)) {
+              fs.mkdirSync(outputDir, { recursive: true });
+            }
+            for (const file of result.files) {
+              const filePath = path.join(outputDir, file.filename);
+              fs.writeFileSync(filePath, file.content);
+              console.log(`\x1b[32m✓ Written ${file.filename}\x1b[0m`);
+            }
+          } else {
+            console.log('\n--- iOS Output ---\n');
+            console.log(result.files.map(f => `// ${f.filename}\n${f.content}`).join('\n\n'));
+          }
+
+          process.exit(0);
+        }
+
+        // Special handling for Android target
+        if (target === 'android') {
+          if (!isHolo) {
+            console.error(`\x1b[31mError: Android compilation requires .holo files.\x1b[0m`);
+            process.exit(1);
+          }
+
+          const { HoloCompositionParser, AndroidCompiler } = await import('@holoscript/core');
+          const compositionParser = new HoloCompositionParser();
+          const parseResult = compositionParser.parse(content);
+
+          if (!parseResult.success || !parseResult.ast) {
+            console.error(`\x1b[31mError parsing for Android:\x1b[0m`);
+            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            process.exit(1);
+          }
+
+          console.log(`\x1b[2m[DEBUG] Compiling to Android Kotlin/Jetpack Compose...\x1b[0m`);
+          const compiler = new AndroidCompiler({
+            packageName: `com.holoscript.${(parseResult.ast.name || 'app').toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+            minSdkVersion: 26,
+            useSceneViewer: true,
+            useARCore: true,
+          });
+          const result = compiler.compile(parseResult.ast);
+
+          console.log(`\x1b[32m✓ Android compilation successful!\x1b[0m`);
+          console.log(`\x1b[2m  Generated ${result.files.length} files\x1b[0m`);
+          console.log(`\x1b[2m  Scenes: ${parseResult.ast.objects?.length || 0}\x1b[0m`);
+
+          if (options.output) {
+            const outputDir = path.resolve(options.output);
+            if (!fs.existsSync(outputDir)) {
+              fs.mkdirSync(outputDir, { recursive: true });
+            }
+            for (const file of result.files) {
+              const filePath = path.join(outputDir, file.filename);
+              fs.writeFileSync(filePath, file.content);
+              console.log(`\x1b[32m✓ Written ${file.filename}\x1b[0m`);
+            }
+          } else {
+            console.log('\n--- Android Output ---\n');
+            console.log(result.files.map(f => `// ${f.filename}\n${f.content}`).join('\n\n'));
+          }
+
+          process.exit(0);
+        }
+
+        // Special handling for Godot target
+        if (target === 'godot') {
+          if (!isHolo) {
+            console.error(`\x1b[31mError: Godot compilation requires .holo files.\x1b[0m`);
+            process.exit(1);
+          }
+
+          const { HoloCompositionParser, GodotCompiler } = await import('@holoscript/core');
+          const compositionParser = new HoloCompositionParser();
+          const parseResult = compositionParser.parse(content);
+
+          if (!parseResult.success || !parseResult.ast) {
+            console.error(`\x1b[31mError parsing for Godot:\x1b[0m`);
+            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            process.exit(1);
+          }
+
+          console.log(`\x1b[2m[DEBUG] Compiling to Godot GDScript...\x1b[0m`);
+          const compiler = new GodotCompiler({
+            projectName: parseResult.ast.name || 'HoloScriptProject',
+            godotVersion: '4.2',
+            useXR: true,
+          });
+          const output = compiler.compile(parseResult.ast);
+
+          console.log(`\x1b[32m✓ Godot compilation successful!\x1b[0m`);
+          console.log(`\x1b[2m  Objects: ${parseResult.ast.objects?.length || 0}\x1b[0m`);
+
+          if (options.output) {
+            const outputPath = path.resolve(options.output);
+            const gdPath = outputPath.endsWith('.gd') ? outputPath : outputPath + '.gd';
+            fs.writeFileSync(gdPath, output);
+            console.log(`\x1b[32m✓ GDScript written to ${gdPath}\x1b[0m`);
+          } else {
+            console.log('\n--- Godot GDScript Output ---\n');
+            console.log(output);
+          }
+
+          process.exit(0);
+        }
+
+        // Special handling for VisionOS target
+        if (target === 'visionos') {
+          if (!isHolo) {
+            console.error(`\x1b[31mError: VisionOS compilation requires .holo files.\x1b[0m`);
+            process.exit(1);
+          }
+
+          const { HoloCompositionParser, VisionOSCompiler } = await import('@holoscript/core');
+          const compositionParser = new HoloCompositionParser();
+          const parseResult = compositionParser.parse(content);
+
+          if (!parseResult.success || !parseResult.ast) {
+            console.error(`\x1b[31mError parsing for VisionOS:\x1b[0m`);
+            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            process.exit(1);
+          }
+
+          console.log(`\x1b[2m[DEBUG] Compiling to VisionOS Swift/RealityKit...\x1b[0m`);
+          const compiler = new VisionOSCompiler({
+            projectName: parseResult.ast.name || 'HoloScriptVision',
+            useImmersiveSpace: true,
+            useRealityKit: true,
+            minimumVersion: '1.0',
+          });
+          const output = compiler.compile(parseResult.ast);
+
+          console.log(`\x1b[32m✓ VisionOS compilation successful!\x1b[0m`);
+          console.log(`\x1b[2m  Objects: ${parseResult.ast.objects?.length || 0}\x1b[0m`);
+
+          if (options.output) {
+            const outputPath = path.resolve(options.output);
+            const swiftPath = outputPath.endsWith('.swift') ? outputPath : outputPath + '.swift';
+            fs.writeFileSync(swiftPath, output);
+            console.log(`\x1b[32m✓ VisionOS Swift written to ${swiftPath}\x1b[0m`);
+          } else {
+            console.log('\n--- VisionOS Swift Output ---\n');
+            console.log(output);
+          }
+
+          process.exit(0);
+        }
+
+        // Special handling for OpenXR target
+        if (target === 'openxr') {
+          if (!isHolo) {
+            console.error(`\x1b[31mError: OpenXR compilation requires .holo files.\x1b[0m`);
+            process.exit(1);
+          }
+
+          const { HoloCompositionParser, OpenXRCompiler } = await import('@holoscript/core');
+          const compositionParser = new HoloCompositionParser();
+          const parseResult = compositionParser.parse(content);
+
+          if (!parseResult.success || !parseResult.ast) {
+            console.error(`\x1b[31mError parsing for OpenXR:\x1b[0m`);
+            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            process.exit(1);
+          }
+
+          console.log(`\x1b[2m[DEBUG] Compiling to OpenXR C++...\x1b[0m`);
+          const compiler = new OpenXRCompiler({
+            applicationName: parseResult.ast.name || 'HoloScriptXR',
+            engineVersion: '1.0.0',
+            enableHandTracking: true,
+            enablePassthrough: true,
+          });
+          const output = compiler.compile(parseResult.ast);
+
+          console.log(`\x1b[32m✓ OpenXR compilation successful!\x1b[0m`);
+          console.log(`\x1b[2m  Objects: ${parseResult.ast.objects?.length || 0}\x1b[0m`);
+
+          if (options.output) {
+            const outputPath = path.resolve(options.output);
+            const cppPath = outputPath.endsWith('.cpp') ? outputPath : outputPath + '.cpp';
+            fs.writeFileSync(cppPath, output);
+            console.log(`\x1b[32m✓ OpenXR C++ written to ${cppPath}\x1b[0m`);
+          } else {
+            console.log('\n--- OpenXR C++ Output ---\n');
+            console.log(output);
+          }
+
+          process.exit(0);
+        }
+
+        // Special handling for AndroidXR target
+        if (target === 'androidxr') {
+          if (!isHolo) {
+            console.error(`\x1b[31mError: AndroidXR compilation requires .holo files.\x1b[0m`);
+            process.exit(1);
+          }
+
+          const { HoloCompositionParser, AndroidXRCompiler } = await import('@holoscript/core');
+          const compositionParser = new HoloCompositionParser();
+          const parseResult = compositionParser.parse(content);
+
+          if (!parseResult.success || !parseResult.ast) {
+            console.error(`\x1b[31mError parsing for AndroidXR:\x1b[0m`);
+            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            process.exit(1);
+          }
+
+          console.log(`\x1b[2m[DEBUG] Compiling to AndroidXR Kotlin...\x1b[0m`);
+          const compiler = new AndroidXRCompiler({
+            packageName: `com.holoscript.xr.${(parseResult.ast.name || 'app').toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+            minSdkVersion: 29,
+            useOpenXR: true,
+            enableHandTracking: true,
+          });
+          const output = compiler.compile(parseResult.ast);
+
+          console.log(`\x1b[32m✓ AndroidXR compilation successful!\x1b[0m`);
+          console.log(`\x1b[2m  Objects: ${parseResult.ast.objects?.length || 0}\x1b[0m`);
+
+          if (options.output) {
+            const outputPath = path.resolve(options.output);
+            const ktPath = outputPath.endsWith('.kt') ? outputPath : outputPath + '.kt';
+            fs.writeFileSync(ktPath, output);
+            console.log(`\x1b[32m✓ AndroidXR Kotlin written to ${ktPath}\x1b[0m`);
+          } else {
+            console.log('\n--- AndroidXR Kotlin Output ---\n');
+            console.log(output);
+          }
+
+          process.exit(0);
+        }
+
+        // Special handling for WebGPU target
+        if (target === 'webgpu') {
+          if (!isHolo) {
+            console.error(`\x1b[31mError: WebGPU compilation requires .holo files.\x1b[0m`);
+            process.exit(1);
+          }
+
+          const { HoloCompositionParser, WebGPUCompiler } = await import('@holoscript/core');
+          const compositionParser = new HoloCompositionParser();
+          const parseResult = compositionParser.parse(content);
+
+          if (!parseResult.success || !parseResult.ast) {
+            console.error(`\x1b[31mError parsing for WebGPU:\x1b[0m`);
+            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            process.exit(1);
+          }
+
+          console.log(`\x1b[2m[DEBUG] Compiling to WebGPU TypeScript...\x1b[0m`);
+          const compiler = new WebGPUCompiler({
+            enableShadows: true,
+            enablePBR: true,
+            sampleCount: 4,
+          });
+          const output = compiler.compile(parseResult.ast);
+
+          console.log(`\x1b[32m✓ WebGPU compilation successful!\x1b[0m`);
+          console.log(`\x1b[2m  Objects: ${parseResult.ast.objects?.length || 0}\x1b[0m`);
+
+          if (options.output) {
+            const outputPath = path.resolve(options.output);
+            const tsPath = outputPath.endsWith('.ts') ? outputPath : outputPath + '.ts';
+            fs.writeFileSync(tsPath, output);
+            console.log(`\x1b[32m✓ WebGPU TypeScript written to ${tsPath}\x1b[0m`);
+          } else {
+            console.log('\n--- WebGPU TypeScript Output ---\n');
+            console.log(output);
           }
 
           process.exit(0);

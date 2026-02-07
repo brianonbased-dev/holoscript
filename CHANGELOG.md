@@ -1,3 +1,54 @@
+## [Unreleased]
+
+### Added
+
+#### New Platform Compilers
+- **VRChatCompiler** - Compile to VRChat SDK3 worlds with UdonSharp scripts
+  - VRC_Pickup, VRC_Trigger, VRC_ObjectSync components
+  - Avatar pedestals, mirrors, portals
+  - Spatial audio with VRC_SpatialAudioSource
+  - CLI: `holoscript compile --target vrchat`
+
+- **UnrealCompiler** - Compile to Unreal Engine 5 C++ / Blueprint
+  - AActor-derived C++ classes with UPROPERTY/UFUNCTION macros
+  - Enhanced Input for VR interactions
+  - Niagara particle system integration
+  - CLI: `holoscript compile --target unreal`
+
+- **IOSCompiler** - Compile to iOS Swift/ARKit
+  - SwiftUI + ARKit integration with ARSCNView
+  - Plane detection and hit testing
+  - World tracking configuration
+  - Gesture recognizers for interaction
+  - CLI: `holoscript compile --target ios`
+
+- **AndroidCompiler** - Compile to Android Kotlin/ARCore
+  - Kotlin Activity with ARCore Session
+  - Sceneform / Filament rendering support
+  - Jetpack Compose UI integration
+  - Touch gesture handling
+  - CLI: `holoscript compile --target android`
+
+#### Additional Compile Targets
+- **GodotCompiler** - CLI: `holoscript compile --target godot`
+- **VisionOSCompiler** - CLI: `holoscript compile --target visionos`
+- **OpenXRCompiler** - CLI: `holoscript compile --target openxr`
+- **AndroidXRCompiler** - CLI: `holoscript compile --target androidxr`
+- **WebGPUCompiler** - CLI: `holoscript compile --target webgpu`
+
+#### Editor Support
+- **Neovim Plugin** - Native Neovim support with Tree-sitter
+  - Syntax highlighting for .hs, .hsplus, .holo files
+  - LSP integration for completions and diagnostics
+  - Custom commands and keybindings
+  - Located in `packages/neovim-plugin/`
+
+### Changed
+- Updated CLI `compile` command to support all 18 compile targets
+- Added 71 unit tests for new VRChat, Unreal, iOS, and Android compilers
+
+---
+
 ## [3.0.0] - 2026-02-05
 
 ### 🎉 HoloScript 3.0 - Major Release
