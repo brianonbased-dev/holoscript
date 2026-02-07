@@ -19,8 +19,8 @@ describe('Spread Operator', () => {
     expect(result.success).toBe(true);
 
     const obj = result.ast.children[1]; // Derived object
-    const spreadNode = obj.children?.find(n => n.type === 'spread');
-    
+    const spreadNode = obj.children?.find((n) => n.type === 'spread');
+
     expect(spreadNode).toBeDefined();
     expect(spreadNode?.target).toBe('Base');
   });

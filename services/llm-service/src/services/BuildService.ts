@@ -33,7 +33,9 @@ export class BuildService {
 
   async generateFromPrompt(prompt: string, options: GenerateOptions): Promise<GeneratedCode> {
     try {
-      logger.info(`[BuildService] Generating for user ${options.userId}: ${prompt.slice(0, 50)}...`);
+      logger.info(
+        `[BuildService] Generating for user ${options.userId}: ${prompt.slice(0, 50)}...`
+      );
 
       // Create system prompt for HoloScript generation
       const systemPrompt = `You are a HoloScript code generator. 
@@ -66,7 +68,10 @@ Use proper syntax with shape, animation, and positioning blocks.`;
     }
   }
 
-  async saveBuild(userId: string, data: { name: string; code: string; description?: string }): Promise<StoredBuild> {
+  async saveBuild(
+    userId: string,
+    data: { name: string; code: string; description?: string }
+  ): Promise<StoredBuild> {
     return this.storage.saveBuild(userId, {
       userId,
       ...data,

@@ -100,10 +100,12 @@ describe('URDFCompiler', () => {
     it('should exclude visual when includeVisual is false', () => {
       const customCompiler = new URDFCompiler({ includeVisual: false });
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Cube',
-          properties: [{ key: 'geometry', value: 'cube' }],
-        })],
+        objects: [
+          createObject({
+            name: 'Cube',
+            properties: [{ key: 'geometry', value: 'cube' }],
+          }),
+        ],
       });
       const urdf = customCompiler.compile(composition);
 
@@ -117,11 +119,13 @@ describe('URDFCompiler', () => {
     it('should exclude collision when includeCollision is false', () => {
       const customCompiler = new URDFCompiler({ includeCollision: false });
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Cube',
-          properties: [{ key: 'geometry', value: 'cube' }],
-          traits: ['physics', 'collidable'],
-        })],
+        objects: [
+          createObject({
+            name: 'Cube',
+            properties: [{ key: 'geometry', value: 'cube' }],
+            traits: ['physics', 'collidable'],
+          }),
+        ],
       });
       const urdf = customCompiler.compile(composition);
 
@@ -134,10 +138,12 @@ describe('URDFCompiler', () => {
         includeVisual: true,
       });
       const composition = createComposition({
-        objects: [createObject({
-          name: 'CustomMesh',
-          properties: [{ key: 'geometry', value: 'robot.stl' }],
-        })],
+        objects: [
+          createObject({
+            name: 'CustomMesh',
+            properties: [{ key: 'geometry', value: 'robot.stl' }],
+          }),
+        ],
       });
       const urdf = customCompiler.compile(composition);
 
@@ -150,10 +156,12 @@ describe('URDFCompiler', () => {
         includeInertial: true,
       });
       const composition = createComposition({
-        objects: [createObject({
-          name: 'HeavyBox',
-          properties: [{ key: 'geometry', value: 'cube' }],
-        })],
+        objects: [
+          createObject({
+            name: 'HeavyBox',
+            properties: [{ key: 'geometry', value: 'cube' }],
+          }),
+        ],
       });
       const urdf = customCompiler.compile(composition);
 
@@ -201,13 +209,15 @@ describe('URDFCompiler', () => {
   describe('Geometry Handling', () => {
     it('should generate box geometry for cube', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Cube',
-          properties: [
-            { key: 'geometry', value: 'cube' },
-            { key: 'scale', value: 2 },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'Cube',
+            properties: [
+              { key: 'geometry', value: 'cube' },
+              { key: 'scale', value: 2 },
+            ],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -216,13 +226,15 @@ describe('URDFCompiler', () => {
 
     it('should generate sphere geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Sphere',
-          properties: [
-            { key: 'geometry', value: 'sphere' },
-            { key: 'scale', value: 1 },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'Sphere',
+            properties: [
+              { key: 'geometry', value: 'sphere' },
+              { key: 'scale', value: 1 },
+            ],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -231,13 +243,15 @@ describe('URDFCompiler', () => {
 
     it('should generate cylinder geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Cylinder',
-          properties: [
-            { key: 'geometry', value: 'cylinder' },
-            { key: 'scale', value: 1 },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'Cylinder',
+            properties: [
+              { key: 'geometry', value: 'cylinder' },
+              { key: 'scale', value: 1 },
+            ],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -246,10 +260,12 @@ describe('URDFCompiler', () => {
 
     it('should handle mesh files', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Robot',
-          properties: [{ key: 'geometry', value: 'robot_arm.stl' }],
-        })],
+        objects: [
+          createObject({
+            name: 'Robot',
+            properties: [{ key: 'geometry', value: 'robot_arm.stl' }],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -258,10 +274,12 @@ describe('URDFCompiler', () => {
 
     it('should convert .glb to .stl for mesh references', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Model',
-          properties: [{ key: 'geometry', value: 'model.glb' }],
-        })],
+        objects: [
+          createObject({
+            name: 'Model',
+            properties: [{ key: 'geometry', value: 'model.glb' }],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -272,13 +290,15 @@ describe('URDFCompiler', () => {
   describe('Position and Rotation', () => {
     it('should extract position from properties', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'PositionedObject',
-          properties: [
-            { key: 'geometry', value: 'cube' },
-            { key: 'position', value: [1, 2, 3] },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'PositionedObject',
+            properties: [
+              { key: 'geometry', value: 'cube' },
+              { key: 'position', value: [1, 2, 3] },
+            ],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -287,13 +307,15 @@ describe('URDFCompiler', () => {
 
     it('should convert rotation from degrees to radians', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'RotatedObject',
-          properties: [
-            { key: 'geometry', value: 'cube' },
-            { key: 'rotation', value: [90, 0, 0] },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'RotatedObject',
+            properties: [
+              { key: 'geometry', value: 'cube' },
+              { key: 'rotation', value: [90, 0, 0] },
+            ],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -303,10 +325,12 @@ describe('URDFCompiler', () => {
 
     it('should default position to [0,0,0]', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'DefaultPosition',
-          properties: [{ key: 'geometry', value: 'cube' }],
-        })],
+        objects: [
+          createObject({
+            name: 'DefaultPosition',
+            properties: [{ key: 'geometry', value: 'cube' }],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -317,10 +341,12 @@ describe('URDFCompiler', () => {
   describe('Physics and Inertial', () => {
     it('should include inertial properties by default', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'PhysicsObject',
-          properties: [{ key: 'geometry', value: 'cube' }],
-        })],
+        objects: [
+          createObject({
+            name: 'PhysicsObject',
+            properties: [{ key: 'geometry', value: 'cube' }],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -331,13 +357,15 @@ describe('URDFCompiler', () => {
 
     it('should extract mass from physics property', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'HeavyObject',
-          properties: [
-            { key: 'geometry', value: 'cube' },
-            { key: 'physics', value: { mass: 10 } },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'HeavyObject',
+            properties: [
+              { key: 'geometry', value: 'cube' },
+              { key: 'physics', value: { mass: 10 } },
+            ],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -346,14 +374,16 @@ describe('URDFCompiler', () => {
 
     it('should calculate inertia for box geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'InertiaBox',
-          properties: [
-            { key: 'geometry', value: 'box' },
-            { key: 'scale', value: 1 },
-            { key: 'physics', value: { mass: 1 } },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'InertiaBox',
+            properties: [
+              { key: 'geometry', value: 'box' },
+              { key: 'scale', value: 1 },
+              { key: 'physics', value: { mass: 1 } },
+            ],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -363,14 +393,16 @@ describe('URDFCompiler', () => {
 
     it('should calculate inertia for sphere geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'InertiaSphere',
-          properties: [
-            { key: 'geometry', value: 'sphere' },
-            { key: 'scale', value: 1 },
-            { key: 'physics', value: { mass: 1 } },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'InertiaSphere',
+            properties: [
+              { key: 'geometry', value: 'sphere' },
+              { key: 'scale', value: 1 },
+              { key: 'physics', value: { mass: 1 } },
+            ],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -382,11 +414,13 @@ describe('URDFCompiler', () => {
   describe('Collision Handling', () => {
     it('should add collision for objects with collidable trait', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Collidable',
-          properties: [{ key: 'geometry', value: 'cube' }],
-          traits: ['collidable'],
-        })],
+        objects: [
+          createObject({
+            name: 'Collidable',
+            properties: [{ key: 'geometry', value: 'cube' }],
+            traits: ['collidable'],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -395,11 +429,13 @@ describe('URDFCompiler', () => {
 
     it('should add collision for objects with physics trait', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'PhysicsBody',
-          properties: [{ key: 'geometry', value: 'cube' }],
-          traits: ['physics'],
-        })],
+        objects: [
+          createObject({
+            name: 'PhysicsBody',
+            properties: [{ key: 'geometry', value: 'cube' }],
+            traits: ['physics'],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -408,11 +444,13 @@ describe('URDFCompiler', () => {
 
     it('should add collision for objects with rigid trait', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'RigidBody',
-          properties: [{ key: 'geometry', value: 'cube' }],
-          traits: ['rigid'],
-        })],
+        objects: [
+          createObject({
+            name: 'RigidBody',
+            properties: [{ key: 'geometry', value: 'cube' }],
+            traits: ['rigid'],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -422,11 +460,13 @@ describe('URDFCompiler', () => {
     it('should not add collision for non-collidable objects', () => {
       const customCompiler = new URDFCompiler({ includeCollision: true });
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Visual',
-          properties: [{ key: 'geometry', value: 'cube' }],
-          traits: [], // No physics traits
-        })],
+        objects: [
+          createObject({
+            name: 'Visual',
+            properties: [{ key: 'geometry', value: 'cube' }],
+            traits: [], // No physics traits
+          }),
+        ],
       });
       const urdf = customCompiler.compile(composition);
 
@@ -439,13 +479,12 @@ describe('URDFCompiler', () => {
   describe('Spatial Groups', () => {
     it('should process spatial groups as parent links', () => {
       const composition = createComposition({
-        spatialGroups: [{
-          name: 'ArmGroup',
-          objects: [
-            createObject({ name: 'Shoulder' }),
-            createObject({ name: 'Elbow' }),
-          ],
-        }],
+        spatialGroups: [
+          {
+            name: 'ArmGroup',
+            objects: [createObject({ name: 'Shoulder' }), createObject({ name: 'Elbow' })],
+          },
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -456,10 +495,12 @@ describe('URDFCompiler', () => {
 
     it('should create joints for spatial group hierarchy', () => {
       const composition = createComposition({
-        spatialGroups: [{
-          name: 'LegGroup',
-          objects: [createObject({ name: 'Foot' })],
-        }],
+        spatialGroups: [
+          {
+            name: 'LegGroup',
+            objects: [createObject({ name: 'Foot' })],
+          },
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -531,10 +572,12 @@ describe('URDFCompiler', () => {
 
     it('should handle object without geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'NoGeometry',
-          properties: [],
-        })],
+        objects: [
+          createObject({
+            name: 'NoGeometry',
+            properties: [],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -544,13 +587,15 @@ describe('URDFCompiler', () => {
 
     it('should handle array scale values', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'ArrayScale',
-          properties: [
-            { key: 'geometry', value: 'cube' },
-            { key: 'scale', value: [2, 3, 4] },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'ArrayScale',
+            properties: [
+              { key: 'geometry', value: 'cube' },
+              { key: 'scale', value: [2, 3, 4] },
+            ],
+          }),
+        ],
       });
       const urdf = compiler.compile(composition);
 
@@ -560,11 +605,13 @@ describe('URDFCompiler', () => {
 
     it('should handle missing optional properties gracefully', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Minimal',
-          properties: [],
-          traits: undefined as any,
-        })],
+        objects: [
+          createObject({
+            name: 'Minimal',
+            properties: [],
+            traits: undefined as any,
+          }),
+        ],
       });
 
       expect(() => compiler.compile(composition)).not.toThrow();

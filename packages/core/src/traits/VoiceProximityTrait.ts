@@ -57,9 +57,9 @@ function calculateAttenuation(
 ): number {
   if (distance <= minDist) return 1;
   if (distance >= maxDist) return 0;
-  
+
   const normalized = (distance - minDist) / (maxDist - minDist);
-  
+
   switch (curve) {
     case 'linear':
       return 1 - normalized;
@@ -72,10 +72,7 @@ function calculateAttenuation(
   }
 }
 
-function isInZone(
-  position: { x: number; y: number; z: number },
-  zone: VoiceZone
-): boolean {
+function isInZone(position: { x: number; y: number; z: number }, zone: VoiceZone): boolean {
   const dx = position.x - zone.bounds.center.x;
   const dy = position.y - zone.bounds.center.y;
   const dz = position.z - zone.bounds.center.z;
@@ -114,7 +111,7 @@ export const voiceProximityHandler: TraitHandler<VoiceProximityConfig> = {
       panningVector: { x: 0, y: 0, z: 0 },
     };
     (node as any).__voiceProximityState = state;
-    
+
     context.emit?.('voice_proximity_register', {
       node,
       minDistance: config.min_distance,
@@ -137,7 +134,7 @@ export const voiceProximityHandler: TraitHandler<VoiceProximityConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__voiceProximityState as VoiceProximityState;
     if (!state || state.isMuted) return;
-    
+
     // Smooth attenuation transition
     const smoothSpeed = delta * 5;
     if (state.currentAttenuation < state.targetAttenuation) {
@@ -151,14 +148,14 @@ export const voiceProximityHandler: TraitHandler<VoiceProximityConfig> = {
         state.targetAttenuation
       );
     }
-    
+
     // Apply attenuation
     if (state.voiceActive) {
       context.emit?.('voice_set_gain', {
         node,
         gain: state.currentAttenuation,
       });
-      
+
       // Apply HRTF panning
       if (config.enable_hrtf) {
         context.emit?.('voice_set_panning', {
@@ -172,14 +169,14 @@ export const voiceProximityHandler: TraitHandler<VoiceProximityConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__voiceProximityState as VoiceProximityState;
     if (!state) return;
-    
+
     if (event.type === 'voice_distance_update') {
       const distance = event.distance as number;
       const listenerPos = event.listenerPosition as { x: number; y: number; z: number };
       const speakerPos = event.speakerPosition as { x: number; y: number; z: number };
-      
+
       state.distanceToListener = distance;
-      
+
       // Calculate base attenuation
       let attenuation = calculateAttenuation(
         distance,
@@ -187,7 +184,7 @@ export const voiceProximityHandler: TraitHandler<VoiceProximityConfig> = {
         config.max_distance,
         config.falloff
       );
-      
+
       // Apply zone modifiers
       for (const zone of config.zones) {
         if (isInZone(speakerPos, zone) && isInZone(listenerPos, zone)) {
@@ -201,9 +198,9 @@ export const voiceProximityHandler: TraitHandler<VoiceProximityConfig> = {
           }
         }
       }
-      
+
       state.targetAttenuation = attenuation;
-      
+
       // Calculate panning vector
       if (distance > 0) {
         state.panningVector = {
@@ -212,7 +209,7 @@ export const voiceProximityHandler: TraitHandler<VoiceProximityConfig> = {
           z: (speakerPos.z - listenerPos.z) / distance,
         };
       }
-      
+
       context.emit?.('voice_proximity_changed', {
         node,
         distance,

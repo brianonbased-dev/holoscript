@@ -363,7 +363,11 @@ export class HololandGraphicsPipelineService {
           width: 2048,
           height: 2048,
           mipLevels: 8,
-          gpuMemory: this.estimateTextureMemory(2048, 2048, this.selectTextureFormat(config.compression)),
+          gpuMemory: this.estimateTextureMemory(
+            2048,
+            2048,
+            this.selectTextureFormat(config.compression)
+          ),
           loaded: false,
         });
       });
@@ -391,7 +395,11 @@ export class HololandGraphicsPipelineService {
   /**
    * Estimate texture memory usage
    */
-  private estimateTextureMemory(width: number, height: number, format: TextureAsset['format']): number {
+  private estimateTextureMemory(
+    width: number,
+    height: number,
+    format: TextureAsset['format']
+  ): number {
     const pixels = width * height;
     let bytesPerPixel = 4; // RGBA8
 
@@ -461,7 +469,6 @@ export class HololandGraphicsPipelineService {
     // Configure shadow map resolution and filtering
     // const shadowQuality = this.platformConfig.shadowQuality;
     // const _shadowResolution = this.shadowResolutionForQuality(shadowQuality);
-
     // Create shadow map textures
     // This would allocate GPU memory for shadow maps
   }
@@ -490,7 +497,6 @@ export class HololandGraphicsPipelineService {
   private setupGlobalIllumination(__config: any): void {
     // Create light probes for indirect lighting
     // const _probeCount = __config.probes || 16;
-
     // Allocate GPU memory for probes
     // Each probe stores 6 faces of cubemap
   }
@@ -612,7 +618,7 @@ export class HololandGraphicsPipelineService {
   getGPUMemoryEstimate(): GPUMemoryEstimate {
     let textureMemory = 0;
     let geometryMemory = 0;
-    let bufferMemory = 0;
+    const bufferMemory = 0;
 
     this.textureCache.forEach((tex) => {
       if (tex.loaded) {

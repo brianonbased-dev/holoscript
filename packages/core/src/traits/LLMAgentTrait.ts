@@ -70,26 +70,26 @@ function estimateTokens(text: string): number {
 function trimHistory(history: LLMMessage[], maxTokens: number): LLMMessage[] {
   const result: LLMMessage[] = [];
   let tokenCount = 0;
-  
+
   // Always keep system message
-  const systemMsg = history.find(m => m.role === 'system');
+  const systemMsg = history.find((m) => m.role === 'system');
   if (systemMsg) {
     result.push(systemMsg);
     tokenCount += estimateTokens(systemMsg.content);
   }
-  
+
   // Add recent messages from end, respecting token limit
   for (let i = history.length - 1; i >= 0; i--) {
     const msg = history[i];
     if (msg.role === 'system') continue;
-    
+
     const msgTokens = estimateTokens(msg.content);
     if (tokenCount + msgTokens > maxTokens) break;
-    
+
     result.unshift(msg);
     tokenCount += msgTokens;
   }
-  
+
   return result;
 }
 
@@ -112,8 +112,8 @@ function checkEscalation(
         break;
       case 'uncertainty':
         // Check for uncertainty markers
-        const uncertaintyWords = ['unsure', 'don\'t know', 'uncertain', 'maybe', 'might'];
-        if (uncertaintyWords.some(w => message.toLowerCase().includes(w))) {
+        const uncertaintyWords = ['unsure', "don't know", 'uncertain', 'maybe', 'might'];
+        if (uncertaintyWords.some((w) => message.toLowerCase().includes(w))) {
           return cond;
         }
         break;
@@ -154,7 +154,7 @@ export const llmAgentHandler: TraitHandler<LLMConfig> = {
       lastRequestTime: 0,
       tokenCount: 0,
     };
-    
+
     // Add system prompt to history
     if (config.system_prompt) {
       state.conversationHistory.push({
@@ -163,7 +163,7 @@ export const llmAgentHandler: TraitHandler<LLMConfig> = {
         timestamp: Date.now(),
       });
     }
-    
+
     (node as any).__llmAgentState = state;
     context.emit?.('llm_agent_ready', { node });
   },
@@ -172,24 +172,24 @@ export const llmAgentHandler: TraitHandler<LLMConfig> = {
     delete (node as any).__llmAgentState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__llmAgentState as LLMState;
     if (!state) return;
-    
+
     // Process pending tool calls
     if (state.pendingToolCalls.length > 0 && !state.isProcessing) {
       const toolCall = state.pendingToolCalls.shift()!;
-      
+
       context.emit?.('llm_tool_call', {
         node,
         tool: toolCall.name,
         arguments: toolCall.arguments,
         callId: toolCall.id,
       });
-      
+
       state.actionsTaken++;
       state.turnActionCount++;
-      
+
       // Check bounded autonomy
       if (config.bounded_autonomy && state.turnActionCount >= config.max_actions_per_turn) {
         context.emit?.('llm_turn_limit_reached', {
@@ -203,17 +203,17 @@ export const llmAgentHandler: TraitHandler<LLMConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__llmAgentState as LLMState;
     if (!state) return;
-    
+
     if (event.type === 'llm_prompt') {
       // User sends a prompt
       const userMessage = event.message as string;
-      
+
       state.conversationHistory.push({
         role: 'user',
         content: userMessage,
         timestamp: Date.now(),
       });
-      
+
       // Check escalation
       const escalation = checkEscalation(userMessage, state, config.escalation_conditions);
       if (escalation) {
@@ -225,21 +225,21 @@ export const llmAgentHandler: TraitHandler<LLMConfig> = {
         });
         if (escalation.action === 'pause') return;
       }
-      
+
       // Rate limit check
       const now = Date.now();
       if (now - state.lastRequestTime < config.rate_limit_ms) {
         context.emit?.('llm_rate_limited', { node });
         return;
       }
-      
+
       state.isProcessing = true;
       state.lastRequestTime = now;
       state.turnActionCount = 0;
-      
+
       // Prepare messages for API
       const messages = trimHistory(state.conversationHistory, config.context_window);
-      
+
       // Emit request for external handling
       context.emit?.('llm_request', {
         node,
@@ -251,12 +251,12 @@ export const llmAgentHandler: TraitHandler<LLMConfig> = {
     } else if (event.type === 'llm_response') {
       // Received response from LLM
       state.isProcessing = false;
-      
+
       const response = event.response as {
         content?: string;
         tool_calls?: Array<{ id: string; function: { name: string; arguments: string } }>;
       };
-      
+
       // Handle tool calls
       if (response.tool_calls && response.tool_calls.length > 0) {
         for (const tc of response.tool_calls) {
@@ -270,11 +270,11 @@ export const llmAgentHandler: TraitHandler<LLMConfig> = {
             // Invalid JSON in arguments
           }
         }
-        
+
         state.conversationHistory.push({
           role: 'assistant',
           content: response.content || '',
-          tool_calls: response.tool_calls.map(tc => ({
+          tool_calls: response.tool_calls.map((tc) => ({
             id: tc.id,
             name: tc.function.name,
             arguments: tc.function.arguments,
@@ -283,13 +283,13 @@ export const llmAgentHandler: TraitHandler<LLMConfig> = {
         });
       } else if (response.content) {
         state.lastResponse = response.content;
-        
+
         state.conversationHistory.push({
           role: 'assistant',
           content: response.content,
           timestamp: Date.now(),
         });
-        
+
         // Check escalation in response
         const escalation = checkEscalation(response.content, state, config.escalation_conditions);
         if (escalation) {
@@ -300,19 +300,16 @@ export const llmAgentHandler: TraitHandler<LLMConfig> = {
             message: response.content,
           });
         }
-        
+
         context.emit?.('llm_message', {
           node,
           content: response.content,
         });
       }
-      
+
       // Trim history
       if (state.conversationHistory.length > config.max_history_length) {
-        state.conversationHistory = trimHistory(
-          state.conversationHistory,
-          config.context_window
-        );
+        state.conversationHistory = trimHistory(state.conversationHistory, config.context_window);
       }
     } else if (event.type === 'llm_tool_result') {
       // Tool execution result
@@ -322,12 +319,12 @@ export const llmAgentHandler: TraitHandler<LLMConfig> = {
         tool_call_id: event.callId as string,
         timestamp: Date.now(),
       });
-      
+
       // Continue conversation after tool result
       if (!state.isProcessing) {
         const messages = trimHistory(state.conversationHistory, config.context_window);
         state.isProcessing = true;
-        
+
         context.emit?.('llm_request', {
           node,
           model: config.model,

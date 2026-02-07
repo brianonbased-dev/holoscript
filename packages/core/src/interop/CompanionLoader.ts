@@ -1,6 +1,6 @@
 /**
  * Companion Loader for HoloScript+ @import directive
- * 
+ *
  * Bridges the gap between @import directives and TypeScript companions.
  * Uses ModuleResolver for actual module loading.
  */
@@ -36,17 +36,17 @@ export class CompanionLoader {
       preloaded: options.preloaded ?? {},
       allowDynamic: options.allowDynamic ?? true,
     };
-    
+
     this.resolver = new ModuleResolver(this.options.basePath);
   }
 
   /**
    * Load all companions required by an AST
-   * 
+   *
    * @example
    * const loader = new CompanionLoader({ basePath: './src' });
    * const { companions, errors } = await loader.loadFromAST(ast);
-   * 
+   *
    * const runtime = new HoloScriptPlusRuntime(ast, { companions });
    */
   async loadFromAST(ast: HSPlusAST): Promise<LoadResult> {
@@ -87,12 +87,12 @@ export class CompanionLoader {
       // Try to resolve and load the module
       const resolvedPath = this.resolver.resolveModule(modulePath);
       const module = this.resolver.loadModule(resolvedPath);
-      
+
       // Return all exports as a record
       if (typeof module === 'object' && module !== null) {
         return module;
       }
-      
+
       // Wrap non-object exports
       return { default: module };
     } catch (error) {
@@ -101,7 +101,7 @@ export class CompanionLoader {
         const resolved = this.resolver.resolveModule(modulePath);
         const mod = await import(resolved);
         return mod;
-      } catch (importError) {
+      } catch (_importError) {
         throw new Error(`Failed to load module "${modulePath}": ${error}`);
       }
     }
@@ -133,7 +133,7 @@ export function createCompanionLoader(options?: CompanionLoaderOptions): Compani
  * Convenience function to load companions from an AST
  */
 export async function loadCompanions(
-  ast: HSPlusAST, 
+  ast: HSPlusAST,
   options?: CompanionLoaderOptions
 ): Promise<LoadResult> {
   const loader = new CompanionLoader(options);

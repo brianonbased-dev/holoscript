@@ -10,9 +10,9 @@
  *   holoscript-lint --fix "src/*.holo"
  */
 
-import { existsSync, readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join, extname, resolve } from 'path';
-import { HoloScriptLinter, LinterConfig, DEFAULT_CONFIG, LintResult } from './index.js';
+import { HoloScriptLinter, LinterConfig, LintResult } from './index.js';
 
 interface CliOptions {
   fix: boolean;
@@ -100,7 +100,11 @@ function parseArgs(args: string[]): { options: CliOptions; files: string[] } {
 
 function loadConfig(configPath?: string): Partial<LinterConfig> {
   if (!configPath) {
-    const defaultPaths = ['.holoscriptlintrc', '.holoscriptlintrc.json', 'holoscript-lint.config.json'];
+    const defaultPaths = [
+      '.holoscriptlintrc',
+      '.holoscriptlintrc.json',
+      'holoscript-lint.config.json',
+    ];
     for (const p of defaultPaths) {
       if (existsSync(p)) {
         configPath = p;
@@ -174,7 +178,9 @@ function formatStylish(results: LintResult[]): string {
   const totalWarnings = results.reduce((sum, r) => sum + r.warningCount, 0);
 
   if (totalErrors > 0 || totalWarnings > 0) {
-    lines.push(`\n\x1b[1m✖ ${totalErrors + totalWarnings} problems (${totalErrors} errors, ${totalWarnings} warnings)\x1b[0m`);
+    lines.push(
+      `\n\x1b[1m✖ ${totalErrors + totalWarnings} problems (${totalErrors} errors, ${totalWarnings} warnings)\x1b[0m`
+    );
   }
 
   return lines.join('\n');
@@ -189,7 +195,9 @@ function formatCompact(results: LintResult[]): string {
 
   for (const result of results) {
     for (const d of result.diagnostics) {
-      lines.push(`${result.filePath}:${d.line}:${d.column}: ${d.severity} - ${d.message} (${d.ruleId})`);
+      lines.push(
+        `${result.filePath}:${d.line}:${d.column}: ${d.severity} - ${d.message} (${d.ruleId})`
+      );
     }
   }
 

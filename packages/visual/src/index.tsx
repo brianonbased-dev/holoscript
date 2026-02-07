@@ -1,6 +1,6 @@
 /**
  * HoloScript Visual - Node-based visual programming for HoloScript
- * 
+ *
  * @package @holoscript/visual
  */
 
@@ -23,7 +23,7 @@ export {
   DATA_NODES,
   NODE_REGISTRY,
   getNodeDefinition,
-  getNodesByCategory
+  getNodesByCategory,
 } from './nodes/nodeRegistry';
 
 // Code generation

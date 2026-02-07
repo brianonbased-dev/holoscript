@@ -99,9 +99,9 @@ function planActions(
 ): GOAPAction[] | null {
   const openSet: PlanNode[] = [];
   const closedSet = new Set<string>();
-  
+
   const stateKey = (s: WorldState) => JSON.stringify(s);
-  
+
   const startNode: PlanNode = {
     state: { ...worldState },
     action: null,
@@ -110,14 +110,14 @@ function planActions(
     hCost: heuristic(worldState, goal.desiredState),
     fCost: heuristic(worldState, goal.desiredState),
   };
-  
+
   openSet.push(startNode);
-  
+
   while (openSet.length > 0) {
     // Get node with lowest fCost
     openSet.sort((a, b) => a.fCost - b.fCost);
     const current = openSet.shift()!;
-    
+
     // Goal reached?
     if (stateMatches(current.state, goal.desiredState)) {
       // Reconstruct plan
@@ -129,34 +129,37 @@ function planActions(
       }
       return plan;
     }
-    
+
     const key = stateKey(current.state);
     if (closedSet.has(key)) continue;
     closedSet.add(key);
-    
+
     // Check max depth
     let depth = 0;
     let temp: PlanNode | null = current;
-    while (temp) { depth++; temp = temp.parent; }
+    while (temp) {
+      depth++;
+      temp = temp.parent;
+    }
     if (depth > maxDepth) continue;
-    
+
     // Try each action
     for (const action of actions) {
       // Check preconditions
       if (!checkPreconditions(current.state, action.preconditions)) continue;
-      
+
       // Check action validity
       if (action.isValid && !action.isValid(current.state)) continue;
-      
+
       // Apply effects
       const newState = applyEffects(current.state, action.effects);
-      
+
       // Skip if already explored
       if (closedSet.has(stateKey(newState))) continue;
-      
+
       const gCost = current.gCost + action.cost;
       const hCost = heuristic(newState, goal.desiredState);
-      
+
       openSet.push({
         state: newState,
         action,
@@ -167,7 +170,7 @@ function planActions(
       });
     }
   }
-  
+
   return null; // No plan found
 }
 
@@ -178,12 +181,12 @@ function planActions(
 export const goalOrientedHandler: TraitHandler<GOAPConfig> = {
   name: 'goal_oriented' as any,
 
-  defaultConfig: { 
-    goals: [], 
-    actions: [], 
+  defaultConfig: {
+    goals: [],
+    actions: [],
     initial_state: {},
-    replan_interval: 5000, 
-    max_plan_depth: 10 
+    replan_interval: 5000,
+    max_plan_depth: 10,
   },
 
   onAttach(node, config, context) {
@@ -197,7 +200,7 @@ export const goalOrientedHandler: TraitHandler<GOAPConfig> = {
       isExecuting: false,
     };
     (node as any).__goalOrientedState = state;
-    
+
     // Initial planning
     selectGoalAndPlan(state, config, context, node);
   },
@@ -209,43 +212,43 @@ export const goalOrientedHandler: TraitHandler<GOAPConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__goalOrientedState as GOAPState;
     if (!state) return;
-    
+
     // Periodic replan
     state.replanTimer += delta * 1000;
     if (state.replanTimer >= config.replan_interval) {
       state.replanTimer = 0;
       selectGoalAndPlan(state, config, context, node);
     }
-    
+
     // Execute current action
     if (state.isExecuting && state.plan.length > 0) {
       const currentAction = state.plan[state.planIndex];
-      
+
       if (currentAction) {
         state.currentActionTime += delta;
-        
+
         const duration = currentAction.duration ?? 1;
         if (state.currentActionTime >= duration) {
           // Action complete - apply effects
           state.worldState = applyEffects(state.worldState, currentAction.effects);
-          
+
           context.emit?.('goap_action_complete', {
             node,
             action: currentAction.name,
             worldState: state.worldState,
           });
-          
+
           // Move to next action
           state.planIndex++;
           state.currentActionTime = 0;
-          
+
           if (state.planIndex >= state.plan.length) {
             // Plan complete
             context.emit?.('goap_goal_complete', {
               node,
               goal: state.currentGoal?.name,
             });
-            
+
             state.isExecuting = false;
             selectGoalAndPlan(state, config, context, node);
           }
@@ -257,7 +260,7 @@ export const goalOrientedHandler: TraitHandler<GOAPConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__goalOrientedState as GOAPState;
     if (!state) return;
-    
+
     if (event.type === 'goap_set_state') {
       Object.assign(state.worldState, event.state);
       // Trigger replan on state change
@@ -281,47 +284,42 @@ function selectGoalAndPlan(
 ): void {
   // Find highest priority valid goal
   const validGoals = config.goals
-    .filter(g => {
+    .filter((g) => {
       if (g.isValid && !g.isValid(state.worldState)) return false;
       return !stateMatches(state.worldState, g.desiredState);
     })
     .sort((a, b) => b.priority - a.priority);
-  
+
   if (validGoals.length === 0) {
     state.currentGoal = null;
     state.plan = [];
     state.isExecuting = false;
     return;
   }
-  
+
   const goal = validGoals[0];
   state.currentGoal = goal;
-  
+
   // Plan to achieve goal
-  const plan = planActions(
-    state.worldState,
-    goal,
-    config.actions,
-    config.max_plan_depth
-  );
-  
+  const plan = planActions(state.worldState, goal, config.actions, config.max_plan_depth);
+
   if (plan && plan.length > 0) {
     state.plan = plan;
     state.planIndex = 0;
     state.currentActionTime = 0;
     state.isExecuting = true;
-    
+
     context.emit?.('goap_plan_created', {
       node,
       goal: goal.name,
-      actions: plan.map(a => a.name),
+      actions: plan.map((a) => a.name),
     });
   } else {
     context.emit?.('goap_plan_failed', {
       node,
       goal: goal.name,
     });
-    
+
     state.plan = [];
     state.isExecuting = false;
   }

@@ -219,7 +219,8 @@ export class GodotCompiler {
     if (fov) this.emit(`cam.fov = ${fov}`);
     const pos = this.findProp(camera.properties, 'position');
     if (pos) this.emit(`cam.position = ${this.toVector3(pos as any)}`);
-    const lookAt = this.findProp(camera.properties, 'look_at') || this.findProp(camera.properties, 'lookAt');
+    const lookAt =
+      this.findProp(camera.properties, 'look_at') || this.findProp(camera.properties, 'lookAt');
     if (lookAt) this.emit(`cam.look_at(${this.toVector3(lookAt as any)})`);
     const near = this.findProp(camera.properties, 'near');
     if (near) this.emit(`cam.near = ${near}`);
@@ -236,13 +237,16 @@ export class GodotCompiler {
     const isText = meshType === 'text';
     const isModel = !!this.findObjProp(obj, 'model') || !!this.findObjProp(obj, 'src');
     const isSparkles = meshType === 'sparkles';
-    const isLight = ['directional', 'point', 'spot', 'hemisphere', 'ambient', 'area'].includes(meshType as string);
+    const isLight = ['directional', 'point', 'spot', 'hemisphere', 'ambient', 'area'].includes(
+      meshType as string
+    );
 
     this.emit(`# Object: ${obj.name}`);
 
     if (isLight) {
       const lightMap: Record<string, string> = {
-        directional: 'DirectionalLight3D', point: 'OmniLight3D',
+        directional: 'DirectionalLight3D',
+        point: 'OmniLight3D',
         spot: 'SpotLight3D',
       };
       this.emit(`var ${varName} = ${lightMap[meshType as string] || 'DirectionalLight3D'}.new()`);
@@ -261,7 +265,7 @@ export class GodotCompiler {
       this.emit(`var ${varName} = GPUParticles3D.new()`);
     } else {
       // Physics body wrapper if needed
-      const hasPhysics = obj.traits?.some(t => t.name === 'physics' || t.name === 'grabbable');
+      const hasPhysics = obj.traits?.some((t) => t.name === 'physics' || t.name === 'grabbable');
       if (hasPhysics) {
         this.emit(`var ${varName}_body = RigidBody3D.new()`);
         this.emit(`${varName}_body.name = "${obj.name}"`);
@@ -270,9 +274,14 @@ export class GodotCompiler {
       this.emit(`var ${varName} = MeshInstance3D.new()`);
 
       const meshMap: Record<string, string> = {
-        sphere: 'SphereMesh', box: 'BoxMesh', cube: 'BoxMesh',
-        cylinder: 'CylinderMesh', cone: 'CylinderMesh',
-        plane: 'PlaneMesh', torus: 'TorusMesh', capsule: 'CapsuleMesh',
+        sphere: 'SphereMesh',
+        box: 'BoxMesh',
+        cube: 'BoxMesh',
+        cylinder: 'CylinderMesh',
+        cone: 'CylinderMesh',
+        plane: 'PlaneMesh',
+        torus: 'TorusMesh',
+        capsule: 'CapsuleMesh',
       };
       const gdMesh = meshMap[meshType as string] || 'BoxMesh';
       this.emit(`${varName}.mesh = ${gdMesh}.new()`);
@@ -304,7 +313,9 @@ export class GodotCompiler {
       }
 
       // Collider
-      const hasCollider = obj.traits?.some(t => t.name === 'collidable' || t.name === 'physics' || t.name === 'grabbable');
+      const hasCollider = obj.traits?.some(
+        (t) => t.name === 'collidable' || t.name === 'physics' || t.name === 'grabbable'
+      );
       if (hasCollider && !hasPhysics) {
         this.emit(`var ${varName}_static = StaticBody3D.new()`);
         this.emit(`var ${varName}_shape = CollisionShape3D.new()`);
@@ -334,7 +345,7 @@ export class GodotCompiler {
     if (scale) this.emit(`${varName}.scale = ${this.toVector3(scale as any)}`);
 
     // Add to parent
-    const hasPhysics = obj.traits?.some(t => t.name === 'physics' || t.name === 'grabbable');
+    const hasPhysics = obj.traits?.some((t) => t.name === 'physics' || t.name === 'grabbable');
     if (hasPhysics) {
       this.emit(`${parentVar}.add_child(${varName}_body)`);
     } else {
@@ -378,19 +389,45 @@ export class GodotCompiler {
         else if (tn === 'reverb_zone') {
           this.emit(`var ${varName}_reverb = AudioEffectReverb.new()`);
           this.emit(`# @reverb_zone — add to AudioBus`);
-        } else if (tn === 'ambisonics' || tn === 'hrtf' || tn === 'audio_occlusion' || tn === 'audio_portal' || tn === 'audio_material' || tn === 'head_tracked_audio') {
+        } else if (
+          tn === 'ambisonics' ||
+          tn === 'hrtf' ||
+          tn === 'audio_occlusion' ||
+          tn === 'audio_portal' ||
+          tn === 'audio_material' ||
+          tn === 'head_tracked_audio'
+        ) {
           this.emit(`# @${tn} — spatial audio: ${JSON.stringify(trait.config || {})}`);
         }
         // Volumetric Content
-        else if (tn === 'gaussian_splat' || tn === 'nerf' || tn === 'volumetric_video' || tn === 'point_cloud' || tn === 'photogrammetry') {
+        else if (
+          tn === 'gaussian_splat' ||
+          tn === 'nerf' ||
+          tn === 'volumetric_video' ||
+          tn === 'point_cloud' ||
+          tn === 'photogrammetry'
+        ) {
           this.emit(`# @${tn} — volumetric renderer: ${JSON.stringify(trait.config || {})}`);
         }
         // Accessibility
-        else if (tn === 'accessible' || tn === 'alt_text' || tn === 'screen_reader' || tn === 'high_contrast' || tn === 'motion_reduced' || tn === 'magnifiable') {
+        else if (
+          tn === 'accessible' ||
+          tn === 'alt_text' ||
+          tn === 'screen_reader' ||
+          tn === 'high_contrast' ||
+          tn === 'motion_reduced' ||
+          tn === 'magnifiable'
+        ) {
           this.emit(`# @${tn} — accessibility: ${JSON.stringify(trait.config || {})}`);
         }
         // Input Modalities
-        else if (tn === 'eye_tracking' || tn === 'hand_tracking' || tn === 'body_tracking' || tn === 'face_tracking' || tn === 'controller') {
+        else if (
+          tn === 'eye_tracking' ||
+          tn === 'hand_tracking' ||
+          tn === 'body_tracking' ||
+          tn === 'face_tracking' ||
+          tn === 'controller'
+        ) {
           this.emit(`# @${tn} — XR input: ${JSON.stringify(trait.config || {})}`);
         }
         // Catch-all
@@ -439,7 +476,7 @@ export class GodotCompiler {
 
   private compileAudio(audio: HoloAudio): void {
     const varName = this.sanitizeName(audio.name);
-    const spatial = audio.properties.find(p => p.key === 'spatial')?.value;
+    const spatial = audio.properties.find((p) => p.key === 'spatial')?.value;
 
     this.emit(`# Audio: ${audio.name}`);
     if (spatial) {
@@ -461,7 +498,7 @@ export class GodotCompiler {
       }
     }
 
-    const loop = audio.properties.find(p => p.key === 'loop')?.value;
+    const loop = audio.properties.find((p) => p.key === 'loop')?.value;
     this.emit(`add_child(${varName})`);
     this.emit(`${varName}.play()`);
     if (loop) {
@@ -476,24 +513,24 @@ export class GodotCompiler {
     this.emit(`var ${varName} = Area3D.new()`);
     this.emit(`${varName}.name = "${zone.name}"`);
 
-    const shape = zone.properties.find(p => p.key === 'shape')?.value;
+    const shape = zone.properties.find((p) => p.key === 'shape')?.value;
     this.emit(`var ${varName}_shape = CollisionShape3D.new()`);
 
     if (shape === 'box') {
       this.emit(`${varName}_shape.shape = BoxShape3D.new()`);
-      const size = zone.properties.find(p => p.key === 'size')?.value;
+      const size = zone.properties.find((p) => p.key === 'size')?.value;
       if (size && Array.isArray(size)) {
         this.emit(`${varName}_shape.shape.size = ${this.toVector3(size)}`);
       }
     } else if (shape === 'sphere') {
       this.emit(`${varName}_shape.shape = SphereShape3D.new()`);
-      const radius = zone.properties.find(p => p.key === 'radius')?.value;
+      const radius = zone.properties.find((p) => p.key === 'radius')?.value;
       if (radius) this.emit(`${varName}_shape.shape.radius = ${radius}`);
     }
 
     this.emit(`${varName}.add_child(${varName}_shape)`);
 
-    const pos = zone.properties.find(p => p.key === 'position')?.value;
+    const pos = zone.properties.find((p) => p.key === 'position')?.value;
     if (pos) this.emit(`${varName}.position = ${this.toVector3(pos as any)}`);
 
     // Connect handlers
@@ -521,14 +558,20 @@ export class GodotCompiler {
 
     for (const entry of tl.entries) {
       if (entry.action.kind === 'animate') {
-        this.emit(`tween.tween_callback(func(): pass) # animate "${entry.action.target}" at ${entry.time}s`);
+        this.emit(
+          `tween.tween_callback(func(): pass) # animate "${entry.action.target}" at ${entry.time}s`
+        );
         for (const [key, value] of Object.entries(entry.action.properties)) {
           this.emit(`# ${key}: ${JSON.stringify(value)}`);
         }
       } else if (entry.action.kind === 'emit') {
-        this.emit(`tween.tween_callback(func(): print("Event: ${entry.action.event}")).set_delay(${entry.time})`);
+        this.emit(
+          `tween.tween_callback(func(): print("Event: ${entry.action.event}")).set_delay(${entry.time})`
+        );
       } else if (entry.action.kind === 'call') {
-        this.emit(`tween.tween_callback(func(): ${entry.action.method}()).set_delay(${entry.time})`);
+        this.emit(
+          `tween.tween_callback(func(): ${entry.action.method}()).set_delay(${entry.time})`
+        );
       }
     }
 
@@ -541,9 +584,9 @@ export class GodotCompiler {
     this.emit(`func ${varName}():`);
     this.indentLevel++;
 
-    const target = tr.properties.find(p => p.key === 'target')?.value;
-    const effect = tr.properties.find(p => p.key === 'effect')?.value;
-    const duration = tr.properties.find(p => p.key === 'duration')?.value;
+    const target = tr.properties.find((p) => p.key === 'target')?.value;
+    const effect = tr.properties.find((p) => p.key === 'effect')?.value;
+    const duration = tr.properties.find((p) => p.key === 'duration')?.value;
 
     this.emit(`# Transition: ${effect} (${duration}s)`);
     if (target) {
@@ -571,12 +614,12 @@ export class GodotCompiler {
 
     for (const el of ui.elements) {
       const varName = this.sanitizeName(el.name);
-      const elType = el.properties.find(p => p.key === 'type')?.value;
+      const elType = el.properties.find((p) => p.key === 'type')?.value;
 
       this.emit(`# UI: ${el.name} (${elType})`);
       if (elType === 'text') {
         this.emit(`var ${varName} = Label.new()`);
-        const text = el.properties.find(p => p.key === 'text')?.value;
+        const text = el.properties.find((p) => p.key === 'text')?.value;
         if (text) this.emit(`${varName}.text = "${text}"`);
       } else if (elType === 'progress') {
         this.emit(`var ${varName} = ProgressBar.new()`);
@@ -587,11 +630,11 @@ export class GodotCompiler {
       }
       this.emit(`${varName}.name = "${el.name}"`);
 
-      const pos = el.properties.find(p => p.key === 'position')?.value;
+      const pos = el.properties.find((p) => p.key === 'position')?.value;
       if (pos && Array.isArray(pos)) {
         this.emit(`${varName}.position = Vector2(${pos[0]}, ${pos[1]})`);
       }
-      const size = el.properties.find(p => p.key === 'size')?.value;
+      const size = el.properties.find((p) => p.key === 'size')?.value;
       if (size && Array.isArray(size)) {
         this.emit(`${varName}.size = Vector2(${size[0]}, ${size[1]})`);
       }
@@ -630,7 +673,7 @@ export class GodotCompiler {
     if (typeof value === 'boolean') return value ? 'true' : 'false';
     if (typeof value === 'string') return `"${value}"`;
     if (value === null) return 'null';
-    if (Array.isArray(value)) return `[${value.map(v => this.toGDScriptValue(v)).join(', ')}]`;
+    if (Array.isArray(value)) return `[${value.map((v) => this.toGDScriptValue(v)).join(', ')}]`;
     return 'null';
   }
 
@@ -639,6 +682,6 @@ export class GodotCompiler {
   }
 
   private findObjProp(obj: HoloObjectDecl, key: string): HoloValue | undefined {
-    return obj.properties?.find(p => p.key === key)?.value;
+    return obj.properties?.find((p) => p.key === key)?.value;
   }
 }

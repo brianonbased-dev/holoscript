@@ -19,7 +19,6 @@ import type {
   StateDeclaration,
   VRHand,
   Vector3,
-  Color,
 } from '../types/HoloScriptPlus';
 import type { HSPlusDirective } from '../types';
 import { ReactiveState, createState, ExpressionEvaluator } from '../state/ReactiveState';
@@ -482,9 +481,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
         result[key] = this.interpolateString(value, context);
       } else if (value && typeof value === 'object' && '__expr' in value) {
         this.evaluator.updateContext(context);
-        result[key] = this.evaluator.evaluate(
-          (value as unknown as { __raw: string }).__raw
-        );
+        result[key] = this.evaluator.evaluate((value as unknown as { __raw: string }).__raw);
       } else {
         result[key] = value;
       }
@@ -1206,7 +1203,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
     oldVersion: string | number,
     newTemplate: HSPlusNode
   ): void {
-    const context = this.createTraitContext(instance);
+    const _context = this.createTraitContext(instance);
 
     // 1. Preserve existing properties/state
     const currentProperties = { ...(instance.node.properties || {}) };

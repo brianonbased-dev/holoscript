@@ -9,6 +9,7 @@ npm install holoscript
 ```
 
 This installs all HoloScript packages:
+
 - `@holoscript/core` - Parser and compiler
 - `@holoscript/cli` - Command-line tools
 - `@holoscript/linter` - Code linting

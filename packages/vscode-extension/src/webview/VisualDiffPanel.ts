@@ -26,9 +26,7 @@ export class VisualDiffPanel {
       column,
       {
         enableScripts: true,
-        localResourceRoots: [
-          vscode.Uri.joinPath(extensionUri, 'media')
-        ]
+        localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')],
       }
     );
 
@@ -51,7 +49,7 @@ export class VisualDiffPanel {
     this._panel.webview.postMessage({
       command: 'update',
       base: baseImage,
-      target: targetImage
+      target: targetImage,
     });
   }
 

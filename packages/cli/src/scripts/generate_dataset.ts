@@ -1,6 +1,6 @@
 /**
  * HoloScript Synthetic Data Generator
- * 
+ *
  * Generates training examples for Brittney (AI Assistant).
  * Focus areas:
  * 1. VR Design Patterns (Comfort, Ergonomics)
@@ -34,16 +34,16 @@ function generateVRPattern(): TrainingExample {
   const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
   const trait = TRAITS[Math.floor(Math.random() * TRAITS.length)];
   const name = `${shape}_${Math.floor(Math.random() * 1000)}`;
-  
+
   const input = `Create a ${shape} that is ${trait}`;
-  
+
   let code = `orb ${name} {\n  shape: "${shape}"\n  color: "${COLORS[Math.floor(Math.random() * COLORS.length)]}"\n`;
   code += `  @${trait}\n`;
-  
+
   if (trait === 'grabbable') {
     code += `  on_grab: {\n    haptic.pulse(0.5)\n  }\n`;
   }
-  
+
   code += `}`;
 
   return {
@@ -53,31 +53,31 @@ function generateVRPattern(): TrainingExample {
     output: code,
     metadata: {
       patterns: ['vr_trait', trait],
-      complexity: 1
-    }
+      complexity: 1,
+    },
   };
 }
 
 function generateErrorPattern(): TrainingExample {
   const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
   const name = `${shape}_err_${Math.floor(Math.random() * 1000)}`;
-  
+
   // Error 1: Typo
   const buggyCode = `orb ${name} {\n  shape: "sper"\n  color: "red"\n}`;
   const fixedCode = `orb ${name} {\n  shape: "sphere"\n  color: "#ff0000"\n}`;
-  
+
   // Error 2: Missing Trait
   if (Math.random() > 0.5) {
-     return {
-        id: `fix_${Date.now()}_${Math.random()}`,
-        type: 'correction',
-        input: `orb ${name} {\n  shape: "${shape}"\n  on_grab: { log("Grabbed") }\n}`,
-        output: `orb ${name} {\n  shape: "${shape}"\n  @grabbable\n  on_grab: { log("Grabbed") }\n}`,
-        metadata: {
-          patterns: ['missing_trait', 'grabbable'],
-          complexity: 2
-        }
-     };
+    return {
+      id: `fix_${Date.now()}_${Math.random()}`,
+      type: 'correction',
+      input: `orb ${name} {\n  shape: "${shape}"\n  on_grab: { log("Grabbed") }\n}`,
+      output: `orb ${name} {\n  shape: "${shape}"\n  @grabbable\n  on_grab: { log("Grabbed") }\n}`,
+      metadata: {
+        patterns: ['missing_trait', 'grabbable'],
+        complexity: 2,
+      },
+    };
   }
 
   return {
@@ -87,8 +87,8 @@ function generateErrorPattern(): TrainingExample {
     output: fixedCode,
     metadata: {
       patterns: ['typo', 'shape_name'],
-      complexity: 1
-    }
+      complexity: 1,
+    },
   };
 }
 
@@ -105,9 +105,9 @@ function generateErgonomicPattern(): TrainingExample {
   const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
   const zDepth = -(0.5 + Math.random()); // -0.5 to -1.5
   const yHeight = 1.3 + Math.random() * 0.4; // 1.3 to 1.7 (Eye level)
-  
+
   const input = `Place a ${shape} in a comfortable ergonomic position`;
-  
+
   const code = `orb ergonomic_${shape} {
   shape: "${shape}"
   position: { x: 0, y: ${yHeight.toFixed(2)}, z: ${zDepth.toFixed(2)} }
@@ -119,7 +119,7 @@ function generateErgonomicPattern(): TrainingExample {
     type: 'generation',
     input: input,
     output: code,
-    metadata: { patterns: ['ergonomics', 'sweet_spot'], complexity: 1 }
+    metadata: { patterns: ['ergonomics', 'sweet_spot'], complexity: 1 },
   };
 }
 
@@ -128,15 +128,15 @@ function generatePhysicsPattern(): TrainingExample {
   const isDynamic = Math.random() > 0.5;
   const type = isDynamic ? 'dynamic' : 'static';
   const objectType = isDynamic ? 'ball' : 'wall';
-  
+
   const input = `Create a ${objectType} with appropriate physics`;
-  
-  let code = `orb ${objectType}_${Math.floor(Math.random()*100)} {
+
+  let code = `orb ${objectType}_${Math.floor(Math.random() * 100)} {
   shape: "${isDynamic ? 'sphere' : 'cube'}"
   physics: "${type}"
 `;
   if (isDynamic) {
-     code += `  @throwable\n  @grabbable\n`;
+    code += `  @throwable\n  @grabbable\n`;
   }
   code += `}`;
 
@@ -145,17 +145,17 @@ function generatePhysicsPattern(): TrainingExample {
     type: 'generation',
     input: input,
     output: code,
-    metadata: { patterns: ['physics', type], complexity: 2 }
+    metadata: { patterns: ['physics', type], complexity: 2 },
   };
 }
 
 function generateEventPattern(): TrainingExample {
   // Rule 9: Responsive Events
-  const trait = 'grabbable';
-  const shape = 'cube';
-  
+  const _trait = 'grabbable';
+  const _shape = 'cube';
+
   const input = `Make a grabbable cube that gives feedback`;
-  
+
   const code = `orb responsive_cube {
   shape: "cube"
   @grabbable
@@ -176,16 +176,16 @@ function generateEventPattern(): TrainingExample {
     type: 'generation',
     input: input,
     output: code,
-    metadata: { patterns: ['events', 'feedback'], complexity: 2 }
+    metadata: { patterns: ['events', 'feedback'], complexity: 2 },
   };
 }
 
 function main() {
   const count = process.argv[2] ? parseInt(process.argv[2]) : 50;
   console.log(`Generating ${count} training examples...`);
-  
+
   const dataset: TrainingExample[] = [];
-  
+
   for (let i = 0; i < count; i++) {
     const rand = Math.random();
     if (rand < 0.2) {
@@ -200,13 +200,13 @@ function main() {
       dataset.push(generateEventPattern());
     }
   }
-  
+
   const outDir = path.resolve(__dirname, '../../../../datasets');
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
-  
+
   const outFile = path.join(outDir, `synthetic_data_${Date.now()}.json`);
   fs.writeFileSync(outFile, JSON.stringify(dataset, null, 2));
-  
+
   console.log(`✓ Generated ${dataset.length} examples in ${outFile}`);
 }
 

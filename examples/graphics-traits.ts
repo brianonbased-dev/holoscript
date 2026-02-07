@@ -2,14 +2,19 @@
 // This file demonstrates real-world usage of MaterialTrait, LightingTrait, and RenderingTrait
 
 import {
-  MaterialTrait, LightingTrait, RenderingTrait,
-  MATERIAL_PRESETS, LIGHTING_PRESETS,
-  type PBRMaterial, type LightSource, type RenderingOptimization,
+  MaterialTrait,
+  LightingTrait,
+  RenderingTrait,
+  MATERIAL_PRESETS,
+  LIGHTING_PRESETS,
+  type PBRMaterial,
+  type LightSource,
+  type RenderingOptimization,
 } from '@holoscript/core';
 
 /**
  * Example 1: Creating a Photorealistic Metal Sphere
- * 
+ *
  * Demonstrates:
  * - PBR material setup
  * - Texture mapping
@@ -49,7 +54,7 @@ export function createMetalSphere() {
 
 /**
  * Example 2: Realistic Wood Material
- * 
+ *
  * Demonstrates:
  * - Using material presets
  * - Custom texture configuration
@@ -69,18 +74,18 @@ export function createWoodMaterial() {
   material.addTexture({
     path: '/assets/wood/normal.jpg',
     channel: 'normalMap',
-    scale: { x: 2, y: 1 },  // Stretch wood grain
+    scale: { x: 2, y: 1 }, // Stretch wood grain
   });
 
-  material.setCompression('dxt');  // DXT for smaller file size
-  material.setTextureStreaming(true, 256);  // 256 MB budget
+  material.setCompression('dxt'); // DXT for smaller file size
+  material.setTextureStreaming(true, 256); // 256 MB budget
 
   return material;
 }
 
 /**
  * Example 3: Glass/Transparent Material
- * 
+ *
  * Demonstrates:
  * - Transparency and IOR (Index of Refraction)
  * - Custom shaders for special effects
@@ -94,7 +99,7 @@ export function createGlassMaterial() {
       metallic: 0,
       roughness: 0.1,
       transmission: 1.0,
-      ior: 1.5,  // Glass IOR
+      ior: 1.5, // Glass IOR
     },
   });
 
@@ -113,7 +118,7 @@ export function createGlassMaterial() {
 
 /**
  * Example 4: Professional Studio Lighting
- * 
+ *
  * Demonstrates:
  * - Three-point lighting setup
  * - Shadow configuration
@@ -124,37 +129,37 @@ export function setupStudioLighting() {
 
   // Key light (main)
   lighting.createDirectionalLight(
-    { x: 0.8, y: 1, z: 0.6 },     // direction (from upper left)
-    { r: 1, g: 0.95, b: 0.9 },    // warm white
-    1.2,                            // strong intensity
-    true,                           // cast shadows
+    { x: 0.8, y: 1, z: 0.6 }, // direction (from upper left)
+    { r: 1, g: 0.95, b: 0.9 }, // warm white
+    1.2, // strong intensity
+    true // cast shadows
   );
 
   // Fill light (balance shadows)
   lighting.createPointLight(
-    { x: -0.8, y: 0.5, z: 0.4 },   // opposite side
-    { r: 0.7, g: 0.7, b: 0.8 },    // cool blue
-    0.6,                            // medium intensity
-    30,                             // 30 unit range
-    false,                          // no shadows
+    { x: -0.8, y: 0.5, z: 0.4 }, // opposite side
+    { r: 0.7, g: 0.7, b: 0.8 }, // cool blue
+    0.6, // medium intensity
+    30, // 30 unit range
+    false // no shadows
   );
 
   // Back light (rim light for separation)
   lighting.createSpotLight(
-    { x: 0, y: 0.5, z: -1 },       // behind object
-    { x: 0, y: 0, z: 1 },          // pointing forward
-    { r: 0.8, g: 0.8, b: 1 },      // cool white
-    0.4,                            // medium intensity
-    25,                             // 25 unit range
-    Math.PI / 6,                    // 30 degree spread
-    false,                          // no shadows
+    { x: 0, y: 0.5, z: -1 }, // behind object
+    { x: 0, y: 0, z: 1 }, // pointing forward
+    { r: 0.8, g: 0.8, b: 1 }, // cool white
+    0.4, // medium intensity
+    25, // 25 unit range
+    Math.PI / 6, // 30 degree spread
+    false // no shadows
   );
 
   // Ambient light (global illumination)
   lighting.setAmbientLight(
-    { r: 0.8, g: 0.85, b: 0.9 },   // sky color (light blue)
-    { r: 0.3, g: 0.3, b: 0.25 },   // ground color (dark)
-    0.8,                            // moderate intensity
+    { r: 0.8, g: 0.85, b: 0.9 }, // sky color (light blue)
+    { r: 0.3, g: 0.3, b: 0.25 }, // ground color (dark)
+    0.8 // moderate intensity
   );
 
   // Configure global illumination
@@ -171,7 +176,7 @@ export function setupStudioLighting() {
 
 /**
  * Example 5: Dynamic Day/Night Lighting
- * 
+ *
  * Demonstrates:
  * - Time-based lighting changes
  * - Preset application
@@ -191,15 +196,15 @@ export class DayNightLighting {
     // Bright daylight
     this.sunId = this.lighting.createDirectionalLight(
       { x: 0.5, y: 1, z: 0.5 },
-      { r: 1, g: 0.95, b: 0.8 },   // warm sunlight
-      1.5,                          // bright
-      true,
+      { r: 1, g: 0.95, b: 0.8 }, // warm sunlight
+      1.5, // bright
+      true
     );
   }
 
   updateTime(timeOfDay: number) {
     // timeOfDay: 0-24 (hours)
-    
+
     if (timeOfDay < 6) {
       // Night: Deep blue, low light
       this.lighting.updateLight(this.sunId, {
@@ -208,7 +213,7 @@ export class DayNightLighting {
       });
     } else if (timeOfDay < 8) {
       // Sunrise: Orange
-      const progress = (timeOfDay - 6) / 2;  // 0-1
+      const progress = (timeOfDay - 6) / 2; // 0-1
       this.lighting.updateLight(this.sunId, {
         intensity: 0.5 + progress * 0.5,
         color: {
@@ -225,7 +230,7 @@ export class DayNightLighting {
       });
     } else if (timeOfDay < 20) {
       // Sunset: Red/orange
-      const progress = (timeOfDay - 18) / 2;  // 0-1
+      const progress = (timeOfDay - 18) / 2; // 0-1
       this.lighting.updateLight(this.sunId, {
         intensity: 1.5 - progress * 0.4,
         color: {
@@ -255,7 +260,7 @@ export class DayNightLighting {
 
 /**
  * Example 6: Mobile vs Desktop Rendering
- * 
+ *
  * Demonstrates:
  * - Platform-specific optimization
  * - Quality presets
@@ -269,13 +274,13 @@ export function setupRenderingForPlatform(platform: 'mobile' | 'vr' | 'desktop')
       rendering.optimizeForMobile();
       rendering.applyQualityPreset('low');
       rendering.setMaxTextureResolution(512);
-      rendering.setTextureStreaming(true, 128);  // 128 MB
+      rendering.setTextureStreaming(true, 128); // 128 MB
       rendering.setTextureCompression('astc');
       rendering.setInstancing(true, 500);
       break;
 
     case 'vr':
-      rendering.optimizeForVRAR(90);  // 90 FPS for VR
+      rendering.optimizeForVRAR(90); // 90 FPS for VR
       rendering.applyQualityPreset('high');
       rendering.setMaxTextureResolution(2048);
       rendering.setTextureStreaming(true, 512);
@@ -303,7 +308,7 @@ export function setupRenderingForPlatform(platform: 'mobile' | 'vr' | 'desktop')
 
 /**
  * Example 7: Complete Scene Setup
- * 
+ *
  * Demonstrates:
  * - Integration of all three trait systems
  * - Performance monitoring
@@ -336,7 +341,7 @@ export class RealisticScene {
     // Emissive (for lights/screens)
     const emissive = MATERIAL_PRESETS.emissive();
     emissive.updatePBR({
-      emission: { r: 1, g: 0.8, b: 0.2 },  // yellow glow
+      emission: { r: 1, g: 0.8, b: 0.2 }, // yellow glow
     });
     this.materials.set('emissive', emissive);
   }
@@ -382,7 +387,7 @@ export class RealisticScene {
 
 /**
  * Example 8: Interactive Material Editor
- * 
+ *
  * Demonstrates:
  * - Dynamic material adjustment
  * - Real-time updates

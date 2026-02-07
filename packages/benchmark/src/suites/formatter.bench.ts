@@ -1,6 +1,6 @@
 /**
  * Formatter Benchmarks
- * 
+ *
  * Measures code formatting performance
  */
 

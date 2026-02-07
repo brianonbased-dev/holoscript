@@ -20,17 +20,27 @@ interface FluidState {
   isSimulating: boolean;
   particleCount: number;
   volume: number;
-  boundingBox: { min: { x: number; y: number; z: number }; max: { x: number; y: number; z: number } };
+  boundingBox: {
+    min: { x: number; y: number; z: number };
+    max: { x: number; y: number; z: number };
+  };
   simulationHandle: unknown;
-  emitters: Map<string, { position: { x: number; y: number; z: number }; rate: number; velocity: { x: number; y: number; z: number } }>;
+  emitters: Map<
+    string,
+    {
+      position: { x: number; y: number; z: number };
+      rate: number;
+      velocity: { x: number; y: number; z: number };
+    }
+  >;
 }
 
 interface FluidConfig {
   method: SimulationMethod;
   particle_count: number;
-  viscosity: number;  // Pa·s
-  surface_tension: number;  // N/m
-  density: number;  // kg/m³
+  viscosity: number; // Pa·s
+  surface_tension: number; // N/m
+  density: number; // kg/m³
   gravity: [number, number, number];
   render_mode: RenderMode;
   kernel_radius: number;
@@ -73,7 +83,7 @@ export const fluidHandler: TraitHandler<FluidConfig> = {
       emitters: new Map(),
     };
     (node as any).__fluidState = state;
-    
+
     // Create fluid simulation
     context.emit?.('fluid_create', {
       node,
@@ -86,7 +96,7 @@ export const fluidHandler: TraitHandler<FluidConfig> = {
       kernelRadius: config.kernel_radius,
       timeStep: config.time_step,
     });
-    
+
     state.isSimulating = true;
   },
 
@@ -101,11 +111,11 @@ export const fluidHandler: TraitHandler<FluidConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__fluidState as FluidState;
     if (!state || !state.isSimulating) return;
-    
+
     // Process emitters
     for (const [emitterId, emitter] of state.emitters) {
       const particlesToEmit = Math.floor(emitter.rate * delta);
-      
+
       if (particlesToEmit > 0 && state.particleCount < config.particle_count) {
         context.emit?.('fluid_emit_particles', {
           node,
@@ -116,7 +126,7 @@ export const fluidHandler: TraitHandler<FluidConfig> = {
         });
       }
     }
-    
+
     // Step simulation
     context.emit?.('fluid_step', {
       node,
@@ -127,12 +137,12 @@ export const fluidHandler: TraitHandler<FluidConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__fluidState as FluidState;
     if (!state) return;
-    
+
     if (event.type === 'fluid_particle_update') {
       state.particleCount = event.particleCount as number;
-      state.volume = event.volume as number || 0;
-      state.boundingBox = event.boundingBox as typeof state.boundingBox || state.boundingBox;
-      
+      state.volume = (event.volume as number) || 0;
+      state.boundingBox = (event.boundingBox as typeof state.boundingBox) || state.boundingBox;
+
       // Update rendering
       context.emit?.('fluid_render_update', {
         node,
@@ -141,20 +151,20 @@ export const fluidHandler: TraitHandler<FluidConfig> = {
         mode: config.render_mode,
       });
     } else if (event.type === 'fluid_add_emitter') {
-      const emitterId = event.emitterId as string || `emitter_${state.emitters.size}`;
-      
+      const emitterId = (event.emitterId as string) || `emitter_${state.emitters.size}`;
+
       state.emitters.set(emitterId, {
-        position: event.position as { x: number; y: number; z: number } || { x: 0, y: 0, z: 0 },
-        rate: event.rate as number || 100,
-        velocity: event.velocity as { x: number; y: number; z: number } || { x: 0, y: -1, z: 0 },
+        position: (event.position as { x: number; y: number; z: number }) || { x: 0, y: 0, z: 0 },
+        rate: (event.rate as number) || 100,
+        velocity: (event.velocity as { x: number; y: number; z: number }) || { x: 0, y: -1, z: 0 },
       });
     } else if (event.type === 'fluid_remove_emitter') {
       const emitterId = event.emitterId as string;
       state.emitters.delete(emitterId);
     } else if (event.type === 'fluid_add_particles') {
       const positions = event.positions as Array<{ x: number; y: number; z: number }>;
-      const velocities = event.velocities as Array<{ x: number; y: number; z: number }> || [];
-      
+      const velocities = (event.velocities as Array<{ x: number; y: number; z: number }>) || [];
+
       context.emit?.('fluid_spawn_particles', {
         node,
         positions,
@@ -162,16 +172,16 @@ export const fluidHandler: TraitHandler<FluidConfig> = {
       });
     } else if (event.type === 'fluid_splash') {
       const position = event.position as { x: number; y: number; z: number };
-      const force = event.force as number || 10;
-      const radius = event.radius as number || 0.5;
-      
+      const force = (event.force as number) || 10;
+      const radius = (event.radius as number) || 0.5;
+
       context.emit?.('fluid_apply_impulse', {
         node,
         position,
         force,
         radius,
       });
-      
+
       context.emit?.('on_fluid_splash', {
         node,
         position,
@@ -182,7 +192,7 @@ export const fluidHandler: TraitHandler<FluidConfig> = {
         min: event.min as typeof state.boundingBox.min,
         max: event.max as typeof state.boundingBox.max,
       };
-      
+
       context.emit?.('fluid_update_bounds', {
         node,
         bounds: state.boundingBox,
@@ -195,7 +205,7 @@ export const fluidHandler: TraitHandler<FluidConfig> = {
       state.particleCount = 0;
       state.volume = 0;
       state.emitters.clear();
-      
+
       context.emit?.('fluid_clear', { node });
     } else if (event.type === 'fluid_set_viscosity') {
       context.emit?.('fluid_update_params', {

@@ -1,15 +1,15 @@
 /**
  * HoloScript Builtin Registry
- * 
+ *
  * Maps `runtime @builtin` declarations to JavaScript implementations.
  * Enables HoloScript to call into native modules (Whisper.cpp, WebGPU, etc.)
- * 
+ *
  * Usage in HoloScript+:
  * ```holoscript
  * runtime SpeechRecognizer @builtin {
  *   backend: "whisper.cpp"
  * }
- * 
+ *
  * runtime PhysicsEngine @builtin {
  *   backend: "gpu_compute"
  * }
@@ -38,7 +38,7 @@ export interface RuntimeDeclaration {
 
 /**
  * BuiltinRegistry
- * 
+ *
  * Central registry for native module bindings.
  * HoloScript runtime queries this registry when encountering @builtin.
  */
@@ -46,11 +46,11 @@ export class BuiltinRegistry {
   private static instance: BuiltinRegistry | null = null;
   private implementations: Map<string, BuiltinImplementation> = new Map();
   private instances: Map<string, unknown> = new Map();
-  
+
   private constructor() {
     this.registerDefaultBuiltins();
   }
-  
+
   /**
    * Get singleton instance
    */
@@ -60,21 +60,21 @@ export class BuiltinRegistry {
     }
     return BuiltinRegistry.instance;
   }
-  
+
   /**
    * Register a builtin implementation
    */
   register(name: string, implementation: BuiltinImplementation): void {
     this.implementations.set(name.toLowerCase(), implementation);
   }
-  
+
   /**
    * Check if a builtin exists
    */
   has(name: string): boolean {
     return this.implementations.has(name.toLowerCase());
   }
-  
+
   /**
    * Create an instance of a builtin
    */
@@ -83,28 +83,28 @@ export class BuiltinRegistry {
     if (!impl) {
       throw new Error(`Unknown builtin: ${declaration.name}`);
     }
-    
+
     // Check backend support
     if (impl.backends && !impl.backends.includes(declaration.backend)) {
       console.warn(
         `Backend "${declaration.backend}" not supported for ${declaration.name}. ` +
-        `Supported: ${impl.backends.join(', ')}`
+          `Supported: ${impl.backends.join(', ')}`
       );
     }
-    
+
     // Create instance
     const instance = impl.create({
       backend: declaration.backend,
       ...declaration.config,
     });
-    
+
     // Store reference for cleanup
     const key = `${declaration.name}_${Date.now()}`;
     this.instances.set(key, instance);
-    
+
     return instance;
   }
-  
+
   /**
    * Get list of registered builtins
    */
@@ -115,7 +115,7 @@ export class BuiltinRegistry {
       backends: impl.backends,
     }));
   }
-  
+
   /**
    * Cleanup all instances
    */
@@ -129,7 +129,7 @@ export class BuiltinRegistry {
     }
     this.instances.clear();
   }
-  
+
   /**
    * Register default HoloScript builtins
    */
@@ -141,13 +141,13 @@ export class BuiltinRegistry {
       create: async (config) => {
         const { SpeechRecognizer } = await import('@hololand/voice');
         const recognizer = new SpeechRecognizer({
-          backend: config.backend as 'whisper' | 'browser' | 'auto' || 'auto',
+          backend: (config.backend as 'whisper' | 'browser' | 'auto') || 'auto',
         });
         await recognizer.initialize();
         return recognizer;
       },
     });
-    
+
     // TextToSpeech
     this.register('TextToSpeech', {
       description: 'Text-to-speech synthesis',
@@ -155,12 +155,12 @@ export class BuiltinRegistry {
       create: async (config) => {
         const { TextToSpeech } = await import('@hololand/voice');
         return new TextToSpeech({
-          backend: config.backend as 'browser' | 'elevenlabs' | 'azure' || 'browser',
+          backend: (config.backend as 'browser' | 'elevenlabs' | 'azure') || 'browser',
           apiKey: config.apiKey as string,
         });
       },
     });
-    
+
     // FlowFieldGenerator
     this.register('FlowFieldGenerator', {
       description: 'Pathfinding flow field generation',
@@ -169,23 +169,23 @@ export class BuiltinRegistry {
         if (config.backend === 'gpu') {
           const { FlowFieldCompute } = await import('@hololand/gpu');
           const ff = new FlowFieldCompute({
-            width: config.width as number || 64,
-            height: config.height as number || 64,
-            cellSize: config.cellSize as number || 1.0,
+            width: (config.width as number) || 64,
+            height: (config.height as number) || 64,
+            cellSize: (config.cellSize as number) || 1.0,
           });
           await ff.initialize();
           return ff;
         } else {
           const { FlowFieldGenerator } = await import('@hololand/navigation');
           return new FlowFieldGenerator({
-            width: config.width as number || 64,
-            height: config.height as number || 64,
-            cellSize: config.cellSize as number || 1.0,
+            width: (config.width as number) || 64,
+            height: (config.height as number) || 64,
+            cellSize: (config.cellSize as number) || 1.0,
           });
         }
       },
     });
-    
+
     // FrustrationEstimator
     this.register('FrustrationEstimator', {
       description: 'VR frustration detection',
@@ -193,11 +193,11 @@ export class BuiltinRegistry {
       create: async (config) => {
         const { FrustrationEstimator } = await import('@hololand/gestures');
         return new FrustrationEstimator({
-          frustrationThreshold: config.threshold as number || 0.6,
+          frustrationThreshold: (config.threshold as number) || 0.6,
         });
       },
     });
-    
+
     // GPUContext
     this.register('GPUContext', {
       description: 'WebGPU compute context',
@@ -205,7 +205,8 @@ export class BuiltinRegistry {
       create: async (config) => {
         const { GPUContext } = await import('@hololand/gpu');
         const ctx = new GPUContext({
-          powerPreference: config.powerPreference as 'low-power' | 'high-performance' || 'high-performance',
+          powerPreference:
+            (config.powerPreference as 'low-power' | 'high-performance') || 'high-performance',
         });
         await ctx.initialize();
         return ctx;
@@ -226,14 +227,14 @@ export function parseRuntimeDeclaration(
   config: Record<string, unknown>
 ): RuntimeDeclaration {
   // Find @builtin directive
-  const builtinDirective = directives.find(d => d.type === 'builtin');
+  const builtinDirective = directives.find((d) => d.type === 'builtin');
   if (!builtinDirective) {
     throw new Error(`Runtime "${name}" is missing @builtin directive`);
   }
-  
+
   return {
     name,
-    backend: config.backend as string || 'auto',
+    backend: (config.backend as string) || 'auto',
     config,
   };
 }

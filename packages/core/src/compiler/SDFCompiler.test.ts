@@ -154,10 +154,12 @@ describe('SDFCompiler', () => {
     it('should use custom mesh path prefix', () => {
       const customCompiler = new SDFCompiler({ meshPathPrefix: 'file:///meshes/' });
       const composition = createComposition({
-        objects: [createObject({
-          name: 'CustomMesh',
-          properties: [{ key: 'geometry', value: 'robot.dae' }],
-        })],
+        objects: [
+          createObject({
+            name: 'CustomMesh',
+            properties: [{ key: 'geometry', value: 'robot.dae' }],
+          }),
+        ],
       });
       const sdf = customCompiler.compile(composition);
 
@@ -249,10 +251,7 @@ describe('SDFCompiler', () => {
   describe('Object Processing', () => {
     it('should create model for each object', () => {
       const composition = createComposition({
-        objects: [
-          createObject({ name: 'Object1' }),
-          createObject({ name: 'Object2' }),
-        ],
+        objects: [createObject({ name: 'Object1' }), createObject({ name: 'Object2' })],
       });
       const sdf = compiler.compile(composition);
 
@@ -262,10 +261,12 @@ describe('SDFCompiler', () => {
 
     it('should mark static objects without physics traits', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'StaticBox',
-          traits: [], // No physics
-        })],
+        objects: [
+          createObject({
+            name: 'StaticBox',
+            traits: [], // No physics
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -274,10 +275,12 @@ describe('SDFCompiler', () => {
 
     it('should not mark dynamic objects as static', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'DynamicBox',
-          traits: ['physics'],
-        })],
+        objects: [
+          createObject({
+            name: 'DynamicBox',
+            traits: ['physics'],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -308,13 +311,15 @@ describe('SDFCompiler', () => {
   describe('Geometry Handling', () => {
     it('should generate box geometry for cube', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Cube',
-          properties: [
-            { key: 'geometry', value: 'cube' },
-            { key: 'scale', value: 2 },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'Cube',
+            properties: [
+              { key: 'geometry', value: 'cube' },
+              { key: 'scale', value: 2 },
+            ],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -323,13 +328,15 @@ describe('SDFCompiler', () => {
 
     it('should generate sphere geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Sphere',
-          properties: [
-            { key: 'geometry', value: 'sphere' },
-            { key: 'scale', value: 2 },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'Sphere',
+            properties: [
+              { key: 'geometry', value: 'sphere' },
+              { key: 'scale', value: 2 },
+            ],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -338,13 +345,15 @@ describe('SDFCompiler', () => {
 
     it('should generate cylinder geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Cylinder',
-          properties: [
-            { key: 'geometry', value: 'cylinder' },
-            { key: 'scale', value: 1 },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'Cylinder',
+            properties: [
+              { key: 'geometry', value: 'cylinder' },
+              { key: 'scale', value: 1 },
+            ],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -353,13 +362,15 @@ describe('SDFCompiler', () => {
 
     it('should generate plane geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Floor',
-          properties: [
-            { key: 'geometry', value: 'plane' },
-            { key: 'scale', value: 10 },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'Floor',
+            properties: [
+              { key: 'geometry', value: 'plane' },
+              { key: 'scale', value: 10 },
+            ],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -368,13 +379,15 @@ describe('SDFCompiler', () => {
 
     it('should generate capsule geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Capsule',
-          properties: [
-            { key: 'geometry', value: 'capsule' },
-            { key: 'scale', value: 3 },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'Capsule',
+            properties: [
+              { key: 'geometry', value: 'capsule' },
+              { key: 'scale', value: 3 },
+            ],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -383,10 +396,12 @@ describe('SDFCompiler', () => {
 
     it('should handle mesh files', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Robot',
-          properties: [{ key: 'geometry', value: 'robot.dae' }],
-        })],
+        objects: [
+          createObject({
+            name: 'Robot',
+            properties: [{ key: 'geometry', value: 'robot.dae' }],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -395,10 +410,12 @@ describe('SDFCompiler', () => {
 
     it('should default to box geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Unknown',
-          properties: [{ key: 'geometry', value: 'unknowntype' }],
-        })],
+        objects: [
+          createObject({
+            name: 'Unknown',
+            properties: [{ key: 'geometry', value: 'unknowntype' }],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -409,12 +426,12 @@ describe('SDFCompiler', () => {
   describe('Position and Rotation', () => {
     it('should include pose with position', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'PositionedObject',
-          properties: [
-            { key: 'position', value: [1, 2, 3] },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'PositionedObject',
+            properties: [{ key: 'position', value: [1, 2, 3] }],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -423,12 +440,12 @@ describe('SDFCompiler', () => {
 
     it('should convert rotation from degrees to radians', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'RotatedObject',
-          properties: [
-            { key: 'rotation', value: [90, 0, 0] },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'RotatedObject',
+            properties: [{ key: 'rotation', value: [90, 0, 0] }],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -449,10 +466,12 @@ describe('SDFCompiler', () => {
   describe('Inertial Properties', () => {
     it('should include inertial for dynamic objects', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Dynamic',
-          traits: ['physics'],
-        })],
+        objects: [
+          createObject({
+            name: 'Dynamic',
+            traits: ['physics'],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -463,13 +482,13 @@ describe('SDFCompiler', () => {
 
     it('should extract mass from physics property', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Heavy',
-          properties: [
-            { key: 'physics', value: { mass: 10 } },
-          ],
-          traits: ['physics'],
-        })],
+        objects: [
+          createObject({
+            name: 'Heavy',
+            properties: [{ key: 'physics', value: { mass: 10 } }],
+            traits: ['physics'],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -478,10 +497,12 @@ describe('SDFCompiler', () => {
 
     it('should use default mass of 1.0', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'DefaultMass',
-          traits: ['physics'],
-        })],
+        objects: [
+          createObject({
+            name: 'DefaultMass',
+            traits: ['physics'],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -490,10 +511,12 @@ describe('SDFCompiler', () => {
 
     it('should not include inertial for static objects', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Static',
-          traits: [],
-        })],
+        objects: [
+          createObject({
+            name: 'Static',
+            traits: [],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -509,11 +532,13 @@ describe('SDFCompiler', () => {
   describe('Collision Handling', () => {
     it('should add collision for collidable objects', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'Collidable',
-          properties: [{ key: 'geometry', value: 'cube' }],
-          traits: ['collidable'],
-        })],
+        objects: [
+          createObject({
+            name: 'Collidable',
+            properties: [{ key: 'geometry', value: 'cube' }],
+            traits: ['collidable'],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -527,11 +552,13 @@ describe('SDFCompiler', () => {
 
     it('should add collision for physics objects', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'PhysicsBody',
-          properties: [{ key: 'geometry', value: 'sphere' }],
-          traits: ['physics'],
-        })],
+        objects: [
+          createObject({
+            name: 'PhysicsBody',
+            properties: [{ key: 'geometry', value: 'sphere' }],
+            traits: ['physics'],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -544,11 +571,13 @@ describe('SDFCompiler', () => {
 
     it('should add collision for rigid objects', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'RigidBody',
-          properties: [{ key: 'geometry', value: 'cube' }],
-          traits: ['rigid'],
-        })],
+        objects: [
+          createObject({
+            name: 'RigidBody',
+            properties: [{ key: 'geometry', value: 'cube' }],
+            traits: ['rigid'],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -572,10 +601,12 @@ describe('SDFCompiler', () => {
 
     it('should parse hex colors', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'ColoredBox',
-          properties: [{ key: 'color', value: '#ff0000' }],
-        })],
+        objects: [
+          createObject({
+            name: 'ColoredBox',
+            properties: [{ key: 'color', value: '#ff0000' }],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -585,10 +616,12 @@ describe('SDFCompiler', () => {
 
     it('should parse named colors', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'GreenBox',
-          properties: [{ key: 'color', value: 'green' }],
-        })],
+        objects: [
+          createObject({
+            name: 'GreenBox',
+            properties: [{ key: 'color', value: 'green' }],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -597,11 +630,13 @@ describe('SDFCompiler', () => {
 
     it('should add emissive for glowing objects', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'GlowingOrb',
-          properties: [{ key: 'color', value: '#ff00ff' }],
-          traits: ['glowing'],
-        })],
+        objects: [
+          createObject({
+            name: 'GlowingOrb',
+            properties: [{ key: 'color', value: '#ff00ff' }],
+            traits: ['glowing'],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -610,11 +645,13 @@ describe('SDFCompiler', () => {
 
     it('should add emissive for emissive trait', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'EmissiveLight',
-          properties: [{ key: 'color', value: 'yellow' }],
-          traits: ['emissive'],
-        })],
+        objects: [
+          createObject({
+            name: 'EmissiveLight',
+            properties: [{ key: 'color', value: 'yellow' }],
+            traits: ['emissive'],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -634,13 +671,15 @@ describe('SDFCompiler', () => {
   describe('Light Processing', () => {
     it('should process point lights', () => {
       const composition = createComposition({
-        lights: [createLight({
-          name: 'PointLight',
-          type: 'point',
-          position: [0, 0, 5],
-          color: '#ffffff',
-          intensity: 1.0,
-        })],
+        lights: [
+          createLight({
+            name: 'PointLight',
+            type: 'point',
+            position: [0, 0, 5],
+            color: '#ffffff',
+            intensity: 1.0,
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -649,10 +688,12 @@ describe('SDFCompiler', () => {
 
     it('should process directional lights', () => {
       const composition = createComposition({
-        lights: [createLight({
-          name: 'DirectionalLight',
-          type: 'directional',
-        })],
+        lights: [
+          createLight({
+            name: 'DirectionalLight',
+            type: 'directional',
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -661,11 +702,13 @@ describe('SDFCompiler', () => {
 
     it('should process spot lights with angle', () => {
       const composition = createComposition({
-        lights: [createLight({
-          name: 'SpotLight',
-          type: 'spot',
-          angle: 30,
-        })],
+        lights: [
+          createLight({
+            name: 'SpotLight',
+            type: 'spot',
+            angle: 30,
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -678,10 +721,12 @@ describe('SDFCompiler', () => {
 
     it('should include light position as pose', () => {
       const composition = createComposition({
-        lights: [createLight({
-          name: 'PositionedLight',
-          position: [1, 2, 3],
-        })],
+        lights: [
+          createLight({
+            name: 'PositionedLight',
+            position: [1, 2, 3],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -690,11 +735,13 @@ describe('SDFCompiler', () => {
 
     it('should include light color and intensity', () => {
       const composition = createComposition({
-        lights: [createLight({
-          name: 'ColorLight',
-          color: '#ff0000',
-          intensity: 2.0,
-        })],
+        lights: [
+          createLight({
+            name: 'ColorLight',
+            color: '#ff0000',
+            intensity: 2.0,
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -704,10 +751,12 @@ describe('SDFCompiler', () => {
 
     it('should include attenuation for lights with range', () => {
       const composition = createComposition({
-        lights: [createLight({
-          name: 'RangedLight',
-          range: 10,
-        })],
+        lights: [
+          createLight({
+            name: 'RangedLight',
+            range: 10,
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -717,10 +766,12 @@ describe('SDFCompiler', () => {
 
     it('should honor castShadow property', () => {
       const composition = createComposition({
-        lights: [createLight({
-          name: 'NoShadowLight',
-          castShadow: false,
-        })],
+        lights: [
+          createLight({
+            name: 'NoShadowLight',
+            castShadow: false,
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -731,10 +782,12 @@ describe('SDFCompiler', () => {
   describe('Spatial Groups', () => {
     it('should add comment for spatial groups', () => {
       const composition = createComposition({
-        spatialGroups: [{
-          name: 'ObjectGroup',
-          objects: [],
-        }],
+        spatialGroups: [
+          {
+            name: 'ObjectGroup',
+            objects: [],
+          },
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -743,13 +796,15 @@ describe('SDFCompiler', () => {
 
     it('should process objects within spatial groups', () => {
       const composition = createComposition({
-        spatialGroups: [{
-          name: 'MyGroup',
-          objects: [
-            createObject({ name: 'GroupedObject1' }),
-            createObject({ name: 'GroupedObject2' }),
-          ],
-        }],
+        spatialGroups: [
+          {
+            name: 'MyGroup',
+            objects: [
+              createObject({ name: 'GroupedObject1' }),
+              createObject({ name: 'GroupedObject2' }),
+            ],
+          },
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -783,10 +838,12 @@ describe('SDFCompiler', () => {
 
     it('should handle object without geometry', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'NoGeometry',
-          properties: [],
-        })],
+        objects: [
+          createObject({
+            name: 'NoGeometry',
+            properties: [],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -796,13 +853,15 @@ describe('SDFCompiler', () => {
 
     it('should handle array scale values', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'ArrayScale',
-          properties: [
-            { key: 'geometry', value: 'cube' },
-            { key: 'scale', value: [2, 3, 4] },
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'ArrayScale',
+            properties: [
+              { key: 'geometry', value: 'cube' },
+              { key: 'scale', value: [2, 3, 4] },
+            ],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -812,9 +871,11 @@ describe('SDFCompiler', () => {
 
     it('should handle light without optional properties', () => {
       const composition = createComposition({
-        lights: [createLight({
-          name: 'MinimalLight',
-        })],
+        lights: [
+          createLight({
+            name: 'MinimalLight',
+          }),
+        ],
       });
 
       expect(() => compiler.compile(composition)).not.toThrow();
@@ -822,10 +883,12 @@ describe('SDFCompiler', () => {
 
     it('should handle unknown light type', () => {
       const composition = createComposition({
-        lights: [createLight({
-          name: 'UnknownType',
-          type: 'area' as any, // Unknown type
-        })],
+        lights: [
+          createLight({
+            name: 'UnknownType',
+            type: 'area' as any, // Unknown type
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -835,10 +898,12 @@ describe('SDFCompiler', () => {
 
     it('should handle unknown named color', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'UnknownColor',
-          properties: [{ key: 'color', value: 'ultraviolet' }],
-        })],
+        objects: [
+          createObject({
+            name: 'UnknownColor',
+            properties: [{ key: 'color', value: 'ultraviolet' }],
+          }),
+        ],
       });
       const sdf = compiler.compile(composition);
 
@@ -904,19 +969,21 @@ describe('SDFCompiler', () => {
             castShadow: true,
           }),
         ],
-        spatialGroups: [{
-          name: 'Tools',
-          objects: [
-            createObject({
-              name: 'Wrench',
-              properties: [
-                { key: 'geometry', value: 'wrench.stl' },
-                { key: 'position', value: [0.5, 0, 1.05] },
-              ],
-              traits: ['grabbable'],
-            }),
-          ],
-        }],
+        spatialGroups: [
+          {
+            name: 'Tools',
+            objects: [
+              createObject({
+                name: 'Wrench',
+                properties: [
+                  { key: 'geometry', value: 'wrench.stl' },
+                  { key: 'position', value: [0.5, 0, 1.05] },
+                ],
+                traits: ['grabbable'],
+              }),
+            ],
+          },
+        ],
       });
 
       const customCompiler = new SDFCompiler({

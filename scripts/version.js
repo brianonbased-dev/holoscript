@@ -2,7 +2,7 @@
 
 /**
  * Version Management Script
- * 
+ *
  * Handles semantic versioning bumping and changelog generation
  * Usage: node scripts/version.js [major|minor|patch|prerelease]
  */
@@ -11,11 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const PACKAGES = [
-  'packages/core',
-  'packages/cli',
-  'packages/infinityassistant',
-];
+const PACKAGES = ['packages/core', 'packages/cli', 'packages/infinityassistant'];
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf-8'));

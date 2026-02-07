@@ -320,9 +320,7 @@ export const AUDIO_TRAIT_MAP: Record<string, TraitMapping> = {
     trait: 'audio_occlusion',
     components: [],
     level: 'comment',
-    generate: () => [
-      `// @audio_occlusion — RealityKit handles automatically with scene geometry`,
-    ],
+    generate: () => [`// @audio_occlusion — RealityKit handles automatically with scene geometry`],
   },
 
   head_tracked_audio: {
@@ -376,9 +374,7 @@ export const AR_TRAIT_MAP: Record<string, TraitMapping> = {
     trait: 'mesh_detection',
     components: [],
     level: 'comment',
-    generate: () => [
-      `// @mesh_detection — use SceneReconstructionProvider for mesh scanning`,
-    ],
+    generate: () => [`// @mesh_detection — use SceneReconstructionProvider for mesh scanning`],
   },
 
   hand_tracking: {
@@ -409,7 +405,7 @@ export const AR_TRAIT_MAP: Record<string, TraitMapping> = {
     trait: 'occlusion',
     components: [],
     level: 'full',
-    generate: (varName) => [
+    generate: (_varName) => [
       `// @occlusion — RealityKit handles automatically`,
       `// Ensure object has ModelComponent with proper materials`,
     ],
@@ -701,7 +697,7 @@ export const PORTAL_TRAIT_MAP: Record<string, TraitMapping> = {
     level: 'full',
     minVersion: '1.0',
     generate: (varName, config) => {
-      const targetWorld = config.target_world || 'portalWorld';
+      const _targetWorld = config.target_world || 'portalWorld';
       return [
         `let ${varName}World = Entity()`,
         `${varName}World.components.set(WorldComponent())`,

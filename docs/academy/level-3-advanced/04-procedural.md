@@ -5,6 +5,7 @@ Welcome to Lesson 3.4! In this advanced lesson, you'll learn how to generate VR 
 ## Why Procedural Generation?
 
 Procedural generation allows you to:
+
 - Create infinite unique content
 - Reduce asset creation time
 - Enable emergent gameplay
@@ -92,18 +93,18 @@ const height = fbm.noise2D(x, z)
 function generateTerrain(width, depth, resolution) {
   const noise = new FractalNoise({ seed: worldSeed })
   const vertices = []
-  
+
   for (let z = 0; z < depth; z++) {
     for (let x = 0; x < width; x++) {
       const nx = x / width
       const nz = z / depth
-      
+
       // Multi-layered noise for natural terrain
-      const height = 
+      const height =
         noise.noise2D(nx * 2, nz * 2) * 20 +       // Hills
         noise.noise2D(nx * 8, nz * 8) * 5 +        // Details
         noise.noise2D(nx * 32, nz * 32) * 1        // Micro details
-      
+
       vertices.push([
         x * resolution,
         height,
@@ -111,7 +112,7 @@ function generateTerrain(width, depth, resolution) {
       ])
     }
   }
-  
+
   return createMesh(vertices, width, depth)
 }
 
@@ -138,7 +139,7 @@ const biomes = {
 function getBiome(height, moisture) {
   // Temperature decreases with height
   const temperature = 1 - (height / 100)
-  
+
   if (height < 0) return biomes.ocean
   if (height < 2) return biomes.beach
   if (temperature > 0.6) return biomes.grass
@@ -158,10 +159,10 @@ class DungeonGenerator {
     this.rooms = []
     this.corridors = []
   }
-  
+
   generate(config) {
     const { width, height, roomCount, minRoomSize, maxRoomSize } = config
-    
+
     // Generate rooms
     for (let i = 0; i < roomCount; i++) {
       const room = this.generateRoom(width, height, minRoomSize, maxRoomSize)
@@ -169,31 +170,31 @@ class DungeonGenerator {
         this.rooms.push(room)
       }
     }
-    
+
     // Connect rooms with corridors
     this.connectRooms()
-    
+
     return { rooms: this.rooms, corridors: this.corridors }
   }
-  
+
   generateRoom(mapWidth, mapHeight, minSize, maxSize) {
     const w = this.rng.int(minSize, maxSize)
     const h = this.rng.int(minSize, maxSize)
     const x = this.rng.int(1, mapWidth - w - 1)
     const y = this.rng.int(1, mapHeight - h - 1)
-    
+
     return { x, y, width: w, height: h, center: [x + w/2, y + h/2] }
   }
-  
+
   connectRooms() {
     // Minimum spanning tree for room connections
     const connected = [this.rooms[0]]
     const unconnected = this.rooms.slice(1)
-    
+
     while (unconnected.length > 0) {
       let minDist = Infinity
       let closestPair = null
-      
+
       for (const roomA of connected) {
         for (const roomB of unconnected) {
           const dist = this.distance(roomA.center, roomB.center)
@@ -203,7 +204,7 @@ class DungeonGenerator {
           }
         }
       }
-      
+
       if (closestPair) {
         this.corridors.push(this.createCorridor(closestPair[0], closestPair[1]))
         connected.push(closestPair[1])
@@ -241,31 +242,31 @@ class WFCGenerator {
     this.tiles = tiles
     this.rules = adjacencyRules
   }
-  
+
   generate(width, height) {
     // Initialize grid with all possibilities
-    const grid = new Array(width * height).fill(null).map(() => 
+    const grid = new Array(width * height).fill(null).map(() =>
       new Set(this.tiles.map(t => t.id))
     )
-    
+
     while (!this.isCollapsed(grid)) {
       // Find cell with lowest entropy
       const cell = this.findLowestEntropy(grid)
-      
+
       // Collapse to single tile
       this.collapse(grid, cell)
-      
+
       // Propagate constraints
       this.propagate(grid, cell)
     }
-    
+
     return grid.map(cell => [...cell][0])
   }
-  
+
   findLowestEntropy(grid) {
     let minEntropy = Infinity
     let candidates = []
-    
+
     grid.forEach((possibilities, index) => {
       if (possibilities.size > 1) {
         if (possibilities.size < minEntropy) {
@@ -276,7 +277,7 @@ class WFCGenerator {
         }
       }
     })
-    
+
     return random.pick(candidates)
   }
 }
@@ -296,40 +297,40 @@ function scatterObjects(template, config) {
     slopeLimit,
     alignToNormal
   } = config
-  
+
   const placed = []
   const attempts = count * 10  // Allow some failures
-  
+
   for (let i = 0; i < attempts && placed.length < count; i++) {
     const x = random.float(bounds.min.x, bounds.max.x)
     const z = random.float(bounds.min.z, bounds.max.z)
     const y = heightMap.getHeight(x, z)
     const normal = heightMap.getNormal(x, z)
     const slope = Math.acos(normal.y) * (180 / Math.PI)
-    
+
     // Check slope
     if (slope > slopeLimit) continue
-    
+
     // Check minimum spacing
-    const tooClose = placed.some(p => 
+    const tooClose = placed.some(p =>
       Math.hypot(p.x - x, p.z - z) < minSpacing
     )
     if (tooClose) continue
-    
+
     // Place object
     const rotation = alignToNormal
       ? calculateAlignmentRotation(normal)
       : [0, random.float(0, 360), 0]
-    
+
     spawn(template, {
       position: [x, y, z],
       rotation,
       scale: random.float(0.8, 1.2)
     })
-    
+
     placed.push({ x, z })
   }
-  
+
   return placed
 }
 
@@ -354,20 +355,20 @@ function poissonDiskSampling(width, height, minDistance, maxAttempts = 30) {
   const gridWidth = Math.ceil(width / cellSize)
   const gridHeight = Math.ceil(height / cellSize)
   const grid = new Array(gridWidth * gridHeight).fill(null)
-  
+
   const points = []
   const active = []
-  
+
   // Start with random point
   const initial = [random.float(0, width), random.float(0, height)]
   points.push(initial)
   active.push(initial)
-  
+
   while (active.length > 0) {
     const idx = random.int(0, active.length - 1)
     const point = active[idx]
     let found = false
-    
+
     for (let i = 0; i < maxAttempts; i++) {
       const angle = random.float(0, Math.PI * 2)
       const distance = random.float(minDistance, minDistance * 2)
@@ -375,7 +376,7 @@ function poissonDiskSampling(width, height, minDistance, maxAttempts = 30) {
         point[0] + Math.cos(angle) * distance,
         point[1] + Math.sin(angle) * distance
       ]
-      
+
       if (isValid(candidate, grid, points, minDistance, width, height)) {
         points.push(candidate)
         active.push(candidate)
@@ -384,12 +385,12 @@ function poissonDiskSampling(width, height, minDistance, maxAttempts = 30) {
         break
       }
     }
-    
+
     if (!found) {
       active.splice(idx, 1)
     }
   }
-  
+
   return points
 }
 ```
@@ -399,7 +400,7 @@ function poissonDiskSampling(width, height, minDistance, maxAttempts = 30) {
 ```hs
 function generateWithLOD(position, playerPosition) {
   const distance = position.distanceTo(playerPosition)
-  
+
   if (distance < 50) {
     // Full detail
     return spawn(DetailedTree, { position })
@@ -432,22 +433,22 @@ class ChunkManager {
     this.viewDistance = viewDistance
     this.loadedChunks = new Map()
   }
-  
+
   update(playerPosition) {
     const playerChunk = this.getChunkCoord(playerPosition)
-    
+
     // Load new chunks
     for (let dx = -this.viewDistance; dx <= this.viewDistance; dx++) {
       for (let dz = -this.viewDistance; dz <= this.viewDistance; dz++) {
         const coord = [playerChunk[0] + dx, playerChunk[1] + dz]
         const key = `${coord[0]},${coord[1]}`
-        
+
         if (!this.loadedChunks.has(key)) {
           this.loadChunk(coord)
         }
       }
     }
-    
+
     // Unload distant chunks
     for (const [key, chunk] of this.loadedChunks) {
       const coord = key.split(',').map(Number)
@@ -455,13 +456,13 @@ class ChunkManager {
         Math.abs(coord[0] - playerChunk[0]),
         Math.abs(coord[1] - playerChunk[1])
       )
-      
+
       if (dist > this.viewDistance + 1) {
         this.unloadChunk(key)
       }
     }
   }
-  
+
   loadChunk(coord) {
     const seed = `${worldSeed}_${coord[0]}_${coord[1]}`
     const chunk = new Chunk(coord, this.chunkSize, seed)

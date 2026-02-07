@@ -241,10 +241,7 @@ export function createMemoryStorage(): StorageAdapter {
   return new MemoryStorageAdapter();
 }
 
-export function createIndexedDBStorage(
-  dbName?: string,
-  storeName?: string
-): StorageAdapter {
+export function createIndexedDBStorage(dbName?: string, storeName?: string): StorageAdapter {
   return new IndexedDBStorageAdapter(dbName, storeName);
 }
 

@@ -8,12 +8,8 @@
 
 import { readFileSync, existsSync, unlinkSync } from 'fs';
 import { join } from 'path';
-import {
-  PublishValidator,
-  validateForPublish,
-  type ValidationResult,
-} from './validator';
-import { PackagePackager, packPackage, type PackageResult } from './packager';
+import { validateForPublish } from './validator';
+import { packPackage } from './packager';
 
 // ============================================================================
 // Types
@@ -90,7 +86,7 @@ export class PackagePublisher {
    * Publish package to registry
    */
   async publish(): Promise<PublishResult> {
-    const errors: string[] = [];
+    const _errors: string[] = [];
     const warnings: string[] = [];
 
     // 1. Validate package
@@ -107,7 +103,8 @@ export class PackagePublisher {
       console.log('\n\x1b[31m✗ Validation failed:\x1b[0m');
       for (const error of validation.errors) {
         console.log(`  \x1b[31m• [${error.code}] ${error.message}\x1b[0m`);
-        if (error.file) console.log(`    \x1b[2m${error.file}${error.line ? `:${error.line}` : ''}\x1b[0m`);
+        if (error.file)
+          console.log(`    \x1b[2m${error.file}${error.line ? `:${error.line}` : ''}\x1b[0m`);
         if (error.fix) console.log(`    \x1b[33mFix: ${error.fix}\x1b[0m`);
       }
       return {
@@ -259,20 +256,22 @@ export class PackagePublisher {
     // Build request body
     const boundary = '----HoloScriptPublish' + Date.now();
     const body = this.buildMultipartBody(boundary, {
-      'package': {
+      package: {
         filename: `${name}-${version}.tgz`,
         contentType: 'application/gzip',
         content: tarball,
       },
-      'metadata': {
+      metadata: {
         contentType: 'application/json',
-        content: Buffer.from(JSON.stringify({
-          name,
-          version,
-          tag: this.options.tag,
-          access: this.options.access,
-          otp: this.options.otp,
-        })),
+        content: Buffer.from(
+          JSON.stringify({
+            name,
+            version,
+            tag: this.options.tag,
+            access: this.options.access,
+            otp: this.options.otp,
+          })
+        ),
       },
     });
 
@@ -281,7 +280,7 @@ export class PackagePublisher {
         method: 'PUT',
         headers: {
           'Content-Type': `multipart/form-data; boundary=${boundary}`,
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'User-Agent': 'holoscript-cli/1.0.0',
         },
         body,
@@ -335,13 +334,13 @@ export class PackagePublisher {
       chunks.push(Buffer.from(`--${boundary}\r\n`));
 
       if (part.filename) {
-        chunks.push(Buffer.from(
-          `Content-Disposition: form-data; name="${name}"; filename="${part.filename}"\r\n`
-        ));
+        chunks.push(
+          Buffer.from(
+            `Content-Disposition: form-data; name="${name}"; filename="${part.filename}"\r\n`
+          )
+        );
       } else {
-        chunks.push(Buffer.from(
-          `Content-Disposition: form-data; name="${name}"\r\n`
-        ));
+        chunks.push(Buffer.from(`Content-Disposition: form-data; name="${name}"\r\n`));
       }
 
       chunks.push(Buffer.from(`Content-Type: ${part.contentType}\r\n\r\n`));

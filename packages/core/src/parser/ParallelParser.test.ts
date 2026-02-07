@@ -6,12 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import {
-  ParallelParser,
-  createParallelParser,
-  FileInput,
-  ParseProgress,
-} from './ParallelParser';
+import { ParallelParser, createParallelParser, FileInput, ParseProgress } from './ParallelParser';
 import { WorkerPool, createWorkerPool } from './WorkerPool';
 import { HoloScriptPlusParser } from './HoloScriptPlusParser';
 

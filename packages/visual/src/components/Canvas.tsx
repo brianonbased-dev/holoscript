@@ -1,6 +1,6 @@
 /**
  * HoloScript Visual - Canvas Component
- * 
+ *
  * Main node editor canvas using React Flow.
  */
 
@@ -12,7 +12,7 @@ import ReactFlow, {
   type ReactFlowInstance,
   type OnConnect,
   type OnNodesChange,
-  type OnEdgesChange
+  type OnEdgesChange,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -25,7 +25,7 @@ import { CATEGORY_COLORS } from '../types';
  * Custom node types for React Flow
  */
 const nodeTypes = {
-  holoNode: HoloNode
+  holoNode: HoloNode,
 };
 
 /**
@@ -42,7 +42,7 @@ export interface CanvasProps {
 const Canvas: React.FC<CanvasProps> = ({ className, style }) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const reactFlowInstance = useRef<ReactFlowInstance | null>(null);
-  
+
   // Get state and actions from store
   const nodes = useGraphStore((s) => s.nodes);
   const edges = useGraphStore((s) => s.edges);
@@ -51,33 +51,33 @@ const Canvas: React.FC<CanvasProps> = ({ className, style }) => {
   const onConnect = useGraphStore((s) => s.onConnect);
   const addNode = useGraphStore((s) => s.addNode);
   const setSelectedNodes = useGraphStore((s) => s.setSelectedNodes);
-  
+
   // Handle dropping a node from sidebar
   const handleDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
-      
+
       const nodeType = event.dataTransfer.getData('application/holoscript-node');
       if (!nodeType || !reactFlowInstance.current) return;
-      
+
       const bounds = reactFlowWrapper.current?.getBoundingClientRect();
       if (!bounds) return;
-      
+
       const position = reactFlowInstance.current.project({
         x: event.clientX - bounds.left,
-        y: event.clientY - bounds.top
+        y: event.clientY - bounds.top,
       });
-      
+
       addNode(nodeType, position);
     },
     [addNode]
   );
-  
+
   const handleDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
-  
+
   // Handle selection changes
   const handleSelectionChange = useCallback(
     ({ nodes }: { nodes: HoloNodeType[] }) => {
@@ -85,12 +85,12 @@ const Canvas: React.FC<CanvasProps> = ({ className, style }) => {
     },
     [setSelectedNodes]
   );
-  
+
   // Initialize React Flow
   const handleInit = useCallback((instance: ReactFlowInstance) => {
     reactFlowInstance.current = instance;
   }, []);
-  
+
   return (
     <div
       ref={reactFlowWrapper}
@@ -99,7 +99,7 @@ const Canvas: React.FC<CanvasProps> = ({ className, style }) => {
         flex: 1,
         height: '100%',
         backgroundColor: '#0d0d14',
-        ...style
+        ...style,
       }}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
@@ -119,17 +119,17 @@ const Canvas: React.FC<CanvasProps> = ({ className, style }) => {
         defaultEdgeOptions={{
           type: 'smoothstep',
           animated: true,
-          style: { stroke: '#60a5fa', strokeWidth: 2 }
+          style: { stroke: '#60a5fa', strokeWidth: 2 },
         }}
         connectionLineStyle={{ stroke: '#60a5fa', strokeWidth: 2 }}
         proOptions={{ hideAttribution: true }}
       >
         <Background color="#2d2d3d" gap={16} size={1} />
-        <Controls 
-          style={{ 
+        <Controls
+          style={{
             backgroundColor: '#2d2d3d',
             borderRadius: 8,
-            border: '1px solid #3d3d4d'
+            border: '1px solid #3d3d4d',
           }}
         />
         <MiniMap
@@ -140,7 +140,7 @@ const Canvas: React.FC<CanvasProps> = ({ className, style }) => {
           style={{
             backgroundColor: '#1e1e2e',
             border: '1px solid #3d3d4d',
-            borderRadius: 8
+            borderRadius: 8,
           }}
           maskColor="rgba(0, 0, 0, 0.5)"
         />

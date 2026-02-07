@@ -103,14 +103,14 @@ export class KnowledgeClient {
   private timeout: number;
   private domain: string = 'holoscript';
 
-  constructor(options: {
-    baseUrl?: string;
-    timeout?: number;
-    domain?: string;
-  } = {}) {
-    this.baseUrl = options.baseUrl ||
-      process.env.KNOWLEDGE_HUB_URL ||
-      'http://localhost:3001';
+  constructor(
+    options: {
+      baseUrl?: string;
+      timeout?: number;
+      domain?: string;
+    } = {}
+  ) {
+    this.baseUrl = options.baseUrl || process.env.KNOWLEDGE_HUB_URL || 'http://localhost:3001';
     this.timeout = options.timeout || 10000;
     this.domain = options.domain || 'holoscript';
   }
@@ -128,8 +128,8 @@ export class KnowledgeClient {
         domain: options.domain || this.domain,
         tags: options.tags,
         limit: options.limit || 5,
-        minScore: options.minScore || 0.7
-      })
+        minScore: options.minScore || 0.7,
+      }),
     });
 
     return response.results || [];
@@ -153,17 +153,17 @@ export class KnowledgeClient {
 
   async getRelevantPatterns(context: string): Promise<Pattern[]> {
     const results = await this.searchPatterns(context);
-    return results.map(r => this.parsePattern(r));
+    return results.map((r) => this.parsePattern(r));
   }
 
   async getRelevantGotchas(context: string): Promise<Gotcha[]> {
     const results = await this.searchGotchas(context);
-    return results.map(r => this.parseGotcha(r));
+    return results.map((r) => this.parseGotcha(r));
   }
 
   async getRelevantWisdom(context: string): Promise<Wisdom[]> {
     const results = await this.searchWisdom(context);
-    return results.map(r => this.parseWisdom(r));
+    return results.map((r) => this.parseWisdom(r));
   }
 
   // --------------------------------------------------------------------------
@@ -175,8 +175,8 @@ export class KnowledgeClient {
       method: 'POST',
       body: JSON.stringify({
         ...gotcha,
-        domain: this.domain
-      })
+        domain: this.domain,
+      }),
     });
     return response.id;
   }
@@ -186,8 +186,8 @@ export class KnowledgeClient {
       method: 'POST',
       body: JSON.stringify({
         ...pattern,
-        domain: this.domain
-      })
+        domain: this.domain,
+      }),
     });
     return response.id;
   }
@@ -197,8 +197,8 @@ export class KnowledgeClient {
       method: 'POST',
       body: JSON.stringify({
         ...wisdom,
-        domain: this.domain
-      })
+        domain: this.domain,
+      }),
     });
     return response.id;
   }
@@ -210,7 +210,7 @@ export class KnowledgeClient {
   async getSessionContext(): Promise<SearchResult[]> {
     return this.search('current session context priorities', {
       category: 'session',
-      limit: 3
+      limit: 3,
     });
   }
 
@@ -224,8 +224,8 @@ export class KnowledgeClient {
       method: 'POST',
       body: JSON.stringify({
         ...context,
-        domain: this.domain
-      })
+        domain: this.domain,
+      }),
     });
     return response.id;
   }
@@ -236,7 +236,7 @@ export class KnowledgeClient {
 
   async getStats(): Promise<KnowledgeStats> {
     const response = await this.request('/api/stats', {
-      method: 'GET'
+      method: 'GET',
     });
     return response;
   }
@@ -244,7 +244,7 @@ export class KnowledgeClient {
   async isAvailable(): Promise<boolean> {
     try {
       const response = await this.request('/health', {
-        method: 'GET'
+        method: 'GET',
       });
       return response.status === 'ok';
     } catch {
@@ -265,9 +265,9 @@ export class KnowledgeClient {
         ...options,
         headers: {
           'Content-Type': 'application/json',
-          ...(options.headers || {})
+          ...(options.headers || {}),
         },
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -299,7 +299,7 @@ export class KnowledgeClient {
       solution: solutionMatch?.[1]?.trim() || '',
       example: exampleMatch?.[1]?.trim(),
       domain: result.metadata.domain,
-      tags: result.metadata.tags
+      tags: result.metadata.tags,
     };
   }
 
@@ -318,7 +318,7 @@ export class KnowledgeClient {
       fix: fixMatch?.[1]?.trim() || '',
       prevention: preventionMatch?.[1]?.trim(),
       domain: result.metadata.domain,
-      tags: result.metadata.tags
+      tags: result.metadata.tags,
     };
   }
 
@@ -337,7 +337,7 @@ export class KnowledgeClient {
       context: contextMatch?.[1]?.trim(),
       source: sourceMatch?.[1]?.trim(),
       domain: result.metadata.domain,
-      tags: result.metadata.tags
+      tags: result.metadata.tags,
     };
   }
 }

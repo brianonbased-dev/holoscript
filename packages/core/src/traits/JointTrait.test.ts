@@ -189,11 +189,11 @@ describe('JointTrait', () => {
     it('should remove event listener', () => {
       let count = 0;
       const handler = () => count++;
-      
+
       trait.on('break', handler);
       trait.break();
       expect(count).toBe(1);
-      
+
       trait.reset();
       trait.off('break', handler);
       trait.break();

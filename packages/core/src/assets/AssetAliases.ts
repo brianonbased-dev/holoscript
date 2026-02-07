@@ -8,31 +8,31 @@
 
 export const DEFAULT_ASSET_ALIASES: Record<string, string> = {
   // Nature
-  'tree': 'nature/oak_tree_v1',
-  'pine': 'nature/pine_evergreen_01',
-  'rock': 'nature/granite_rock_01',
-  'bush': 'nature/hedge_shrub_01',
-  'grass': 'nature/grass_clump_01',
-  'flower': 'nature/wildflower_blue_01',
+  tree: 'nature/oak_tree_v1',
+  pine: 'nature/pine_evergreen_01',
+  rock: 'nature/granite_rock_01',
+  bush: 'nature/hedge_shrub_01',
+  grass: 'nature/grass_clump_01',
+  flower: 'nature/wildflower_blue_01',
 
   // Architecture/Props
-  'bench': 'props/park_bench_wood',
-  'lamp': 'props/street_lamp_deco',
-  'fountain': 'props/fountain_art_deco',
-  'arch': 'props/deco_arch_stone',
-  'dome': 'props/glass_dome_gold',
+  bench: 'props/park_bench_wood',
+  lamp: 'props/street_lamp_deco',
+  fountain: 'props/fountain_art_deco',
+  arch: 'props/deco_arch_stone',
+  dome: 'props/glass_dome_gold',
 
   // Characters
-  'human_male': 'characters/base_male_rigged',
-  'human_female': 'characters/base_female_rigged',
-  'robot': 'characters/droid_worker_01',
-  'brittney': 'characters/brittney_v4_rigged',
-  'avatar': 'characters/base_avatar_01',
+  human_male: 'characters/base_male_rigged',
+  human_female: 'characters/base_female_rigged',
+  robot: 'characters/droid_worker_01',
+  brittney: 'characters/brittney_v4_rigged',
+  avatar: 'characters/base_avatar_01',
 
   // Structures
-  'shop': 'buildings/shop_front_01',
-  'house': 'buildings/cottage_solarpunk_01',
-  'tower': 'buildings/tech_spire_01',
+  shop: 'buildings/shop_front_01',
+  house: 'buildings/cottage_solarpunk_01',
+  tower: 'buildings/tech_spire_01',
 };
 
 /**
@@ -41,16 +41,16 @@ export const DEFAULT_ASSET_ALIASES: Record<string, string> = {
  */
 export function resolveAssetAlias(name: string, customAliases?: Record<string, string>): string {
   const normalized = name.toLowerCase();
-  
+
   // Check custom aliases first
   if (customAliases && customAliases[normalized]) {
     return customAliases[normalized];
   }
-  
+
   // Check default aliases
   if (DEFAULT_ASSET_ALIASES[normalized]) {
     return DEFAULT_ASSET_ALIASES[normalized];
   }
-  
+
   return name;
 }

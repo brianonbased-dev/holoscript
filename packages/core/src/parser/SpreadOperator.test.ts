@@ -1,6 +1,6 @@
 /**
  * Spread Operator Tests - Sprint 1
- * 
+ *
  * Tests for comprehensive spread operator support across:
  * - Object spread syntax
  * - Array spread syntax
@@ -17,7 +17,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
   // =========================================================================
   // OBJECT SPREAD TESTS
   // =========================================================================
-  
+
   describe('Object Spread', () => {
     test('should parse object spread with template reference', () => {
       const source = `
@@ -31,7 +31,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           scale: 2.0
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
       expect(result.errors.length).toBe(0);
@@ -45,7 +45,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           color: "red"
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -57,7 +57,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           title: "Custom"
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -73,7 +73,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           scale: 1.5
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -84,7 +84,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           ...
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0].message).toContain('Unexpected token in expression');
@@ -94,7 +94,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
   // =========================================================================
   // ARRAY SPREAD TESTS
   // =========================================================================
-  
+
   describe('Array Spread', () => {
     test('should parse array spread with reference', () => {
       const source = `
@@ -105,7 +105,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           ]
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
       expect(result.errors.length).toBe(0);
@@ -123,7 +123,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           ]
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -143,7 +143,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           }
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -156,7 +156,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           mixed: [true, ...config.flags, false]
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -169,7 +169,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           2
         ]
       `;
-      
+
       const result = parser.parse(source);
       expect(result.errors.length).toBeGreaterThan(0);
     });
@@ -178,7 +178,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
   // =========================================================================
   // TEMPLATE SPREAD TESTS
   // =========================================================================
-  
+
   describe('Template & Property Spread', () => {
     test('should parse template spread in trait properties', () => {
       const source = `
@@ -188,7 +188,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
         )
         orb rigidBody {}
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -205,7 +205,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           }
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -218,7 +218,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           color: "green"
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -227,7 +227,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
   // =========================================================================
   // COMPLEX SCENARIOS
   // =========================================================================
-  
+
   describe('Complex Spread Scenarios', () => {
     test('should parse composition with spreads', () => {
       const source = `
@@ -246,7 +246,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           }
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -271,7 +271,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           }
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -294,7 +294,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           }
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -303,16 +303,16 @@ describe('Spread Operator (...) - Sprint 1', () => {
   // =========================================================================
   // AST STRUCTURE VALIDATION
   // =========================================================================
-  
+
   describe('Spread AST Node Structure', () => {
     test('should create proper spread AST nodes in arrays', () => {
       const source = `orb obj { items: [1, ...arr, 2] }`;
       const result = parser.parse(source);
-      
+
       expect(result.success).toBe(true);
       const firstChild = result.ast.children?.[0];
-      const itemsProp = (firstChild as any)?.properties?.items;
-      
+      const itemsProp = (firstChild)?.properties?.items;
+
       // Should have array with mixed elements and spread
       expect(Array.isArray(itemsProp)).toBe(true);
       expect(itemsProp.some((item: any) => item.type === 'spread')).toBe(true);
@@ -321,24 +321,24 @@ describe('Spread Operator (...) - Sprint 1', () => {
     test('should create proper spread AST nodes in objects', () => {
       const source = `orb obj { config: { ...base, key: "value" } }`;
       const result = parser.parse(source);
-      
+
       expect(result.success).toBe(true);
       const firstChild = result.ast.children?.[0];
-      const config = (firstChild as any)?.properties?.config;
-      
+      const config = (firstChild)?.properties?.config;
+
       // Should have object with spread key
       expect(config).toBeDefined();
-      expect(Object.keys(config).some(k => k.startsWith('__spread_'))).toBe(true);
+      expect(Object.keys(config).some((k) => k.startsWith('__spread_'))).toBe(true);
     });
 
     test('spread AST should contain argument field', () => {
       const source = `orb obj { data: [...myArray] }`;
       const result = parser.parse(source);
-      
+
       expect(result.success).toBe(true);
       const firstChild = result.ast.children?.[0];
-      const data = (firstChild as any)?.properties?.data;
-      
+      const data = (firstChild)?.properties?.data;
+
       if (Array.isArray(data) && data[0]?.type === 'spread') {
         expect(data[0]).toHaveProperty('argument');
         expect(data[0].argument).toBeDefined();
@@ -349,7 +349,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
   // =========================================================================
   // EDGE CASES
   // =========================================================================
-  
+
   describe('Edge Cases & Recovery', () => {
     test('should handle spread in empty array', () => {
       const source = `orb obj { items: [...arr] }`;
@@ -395,7 +395,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
         orb obj1 { items: [...validArray] }
         orb obj2 { data: [...anotherArray] }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
       expect(result.ast.children?.length).toBe(2);
@@ -460,7 +460,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
 
       expect(result.success).toBe(true);
       const firstChild = result.ast.children?.[0];
-      const data = (firstChild as any)?.properties?.data;
+      const data = (firstChild)?.properties?.data;
 
       // Should be a call expression with spread arguments
       expect(data).toBeDefined();
@@ -469,8 +469,8 @@ describe('Spread Operator (...) - Sprint 1', () => {
 
       // parseParenExpression unwraps single arguments, so check both cases
       const args = Array.isArray(data.args) ? data.args : [data.args];
-      const hasSpread = args.some((arg: any) =>
-        arg && typeof arg === 'object' && arg.type === 'spread'
+      const hasSpread = args.some(
+        (arg: any) => arg && typeof arg === 'object' && arg.type === 'spread'
       );
       expect(hasSpread).toBe(true);
     });
@@ -522,7 +522,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
 
       expect(result.success).toBe(true);
       const firstChild = result.ast.children?.[0];
-      const handler = (firstChild as any)?.properties?.handler;
+      const handler = (firstChild)?.properties?.handler;
 
       expect(handler.type).toBe('arrow_function');
       expect(handler.params).toHaveLength(1);
@@ -610,7 +610,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           config: { ...template, key: "val" }
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
     });
@@ -627,7 +627,7 @@ describe('Spread Operator (...) - Sprint 1', () => {
           ]
         }
       `;
-      
+
       const result = parser.parse(source);
       expect(result.success).toBe(true);
       expect(result.errors.length).toBe(0);

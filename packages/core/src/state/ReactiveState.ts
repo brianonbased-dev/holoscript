@@ -180,7 +180,7 @@ export class ReactiveState<T extends StateDeclaration> implements IReactiveState
     // Listen for remote updates
     eventBus.on(`state_sync:${this.syncId}`, (data: any) => {
       if (data.source === 'local') return; // Ignore own events (if loopback)
-      
+
       this.isApplyingSync = true;
       try {
         this.update(data.updates);
@@ -198,7 +198,7 @@ export class ReactiveState<T extends StateDeclaration> implements IReactiveState
       eventBus.emit(`state_sync:${this.syncId}`, {
         source: 'local',
         timestamp: Date.now(),
-        updates: { [key]: value }
+        updates: { [key]: value },
       });
     }
   }
@@ -385,7 +385,10 @@ export class ReactiveState<T extends StateDeclaration> implements IReactiveState
 // FACTORY FUNCTIONS
 // =============================================================================
 
-export function createState<T extends StateDeclaration>(initialState: T, syncId?: string): ReactiveState<T> {
+export function createState<T extends StateDeclaration>(
+  initialState: T,
+  syncId?: string
+): ReactiveState<T> {
   return new ReactiveState(initialState, syncId);
 }
 
@@ -622,10 +625,4 @@ export class StateDOMBinder<T extends StateDeclaration> {
 // EXPORTS
 // =============================================================================
 
-export {
-  track,
-  trigger,
-  runEffect,
-  flushEffects,
-  createReactiveProxy,
-};
+export { track, trigger, runEffect, flushEffects, createReactiveProxy };

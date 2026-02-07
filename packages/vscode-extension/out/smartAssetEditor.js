@@ -1,53 +1,55 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.SmartAssetEditorProvider = void 0;
-const vscode = require("vscode");
-const AdmZip = require("adm-zip");
+const vscode = require('vscode');
+const AdmZip = require('adm-zip');
 class SmartAssetEditorProvider {
-    static register(context) {
-        const provider = new SmartAssetEditorProvider(context);
-        return vscode.window.registerCustomEditorProvider(SmartAssetEditorProvider.viewType, provider, {
-            webviewOptions: {
-                retainContextWhenHidden: true,
-            },
-            supportsMultipleEditorsPerDocument: false,
-        });
+  static register(context) {
+    const provider = new SmartAssetEditorProvider(context);
+    return vscode.window.registerCustomEditorProvider(SmartAssetEditorProvider.viewType, provider, {
+      webviewOptions: {
+        retainContextWhenHidden: true,
+      },
+      supportsMultipleEditorsPerDocument: false,
+    });
+  }
+  constructor(context) {
+    this.context = context;
+  }
+  async openCustomDocument(uri, openContext, token) {
+    return { uri, dispose: () => {} };
+  }
+  async resolveCustomEditor(document, webviewPanel, token) {
+    webviewPanel.webview.options = {
+      enableScripts: true,
+    };
+    try {
+      const fileData = await vscode.workspace.fs.readFile(document.uri);
+      const zip = new AdmZip(Buffer.from(fileData));
+      const entry = zip.getEntry('smart-asset.json');
+      if (!entry) {
+        webviewPanel.webview.html = this.getErrorHtml(
+          'Invalid Smart Asset: smart-asset.json not found.'
+        );
+        return;
+      }
+      const jsonContent = entry.getData().toString('utf8');
+      let smartAsset;
+      try {
+        smartAsset = JSON.parse(jsonContent);
+      } catch (e) {
+        webviewPanel.webview.html = this.getErrorHtml(
+          'Invalid Smart Asset: Malformed smart-asset.json.'
+        );
+        return;
+      }
+      webviewPanel.webview.html = this.getHtmlForWebview(smartAsset);
+    } catch (error) {
+      webviewPanel.webview.html = this.getErrorHtml(`Error opening asset: ${error}`);
     }
-    constructor(context) {
-        this.context = context;
-    }
-    async openCustomDocument(uri, openContext, token) {
-        return { uri, dispose: () => { } };
-    }
-    async resolveCustomEditor(document, webviewPanel, token) {
-        webviewPanel.webview.options = {
-            enableScripts: true,
-        };
-        try {
-            const fileData = await vscode.workspace.fs.readFile(document.uri);
-            const zip = new AdmZip(Buffer.from(fileData));
-            const entry = zip.getEntry('smart-asset.json');
-            if (!entry) {
-                webviewPanel.webview.html = this.getErrorHtml("Invalid Smart Asset: smart-asset.json not found.");
-                return;
-            }
-            const jsonContent = entry.getData().toString('utf8');
-            let smartAsset;
-            try {
-                smartAsset = JSON.parse(jsonContent);
-            }
-            catch (e) {
-                webviewPanel.webview.html = this.getErrorHtml("Invalid Smart Asset: Malformed smart-asset.json.");
-                return;
-            }
-            webviewPanel.webview.html = this.getHtmlForWebview(smartAsset);
-        }
-        catch (error) {
-            webviewPanel.webview.html = this.getErrorHtml(`Error opening asset: ${error}`);
-        }
-    }
-    getErrorHtml(error) {
-        return `
+  }
+  getErrorHtml(error) {
+    return `
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -62,13 +64,13 @@ class SmartAssetEditorProvider {
             </body>
             </html>
         `;
-    }
-    getHtmlForWebview(asset) {
-        const scriptPreview = asset.script || '// No script provided';
-        const metadata = asset.metadata || {};
-        const physics = asset.physics || {};
-        const ai = asset.ai || {};
-        return `
+  }
+  getHtmlForWebview(asset) {
+    const scriptPreview = asset.script || '// No script provided';
+    const metadata = asset.metadata || {};
+    const physics = asset.physics || {};
+    const ai = asset.ai || {};
+    return `
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -148,15 +150,15 @@ class SmartAssetEditorProvider {
             </body>
             </html>
         `;
-    }
-    escapeHtml(unsafe) {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
+  }
+  escapeHtml(unsafe) {
+    return unsafe
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 }
 exports.SmartAssetEditorProvider = SmartAssetEditorProvider;
 SmartAssetEditorProvider.viewType = 'holoscript.smartAssetViewer';

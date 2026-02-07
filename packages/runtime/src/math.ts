@@ -106,12 +106,7 @@ export function shuffle<T>(array: T[]): T[] {
 /**
  * Calculate distance between two 2D points
  */
-export function distance2D(
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number
-): number {
+export function distance2D(x1: number, y1: number, x2: number, y2: number): number {
   const dx = x2 - x1;
   const dy = y2 - y1;
   return Math.sqrt(dx * dx + dy * dy);
@@ -199,12 +194,7 @@ export function noise1D(x: number): number {
 /**
  * Fractal Brownian Motion (fbm) - layered noise
  */
-export function fbm(
-  x: number,
-  octaves = 4,
-  lacunarity = 2,
-  persistence = 0.5
-): number {
+export function fbm(x: number, octaves = 4, lacunarity = 2, persistence = 0.5): number {
   let value = 0;
   let amplitude = 1;
   let frequency = 1;

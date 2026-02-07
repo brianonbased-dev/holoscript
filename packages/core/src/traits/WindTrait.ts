@@ -21,17 +21,17 @@ interface WindState {
 }
 
 interface WindConfig {
-  direction: number[];         // Normalized wind direction [x, y, z]
-  strength: number;            // Base wind strength (m/s)
-  turbulence: number;          // Turbulence intensity (0-1)
+  direction: number[]; // Normalized wind direction [x, y, z]
+  strength: number; // Base wind strength (m/s)
+  turbulence: number; // Turbulence intensity (0-1)
   turbulence_frequency: number; // How fast turbulence changes
-  pulse: boolean;              // Whether wind pulses on/off
-  pulse_frequency: number;     // Pulses per second
+  pulse: boolean; // Whether wind pulses on/off
+  pulse_frequency: number; // Pulses per second
   falloff: 'none' | 'linear' | 'quadratic'; // Distance falloff
-  radius: number;              // Effective radius
-  affects: string[];           // Tags of objects to affect (empty = all)
-  gust_chance: number;         // Chance of random gusts (0-1)
-  gust_multiplier: number;     // Gust strength multiplier
+  radius: number; // Effective radius
+  affects: string[]; // Tags of objects to affect (empty = all)
+  gust_chance: number; // Chance of random gusts (0-1)
+  gust_multiplier: number; // Gust strength multiplier
 }
 
 // =============================================================================
@@ -61,30 +61,30 @@ function smoothNoise(t: number, seed: number = 0): number {
 export const windHandler: TraitHandler<WindConfig> = {
   name: 'wind' as any,
 
-  defaultConfig: { 
-    direction: [1, 0, 0], 
-    strength: 5, 
-    turbulence: 0.3, 
-    turbulence_frequency: 1.0, 
-    pulse: false, 
-    pulse_frequency: 0.5, 
-    falloff: 'none', 
-    radius: 100, 
+  defaultConfig: {
+    direction: [1, 0, 0],
+    strength: 5,
+    turbulence: 0.3,
+    turbulence_frequency: 1.0,
+    pulse: false,
+    pulse_frequency: 0.5,
+    falloff: 'none',
+    radius: 100,
     affects: [],
     gust_chance: 0.01,
     gust_multiplier: 2.0,
   },
 
   onAttach(node, config, context) {
-    const state: WindState = { 
-      currentStrength: config.strength, 
+    const state: WindState = {
+      currentStrength: config.strength,
       gustTimer: 0,
       turbulenceOffset: { x: 0, y: 0, z: 0 },
       time: 0,
       isActive: true,
     };
     (node as any).__windState = state;
-    
+
     // Register wind zone with physics system via event
     context.emit?.('register_wind_zone', {
       node,
@@ -103,7 +103,7 @@ export const windHandler: TraitHandler<WindConfig> = {
     if (!state || !state.isActive) return;
 
     state.time += delta;
-    
+
     // Update turbulence
     const turbTime = state.time * config.turbulence_frequency;
     state.turbulenceOffset = {
@@ -111,18 +111,18 @@ export const windHandler: TraitHandler<WindConfig> = {
       y: smoothNoise(turbTime, 1) * config.turbulence * 0.5, // Less vertical turbulence
       z: smoothNoise(turbTime, 2) * config.turbulence,
     };
-    
+
     // Handle pulsing
     let pulseMultiplier = 1.0;
     if (config.pulse) {
       const pulsePhase = state.time * config.pulse_frequency * Math.PI * 2;
       pulseMultiplier = (Math.sin(pulsePhase) + 1) / 2; // 0 to 1
     }
-    
+
     // Handle gusts
     state.gustTimer = Math.max(0, state.gustTimer - delta);
     let gustMultiplier = 1.0;
-    
+
     if (state.gustTimer > 0) {
       gustMultiplier = config.gust_multiplier;
     } else if (Math.random() < config.gust_chance * delta * 60) {
@@ -131,13 +131,13 @@ export const windHandler: TraitHandler<WindConfig> = {
       gustMultiplier = config.gust_multiplier;
       context.emit?.('on_gust_start', { node, duration: state.gustTimer });
     }
-    
+
     // Calculate current effective strength
     state.currentStrength = config.strength * pulseMultiplier * gustMultiplier;
-    
+
     // Request objects in radius and apply wind force via events
     const windPos = (node as any).position || { x: 0, y: 0, z: 0 };
-    
+
     // Emit wind zone update for physics system to apply forces
     context.emit?.('wind_zone_update', {
       node,
@@ -149,11 +149,11 @@ export const windHandler: TraitHandler<WindConfig> = {
       falloff: config.falloff,
       affects: config.affects,
     });
-    
+
     // Emit wind change event when strength changes significantly
     if (Math.abs(state.currentStrength - config.strength * pulseMultiplier) > 0.5) {
-      context.emit?.('on_wind_change', { 
-        node, 
+      context.emit?.('on_wind_change', {
+        node,
         strength: state.currentStrength,
         direction: config.direction,
       });
@@ -163,7 +163,7 @@ export const windHandler: TraitHandler<WindConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__windState as WindState;
     if (!state) return;
-    
+
     if (event.type === 'set_wind_direction') {
       config.direction = event.direction;
     } else if (event.type === 'set_wind_strength') {
@@ -180,7 +180,7 @@ export const windHandler: TraitHandler<WindConfig> = {
 // HELPER FUNCTIONS
 // =============================================================================
 
-function calculateWindForce(
+function _calculateWindForce(
   state: WindState,
   config: WindConfig,
   windPos: { x: number; y: number; z: number },
@@ -191,27 +191,27 @@ function calculateWindForce(
   const dy = objectPos.y - windPos.y;
   const dz = objectPos.z - windPos.z;
   const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-  
+
   // Calculate falloff
   let falloff = 1.0;
   if (distance > config.radius) {
     falloff = 0;
   } else if (config.falloff === 'linear') {
-    falloff = 1 - (distance / config.radius);
+    falloff = 1 - distance / config.radius;
   } else if (config.falloff === 'quadratic') {
     const ratio = distance / config.radius;
-    falloff = 1 - (ratio * ratio);
+    falloff = 1 - ratio * ratio;
   }
-  
+
   if (falloff <= 0) return { x: 0, y: 0, z: 0 };
-  
+
   // Apply turbulence to direction
   const dir = {
     x: config.direction[0] + state.turbulenceOffset.x,
     y: config.direction[1] + state.turbulenceOffset.y,
     z: config.direction[2] + state.turbulenceOffset.z,
   };
-  
+
   // Normalize
   const len = Math.sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
   if (len > 0) {
@@ -219,10 +219,10 @@ function calculateWindForce(
     dir.y /= len;
     dir.z /= len;
   }
-  
+
   // Calculate final force
   const forceMag = state.currentStrength * falloff;
-  
+
   return {
     x: dir.x * forceMag,
     y: dir.y * forceMag,

@@ -4,22 +4,22 @@ HoloScript has three file formats, each optimized for different use cases.
 
 ## Overview
 
-| Extension | Style | Parser | Best For |
-|-----------|-------|--------|----------|
-| `.hs` | Object-centric | ✅ Working | Prototypes, learning |
-| `.hsplus` | Object + Traits | ✅ Working | Production VR/AR apps |
-| `.holo` | Scene-centric | ✅ Working | AI generation, full worlds |
+| Extension | Style           | Parser     | Best For                   |
+| --------- | --------------- | ---------- | -------------------------- |
+| `.hs`     | Object-centric  | ✅ Working | Prototypes, learning       |
+| `.hsplus` | Object + Traits | ✅ Working | Production VR/AR apps      |
+| `.holo`   | Scene-centric   | ✅ Working | AI generation, full worlds |
 
 ## Format Selection Guide
 
-| Use Case | Recommended Format |
-|----------|--------------------|
-| AI-friendly scene composition | `.holo` |
-| Libraries, visual components | `.hs` |
-| VR interactions, reactive state | `.hsplus` ✨ |
-| Simple prototypes | `.hs` |
-| Complete game levels | `.holo` |
-| Multiplayer networking | `.hsplus` |
+| Use Case                        | Recommended Format |
+| ------------------------------- | ------------------ |
+| AI-friendly scene composition   | `.holo`            |
+| Libraries, visual components    | `.hs`              |
+| VR interactions, reactive state | `.hsplus` ✨       |
+| Simple prototypes               | `.hs`              |
+| Complete game levels            | `.holo`            |
+| Multiplayer networking          | `.hsplus`          |
 
 ::: tip Recommended Default
 **`.hsplus` is recommended for most use cases** with `@trait`, `@state`, `${interpolation}`, and `.ts` companion file support.
@@ -89,14 +89,14 @@ orb player {
   @collidable
   @physics
   @networked
-  
+
   position: [0, 1.6, 0]
-  
+
   state {
     health: 100
     isAlive: true
   }
-  
+
   on_collision(other) {
     if (other.is_enemy) {
       this.state.health -= 10
@@ -108,14 +108,14 @@ orb weapon {
   @grabbable(snap_to_hand: true)
   @throwable(velocity_multiplier: 2.0)
   @glowing(color: "#00ffff")
-  
+
   position: [1, 1, -2]
-  
+
   on_grab: {
     haptic_feedback("dominant", 0.5)
     play_sound("pickup.wav")
   }
-  
+
   on_throw: {
     enable_damage()
   }
@@ -126,7 +126,7 @@ networked_object syncedPlayer {
   sync_rate: 20hz
   position: synced
   rotation: synced
-  
+
   state {
     displayName: "Player"
     score: 0
@@ -171,16 +171,16 @@ composition "My Game Level" {
     @physics
     @collidable
     @destructible
-    
+
     state {
       health: 100
       speed: 5
     }
-    
+
     action attack(target) {
       target.take_damage(10)
     }
-    
+
     action die() {
       spawn "Explosion" at this.position
       Player.score += 10
@@ -191,7 +191,7 @@ composition "My Game Level" {
   template "Collectible" {
     @grabbable
     @glowing
-    
+
     on_grab: {
       Player.inventory.add(this.item_type)
       destroy this
@@ -202,7 +202,7 @@ composition "My Game Level" {
   object "Player" {
     @collidable
     position: [0, 1.6, 0]
-    
+
     state {
       score: 0
       inventory: []
@@ -212,16 +212,16 @@ composition "My Game Level" {
   // Grouped objects
   spatial_group "EnemySpawns" {
     position: [0, 0, 50]
-    
+
     object "Goblin_1" using "Enemy" {
       position: [0, 0, 0]
       color: "#00ff00"
     }
-    
+
     object "Goblin_2" using "Enemy" {
       position: [5, 0, 0]
     }
-    
+
     object "Goblin_3" using "Enemy" {
       position: [10, 0, 0]
     }
@@ -233,12 +233,12 @@ composition "My Game Level" {
       spawn "Boss" at [0, 0, 100]
       lock_doors()
     }
-    
+
     on_all_enemies_dead {
       unlock_doors()
       spawn_loot()
     }
-    
+
     every 30s {
       spawn_wave()
     }
@@ -268,16 +268,16 @@ composition "My Game Level" {
 
 ## Format Comparison
 
-| Feature | .hs | .hsplus | .holo |
-|---------|-----|---------|-------|
-| Objects | `orb name {}` | `orb name {}` | `object "name" {}` |
-| Functions | `function name() {}` | `function name() {}` | `action name() {}` |
-| VR Traits | ❌ | `@grabbable` | `@grabbable` |
-| Reactive State | ❌ | `@state {}` | `state {}` |
-| Templates | ❌ | ❌ | `template "Name" {}` |
-| Environment | ❌ | ❌ | `environment {}` |
-| Spatial Groups | ❌ | ❌ | `spatial_group {}` |
-| Logic Block | ❌ | ❌ | `logic {}` |
+| Feature        | .hs                  | .hsplus              | .holo                |
+| -------------- | -------------------- | -------------------- | -------------------- |
+| Objects        | `orb name {}`        | `orb name {}`        | `object "name" {}`   |
+| Functions      | `function name() {}` | `function name() {}` | `action name() {}`   |
+| VR Traits      | ❌                   | `@grabbable`         | `@grabbable`         |
+| Reactive State | ❌                   | `@state {}`          | `state {}`           |
+| Templates      | ❌                   | ❌                   | `template "Name" {}` |
+| Environment    | ❌                   | ❌                   | `environment {}`     |
+| Spatial Groups | ❌                   | ❌                   | `spatial_group {}`   |
+| Logic Block    | ❌                   | ❌                   | `logic {}`           |
 
 ---
 
@@ -331,13 +331,13 @@ composition "Ball Demo" {
 
 When using all three formats together:
 
-| Capability | Combined Value |
-|------------|----------------|
-| VR Traits | 55 (stackable - 20+ per object) |
-| Lifecycle Hooks | 80+ (combinable) |
-| Builtin Functions | 90+ |
-| Import Chains | Unlimited |
-| Nesting Depth | Unlimited (AST) |
+| Capability        | Combined Value                  |
+| ----------------- | ------------------------------- |
+| VR Traits         | 55 (stackable - 20+ per object) |
+| Lifecycle Hooks   | 80+ (combinable)                |
+| Builtin Functions | 90+                             |
+| Import Chains     | Unlimited                       |
+| Nesting Depth     | Unlimited (AST)                 |
 
 ### The Power Formula
 
@@ -360,7 +360,7 @@ COMBINED = .holo(∞ scene) × .hsplus(55 traits + 80 hooks) × .ts(logic)
 When using AI to generate HoloScript:
 
 - **Use `.holo`** for scene generation
-- **Use `.hsplus`** for component generation  
+- **Use `.hsplus`** for component generation
 - The MCP server's `generate_scene` tool outputs `.holo`
 - The `generate_object` tool outputs `.hsplus`
 

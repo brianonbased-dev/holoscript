@@ -13,7 +13,15 @@ import type { TraitHandler } from './TraitTypes';
 // TYPES
 // =============================================================================
 
-type ReverbPreset = 'room' | 'hall' | 'cathedral' | 'cave' | 'outdoor' | 'bathroom' | 'studio' | 'custom';
+type ReverbPreset =
+  | 'room'
+  | 'hall'
+  | 'cathedral'
+  | 'cave'
+  | 'outdoor'
+  | 'bathroom'
+  | 'studio'
+  | 'custom';
 type ZoneShape = 'box' | 'sphere' | 'convex';
 
 interface ReverbZoneState {
@@ -72,7 +80,7 @@ export const reverbZoneHandler: TraitHandler<ReverbZoneConfig> = {
       convolverLoaded: false,
     };
     (node as any).__reverbZoneState = state;
-    
+
     // Register reverb zone
     context.emit?.('reverb_zone_register', {
       node,
@@ -96,22 +104,16 @@ export const reverbZoneHandler: TraitHandler<ReverbZoneConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__reverbZoneState as ReverbZoneState;
     if (!state || !state.isActive) return;
-    
+
     // Smooth blend toward target wet level
-    const blendSpeed = delta * 2;  // 0.5 seconds to blend
-    
+    const blendSpeed = delta * 2; // 0.5 seconds to blend
+
     if (state.currentWetLevel < state.targetWetLevel) {
-      state.currentWetLevel = Math.min(
-        state.currentWetLevel + blendSpeed,
-        state.targetWetLevel
-      );
+      state.currentWetLevel = Math.min(state.currentWetLevel + blendSpeed, state.targetWetLevel);
     } else if (state.currentWetLevel > state.targetWetLevel) {
-      state.currentWetLevel = Math.max(
-        state.currentWetLevel - blendSpeed,
-        state.targetWetLevel
-      );
+      state.currentWetLevel = Math.max(state.currentWetLevel - blendSpeed, state.targetWetLevel);
     }
-    
+
     // Update reverb mix
     if (state.listenersInZone.size > 0) {
       context.emit?.('reverb_update_mix', {
@@ -125,14 +127,14 @@ export const reverbZoneHandler: TraitHandler<ReverbZoneConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__reverbZoneState as ReverbZoneState;
     if (!state) return;
-    
+
     if (event.type === 'listener_enter_zone') {
       const listenerId = event.listenerId as string;
       const wasEmpty = state.listenersInZone.size === 0;
-      
+
       state.listenersInZone.add(listenerId);
       state.targetWetLevel = 1;
-      
+
       if (wasEmpty) {
         context.emit?.('reverb_zone_enter', {
           node,
@@ -143,17 +145,17 @@ export const reverbZoneHandler: TraitHandler<ReverbZoneConfig> = {
     } else if (event.type === 'listener_exit_zone') {
       const listenerId = event.listenerId as string;
       state.listenersInZone.delete(listenerId);
-      
+
       if (state.listenersInZone.size === 0) {
         state.targetWetLevel = 0;
         context.emit?.('reverb_zone_exit', { node, listenerId });
       }
     } else if (event.type === 'listener_distance_update') {
       const distance = event.distance as number;
-      
+
       // Blend based on distance from zone edge
       if (distance < config.blend_distance) {
-        state.targetWetLevel = 1 - (distance / config.blend_distance);
+        state.targetWetLevel = 1 - distance / config.blend_distance;
       } else {
         state.targetWetLevel = 0;
       }

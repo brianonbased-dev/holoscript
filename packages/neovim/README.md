@@ -7,7 +7,7 @@ Neovim plugin for HoloScript language support.
 - 🎨 **Syntax Highlighting** - Full highlighting for `.holo` and `.hsplus` files
 - 🔧 **LSP Integration** - Auto-connects to `@holoscript/lsp` for:
   - Code completion
-  - Hover documentation  
+  - Hover documentation
   - Go to definition
   - Diagnostics
   - Code actions
@@ -67,13 +67,13 @@ require('holoscript').setup({
     enabled = true,
     cmd = { "npx", "@holoscript/lsp", "--stdio" },
   },
-  
+
   -- Avoid .hs conflict with Haskell
   register_hs_extension = false,
-  
+
   -- Format on save
   format_on_save = false,
-  
+
   -- Keymaps (false to disable)
   keymaps = {
     format = "<leader>hf",
@@ -83,7 +83,7 @@ require('holoscript').setup({
     hover = "K",
     code_action = "<leader>ca",
   },
-  
+
   diagnostics = {
     enabled = true,
     virtual_text = true,
@@ -95,33 +95,33 @@ require('holoscript').setup({
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `:HoloScriptValidate` | Validate current buffer |
+| Command                       | Description                                    |
+| ----------------------------- | ---------------------------------------------- |
+| `:HoloScriptValidate`         | Validate current buffer                        |
 | `:HoloScriptPreview [target]` | Preview compiled output (e.g., `r3f`, `unity`) |
-| `:HoloScriptDocs [topic]` | Open documentation |
-| `:HoloScriptNew [name]` | Insert new composition template |
+| `:HoloScriptDocs [topic]`     | Open documentation                             |
+| `:HoloScriptNew [name]`       | Insert new composition template                |
 
 ## Keymaps
 
 Default keymaps (customizable via config):
 
-| Key | Action |
-|-----|--------|
-| `gd` | Go to definition |
-| `K` | Hover documentation |
-| `<leader>ca` | Code actions |
-| `<leader>hf` | Format buffer |
-| `<leader>hv` | Validate |
-| `<leader>hp` | Compile preview |
+| Key          | Action              |
+| ------------ | ------------------- |
+| `gd`         | Go to definition    |
+| `K`          | Hover documentation |
+| `<leader>ca` | Code actions        |
+| `<leader>hf` | Format buffer       |
+| `<leader>hv` | Validate            |
+| `<leader>hp` | Compile preview     |
 
 ## Supported File Types
 
-| Extension | Filetype | Description |
-|-----------|----------|-------------|
-| `.holo` | `holo` | Declarative compositions |
-| `.hsplus` | `holo` | HoloScript Plus with VR traits |
-| `.hs` | `holoscript` | Classic HoloScript (disabled by default) |
+| Extension | Filetype     | Description                              |
+| --------- | ------------ | ---------------------------------------- |
+| `.holo`   | `holo`       | Declarative compositions                 |
+| `.hsplus` | `holo`       | HoloScript Plus with VR traits           |
+| `.hs`     | `holoscript` | Classic HoloScript (disabled by default) |
 
 > **Note:** `.hs` registration is disabled by default to avoid conflicts with Haskell. Enable with `register_hs_extension = true`.
 
@@ -144,6 +144,7 @@ hi holoComment guifg=#5c6370
 ### LSP not starting
 
 1. Ensure `@holoscript/lsp` is installed:
+
    ```bash
    npm list -g @holoscript/lsp
    ```
@@ -158,6 +159,7 @@ hi holoComment guifg=#5c6370
 ### Syntax not highlighting
 
 Check filetype is set:
+
 ```vim
 :set filetype?
 ```

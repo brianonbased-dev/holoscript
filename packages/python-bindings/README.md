@@ -69,7 +69,7 @@ if hs.validate(scene.code).valid:
     # Create shareable preview
     preview = hs.render(scene.code, format="gif", duration=3000)
     share = hs.share(scene.code, title="Floating Castle", platform="x")
-    
+
     # Return to user
     print(f"Here's your VR scene: {share.playground_url}")
     print(f"Preview: {preview.url}")

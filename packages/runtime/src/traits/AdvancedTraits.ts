@@ -29,7 +29,7 @@ function computeParabolicArc(
   const v0 = forward.clone().normalize().multiplyScalar(velocity);
   const dt = 0.05;
   let pos = origin.clone();
-  let vel = v0.clone();
+  const vel = v0.clone();
   let hitPoint: THREE.Vector3 | null = null;
 
   for (let i = 0; i <= segments; i++) {
@@ -468,7 +468,7 @@ export const WeatherTrait: TraitHandler = {
 
     if (weatherType === 'fog') {
       // Apply fog to the scene
-      const fogColor = new THREE.Color(cfg.fogColor as string || '#cccccc');
+      const fogColor = new THREE.Color((cfg.fogColor as string) || '#cccccc');
       const near = (cfg.fogNear as number) || 5;
       const far = (cfg.fogFar as number) || 50;
 
@@ -1059,9 +1059,7 @@ export const HapticTrait: TraitHandler = {
       const session = renderer.xr.getSession();
       if (session && session.inputSources) {
         for (const inputSource of session.inputSources) {
-          const isTargetHand =
-            handPref === 'both' ||
-            inputSource.handedness === handPref;
+          const isTargetHand = handPref === 'both' || inputSource.handedness === handPref;
 
           if (isTargetHand && inputSource.gamepad) {
             const gamepad = inputSource.gamepad;

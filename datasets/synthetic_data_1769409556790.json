@@ -5,10 +5,7 @@
     "input": "Create a cylinder that is grabbable",
     "output": "orb cylinder_187 {\n  shape: \"cylinder\"\n  color: \"#ffff00\"\n  @grabbable\n  on_grab: {\n    haptic.pulse(0.5)\n  }\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "grabbable"
-      ],
+      "patterns": ["vr_trait", "grabbable"],
       "complexity": 1
     }
   },
@@ -18,10 +15,7 @@
     "input": "orb pyramid_err_243 {\n  shape: \"pyramid\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb pyramid_err_243 {\n  shape: \"pyramid\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -31,10 +25,7 @@
     "input": "orb pyramid_err_206 {\n  shape: \"pyramid\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb pyramid_err_206 {\n  shape: \"pyramid\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -44,10 +35,7 @@
     "input": "orb sphere_err_752 {\n  shape: \"sphere\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb sphere_err_752 {\n  shape: \"sphere\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -57,10 +45,7 @@
     "input": "orb pyramid_err_983 {\n  shape: \"pyramid\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb pyramid_err_983 {\n  shape: \"pyramid\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -70,10 +55,7 @@
     "input": "orb cylinder_err_86 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb cylinder_err_86 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -83,10 +65,7 @@
     "input": "Create a plane that is networked",
     "output": "orb plane_602 {\n  shape: \"plane\"\n  color: \"#00ff00\"\n  @networked\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "networked"
-      ],
+      "patterns": ["vr_trait", "networked"],
       "complexity": 1
     }
   },
@@ -96,10 +75,7 @@
     "input": "Create a cylinder that is networked",
     "output": "orb cylinder_166 {\n  shape: \"cylinder\"\n  color: \"#ff0000\"\n  @networked\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "networked"
-      ],
+      "patterns": ["vr_trait", "networked"],
       "complexity": 1
     }
   },
@@ -109,10 +85,7 @@
     "input": "Create a cylinder that is grabbable",
     "output": "orb cylinder_924 {\n  shape: \"cylinder\"\n  color: \"#ff0000\"\n  @grabbable\n  on_grab: {\n    haptic.pulse(0.5)\n  }\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "grabbable"
-      ],
+      "patterns": ["vr_trait", "grabbable"],
       "complexity": 1
     }
   },
@@ -122,10 +95,7 @@
     "input": "Create a sphere that is grabbable",
     "output": "orb sphere_527 {\n  shape: \"sphere\"\n  color: \"#ffff00\"\n  @grabbable\n  on_grab: {\n    haptic.pulse(0.5)\n  }\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "grabbable"
-      ],
+      "patterns": ["vr_trait", "grabbable"],
       "complexity": 1
     }
   },
@@ -135,10 +105,7 @@
     "input": "orb plane_err_749 {\n  shape: \"plane\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb plane_err_749 {\n  shape: \"plane\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -148,10 +115,7 @@
     "input": "orb plane_err_241 {\n  shape: \"plane\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb plane_err_241 {\n  shape: \"plane\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -161,10 +125,7 @@
     "input": "Create a pyramid that is hoverable",
     "output": "orb pyramid_473 {\n  shape: \"pyramid\"\n  color: \"#ffff00\"\n  @hoverable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "hoverable"
-      ],
+      "patterns": ["vr_trait", "hoverable"],
       "complexity": 1
     }
   },
@@ -174,10 +135,7 @@
     "input": "Create a cylinder that is pointable",
     "output": "orb cylinder_135 {\n  shape: \"cylinder\"\n  color: \"#00ffff\"\n  @pointable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "pointable"
-      ],
+      "patterns": ["vr_trait", "pointable"],
       "complexity": 1
     }
   },
@@ -187,10 +145,7 @@
     "input": "Create a pyramid that is grabbable",
     "output": "orb pyramid_114 {\n  shape: \"pyramid\"\n  color: \"#ff00ff\"\n  @grabbable\n  on_grab: {\n    haptic.pulse(0.5)\n  }\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "grabbable"
-      ],
+      "patterns": ["vr_trait", "grabbable"],
       "complexity": 1
     }
   },
@@ -200,10 +155,7 @@
     "input": "orb cylinder_err_681 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb cylinder_err_681 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -213,10 +165,7 @@
     "input": "Create a cylinder that is hoverable",
     "output": "orb cylinder_21 {\n  shape: \"cylinder\"\n  color: \"#ffff00\"\n  @hoverable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "hoverable"
-      ],
+      "patterns": ["vr_trait", "hoverable"],
       "complexity": 1
     }
   },
@@ -226,10 +175,7 @@
     "input": "Create a plane that is pointable",
     "output": "orb plane_952 {\n  shape: \"plane\"\n  color: \"#ff00ff\"\n  @pointable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "pointable"
-      ],
+      "patterns": ["vr_trait", "pointable"],
       "complexity": 1
     }
   },
@@ -239,10 +185,7 @@
     "input": "Create a cylinder that is grabbable",
     "output": "orb cylinder_777 {\n  shape: \"cylinder\"\n  color: \"#00ffff\"\n  @grabbable\n  on_grab: {\n    haptic.pulse(0.5)\n  }\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "grabbable"
-      ],
+      "patterns": ["vr_trait", "grabbable"],
       "complexity": 1
     }
   },
@@ -252,10 +195,7 @@
     "input": "Create a cube that is hoverable",
     "output": "orb cube_543 {\n  shape: \"cube\"\n  color: \"#ff0000\"\n  @hoverable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "hoverable"
-      ],
+      "patterns": ["vr_trait", "hoverable"],
       "complexity": 1
     }
   },
@@ -265,10 +205,7 @@
     "input": "Create a plane that is grabbable",
     "output": "orb plane_864 {\n  shape: \"plane\"\n  color: \"#ffff00\"\n  @grabbable\n  on_grab: {\n    haptic.pulse(0.5)\n  }\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "grabbable"
-      ],
+      "patterns": ["vr_trait", "grabbable"],
       "complexity": 1
     }
   },
@@ -278,10 +215,7 @@
     "input": "Create a cylinder that is throwable",
     "output": "orb cylinder_842 {\n  shape: \"cylinder\"\n  color: \"#00ff00\"\n  @throwable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "throwable"
-      ],
+      "patterns": ["vr_trait", "throwable"],
       "complexity": 1
     }
   },
@@ -291,10 +225,7 @@
     "input": "Create a cube that is networked",
     "output": "orb cube_111 {\n  shape: \"cube\"\n  color: \"#ff00ff\"\n  @networked\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "networked"
-      ],
+      "patterns": ["vr_trait", "networked"],
       "complexity": 1
     }
   },
@@ -304,10 +235,7 @@
     "input": "Create a cylinder that is throwable",
     "output": "orb cylinder_68 {\n  shape: \"cylinder\"\n  color: \"#00ffff\"\n  @throwable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "throwable"
-      ],
+      "patterns": ["vr_trait", "throwable"],
       "complexity": 1
     }
   },
@@ -317,10 +245,7 @@
     "input": "Create a sphere that is networked",
     "output": "orb sphere_244 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n  @networked\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "networked"
-      ],
+      "patterns": ["vr_trait", "networked"],
       "complexity": 1
     }
   },
@@ -330,10 +255,7 @@
     "input": "Create a pyramid that is throwable",
     "output": "orb pyramid_118 {\n  shape: \"pyramid\"\n  color: \"#ff0000\"\n  @throwable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "throwable"
-      ],
+      "patterns": ["vr_trait", "throwable"],
       "complexity": 1
     }
   },
@@ -343,10 +265,7 @@
     "input": "Create a plane that is hoverable",
     "output": "orb plane_579 {\n  shape: \"plane\"\n  color: \"#ffff00\"\n  @hoverable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "hoverable"
-      ],
+      "patterns": ["vr_trait", "hoverable"],
       "complexity": 1
     }
   },
@@ -356,10 +275,7 @@
     "input": "orb cylinder_err_778 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb cylinder_err_778 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -369,10 +285,7 @@
     "input": "Create a sphere that is hoverable",
     "output": "orb sphere_742 {\n  shape: \"sphere\"\n  color: \"#ffff00\"\n  @hoverable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "hoverable"
-      ],
+      "patterns": ["vr_trait", "hoverable"],
       "complexity": 1
     }
   },
@@ -382,10 +295,7 @@
     "input": "orb cylinder_err_818 {\n  shape: \"cylinder\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb cylinder_err_818 {\n  shape: \"cylinder\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -395,10 +305,7 @@
     "input": "Create a sphere that is throwable",
     "output": "orb sphere_652 {\n  shape: \"sphere\"\n  color: \"#ff00ff\"\n  @throwable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "throwable"
-      ],
+      "patterns": ["vr_trait", "throwable"],
       "complexity": 1
     }
   },
@@ -408,10 +315,7 @@
     "input": "Create a pyramid that is pointable",
     "output": "orb pyramid_716 {\n  shape: \"pyramid\"\n  color: \"#ff00ff\"\n  @pointable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "pointable"
-      ],
+      "patterns": ["vr_trait", "pointable"],
       "complexity": 1
     }
   },
@@ -421,10 +325,7 @@
     "input": "Create a cube that is sync",
     "output": "orb cube_774 {\n  shape: \"cube\"\n  color: \"#ff0000\"\n  @sync\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "sync"
-      ],
+      "patterns": ["vr_trait", "sync"],
       "complexity": 1
     }
   },
@@ -434,10 +335,7 @@
     "input": "Create a sphere that is grabbable",
     "output": "orb sphere_65 {\n  shape: \"sphere\"\n  color: \"#00ff00\"\n  @grabbable\n  on_grab: {\n    haptic.pulse(0.5)\n  }\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "grabbable"
-      ],
+      "patterns": ["vr_trait", "grabbable"],
       "complexity": 1
     }
   },
@@ -447,10 +345,7 @@
     "input": "Create a plane that is sync",
     "output": "orb plane_657 {\n  shape: \"plane\"\n  color: \"#0000ff\"\n  @sync\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "sync"
-      ],
+      "patterns": ["vr_trait", "sync"],
       "complexity": 1
     }
   },
@@ -460,10 +355,7 @@
     "input": "Create a cube that is networked",
     "output": "orb cube_321 {\n  shape: \"cube\"\n  color: \"#0000ff\"\n  @networked\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "networked"
-      ],
+      "patterns": ["vr_trait", "networked"],
       "complexity": 1
     }
   },
@@ -473,10 +365,7 @@
     "input": "Create a cylinder that is hoverable",
     "output": "orb cylinder_266 {\n  shape: \"cylinder\"\n  color: \"#00ffff\"\n  @hoverable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "hoverable"
-      ],
+      "patterns": ["vr_trait", "hoverable"],
       "complexity": 1
     }
   },
@@ -486,10 +375,7 @@
     "input": "Create a cube that is pointable",
     "output": "orb cube_702 {\n  shape: \"cube\"\n  color: \"#ff0000\"\n  @pointable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "pointable"
-      ],
+      "patterns": ["vr_trait", "pointable"],
       "complexity": 1
     }
   },
@@ -499,10 +385,7 @@
     "input": "Create a sphere that is throwable",
     "output": "orb sphere_809 {\n  shape: \"sphere\"\n  color: \"#0000ff\"\n  @throwable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "throwable"
-      ],
+      "patterns": ["vr_trait", "throwable"],
       "complexity": 1
     }
   },
@@ -512,10 +395,7 @@
     "input": "Create a pyramid that is throwable",
     "output": "orb pyramid_110 {\n  shape: \"pyramid\"\n  color: \"#00ffff\"\n  @throwable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "throwable"
-      ],
+      "patterns": ["vr_trait", "throwable"],
       "complexity": 1
     }
   },
@@ -525,10 +405,7 @@
     "input": "orb sper_err_767 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb sphere_err_767 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -538,10 +415,7 @@
     "input": "orb cylinder_err_219 {\n  shape: \"cylinder\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb cylinder_err_219 {\n  shape: \"cylinder\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -551,10 +425,7 @@
     "input": "orb plane_err_313 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb plane_err_313 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -564,10 +435,7 @@
     "input": "Create a sphere that is networked",
     "output": "orb sphere_678 {\n  shape: \"sphere\"\n  color: \"#ff00ff\"\n  @networked\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "networked"
-      ],
+      "patterns": ["vr_trait", "networked"],
       "complexity": 1
     }
   },
@@ -577,10 +445,7 @@
     "input": "Create a plane that is throwable",
     "output": "orb plane_92 {\n  shape: \"plane\"\n  color: \"#0000ff\"\n  @throwable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "throwable"
-      ],
+      "patterns": ["vr_trait", "throwable"],
       "complexity": 1
     }
   },
@@ -590,10 +455,7 @@
     "input": "Create a sphere that is sync",
     "output": "orb sphere_81 {\n  shape: \"sphere\"\n  color: \"#0000ff\"\n  @sync\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "sync"
-      ],
+      "patterns": ["vr_trait", "sync"],
       "complexity": 1
     }
   },
@@ -603,10 +465,7 @@
     "input": "Create a sphere that is sync",
     "output": "orb sphere_709 {\n  shape: \"sphere\"\n  color: \"#00ffff\"\n  @sync\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "sync"
-      ],
+      "patterns": ["vr_trait", "sync"],
       "complexity": 1
     }
   },
@@ -616,10 +475,7 @@
     "input": "orb plane_err_243 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb plane_err_243 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -629,10 +485,7 @@
     "input": "Create a plane that is sync",
     "output": "orb plane_312 {\n  shape: \"plane\"\n  color: \"#0000ff\"\n  @sync\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "sync"
-      ],
+      "patterns": ["vr_trait", "sync"],
       "complexity": 1
     }
   },
@@ -642,10 +495,7 @@
     "input": "Create a sphere that is networked",
     "output": "orb sphere_200 {\n  shape: \"sphere\"\n  color: \"#00ffff\"\n  @networked\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "networked"
-      ],
+      "patterns": ["vr_trait", "networked"],
       "complexity": 1
     }
   }

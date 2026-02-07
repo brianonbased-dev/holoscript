@@ -178,7 +178,10 @@ export function assert(condition: boolean, message?: string): asserts condition 
 /**
  * Assert a value is not null or undefined
  */
-export function assertDefined<T>(value: T | null | undefined, message?: string): asserts value is T {
+export function assertDefined<T>(
+  value: T | null | undefined,
+  message?: string
+): asserts value is T {
   if (value === null || value === undefined) {
     throw new Error(message ?? 'Value is null or undefined');
   }
@@ -266,7 +269,7 @@ export function equals(a: unknown, b: unknown): boolean {
     return true;
   }
 
-  const keysA = Object.keys(a as object);
+  const keysA = Object.keys(a);
   const keysB = Object.keys(b as object);
   if (keysA.length !== keysB.length) return false;
 
@@ -299,7 +302,11 @@ export function pipe(value: unknown, ...fns: ((x: unknown) => unknown)[]): unkno
 export function compose<A>(): (a: A) => A;
 export function compose<A, B>(fn1: (a: A) => B): (a: A) => B;
 export function compose<A, B, C>(fn2: (b: B) => C, fn1: (a: A) => B): (a: A) => C;
-export function compose<A, B, C, D>(fn3: (c: C) => D, fn2: (b: B) => C, fn1: (a: A) => B): (a: A) => D;
+export function compose<A, B, C, D>(
+  fn3: (c: C) => D,
+  fn2: (b: B) => C,
+  fn1: (a: A) => B
+): (a: A) => D;
 export function compose(...fns: ((x: unknown) => unknown)[]): (x: unknown) => unknown {
   return (value: unknown) => fns.reduceRight((acc, fn) => fn(acc), value);
 }

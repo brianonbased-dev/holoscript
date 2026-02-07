@@ -25,14 +25,19 @@ interface ClothState {
   isSimulating: boolean;
   isTorn: boolean;
   vertices: ClothVertex[][];
-  constraints: Array<{ a: [number, number]; b: [number, number]; restLength: number; broken: boolean }>;
+  constraints: Array<{
+    a: [number, number];
+    b: [number, number];
+    restLength: number;
+    broken: boolean;
+  }>;
   windForce: { x: number; y: number; z: number };
   simulationHandle: unknown;
 }
 
 interface ClothConfig {
-  resolution: number;  // Grid resolution NxN
-  stiffness: number;  // 0-1
+  resolution: number; // Grid resolution NxN
+  stiffness: number; // 0-1
   damping: number;
   mass: number;
   gravity_scale: number;
@@ -41,7 +46,7 @@ interface ClothConfig {
   self_collision: boolean;
   tearable: boolean;
   tear_threshold: number;
-  pin_vertices: Array<[number, number]>;  // Grid coordinates to pin
+  pin_vertices: Array<[number, number]>; // Grid coordinates to pin
 }
 
 // =============================================================================
@@ -75,10 +80,10 @@ export const clothHandler: TraitHandler<ClothConfig> = {
       simulationHandle: null,
     };
     (node as any).__clothState = state;
-    
+
     // Initialize cloth mesh
     initializeClothMesh(state, config);
-    
+
     // Register with physics system
     context.emit?.('cloth_create', {
       node,
@@ -90,7 +95,7 @@ export const clothHandler: TraitHandler<ClothConfig> = {
       selfCollision: config.self_collision,
       collisionMargin: config.collision_margin,
     });
-    
+
     state.isSimulating = true;
   },
 
@@ -105,7 +110,7 @@ export const clothHandler: TraitHandler<ClothConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__clothState as ClothState;
     if (!state || !state.isSimulating) return;
-    
+
     // Apply wind force
     if (config.wind_response > 0) {
       context.emit?.('cloth_apply_force', {
@@ -117,7 +122,7 @@ export const clothHandler: TraitHandler<ClothConfig> = {
         },
       });
     }
-    
+
     // Update simulation
     context.emit?.('cloth_step', {
       node,
@@ -128,12 +133,12 @@ export const clothHandler: TraitHandler<ClothConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__clothState as ClothState;
     if (!state) return;
-    
+
     if (event.type === 'cloth_vertex_update') {
       // Update vertex positions from physics
       const positions = event.positions as Array<{ x: number; y: number; z: number }>;
       const res = config.resolution;
-      
+
       for (let i = 0; i < res && i < positions.length / res; i++) {
         for (let j = 0; j < res; j++) {
           const idx = i * res + j;
@@ -142,7 +147,7 @@ export const clothHandler: TraitHandler<ClothConfig> = {
           }
         }
       }
-      
+
       // Update mesh
       context.emit?.('cloth_mesh_update', {
         node,
@@ -153,20 +158,20 @@ export const clothHandler: TraitHandler<ClothConfig> = {
     } else if (event.type === 'cloth_apply_force') {
       const force = event.force as { x: number; y: number; z: number };
       const position = event.position as { x: number; y: number; z: number } | undefined;
-      
+
       context.emit?.('cloth_external_force', {
         node,
         force,
         position,
-        radius: event.radius as number || 0.5,
+        radius: (event.radius as number) || 0.5,
       });
     } else if (event.type === 'cloth_pin_vertex') {
       const x = event.x as number;
       const y = event.y as number;
-      
+
       if (state.vertices[x]?.[y]) {
         state.vertices[x][y].isPinned = true;
-        
+
         context.emit?.('cloth_update_pin', {
           node,
           vertex: [x, y],
@@ -176,10 +181,10 @@ export const clothHandler: TraitHandler<ClothConfig> = {
     } else if (event.type === 'cloth_unpin_vertex') {
       const x = event.x as number;
       const y = event.y as number;
-      
+
       if (state.vertices[x]?.[y]) {
         state.vertices[x][y].isPinned = false;
-        
+
         context.emit?.('cloth_update_pin', {
           node,
           vertex: [x, y],
@@ -192,7 +197,7 @@ export const clothHandler: TraitHandler<ClothConfig> = {
         if (state.constraints[constraintIdx]) {
           state.constraints[constraintIdx].broken = true;
           state.isTorn = true;
-          
+
           context.emit?.('on_cloth_tear', {
             node,
             constraintIndex: constraintIdx,
@@ -202,7 +207,7 @@ export const clothHandler: TraitHandler<ClothConfig> = {
     } else if (event.type === 'cloth_reset') {
       initializeClothMesh(state, config);
       state.isTorn = false;
-      
+
       context.emit?.('cloth_reinitialize', {
         node,
         vertices: state.vertices,
@@ -220,7 +225,7 @@ export const clothHandler: TraitHandler<ClothConfig> = {
         isTorn: state.isTorn,
         vertexCount: config.resolution * config.resolution,
         constraintCount: state.constraints.length,
-        brokenConstraints: state.constraints.filter(c => c.broken).length,
+        brokenConstraints: state.constraints.filter((c) => c.broken).length,
       });
     }
   },
@@ -230,13 +235,13 @@ function initializeClothMesh(state: ClothState, config: ClothConfig): void {
   const res = config.resolution;
   state.vertices = [];
   state.constraints = [];
-  
+
   // Create vertex grid
   for (let i = 0; i < res; i++) {
     state.vertices[i] = [];
     for (let j = 0; j < res; j++) {
       const isPinned = config.pin_vertices.some(([px, py]) => px === i && py === j);
-      
+
       state.vertices[i][j] = {
         position: { x: j / res, y: 0, z: i / res },
         prevPosition: { x: j / res, y: 0, z: i / res },
@@ -246,7 +251,7 @@ function initializeClothMesh(state: ClothState, config: ClothConfig): void {
       };
     }
   }
-  
+
   // Create structural constraints
   for (let i = 0; i < res; i++) {
     for (let j = 0; j < res; j++) {

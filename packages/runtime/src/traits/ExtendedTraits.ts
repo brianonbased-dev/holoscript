@@ -60,7 +60,7 @@ export const StackableTrait: TraitHandler = {
     context.data.stackedCount = 0;
   },
 
-  onUpdate(context: TraitContext, delta: number) {
+  onUpdate(context: TraitContext, _delta: number) {
     if (context.data.stackedOn) return; // Already stacked
 
     const obj = context.object;
@@ -71,9 +71,11 @@ export const StackableTrait: TraitHandler = {
     // Find stackable objects below
     scene.traverse((child: THREE.Object3D) => {
       if (child === obj) return;
-      const traits = (child as any)._traits as Array<{ name: string; context: TraitContext }> | undefined;
+      const traits = (child as any)._traits as
+        | Array<{ name: string; context: TraitContext }>
+        | undefined;
       if (!traits) return;
-      const stackTrait = traits.find(t => t.name === 'stackable');
+      const stackTrait = traits.find((t) => t.name === 'stackable');
       if (!stackTrait) return;
 
       // Check if directly above
@@ -86,7 +88,7 @@ export const StackableTrait: TraitHandler = {
         const maxStack = stackTrait.context.data.maxStack as number;
         if (count < maxStack) {
           // Snap to top
-          const offset = context.data.stackOffset as number || child.scale.y;
+          const offset = (context.data.stackOffset as number) || child.scale.y;
           obj.position.x = child.position.x;
           obj.position.y = child.position.y + offset;
           obj.position.z = child.position.z;
@@ -117,7 +119,7 @@ export const SnappableTrait: TraitHandler = {
     context.data.isSnapped = false;
   },
 
-  onUpdate(context: TraitContext, delta: number) {
+  onUpdate(context: TraitContext, _delta: number) {
     const obj = context.object;
     const grid = context.data.gridSize as number;
     const snapPoints = context.data.snapPoints as number[][];
@@ -237,7 +239,7 @@ export const BreakableTrait: TraitHandler = {
       }
 
       // Fade and remove
-      const fade = 1 - (timers[i] / lifetime);
+      const fade = 1 - timers[i] / lifetime;
       if (fade <= 0) {
         meshes[i].parent?.remove(meshes[i]);
         meshes[i].geometry.dispose();
@@ -389,8 +391,13 @@ export const PatrolTrait: TraitHandler = {
 
   onApply(context: TraitContext) {
     const cfg = context.config;
-    const waypoints = (cfg.waypoints as number[][]) ?? [[0, 0, 0], [2, 0, 0], [2, 0, 2], [0, 0, 2]];
-    context.data.waypoints = waypoints.map(w => new THREE.Vector3(w[0], w[1] ?? 0, w[2] ?? 0));
+    const waypoints = (cfg.waypoints as number[][]) ?? [
+      [0, 0, 0],
+      [2, 0, 0],
+      [2, 0, 2],
+      [0, 0, 2],
+    ];
+    context.data.waypoints = waypoints.map((w) => new THREE.Vector3(w[0], w[1] ?? 0, w[2] ?? 0));
     context.data.speed = (cfg.speed as number) ?? 1;
     context.data.currentIndex = 0;
     context.data.loop = (cfg.loop as boolean) ?? true;
@@ -468,7 +475,9 @@ export const NetworkedTrait: TraitHandler = {
     context.data.lastSync = 0;
     context.data.syncTimer = 0;
 
-    console.log(`[HoloScript] Networked trait applied to "${context.object.name}" (ownership: ${context.data.ownership})`);
+    console.log(
+      `[HoloScript] Networked trait applied to "${context.object.name}" (ownership: ${context.data.ownership})`
+    );
   },
 
   onUpdate(context: TraitContext, delta: number) {
@@ -502,7 +511,9 @@ export const AnchorTrait: TraitHandler = {
     context.data.anchorPosition = context.object.position.clone();
     context.data.anchorRotation = context.object.quaternion.clone();
 
-    console.log(`[HoloScript] Anchor set at (${context.object.position.x.toFixed(2)}, ${context.object.position.y.toFixed(2)}, ${context.object.position.z.toFixed(2)})`);
+    console.log(
+      `[HoloScript] Anchor set at (${context.object.position.x.toFixed(2)}, ${context.object.position.y.toFixed(2)}, ${context.object.position.z.toFixed(2)})`
+    );
   },
 
   onUpdate(context: TraitContext, _delta: number) {
@@ -633,7 +644,9 @@ export const ReverbZoneTrait: TraitHandler = {
       context.data.boundsVisual = sphere;
     }
 
-    console.log(`[HoloScript] Reverb zone "${context.data.reverbType}" (radius: ${context.data.radius}m, decay: ${context.data.decay}s)`);
+    console.log(
+      `[HoloScript] Reverb zone "${context.data.reverbType}" (radius: ${context.data.radius}m, decay: ${context.data.decay}s)`
+    );
   },
 
   onUpdate(_context: TraitContext, _delta: number) {
@@ -666,7 +679,9 @@ export const VoiceProximityTrait: TraitHandler = {
     context.data.maxVolume = (cfg.max_volume as number) ?? 1;
     context.data.falloff = (cfg.falloff as string) ?? 'linear'; // linear, exponential
 
-    console.log(`[HoloScript] Voice proximity: near=${context.data.nearDistance}m, far=${context.data.farDistance}m`);
+    console.log(
+      `[HoloScript] Voice proximity: near=${context.data.nearDistance}m, far=${context.data.farDistance}m`
+    );
   },
 
   onUpdate(_context: TraitContext, _delta: number) {

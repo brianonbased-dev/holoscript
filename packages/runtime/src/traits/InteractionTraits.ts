@@ -11,40 +11,40 @@ export const GrabbableTrait: TraitHandler = {
     context.object.userData.grabbable = true;
     context.data.originalMass = null;
     context.data.wasKinematic = false;
-    
+
     if (context.config.snapToHand) {
       context.object.userData.snapToHand = true;
     }
-    
+
     // Store grip offset
     context.data.gripOffset = context.config.gripOffset || { x: 0, y: 0, z: 0 };
   },
-  onUpdate: (context: TraitContext, delta: number) => {
+  onUpdate: (context: TraitContext, _delta: number) => {
     const isHeld = context.object.userData.isHeld;
     const body = context.physicsWorld.getBody(context.object.name);
-    
+
     if (isHeld && body) {
       // Store original mass on first grab
       if (context.data.originalMass === null) {
         context.data.originalMass = body.mass;
         context.data.wasKinematic = body.type === 4; // KINEMATIC
       }
-      
+
       // Make kinematic while held
       context.physicsWorld.setKinematic(context.object.name, true);
       context.physicsWorld.setVelocity(context.object.name, [0, 0, 0]);
-      
+
       // Sync physics to visual
       context.physicsWorld.setPosition(context.object.name, [
         context.object.position.x,
         context.object.position.y,
-        context.object.position.z
+        context.object.position.z,
       ]);
       context.physicsWorld.setRotation(context.object.name, [
         context.object.quaternion.x,
         context.object.quaternion.y,
         context.object.quaternion.z,
-        context.object.quaternion.w
+        context.object.quaternion.w,
       ]);
     } else if (!isHeld && context.data.originalMass !== null && body) {
       // Restore physics on release
@@ -58,7 +58,7 @@ export const GrabbableTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     context.object.userData.grabbable = false;
-  }
+  },
 };
 
 // ============================================================================
@@ -73,46 +73,48 @@ export const ThrowableTrait: TraitHandler = {
     context.data.maxThrowSpeed = context.config.maxSpeed || 20;
     context.data.velocityScale = context.config.velocityScale || 1.5;
   },
-  onUpdate: (context: TraitContext, delta: number) => {
+  onUpdate: (context: TraitContext, _delta: number) => {
     if (context.object.userData.isHeld) {
       // Track position history for velocity calculation
       const history = context.data.velocityHistory;
-      history.push({ 
-        pos: context.object.position.clone(), 
-        time: performance.now() 
+      history.push({
+        pos: context.object.position.clone(),
+        time: performance.now(),
       });
       if (history.length > 10) history.shift();
     }
   },
   onRemove: (context: TraitContext) => {
     context.object.userData.throwable = false;
-  }
+  },
 };
 
 // Helper to calculate throw velocity on release
 export function calculateThrowVelocity(context: TraitContext): [number, number, number] {
   const history = context.data.velocityHistory || [];
   if (history.length < 2) return [0, 0, 0];
-  
+
   const recent = history.slice(-3);
-  let vx = 0, vy = 0, vz = 0;
-  
+  let vx = 0,
+    vy = 0,
+    vz = 0;
+
   for (let i = 1; i < recent.length; i++) {
-    const dt = (recent[i].time - recent[i-1].time) / 1000;
+    const dt = (recent[i].time - recent[i - 1].time) / 1000;
     if (dt > 0) {
-      vx += (recent[i].pos.x - recent[i-1].pos.x) / dt;
-      vy += (recent[i].pos.y - recent[i-1].pos.y) / dt;
-      vz += (recent[i].pos.z - recent[i-1].pos.z) / dt;
+      vx += (recent[i].pos.x - recent[i - 1].pos.x) / dt;
+      vy += (recent[i].pos.y - recent[i - 1].pos.y) / dt;
+      vz += (recent[i].pos.z - recent[i - 1].pos.z) / dt;
     }
   }
-  
+
   const count = recent.length - 1;
   vx = (vx / count) * (context.data.velocityScale || 1.5);
   vy = (vy / count) * (context.data.velocityScale || 1.5);
   vz = (vz / count) * (context.data.velocityScale || 1.5);
-  
+
   // Clamp to max speed
-  const speed = Math.sqrt(vx*vx + vy*vy + vz*vz);
+  const speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
   const maxSpeed = context.data.maxThrowSpeed || 20;
   if (speed > maxSpeed) {
     const scale = maxSpeed / speed;
@@ -120,7 +122,7 @@ export function calculateThrowVelocity(context: TraitContext): [number, number, 
     vy *= scale;
     vz *= scale;
   }
-  
+
   return [vx, vy, vz];
 }
 
@@ -133,21 +135,21 @@ export const CollidableTrait: TraitHandler = {
   onApply: (context: TraitContext) => {
     context.object.userData.collidable = true;
     context.data.collisionCallbacks = [];
-    
+
     // Subscribe to collision events
     const unsubscribe = context.physicsWorld.onCollision(context.object.name, (event) => {
       // Store collision for access
       context.object.userData.lastCollision = event;
-      
+
       // Call registered callbacks
       for (const cb of context.data.collisionCallbacks) {
         cb(event);
       }
-      
+
       // Dispatch custom event on the object (cast to any for custom event types)
       (context.object as any).dispatchEvent({ type: event.type, event });
     });
-    
+
     context.data.unsubscribeCollision = unsubscribe;
   },
   onRemove: (context: TraitContext) => {
@@ -155,7 +157,7 @@ export const CollidableTrait: TraitHandler = {
     if (context.data.unsubscribeCollision) {
       context.data.unsubscribeCollision();
     }
-  }
+  },
 };
 
 // ============================================================================
@@ -166,11 +168,11 @@ export const PhysicsTrait: TraitHandler = {
   name: 'physics',
   onApply: (context: TraitContext) => {
     const config = context.config;
-    
+
     // Add physics body with configuration
     context.physicsWorld.addBodyWithConfig(context.object.name, context.object, {
       mass: config.mass ?? 1,
-      type: config.static ? 'static' : (config.kinematic ? 'kinematic' : 'dynamic'),
+      type: config.static ? 'static' : config.kinematic ? 'kinematic' : 'dynamic',
       shape: config.shape || 'box',
       friction: config.friction ?? 0.3,
       restitution: config.bounciness ?? config.restitution ?? 0.3,
@@ -179,18 +181,18 @@ export const PhysicsTrait: TraitHandler = {
       isTrigger: config.isTrigger ?? false,
       fixedRotation: config.fixedRotation ?? false,
     });
-    
+
     // Apply initial velocity if specified
     if (config.velocity) {
       context.physicsWorld.setVelocity(context.object.name, config.velocity);
     }
-    
+
     context.object.userData.hasPhysics = true;
   },
   onRemove: (context: TraitContext) => {
     context.physicsWorld.removeBody(context.object.name);
     context.object.userData.hasPhysics = false;
-  }
+  },
 };
 
 // ============================================================================
@@ -211,7 +213,7 @@ export const GravityTrait: TraitHandler = {
   onRemove: (context: TraitContext) => {
     context.physicsWorld.removeBody(context.object.name);
     context.object.userData.hasGravity = false;
-  }
+  },
 };
 
 // ============================================================================
@@ -227,11 +229,11 @@ export const TriggerTrait: TraitHandler = {
       shape: context.config.shape || 'box',
       isTrigger: true,
     });
-    
+
     context.object.userData.isTrigger = true;
     context.data.enterCallbacks = [];
     context.data.exitCallbacks = [];
-    
+
     // Subscribe to trigger events
     const unsubscribe = context.physicsWorld.onCollision(context.object.name, (event) => {
       if (event.type === 'trigger-enter') {
@@ -242,14 +244,14 @@ export const TriggerTrait: TraitHandler = {
         (context.object as any).dispatchEvent({ type: 'triggerExit', event });
       }
     });
-    
+
     context.data.unsubscribe = unsubscribe;
   },
   onRemove: (context: TraitContext) => {
     context.physicsWorld.removeBody(context.object.name);
     context.object.userData.isTrigger = false;
     if (context.data.unsubscribe) context.data.unsubscribe();
-  }
+  },
 };
 
 // ============================================================================
@@ -264,11 +266,11 @@ export const PointableTrait: TraitHandler = {
     context.data.highlightColor = context.config.highlightColor || 0x4488ff;
     context.data.originalEmissive = null;
   },
-  onUpdate: (context: TraitContext, delta: number) => {
+  onUpdate: (context: TraitContext, _delta: number) => {
     const mesh = context.object as THREE.Mesh;
     if (mesh.material && 'emissive' in mesh.material) {
       const mat = mesh.material as THREE.MeshStandardMaterial;
-      
+
       if (context.object.userData.isPointed) {
         if (context.data.originalEmissive === null) {
           context.data.originalEmissive = mat.emissive.getHex();
@@ -282,7 +284,7 @@ export const PointableTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     context.object.userData.pointable = false;
-  }
+  },
 };
 
 // ============================================================================
@@ -298,11 +300,9 @@ export const HoverableTrait: TraitHandler = {
     context.data.originalScale = context.object.scale.clone();
   },
   onUpdate: (context: TraitContext, delta: number) => {
-    const targetScale = context.object.userData.isHovered 
-      ? context.data.hoverScale 
-      : 1.0;
+    const targetScale = context.object.userData.isHovered ? context.data.hoverScale : 1.0;
     const origScale = context.data.originalScale;
-    
+
     // Smooth scale transition
     const currentScale = context.object.scale.x / origScale.x;
     const newScale = THREE.MathUtils.lerp(currentScale, targetScale, delta * 10);
@@ -316,7 +316,7 @@ export const HoverableTrait: TraitHandler = {
     context.object.userData.hoverable = false;
     const orig = context.data.originalScale;
     if (orig) context.object.scale.copy(orig);
-  }
+  },
 };
 
 // ============================================================================
@@ -331,7 +331,7 @@ export const ClickableTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     context.object.userData.clickable = false;
-  }
+  },
 };
 
 // ============================================================================
@@ -346,12 +346,12 @@ export const DraggableTrait: TraitHandler = {
     context.data.isDragging = false;
     context.data.dragOffset = new THREE.Vector3();
   },
-  onUpdate: (context: TraitContext, delta: number) => {
+  onUpdate: (_context: TraitContext, _delta: number) => {
     // Drag logic handled by InputManager
   },
   onRemove: (context: TraitContext) => {
     context.object.userData.draggable = false;
-  }
+  },
 };
 
 // ============================================================================
@@ -368,7 +368,7 @@ export const ScalableTrait: TraitHandler = {
     context.data.initialDistance = 0;
     context.data.initialScale = 1;
   },
-  onUpdate: (context: TraitContext, delta: number) => {
+  onUpdate: (context: TraitContext, _delta: number) => {
     // Two-handed scaling logic
     if (context.data.isScaling && context.data.hands) {
       const hands = context.data.hands;
@@ -384,7 +384,7 @@ export const ScalableTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     context.object.userData.scalable = false;
-  }
+  },
 };
 
 // ============================================================================
@@ -436,7 +436,7 @@ export const GlowingTrait: TraitHandler = {
         mat.emissiveIntensity = context.data.originalIntensity;
       }
     }
-  }
+  },
 };
 
 // ============================================================================
@@ -478,7 +478,7 @@ export const TransparentTrait: TraitHandler = {
       const mat = mesh.material as THREE.MeshStandardMaterial;
       mat.opacity = context.data.originalOpacity;
     }
-  }
+  },
 };
 
 // ============================================================================
@@ -511,7 +511,7 @@ export const SpinningTrait: TraitHandler = {
       else if (axis === 'z') obj.rotation.z += rotAmount;
     }
   },
-  onRemove: () => {}
+  onRemove: () => {},
 };
 
 // ============================================================================
@@ -533,7 +533,7 @@ export const FloatingTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     context.object.position.y = context.data.baseY;
-  }
+  },
 };
 
 // ============================================================================
@@ -546,13 +546,13 @@ export const BillboardTrait: TraitHandler = {
     context.data.lockY = context.config.lockY ?? true; // Lock vertical axis
     context.object.userData.billboard = true;
   },
-  onUpdate: (context: TraitContext, delta: number) => {
+  onUpdate: (_context: TraitContext, _delta: number) => {
     // Billboard update handled by InputManager camera reference
     // This is a marker trait - actual billboarding done in render loop
   },
   onRemove: (context: TraitContext) => {
     context.object.userData.billboard = false;
-  }
+  },
 };
 
 // ============================================================================
@@ -578,7 +578,7 @@ export const PulseTrait: TraitHandler = {
   onRemove: (context: TraitContext) => {
     const orig = context.data.originalScale;
     if (orig) context.object.scale.copy(orig);
-  }
+  },
 };
 
 // ============================================================================
@@ -602,7 +602,7 @@ export const AnimatedTrait: TraitHandler = {
       speed: context.data.speed,
     };
   },
-  onUpdate: (context: TraitContext, delta: number) => {
+  onUpdate: (_context: TraitContext, _delta: number) => {
     // Mixer update is handled in BrowserRuntime's animation loop
     // This trait just marks the object and stores config
   },
@@ -610,7 +610,7 @@ export const AnimatedTrait: TraitHandler = {
     if (context.data.action) {
       context.data.action.stop();
     }
-  }
+  },
 };
 
 // ============================================================================
@@ -639,7 +639,7 @@ export const LookAtTrait: TraitHandler = {
     });
 
     if (targetObj) {
-      const targetPos = (targetObj as THREE.Object3D).position.clone();
+      const targetPos = (targetObj).position.clone();
       if (context.data.lockY) {
         targetPos.y = context.object.position.y;
       }
@@ -657,7 +657,7 @@ export const LookAtTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     context.object.userData.lookAtTarget = null;
-  }
+  },
 };
 
 // ============================================================================
@@ -679,7 +679,7 @@ export const OutlineTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     context.object.userData.outline = null;
-  }
+  },
 };
 
 // ============================================================================
@@ -695,7 +695,7 @@ export const ProximityTrait: TraitHandler = {
     context.data.playerInside = false;
     context.object.userData.proximityRadius = context.data.radius;
   },
-  onUpdate: (context: TraitContext, delta: number) => {
+  onUpdate: (context: TraitContext, _delta: number) => {
     // Proximity check handled by InputManager with camera position
     const isInside = context.object.userData.playerNearby ?? false;
 
@@ -713,5 +713,5 @@ export const ProximityTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     context.object.userData.proximityRadius = null;
-  }
+  },
 };

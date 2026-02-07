@@ -1,6 +1,6 @@
 /**
  * HoloScript AI Agent API
- * 
+ *
  * Provides programmatic access for AI agents (Brittney, Claude, Copilot, etc.)
  * to control the HoloScript extension, generate code, and interact with previews.
  */
@@ -60,16 +60,22 @@ export class HoloScriptAgentAPI {
   private registerAgentCommands(context: vscode.ExtensionContext): void {
     // Command: Create new HoloScript file
     context.subscriptions.push(
-      vscode.commands.registerCommand('holoscript.agent.createFile', async (args: { filename: string; content: string; openPreview?: boolean }) => {
-        return this.createHoloFile(args.filename, args.content, args.openPreview);
-      })
+      vscode.commands.registerCommand(
+        'holoscript.agent.createFile',
+        async (args: { filename: string; content: string; openPreview?: boolean }) => {
+          return this.createHoloFile(args.filename, args.content, args.openPreview);
+        }
+      )
     );
 
     // Command: Generate object from description
     context.subscriptions.push(
-      vscode.commands.registerCommand('holoscript.agent.generateObject', async (args: GenerateObjectRequest) => {
-        return this.generateObject(args);
-      })
+      vscode.commands.registerCommand(
+        'holoscript.agent.generateObject',
+        async (args: GenerateObjectRequest) => {
+          return this.generateObject(args);
+        }
+      )
     );
 
     // Command: Analyze current scene
@@ -81,37 +87,52 @@ export class HoloScriptAgentAPI {
 
     // Command: Insert code at cursor
     context.subscriptions.push(
-      vscode.commands.registerCommand('holoscript.agent.insertCode', async (args: { code: string }) => {
-        return this.insertCodeAtCursor(args.code);
-      })
+      vscode.commands.registerCommand(
+        'holoscript.agent.insertCode',
+        async (args: { code: string }) => {
+          return this.insertCodeAtCursor(args.code);
+        }
+      )
     );
 
     // Command: Open preview for file
     context.subscriptions.push(
-      vscode.commands.registerCommand('holoscript.agent.openPreview', async (args?: { filePath?: string }) => {
-        return this.openPreview(args?.filePath);
-      })
+      vscode.commands.registerCommand(
+        'holoscript.agent.openPreview',
+        async (args?: { filePath?: string }) => {
+          return this.openPreview(args?.filePath);
+        }
+      )
     );
 
     // Command: Add trait to object
     context.subscriptions.push(
-      vscode.commands.registerCommand('holoscript.agent.addTrait', async (args: { objectName: string; trait: string }) => {
-        return this.addTraitToObject(args.objectName, args.trait);
-      })
+      vscode.commands.registerCommand(
+        'holoscript.agent.addTrait',
+        async (args: { objectName: string; trait: string }) => {
+          return this.addTraitToObject(args.objectName, args.trait);
+        }
+      )
     );
 
     // Command: List available traits
     context.subscriptions.push(
-      vscode.commands.registerCommand('holoscript.agent.listTraits', async (args?: { category?: string }) => {
-        return this.listTraits(args?.category);
-      })
+      vscode.commands.registerCommand(
+        'holoscript.agent.listTraits',
+        async (args?: { category?: string }) => {
+          return this.listTraits(args?.category);
+        }
+      )
     );
 
     // Command: Validate HoloScript syntax
     context.subscriptions.push(
-      vscode.commands.registerCommand('holoscript.agent.validate', async (args?: { content?: string }) => {
-        return this.validateSyntax(args?.content);
-      })
+      vscode.commands.registerCommand(
+        'holoscript.agent.validate',
+        async (args?: { content?: string }) => {
+          return this.validateSyntax(args?.content);
+        }
+      )
     );
 
     // Command: Get extension status
@@ -125,7 +146,11 @@ export class HoloScriptAgentAPI {
   /**
    * Create a new HoloScript file
    */
-  async createHoloFile(filename: string, content: string, openPreview = true): Promise<AgentResponse> {
+  async createHoloFile(
+    filename: string,
+    content: string,
+    openPreview = true
+  ): Promise<AgentResponse> {
     try {
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
       if (!workspaceFolder) {
@@ -168,7 +193,7 @@ export class HoloScriptAgentAPI {
    */
   async generateObject(request: GenerateObjectRequest): Promise<AgentResponse> {
     const { description, format = 'hsplus', traits = [] } = request;
-    
+
     // Parse description for object type hints
     const desc = description.toLowerCase();
     let objectType = 'object';
@@ -210,12 +235,12 @@ export class HoloScriptAgentAPI {
     const objectName = description
       .split(' ')
       .slice(0, 2)
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
       .join('');
 
     // Generate code based on format
     let code: string;
-    
+
     if (format === 'holo') {
       code = `object "${objectName}" {
   ${suggestedTraits.join('\n  ')}
@@ -299,7 +324,7 @@ export class HoloScriptAgentAPI {
       return { success: false, error: 'No active editor' };
     }
 
-    await editor.edit(editBuilder => {
+    await editor.edit((editBuilder) => {
       editBuilder.insert(editor.selection.active, code);
     });
 
@@ -340,7 +365,7 @@ export class HoloScriptAgentAPI {
     }
 
     const content = editor.document.getText();
-    
+
     // Find the object/orb declaration
     const patterns = [
       new RegExp(`(object\\s+["']${objectName}["']\\s*\\{)`, 'i'),
@@ -352,7 +377,7 @@ export class HoloScriptAgentAPI {
       const match = content.match(pattern);
       if (match && match.index !== undefined) {
         const insertPos = editor.document.positionAt(match.index + match[1].length);
-        await editor.edit(editBuilder => {
+        await editor.edit((editBuilder) => {
           const traitLine = trait.startsWith('@') ? trait : `@${trait}`;
           editBuilder.insert(insertPos, `\n  ${traitLine}`);
         });
@@ -373,7 +398,15 @@ export class HoloScriptAgentAPI {
    */
   async listTraits(category?: string): Promise<AgentResponse> {
     const traits: Record<string, string[]> = {
-      interaction: ['@grabbable', '@throwable', '@holdable', '@clickable', '@hoverable', '@draggable', '@haptic'],
+      interaction: [
+        '@grabbable',
+        '@throwable',
+        '@holdable',
+        '@clickable',
+        '@hoverable',
+        '@draggable',
+        '@haptic',
+      ],
       physics: ['@collidable', '@physics', '@rigid', '@kinematic', '@trigger', '@gravity'],
       visual: ['@glowing', '@emissive', '@transparent', '@reflective', '@animated', '@billboard'],
       networking: ['@networked', '@synced', '@persistent', '@owned', '@host_only'],
@@ -396,7 +429,7 @@ export class HoloScriptAgentAPI {
   async validateSyntax(content?: string): Promise<AgentResponse> {
     const editor = vscode.window.activeTextEditor;
     const text = content || editor?.document.getText();
-    
+
     if (!text) {
       return { success: false, error: 'No content to validate' };
     }
@@ -410,7 +443,7 @@ export class HoloScriptAgentAPI {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      
+
       for (const char of line) {
         if (char === '"' || char === "'") {
           inString = !inString;
@@ -445,7 +478,7 @@ export class HoloScriptAgentAPI {
    */
   async getStatus(): Promise<AgentResponse> {
     const editor = vscode.window.activeTextEditor;
-    
+
     return {
       success: true,
       data: {
@@ -470,9 +503,11 @@ export class HoloScriptAgentAPI {
   }
 
   private isHoloScriptFile(document: vscode.TextDocument): boolean {
-    return document.languageId === 'holoscript' || 
-           document.languageId === 'holoscriptplus' ||
-           /\.(holo|hsplus|hs)$/.test(document.fileName);
+    return (
+      document.languageId === 'holoscript' ||
+      document.languageId === 'holoscriptplus' ||
+      /\.(holo|hsplus|hs)$/.test(document.fileName)
+    );
   }
 }
 

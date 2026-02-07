@@ -108,8 +108,8 @@ export class AndroidXRCompiler {
       this.emit('import com.google.android.filament.LightManager');
       this.emit('import com.google.android.filament.utils.Float3');
     }
-    const hasHandTracking = composition.objects?.some(o =>
-      o.traits?.some(t => t.name === 'hand_tracking')
+    const hasHandTracking = composition.objects?.some((o) =>
+      o.traits?.some((t) => t.name === 'hand_tracking')
     );
     if (hasHandTracking) {
       this.emit('import androidx.xr.scenecore.InputEvent');
@@ -135,7 +135,10 @@ export class AndroidXRCompiler {
     this.indent();
     this.emit('super.onCreate(savedInstanceState)');
     this.emit('xrSession = XRSession.create(this)');
-    if (this.options.useARCore) { this.emit(''); this.emitARSession(); }
+    if (this.options.useARCore) {
+      this.emit('');
+      this.emitARSession();
+    }
     if (composition.audio?.length) {
       this.emit('');
       this.emit('val audioAttrs = AudioAttributes.Builder()');
@@ -143,7 +146,9 @@ export class AndroidXRCompiler {
       this.emit('.setUsage(AudioAttributes.USAGE_GAME)');
       this.emit('.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()');
       this.dedent();
-      this.emit('soundPool = SoundPool.Builder().setMaxStreams(8).setAudioAttributes(audioAttrs).build()');
+      this.emit(
+        'soundPool = SoundPool.Builder().setMaxStreams(8).setAudioAttributes(audioAttrs).build()'
+      );
     }
     this.emit('');
     this.emit('setContent {');
@@ -244,17 +249,19 @@ export class AndroidXRCompiler {
     this.emit(`// Object: ${obj.name}`);
 
     // Trait: plane_detection
-    if (obj.traits?.some(t => t.name === 'plane_detection')) {
+    if (obj.traits?.some((t) => t.name === 'plane_detection')) {
       this.emit(`val ${v}Plane = xrSession.scene.createEntity("${obj.name}_plane")`);
       this.emit(`${v}Plane.setPose(Pose(Vector3(0f, 0f, 0f), Quaternion.identity()))`);
     }
     // Trait: anchor
-    const anchor = obj.traits?.find(t => t.name === 'anchor');
+    const anchor = obj.traits?.find((t) => t.name === 'anchor');
     if (anchor) {
-      this.emit(`val ${v}Anchor = xrSession.scene.createAnchorEntity() // type: ${anchor.config?.type ?? 'plane'}`);
+      this.emit(
+        `val ${v}Anchor = xrSession.scene.createAnchorEntity() // type: ${anchor.config?.type ?? 'plane'}`
+      );
     }
     // Trait: hand_tracking
-    if (obj.traits?.some(t => t.name === 'hand_tracking')) {
+    if (obj.traits?.some((t) => t.name === 'hand_tracking')) {
       this.emit(`val ${v}Hand = HandNode(xrSession)`);
       this.emit(`${v}Hand.setOnInputEventListener { event: InputEvent -> /* hand input */ }`);
     }
@@ -267,14 +274,18 @@ export class AndroidXRCompiler {
       const color = this.findProp(obj, 'color');
       this.emit(`SpatialPanel(SubspaceModifier.width(200f).height(60f)) {`);
       this.indent();
-      this.emit(`Text("${text}", color = ${color ? this.toKotlinColor(color as string) : 'Color.White'})`);
+      this.emit(
+        `Text("${text}", color = ${color ? this.toKotlinColor(color as string) : 'Color.White'})`
+      );
       this.dedent();
       this.emit('}');
     } else {
       this.emit(`val ${v} = xrSession.scene.createEntity("${obj.name}")`);
       const pos = this.findProp(obj, 'position');
       if (pos && Array.isArray(pos)) {
-        this.emit(`${v}.setPose(Pose(${this.toKotlinFloat3(pos as number[])}, Quaternion.identity()))`);
+        this.emit(
+          `${v}.setPose(Pose(${this.toKotlinFloat3(pos as number[])}, Quaternion.identity()))`
+        );
       }
       const scale = this.findProp(obj, 'scale');
       if (scale && Array.isArray(scale)) {
@@ -319,7 +330,9 @@ export class AndroidXRCompiler {
     this.emit(`val ${v} = xrSession.scene.createEntity("${group.name}")`);
     for (const p of group.properties) {
       if (p.key === 'position' && Array.isArray(p.value))
-        this.emit(`${v}.setPose(Pose(${this.toKotlinFloat3(p.value as number[])}, Quaternion.identity()))`);
+        this.emit(
+          `${v}.setPose(Pose(${this.toKotlinFloat3(p.value as number[])}, Quaternion.identity()))`
+        );
       else if (p.key === 'scale' && Array.isArray(p.value))
         this.emit(`${v}.setScale(${this.toKotlinFloat3(p.value as number[])})`);
       else if (p.key === 'scale' && typeof p.value === 'number')
@@ -340,20 +353,26 @@ export class AndroidXRCompiler {
   private emitLight(light: HoloLight): void {
     const v = this.sanitizeName(light.name);
     const typeMap: Record<string, string> = {
-      directional: 'DIRECTIONAL', point: 'POINT', spot: 'SPOT',
-      ambient: 'DIRECTIONAL', hemisphere: 'DIRECTIONAL', area: 'POINT',
+      directional: 'DIRECTIONAL',
+      point: 'POINT',
+      spot: 'SPOT',
+      ambient: 'DIRECTIONAL',
+      hemisphere: 'DIRECTIONAL',
+      area: 'POINT',
     };
     this.emit('');
     this.emit(`val ${v} = xrSession.scene.createEntity("${light.name}")`);
     this.emit(`// Filament type: LightManager.Type.${typeMap[light.lightType] ?? 'POINT'}`);
 
-    const color = light.properties.find(p => p.key === 'color');
-    const intensity = light.properties.find(p => p.key === 'intensity');
-    const pos = light.properties.find(p => p.key === 'position');
+    const color = light.properties.find((p) => p.key === 'color');
+    const intensity = light.properties.find((p) => p.key === 'intensity');
+    const pos = light.properties.find((p) => p.key === 'position');
     if (color) this.emit(`// Color: ${color.value}`);
     if (intensity) this.emit(`// Intensity: ${(intensity.value as number) * 100000}f lux`);
     if (pos && Array.isArray(pos.value))
-      this.emit(`${v}.setPose(Pose(${this.toKotlinFloat3(pos.value as number[])}, Quaternion.identity()))`);
+      this.emit(
+        `${v}.setPose(Pose(${this.toKotlinFloat3(pos.value as number[])}, Quaternion.identity()))`
+      );
   }
 
   // ─── Camera ──────────────────────────────────────────────────────────
@@ -363,8 +382,7 @@ export class AndroidXRCompiler {
     for (const p of cam.properties) {
       if (p.key === 'passthrough' && (p.value === true || p.value === 'true'))
         this.emit('xrSession.scene.configure { it.focusMode = Config.FocusMode.AUTO }');
-      else if (p.key === 'fov')
-        this.emit(`// FOV: ${p.value} -- managed by XR headset`);
+      else if (p.key === 'fov') this.emit(`// FOV: ${p.value} -- managed by XR headset`);
     }
   }
 
@@ -383,7 +401,9 @@ export class AndroidXRCompiler {
       if (e.action.kind === 'animate') {
         for (const [k, val] of Object.entries(e.action.properties)) {
           if (typeof val === 'number') {
-            this.emit(`anims.add(ObjectAnimator.ofFloat(null, "${k}", ${val}f).apply { startDelay = ${ms}L; duration = 300L })`);
+            this.emit(
+              `anims.add(ObjectAnimator.ofFloat(null, "${k}", ${val}f).apply { startDelay = ${ms}L; duration = 300L })`
+            );
           }
         }
       } else if (e.action.kind === 'emit') {
@@ -397,7 +417,9 @@ export class AndroidXRCompiler {
     if (tl.loop) {
       this.emit('set.addListener(object : android.animation.AnimatorListenerAdapter() {');
       this.indent();
-      this.emit(`override fun onAnimationEnd(a: android.animation.Animator) { playTimeline_${fn}() }`);
+      this.emit(
+        `override fun onAnimationEnd(a: android.animation.Animator) { playTimeline_${fn}() }`
+      );
       this.dedent();
       this.emit('})');
     }
@@ -410,11 +432,11 @@ export class AndroidXRCompiler {
 
   private emitAudio(audio: HoloAudio): void {
     const v = this.sanitizeName(audio.name);
-    const src = audio.properties.find(p => p.key === 'src' || p.key === 'source')?.value;
-    const spatial = audio.properties.find(p => p.key === 'spatial')?.value;
-    const volume = audio.properties.find(p => p.key === 'volume')?.value ?? 1.0;
-    const loop = audio.properties.find(p => p.key === 'loop')?.value;
-    const pos = audio.properties.find(p => p.key === 'position')?.value;
+    const src = audio.properties.find((p) => p.key === 'src' || p.key === 'source')?.value;
+    const spatial = audio.properties.find((p) => p.key === 'spatial')?.value;
+    const volume = audio.properties.find((p) => p.key === 'volume')?.value ?? 1.0;
+    const loop = audio.properties.find((p) => p.key === 'loop')?.value;
+    const pos = audio.properties.find((p) => p.key === 'position')?.value;
 
     this.emit('');
     this.emit(`// Audio: ${audio.name}`);
@@ -423,13 +445,17 @@ export class AndroidXRCompiler {
     }
     if (spatial && pos && Array.isArray(pos)) {
       this.emit(`val ${v}Entity = xrSession.scene.createEntity("${audio.name}")`);
-      this.emit(`${v}Entity.setPose(Pose(${this.toKotlinFloat3(pos as number[])}, Quaternion.identity()))`);
+      this.emit(
+        `${v}Entity.setPose(Pose(${this.toKotlinFloat3(pos as number[])}, Quaternion.identity()))`
+      );
       this.emit(`val ${v}Track = SpatialAudioTrack(xrSession, ${v}Entity)`);
     }
     if (src) {
       this.emit(`soundPool.setOnLoadCompleteListener { pool, id, _ ->`);
       this.indent();
-      this.emit(`if (id == ${v}Id) pool.play(id, ${volume}f, ${volume}f, 1, ${loop ? 1 : 0}, 1.0f)`);
+      this.emit(
+        `if (id == ${v}Id) pool.play(id, ${volume}f, ${volume}f, 1, ${loop ? 1 : 0}, 1.0f)`
+      );
       this.dedent();
       this.emit('}');
     }
@@ -442,19 +468,21 @@ export class AndroidXRCompiler {
     this.emit('// UI Layer');
     for (const el of ui.elements) {
       const vn = this.sanitizeName(el.name);
-      const w = el.properties.find(p => p.key === 'width')?.value ?? 400;
-      const h = el.properties.find(p => p.key === 'height')?.value ?? 300;
-      const text = el.properties.find(p => p.key === 'text')?.value;
-      const label = el.properties.find(p => p.key === 'label')?.value;
-      const elType = el.properties.find(p => p.key === 'type')?.value;
+      const w = el.properties.find((p) => p.key === 'width')?.value ?? 400;
+      const h = el.properties.find((p) => p.key === 'height')?.value ?? 300;
+      const text = el.properties.find((p) => p.key === 'text')?.value;
+      const label = el.properties.find((p) => p.key === 'label')?.value;
+      const elType = el.properties.find((p) => p.key === 'type')?.value;
 
       this.emit(`SpatialPanel(SubspaceModifier.width(${w}f).height(${h}f)) {`);
       this.indent();
       if (elType === 'button' && label) {
         this.emit(`Button(onClick = { /* ${vn} */ }) { Text("${label}") }`);
       } else if (text) {
-        const color = el.properties.find(p => p.key === 'color')?.value;
-        this.emit(`Text("${text}", color = ${color ? this.toKotlinColor(color as string) : 'Color.White'})`);
+        const color = el.properties.find((p) => p.key === 'color')?.value;
+        this.emit(
+          `Text("${text}", color = ${color ? this.toKotlinColor(color as string) : 'Color.White'})`
+        );
       } else {
         this.emit(`Column(modifier = Modifier.fillMaxSize()) { Text("${el.name}") }`);
       }
@@ -468,18 +496,19 @@ export class AndroidXRCompiler {
   private emitZone(zone: HoloZone): void {
     const v = this.sanitizeName(zone.name);
     this.emit(`val ${v} = xrSession.scene.createEntity("${zone.name}")`);
-    const pos = zone.properties.find(p => p.key === 'position')?.value;
+    const pos = zone.properties.find((p) => p.key === 'position')?.value;
     if (pos && Array.isArray(pos))
-      this.emit(`${v}.setPose(Pose(${this.toKotlinFloat3(pos as number[])}, Quaternion.identity()))`);
-    const shape = zone.properties.find(p => p.key === 'shape')?.value;
-    const size = zone.properties.find(p => p.key === 'size')?.value;
-    const radius = zone.properties.find(p => p.key === 'radius')?.value;
+      this.emit(
+        `${v}.setPose(Pose(${this.toKotlinFloat3(pos as number[])}, Quaternion.identity()))`
+      );
+    const shape = zone.properties.find((p) => p.key === 'shape')?.value;
+    const size = zone.properties.find((p) => p.key === 'size')?.value;
+    const radius = zone.properties.find((p) => p.key === 'radius')?.value;
     if (shape === 'box' && size && Array.isArray(size))
       this.emit(`// Trigger volume: box ${(size as number[]).join('x')}`);
-    else if (shape === 'sphere' && radius)
-      this.emit(`// Trigger volume: sphere r=${radius}`);
+    else if (shape === 'sphere' && radius) this.emit(`// Trigger volume: sphere r=${radius}`);
     if (zone.handlers?.length)
-      this.emit(`// Handlers: ${zone.handlers.map(h => h.event).join(', ')}`);
+      this.emit(`// Handlers: ${zone.handlers.map((h) => h.event).join(', ')}`);
   }
 
   // ─── Effects ─────────────────────────────────────────────────────────
@@ -494,13 +523,15 @@ export class AndroidXRCompiler {
 
   private emitTransition(tr: HoloTransition): void {
     const fn = this.sanitizeName(tr.name);
-    const target = tr.properties.find(p => p.key === 'target')?.value;
-    const dur = tr.properties.find(p => p.key === 'duration')?.value ?? 0.5;
+    const target = tr.properties.find((p) => p.key === 'target')?.value;
+    const dur = tr.properties.find((p) => p.key === 'duration')?.value ?? 0.5;
     this.emit('');
     this.emit(`private fun transition_${fn}() {`);
     this.indent();
     this.emit(`// -> "${target}"`);
-    this.emit(`ObjectAnimator.ofFloat(null, "alpha", 1f, 0f).apply { duration = ${Math.round((dur as number) * 1000)}L }.start()`);
+    this.emit(
+      `ObjectAnimator.ofFloat(null, "alpha", 1f, 0f).apply { duration = ${Math.round((dur as number) * 1000)}L }.start()`
+    );
     this.dedent();
     this.emit('}');
   }
@@ -509,10 +540,8 @@ export class AndroidXRCompiler {
 
   /** Converts [x, y, z] to `Float3(xf, yf, zf)`. */
   private toKotlinFloat3(arr: number[]): string {
-    if (Array.isArray(arr) && arr.length >= 3)
-      return `Float3(${arr[0]}f, ${arr[1]}f, ${arr[2]}f)`;
-    if (Array.isArray(arr) && arr.length >= 1)
-      return `Float3(${arr[0]}f, ${arr[0]}f, ${arr[0]}f)`;
+    if (Array.isArray(arr) && arr.length >= 3) return `Float3(${arr[0]}f, ${arr[1]}f, ${arr[2]}f)`;
+    if (Array.isArray(arr) && arr.length >= 1) return `Float3(${arr[0]}f, ${arr[0]}f, ${arr[0]}f)`;
     const v = typeof arr === 'number' ? arr : 0;
     return `Float3(${v}f, ${v}f, ${v}f)`;
   }
@@ -523,7 +552,12 @@ export class AndroidXRCompiler {
       const raw = hex.slice(1);
       if (raw.length === 6) return `Color(0xFF${raw.toUpperCase()})`;
       if (raw.length === 8) {
-        const [rr, gg, bb, aa] = [raw.substring(0,2), raw.substring(2,4), raw.substring(4,6), raw.substring(6,8)];
+        const [rr, gg, bb, aa] = [
+          raw.substring(0, 2),
+          raw.substring(2, 4),
+          raw.substring(4, 6),
+          raw.substring(6, 8),
+        ];
         return `Color(0x${aa.toUpperCase()}${rr.toUpperCase()}${gg.toUpperCase()}${bb.toUpperCase()})`;
       }
     }
@@ -533,9 +567,14 @@ export class AndroidXRCompiler {
   /** Maps HoloScript shape names to Filament geometric primitive descriptions. */
   private mapShapeToFilament(type: string): string {
     const map: Record<string, string> = {
-      cube: 'BoxShape', box: 'BoxShape', sphere: 'IcoSphereShape',
-      cylinder: 'CylinderShape', cone: 'ConeShape', plane: 'QuadShape',
-      torus: 'CustomRingGeometry', capsule: 'CapsuleShape',
+      cube: 'BoxShape',
+      box: 'BoxShape',
+      sphere: 'IcoSphereShape',
+      cylinder: 'CylinderShape',
+      cone: 'ConeShape',
+      plane: 'QuadShape',
+      torus: 'CustomRingGeometry',
+      capsule: 'CapsuleShape',
     };
     return map[type] ?? `Unknown("${type}")`;
   }
@@ -547,12 +586,13 @@ export class AndroidXRCompiler {
     if (typeof value === 'boolean') return value ? 'true' : 'false';
     if (typeof value === 'string') return `"${value}"`;
     if (value === null) return 'null';
-    if (Array.isArray(value)) return `listOf(${value.map(v => this.toKotlinValue(v)).join(', ')})`;
+    if (Array.isArray(value))
+      return `listOf(${value.map((v) => this.toKotlinValue(v)).join(', ')})`;
     return 'null';
   }
 
   private findProp(obj: HoloObjectDecl, key: string): HoloValue | undefined {
-    return obj.properties?.find(p => p.key === key)?.value;
+    return obj.properties?.find((p) => p.key === key)?.value;
   }
 
   private sanitizeName(name: string): string {
@@ -563,6 +603,10 @@ export class AndroidXRCompiler {
     this.lines.push(this.options.indent.repeat(this.indentLevel) + line);
   }
 
-  private indent(): void { this.indentLevel++; }
-  private dedent(): void { if (this.indentLevel > 0) this.indentLevel--; }
+  private indent(): void {
+    this.indentLevel++;
+  }
+  private dedent(): void {
+    if (this.indentLevel > 0) this.indentLevel--;
+  }
 }

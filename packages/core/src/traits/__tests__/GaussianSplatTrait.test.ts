@@ -34,7 +34,7 @@ describe('GaussianSplatTrait', () => {
 
     it('should attach and create state', () => {
       attachTrait(gaussianSplatHandler, node, {}, ctx);
-      
+
       const state = (node as any).__gaussianSplatState;
       expect(state).toBeDefined();
       expect(state.isLoaded).toBe(false);
@@ -43,7 +43,7 @@ describe('GaussianSplatTrait', () => {
 
     it('should start loading if source provided', () => {
       attachTrait(gaussianSplatHandler, node, { source: 'scene.ply' }, ctx);
-      
+
       const state = (node as any).__gaussianSplatState;
       expect(state.isLoading).toBe(true);
     });
@@ -63,7 +63,7 @@ describe('GaussianSplatTrait', () => {
         boundingBox: { min: [-5, -5, -5], max: [5, 5, 5] },
         renderHandle: {},
       });
-      
+
       const state = (node as any).__gaussianSplatState;
       expect(state.isLoaded).toBe(true);
       expect(state.splatCount).toBe(100000);
@@ -76,7 +76,7 @@ describe('GaussianSplatTrait', () => {
         progress: 0.5,
         loadedSplats: 50000,
       });
-      
+
       expect(getEventCount(ctx, 'on_splat_progress')).toBe(1);
     });
   });
@@ -99,7 +99,7 @@ describe('GaussianSplatTrait', () => {
         type: 'splat_set_quality',
         quality: 'high',
       });
-      
+
       expect(getEventCount(ctx, 'splat_update_quality')).toBe(1);
     });
   });
@@ -141,7 +141,7 @@ describe('GaussianSplatTrait', () => {
         type: 'splat_visibility_update',
         visibleCount: 50000,
       });
-      
+
       const state = (node as any).__gaussianSplatState;
       expect(state.visibleSplats).toBe(50000);
     });
@@ -158,9 +158,9 @@ describe('GaussianSplatTrait', () => {
         renderHandle: {},
       });
       ctx.clearEvents();
-      
+
       gaussianSplatHandler.onDetach?.(node, gaussianSplatHandler.defaultConfig, ctx);
-      
+
       expect((node as any).__gaussianSplatState).toBeUndefined();
       expect(getEventCount(ctx, 'splat_destroy')).toBe(1);
     });
@@ -177,12 +177,12 @@ describe('GaussianSplatTrait', () => {
         renderHandle: {},
       });
       ctx.clearEvents();
-      
+
       sendEvent(gaussianSplatHandler, node, { source: 'scene.ply', quality: 'high' }, ctx, {
         type: 'splat_query',
         queryId: 'test-query',
       });
-      
+
       const info = getLastEvent(ctx, 'splat_info');
       expect(info).toBeDefined();
       expect(info.queryId).toBe('test-query');

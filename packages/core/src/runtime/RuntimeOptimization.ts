@@ -318,8 +318,10 @@ export class Batcher<T, R> {
  * Performance profiler with hot path tracking
  */
 export class PerformanceProfiler {
-  private measurements: Map<string, { count: number; totalTime: number; minTime: number; maxTime: number }> =
-    new Map();
+  private measurements: Map<
+    string,
+    { count: number; totalTime: number; minTime: number; maxTime: number }
+  > = new Map();
   private activeTimers: Map<string, number> = new Map();
 
   /**
@@ -343,7 +345,12 @@ export class PerformanceProfiler {
     this.activeTimers.delete(label);
 
     // Update statistics
-    const stats = this.measurements.get(label) || { count: 0, totalTime: 0, minTime: Infinity, maxTime: -Infinity };
+    const stats = this.measurements.get(label) || {
+      count: 0,
+      totalTime: 0,
+      minTime: Infinity,
+      maxTime: -Infinity,
+    };
 
     stats.count++;
     stats.totalTime += duration;
@@ -373,7 +380,9 @@ export class PerformanceProfiler {
   getReport(): string {
     let report = '=== Performance Profile ===\n\n';
 
-    const sorted = Array.from(this.measurements.entries()).sort((a, b) => b[1].totalTime - a[1].totalTime);
+    const sorted = Array.from(this.measurements.entries()).sort(
+      (a, b) => b[1].totalTime - a[1].totalTime
+    );
 
     for (const [label, stats] of sorted) {
       const avgTime = stats.totalTime / stats.count;

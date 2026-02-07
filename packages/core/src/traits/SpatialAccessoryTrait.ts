@@ -13,9 +13,24 @@ import type { TraitHandler } from './TraitTypes';
 // TYPES
 // =============================================================================
 
-type DeviceType = 'controller' | 'tracker' | 'stylus' | 'haptic_vest' | 'haptic_gloves' | 'eye_tracker' | 'custom';
+type DeviceType =
+  | 'controller'
+  | 'tracker'
+  | 'stylus'
+  | 'haptic_vest'
+  | 'haptic_gloves'
+  | 'eye_tracker'
+  | 'custom';
 type TrackingMode = 'full_6dof' | 'rotation_only' | 'position_only' | 'optical' | 'hybrid';
-type AttachPoint = 'left_hand' | 'right_hand' | 'head' | 'waist' | 'left_foot' | 'right_foot' | 'chest' | 'custom';
+type AttachPoint =
+  | 'left_hand'
+  | 'right_hand'
+  | 'head'
+  | 'waist'
+  | 'left_foot'
+  | 'right_foot'
+  | 'chest'
+  | 'custom';
 
 interface SpatialAccessoryState {
   isConnected: boolean;
@@ -79,7 +94,7 @@ export const spatialAccessoryHandler: TraitHandler<SpatialAccessoryConfig> = {
       lastInput: 0,
     };
     (node as any).__spatialAccessoryState = state;
-    
+
     if (config.device_id) {
       context.emit?.('accessory_connect', {
         node,
@@ -98,10 +113,10 @@ export const spatialAccessoryHandler: TraitHandler<SpatialAccessoryConfig> = {
     delete (node as any).__spatialAccessoryState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__spatialAccessoryState as SpatialAccessoryState;
     if (!state || !state.isConnected) return;
-    
+
     context.emit?.('accessory_request_pose', {
       node,
       trackingMode: config.tracking_mode,
@@ -111,12 +126,12 @@ export const spatialAccessoryHandler: TraitHandler<SpatialAccessoryConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__spatialAccessoryState as SpatialAccessoryState;
     if (!state) return;
-    
+
     if (event.type === 'accessory_connected') {
       state.isConnected = true;
-      state.hapticMotors = event.hapticMotors as number || 0;
-      state.batteryLevel = event.batteryLevel as number || 1.0;
-      
+      state.hapticMotors = (event.hapticMotors as number) || 0;
+      state.batteryLevel = (event.batteryLevel as number) || 1.0;
+
       if (config.led_enabled) {
         context.emit?.('accessory_set_led', {
           node,
@@ -124,7 +139,7 @@ export const spatialAccessoryHandler: TraitHandler<SpatialAccessoryConfig> = {
           enabled: true,
         });
       }
-      
+
       context.emit?.('on_accessory_connected', {
         node,
         deviceType: config.device_type,
@@ -135,7 +150,7 @@ export const spatialAccessoryHandler: TraitHandler<SpatialAccessoryConfig> = {
     } else if (event.type === 'accessory_pose_update') {
       const pose = event.pose as typeof state.lastPose;
       state.lastPose = pose;
-      
+
       context.emit?.('accessory_apply_pose', {
         node,
         attachPoint: config.attach_point,
@@ -145,10 +160,10 @@ export const spatialAccessoryHandler: TraitHandler<SpatialAccessoryConfig> = {
     } else if (event.type === 'accessory_input') {
       const buttonName = event.button as string;
       const value = event.value as number;
-      
+
       state.inputs.set(buttonName, value);
       state.lastInput = Date.now();
-      
+
       const mappedAction = config.input_mapping[buttonName];
       if (mappedAction) {
         context.emit?.('on_accessory_input', {
@@ -158,7 +173,7 @@ export const spatialAccessoryHandler: TraitHandler<SpatialAccessoryConfig> = {
           value,
         });
       }
-      
+
       // Pressure sensitivity
       if (config.pressure_sensitivity && typeof value === 'number' && value > 0 && value < 1) {
         context.emit?.('on_pressure_change', {
@@ -169,12 +184,12 @@ export const spatialAccessoryHandler: TraitHandler<SpatialAccessoryConfig> = {
       }
     } else if (event.type === 'accessory_haptic') {
       if (!config.haptic_feedback || state.hapticMotors === 0) return;
-      
+
       context.emit?.('accessory_play_haptic', {
         node,
-        intensity: event.intensity as number || 0.5,
-        duration: event.duration as number || 100,
-        pattern: event.pattern as number[] || [event.intensity as number || 0.5],
+        intensity: (event.intensity as number) || 0.5,
+        duration: (event.duration as number) || 100,
+        pattern: (event.pattern as number[]) || [(event.intensity as number) || 0.5],
       });
     } else if (event.type === 'accessory_calibrate') {
       state.isCalibrated = false;
@@ -187,7 +202,7 @@ export const spatialAccessoryHandler: TraitHandler<SpatialAccessoryConfig> = {
       context.emit?.('on_accessory_calibrated', { node });
     } else if (event.type === 'accessory_battery_update') {
       state.batteryLevel = event.level as number;
-      
+
       if (state.batteryLevel < 0.2) {
         context.emit?.('on_accessory_low_battery', {
           node,

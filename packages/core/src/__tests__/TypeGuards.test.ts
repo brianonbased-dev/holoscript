@@ -15,7 +15,7 @@ describe('HoloScript Type Guards', () => {
       kind: 'let',
       name: 'x',
       dataType: 'any',
-      value: 10
+      value: 10,
     };
 
     const gate: GateNode = {
@@ -23,21 +23,21 @@ describe('HoloScript Type Guards', () => {
       condition: {
         type: 'type-guard',
         subject: 'x',
-        guardType: 'number'
+        guardType: 'number',
       },
       truePath: [
         {
-           type: 'expression-statement',
-           expression: 'x',
-           position: { x: 1, y: 1, z: 0 }
-        } as any
+          type: 'expression-statement',
+          expression: 'x',
+          position: { x: 1, y: 1, z: 0 },
+        } as any,
       ],
-      falsePath: []
+      falsePath: [],
     };
 
     const result = typeChecker.check([varDecl, gate]);
-    
-    const debugDiagnostic = result.diagnostics.find(d => d.code === 'DEBUG' && d.line === 1);
+
+    const debugDiagnostic = result.diagnostics.find((d) => d.code === 'DEBUG' && d.line === 1);
     expect(debugDiagnostic).toBeDefined();
     expect(debugDiagnostic?.message).toContain("Type of 'x' is number");
   });
@@ -48,7 +48,7 @@ describe('HoloScript Type Guards', () => {
       kind: 'let',
       name: 'y',
       dataType: 'string',
-      value: "hello"
+      value: 'hello',
     };
 
     const gate: GateNode = {
@@ -56,21 +56,21 @@ describe('HoloScript Type Guards', () => {
       condition: {
         type: 'type-guard',
         subject: 'y',
-        guardType: 'number' // Intentionally narrow to something different
+        guardType: 'number', // Intentionally narrow to something different
       },
       truePath: [],
-      falsePath: []
+      falsePath: [],
     };
 
     const afterGate: ASTNode = {
       type: 'expression-statement',
       expression: 'y',
-      position: { x: 2, y: 1, z: 0 }
+      position: { x: 2, y: 1, z: 0 },
     } as any;
 
     const result = typeChecker.check([varDecl, gate, afterGate]);
-    
-    const debugDiagnostic = result.diagnostics.find(d => d.code === 'DEBUG' && d.line === 2);
+
+    const debugDiagnostic = result.diagnostics.find((d) => d.code === 'DEBUG' && d.line === 2);
     expect(debugDiagnostic).toBeDefined();
     expect(debugDiagnostic?.message).toContain("Type of 'y' is string");
   });

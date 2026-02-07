@@ -48,14 +48,14 @@ Hololand is a **VR social platform** where:
 
 ### Hololand Components
 
-| Component | Description | Uses HoloScript? |
-|-----------|-------------|------------------|
-| **World Editor** | Visual + code editor for creating worlds | Yes - outputs .holo files |
-| **World Runtime** | Executes HoloScript worlds in VR | Yes - uses @holoscript/runtime |
-| **Multiplayer Backend** | Server infrastructure for sessions | No - Node.js/Go backend |
-| **Discovery/Store** | Find and download worlds | No - Web frontend |
-| **Social Features** | Friends, chat, avatars | Partial - avatars in HoloScript |
-| **Monetization** | Creators earn from worlds | No - Backend service |
+| Component               | Description                              | Uses HoloScript?                |
+| ----------------------- | ---------------------------------------- | ------------------------------- |
+| **World Editor**        | Visual + code editor for creating worlds | Yes - outputs .holo files       |
+| **World Runtime**       | Executes HoloScript worlds in VR         | Yes - uses @holoscript/runtime  |
+| **Multiplayer Backend** | Server infrastructure for sessions       | No - Node.js/Go backend         |
+| **Discovery/Store**     | Find and download worlds                 | No - Web frontend               |
+| **Social Features**     | Friends, chat, avatars                   | Partial - avatars in HoloScript |
+| **Monetization**        | Creators earn from worlds                | No - Backend service            |
 
 ---
 
@@ -73,17 +73,17 @@ Hololand is a **VR social platform** where:
 
 ### Hololand Platform Features Needed
 
-| Feature | Type | Priority |
-|---------|------|----------|
-| World hosting infrastructure | Backend | P0 |
-| User accounts and auth | Backend | P0 |
-| Multiplayer session management | Backend | P0 |
-| World discovery/store | Frontend | P1 |
-| In-world chat and voice | Runtime + Backend | P1 |
-| Avatar system | Runtime | P1 |
-| Creator dashboard | Frontend | P2 |
-| Monetization/payments | Backend | P2 |
-| Mobile companion app | Mobile | P3 |
+| Feature                        | Type              | Priority |
+| ------------------------------ | ----------------- | -------- |
+| World hosting infrastructure   | Backend           | P0       |
+| User accounts and auth         | Backend           | P0       |
+| Multiplayer session management | Backend           | P0       |
+| World discovery/store          | Frontend          | P1       |
+| In-world chat and voice        | Runtime + Backend | P1       |
+| Avatar system                  | Runtime           | P1       |
+| Creator dashboard              | Frontend          | P2       |
+| Monetization/payments          | Backend           | P2       |
+| Mobile companion app           | Mobile            | P3       |
 
 ---
 
@@ -91,49 +91,49 @@ Hololand is a **VR social platform** where:
 
 ### Q1: Foundation (Feb-Mar) - 4 weeks
 
-| Feature | Team | Days |
-|---------|------|------|
-| User authentication (OAuth) | Backend | 5 |
-| World upload/storage (S3) | Backend | 4 |
-| Basic multiplayer sessions | Backend | 6 |
-| Web portal MVP | Frontend | 5 |
-| Quest 3 VR client shell | VR | 5 |
+| Feature                     | Team     | Days |
+| --------------------------- | -------- | ---- |
+| User authentication (OAuth) | Backend  | 5    |
+| World upload/storage (S3)   | Backend  | 4    |
+| Basic multiplayer sessions  | Backend  | 6    |
+| Web portal MVP              | Frontend | 5    |
+| Quest 3 VR client shell     | VR       | 5    |
 
 **Milestone:** Users can create accounts, upload worlds, join basic sessions
 
 ### Q2: Social (Apr-Jun) - 8 weeks
 
-| Feature | Team | Days |
-|---------|------|------|
-| Friends system | Backend | 4 |
-| In-world voice chat (WebRTC) | Runtime | 6 |
-| Avatar customization | Runtime | 5 |
-| World ratings/reviews | Backend + Frontend | 4 |
-| Creator analytics dashboard | Frontend | 5 |
+| Feature                      | Team               | Days |
+| ---------------------------- | ------------------ | ---- |
+| Friends system               | Backend            | 4    |
+| In-world voice chat (WebRTC) | Runtime            | 6    |
+| Avatar customization         | Runtime            | 5    |
+| World ratings/reviews        | Backend + Frontend | 4    |
+| Creator analytics dashboard  | Frontend           | 5    |
 
 **Milestone:** Social VR experience with voice, friends, custom avatars
 
 ### Q3: Growth (Jul-Sep) - 8 weeks
 
-| Feature | Team | Days |
-|---------|------|------|
-| World monetization | Backend | 8 |
-| Featured worlds curation | Backend + Frontend | 4 |
-| Mobile companion app | Mobile | 10 |
-| World templates/starter kits | Content | 5 |
-| Creator verification program | Backend | 3 |
+| Feature                      | Team               | Days |
+| ---------------------------- | ------------------ | ---- |
+| World monetization           | Backend            | 8    |
+| Featured worlds curation     | Backend + Frontend | 4    |
+| Mobile companion app         | Mobile             | 10   |
+| World templates/starter kits | Content            | 5    |
+| Creator verification program | Backend            | 3    |
 
 **Milestone:** Creators can monetize, users can discover worlds easily
 
 ### Q4: Scale (Oct-Dec) - 8 weeks
 
-| Feature | Team | Days |
-|---------|------|------|
-| Global CDN for assets | Infra | 6 |
-| Sharding for large worlds | Backend | 8 |
-| Cross-platform (PCVR, Quest, Web) | Runtime | 10 |
-| API for third-party tools | Backend | 5 |
-| Enterprise/education tier | Backend | 4 |
+| Feature                           | Team    | Days |
+| --------------------------------- | ------- | ---- |
+| Global CDN for assets             | Infra   | 6    |
+| Sharding for large worlds         | Backend | 8    |
+| Cross-platform (PCVR, Quest, Web) | Runtime | 10   |
+| API for third-party tools         | Backend | 5    |
+| Enterprise/education tier         | Backend | 4    |
 
 **Milestone:** Platform ready for scale, cross-platform support
 
@@ -182,11 +182,7 @@ composition "My VR World" {
 
 ```typescript
 // Hololand VR Client (built with HoloScript)
-import {
-  HoloScriptPlusParser,
-  BrowserRuntime,
-  createRuntime
-} from '@holoscript/core';
+import { HoloScriptPlusParser, BrowserRuntime, createRuntime } from '@holoscript/core';
 import { runtime, PhysicsWorld, TraitSystem } from '@holoscript/runtime';
 
 class HololandClient {
@@ -216,13 +212,13 @@ class HololandClient {
 
 ## Hololand vs Partner SDK
 
-| Aspect | Hololand | Partner SDK |
-|--------|----------|-------------|
-| **Relationship** | First-party platform | Third-party integration |
-| **Uses** | @holoscript/core, @holoscript/runtime | @holoscript/partner-sdk |
-| **Purpose** | Run VR worlds | Export to other engines |
-| **Auth** | Direct Hololand accounts | Partner API keys |
-| **Data** | Full world execution | Registry/analytics access |
+| Aspect           | Hololand                              | Partner SDK               |
+| ---------------- | ------------------------------------- | ------------------------- |
+| **Relationship** | First-party platform                  | Third-party integration   |
+| **Uses**         | @holoscript/core, @holoscript/runtime | @holoscript/partner-sdk   |
+| **Purpose**      | Run VR worlds                         | Export to other engines   |
+| **Auth**         | Direct Hololand accounts              | Partner API keys          |
+| **Data**         | Full world execution                  | Registry/analytics access |
 
 ---
 
@@ -256,23 +252,23 @@ github.com/brianonbased-dev/
 
 ### 2026 Targets
 
-| Metric | Q2 | Q4 |
-|--------|----|----|
+| Metric           | Q2    | Q4     |
+| ---------------- | ----- | ------ |
 | Registered users | 1,000 | 10,000 |
-| Published worlds | 100 | 1,000 |
-| DAU | 100 | 1,000 |
-| Creators earning | 10 | 100 |
-| Platform uptime | 99% | 99.9% |
+| Published worlds | 100   | 1,000  |
+| DAU              | 100   | 1,000  |
+| Creators earning | 10    | 100    |
+| Platform uptime  | 99%   | 99.9%  |
 
 ### 2027 Targets
 
-| Metric | Target |
-|--------|--------|
-| Registered users | 100,000 |
-| Published worlds | 10,000 |
-| MAU | 50,000 |
-| Creator earnings | $100k/month |
-| Platforms | Quest, PCVR, Web, Mobile |
+| Metric           | Target                   |
+| ---------------- | ------------------------ |
+| Registered users | 100,000                  |
+| Published worlds | 10,000                   |
+| MAU              | 50,000                   |
+| Creator earnings | $100k/month              |
+| Platforms        | Quest, PCVR, Web, Mobile |
 
 ---
 
@@ -284,6 +280,6 @@ github.com/brianonbased-dev/
 
 ---
 
-*Last updated: 2026-02-05*
-*HoloScript Version: 3.0.0*
-*Hololand Target: 1.0.0 (2026 Q2)*
+_Last updated: 2026-02-05_
+_HoloScript Version: 3.0.0_
+_Hololand Target: 1.0.0 (2026 Q2)_

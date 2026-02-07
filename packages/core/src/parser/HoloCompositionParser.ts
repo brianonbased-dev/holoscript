@@ -144,6 +144,7 @@ type TokenType =
   | 'ANIMATE'
   | 'USING'
   | 'IMPORT'
+  | 'ON_ERROR'
   | 'FROM'
   | 'PARTICLE_SYSTEM'
   | 'LIGHT'
@@ -209,6 +210,9 @@ const KEYWORDS: Record<string, TokenType> = {
   return: 'RETURN',
   emit: 'EMIT',
   animate: 'ANIMATE',
+  on_error: 'ON_ERROR',
+  node: 'SPATIAL_GROUP',
+  orb: 'OBJECT',
   using: 'USING',
   import: 'IMPORT',
   from: 'FROM',
@@ -674,7 +678,7 @@ export class HoloCompositionParser {
    */
   private parseImplicitComposition(): HoloComposition {
     this.pushContext('implicit-composition');
-    
+
     const composition: HoloComposition = {
       type: 'Composition',
       name: 'implicit',
@@ -709,7 +713,7 @@ export class HoloCompositionParser {
           this.advance(); // consume @
           const decoratorName = this.current().value.toLowerCase();
           this.advance(); // consume decorator name
-          
+
           if (decoratorName === 'world' || decoratorName === 'environment') {
             composition.environment = this.parseEnvironmentBody();
           } else {
@@ -737,7 +741,7 @@ export class HoloCompositionParser {
           this.advance();
         }
         this.skipNewlines();
-      } catch (err) {
+      } catch (_err) {
         // Error recovery: skip to next statement
         this.advance();
       }
@@ -752,7 +756,7 @@ export class HoloCompositionParser {
    */
   private parseEnvironmentBody(): HoloEnvironment {
     const properties: HoloEnvironmentProperty[] = [];
-    
+
     if (this.check('LBRACE')) {
       this.expect('LBRACE');
       this.skipNewlines();
@@ -780,10 +784,10 @@ export class HoloCompositionParser {
   private parseOrbDeclaration(): HoloObjectDecl {
     this.advance(); // consume 'orb'
     const name = this.expectString();
-    
+
     const traits: HoloObjectTrait[] = [];
     const properties: HoloObjectProperty[] = [];
-    
+
     // Parse traits after name: @grabbable @glowing etc.
     while (this.check('AT' as any)) {
       this.advance(); // consume @
@@ -855,7 +859,7 @@ export class HoloCompositionParser {
 
   private parseComposition(): HoloComposition {
     this.pushContext('composition');
-    
+
     this.expect('COMPOSITION');
     const name = this.expectString();
     this.expect('LBRACE');
@@ -955,7 +959,7 @@ export class HoloCompositionParser {
           this.advance(); // consume @
           const decoratorName = this.current().value.toLowerCase();
           this.advance(); // consume decorator name
-          
+
           if (decoratorName === 'state') {
             composition.state = this.parseStateBody();
           } else if (decoratorName === 'world' || decoratorName === 'environment') {
@@ -968,7 +972,7 @@ export class HoloCompositionParser {
           }
         } else {
           let suggestion: string | undefined;
-          
+
           // Check if this unexpected identifier is a typo of a keyword
           if (this.current().type === 'IDENTIFIER' && this.current().value) {
             const allKeywords = Object.keys(KEYWORDS);
@@ -977,7 +981,7 @@ export class HoloCompositionParser {
               suggestion = `Did you mean the keyword \`${match}\`?`;
             }
           }
-          
+
           this.error(`Unexpected token: ${this.current().type}`, suggestion);
           this.advance();
         }
@@ -1658,10 +1662,15 @@ export class HoloCompositionParser {
       this.advance(); // consume the type keyword (spatial_agent, etc.)
     }
     let name = '';
-    if (typeOverride === 'behavior' && this.check('LBRACE')) {
+    if (this.check('STRING')) {
+      name = this.expectString();
+    } else if (this.check('IDENTIFIER')) {
+      name = this.expectIdentifier();
+    } else if (typeOverride === 'behavior' && this.check('LBRACE')) {
       name = 'behavior'; // anonymous block name
     } else {
-      name = this.expectString();
+      this.error(`Expected string or identifier for object name, got ${this.current().type}`);
+      name = 'unknown';
     }
     let template: string | undefined;
 
@@ -1743,6 +1752,14 @@ export class HoloCompositionParser {
             key,
             value: { type: 'EventHandler', parameters, body } as any,
           });
+        } else if (this.check('EQUALS')) {
+          // Common mistake: using = instead of : for property assignment
+          this.error(
+            `Use ':' instead of '=' for property definitions`,
+            `Use ':' instead of '=' for property definitions. Change '${key} = value' to '${key}: value'`
+          );
+          this.advance(); // skip the =
+          properties.push({ type: 'ObjectProperty', key, value: this.parseValue() });
         } else {
           // Bare identifier (like a trait without @)
           properties.push({ type: 'ObjectProperty', key, value: true });
@@ -1783,7 +1800,15 @@ export class HoloCompositionParser {
 
   private parseSpatialGroup(): HoloSpatialGroup {
     this.expect('SPATIAL_GROUP');
-    const name = this.expectString();
+    let name = '';
+    if (this.check('STRING')) {
+      name = this.expectString();
+    } else if (this.check('IDENTIFIER')) {
+      name = this.expectIdentifier();
+    } else {
+      this.error(`Expected string or identifier for spatial_group name, got ${this.current().type}`);
+      name = 'unknown';
+    }
 
     const properties: HoloGroupProperty[] = [];
 
@@ -1799,6 +1824,7 @@ export class HoloCompositionParser {
 
     const objects: HoloObjectDecl[] = [];
     const groups: HoloSpatialGroup[] = [];
+    const body: HoloStatement[] = [];
 
     while (!this.check('RBRACE') && !this.isAtEnd()) {
       this.skipNewlines();
@@ -1808,6 +1834,21 @@ export class HoloCompositionParser {
         objects.push(this.parseObject());
       } else if (this.check('SPATIAL_GROUP')) {
         groups.push(this.parseSpatialGroup());
+      } else if (this.isStatementKeyword()) {
+        const stmt = this.parseStatement();
+        if (stmt) body.push(stmt);
+      } else if (this.check('IDENTIFIER')) {
+        // Peek ahead to see if it's a property assignment or a statement
+        const next = this.tokens[this.pos + 1];
+        if (next && next.type === 'COLON') {
+          const key = this.expectIdentifier();
+          this.expect('COLON');
+          const value = this.parseValue();
+          properties.push({ type: 'GroupProperty', key, value });
+        } else {
+          const stmt = this.parseStatement();
+          if (stmt) body.push(stmt);
+        }
       } else {
         const key = this.expectIdentifier();
         this.expect('COLON');
@@ -1824,6 +1865,7 @@ export class HoloCompositionParser {
       properties,
       objects,
       groups: groups.length > 0 ? groups : undefined,
+      body: body.length > 0 ? body : undefined,
     };
   }
 
@@ -1933,6 +1975,7 @@ export class HoloCompositionParser {
     if (this.check('RETURN')) return this.parseReturnStatement();
     if (this.check('EMIT')) return this.parseEmitStatement();
     if (this.check('ANIMATE')) return this.parseAnimateStatement();
+    if (this.check('ON_ERROR')) return this.parseOnErrorStatement();
 
     // Assignment or expression
     return this.parseAssignmentOrExpression();
@@ -2399,6 +2442,18 @@ export class HoloCompositionParser {
     return false;
   }
 
+  private isStatementKeyword(): boolean {
+    const type = this.current().type;
+    return (
+      type === 'IF' ||
+      type === 'FOR' ||
+      type === 'AWAIT' ||
+      type === 'RETURN' ||
+      type === 'EMIT' ||
+      type === 'ANIMATE'
+    );
+  }
+
   private isPrimitiveShape(value: string): boolean {
     return PRIMITIVE_SHAPES.has(value.toLowerCase());
   }
@@ -2410,13 +2465,36 @@ export class HoloCompositionParser {
   private isPropertyName(): boolean {
     const type = this.current().type;
     if (type === 'IDENTIFIER') return true;
-    
+
     // Keywords that can also be property names in object bodies
     const validPropertyKeywords = [
-      'ANIMATE', 'AUDIO', 'CAMERA', 'EFFECTS', 'ENVIRONMENT', 'LIGHT', 'LOGIC',
-      'MATERIAL', 'POSITION', 'ROTATION', 'SCALE', 'COLOR', 'TIMELINE', 'ZONE',
-      'UI', 'TRANSITION', 'NPC', 'QUEST', 'ABILITY', 'DIALOGUE', 'SHAPE',
-      'IMPORT', 'USING', 'TEMPLATE', 'GEOMETRY', 'PHYSICS', 'TEXTURE'
+      'ANIMATE',
+      'AUDIO',
+      'CAMERA',
+      'EFFECTS',
+      'ENVIRONMENT',
+      'LIGHT',
+      'LOGIC',
+      'MATERIAL',
+      'POSITION',
+      'ROTATION',
+      'SCALE',
+      'COLOR',
+      'TIMELINE',
+      'ZONE',
+      'UI',
+      'TRANSITION',
+      'NPC',
+      'QUEST',
+      'ABILITY',
+      'DIALOGUE',
+      'SHAPE',
+      'IMPORT',
+      'USING',
+      'TEMPLATE',
+      'GEOMETRY',
+      'PHYSICS',
+      'TEXTURE',
     ];
     return validPropertyKeywords.includes(type);
   }
@@ -2472,7 +2550,7 @@ export class HoloCompositionParser {
       while (!this.check('RBRACE') && !this.isAtEnd()) {
         this.skipNewlines();
         if (this.check('RBRACE')) break;
-        
+
         // Parse object body members (similar to parseObject)
         if (this.check('AT' as any)) {
           this.advance(); // consume @
@@ -2501,7 +2579,7 @@ export class HoloCompositionParser {
     }
 
     this.popContext();
-    
+
     const obj: HoloObjectDecl = {
       type: 'Object',
       name: id,
@@ -2509,7 +2587,7 @@ export class HoloCompositionParser {
       traits,
       children: children.length > 0 ? children : undefined,
     };
-    
+
     return obj;
   }
 
@@ -2522,10 +2600,10 @@ export class HoloCompositionParser {
     if (this.check(type)) {
       return this.advance();
     }
-    
+
     const current = this.current();
     let suggestion: string | undefined;
-    
+
     // Check for keyword typos when we have an identifier but expect a keyword
     if (current.type === 'IDENTIFIER' && current.value) {
       // Create a map of token types to their keyword text
@@ -2533,19 +2611,19 @@ export class HoloCompositionParser {
       for (const [keyword, tokenType] of Object.entries(KEYWORDS)) {
         tokenToKeyword[tokenType] = keyword;
       }
-      
+
       // If we're expecting a keyword token type, check for typos
       if (tokenToKeyword[type]) {
         const expectedKeyword = tokenToKeyword[type];
         const allKeywords = Object.keys(KEYWORDS);
         const match = TypoDetector.findClosestMatch(current.value, allKeywords);
-        
+
         if (match && match.toLowerCase() === expectedKeyword) {
           suggestion = `Did you mean the keyword \`${match}\`?`;
         }
       }
     }
-    
+
     // Provide contextual suggestions
     if (!suggestion) {
       if (type === 'RBRACE' && current.type === 'IDENTIFIER') {
@@ -2560,17 +2638,17 @@ export class HoloCompositionParser {
         suggestion = 'Missing closing parenthesis `)`';
       }
     }
-    
+
     this.error(`Expected ${type}, got ${current.type}`, suggestion);
-    
+
     // Try to recover
     this.recoverToNextStatement();
-    
+
     // Advance to prevent infinite loops
     if (!this.isAtEnd()) {
       return this.advance();
     }
-    
+
     return current;
   }
 
@@ -2578,16 +2656,16 @@ export class HoloCompositionParser {
     if (this.check('STRING')) {
       return this.advance().value;
     }
-    
+
     const current = this.current();
     let suggestion: string | undefined;
-    
+
     if (current.type === 'IDENTIFIER') {
       suggestion = `Wrap the identifier \`${current.value}\` in quotes: "${current.value}"`;
     } else {
       suggestion = 'Strings must be enclosed in double or single quotes';
     }
-    
+
     this.error(`Expected string, got ${current.type}`, suggestion);
     return '';
   }
@@ -2598,20 +2676,37 @@ export class HoloCompositionParser {
     if (this.check('IDENTIFIER')) {
       return this.advance().value;
     }
-    
+
     // Keywords can also be used as property names (e.g., audio, object, state)
     const current = this.current();
     const keywordTypes = [
-      'AUDIO', 'OBJECT', 'STATE', 'TEMPLATE', 'ENVIRONMENT', 'LIGHT',
-      'CAMERA', 'EFFECTS', 'LOGIC', 'TIMELINE', 'ZONE', 'UI', 'TRANSITION',
-      'NPC', 'QUEST', 'ABILITY', 'DIALOGUE', 'SHAPE', 'IMPORT', 'USING'
+      'AUDIO',
+      'OBJECT',
+      'STATE',
+      'TEMPLATE',
+      'ENVIRONMENT',
+      'LIGHT',
+      'CAMERA',
+      'EFFECTS',
+      'LOGIC',
+      'TIMELINE',
+      'ZONE',
+      'UI',
+      'TRANSITION',
+      'NPC',
+      'QUEST',
+      'ABILITY',
+      'DIALOGUE',
+      'SHAPE',
+      'IMPORT',
+      'USING',
     ];
     if (keywordTypes.includes(current.type)) {
       return this.advance().value;
     }
-    
+
     let suggestion: string | undefined;
-    
+
     // Check if user typed a keyword that looks like an identifier typo
     if (current.type === 'STRING') {
       suggestion = 'Remove quotes - identifiers should not be quoted';
@@ -2623,7 +2718,7 @@ export class HoloCompositionParser {
         suggestion = `Did you mean the keyword \`${match}\`?`;
       }
     }
-    
+
     this.error(`Expected identifier, got ${current.type}`, suggestion);
     return '';
   }
@@ -2648,36 +2743,34 @@ export class HoloCompositionParser {
   }
 
   private error(message: string, suggestion?: string): void {
-    const context = this.parseContext.length > 0 
-      ? ` (in ${this.parseContext.join(' > ')})`
-      : '';
-    
-    let fullMessage = `${message}${context}`;
-    
+    const context = this.parseContext.length > 0 ? ` (in ${this.parseContext.join(' > ')})` : '';
+
+    const fullMessage = `${message}${context}`;
+
     this.errors.push({
       message: fullMessage,
       loc: this.currentLocation(),
       suggestion,
       severity: 'error',
     });
-    
+
     if (!this.options.tolerant) {
-      const errorMsg = suggestion 
-        ? `${fullMessage}\n  Suggestion: ${suggestion}`
-        : fullMessage;
+      const errorMsg = suggestion ? `${fullMessage}\n  Suggestion: ${suggestion}` : fullMessage;
       throw new Error(`Parse error at line ${this.currentLocation().line}: ${errorMsg}`);
     }
   }
 
   private recoverToNextStatement(): void {
     // Skip tokens until we find a likely statement boundary
-    while (!this.isAtEnd() && 
-           !this.check('NEWLINE') && 
-           !this.check('RBRACE') && 
-           !this.check('OBJECT') && 
-           !this.check('TEMPLATE') &&
-           !this.check('ENVIRONMENT') &&
-           !this.check('STATE')) {
+    while (
+      !this.isAtEnd() &&
+      !this.check('NEWLINE') &&
+      !this.check('RBRACE') &&
+      !this.check('OBJECT') &&
+      !this.check('TEMPLATE') &&
+      !this.check('ENVIRONMENT') &&
+      !this.check('STATE')
+    ) {
       this.advance();
     }
   }
@@ -2720,7 +2813,7 @@ export class HoloCompositionParser {
   private parseNPC(): HoloNPC {
     this.expect('NPC');
     const name = this.expectString();
-    
+
     this.pushContext(`NPC "${name}"`);
     this.expect('LBRACE');
     this.skipNewlines();
@@ -2854,7 +2947,7 @@ export class HoloCompositionParser {
   private parseQuest(): HoloQuest {
     this.expect('QUEST');
     const name = this.expectString();
-    
+
     this.pushContext(`Quest "${name}"`);
     this.expect('LBRACE');
     this.skipNewlines();
@@ -3552,11 +3645,11 @@ export class HoloCompositionParser {
 
     let shapeType = 'box';
     if (this.check('IDENTIFIER')) {
-        const typeName = this.current().value.toLowerCase();
-        if (PRIMITIVE_SHAPES.has(typeName)) {
-            shapeType = typeName;
-            this.advance();
-        }
+      const typeName = this.current().value.toLowerCase();
+      if (PRIMITIVE_SHAPES.has(typeName)) {
+        shapeType = typeName;
+        this.advance();
+      }
     }
 
     this.expect('LBRACE');

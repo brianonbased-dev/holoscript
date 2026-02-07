@@ -26,14 +26,16 @@ import init, { parse, validate, version } from '@holoscript/wasm';
 await init();
 
 // Parse HoloScript source code
-const ast = JSON.parse(parse(`
+const ast = JSON.parse(
+  parse(`
   orb cube {
     @grabbable
     @physics { mass: 1.5 }
     color: "red"
     position: [0, 1, 0]
   }
-`));
+`)
+);
 
 console.log(ast);
 
@@ -137,11 +139,11 @@ npm run test
 
 Benchmarks on a typical development machine:
 
-| Operation | JavaScript | WASM | Speedup |
-|-----------|------------|------|---------|
-| Parse 100 lines | 5ms | 0.5ms | 10x |
-| Parse 1000 lines | 50ms | 5ms | 10x |
-| Validate 1000 lines | 30ms | 2ms | 15x |
+| Operation           | JavaScript | WASM  | Speedup |
+| ------------------- | ---------- | ----- | ------- |
+| Parse 100 lines     | 5ms        | 0.5ms | 10x     |
+| Parse 1000 lines    | 50ms       | 5ms   | 10x     |
+| Validate 1000 lines | 30ms       | 2ms   | 15x     |
 
 ## Browser Compatibility
 

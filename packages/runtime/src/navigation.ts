@@ -157,10 +157,7 @@ export function clearHistory(): void {
 /**
  * Parse route parameters from path
  */
-export function parseParams(
-  pattern: string,
-  path: string
-): Record<string, string> | null {
+export function parseParams(pattern: string, path: string): Record<string, string> | null {
   const patternParts = pattern.split('/');
   const pathParts = path.split('/');
 
@@ -207,9 +204,7 @@ export function parseQuery(search: string): Record<string, string> {
   for (const pair of pairs) {
     const [key, value] = pair.split('=');
     if (key) {
-      params[decodeURIComponent(key)] = value
-        ? decodeURIComponent(value)
-        : '';
+      params[decodeURIComponent(key)] = value ? decodeURIComponent(value) : '';
     }
   }
 
@@ -224,9 +219,7 @@ export function buildQuery(params: Record<string, string | number | boolean>): s
 
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null) {
-      pairs.push(
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
-      );
+      pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);
     }
   }
 
@@ -236,9 +229,7 @@ export function buildQuery(params: Record<string, string | number | boolean>): s
 /**
  * Listen for navigation events
  */
-export function onNavigate(
-  callback: (event: { from: string; to: string }) => void
-): () => void {
+export function onNavigate(callback: (event: { from: string; to: string }) => void): () => void {
   return eventBus.on('navigation:after', callback);
 }
 

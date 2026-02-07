@@ -1,4 +1,3 @@
-
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -37,10 +36,12 @@ export class VisualReportGenerator {
       <body>
         <h1>Visual Regression Report</h1>
         <p>Total Tests: ${this.results.length}</p>
-        <p>Passed: <span class="pass">${this.results.filter(r => r.passed).length}</span></p>
-        <p>Failed: <span class="fail">${this.results.filter(r => !r.passed).length}</span></p>
+        <p>Passed: <span class="pass">${this.results.filter((r) => r.passed).length}</span></p>
+        <p>Failed: <span class="fail">${this.results.filter((r) => !r.passed).length}</span></p>
 
-        ${this.results.map(r => `
+        ${this.results
+          .map(
+            (r) => `
           <div class="test-case">
             <h2 class="${r.passed ? 'pass' : 'fail'}">${r.name}</h2>
             <p>Diff Pixels: ${r.diffPixels}</p>
@@ -53,15 +54,21 @@ export class VisualReportGenerator {
                 <strong>Actual</strong>
                 <img src="${this.getRelativePath(outputPath, r.actualPath)}" />
               </div>
-              ${r.diffPath ? `
+              ${
+                r.diffPath
+                  ? `
               <div class="image-col">
                 <strong>Diff</strong>
                 <img src="${this.getRelativePath(outputPath, r.diffPath)}" />
               </div>
-              ` : ''}
+              `
+                  : ''
+              }
             </div>
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
       </body>
       </html>
     `;

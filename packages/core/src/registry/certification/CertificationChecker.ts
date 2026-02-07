@@ -315,15 +315,18 @@ export class CertificationChecker {
       const ternaryCount = (file.content.match(/\?.*:/g) || []).length;
       const andOrCount = (file.content.match(/&&|\|\|/g) || []).length;
 
-      const fileComplexity = ifCount + forCount + whileCount + caseCount + ternaryCount + andOrCount;
+      const fileComplexity =
+        ifCount + forCount + whileCount + caseCount + ternaryCount + andOrCount;
       totalComplexity += fileComplexity;
 
       // Count functions
-      functionCount += (file.content.match(/function\s+\w+|=>\s*{|\w+\s*\([^)]*\)\s*{/g) || []).length;
+      functionCount += (file.content.match(/function\s+\w+|=>\s*{|\w+\s*\([^)]*\)\s*{/g) || [])
+        .length;
     }
 
     const avgComplexity = functionCount > 0 ? totalComplexity / functionCount : 0;
-    const grade = avgComplexity <= 5 ? 'A' : avgComplexity <= 10 ? 'B' : avgComplexity <= 20 ? 'C' : 'D';
+    const grade =
+      avgComplexity <= 5 ? 'A' : avgComplexity <= 10 ? 'B' : avgComplexity <= 20 ? 'C' : 'D';
 
     return {
       id: 'code_complexity',
@@ -355,8 +358,8 @@ export class CertificationChecker {
         estimatedCoverage >= this.config.requiredCoverage
           ? 'passed'
           : estimatedCoverage >= 50
-          ? 'warning'
-          : 'failed',
+            ? 'warning'
+            : 'failed',
       message: hasTests
         ? `Estimated coverage: ${estimatedCoverage.toFixed(0)}% (${testFileCount} test files)`
         : 'No test files found',
@@ -675,7 +678,11 @@ export class CertificationChecker {
     };
   }
 
-  private calculateScore(checks: CheckResult[]): { score: number; maxScore: number; grade: CertificationResult['grade'] } {
+  private calculateScore(checks: CheckResult[]): {
+    score: number;
+    maxScore: number;
+    grade: CertificationResult['grade'];
+  } {
     let score = 0;
     let maxScore = 0;
 
@@ -694,7 +701,15 @@ export class CertificationChecker {
 
     const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
     const grade: CertificationResult['grade'] =
-      percentage >= 90 ? 'A' : percentage >= 80 ? 'B' : percentage >= 70 ? 'C' : percentage >= 60 ? 'D' : 'F';
+      percentage >= 90
+        ? 'A'
+        : percentage >= 80
+          ? 'B'
+          : percentage >= 70
+            ? 'C'
+            : percentage >= 60
+              ? 'D'
+              : 'F';
 
     return { score, maxScore, grade };
   }

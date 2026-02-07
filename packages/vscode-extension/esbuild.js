@@ -15,7 +15,7 @@ async function main() {
     external: ['vscode'],
     logLevel: 'info',
   });
-  
+
   if (process.argv.includes('--watch')) {
     await ctx.watch();
   } else {
@@ -24,7 +24,7 @@ async function main() {
   }
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.error(e);
   process.exit(1);
 });

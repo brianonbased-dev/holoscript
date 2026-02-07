@@ -14,11 +14,13 @@ import type { HoloComposition, HoloObjectDecl } from '../parser/HoloCompositionT
 import type { HSPlusAST, HSPlusNode } from '../types/HoloScriptPlus';
 
 // Helper to create test composition
-function createTestComposition(options: {
-  name?: string;
-  state?: Record<string, unknown>;
-  objects?: Partial<HoloObjectDecl>[];
-} = {}): HoloComposition {
+function createTestComposition(
+  options: {
+    name?: string;
+    state?: Record<string, unknown>;
+    objects?: Partial<HoloObjectDecl>[];
+  } = {}
+): HoloComposition {
   return {
     name: options.name || 'test_scene',
     objects: (options.objects || []).map((obj, i) => ({
@@ -28,26 +30,24 @@ function createTestComposition(options: {
       traits: obj.traits || [],
       children: obj.children || [],
     })),
-    state: options.state
-      ? { declarations: options.state }
-      : undefined,
+    state: options.state ? { declarations: options.state } : undefined,
   } as HoloComposition;
 }
 
 // Helper to create test AST
-function createTestAST(options: {
-  state?: Record<string, unknown>;
-  children?: Partial<HSPlusNode>[];
-} = {}): HSPlusAST {
+function createTestAST(
+  options: {
+    state?: Record<string, unknown>;
+    children?: Partial<HSPlusNode>[];
+  } = {}
+): HSPlusAST {
   return {
     root: {
       type: 'scene',
       id: 'root',
       properties: {},
       traits: new Map(),
-      directives: options.state
-        ? [{ type: 'state', body: options.state }]
-        : [],
+      directives: options.state ? [{ type: 'state', body: options.state }] : [],
       children: (options.children || []).map((node, i) => ({
         type: node.type || 'object',
         id: node.id || `obj_${i}`,
@@ -127,9 +127,7 @@ describe('WASMCompiler', () => {
           },
           {
             name: 'actuator',
-            properties: [
-              { key: 'power', value: 100 },
-            ],
+            properties: [{ key: 'power', value: 100 }],
           },
         ],
       });
@@ -247,9 +245,7 @@ describe('WASMCompiler', () => {
       expect(layout.stringsOffset).toBe(layout.eventsOffset + layout.eventsSize);
 
       // Total should be sum of all
-      expect(layout.totalSize).toBeGreaterThanOrEqual(
-        layout.stringsOffset + layout.stringsSize
-      );
+      expect(layout.totalSize).toBeGreaterThanOrEqual(layout.stringsOffset + layout.stringsSize);
     });
   });
 
@@ -410,9 +406,7 @@ describe('WASMCompiler edge cases', () => {
 
   it('should handle objects without properties', () => {
     const comp = createTestComposition({
-      objects: [
-        { name: 'empty_obj', properties: [] },
-      ],
+      objects: [{ name: 'empty_obj', properties: [] }],
     });
     const result = compileToWASM(comp);
 

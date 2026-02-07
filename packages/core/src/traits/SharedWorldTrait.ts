@@ -36,7 +36,7 @@ interface SharedWorldState {
 
 interface SharedWorldConfig {
   authority_model: AuthorityModel;
-  sync_rate: number;  // Hz
+  sync_rate: number; // Hz
   conflict_resolution: ConflictResolution;
   object_ownership: boolean;
   late_join_sync: boolean;
@@ -75,7 +75,7 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
       pendingUpdates: [],
     };
     (node as any).__sharedWorldState = state;
-    
+
     context.emit?.('shared_world_init', {
       node,
       authorityModel: config.authority_model,
@@ -85,10 +85,10 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
 
   onDetach(node, config, context) {
     const state = (node as any).__sharedWorldState as SharedWorldState;
-    
+
     if (state?.isSynced) {
       context.emit?.('shared_world_leave', { node });
-      
+
       if (config.state_persistence) {
         context.emit?.('shared_world_persist', {
           node,
@@ -96,21 +96,21 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
         });
       }
     }
-    
+
     delete (node as any).__sharedWorldState;
   },
 
   onUpdate(node, config, context, delta) {
     const state = (node as any).__sharedWorldState as SharedWorldState;
     if (!state || !state.isSynced) return;
-    
+
     const syncInterval = 1 / config.sync_rate;
     state.syncAccumulator += delta;
-    
+
     if (state.syncAccumulator >= syncInterval) {
       state.syncAccumulator = 0;
       state.lastSyncTime = Date.now();
-      
+
       // Send pending updates
       if (state.pendingUpdates.length > 0) {
         context.emit?.('shared_world_send_updates', {
@@ -118,7 +118,7 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
           updates: state.pendingUpdates,
           isHost: state.isHost,
         });
-        
+
         state.pendingUpdates = [];
       }
     }
@@ -127,24 +127,29 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__sharedWorldState as SharedWorldState;
     if (!state) return;
-    
+
     if (event.type === 'shared_world_connected') {
       state.isSynced = true;
       state.isHost = event.isHost as boolean;
-      
+
       context.emit?.('on_world_connected', {
         node,
         isHost: state.isHost,
       });
-      
+
       // Request full state if late join
       if (config.late_join_sync && !state.isHost) {
         context.emit?.('shared_world_request_state', { node });
       }
     } else if (event.type === 'shared_world_full_state') {
       // Receive full world state
-      const objects = event.objects as Array<{ nodeId: string; ownerId: string | null; state: unknown; version: number }>;
-      
+      const objects = event.objects as Array<{
+        nodeId: string;
+        ownerId: string | null;
+        state: unknown;
+        version: number;
+      }>;
+
       for (const obj of objects) {
         state.syncedObjects.set(obj.nodeId, {
           nodeId: obj.nodeId,
@@ -152,7 +157,7 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
           lastSync: Date.now(),
           version: obj.version,
         });
-        
+
         context.emit?.('shared_world_apply_state', {
           node,
           targetNodeId: obj.nodeId,
@@ -160,12 +165,12 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
           interpolate: config.interpolation,
         });
       }
-      
+
       state.objectCount = state.syncedObjects.size;
     } else if (event.type === 'shared_world_register_object') {
       const targetNodeId = event.nodeId as string;
       const ownerId = event.ownerId as string | null;
-      
+
       if (state.syncedObjects.size < config.max_objects) {
         state.syncedObjects.set(targetNodeId, {
           nodeId: targetNodeId,
@@ -173,9 +178,9 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
           lastSync: Date.now(),
           version: 0,
         });
-        
+
         state.objectCount = state.syncedObjects.size;
-        
+
         context.emit?.('shared_world_object_registered', {
           node,
           nodeId: targetNodeId,
@@ -186,24 +191,24 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
       const targetNodeId = event.nodeId as string;
       const newState = event.state;
       const senderId = event.senderId as string;
-      
+
       const obj = state.syncedObjects.get(targetNodeId);
       if (!obj) return;
-      
+
       // Check ownership
       if (config.object_ownership && obj.ownerId && obj.ownerId !== senderId) {
         if (config.conflict_resolution === 'reject') {
-          return;  // Reject non-owner updates
+          return; // Reject non-owner updates
         }
       }
-      
+
       // Handle conflict resolution
-      const incomingVersion = event.version as number || 0;
-      
+      const incomingVersion = (event.version as number) || 0;
+
       if (config.conflict_resolution === 'last_write_wins' || incomingVersion > obj.version) {
         obj.version = incomingVersion;
         obj.lastSync = Date.now();
-        
+
         context.emit?.('shared_world_apply_state', {
           node,
           targetNodeId,
@@ -214,11 +219,11 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
     } else if (event.type === 'shared_world_queue_update') {
       const targetNodeId = event.nodeId as string;
       const newState = event.state;
-      
+
       const obj = state.syncedObjects.get(targetNodeId);
       if (obj) {
         obj.version++;
-        
+
         state.pendingUpdates.push({
           nodeId: targetNodeId,
           state: newState,
@@ -228,13 +233,13 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
     } else if (event.type === 'shared_world_peer_joined') {
       const peerId = event.peerId as string;
       state.connectedPeers.add(peerId);
-      
+
       context.emit?.('on_peer_joined', {
         node,
         peerId,
         peerCount: state.connectedPeers.size,
       });
-      
+
       // Send full state to new peer if we're host
       if (state.isHost && config.late_join_sync) {
         context.emit?.('shared_world_send_full_state', {
@@ -246,7 +251,7 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
     } else if (event.type === 'shared_world_peer_left') {
       const peerId = event.peerId as string;
       state.connectedPeers.delete(peerId);
-      
+
       // Remove ownership from objects owned by leaving peer
       if (config.object_ownership) {
         for (const obj of state.syncedObjects.values()) {
@@ -255,7 +260,7 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
           }
         }
       }
-      
+
       context.emit?.('on_peer_left', {
         node,
         peerId,
@@ -264,11 +269,11 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
     } else if (event.type === 'shared_world_claim_ownership') {
       const targetNodeId = event.nodeId as string;
       const newOwnerId = event.ownerId as string;
-      
+
       const obj = state.syncedObjects.get(targetNodeId);
       if (obj && (!obj.ownerId || config.authority_model === 'distributed')) {
         obj.ownerId = newOwnerId;
-        
+
         context.emit?.('shared_world_ownership_changed', {
           node,
           nodeId: targetNodeId,

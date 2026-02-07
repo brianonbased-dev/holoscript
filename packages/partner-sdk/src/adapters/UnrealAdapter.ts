@@ -213,9 +213,7 @@ ${this.generateTraitImplementations(className, node.traits)}
     const blueprintData = {
       objectType: 'Blueprint',
       name: className,
-      parentClass: this.config.blueprintsOnly
-        ? 'Actor'
-        : `AHS_${this.toPascalCase(node.name)}`,
+      parentClass: this.config.blueprintsOnly ? 'Actor' : `AHS_${this.toPascalCase(node.name)}`,
       components: [
         {
           type: 'SceneComponent',
@@ -296,9 +294,13 @@ public class ${this.config.moduleName} : ModuleRules
             "Core",
             "CoreUObject",
             "Engine",
-            "InputCore"${this.config.vrSupport ? `,
+            "InputCore"${
+              this.config.vrSupport
+                ? `,
             "HeadMountedDisplay",
-            "OpenXRHMD"` : ''}
+            "OpenXRHMD"`
+                : ''
+            }
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] {

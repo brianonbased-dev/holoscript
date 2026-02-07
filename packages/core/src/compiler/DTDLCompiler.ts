@@ -164,8 +164,11 @@ export class DTDLCompiler {
   /**
    * Check if traits include a specific trait name
    */
-  private hasTrait(traits: Array<string | { name: string }> | undefined, targetTrait: string): boolean {
-    return traits?.some(t => this.getTraitName(t) === targetTrait) ?? false;
+  private hasTrait(
+    traits: Array<string | { name: string }> | undefined,
+    targetTrait: string
+  ): boolean {
+    return traits?.some((t) => this.getTraitName(t) === targetTrait) ?? false;
   }
 
   compile(composition: HoloComposition): string {
@@ -371,7 +374,7 @@ export class DTDLCompiler {
     // Handle both structured format (properties array) and plain object format
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const envAny = env as any;
-    
+
     // If env has a properties array, use it; otherwise treat env itself as key-value object
     if (Array.isArray(envAny.properties)) {
       for (const prop of envAny.properties) {
@@ -389,7 +392,7 @@ export class DTDLCompiler {
     return props;
   }
 
-  private addEnvironmentProperty(props: DTDLProperty[], key: string, value: unknown): void {
+  private addEnvironmentProperty(props: DTDLProperty[], key: string, _value: unknown): void {
     if (key === 'skybox') {
       props.push({
         '@type': 'Property',

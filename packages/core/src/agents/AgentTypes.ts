@@ -13,13 +13,13 @@
  * The 7 phases of the uAA2++ protocol
  */
 export type AgentPhase =
-  | 'INTAKE'    // Phase 0: Gather data and context
-  | 'REFLECT'   // Phase 1: Analyze and understand
-  | 'EXECUTE'   // Phase 2: Take action
-  | 'COMPRESS'  // Phase 3: Store knowledge efficiently
-  | 'REINTAKE'  // Phase 4: Re-evaluate with compressed knowledge
-  | 'GROW'      // Phase 5: Learn and improve
-  | 'EVOLVE';   // Phase 6: Adapt and optimize
+  | 'INTAKE' // Phase 0: Gather data and context
+  | 'REFLECT' // Phase 1: Analyze and understand
+  | 'EXECUTE' // Phase 2: Take action
+  | 'COMPRESS' // Phase 3: Store knowledge efficiently
+  | 'REINTAKE' // Phase 4: Re-evaluate with compressed knowledge
+  | 'GROW' // Phase 5: Learn and improve
+  | 'EVOLVE'; // Phase 6: Adapt and optimize
 
 /**
  * Phase execution order
@@ -228,24 +228,24 @@ export type AgentCategory =
  * Agent position in the Lotus Flower Architecture
  */
 export type AgentPosition =
-  | 'center'           // Core coordinator (CEO)
-  | 'inner-circle'     // High-trust advisors
-  | 'main-petal'       // Primary executors
-  | 'inner-petal'      // Specialist agents
-  | 'supportive'       // Helper agents
-  | 'background'       // Background processors
-  | 'infrastructure';  // System services
+  | 'center' // Core coordinator (CEO)
+  | 'inner-circle' // High-trust advisors
+  | 'main-petal' // Primary executors
+  | 'inner-petal' // Specialist agents
+  | 'supportive' // Helper agents
+  | 'background' // Background processors
+  | 'infrastructure'; // System services
 
 /**
  * Agent orchestral section (musical metaphor)
  */
 export type AgentSection =
-  | 'strings'     // Foundation & harmony
-  | 'woodwinds'   // Melody & nuance
-  | 'brass'       // Power & announcements
-  | 'percussion'  // Rhythm & timing
-  | 'keyboard'    // Versatility & support
-  | 'vocal';      // Communication & expression
+  | 'strings' // Foundation & harmony
+  | 'woodwinds' // Melody & nuance
+  | 'brass' // Power & announcements
+  | 'percussion' // Rhythm & timing
+  | 'keyboard' // Versatility & support
+  | 'vocal'; // Communication & expression
 
 /**
  * Architecture awareness metadata

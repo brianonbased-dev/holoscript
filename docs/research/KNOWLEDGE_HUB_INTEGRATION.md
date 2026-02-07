@@ -62,8 +62,8 @@ export class KnowledgeClient {
       body: JSON.stringify({
         query,
         category: 'pattern',
-        domain: 'holoscript'
-      })
+        domain: 'holoscript',
+      }),
     });
     return response.json();
   }
@@ -75,8 +75,8 @@ export class KnowledgeClient {
       body: JSON.stringify({
         query: context,
         category: 'gotcha',
-        domain: 'holoscript'
-      })
+        domain: 'holoscript',
+      }),
     });
     return response.json();
   }
@@ -85,7 +85,7 @@ export class KnowledgeClient {
     await fetch(`${this.baseUrl}/gotchas`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...gotcha, domain: 'holoscript' })
+      body: JSON.stringify({ ...gotcha, domain: 'holoscript' }),
     });
   }
 
@@ -96,8 +96,8 @@ export class KnowledgeClient {
       body: JSON.stringify({
         query: topic,
         category: 'wisdom',
-        domain: 'holoscript'
-      })
+        domain: 'holoscript',
+      }),
     });
     return response.json();
   }
@@ -231,12 +231,12 @@ KNOWLEDGE_HUB_URL=http://localhost:3001  # Development
 
 ## Implementation Status
 
-| Component | Status | Location |
-|-----------|--------|----------|
+| Component                    | Status       | Location                                                                                                                    |
+| ---------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
 | AI Workspace Semantic Search | **Designed** | [Strategy Doc](../../../AI_Workspace/uAA2++_Protocol/4.GROW/research/2026-02-05_semantic-search-implementation-strategy.md) |
-| HoloScript Knowledge Client | **Planned** | `packages/cli/src/knowledge-client.ts` |
-| MCP Delegation Tools | **Planned** | `packages/mcp-server/src/tools/` |
-| CLI `.knowledge` Command | **Planned** | `packages/cli/src/repl.ts` |
+| HoloScript Knowledge Client  | **Planned**  | `packages/cli/src/knowledge-client.ts`                                                                                      |
+| MCP Delegation Tools         | **Planned**  | `packages/mcp-server/src/tools/`                                                                                            |
+| CLI `.knowledge` Command     | **Planned**  | `packages/cli/src/repl.ts`                                                                                                  |
 
 ---
 
@@ -248,4 +248,4 @@ KNOWLEDGE_HUB_URL=http://localhost:3001  # Development
 
 ---
 
-*Research conducted via uAA2++ Protocol v3.0*
+_Research conducted via uAA2++ Protocol v3.0_

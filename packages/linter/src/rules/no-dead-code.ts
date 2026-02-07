@@ -152,10 +152,7 @@ function collectReferences(source: string): Set<string> {
 /**
  * Check if a symbol should be ignored
  */
-function shouldIgnore(
-  name: string,
-  options: NoDeadCodeOptions
-): boolean {
+function shouldIgnore(name: string, options: NoDeadCodeOptions): boolean {
   // Ignore private symbols (starting with _)
   if (options.ignorePrivate && name.startsWith('_')) {
     return true;

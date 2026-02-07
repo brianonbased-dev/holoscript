@@ -103,10 +103,10 @@ interface GltfData {
 // GLB Constants
 // ---------------------------------------------------------------------------
 
-const GLB_MAGIC = 0x46546C67; // "glTF" in little-endian
+const GLB_MAGIC = 0x46546c67; // "glTF" in little-endian
 const GLB_VERSION = 2;
-const GLB_CHUNK_JSON = 0x4E4F534A; // "JSON" in little-endian
-const GLB_CHUNK_BIN = 0x004E4942;  // "BIN\0" in little-endian
+const GLB_CHUNK_JSON = 0x4e4f534a; // "JSON" in little-endian
+const _GLB_CHUNK_BIN = 0x004e4942; // "BIN\0" in little-endian
 const GLB_HEADER_SIZE = 12;
 const GLB_CHUNK_HEADER_SIZE = 8;
 
@@ -188,9 +188,8 @@ function rgbToHex(r: number, g: number, b: number): string {
   const toSrgb = (c: number): number => {
     const clamped = Math.max(0, Math.min(1, c));
     // Linear to sRGB approximation
-    const corrected = clamped <= 0.0031308
-      ? clamped * 12.92
-      : 1.055 * Math.pow(clamped, 1.0 / 2.4) - 0.055;
+    const corrected =
+      clamped <= 0.0031308 ? clamped * 12.92 : 1.055 * Math.pow(clamped, 1.0 / 2.4) - 0.055;
     return Math.round(corrected * 255);
   };
 
@@ -416,8 +415,8 @@ function inferTraits(node: GltfNode, gltf: GltfData): string[] {
   if (gltf.animations && gltf.animations.length > 0 && gltf.nodes) {
     const nodeIndex = gltf.nodes.indexOf(node);
     if (nodeIndex >= 0) {
-      const hasAnimation = gltf.animations.some(anim =>
-        anim.channels.some(ch => ch.target.node === nodeIndex)
+      const hasAnimation = gltf.animations.some((anim) =>
+        anim.channels.some((ch) => ch.target.node === nodeIndex)
       );
       if (hasAnimation && !traits.includes('@animated')) {
         traits.push('@animated');
@@ -509,7 +508,7 @@ function getAnimationClipsForNode(nodeIndex: number, gltf: GltfData): string[] {
   }
 
   for (const anim of gltf.animations) {
-    const targetsThisNode = anim.channels.some(ch => ch.target.node === nodeIndex);
+    const targetsThisNode = anim.channels.some((ch) => ch.target.node === nodeIndex);
     if (targetsThisNode) {
       const clipName = anim.name || `animation_${gltf.animations.indexOf(anim)}`;
       if (!clips.includes(clipName)) {
@@ -572,12 +571,7 @@ function extractPhysicsParams(node: GltfNode): string[] {
  * Convert a single glTF node (and its children recursively) into .holo
  * object block(s).
  */
-function nodeToHolo(
-  nodeIndex: number,
-  gltf: GltfData,
-  inputPath: string,
-  indent: number
-): string {
+function nodeToHolo(nodeIndex: number, gltf: GltfData, inputPath: string, indent: number): string {
   const nodes = gltf.nodes;
   if (!nodes || nodeIndex < 0 || nodeIndex >= nodes.length) {
     return '';
@@ -587,7 +581,7 @@ function nodeToHolo(
   const pad = '  '.repeat(indent);
   const innerPad = '  '.repeat(indent + 1);
   const rawName = node.name || `node_${nodeIndex}`;
-  const safeName = sanitizeName(rawName);
+  const _safeName = sanitizeName(rawName);
   const displayName = node.name || `Node_${nodeIndex}`;
 
   // Collect traits
@@ -668,7 +662,7 @@ function nodeToHolo(
     if (animClips.length === 1) {
       lines.push(`${innerPad}animation_clip: "${animClips[0]}"`);
     } else {
-      const clipsStr = animClips.map(c => `"${c}"`).join(', ');
+      const clipsStr = animClips.map((c) => `"${c}"`).join(', ');
       lines.push(`${innerPad}animation_clips: [${clipsStr}]`);
     }
   }
@@ -680,7 +674,7 @@ function nodeToHolo(
 
   // Custom extras as comments
   if (node.extras) {
-    const extrasKeys = Object.keys(node.extras).filter(k => k !== 'holoscript_traits');
+    const extrasKeys = Object.keys(node.extras).filter((k) => k !== 'holoscript_traits');
     if (extrasKeys.length > 0) {
       lines.push(`${innerPad}// Custom properties from glTF extras:`);
       for (const key of extrasKeys) {
@@ -806,7 +800,7 @@ function buildHoloComposition(gltf: GltfData, inputPath: string): string {
           targetNodes.add(ch.target.node);
         }
       }
-      const targetNames = [...targetNodes].map(idx => {
+      const targetNames = [...targetNodes].map((idx) => {
         if (gltf.nodes && gltf.nodes[idx]) {
           return gltf.nodes[idx].name || `node_${idx}`;
         }
@@ -864,9 +858,7 @@ export function importGltf(inputPath: string): string {
       throw new Error(`Failed to parse glTF JSON from ${resolvedPath}: ${(e as Error).message}`);
     }
   } else {
-    throw new Error(
-      `Unsupported file extension "${ext}". Expected ".gltf" or ".glb".`
-    );
+    throw new Error(`Unsupported file extension "${ext}". Expected ".gltf" or ".glb".`);
   }
 
   // Validate minimal glTF structure

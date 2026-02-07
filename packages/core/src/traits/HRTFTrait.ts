@@ -23,7 +23,10 @@ interface HRTFState {
   subjectId: number | null;
   headRadius: number;
   listenerPosition: { x: number; y: number; z: number };
-  listenerOrientation: { forward: { x: number; y: number; z: number }; up: { x: number; y: number; z: number } };
+  listenerOrientation: {
+    forward: { x: number; y: number; z: number };
+    up: { x: number; y: number; z: number };
+  };
 }
 
 interface HRTFConfig {
@@ -66,7 +69,7 @@ export const hrtfHandler: TraitHandler<HRTFConfig> = {
       listenerOrientation: { forward: { x: 0, y: 0, z: -1 }, up: { x: 0, y: 1, z: 0 } },
     };
     (node as any).__hrtfState = state;
-    
+
     // Request HRTF database load
     if (config.custom_sofa_url) {
       context.emit?.('hrtf_load_custom', {
@@ -80,7 +83,7 @@ export const hrtfHandler: TraitHandler<HRTFConfig> = {
         profile: config.profile,
       });
     }
-    
+
     context.emit?.('hrtf_configure', {
       node,
       interpolation: config.interpolation,
@@ -96,10 +99,10 @@ export const hrtfHandler: TraitHandler<HRTFConfig> = {
     delete (node as any).__hrtfState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__hrtfState as HRTFState;
     if (!state || !state.isActive) return;
-    
+
     // Profile change
     if (config.profile !== state.currentProfile) {
       state.currentProfile = config.profile;
@@ -114,7 +117,7 @@ export const hrtfHandler: TraitHandler<HRTFConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__hrtfState as HRTFState;
     if (!state) return;
-    
+
     if (event.type === 'hrtf_database_loaded') {
       state.databaseLoaded = true;
       state.subjectId = event.subjectId as number | null;
@@ -122,7 +125,7 @@ export const hrtfHandler: TraitHandler<HRTFConfig> = {
     } else if (event.type === 'listener_update') {
       state.listenerPosition = event.position as typeof state.listenerPosition;
       state.listenerOrientation = event.orientation as typeof state.listenerOrientation;
-      
+
       context.emit?.('hrtf_listener_update', {
         node,
         position: state.listenerPosition,

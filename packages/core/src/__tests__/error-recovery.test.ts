@@ -1,6 +1,6 @@
 /**
  * Test file for error recovery enhancements
- * 
+ *
  * This file demonstrates the improved error messages,
  * typo detection, and recovery strategies in the HoloScript parser.
  */
@@ -39,7 +39,7 @@ describe('Error Recovery', () => {
     const result = parser.parse(source);
 
     expect(result.success).toBe(false);
-    expect(result.errors.some(e => e.suggestion?.includes(':'))).toBe(true);
+    expect(result.errors.some((e) => e.suggestion?.includes(':'))).toBe(true);
   });
 
   it('should provide context in error messages', () => {
@@ -88,6 +88,6 @@ describe('Error Recovery', () => {
     const result = parser.parse(source);
 
     expect(result.success).toBe(false);
-    expect(result.errors.some(e => e.suggestion?.includes('quotes'))).toBe(true);
+    expect(result.errors.some((e) => e.suggestion?.includes('quotes'))).toBe(true);
   });
 });

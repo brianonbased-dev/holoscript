@@ -11,14 +11,14 @@ HoloScript is the **first spatial programming language** designed for VR/AR deve
 
 ## Three File Formats
 
-| Format | Purpose |
-|--------|---------|
-| `.holo` | Scene compositions (AI-friendly) |
-| `.hsplus` | Objects with VR traits |
-| `.hs` | Classic HoloScript |
+| Format    | Purpose                          |
+| --------- | -------------------------------- |
+| `.holo`   | Scene compositions (AI-friendly) |
+| `.hsplus` | Objects with VR traits           |
+| `.hs`     | Classic HoloScript               |
 
 Click **Next** to create your first scene!
 
 ---
 
-📹 *Video Tutorial: [Coming Soon - Introduction to HoloScript]*
+📹 _Video Tutorial: [Coming Soon - Introduction to HoloScript]_

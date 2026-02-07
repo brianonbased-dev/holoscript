@@ -327,7 +327,7 @@ export class SkeletonTrait {
       currentTime: 0,
       normalizedTime: 0,
       isPlaying: false,
-      layerWeights: this.config.layers?.map(l => l.weight) ?? [1],
+      layerWeights: this.config.layers?.map((l) => l.weight) ?? [1],
     };
 
     // Initialize bones
@@ -411,7 +411,10 @@ export class SkeletonTrait {
   /**
    * Play animation clip
    */
-  public play(clipName: string, options?: { speed?: number; layer?: number; crossfade?: number }): void {
+  public play(
+    clipName: string,
+    options?: { speed?: number; layer?: number; crossfade?: number }
+  ): void {
     const clip = this.clips.get(clipName);
     if (!clip) {
       console.warn(`Animation clip not found: ${clipName}`);

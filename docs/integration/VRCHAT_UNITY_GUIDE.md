@@ -8,9 +8,9 @@ Complete guide for exporting HoloScript to VRChat worlds and Unity projects.
 
 HoloScript provides two paths to Unity:
 
-| Package | Target | Output | Status |
-|---------|--------|--------|--------|
-| `@holoscript/vrchat-export` | VRChat | UdonSharp scripts + prefabs | ✅ Alpha |
+| Package                     | Target          | Output                      | Status   |
+| --------------------------- | --------------- | --------------------------- | -------- |
+| `@holoscript/vrchat-export` | VRChat          | UdonSharp scripts + prefabs | ✅ Alpha |
 | `@holoscript/unity-adapter` | Unity (general) | C# MonoBehaviours + prefabs | ✅ Ready |
 
 ```
@@ -102,17 +102,17 @@ console.log(`Generated ${result.stats.scriptCount} UdonSharp scripts`);
 
 ### HoloScript to Udon Trait Mapping
 
-| HoloScript Trait | VRChat/Udon Equivalent |
-|------------------|------------------------|
-| `@grabbable` | VRC_Pickup |
-| `@throwable` | VRC_Pickup + ThrowVelocity |
-| `@portal` | VRCPortalMarker |
-| `@synced` | UdonSynced variable |
-| `@networked` | Manual sync + ownership |
-| `@audio` | VRC_SpatialAudioSource |
-| `@video` | VRC_AVProVideoPlayer |
-| `@mirror` | VRC_MirrorReflection |
-| `@avatar_pedestal` | VRC_AvatarPedestal |
+| HoloScript Trait   | VRChat/Udon Equivalent     |
+| ------------------ | -------------------------- |
+| `@grabbable`       | VRC_Pickup                 |
+| `@throwable`       | VRC_Pickup + ThrowVelocity |
+| `@portal`          | VRCPortalMarker            |
+| `@synced`          | UdonSynced variable        |
+| `@networked`       | Manual sync + ownership    |
+| `@audio`           | VRC_SpatialAudioSource     |
+| `@video`           | VRC_AVProVideoPlayer       |
+| `@mirror`          | VRC_MirrorReflection       |
+| `@avatar_pedestal` | VRC_AvatarPedestal         |
 
 ### VRChat-Specific Syntax
 
@@ -217,12 +217,12 @@ const result = await exportToUnity(ast, {
 
 ### XR Framework Options
 
-| Framework | Best For |
-|-----------|----------|
+| Framework                | Best For                          |
+| ------------------------ | --------------------------------- |
 | `xr-interaction-toolkit` | Cross-platform (Quest, PC VR, AR) |
-| `oculus` | Meta Quest optimization |
-| `steamvr` | PC VR via SteamVR/OpenVR |
-| `none` | Non-XR Unity projects |
+| `oculus`                 | Meta Quest optimization           |
+| `steamvr`                | PC VR via SteamVR/OpenVR          |
+| `none`                   | Non-XR Unity projects             |
 
 ---
 
@@ -231,6 +231,7 @@ const result = await exportToUnity(ast, {
 ### Same HoloScript, Different Targets
 
 **Source (.hsplus):**
+
 ```hsplus
 composition "BallDemo" {
   template "Ball" {
@@ -246,6 +247,7 @@ composition "BallDemo" {
 ```
 
 **VRChat Export (UdonSharp):**
+
 ```csharp
 using UdonSharp;
 using VRC.SDKBase;
@@ -254,12 +256,12 @@ using VRC.Udon;
 public class Ball : UdonSharpBehaviour
 {
     [UdonSynced] private Vector3 position;
-    
+
     void Start()
     {
         transform.position = new Vector3(0, 1, 0);
     }
-    
+
     public override void OnPickup()
     {
         Networking.SetOwner(Networking.LocalPlayer, gameObject);
@@ -268,6 +270,7 @@ public class Ball : UdonSharpBehaviour
 ```
 
 **Unity Export (C#):**
+
 ```csharp
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -278,7 +281,7 @@ public class Ball : MonoBehaviour
     {
         transform.position = new Vector3(0, 1, 0);
     }
-    
+
     public void OnSelectEntered(SelectEnterEventArgs args)
     {
         Debug.Log($"{gameObject.name} grabbed");
@@ -361,20 +364,20 @@ holoscript dev scene.hsplus
 
 ### VRChat Export Issues
 
-| Issue | Solution |
-|-------|----------|
-| "UdonSharp not found" | Install UdonSharp via VCC |
-| "SDK version mismatch" | Use Unity 2022.3.22f1 |
-| "Pickup not working" | Add Rigidbody, set isKinematic |
-| "Sync not working" | Check ownership transfer |
+| Issue                  | Solution                       |
+| ---------------------- | ------------------------------ |
+| "UdonSharp not found"  | Install UdonSharp via VCC      |
+| "SDK version mismatch" | Use Unity 2022.3.22f1          |
+| "Pickup not working"   | Add Rigidbody, set isKinematic |
+| "Sync not working"     | Check ownership transfer       |
 
 ### Unity Export Issues
 
-| Issue | Solution |
-|-------|----------|
-| "XRGrabInteractable missing" | Install XR Interaction Toolkit |
-| "Namespace conflict" | Change `projectName` in config |
-| "Prefab won't import" | Check Unity version compatibility |
+| Issue                        | Solution                          |
+| ---------------------------- | --------------------------------- |
+| "XRGrabInteractable missing" | Install XR Interaction Toolkit    |
+| "Namespace conflict"         | Change `projectName` in config    |
+| "Prefab won't import"        | Check Unity version compatibility |
 
 ---
 

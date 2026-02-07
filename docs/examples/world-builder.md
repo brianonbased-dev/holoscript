@@ -27,14 +27,14 @@ composition "World Builder Sandbox" {
     @collidable
     @stackable(snap_distance: 0.1)
     @networked
-    
+
     scale: 0.5
-    
+
     on_grab: {
       haptic_feedback("dominant", 0.3)
       this.color = blend(this.color, "#ffffff", 0.3)
     }
-    
+
     on_release: {
       if (@state.grid_snap) {
         this.position = snap_to_grid(this.position, 0.5)
@@ -48,7 +48,7 @@ composition "World Builder Sandbox" {
     @clickable
     @hoverable
     @glowing(intensity: 0.5)
-    
+
     on_hover_enter: { this.scale = 1.2; this.glow_intensity = 1.5 }
     on_hover_exit: { this.scale = 1.0; this.glow_intensity = 0.5 }
   }
@@ -58,35 +58,35 @@ composition "World Builder Sandbox" {
     position: [-1.5, 1.2, -1]
     rotation: [0, 30, 0]
     @world_locked
-    
+
     object "CubeTool" using "ToolButton" {
       position: [0, 0, 0]
       model: "primitives/cube.glb"
       color: "#ff6b6b"
       on_click: { @state.selected_tool = "cube"; spawn_block("cube") }
     }
-    
+
     object "SphereTool" using "ToolButton" {
       position: [0.3, 0, 0]
       model: "primitives/sphere.glb"
       color: "#4ecdc4"
       on_click: { @state.selected_tool = "sphere"; spawn_block("sphere") }
     }
-    
+
     object "CylinderTool" using "ToolButton" {
       position: [0.6, 0, 0]
       model: "primitives/cylinder.glb"
       color: "#ffe66d"
       on_click: { @state.selected_tool = "cylinder"; spawn_block("cylinder") }
     }
-    
+
     object "GridToggle" using "ToolButton" {
       position: [0.3, -0.3, 0]
       model: "icons/grid.glb"
       color: @state.grid_snap ? "#00ff00" : "#666666"
       on_click: { @state.grid_snap = !@state.grid_snap }
     }
-    
+
     object "CountDisplay" {
       @billboard
       position: [0.3, 0.3, 0]
@@ -118,15 +118,15 @@ composition "World Builder Sandbox" {
       block.color = block.base_color
       play_sound("spawn.wav", SpawnPoint.position)
     }
-    
+
     on_scene_load {
       play_ambient("creative_ambient.mp3")
     }
-    
+
     when @state.object_count > 50 {
       notify("You're building something amazing!")
     }
-    
+
     when @state.object_count > 100 {
       notify("Master builder status unlocked!")
     }
@@ -137,6 +137,7 @@ composition "World Builder Sandbox" {
 ## What This Demonstrates
 
 ### 1. Reactive Global State
+
 ```holo
 @state {
   selected_tool: "cube"
@@ -144,18 +145,22 @@ composition "World Builder Sandbox" {
   object_count: 0
 }
 ```
+
 State is reactive - UI updates automatically when values change.
 
 ### 2. Templates for Reusability
+
 ```holo
 template "BuildBlock" {
   @grabbable @physics @collidable @stackable @networked
   // ... shared behavior
 }
 ```
+
 One template, unlimited instances with all traits.
 
 ### 3. Spatial Groups for UI
+
 ```holo
 spatial_group "ToolPalette" {
   @world_locked
@@ -163,23 +168,28 @@ spatial_group "ToolPalette" {
   // Child objects maintain relative positions
 }
 ```
+
 Group objects together, all children move as one.
 
 ### 4. Dynamic Spawning
+
 ```holo
 function spawn_block(shape) {
   let block = spawn "BuildBlock" at SpawnPoint.position
   block.model = "primitives/${shape}.glb"
 }
 ```
+
 Create objects at runtime from templates.
 
 ### 5. Condition-Based Logic
+
 ```holo
 when @state.object_count > 50 {
   notify("You're building something amazing!")
 }
 ```
+
 Reactive triggers that fire when conditions are met.
 
 ---
@@ -187,11 +197,13 @@ Reactive triggers that fire when conditions are met.
 ## Running This Demo
 
 ### Option 1: HoloScript CLI
+
 ```bash
 holoscript preview world-builder.holo
 ```
 
 ### Option 2: Compile to Target
+
 ```bash
 # For web (Three.js)
 holoscript compile world-builder.holo --target threejs
@@ -208,6 +220,7 @@ holoscript compile world-builder.holo --target vrchat
 ## Extending the Demo
 
 ### Add Undo/Redo
+
 ```holo
 @state {
   history: []
@@ -223,6 +236,7 @@ function undo() {
 ```
 
 ### Add Save/Load
+
 ```holo
 object "SaveButton" using "ToolButton" {
   on_click: {
@@ -234,6 +248,7 @@ object "SaveButton" using "ToolButton" {
 ```
 
 ### Add Multiplayer
+
 ```holo
 @networked_state {
   sync_rate: 20hz
@@ -247,12 +262,12 @@ object "SaveButton" using "ToolButton" {
 
 ## The HoloScript Advantage
 
-| Traditional Code | HoloScript |
-|------------------|------------|
-| 500+ lines React/Three.js | ~100 lines .holo |
-| Separate physics library | `@physics` trait |
-| Custom networking code | `@networked` trait |
-| Build UI components | `spatial_group` + templates |
-| State management library | `@state { }` |
+| Traditional Code          | HoloScript                  |
+| ------------------------- | --------------------------- |
+| 500+ lines React/Three.js | ~100 lines .holo            |
+| Separate physics library  | `@physics` trait            |
+| Custom networking code    | `@networked` trait          |
+| Build UI components       | `spatial_group` + templates |
+| State management library  | `@state { }`                |
 
 **This demo compiles to**: Three.js, Unity, VRChat, Babylon.js, Quest native, and more.

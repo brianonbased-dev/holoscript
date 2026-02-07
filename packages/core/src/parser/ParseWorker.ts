@@ -97,12 +97,14 @@ class ParseWorkerInstance {
         filePath: data.filePath,
         ast: null,
         success: false,
-        errors: [{
-          message: error.message,
-          line: 0,
-          column: 0,
-          code: 'PARSE_CRASH',
-        }],
+        errors: [
+          {
+            message: error.message,
+            line: 0,
+            column: 0,
+            code: 'PARSE_CRASH',
+          },
+        ],
         warnings: [],
         exports: [],
         imports: [],

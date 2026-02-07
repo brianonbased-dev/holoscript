@@ -31,11 +31,13 @@ export class HoloScriptCLI {
     try {
       // Load configuration from file if it exists
       this.config = await ConfigLoader.findAndLoad();
-      
+
       if (this.options.verbose && this.config) {
         console.log(`\x1b[2m[TRACE] Loaded configuration from holoscript.config.json\x1b[0m`);
         if (this.config.extends) {
-          console.log(`\x1b[2m[TRACE] Configuration extends: ${JSON.stringify(this.config.extends)}\x1b[0m`);
+          console.log(
+            `\x1b[2m[TRACE] Configuration extends: ${JSON.stringify(this.config.extends)}\x1b[0m`
+          );
         }
       }
 
@@ -101,7 +103,7 @@ export class HoloScriptCLI {
     }
 
     const results = await this.runtime.executeProgram(ast);
-    const allSuccessful = results.every(r => r.success);
+    const allSuccessful = results.every((r) => r.success);
     const lastResult = results[results.length - 1];
 
     if (this.options.json) {

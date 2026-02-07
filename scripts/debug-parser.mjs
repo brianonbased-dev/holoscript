@@ -98,7 +98,7 @@ try {
     code += `  orb#ball${i} @grabbable { color: "#ff0000", position: [${i}, 0, 0] }\n`;
   }
   code += '}';
-  
+
   const r7 = parser.parse(code);
   console.log(`  ✅ Passed in ${Date.now() - start}ms`);
 } catch (e) {

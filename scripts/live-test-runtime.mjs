@@ -4,7 +4,12 @@
  * Tests AST execution, state management, event handling, and traits
  */
 
-import { HoloScriptPlusParser, createRuntime, createState, VRTraitRegistry } from '../packages/core/dist/index.js';
+import {
+  HoloScriptPlusParser,
+  createRuntime,
+  createState,
+  VRTraitRegistry,
+} from '../packages/core/dist/index.js';
 
 const BOLD = '\x1b[1m';
 const GREEN = '\x1b[32m';
@@ -48,8 +53,8 @@ test('Subscribe to state changes (full state callback)', () => {
   const state = createState({ value: 1 });
   let notified = false;
   // subscribe takes callback(state, changedKey)
-  state.subscribe((st, changedKey) => { 
-    if (changedKey === 'value') notified = true; 
+  state.subscribe((st, changedKey) => {
+    if (changedKey === 'value') notified = true;
   });
   state.set('value', 2);
   if (!notified) throw new Error('Subscriber should be notified');
@@ -169,9 +174,9 @@ test('Create runtime from parsed AST', () => {
   const code = `orb Test { state { value: 0 } }`;
   const parser = new HoloScriptPlusParser();
   const result = parser.parse(code);
-  
+
   if (!result.success) throw new Error('Parse failed: ' + JSON.stringify(result.errors));
-  
+
   try {
     const runtime = createRuntime(result.ast);
     if (!runtime) throw new Error('Runtime should be created');
@@ -186,7 +191,7 @@ test('Create runtime from parsed AST', () => {
 });
 
 // =============================================================================
-// Test 5: Verify exports work correctly  
+// Test 5: Verify exports work correctly
 // =============================================================================
 console.log(`\n${BOLD}📁 Test 5: Module Exports${RESET}\n`);
 

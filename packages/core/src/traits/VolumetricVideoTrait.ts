@@ -19,9 +19,9 @@ type PlaybackState = 'stopped' | 'playing' | 'paused' | 'buffering' | 'error';
 interface VolumetricVideoState {
   playbackState: PlaybackState;
   currentFrame: number;
-  currentTime: number;  // seconds
+  currentTime: number; // seconds
   totalFrames: number;
-  duration: number;  // seconds
+  duration: number; // seconds
   fps: number;
   bufferedFrames: number;
   isLoaded: boolean;
@@ -33,12 +33,12 @@ interface VolumetricVideoConfig {
   loop: boolean;
   playback_rate: number;
   preload: boolean;
-  buffer_size: number;  // Frames to buffer ahead
+  buffer_size: number; // Frames to buffer ahead
   spatial_audio: boolean;
   audio_source: string;
   quality: 'low' | 'medium' | 'high' | 'auto';
   start_time: number;
-  end_time: number;  // 0 = play to end
+  end_time: number; // 0 = play to end
 }
 
 // =============================================================================
@@ -74,7 +74,7 @@ export const volumetricVideoHandler: TraitHandler<VolumetricVideoConfig> = {
       isLoaded: false,
     };
     (node as any).__volumetricVideoState = state;
-    
+
     if (config.source) {
       if (config.preload) {
         loadVolumetricVideo(node, state, config, context);
@@ -100,17 +100,17 @@ export const volumetricVideoHandler: TraitHandler<VolumetricVideoConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__volumetricVideoState as VolumetricVideoState;
     if (!state || state.playbackState !== 'playing') return;
-    
+
     // Advance playback
     const frameDelta = (delta / 1000) * state.fps * config.playback_rate;
     state.currentFrame += frameDelta;
     state.currentTime = state.currentFrame / state.fps;
-    
+
     // Check end time
     const endTime = config.end_time > 0 ? config.end_time : state.duration;
     if (state.currentTime >= endTime) {
       if (config.loop) {
-        state.currentFrame = (config.start_time * state.fps);
+        state.currentFrame = config.start_time * state.fps;
         state.currentTime = config.start_time;
         context.emit?.('on_volume_loop', { node });
       } else {
@@ -120,7 +120,7 @@ export const volumetricVideoHandler: TraitHandler<VolumetricVideoConfig> = {
         context.emit?.('on_volume_complete', { node });
       }
     }
-    
+
     // Request frame render
     const frameIndex = Math.floor(state.currentFrame) % state.totalFrames;
     context.emit?.('volumetric_render_frame', {
@@ -128,14 +128,14 @@ export const volumetricVideoHandler: TraitHandler<VolumetricVideoConfig> = {
       frame: frameIndex,
       time: state.currentTime,
     });
-    
+
     context.emit?.('on_volume_frame', {
       node,
       frame: frameIndex,
       time: state.currentTime,
       progress: state.currentTime / state.duration,
     });
-    
+
     // Check buffer state
     if (state.bufferedFrames < config.buffer_size) {
       state.playbackState = 'buffering';
@@ -150,15 +150,15 @@ export const volumetricVideoHandler: TraitHandler<VolumetricVideoConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__volumetricVideoState as VolumetricVideoState;
     if (!state) return;
-    
+
     if (event.type === 'volumetric_play') {
       if (!state.isLoaded) {
         loadVolumetricVideo(node, state, config, context);
         return;
       }
-      
+
       state.playbackState = 'playing';
-      
+
       // Sync audio if configured
       if (config.spatial_audio && config.audio_source) {
         context.emit?.('volumetric_sync_audio', {
@@ -168,18 +168,18 @@ export const volumetricVideoHandler: TraitHandler<VolumetricVideoConfig> = {
           rate: config.playback_rate,
         });
       }
-      
+
       context.emit?.('on_volume_play', {
         node,
         time: state.currentTime,
       });
     } else if (event.type === 'volumetric_pause') {
       state.playbackState = 'paused';
-      
+
       if (config.spatial_audio) {
         context.emit?.('volumetric_pause_audio', { node });
       }
-      
+
       context.emit?.('on_volume_pause', {
         node,
         time: state.currentTime,
@@ -188,34 +188,34 @@ export const volumetricVideoHandler: TraitHandler<VolumetricVideoConfig> = {
       state.playbackState = 'stopped';
       state.currentFrame = config.start_time * state.fps;
       state.currentTime = config.start_time;
-      
+
       if (config.spatial_audio) {
         context.emit?.('volumetric_stop_audio', { node });
       }
-      
+
       context.emit?.('on_volume_stop', { node });
     } else if (event.type === 'volumetric_seek') {
       const time = event.time as number;
       state.currentTime = Math.max(config.start_time, Math.min(time, state.duration));
       state.currentFrame = state.currentTime * state.fps;
-      
+
       // Invalidate buffer
       state.bufferedFrames = 0;
-      
+
       if (config.spatial_audio) {
         context.emit?.('volumetric_seek_audio', {
           node,
           time: state.currentTime,
         });
       }
-      
+
       context.emit?.('on_volume_seek', {
         node,
         time: state.currentTime,
       });
     } else if (event.type === 'volumetric_set_rate') {
       const rate = event.rate as number;
-      
+
       if (config.spatial_audio) {
         context.emit?.('volumetric_set_audio_rate', {
           node,
@@ -225,11 +225,11 @@ export const volumetricVideoHandler: TraitHandler<VolumetricVideoConfig> = {
     } else if (event.type === 'volumetric_loaded') {
       state.isLoaded = true;
       state.totalFrames = event.totalFrames as number;
-      state.fps = event.fps as number || 30;
+      state.fps = (event.fps as number) || 30;
       state.duration = state.totalFrames / state.fps;
       state.currentFrame = config.start_time * state.fps;
       state.currentTime = config.start_time;
-      
+
       context.emit?.('on_volume_loaded', {
         node,
         duration: state.duration,
@@ -238,13 +238,13 @@ export const volumetricVideoHandler: TraitHandler<VolumetricVideoConfig> = {
       });
     } else if (event.type === 'volumetric_buffered') {
       state.bufferedFrames = event.count as number;
-      
+
       if (state.playbackState === 'buffering' && state.bufferedFrames >= config.buffer_size / 2) {
         state.playbackState = 'playing';
       }
     } else if (event.type === 'volumetric_error') {
       state.playbackState = 'error';
-      
+
       context.emit?.('on_volume_error', {
         node,
         error: event.error,

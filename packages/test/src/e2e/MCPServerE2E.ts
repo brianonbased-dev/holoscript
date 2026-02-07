@@ -1,6 +1,6 @@
 /**
  * MCP Server End-to-End Test Runner
- * 
+ *
  * Actually spawns the MCP server and tests the full pipeline.
  * This catches issues that unit tests miss:
  * - Server startup failures
@@ -32,7 +32,7 @@ interface MCPResponse {
   error?: { code: number; message: string; data?: unknown };
 }
 
-interface ToolCallParams {
+interface _ToolCallParams {
   name: string;
   arguments: Record<string, unknown>;
 }
@@ -48,11 +48,14 @@ interface E2ETestResult {
 export class MCPServerE2E extends EventEmitter {
   private process: ChildProcess | null = null;
   private requestId = 0;
-  private pendingRequests = new Map<number, {
-    resolve: (value: MCPResponse) => void;
-    reject: (error: Error) => void;
-    startTime: number;
-  }>();
+  private pendingRequests = new Map<
+    number,
+    {
+      resolve: (value: MCPResponse) => void;
+      reject: (error: Error) => void;
+      startTime: number;
+    }
+  >();
   private buffer = '';
   private isReady = false;
   private startTime = 0;
@@ -66,10 +69,7 @@ export class MCPServerE2E extends EventEmitter {
 
   constructor(private serverPath?: string) {
     super();
-    this.serverPath = serverPath || path.resolve(
-      __dirname,
-      '../../../../mcp-server/dist/cli.js'
-    );
+    this.serverPath = serverPath || path.resolve(__dirname, '../../../../mcp-server/dist/cli.js');
   }
 
   /**
@@ -77,7 +77,7 @@ export class MCPServerE2E extends EventEmitter {
    */
   async start(timeoutMs = 10000): Promise<void> {
     this.startTime = Date.now();
-    
+
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.kill();
@@ -87,15 +87,17 @@ export class MCPServerE2E extends EventEmitter {
       // Try different ways to start the server
       const startMethods = [
         // Method 1: Direct node execution of built CLI
-        () => spawn('node', [this.serverPath!], {
-          stdio: ['pipe', 'pipe', 'pipe'],
-          cwd: path.dirname(this.serverPath!),
-        }),
+        () =>
+          spawn('node', [this.serverPath!], {
+            stdio: ['pipe', 'pipe', 'pipe'],
+            cwd: path.dirname(this.serverPath!),
+          }),
         // Method 2: Using tsx for development
-        () => spawn('npx', ['tsx', this.serverPath!.replace('/dist/', '/src/').replace('.js', '.ts')], {
-          stdio: ['pipe', 'pipe', 'pipe'],
-          shell: true,
-        }),
+        () =>
+          spawn('npx', ['tsx', this.serverPath!.replace('/dist/', '/src/').replace('.js', '.ts')], {
+            stdio: ['pipe', 'pipe', 'pipe'],
+            shell: true,
+          }),
       ];
 
       let methodIndex = 0;
@@ -150,7 +152,9 @@ export class MCPServerE2E extends EventEmitter {
                 this.emit('ready');
                 resolve();
               })
-              .catch(() => { /* Will retry or timeout */ });
+              .catch(() => {
+                /* Will retry or timeout */
+              });
           }
         }, 500);
       };
@@ -177,15 +181,15 @@ export class MCPServerE2E extends EventEmitter {
           this.metrics.totalLatency += latency;
           this.metrics.maxLatency = Math.max(this.metrics.maxLatency, latency);
           this.metrics.minLatency = Math.min(this.metrics.minLatency, latency);
-          
+
           if (response.error) {
             this.metrics.errorCount++;
           }
-          
+
           pending.resolve(response);
           this.pendingRequests.delete(response.id);
         }
-      } catch (e) {
+      } catch (_e) {
         // Not valid JSON, might be debug output
       }
     }
@@ -233,7 +237,10 @@ export class MCPServerE2E extends EventEmitter {
   /**
    * Call an MCP tool
    */
-  async callTool(name: string, args: Record<string, unknown>): Promise<{
+  async callTool(
+    name: string,
+    args: Record<string, unknown>
+  ): Promise<{
     success: boolean;
     result?: unknown;
     error?: string;
@@ -305,13 +312,13 @@ export class MCPServerE2E extends EventEmitter {
 
   private async testListTools(): Promise<E2ETestResult> {
     const start = Date.now();
-    const result = await this.callTool('', {}); // List tools doesn't need a tool name
-    
+    const _result = await this.callTool('', {}); // List tools doesn't need a tool name
+
     // Actually test via tools/list method
     try {
       const response = await this.sendRequest('tools/list', {});
       const tools = (response.result as { tools?: unknown[] })?.tools;
-      
+
       return {
         name: 'List Tools',
         passed: Array.isArray(tools) && tools.length > 0,
@@ -329,7 +336,7 @@ export class MCPServerE2E extends EventEmitter {
   }
 
   private async testParseValidCode(): Promise<E2ETestResult> {
-    const start = Date.now();
+    const _start = Date.now();
     const code = `
       orb player @grabbable @networked {
         position: [0, 1.6, 0]
@@ -349,7 +356,7 @@ export class MCPServerE2E extends EventEmitter {
   }
 
   private async testParseInvalidCode(): Promise<E2ETestResult> {
-    const start = Date.now();
+    const _start = Date.now();
     const code = `
       orb broken {{{
         syntax: error here
@@ -368,7 +375,7 @@ export class MCPServerE2E extends EventEmitter {
   }
 
   private async testValidation(): Promise<E2ETestResult> {
-    const start = Date.now();
+    const _start = Date.now();
     const code = `
       orb testObj @grabbable {
         geometry: "cube"
@@ -376,7 +383,7 @@ export class MCPServerE2E extends EventEmitter {
       }
     `;
 
-    const result = await this.callTool('validate_holoscript', { 
+    const result = await this.callTool('validate_holoscript', {
       code,
       includeWarnings: true,
     });
@@ -391,7 +398,7 @@ export class MCPServerE2E extends EventEmitter {
   }
 
   private async testGeneration(): Promise<E2ETestResult> {
-    const start = Date.now();
+    const _start = Date.now();
     const result = await this.callTool('generate_object', {
       description: 'A red sphere that can be grabbed and thrown',
       format: 'hsplus',
@@ -407,7 +414,7 @@ export class MCPServerE2E extends EventEmitter {
   }
 
   private async testListTraits(): Promise<E2ETestResult> {
-    const start = Date.now();
+    const _start = Date.now();
     const result = await this.callTool('list_traits', { category: 'all' });
 
     return {
@@ -431,7 +438,7 @@ export class MCPServerE2E extends EventEmitter {
     }
 
     const results = await Promise.all(promises);
-    const failures = results.filter(r => !r.success);
+    const failures = results.filter((r) => !r.success);
     const avgLatency = results.reduce((sum, r) => sum + r.latency, 0) / results.length;
 
     return {
@@ -442,13 +449,13 @@ export class MCPServerE2E extends EventEmitter {
         totalRequests: requestCount,
         failures: failures.length,
         avgLatency: Math.round(avgLatency),
-        maxLatency: Math.max(...results.map(r => r.latency)),
+        maxLatency: Math.max(...results.map((r) => r.latency)),
       },
     };
   }
 
   private async testHoloComposition(): Promise<E2ETestResult> {
-    const start = Date.now();
+    const _start = Date.now();
     const code = `
       composition "Test Scene" {
         environment {
@@ -480,9 +487,10 @@ export class MCPServerE2E extends EventEmitter {
   getMetrics() {
     return {
       ...this.metrics,
-      avgLatency: this.metrics.requestCount > 0
-        ? Math.round(this.metrics.totalLatency / this.metrics.requestCount)
-        : 0,
+      avgLatency:
+        this.metrics.requestCount > 0
+          ? Math.round(this.metrics.totalLatency / this.metrics.requestCount)
+          : 0,
       uptime: Date.now() - this.startTime,
       serverReady: this.isReady,
     };
@@ -507,7 +515,7 @@ export async function runE2ETests(): Promise<{
   metrics: ReturnType<MCPServerE2E['getMetrics']>;
 }> {
   const e2e = new MCPServerE2E();
-  
+
   try {
     console.log('🚀 Starting MCP server for E2E tests...');
     await e2e.start();
@@ -526,7 +534,7 @@ export async function runE2ETests(): Promise<{
     }
 
     const metrics = e2e.getMetrics();
-    const passed = results.every(r => r.passed);
+    const passed = results.every((r) => r.passed);
 
     console.log('\n📊 Metrics:');
     console.log(`   Requests: ${metrics.requestCount}`);

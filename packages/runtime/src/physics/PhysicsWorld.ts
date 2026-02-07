@@ -56,43 +56,44 @@ export class PhysicsWorld {
   constructor(options: PhysicsOptions = {}) {
     this.world = new CANNON.World();
     this.setupCollisionEvents();
-    
+
     // Default gravity: Earth's gravity
     const gravity = options.gravity || [0, -9.82, 0];
     this.world.gravity.set(gravity[0], gravity[1], gravity[2]);
-    
+
     // Performance settings
     (this.world.solver as CANNON.GSSolver).iterations = options.iterations || 10;
     this.stepSize = options.stepSize || 1 / 60;
-    
+
     // Default material
     const defaultMaterial = new CANNON.Material('default');
-    const defaultContactMaterial = new CANNON.ContactMaterial(
-      defaultMaterial,
-      defaultMaterial,
-      {
-        friction: 0.3,
-        restitution: 0.3, // Bounciness
-      }
-    );
+    const defaultContactMaterial = new CANNON.ContactMaterial(defaultMaterial, defaultMaterial, {
+      friction: 0.3,
+      restitution: 0.3, // Bounciness
+    });
     this.world.addContactMaterial(defaultContactMaterial);
   }
 
   addBody(
-    id: string, 
-    mesh: THREE.Object3D, 
+    id: string,
+    mesh: THREE.Object3D,
     type: 'box' | 'sphere' | 'plane' = 'box',
     mass: number = 1
   ): CANNON.Body {
     // Determine shape and dimensions based on mesh
     let shape: CANNON.Shape;
-    let position = new CANNON.Vec3(mesh.position.x, mesh.position.y, mesh.position.z);
-    let quaternion = new CANNON.Quaternion(mesh.quaternion.x, mesh.quaternion.y, mesh.quaternion.z, mesh.quaternion.w);
-    
+    const position = new CANNON.Vec3(mesh.position.x, mesh.position.y, mesh.position.z);
+    const quaternion = new CANNON.Quaternion(
+      mesh.quaternion.x,
+      mesh.quaternion.y,
+      mesh.quaternion.z,
+      mesh.quaternion.w
+    );
+
     // Simplistic shape generation based on type
     // In a real implementation, we would inspect mesh geometry bounding box
     const scale = mesh.scale;
-    
+
     if (type === 'sphere') {
       // Assuming radius 0.5 (default sphere geometry) * max scale
       const radius = 0.5 * Math.max(scale.x, scale.y, scale.z);
@@ -100,7 +101,7 @@ export class PhysicsWorld {
     } else if (type === 'plane') {
       shape = new CANNON.Plane();
       // Rotate plane to match Three.js plane (which faces Z) vs Cannon plane (which faces Z)
-      // Actually Cannon plane is infinite on X/Y, facing Z. 
+      // Actually Cannon plane is infinite on X/Y, facing Z.
       // Often planes in Three are floor, rotated -90 on X.
       // We'll trust the mesh rotation.
       mass = 0; // Planes are usually static
@@ -114,7 +115,7 @@ export class PhysicsWorld {
       mass: mass, // 0 = static, >0 = dynamic
       shape: shape,
       position: position,
-      quaternion: quaternion
+      quaternion: quaternion,
     });
 
     this.world.addBody(body);
@@ -136,7 +137,7 @@ export class PhysicsWorld {
   step(timeSinceLastCall: number): void {
     // Fixed time step
     this.world.step(this.stepSize, timeSinceLastCall, 3);
-    
+
     // Sync visual meshes with physics bodies
     this.bodies.forEach((body, id) => {
       const mesh = this.meshes.get(id);
@@ -147,12 +148,16 @@ export class PhysicsWorld {
     });
   }
 
-  applyImpulse(id: string, impulse: [number, number, number], worldPoint?: [number, number, number]): void {
+  applyImpulse(
+    id: string,
+    impulse: [number, number, number],
+    worldPoint?: [number, number, number]
+  ): void {
     const body = this.bodies.get(id);
     if (body) {
       const imp = new CANNON.Vec3(impulse[0], impulse[1], impulse[2]);
-      const point = worldPoint 
-        ? new CANNON.Vec3(worldPoint[0], worldPoint[1], worldPoint[2]) 
+      const point = worldPoint
+        ? new CANNON.Vec3(worldPoint[0], worldPoint[1], worldPoint[2])
         : body.position;
       body.applyImpulse(imp, point);
     }
@@ -188,16 +193,20 @@ export class PhysicsWorld {
         type: isTrigger ? 'trigger-enter' : 'collision-start',
         bodyA: idA,
         bodyB: idB,
-        contactPoint: event.contactEquations?.[0]?.ri ? {
-          x: event.bodyA.position.x + event.contactEquations[0].ri.x,
-          y: event.bodyA.position.y + event.contactEquations[0].ri.y,
-          z: event.bodyA.position.z + event.contactEquations[0].ri.z,
-        } : undefined,
-        contactNormal: event.contactEquations?.[0]?.ni ? {
-          x: event.contactEquations[0].ni.x,
-          y: event.contactEquations[0].ni.y,
-          z: event.contactEquations[0].ni.z,
-        } : undefined,
+        contactPoint: event.contactEquations?.[0]?.ri
+          ? {
+              x: event.bodyA.position.x + event.contactEquations[0].ri.x,
+              y: event.bodyA.position.y + event.contactEquations[0].ri.y,
+              z: event.bodyA.position.z + event.contactEquations[0].ri.z,
+            }
+          : undefined,
+        contactNormal: event.contactEquations?.[0]?.ni
+          ? {
+              x: event.contactEquations[0].ni.x,
+              y: event.contactEquations[0].ni.y,
+              z: event.contactEquations[0].ni.z,
+            }
+          : undefined,
         relativeVelocity: {
           x: event.bodyA.velocity.x - event.bodyB.velocity.x,
           y: event.bodyA.velocity.y - event.bodyB.velocity.y,
@@ -248,30 +257,27 @@ export class PhysicsWorld {
 
   private emitCollision(event: CollisionEvent, idA: string, idB: string): void {
     // Emit to specific body listeners
-    this.collisionListeners.get(idA)?.forEach(cb => cb(event));
-    this.collisionListeners.get(idB)?.forEach(cb => cb(event));
+    this.collisionListeners.get(idA)?.forEach((cb) => cb(event));
+    this.collisionListeners.get(idB)?.forEach((cb) => cb(event));
     // Emit to global listeners
-    this.globalCollisionListeners.forEach(cb => cb(event));
+    this.globalCollisionListeners.forEach((cb) => cb(event));
   }
 
   // ============================================================================
   // Enhanced Body Creation
   // ============================================================================
 
-  addBodyWithConfig(
-    id: string,
-    mesh: THREE.Object3D,
-    config: RigidbodyConfig = {}
-  ): CANNON.Body {
+  addBodyWithConfig(id: string, mesh: THREE.Object3D, config: RigidbodyConfig = {}): CANNON.Body {
     const scale = mesh.scale;
     const shape = this.createShape(config.shape || 'box', scale);
-    
+
     const mass = config.type === 'static' ? 0 : (config.mass ?? 1);
-    const bodyType = config.type === 'kinematic' 
-      ? CANNON.Body.KINEMATIC 
-      : config.type === 'static' 
-        ? CANNON.Body.STATIC 
-        : CANNON.Body.DYNAMIC;
+    const bodyType =
+      config.type === 'kinematic'
+        ? CANNON.Body.KINEMATIC
+        : config.type === 'static'
+          ? CANNON.Body.STATIC
+          : CANNON.Body.DYNAMIC;
 
     const material = new CANNON.Material();
     material.friction = config.friction ?? 0.3;
@@ -282,7 +288,12 @@ export class PhysicsWorld {
       type: bodyType,
       shape,
       position: new CANNON.Vec3(mesh.position.x, mesh.position.y, mesh.position.z),
-      quaternion: new CANNON.Quaternion(mesh.quaternion.x, mesh.quaternion.y, mesh.quaternion.z, mesh.quaternion.w),
+      quaternion: new CANNON.Quaternion(
+        mesh.quaternion.x,
+        mesh.quaternion.y,
+        mesh.quaternion.z,
+        mesh.quaternion.w
+      ),
       material,
       linearDamping: config.linearDamping ?? 0.01,
       angularDamping: config.angularDamping ?? 0.01,
@@ -365,11 +376,15 @@ export class PhysicsWorld {
     }
   }
 
-  applyForce(id: string, force: [number, number, number], worldPoint?: [number, number, number]): void {
+  applyForce(
+    id: string,
+    force: [number, number, number],
+    worldPoint?: [number, number, number]
+  ): void {
     const body = this.bodies.get(id);
     if (body) {
       const f = new CANNON.Vec3(force[0], force[1], force[2]);
-      const point = worldPoint 
+      const point = worldPoint
         ? new CANNON.Vec3(worldPoint[0], worldPoint[1], worldPoint[2])
         : body.position;
       body.applyForce(f, point);
@@ -428,14 +443,17 @@ export class PhysicsWorld {
     return undefined;
   }
 
-  raycast(from: [number, number, number], to: [number, number, number]): { id: string; point: [number, number, number]; normal: [number, number, number] } | null {
+  raycast(
+    from: [number, number, number],
+    to: [number, number, number]
+  ): { id: string; point: [number, number, number]; normal: [number, number, number] } | null {
     const result = new CANNON.RaycastResult();
     const ray = new CANNON.Ray(
       new CANNON.Vec3(from[0], from[1], from[2]),
       new CANNON.Vec3(to[0], to[1], to[2])
     );
     ray.intersectWorld(this.world, { result, skipBackfaces: true });
-    
+
     if (result.hasHit && result.body) {
       const id = this.findBodyId(result.body);
       if (id) {

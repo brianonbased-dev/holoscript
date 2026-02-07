@@ -1,6 +1,6 @@
 /**
  * Google Gemini Integration for HoloScript
- * 
+ *
  * Use Gemini's multimodal capabilities to generate VR scenes
  * from text, images, and even video references.
  */
@@ -51,9 +51,9 @@ interface GenerationResult {
  * Generate HoloScript from text description
  */
 export async function generateFromText(prompt: string): Promise<GenerationResult> {
-  const model = genAI.getGenerativeModel({ 
+  const model = genAI.getGenerativeModel({
     model: 'gemini-1.5-pro',
-    systemInstruction: SYSTEM_INSTRUCTION
+    systemInstruction: SYSTEM_INSTRUCTION,
   });
 
   const result = await model.generateContent([
@@ -61,27 +61,30 @@ export async function generateFromText(prompt: string): Promise<GenerationResult
     
 After the code, provide:
 1. Brief scene explanation
-2. 3 suggestions for enhancements`
+2. 3 suggestions for enhancements`,
   ]);
 
   const text = result.response.text();
-  
+
   // Parse response
   const codeMatch = text.match(/```holo\n([\s\S]*?)```/);
   const code = codeMatch ? codeMatch[1].trim() : '';
-  
+
   const parts = text.split('```');
   const afterCode = parts[2] || '';
-  
+
   const suggestionMatch = afterCode.match(/suggestions?:?\s*\n([\s\S]*)/i);
-  const suggestions = suggestionMatch 
-    ? suggestionMatch[1].split('\n').filter(s => s.trim().match(/^\d+\.|^-/)).map(s => s.replace(/^\d+\.|-/, '').trim())
+  const suggestions = suggestionMatch
+    ? suggestionMatch[1]
+        .split('\n')
+        .filter((s) => s.trim().match(/^\d+\.|^-/))
+        .map((s) => s.replace(/^\d+\.|-/, '').trim())
     : [];
 
   return {
     code,
     explanation: parts[0]?.trim() || 'VR scene generated',
-    suggestions: suggestions.slice(0, 3)
+    suggestions: suggestions.slice(0, 3),
   };
 }
 
@@ -93,27 +96,25 @@ export async function generateFromImage(
   mimeType: string = 'image/png',
   context?: string
 ): Promise<GenerationResult> {
-  const model = genAI.getGenerativeModel({ 
+  const model = genAI.getGenerativeModel({
     model: 'gemini-1.5-pro-vision',
-    systemInstruction: SYSTEM_INSTRUCTION
+    systemInstruction: SYSTEM_INSTRUCTION,
   });
 
   // Handle base64 or buffer
-  const base64 = typeof imageData === 'string' 
-    ? imageData 
-    : imageData.toString('base64');
+  const base64 = typeof imageData === 'string' ? imageData : imageData.toString('base64');
 
   const result = await model.generateContent([
     {
       inlineData: {
         mimeType,
-        data: base64
-      }
+        data: base64,
+      },
     },
     `Recreate this scene in HoloScript VR format. ${context || ''}
     
 Make it interactive with appropriate traits.
-Include environment settings that match the mood.`
+Include environment settings that match the mood.`,
   ]);
 
   const text = result.response.text();
@@ -122,7 +123,7 @@ Include environment settings that match the mood.`
   return {
     code: codeMatch ? codeMatch[1].trim() : '',
     explanation: text.split('```')[0]?.trim() || 'Scene recreated from image',
-    suggestions: []
+    suggestions: [],
   };
 }
 
@@ -133,17 +134,17 @@ export async function generateFromVideo(
   videoUrl: string,
   context?: string
 ): Promise<GenerationResult> {
-  const model = genAI.getGenerativeModel({ 
+  const model = genAI.getGenerativeModel({
     model: 'gemini-1.5-pro',
-    systemInstruction: SYSTEM_INSTRUCTION
+    systemInstruction: SYSTEM_INSTRUCTION,
   });
 
   const result = await model.generateContent([
     {
       fileData: {
         mimeType: 'video/mp4',
-        fileUri: videoUrl
-      }
+        fileUri: videoUrl,
+      },
     },
     `Analyze this video and create a HoloScript VR scene that captures its essence.
     
@@ -152,7 +153,7 @@ ${context || 'Focus on the key visual elements and atmosphere.'}
 Include:
 - Environment that matches the video's setting
 - Key objects that appear
-- Appropriate interactivity`
+- Appropriate interactivity`,
   ]);
 
   const text = result.response.text();
@@ -161,7 +162,7 @@ Include:
   return {
     code: codeMatch ? codeMatch[1].trim() : '',
     explanation: text.split('```')[0]?.trim() || 'Scene generated from video',
-    suggestions: []
+    suggestions: [],
   };
 }
 
@@ -173,17 +174,15 @@ export class GeminiSceneBuilder {
   private chat;
 
   constructor() {
-    this.model = genAI.getGenerativeModel({ 
+    this.model = genAI.getGenerativeModel({
       model: 'gemini-1.5-pro',
-      systemInstruction: SYSTEM_INSTRUCTION
+      systemInstruction: SYSTEM_INSTRUCTION,
     });
     this.chat = this.model.startChat();
   }
 
   async start(initialPrompt: string): Promise<GenerationResult> {
-    const result = await this.chat.sendMessage(
-      `Create a VR scene: ${initialPrompt}`
-    );
+    const result = await this.chat.sendMessage(`Create a VR scene: ${initialPrompt}`);
     return this.parseResponse(result.response.text());
   }
 
@@ -204,7 +203,7 @@ export class GeminiSceneBuilder {
     return {
       code: codeMatch ? codeMatch[1].trim() : '',
       explanation: text.split('```')[0]?.trim() || '',
-      suggestions: []
+      suggestions: [],
     };
   }
 }
@@ -216,18 +215,18 @@ export async function generateGrounded(
   prompt: string,
   searchContext: boolean = true
 ): Promise<GenerationResult> {
-  const model = genAI.getGenerativeModel({ 
+  const model = genAI.getGenerativeModel({
     model: 'gemini-1.5-pro',
     systemInstruction: SYSTEM_INSTRUCTION,
     // Enable grounding with Google Search
-    tools: searchContext ? [{ googleSearch: {} }] : undefined
+    tools: searchContext ? [{ googleSearch: {} }] : undefined,
   });
 
   const result = await model.generateContent([
     `Create an accurate VR recreation: ${prompt}
 
 Use real-world references for accuracy.
-Include historically/architecturally accurate details.`
+Include historically/architecturally accurate details.`,
   ]);
 
   const text = result.response.text();
@@ -236,7 +235,7 @@ Include historically/architecturally accurate details.`
   return {
     code: codeMatch ? codeMatch[1].trim() : '',
     explanation: text.split('```')[0]?.trim() || 'Grounded scene generated',
-    suggestions: []
+    suggestions: [],
   };
 }
 
@@ -244,9 +243,7 @@ Include historically/architecturally accurate details.`
 async function main() {
   // Text-based generation
   console.log('=== Text Generation ===');
-  const scene = await generateFromText(
-    'A Japanese temple garden with a koi pond and stone bridge'
-  );
+  const scene = await generateFromText('A Japanese temple garden with a koi pond and stone bridge');
   console.log(scene.code);
   console.log(`\nSuggestions: ${scene.suggestions.join(', ')}`);
 
@@ -260,9 +257,7 @@ async function main() {
 
   // Grounded generation
   console.log('\n=== Grounded Generation ===');
-  const historic = await generateGrounded(
-    'The interior of the Sistine Chapel'
-  );
+  const historic = await generateGrounded('The interior of the Sistine Chapel');
   console.log(historic.code);
 
   // Image-based generation (requires image)

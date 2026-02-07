@@ -12,7 +12,7 @@ describe('EmotionalVoiceTrait - Phase 20 (Procedural Voice)', () => {
       initialize: vi.fn(),
       generate: vi.fn().mockResolvedValue(new ArrayBuffer(1024)),
       getVoices: vi.fn(),
-      dispose: vi.fn()
+      dispose: vi.fn(),
     };
     registerVoiceSynthesizer('default', mockSynthesizer);
 
@@ -22,7 +22,7 @@ describe('EmotionalVoiceTrait - Phase 20 (Procedural Voice)', () => {
       type: 'object',
       traits: new Map([['emotional_voice', { voiceId: 'voice_1' }]]),
       properties: {},
-      children: []
+      children: [],
     } as any as HSPlusNode;
   });
 
@@ -34,51 +34,68 @@ describe('EmotionalVoiceTrait - Phase 20 (Procedural Voice)', () => {
 
   it('should call synthesizer.generate with correct parameters on speak event', async () => {
     emotionalVoiceHandler.onAttach!(node, emotionalVoiceHandler.defaultConfig as any, {} as any);
-    
+
     const speakEvent = {
       type: 'speak',
       data: {
         text: 'Hello, traveler!',
         emotion: 'friendly',
-        intensity: 0.8
-      }
+        intensity: 0.8,
+      },
     };
 
     // Fast-track calling the internal handleSpeak via onEvent
-    emotionalVoiceHandler.onEvent!(node, emotionalVoiceHandler.defaultConfig as any, {} as any, speakEvent as any);
+    emotionalVoiceHandler.onEvent!(
+      node,
+      emotionalVoiceHandler.defaultConfig as any,
+      {} as any,
+      speakEvent as any
+    );
 
     // Wait for the async generate call (since onEvent doesn't await it internally in the trait)
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
-    expect(mockSynthesizer.generate).toHaveBeenCalledWith(expect.objectContaining({
-      text: 'Hello, traveler!',
-      emotion: {
-        type: 'friendly',
-        intensity: 0.8
-      }
-    }));
+    expect(mockSynthesizer.generate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'Hello, traveler!',
+        emotion: {
+          type: 'friendly',
+          intensity: 0.8,
+        },
+      })
+    );
   });
 
   it('should cache audio buffers for identical requests', async () => {
     emotionalVoiceHandler.onAttach!(node, { cacheEnabled: true } as any, {} as any);
-    
+
     const speakEvent = {
       type: 'speak',
-      data: { text: 'Welcome!' }
+      data: { text: 'Welcome!' },
     };
 
     // First call
-    emotionalVoiceHandler.onEvent!(node, { cacheEnabled: true } as any, {} as any, speakEvent as any);
-    await new Promise(resolve => setTimeout(resolve, 10));
+    emotionalVoiceHandler.onEvent!(
+      node,
+      { cacheEnabled: true } as any,
+      {} as any,
+      speakEvent as any
+    );
+    await new Promise((resolve) => setTimeout(resolve, 10));
     expect(mockSynthesizer.generate).toHaveBeenCalledTimes(1);
 
     // Second call with same text
-    emotionalVoiceHandler.onEvent!(node, { cacheEnabled: true } as any, {} as any, speakEvent as any);
-    await new Promise(resolve => setTimeout(resolve, 10));
-    
+    emotionalVoiceHandler.onEvent!(
+      node,
+      { cacheEnabled: true } as any,
+      {} as any,
+      speakEvent as any
+    );
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
     // Should NOT call synthesizer again
     expect(mockSynthesizer.generate).toHaveBeenCalledTimes(1);
-    
+
     const state = (node as any).__emotionalVoiceState;
     expect(state.audioCache.size).toBe(1);
   });

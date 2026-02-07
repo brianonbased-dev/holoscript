@@ -4,7 +4,11 @@
  * Tests debugger functionality
  */
 
-import { HoloScriptDebugger, HoloScriptRuntime, createDebugger } from '../packages/core/dist/index.js';
+import {
+  HoloScriptDebugger,
+  HoloScriptRuntime,
+  createDebugger,
+} from '../packages/core/dist/index.js';
 
 const BOLD = '\x1b[1m';
 const GREEN = '\x1b[32m';

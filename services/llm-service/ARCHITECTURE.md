@@ -124,13 +124,13 @@ services/llm-service/
 
 ## 🎯 Self-Preservation Features (Built-in)
 
-| Feature | How It Works | Data Location |
-|---------|-------------|-----------------|
-| **Build History** | Every save auto-stored | `.holoscript-llm/builds/` |
-| **User Data** | Local session management | `.holoscript-llm/users/` |
-| **Inference Learning** | Stats tracked per model | In-memory + logs |
-| **Pattern Library** | Common HoloScript saved | Build descriptions |
-| **Offline Support** | Works without internet | 100% local-first |
+| Feature                | How It Works             | Data Location             |
+| ---------------------- | ------------------------ | ------------------------- |
+| **Build History**      | Every save auto-stored   | `.holoscript-llm/builds/` |
+| **User Data**          | Local session management | `.holoscript-llm/users/`  |
+| **Inference Learning** | Stats tracked per model  | In-memory + logs          |
+| **Pattern Library**    | Common HoloScript saved  | Build descriptions        |
+| **Offline Support**    | Works without internet   | 100% local-first          |
 
 ---
 
@@ -167,6 +167,7 @@ http://localhost:8000
 ## 📊 User Data Example
 
 **Build file** (`.holoscript-llm/builds/abc123.json`):
+
 ```json
 {
   "id": "abc123",
@@ -184,12 +185,14 @@ http://localhost:8000
 ## 🎨 User Interface
 
 ### Login Screen
+
 - Username/password input
 - Demo credentials pre-filled
 - Service health check
 - Professional dark theme
 
 ### Builder Screen
+
 - **Left panel**: Describe what you want
 - **Right panel**: Generated HoloScript code
 - **Bottom**: All saved builds in a searchable list
@@ -203,6 +206,7 @@ All in **pure HTML/CSS/JS** - no frameworks needed, ~1500 lines total.
 ## 📈 Extensibility
 
 Easy to add:
+
 - ✅ Different LLM providers (GPT, Claude, etc.)
 - ✅ More authentication methods (OAuth, SAML)
 - ✅ Database backend (Supabase, PostgreSQL)
@@ -216,14 +220,14 @@ Easy to add:
 
 ## ⚡ Performance Characteristics
 
-| Operation | Time | Notes |
-|-----------|------|-------|
-| Login | <100ms | In-memory |
-| Generate (first) | 30-60s | Model loading |
-| Generate (subsequent) | 5-20s | Depends on model size |
-| Save build | <100ms | Local file write |
-| List builds | <50ms | File read |
-| Copy code | <10ms | Browser clipboard |
+| Operation             | Time   | Notes                 |
+| --------------------- | ------ | --------------------- |
+| Login                 | <100ms | In-memory             |
+| Generate (first)      | 30-60s | Model loading         |
+| Generate (subsequent) | 5-20s  | Depends on model size |
+| Save build            | <100ms | Local file write      |
+| List builds           | <50ms  | File read             |
+| Copy code             | <10ms  | Browser clipboard     |
 
 ---
 
@@ -241,6 +245,7 @@ Easy to add:
 ## 🔄 Integration with Other Services
 
 This service can integrate with:
+
 - **@holoscript/core** - Execute generated code
 - **@holoscript/cli** - CLI interface
 - **@holoscript/infinityassistant** - AI building integration

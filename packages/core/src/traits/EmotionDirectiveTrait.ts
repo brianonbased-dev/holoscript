@@ -36,18 +36,37 @@
  * Facial expression preset name
  */
 export type ExpressionPresetName =
-  | 'neutral' | 'happy' | 'sad' | 'angry' | 'surprised'
-  | 'disgusted' | 'fearful' | 'confused' | 'thinking'
-  | 'excited' | 'empathetic' | 'skeptical' | 'amused'
+  | 'neutral'
+  | 'happy'
+  | 'sad'
+  | 'angry'
+  | 'surprised'
+  | 'disgusted'
+  | 'fearful'
+  | 'confused'
+  | 'thinking'
+  | 'excited'
+  | 'empathetic'
+  | 'skeptical'
+  | 'amused'
   | string;
 
 /**
  * Body animation preset name
  */
 export type AnimationPresetName =
-  | 'idle' | 'talking' | 'thinking' | 'listening' | 'nodding'
-  | 'waving' | 'shrugging' | 'pointing' | 'celebrating'
-  | 'saddened' | 'defeated' | 'angry_gesture'
+  | 'idle'
+  | 'talking'
+  | 'thinking'
+  | 'listening'
+  | 'nodding'
+  | 'waving'
+  | 'shrugging'
+  | 'pointing'
+  | 'celebrating'
+  | 'saddened'
+  | 'defeated'
+  | 'angry_gesture'
   | string;
 
 /**
@@ -253,63 +272,102 @@ type EmotionDirectiveEventCallback = (event: EmotionDirectiveEvent) => void;
 export const DEFAULT_EXPRESSION_PRESETS: Record<string, Record<string, number>> = {
   neutral: {},
   happy: {
-    mouthSmileLeft: 0.7, mouthSmileRight: 0.7,
-    browInnerUp: 0.17, eyeSquintLeft: 0.4, eyeSquintRight: 0.4,
-    cheekSquintLeft: 0.3, cheekSquintRight: 0.3,
+    mouthSmileLeft: 0.7,
+    mouthSmileRight: 0.7,
+    browInnerUp: 0.17,
+    eyeSquintLeft: 0.4,
+    eyeSquintRight: 0.4,
+    cheekSquintLeft: 0.3,
+    cheekSquintRight: 0.3,
   },
   sad: {
-    mouthFrownLeft: 0.6, mouthFrownRight: 0.6,
-    browDownLeft: 0.3, browDownRight: 0.3,
-    browInnerUp: 0.5, mouthPucker: 0.15,
+    mouthFrownLeft: 0.6,
+    mouthFrownRight: 0.6,
+    browDownLeft: 0.3,
+    browDownRight: 0.3,
+    browInnerUp: 0.5,
+    mouthPucker: 0.15,
   },
   angry: {
-    browDownLeft: 0.7, browDownRight: 0.7,
-    eyeSquintLeft: 0.5, eyeSquintRight: 0.5,
-    mouthFrownLeft: 0.3, mouthFrownRight: 0.3,
-    jawForward: 0.2, noseSneerLeft: 0.4, noseSneerRight: 0.4,
+    browDownLeft: 0.7,
+    browDownRight: 0.7,
+    eyeSquintLeft: 0.5,
+    eyeSquintRight: 0.5,
+    mouthFrownLeft: 0.3,
+    mouthFrownRight: 0.3,
+    jawForward: 0.2,
+    noseSneerLeft: 0.4,
+    noseSneerRight: 0.4,
   },
   surprised: {
-    browInnerUp: 0.8, browOuterUpLeft: 0.7, browOuterUpRight: 0.7,
-    eyeWideLeft: 0.7, eyeWideRight: 0.7,
-    jawOpen: 0.4, mouthFunnel: 0.2,
+    browInnerUp: 0.8,
+    browOuterUpLeft: 0.7,
+    browOuterUpRight: 0.7,
+    eyeWideLeft: 0.7,
+    eyeWideRight: 0.7,
+    jawOpen: 0.4,
+    mouthFunnel: 0.2,
   },
   disgusted: {
-    noseSneerLeft: 0.6, noseSneerRight: 0.6,
-    mouthUpperUpLeft: 0.3, mouthUpperUpRight: 0.3,
-    browDownLeft: 0.3, browDownRight: 0.3,
+    noseSneerLeft: 0.6,
+    noseSneerRight: 0.6,
+    mouthUpperUpLeft: 0.3,
+    mouthUpperUpRight: 0.3,
+    browDownLeft: 0.3,
+    browDownRight: 0.3,
   },
   fearful: {
-    browInnerUp: 0.7, browOuterUpLeft: 0.5, browOuterUpRight: 0.5,
-    eyeWideLeft: 0.8, eyeWideRight: 0.8,
-    mouthStretchLeft: 0.3, mouthStretchRight: 0.3,
+    browInnerUp: 0.7,
+    browOuterUpLeft: 0.5,
+    browOuterUpRight: 0.5,
+    eyeWideLeft: 0.8,
+    eyeWideRight: 0.8,
+    mouthStretchLeft: 0.3,
+    mouthStretchRight: 0.3,
   },
   thinking: {
-    browDownLeft: 0.2, browInnerUp: 0.3,
-    eyeLookUpLeft: 0.3, eyeLookUpRight: 0.3,
+    browDownLeft: 0.2,
+    browInnerUp: 0.3,
+    eyeLookUpLeft: 0.3,
+    eyeLookUpRight: 0.3,
     mouthPucker: 0.1,
   },
   excited: {
-    mouthSmileLeft: 0.9, mouthSmileRight: 0.9,
-    browInnerUp: 0.4, browOuterUpLeft: 0.3, browOuterUpRight: 0.3,
-    eyeWideLeft: 0.3, eyeWideRight: 0.3,
-    cheekSquintLeft: 0.4, cheekSquintRight: 0.4,
+    mouthSmileLeft: 0.9,
+    mouthSmileRight: 0.9,
+    browInnerUp: 0.4,
+    browOuterUpLeft: 0.3,
+    browOuterUpRight: 0.3,
+    eyeWideLeft: 0.3,
+    eyeWideRight: 0.3,
+    cheekSquintLeft: 0.4,
+    cheekSquintRight: 0.4,
   },
   empathetic: {
     browInnerUp: 0.4,
-    mouthSmileLeft: 0.3, mouthSmileRight: 0.3,
-    eyeSquintLeft: 0.15, eyeSquintRight: 0.15,
+    mouthSmileLeft: 0.3,
+    mouthSmileRight: 0.3,
+    eyeSquintLeft: 0.15,
+    eyeSquintRight: 0.15,
   },
   skeptical: {
-    browDownLeft: 0.5, browOuterUpRight: 0.6,
-    mouthLeft: 0.2, mouthPucker: 0.1,
+    browDownLeft: 0.5,
+    browOuterUpRight: 0.6,
+    mouthLeft: 0.2,
+    mouthPucker: 0.1,
   },
   amused: {
-    mouthSmileLeft: 0.5, mouthSmileRight: 0.5,
-    browInnerUp: 0.1, eyeSquintLeft: 0.3, eyeSquintRight: 0.3,
+    mouthSmileLeft: 0.5,
+    mouthSmileRight: 0.5,
+    browInnerUp: 0.1,
+    eyeSquintLeft: 0.3,
+    eyeSquintRight: 0.3,
   },
   confused: {
-    browInnerUp: 0.5, browDownLeft: 0.3,
-    mouthFrownLeft: 0.2, mouthFrownRight: 0.2,
+    browInnerUp: 0.5,
+    browDownLeft: 0.3,
+    mouthFrownLeft: 0.2,
+    mouthFrownRight: 0.2,
     mouthPucker: 0.1,
   },
 };
@@ -348,7 +406,8 @@ export class EmotionDirectiveTrait {
   private expressionPresets: Map<string, Record<string, number>> = new Map();
   private animationMap: Map<string, string> = new Map();
   private gestureMap: Map<string, string> = new Map();
-  private eventListeners: Map<EmotionDirectiveEventType, Set<EmotionDirectiveEventCallback>> = new Map();
+  private eventListeners: Map<EmotionDirectiveEventType, Set<EmotionDirectiveEventCallback>> =
+    new Map();
 
   // Segment playback state
   private currentResponse: EmotionTaggedResponse | null = null;
@@ -451,7 +510,7 @@ export class EmotionDirectiveTrait {
    * Set a conditional state (persistent behavioral mode)
    */
   public setConditionalState(directive: ConditionalDirective): void {
-    const prev = this.state.conditionalState;
+    const _prev = this.state.conditionalState;
     this.state.conditionalState = directive.state;
 
     if (directive.expression) {
@@ -876,6 +935,8 @@ export class EmotionDirectiveTrait {
 /**
  * Create an emotion directive trait
  */
-export function createEmotionDirectiveTrait(config?: EmotionDirectiveConfig): EmotionDirectiveTrait {
+export function createEmotionDirectiveTrait(
+  config?: EmotionDirectiveConfig
+): EmotionDirectiveTrait {
   return new EmotionDirectiveTrait(config);
 }

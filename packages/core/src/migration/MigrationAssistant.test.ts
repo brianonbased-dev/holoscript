@@ -62,9 +62,7 @@ describe('MigrationAssistant', () => {
       const result = assistant.analyze(source);
       expect(result.totalSuggestions).toBeGreaterThanOrEqual(2);
 
-      const talkable = result.suggestions.find((s) =>
-        s.rule.id === 'migrate-talkable-to-voice'
-      );
+      const talkable = result.suggestions.find((s) => s.rule.id === 'migrate-talkable-to-voice');
       expect(talkable).toBeDefined();
       expect(talkable?.suggested).toBe('@voice');
     });
@@ -80,9 +78,7 @@ describe('MigrationAssistant', () => {
 
       const result = assistant.analyze(source);
 
-      const pos = result.suggestions.find((s) =>
-        s.rule.id === 'migrate-pos-to-position'
-      );
+      const pos = result.suggestions.find((s) => s.rule.id === 'migrate-pos-to-position');
       expect(pos).toBeDefined();
       expect(pos?.suggested).toBe('position:');
     });
@@ -97,9 +93,7 @@ describe('MigrationAssistant', () => {
 
       const result = assistant.analyze(source);
 
-      const spawn = result.suggestions.find((s) =>
-        s.rule.id === 'migrate-spawn-to-create'
-      );
+      const spawn = result.suggestions.find((s) => s.rule.id === 'migrate-spawn-to-create');
       expect(spawn).toBeDefined();
       expect(spawn?.suggested).toBe('create(');
     });
@@ -114,13 +108,11 @@ describe('MigrationAssistant', () => {
 
       const result = assistant.analyze(source);
 
-      const varSuggestion = result.suggestions.find((s) =>
-        s.rule.id === 'migrate-var-to-let'
-      );
+      const varSuggestion = result.suggestions.find((s) => s.rule.id === 'migrate-var-to-let');
       expect(varSuggestion).toBeDefined();
 
-      const objectSuggestion = result.suggestions.find((s) =>
-        s.rule.id === 'migrate-object-to-orb'
+      const objectSuggestion = result.suggestions.find(
+        (s) => s.rule.id === 'migrate-object-to-orb'
       );
       expect(objectSuggestion).toBeDefined();
     });
@@ -132,9 +124,7 @@ var x = 1;
 line 4`;
 
       const result = assistant.analyze(source);
-      const varSuggestion = result.suggestions.find((s) =>
-        s.rule.id === 'migrate-var-to-let'
-      );
+      const varSuggestion = result.suggestions.find((s) => s.rule.id === 'migrate-var-to-let');
 
       expect(varSuggestion?.line).toBe(3);
     });
@@ -418,8 +408,8 @@ pos: [0, 0, 0]
       const source = '@collision';
       const result = assistant.analyze(source);
 
-      const collisionSuggestion = result.suggestions.find((s) =>
-        s.rule.id === 'migrate-collision-to-physics'
+      const collisionSuggestion = result.suggestions.find(
+        (s) => s.rule.id === 'migrate-collision-to-physics'
       );
       expect(collisionSuggestion).toBeDefined();
       expect(collisionSuggestion?.canAutoFix).toBe(false);
@@ -471,8 +461,8 @@ describe('Edge Cases', () => {
     const source = '@talkable @collidable @talkable';
     const result = assistant.analyze(source);
 
-    const talkableCount = result.suggestions.filter((s) =>
-      s.rule.id === 'migrate-talkable-to-voice'
+    const talkableCount = result.suggestions.filter(
+      (s) => s.rule.id === 'migrate-talkable-to-voice'
     ).length;
 
     expect(talkableCount).toBeGreaterThanOrEqual(2);

@@ -207,17 +207,18 @@ export class ComplexityAnalyzer {
     );
 
     // Calculate summary stats
-    const avgCyclomatic = functionMetrics.length > 0
-      ? functionMetrics.reduce((sum, f) => sum + f.cyclomatic, 0) / functionMetrics.length
-      : 0;
+    const avgCyclomatic =
+      functionMetrics.length > 0
+        ? functionMetrics.reduce((sum, f) => sum + f.cyclomatic, 0) / functionMetrics.length
+        : 0;
 
-    const avgFunctionLength = functionMetrics.length > 0
-      ? functionMetrics.reduce((sum, f) => sum + f.lines, 0) / functionMetrics.length
-      : 0;
+    const avgFunctionLength =
+      functionMetrics.length > 0
+        ? functionMetrics.reduce((sum, f) => sum + f.lines, 0) / functionMetrics.length
+        : 0;
 
-    const avgTraitsPerObject = objectMetrics.totalObjects > 0
-      ? traitMetrics.totalUsages / objectMetrics.totalObjects
-      : 0;
+    const avgTraitsPerObject =
+      objectMetrics.totalObjects > 0 ? traitMetrics.totalUsages / objectMetrics.totalObjects : 0;
 
     // Calculate maintainability index
     // Based on Microsoft's formula: 171 - 5.2*ln(V) - 0.23*G - 16.2*ln(L)
@@ -684,7 +685,7 @@ export class ComplexityAnalyzer {
   private calculateMaintainabilityIndex(
     lines: LineMetrics,
     avgCyclomatic: number,
-    functionCount: number
+    _functionCount: number
   ): number {
     // Simplified maintainability index
     // Higher is better (0-100 scale)
@@ -785,7 +786,9 @@ export class ComplexityAnalyzer {
     if (result.functions.length > 0) {
       lines.push('## Function Complexity');
       for (const func of result.functions) {
-        lines.push(`  ${func.name}: cyclomatic=${func.cyclomatic}, lines=${func.lines}, params=${func.parameters}`);
+        lines.push(
+          `  ${func.name}: cyclomatic=${func.cyclomatic}, lines=${func.lines}, params=${func.parameters}`
+        );
       }
       lines.push('');
     }
@@ -866,10 +869,7 @@ export function createComplexityAnalyzer(
 /**
  * Quick analyze helper
  */
-export function analyzeComplexity(
-  source: string,
-  filePath = 'input.holo'
-): ComplexityResult {
+export function analyzeComplexity(source: string, filePath = 'input.holo'): ComplexityResult {
   const analyzer = createComplexityAnalyzer();
   return analyzer.analyze(source, filePath);
 }

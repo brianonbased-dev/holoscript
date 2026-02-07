@@ -75,15 +75,13 @@ describe('SemVer Functions', () => {
     });
 
     it('should format prerelease version', () => {
-      expect(
-        formatSemVer({ major: 1, minor: 0, patch: 0, prerelease: 'alpha' })
-      ).toBe('1.0.0-alpha');
+      expect(formatSemVer({ major: 1, minor: 0, patch: 0, prerelease: 'alpha' })).toBe(
+        '1.0.0-alpha'
+      );
     });
 
     it('should format version with build', () => {
-      expect(
-        formatSemVer({ major: 2, minor: 0, patch: 0, build: '123' })
-      ).toBe('2.0.0+123');
+      expect(formatSemVer({ major: 2, minor: 0, patch: 0, build: '123' })).toBe('2.0.0+123');
     });
   });
 
@@ -572,7 +570,7 @@ describe('Access Control (Sprint 6)', () => {
 
       const org = await registry.getOrganization('mycompany');
       expect(org?.members).toHaveLength(2);
-      expect(org?.members.find(m => m.userId === 'user2')?.role).toBe('member');
+      expect(org?.members.find((m) => m.userId === 'user2')?.role).toBe('member');
     });
 
     it('should require admin/owner to add members', async () => {
@@ -588,7 +586,7 @@ describe('Access Control (Sprint 6)', () => {
     it('should remove member from organization', async () => {
       await registry.createOrganization('mycompany', 'user1');
       await registry.addOrgMember('mycompany', 'user2', 'member', 'user1');
-      
+
       const result = await registry.removeOrgMember('mycompany', 'user2', 'user1');
       expect(result.success).toBe(true);
 
@@ -617,11 +615,17 @@ describe('Access Control (Sprint 6)', () => {
       (pkg as any).visibility = 'private';
       (pkg as any).access = [{ principalId: 'owner1', principalType: 'user', permission: 'admin' }];
 
-      const result = await registry.grantAccess('@mycompany/utils', 'user2', 'user', 'read', 'owner1');
+      const result = await registry.grantAccess(
+        '@mycompany/utils',
+        'user2',
+        'user',
+        'read',
+        'owner1'
+      );
       expect(result.success).toBe(true);
 
       const access = await registry.listAccess('@mycompany/utils');
-      expect(access.find(a => a.principalId === 'user2')).toBeDefined();
+      expect(access.find((a) => a.principalId === 'user2')).toBeDefined();
     });
 
     it('should revoke access from a package', async () => {
@@ -635,7 +639,7 @@ describe('Access Control (Sprint 6)', () => {
       expect(result.success).toBe(true);
 
       const access = await registry.listAccess('@mycompany/utils');
-      expect(access.find(a => a.principalId === 'user2')).toBeUndefined();
+      expect(access.find((a) => a.principalId === 'user2')).toBeUndefined();
     });
 
     it('should set package visibility', async () => {
@@ -652,7 +656,7 @@ describe('Access Control (Sprint 6)', () => {
     it('should check permissions correctly', async () => {
       const pkg = await registry.getPackage('@mycompany/utils');
       if (!pkg) throw new Error('Package not found');
-      
+
       pkg.visibility = 'private';
       pkg.access = [
         { principalId: 'owner1', principalType: 'user', permission: 'admin' },
@@ -677,7 +681,7 @@ describe('Access Control (Sprint 6)', () => {
     it('should allow read on public packages', async () => {
       const pkg = await registry.getPackage('@mycompany/utils');
       if (!pkg) throw new Error('Package not found');
-      
+
       pkg.visibility = 'public';
       expect(registry.hasPermission(pkg, 'anyone', 'read')).toBe(true);
       expect(registry.hasPermission(pkg, 'anyone', 'write')).toBe(false);
@@ -695,7 +699,7 @@ describe('Access Control (Sprint 6)', () => {
 
     it('should validate a token', async () => {
       const { token } = await registry.createToken('user1', 'CI Token');
-      
+
       const validation = await registry.validateToken(token!);
       expect(validation.valid).toBe(true);
       expect(validation.userId).toBe('user1');
@@ -713,12 +717,12 @@ describe('Access Control (Sprint 6)', () => {
 
       const tokens = await registry.listTokens('user1');
       expect(tokens).toHaveLength(2);
-      expect(tokens.every(t => t.userId === 'user1')).toBe(true);
+      expect(tokens.every((t) => t.userId === 'user1')).toBe(true);
     });
 
     it('should revoke a token', async () => {
       const { token, tokenId } = await registry.createToken('user1', 'CI Token');
-      
+
       const revokeResult = await registry.revokeToken(tokenId!, 'user1');
       expect(revokeResult.success).toBe(true);
 
@@ -728,7 +732,7 @@ describe('Access Control (Sprint 6)', () => {
 
     it('should only allow owner to revoke token', async () => {
       const { tokenId } = await registry.createToken('user1', 'CI Token');
-      
+
       const result = await registry.revokeToken(tokenId!, 'user2');
       expect(result.success).toBe(false);
       expect(result.error).toContain('Insufficient permissions');
@@ -752,7 +756,7 @@ describe('Access Control (Sprint 6)', () => {
 
       // Manually set expiry to past
       const tokens = await registry.listTokens('user1');
-      const tokenData = tokens.find(t => t.id === tokenId);
+      const tokenData = tokens.find((t) => t.id === tokenId);
       expect(tokenData?.expires).toBeDefined();
 
       // The token was created with negative days, so it's already expired

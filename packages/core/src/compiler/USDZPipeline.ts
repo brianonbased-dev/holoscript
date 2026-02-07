@@ -559,10 +559,7 @@ export class USDZPipeline {
 /**
  * Generate USDA from composition
  */
-export function generateUSDA(
-  composition: HoloComposition,
-  options?: USDZPipelineOptions
-): string {
+export function generateUSDA(composition: HoloComposition, options?: USDZPipelineOptions): string {
   const pipeline = new USDZPipeline(options);
   return pipeline.generateUSDA(composition);
 }

@@ -4217,14 +4217,14 @@ var require_main2 = __commonJS({
         }
         MarkedString2.is = is;
       })(MarkedString || (exports3.MarkedString = MarkedString = {}));
-      var Hover;
-      (function(Hover2) {
+      var Hover2;
+      (function(Hover3) {
         function is(value) {
           var candidate = value;
           return !!candidate && Is.objectLiteral(candidate) && (MarkupContent.is(candidate.contents) || MarkedString.is(candidate.contents) || Is.typedArray(candidate.contents, MarkedString.is)) && (value.range === void 0 || Range4.is(value.range));
         }
-        Hover2.is = is;
-      })(Hover || (exports3.Hover = Hover = {}));
+        Hover3.is = is;
+      })(Hover2 || (exports3.Hover = Hover2 = {}));
       var ParameterInformation;
       (function(ParameterInformation2) {
         function create(label, documentation) {
@@ -6685,8 +6685,8 @@ var require_protocolCodeAction = __commonJS({
   "../../node_modules/.pnpm/vscode-languageclient@9.0.1/node_modules/vscode-languageclient/lib/common/protocolCodeAction.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var vscode10 = require("vscode");
-    var ProtocolCodeAction = class extends vscode10.CodeAction {
+    var vscode11 = require("vscode");
+    var ProtocolCodeAction = class extends vscode11.CodeAction {
       constructor(title, data) {
         super(title);
         this.data = data;
@@ -6702,7 +6702,7 @@ var require_protocolDiagnostic = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ProtocolDiagnostic = exports2.DiagnosticCode = void 0;
-    var vscode10 = require("vscode");
+    var vscode11 = require("vscode");
     var Is = require_is();
     var DiagnosticCode;
     (function(DiagnosticCode2) {
@@ -6712,7 +6712,7 @@ var require_protocolDiagnostic = __commonJS({
       }
       DiagnosticCode2.is = is;
     })(DiagnosticCode || (exports2.DiagnosticCode = DiagnosticCode = {}));
-    var ProtocolDiagnostic = class extends vscode10.Diagnostic {
+    var ProtocolDiagnostic = class extends vscode11.Diagnostic {
       constructor(range, message, severity, data) {
         super(range, message, severity);
         this.data = data;
@@ -10716,7 +10716,7 @@ var require_notebook = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NotebookDocumentSyncFeature = void 0;
-    var vscode10 = require("vscode");
+    var vscode11 = require("vscode");
     var minimatch = require_minimatch();
     var proto = require_main3();
     var UUID = require_uuid();
@@ -10771,9 +10771,9 @@ var require_notebook = __commonJS({
         c2p2.asNotebookCell = asNotebookCell;
         function asNotebookCellKind(kind) {
           switch (kind) {
-            case vscode10.NotebookCellKind.Markup:
+            case vscode11.NotebookCellKind.Markup:
               return proto.NotebookCellKind.Markup;
-            case vscode10.NotebookCellKind.Code:
+            case vscode11.NotebookCellKind.Code:
               return proto.NotebookCellKind.Code;
           }
         }
@@ -11024,25 +11024,25 @@ var require_notebook = __commonJS({
         this.notebookDidOpen = /* @__PURE__ */ new Set();
         this.disposables = [];
         this.selector = client2.protocol2CodeConverter.asDocumentSelector($NotebookDocumentSyncOptions.asDocumentSelector(options));
-        vscode10.workspace.onDidOpenNotebookDocument((notebookDocument) => {
+        vscode11.workspace.onDidOpenNotebookDocument((notebookDocument) => {
           this.notebookDidOpen.add(notebookDocument.uri.toString());
           this.didOpen(notebookDocument);
         }, void 0, this.disposables);
-        for (const notebookDocument of vscode10.workspace.notebookDocuments) {
+        for (const notebookDocument of vscode11.workspace.notebookDocuments) {
           this.notebookDidOpen.add(notebookDocument.uri.toString());
           this.didOpen(notebookDocument);
         }
-        vscode10.workspace.onDidChangeNotebookDocument((event) => this.didChangeNotebookDocument(event), void 0, this.disposables);
+        vscode11.workspace.onDidChangeNotebookDocument((event) => this.didChangeNotebookDocument(event), void 0, this.disposables);
         if (this.options.save === true) {
-          vscode10.workspace.onDidSaveNotebookDocument((notebookDocument) => this.didSave(notebookDocument), void 0, this.disposables);
+          vscode11.workspace.onDidSaveNotebookDocument((notebookDocument) => this.didSave(notebookDocument), void 0, this.disposables);
         }
-        vscode10.workspace.onDidCloseNotebookDocument((notebookDocument) => {
+        vscode11.workspace.onDidCloseNotebookDocument((notebookDocument) => {
           this.didClose(notebookDocument);
           this.notebookDidOpen.delete(notebookDocument.uri.toString());
         }, void 0, this.disposables);
       }
       getState() {
-        for (const notebook of vscode10.workspace.notebookDocuments) {
+        for (const notebook of vscode11.workspace.notebookDocuments) {
           const matchingCells = this.getMatchingCells(notebook);
           if (matchingCells !== void 0) {
             return { kind: "document", id: "$internal", registrations: true, matches: true };
@@ -11054,10 +11054,10 @@ var require_notebook = __commonJS({
         return "notebook";
       }
       handles(textDocument) {
-        return vscode10.languages.match(this.selector, textDocument) > 0;
+        return vscode11.languages.match(this.selector, textDocument) > 0;
       }
       didOpenNotebookCellTextDocument(notebookDocument, cell) {
-        if (vscode10.languages.match(this.selector, cell.document) === 0) {
+        if (vscode11.languages.match(this.selector, cell.document) === 0) {
           return;
         }
         if (!this.notebookDidOpen.has(notebookDocument.uri.toString())) {
@@ -11088,7 +11088,7 @@ var require_notebook = __commonJS({
         }
       }
       didChangeNotebookCellTextDocument(notebookDocument, event) {
-        if (vscode10.languages.match(this.selector, event.document) === 0) {
+        if (vscode11.languages.match(this.selector, event.document) === 0) {
           return;
         }
         this.doSendChange({
@@ -11361,7 +11361,7 @@ var require_notebook = __commonJS({
         this.client = client2;
         this.registrations = /* @__PURE__ */ new Map();
         this.registrationType = proto.NotebookDocumentSyncRegistrationType.type;
-        vscode10.workspace.onDidOpenTextDocument((textDocument) => {
+        vscode11.workspace.onDidOpenTextDocument((textDocument) => {
           if (textDocument.uri.scheme !== _NotebookDocumentSyncFeature.CellScheme) {
             return;
           }
@@ -11375,7 +11375,7 @@ var require_notebook = __commonJS({
             }
           }
         });
-        vscode10.workspace.onDidChangeTextDocument((event) => {
+        vscode11.workspace.onDidChangeTextDocument((event) => {
           if (event.contentChanges.length === 0) {
             return;
           }
@@ -11393,7 +11393,7 @@ var require_notebook = __commonJS({
             }
           }
         });
-        vscode10.workspace.onDidCloseTextDocument((textDocument) => {
+        vscode11.workspace.onDidCloseTextDocument((textDocument) => {
           if (textDocument.uri.scheme !== _NotebookDocumentSyncFeature.CellScheme) {
             return;
           }
@@ -11458,7 +11458,7 @@ var require_notebook = __commonJS({
         if (textDocument.uri.scheme !== _NotebookDocumentSyncFeature.CellScheme) {
           return false;
         }
-        if (this.dedicatedChannel !== void 0 && vscode10.languages.match(this.dedicatedChannel, textDocument) > 0) {
+        if (this.dedicatedChannel !== void 0 && vscode11.languages.match(this.dedicatedChannel, textDocument) > 0) {
           return true;
         }
         for (const provider of this.registrations.values()) {
@@ -11478,7 +11478,7 @@ var require_notebook = __commonJS({
       }
       findNotebookDocumentAndCell(textDocument) {
         const uri = textDocument.uri.toString();
-        for (const notebookDocument of vscode10.workspace.notebookDocuments) {
+        for (const notebookDocument of vscode11.workspace.notebookDocuments) {
           for (const cell of notebookDocument.getCells()) {
             if (cell.document.uri.toString() === uri) {
               return [notebookDocument, cell];
@@ -13994,7 +13994,7 @@ var require_semanticTokens = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.SemanticTokensFeature = void 0;
-    var vscode10 = require("vscode");
+    var vscode11 = require("vscode");
     var vscode_languageserver_protocol_1 = require_main3();
     var features_1 = require_features();
     var Is = require_is();
@@ -14072,7 +14072,7 @@ var require_semanticTokens = __commonJS({
         const selector = options.documentSelector;
         const fullProvider = Is.boolean(options.full) ? options.full : options.full !== void 0;
         const hasEditProvider = options.full !== void 0 && typeof options.full !== "boolean" && options.full.delta === true;
-        const eventEmitter = new vscode10.EventEmitter();
+        const eventEmitter = new vscode11.EventEmitter();
         const documentProvider = fullProvider ? {
           onDidChangeSemanticTokens: eventEmitter.event,
           provideDocumentSemanticTokens: (document, token) => {
@@ -14144,12 +14144,12 @@ var require_semanticTokens = __commonJS({
         const legend = client2.protocol2CodeConverter.asSemanticTokensLegend(options.legend);
         const documentSelector = client2.protocol2CodeConverter.asDocumentSelector(selector);
         if (documentProvider !== void 0) {
-          disposables.push(vscode10.languages.registerDocumentSemanticTokensProvider(documentSelector, documentProvider, legend));
+          disposables.push(vscode11.languages.registerDocumentSemanticTokensProvider(documentSelector, documentProvider, legend));
         }
         if (rangeProvider !== void 0) {
-          disposables.push(vscode10.languages.registerDocumentRangeSemanticTokensProvider(documentSelector, rangeProvider, legend));
+          disposables.push(vscode11.languages.registerDocumentRangeSemanticTokensProvider(documentSelector, rangeProvider, legend));
         }
-        return [new vscode10.Disposable(() => disposables.forEach((item) => item.dispose())), { range: rangeProvider, full: documentProvider, onDidChangeSemanticTokensEmitter: eventEmitter }];
+        return [new vscode11.Disposable(() => disposables.forEach((item) => item.dispose())), { range: rangeProvider, full: documentProvider, onDidChangeSemanticTokensEmitter: eventEmitter }];
       }
     };
     exports2.SemanticTokensFeature = SemanticTokensFeature;
@@ -20840,11 +20840,13 @@ async function* formatFilesStream(files, config = {}) {
         result: {
           formatted: "",
           changed: false,
-          errors: [{
-            message: err instanceof Error ? err.message : String(err),
-            line: 0,
-            column: 0
-          }]
+          errors: [
+            {
+              message: err instanceof Error ? err.message : String(err),
+              line: 0,
+              column: 0
+            }
+          ]
         }
       };
     }
@@ -21145,7 +21147,33 @@ ${indent}{`;
         if (modulePath.startsWith("@holoscript/") || modulePath.startsWith("@hololand/")) {
           return "internal";
         }
-        const builtins = ["fs", "path", "os", "util", "events", "stream", "http", "https", "crypto", "buffer", "url", "querystring", "zlib", "child_process", "cluster", "dgram", "dns", "net", "readline", "tls", "vm", "assert", "console", "timers", "worker_threads"];
+        const builtins = [
+          "fs",
+          "path",
+          "os",
+          "util",
+          "events",
+          "stream",
+          "http",
+          "https",
+          "crypto",
+          "buffer",
+          "url",
+          "querystring",
+          "zlib",
+          "child_process",
+          "cluster",
+          "dgram",
+          "dns",
+          "net",
+          "readline",
+          "tls",
+          "vm",
+          "assert",
+          "console",
+          "timers",
+          "worker_threads"
+        ];
         const moduleBaseName = modulePath.split("/")[0];
         if (builtins.includes(moduleBaseName) || modulePath.startsWith("node:")) {
           return "builtin";
@@ -21187,7 +21215,7 @@ __export(extension_exports, {
 module.exports = __toCommonJS(extension_exports);
 var path4 = __toESM(require("path"));
 var fs3 = __toESM(require("fs"));
-var vscode9 = __toESM(require("vscode"));
+var vscode10 = __toESM(require("vscode"));
 var import_vscode = require("vscode");
 var import_node = __toESM(require_node3());
 
@@ -25235,7 +25263,7 @@ var coerce = {
 };
 var NEVER = INVALID;
 
-// ../holoscript/dist/chunk-AVQEHER2.mjs
+// ../holoscript/dist/chunk-ULY6OZYA.mjs
 var HoloSmartAssetMetadataSchema = external_exports.object({
   name: external_exports.string(),
   version: external_exports.string(),
@@ -25382,7 +25410,13 @@ var RelayService = class _RelayService {
     console.log("[RelayService] Received:", message);
     switch (message.type) {
       case "transform":
-        await this.handleTransformUpdate(document, message.id, message.position, message.rotation, message.scale);
+        await this.handleTransformUpdate(
+          document,
+          message.id,
+          message.position,
+          message.rotation,
+          message.scale
+        );
         break;
       case "voice_command":
         await this.handleVoiceCommand(document, message.text);
@@ -25398,7 +25432,10 @@ var RelayService = class _RelayService {
    */
   async handleTransformUpdate(document, id, position, rotation, scale) {
     const text = document.getText();
-    const objectRegex = new RegExp(`(?:orb|object)\\s+["']?${id}["']?(?:\\s+using\\s+["'][\\w_]+["'])?(?:\\s+@[\\w]+)*\\s*\\{`, "g");
+    const objectRegex = new RegExp(
+      `(?:orb|object)\\s+["']?${id}["']?(?:\\s+using\\s+["'][\\w_]+["'])?(?:\\s+@[\\w]+)*\\s*\\{`,
+      "g"
+    );
     const match = objectRegex.exec(text);
     if (!match) {
       console.warn(`[RelayService] Object "${id}" not found in document.`);
@@ -25455,7 +25492,9 @@ var RelayService = class _RelayService {
    * Helper to update or insert a property within a block.
    */
   updateProperty(editBuilder, document, blockStart, blockContent, propertyName, newValue) {
-    const propRegex = new RegExp(`${propertyName}\\s*:\\s*(?:\\[[^\\]]+\\]|\\{[^\\}]+\\}|["'][^"']+["']|[\\d.-]+)`);
+    const propRegex = new RegExp(
+      `${propertyName}\\s*:\\s*(?:\\[[^\\]]+\\]|\\{[^\\}]+\\}|["'][^"']+["']|[\\d.-]+)`
+    );
     const propMatch = propRegex.exec(blockContent);
     if (propMatch) {
       const propStartAbs = blockStart + 1 + propMatch.index;
@@ -25611,7 +25650,10 @@ var HoloScriptPreviewPanel = class _HoloScriptPreviewPanel {
               placeHolder: "e.g., 'Add a red cube at 0,1,0'"
             }).then((text) => {
               if (text && this._currentDocument) {
-                RelayService.getInstance().handleMessage({ type: "voice_command", text }, this._currentDocument);
+                RelayService.getInstance().handleMessage(
+                  { type: "voice_command", text },
+                  this._currentDocument
+                );
               }
             });
             return;
@@ -27726,16 +27768,12 @@ var SmartAssetEditorProvider = class _SmartAssetEditorProvider {
   }
   static register(context) {
     const provider = new _SmartAssetEditorProvider(context);
-    return vscode4.window.registerCustomEditorProvider(
-      _SmartAssetEditorProvider.viewType,
-      provider,
-      {
-        webviewOptions: {
-          retainContextWhenHidden: true
-        },
-        supportsMultipleEditorsPerDocument: false
-      }
-    );
+    return vscode4.window.registerCustomEditorProvider(_SmartAssetEditorProvider.viewType, provider, {
+      webviewOptions: {
+        retainContextWhenHidden: true
+      },
+      supportsMultipleEditorsPerDocument: false
+    });
   }
   async openCustomDocument(uri, openContext, token) {
     return { uri, dispose: () => {
@@ -27750,7 +27788,9 @@ var SmartAssetEditorProvider = class _SmartAssetEditorProvider {
       const zip = new AdmZip(Buffer.from(fileData));
       const entry = zip.getEntry("smart-asset.json");
       if (!entry) {
-        webviewPanel.webview.html = this.getErrorHtml("Invalid Smart Asset: smart-asset.json not found.");
+        webviewPanel.webview.html = this.getErrorHtml(
+          "Invalid Smart Asset: smart-asset.json not found."
+        );
         return;
       }
       const jsonContent = entry.getData().toString("utf8");
@@ -27758,7 +27798,9 @@ var SmartAssetEditorProvider = class _SmartAssetEditorProvider {
       try {
         smartAsset = JSON.parse(jsonContent);
       } catch (e) {
-        webviewPanel.webview.html = this.getErrorHtml("Invalid Smart Asset: Malformed smart-asset.json.");
+        webviewPanel.webview.html = this.getErrorHtml(
+          "Invalid Smart Asset: Malformed smart-asset.json."
+        );
         return;
       }
       webviewPanel.webview.html = this.getHtmlForWebview(smartAsset);
@@ -27893,14 +27935,20 @@ var HoloScriptAgentAPI = class _HoloScriptAgentAPI {
   }
   registerAgentCommands(context) {
     context.subscriptions.push(
-      vscode5.commands.registerCommand("holoscript.agent.createFile", async (args) => {
-        return this.createHoloFile(args.filename, args.content, args.openPreview);
-      })
+      vscode5.commands.registerCommand(
+        "holoscript.agent.createFile",
+        async (args) => {
+          return this.createHoloFile(args.filename, args.content, args.openPreview);
+        }
+      )
     );
     context.subscriptions.push(
-      vscode5.commands.registerCommand("holoscript.agent.generateObject", async (args) => {
-        return this.generateObject(args);
-      })
+      vscode5.commands.registerCommand(
+        "holoscript.agent.generateObject",
+        async (args) => {
+          return this.generateObject(args);
+        }
+      )
     );
     context.subscriptions.push(
       vscode5.commands.registerCommand("holoscript.agent.analyzeScene", async () => {
@@ -27908,29 +27956,44 @@ var HoloScriptAgentAPI = class _HoloScriptAgentAPI {
       })
     );
     context.subscriptions.push(
-      vscode5.commands.registerCommand("holoscript.agent.insertCode", async (args) => {
-        return this.insertCodeAtCursor(args.code);
-      })
+      vscode5.commands.registerCommand(
+        "holoscript.agent.insertCode",
+        async (args) => {
+          return this.insertCodeAtCursor(args.code);
+        }
+      )
     );
     context.subscriptions.push(
-      vscode5.commands.registerCommand("holoscript.agent.openPreview", async (args) => {
-        return this.openPreview(args?.filePath);
-      })
+      vscode5.commands.registerCommand(
+        "holoscript.agent.openPreview",
+        async (args) => {
+          return this.openPreview(args?.filePath);
+        }
+      )
     );
     context.subscriptions.push(
-      vscode5.commands.registerCommand("holoscript.agent.addTrait", async (args) => {
-        return this.addTraitToObject(args.objectName, args.trait);
-      })
+      vscode5.commands.registerCommand(
+        "holoscript.agent.addTrait",
+        async (args) => {
+          return this.addTraitToObject(args.objectName, args.trait);
+        }
+      )
     );
     context.subscriptions.push(
-      vscode5.commands.registerCommand("holoscript.agent.listTraits", async (args) => {
-        return this.listTraits(args?.category);
-      })
+      vscode5.commands.registerCommand(
+        "holoscript.agent.listTraits",
+        async (args) => {
+          return this.listTraits(args?.category);
+        }
+      )
     );
     context.subscriptions.push(
-      vscode5.commands.registerCommand("holoscript.agent.validate", async (args) => {
-        return this.validateSyntax(args?.content);
-      })
+      vscode5.commands.registerCommand(
+        "holoscript.agent.validate",
+        async (args) => {
+          return this.validateSyntax(args?.content);
+        }
+      )
     );
     context.subscriptions.push(
       vscode5.commands.registerCommand("holoscript.agent.status", async () => {
@@ -28132,7 +28195,15 @@ var HoloScriptAgentAPI = class _HoloScriptAgentAPI {
    */
   async listTraits(category) {
     const traits = {
-      interaction: ["@grabbable", "@throwable", "@holdable", "@clickable", "@hoverable", "@draggable", "@haptic"],
+      interaction: [
+        "@grabbable",
+        "@throwable",
+        "@holdable",
+        "@clickable",
+        "@hoverable",
+        "@draggable",
+        "@haptic"
+      ],
       physics: ["@collidable", "@physics", "@rigid", "@kinematic", "@trigger", "@gravity"],
       visual: ["@glowing", "@emissive", "@transparent", "@reflective", "@animated", "@billboard"],
       networking: ["@networked", "@synced", "@persistent", "@owned", "@host_only"],
@@ -28219,56 +28290,487 @@ var agentAPI = HoloScriptAgentAPI.getInstance();
 
 // src/completionProvider.ts
 var vscode6 = __toESM(require("vscode"));
-var HoloScriptCompletionItemProvider = class {
-  constructor() {
-    this.traits = [
-      { label: "@grabbable", detail: "Make object grabbable by VR controllers", insertText: "grabbable" },
-      { label: "@physics", detail: "Enable physics simulation", insertText: "physics" },
-      { label: "@collidable", detail: "Enable collision detection", insertText: "collidable" },
-      { label: "@glowing", detail: "Add glow effect", insertText: "glowing" },
-      { label: "@sound", detail: "Attach 3D spatial sound", insertText: 'sound("${1:sound_id}")' },
-      { label: "@lookat", detail: "Make object look at target", insertText: 'lookat("${1:target_id}")' },
-      { label: "@spin", detail: "Spin object continuously", insertText: "spin(${1:speed})" },
-      { label: "@bounce", detail: "Bounce animation", insertText: "bounce(${1:height})" },
-      { label: "@float", detail: "Floating animation", insertText: "float(${1:height})" },
-      { label: "@scale", detail: "Scale animation", insertText: "scale(${1:factor})" },
-      { label: "@fade", detail: "Fade on trigger", insertText: "fade(${1:opacity})" },
-      { label: "@light", detail: "Emit light", insertText: "light(${1:intensity})" },
-      { label: "@particles", detail: "Emit particles", insertText: 'particles("${1:effect_id}")' },
-      { label: "@video", detail: "Play video texture", insertText: 'video("${1:url}")' },
-      { label: "@web", detail: "Display web content", insertText: 'web("${1:url}")' },
-      { label: "@text", detail: "Display 3D text", insertText: 'text("${1:content}")' },
-      { label: "@onclick", detail: "Trigger event on click", insertText: "onclick(${1:event})" },
-      { label: "@onhover", detail: "Trigger event on hover", insertText: "onhover(${1:event})" },
-      { label: "@draggable", detail: "Allow dragging object", insertText: "draggable" },
-      { label: "@rotatable", detail: "Allow rotating object", insertText: "rotatable" },
-      { label: "@scalable", detail: "Allow scaling object", insertText: "scalable" }
-    ];
+var ALL_TRAITS = [
+  // =========================================================================
+  // Interaction traits (11)
+  // =========================================================================
+  {
+    label: "@grabbable",
+    detail: "Make object grabbable by VR controllers",
+    insertText: "grabbable",
+    documentation: "Enables VR controller grab interaction. The object can be picked up, held, and released by the user. Works with both hand tracking and controller input.",
+    category: "Interaction"
+  },
+  {
+    label: "@throwable",
+    detail: "Make object throwable after grabbing",
+    insertText: "throwable(force: ${1:10})",
+    documentation: "Allows the object to be thrown after being grabbed. Inherits velocity from the controller motion on release. Configure `force` to scale throw strength.",
+    category: "Interaction"
+  },
+  {
+    label: "@collidable",
+    detail: "Enable collision detection",
+    insertText: "collidable",
+    documentation: "Adds a collision shape to the object so it can interact physically with other objects. Required for physics-based interactions like stacking or bouncing.",
+    category: "Interaction"
+  },
+  {
+    label: "@physics",
+    detail: "Enable physics simulation",
+    insertText: "physics(mass: ${1:1.0}, restitution: ${2:0.3})",
+    documentation: "Applies rigid-body physics simulation to the object, including gravity, mass, friction, and restitution. The object will respond to forces and collisions.",
+    category: "Interaction"
+  },
+  {
+    label: "@gravity",
+    detail: "Apply gravity to the object",
+    insertText: "gravity(strength: ${1:9.81})",
+    documentation: "Applies gravitational force to the object. Customize `strength` to simulate different environments (e.g., 1.62 for the Moon, 3.72 for Mars).",
+    category: "Interaction"
+  },
+  {
+    label: "@trigger",
+    detail: "Make object act as a trigger zone",
+    insertText: "trigger",
+    documentation: "Converts the object into a trigger volume. Other objects passing through it fire `on_trigger_enter` and `on_trigger_exit` events without physical collision.",
+    category: "Interaction"
+  },
+  {
+    label: "@pointable",
+    detail: "Make object respond to pointer/ray input",
+    insertText: "pointable",
+    documentation: "Allows the object to be targeted by controller ray or gaze pointer. Fires `on_point_enter` and `on_point_exit` events when the ray intersects the object.",
+    category: "Interaction"
+  },
+  {
+    label: "@hoverable",
+    detail: "Make object respond to hover events",
+    insertText: "hoverable",
+    documentation: "Enables hover detection on the object. Fires `on_hover_enter` and `on_hover_exit` when a controller or hand is near the object.",
+    category: "Interaction"
+  },
+  {
+    label: "@clickable",
+    detail: "Make object respond to click/select input",
+    insertText: "clickable",
+    documentation: "Makes the object respond to click or select actions from controllers, hand tracking, or gaze input. Fires `on_click` events.",
+    category: "Interaction"
+  },
+  {
+    label: "@draggable",
+    detail: "Allow dragging the object in space",
+    insertText: "draggable",
+    documentation: "Enables drag interaction on the object. Users can click/grab and move the object along a plane or freely in 3D space.",
+    category: "Interaction"
+  },
+  {
+    label: "@scalable",
+    detail: "Allow scaling the object with gestures",
+    insertText: "scalable(min: ${1:0.1}, max: ${2:10.0})",
+    documentation: "Allows the object to be scaled using pinch gestures or two-controller interaction. Set `min` and `max` to constrain the scale range.",
+    category: "Interaction"
+  },
+  // =========================================================================
+  // Visual traits (10)
+  // =========================================================================
+  {
+    label: "@glowing",
+    detail: "Add glow/emission effect",
+    insertText: 'glowing(color: "${1:#00ffff}", intensity: ${2:1.0})',
+    documentation: "Adds an emissive glow effect to the object. Configure `color` (hex) and `intensity` to control the bloom appearance.",
+    category: "Visual"
+  },
+  {
+    label: "@transparent",
+    detail: "Make object semi-transparent",
+    insertText: "transparent(opacity: ${1:0.5})",
+    documentation: "Sets the object to render with transparency. The `opacity` value ranges from 0.0 (fully transparent) to 1.0 (fully opaque).",
+    category: "Visual"
+  },
+  {
+    label: "@spinning",
+    detail: "Continuously rotate the object",
+    insertText: 'spinning(speed: ${1:1.0}, axis: "${2:y}")',
+    documentation: 'Applies a continuous rotation animation to the object around the specified axis ("x", "y", or "z") at the given speed (revolutions per second).',
+    category: "Visual"
+  },
+  {
+    label: "@floating",
+    detail: "Apply a floating/bobbing animation",
+    insertText: "floating(height: ${1:0.3}, speed: ${2:1.0})",
+    documentation: "Creates a gentle up-and-down bobbing animation. Configure `height` (amplitude) and `speed` (frequency) of the float cycle.",
+    category: "Visual"
+  },
+  {
+    label: "@billboard",
+    detail: "Always face the camera/viewer",
+    insertText: "billboard",
+    documentation: "Makes the object always rotate to face the active camera or viewer. Useful for labels, health bars, and 2D sprites in 3D space.",
+    category: "Visual"
+  },
+  {
+    label: "@pulse",
+    detail: "Pulsing scale/glow animation",
+    insertText: "pulse(speed: ${1:1.0}, intensity: ${2:0.2})",
+    documentation: "Applies a rhythmic pulsing effect that oscillates the object scale or glow intensity. Great for drawing attention to interactive elements.",
+    category: "Visual"
+  },
+  {
+    label: "@animated",
+    detail: "Play animation clips on the object",
+    insertText: 'animated(clip: "${1:idle}", loop: ${2:true})',
+    documentation: "Plays animation clips on the object model. Supports skeletal and morph-target animations. Configure `clip` name and `loop` behavior.",
+    category: "Visual"
+  },
+  {
+    label: "@look_at",
+    detail: "Make object orient toward a target",
+    insertText: 'look_at(target: "${1:camera}")',
+    documentation: 'Rotates the object to face a specified target (another object ID or "camera"). Unlike billboard, this uses the forward axis and can be configured per-axis.',
+    category: "Visual"
+  },
+  {
+    label: "@outline",
+    detail: "Render an outline around the object",
+    insertText: 'outline(color: "${1:#ffffff}", width: ${2:2})',
+    documentation: "Draws a colored outline/silhouette around the object. Commonly used for selection highlighting or emphasis. Configure `color` and `width`.",
+    category: "Visual"
+  },
+  {
+    label: "@proximity",
+    detail: "React based on viewer proximity",
+    insertText: "proximity(range: ${1:5.0})",
+    documentation: "Triggers visual or behavioral changes when a user enters or exits the specified `range` (in meters). Fires `on_proximity_enter` and `on_proximity_exit` events.",
+    category: "Visual"
+  },
+  // =========================================================================
+  // AI/Behavior traits (5)
+  // =========================================================================
+  {
+    label: "@behavior_tree",
+    detail: "Attach a behavior tree AI controller",
+    insertText: 'behavior_tree(root: "${1:patrol}")',
+    documentation: "Drives the object with a behavior tree AI system. Define sequences, selectors, and leaf actions to create complex NPC behaviors. Specify the `root` node name.",
+    category: "AI/Behavior"
+  },
+  {
+    label: "@emotion",
+    detail: "Enable emotional state system",
+    insertText: 'emotion(initial: "${1:neutral}")',
+    documentation: 'Adds an emotional state model to the object. Emotions like "happy", "sad", "angry", "fearful" influence animations, dialog, and behavior tree decisions.',
+    category: "AI/Behavior"
+  },
+  {
+    label: "@goal_oriented",
+    detail: "Enable goal-oriented action planning (GOAP)",
+    insertText: "goal_oriented",
+    documentation: "Attaches a goal-oriented action planning (GOAP) system. The AI evaluates world state and selects actions to achieve its goals dynamically.",
+    category: "AI/Behavior"
+  },
+  {
+    label: "@perception",
+    detail: "Add sensory perception to the object",
+    insertText: "perception(sight: ${1:30}, hearing: ${2:15})",
+    documentation: "Gives the object AI senses including sight (cone-based) and hearing (radius-based). Detected entities are available in behavior tree conditions.",
+    category: "AI/Behavior"
+  },
+  {
+    label: "@memory",
+    detail: "Enable AI memory/knowledge system",
+    insertText: "memory(capacity: ${1:100})",
+    documentation: "Provides the AI with a memory system that stores observed events, entity positions, and interactions. Memories decay over time based on `capacity`.",
+    category: "AI/Behavior"
+  },
+  // =========================================================================
+  // Physics traits (9)
+  // =========================================================================
+  {
+    label: "@cloth",
+    detail: "Simulate cloth/fabric physics",
+    insertText: "cloth(stiffness: ${1:0.5}, damping: ${2:0.1})",
+    documentation: "Applies cloth simulation to the object mesh. The vertices respond to wind, gravity, and collisions. Configure `stiffness` and `damping` for fabric feel.",
+    category: "Physics"
+  },
+  {
+    label: "@soft_body",
+    detail: "Enable soft body deformation physics",
+    insertText: "soft_body(pressure: ${1:1.0})",
+    documentation: "Simulates soft body dynamics allowing the object to deform on impact. Useful for jelly-like objects, balloons, or organic materials. Adjust `pressure` for firmness.",
+    category: "Physics"
+  },
+  {
+    label: "@fluid",
+    detail: "Simulate fluid/liquid physics",
+    insertText: "fluid(viscosity: ${1:0.5}, density: ${2:1.0})",
+    documentation: "Enables fluid simulation on the object. Configure `viscosity` (flow resistance) and `density` for different liquid types (water, honey, lava).",
+    category: "Physics"
+  },
+  {
+    label: "@buoyancy",
+    detail: "Enable buoyancy in fluid volumes",
+    insertText: "buoyancy(density: ${1:0.5})",
+    documentation: "Makes the object float or sink in fluid volumes based on relative `density`. Objects with density less than the fluid will float.",
+    category: "Physics"
+  },
+  {
+    label: "@rope",
+    detail: "Simulate rope/cable physics",
+    insertText: "rope(length: ${1:5.0}, segments: ${2:10})",
+    documentation: "Creates a rope or cable simulation between anchor points. Configure `length` and `segments` for detail. Supports tension, slack, and collision.",
+    category: "Physics"
+  },
+  {
+    label: "@wind",
+    detail: "Apply wind force to the object",
+    insertText: "wind(direction: [${1:1}, ${2:0}, ${3:0}], strength: ${4:5.0})",
+    documentation: "Applies a directional wind force. Affects cloth, particles, soft bodies, and physics objects. Set `direction` vector and `strength`.",
+    category: "Physics"
+  },
+  {
+    label: "@joint",
+    detail: "Create a physics joint/constraint",
+    insertText: 'joint(type: "${1:hinge}", target: "${2:other_object}")',
+    documentation: 'Connects the object to another via a physics joint. Types: "hinge", "ball", "slider", "fixed", "spring". Specify the `target` object ID.',
+    category: "Physics"
+  },
+  {
+    label: "@rigidbody",
+    detail: "Add rigid body physics component",
+    insertText: "rigidbody(mass: ${1:1.0}, friction: ${2:0.5})",
+    documentation: "Attaches a rigid body physics component with configurable `mass`, `friction`, and collision response. Foundation for all physics-based interactions.",
+    category: "Physics"
+  },
+  {
+    label: "@destruction",
+    detail: "Enable destructible object behavior",
+    insertText: "destruction(health: ${1:100}, fragments: ${2:8})",
+    documentation: "Makes the object destructible. When `health` reaches zero, it breaks into `fragments` pieces with physics. Fires `on_destroy` event.",
+    category: "Physics"
+  },
+  // =========================================================================
+  // Extended traits (11)
+  // =========================================================================
+  {
+    label: "@rotatable",
+    detail: "Allow rotating the object with gestures",
+    insertText: "rotatable",
+    documentation: "Enables rotation interaction via controller twist or two-handed gestures. The object can be rotated freely or constrained to specific axes.",
+    category: "Extended"
+  },
+  {
+    label: "@stackable",
+    detail: "Allow objects to stack on each other",
+    insertText: "stackable",
+    documentation: "Enables stacking behavior. Objects with this trait will snap to alignment when placed on top of each other, forming stable stacks.",
+    category: "Extended"
+  },
+  {
+    label: "@snappable",
+    detail: "Snap to predefined positions or grid",
+    insertText: "snappable(grid: ${1:0.25})",
+    documentation: "Makes the object snap to a grid or predefined snap points when moved. Configure `grid` size for the snap interval in meters.",
+    category: "Extended"
+  },
+  {
+    label: "@breakable",
+    detail: "Object can be broken by force",
+    insertText: "breakable(threshold: ${1:50})",
+    documentation: "The object breaks apart when a force exceeding `threshold` is applied. Generates fragment pieces and plays break effects. Fires `on_break` event.",
+    category: "Extended"
+  },
+  {
+    label: "@character",
+    detail: "Define as a character with movement",
+    insertText: "character(speed: ${1:3.0}, jump_height: ${2:1.5})",
+    documentation: "Marks the object as a character entity with built-in movement capabilities: walking, running, jumping. Configure `speed` and `jump_height`.",
+    category: "Extended"
+  },
+  {
+    label: "@patrol",
+    detail: "Follow a patrol path automatically",
+    insertText: 'patrol(path: "${1:patrol_path}", speed: ${2:2.0})',
+    documentation: "Makes the object follow a defined patrol path. The AI navigates between waypoints at the given `speed`. Supports looping and ping-pong modes.",
+    category: "Extended"
+  },
+  {
+    label: "@networked",
+    detail: "Synchronize object across network",
+    insertText: 'networked(sync: [${1:"position", "rotation"}])',
+    documentation: "Enables multiplayer synchronization. The specified properties are replicated across all connected clients. Supports ownership transfer and interpolation.",
+    category: "Extended"
+  },
+  {
+    label: "@anchor",
+    detail: "Create a spatial anchor for AR persistence",
+    insertText: "anchor(persistent: ${1:true})",
+    documentation: "Creates a spatial anchor at the object position for AR experiences. When `persistent` is true, the anchor survives across sessions.",
+    category: "Extended"
+  },
+  {
+    label: "@spatial_audio",
+    detail: "Attach 3D spatial audio source",
+    insertText: 'spatial_audio(src: "${1:sound.mp3}", rolloff: ${2:1.0})',
+    documentation: "Attaches a spatialized 3D audio source to the object. Sound is positioned in 3D space with distance-based `rolloff` attenuation.",
+    category: "Extended"
+  },
+  {
+    label: "@reverb_zone",
+    detail: "Define an audio reverb zone",
+    insertText: 'reverb_zone(preset: "${1:hall}", radius: ${2:10})',
+    documentation: "Creates an audio reverb zone around the object. Sounds playing within the `radius` receive the reverb `preset` (hall, cave, room, outdoor).",
+    category: "Extended"
+  },
+  {
+    label: "@voice_proximity",
+    detail: "Enable proximity-based voice chat",
+    insertText: "voice_proximity(range: ${1:15}, falloff: ${2:1.0})",
+    documentation: "Enables spatial voice chat. Players within `range` meters can hear each other with volume `falloff` based on distance.",
+    category: "Extended"
+  },
+  // =========================================================================
+  // Advanced traits (10)
+  // =========================================================================
+  {
+    label: "@teleport",
+    detail: "Enable teleportation to/from this object",
+    insertText: 'teleport(target: "${1:destination}")',
+    documentation: "Makes the object a teleportation point. Users can teleport to this location, or it can teleport the user to `target` on interaction.",
+    category: "Advanced"
+  },
+  {
+    label: "@ui_panel",
+    detail: "Attach a floating UI panel to the object",
+    insertText: "ui_panel(width: ${1:400}, height: ${2:300})",
+    documentation: "Renders a 2D UI panel in 3D space attached to the object. Supports buttons, text, images, and interactive form elements. Specify `width` and `height` in pixels.",
+    category: "Advanced"
+  },
+  {
+    label: "@particle_system",
+    detail: "Attach a particle emitter to the object",
+    insertText: 'particle_system(effect: "${1:fire}", rate: ${2:100})',
+    documentation: 'Attaches a particle system emitter. Built-in effects: "fire", "smoke", "sparks", "rain", "snow", "magic". Configure emission `rate` per second.',
+    category: "Advanced"
+  },
+  {
+    label: "@weather",
+    detail: "Apply weather effects to the scene",
+    insertText: 'weather(type: "${1:rain}", intensity: ${2:0.5})',
+    documentation: 'Generates environmental weather effects. Types: "rain", "snow", "fog", "storm", "sandstorm". Affects lighting, particles, and audio.',
+    category: "Advanced"
+  },
+  {
+    label: "@day_night",
+    detail: "Enable day/night cycle",
+    insertText: "day_night(duration: ${1:300}, start_time: ${2:0.5})",
+    documentation: "Adds a day/night cycle to the scene. `duration` is cycle length in seconds. `start_time` is 0.0 (midnight) to 1.0 (next midnight), 0.5 = noon.",
+    category: "Advanced"
+  },
+  {
+    label: "@lod",
+    detail: "Enable level-of-detail switching",
+    insertText: "lod(distances: [${1:10, 30, 60}])",
+    documentation: "Automatically switches between detail levels based on camera distance. Provide `distances` array for LOD transition thresholds in meters.",
+    category: "Advanced"
+  },
+  {
+    label: "@hand_tracking",
+    detail: "Enable hand tracking interaction",
+    insertText: 'hand_tracking(gestures: [${1:"pinch", "grab", "point"}])',
+    documentation: "Enables hand-tracking-based interaction with the object. Specify recognized `gestures` array. Fires gesture events for each detected gesture.",
+    category: "Advanced"
+  },
+  {
+    label: "@haptic",
+    detail: "Trigger haptic feedback on interaction",
+    insertText: "haptic(intensity: ${1:0.5}, duration: ${2:100})",
+    documentation: "Sends haptic feedback (vibration) to the VR controller on interaction. Configure `intensity` (0-1) and `duration` in milliseconds.",
+    category: "Advanced"
+  },
+  {
+    label: "@portal",
+    detail: "Create a portal to another scene or location",
+    insertText: 'portal(destination: "${1:scene_name}")',
+    documentation: "Renders a portal view showing the destination scene. Walking through the portal transitions the user to the `destination` scene or location.",
+    category: "Advanced"
+  },
+  {
+    label: "@mirror",
+    detail: "Create a reflective mirror surface",
+    insertText: "mirror(quality: ${1:1.0})",
+    documentation: "Renders real-time reflections on the object surface. The `quality` value (0-1) controls reflection resolution. Higher values are more GPU-intensive.",
+    category: "Advanced"
   }
-  provideCompletionItems(document, position, token, context) {
-    const linePrefix = document.lineAt(position).text.substr(0, position.character);
-    if (!linePrefix.endsWith("@")) {
-    }
-    const completionItems = this.traits.map((trait) => {
+];
+var HoloScriptCompletionItemProvider = class {
+  provideCompletionItems(_document, _position, _token, _context) {
+    const completionItems = ALL_TRAITS.map((trait) => {
       const item = new vscode6.CompletionItem(trait.label, vscode6.CompletionItemKind.Keyword);
-      item.detail = trait.detail;
+      item.detail = `[${trait.category}] ${trait.detail}`;
+      item.sortText = `0_${trait.category}_${trait.label}`;
       if (trait.insertText.includes("${")) {
         item.insertText = new vscode6.SnippetString(trait.insertText);
       } else {
         item.insertText = trait.insertText;
       }
-      item.documentation = new vscode6.MarkdownString(`Applies the **${trait.label}** trait to this object.`);
+      const md = new vscode6.MarkdownString();
+      md.appendMarkdown(`**${trait.label}** \u2014 *${trait.category}*
+
+`);
+      md.appendMarkdown(trait.documentation);
+      item.documentation = md;
       return item;
     });
     return completionItems;
   }
 };
 
-// src/services/McpOrchestratorClient.ts
+// src/hoverProvider.ts
 var vscode7 = __toESM(require("vscode"));
+var traitLookup = new Map(
+  ALL_TRAITS.map((t) => [t.label.slice(1), t])
+  // strip leading '@'
+);
+var HoloScriptHoverProvider = class {
+  provideHover(document, position, _token) {
+    const wordRange = document.getWordRangeAtPosition(position, /@[a-zA-Z_][a-zA-Z0-9_]*/);
+    if (!wordRange) {
+      return void 0;
+    }
+    const word = document.getText(wordRange);
+    const traitName = word.slice(1);
+    const trait = traitLookup.get(traitName);
+    if (!trait) {
+      return void 0;
+    }
+    const md = new vscode7.MarkdownString();
+    md.isTrusted = true;
+    md.supportHtml = true;
+    md.appendMarkdown(`### ${trait.label}
+
+`);
+    md.appendMarkdown(`**Category:** ${trait.category}
+
+`);
+    md.appendMarkdown(`${trait.documentation}
+
+`);
+    md.appendMarkdown(`---
+
+`);
+    md.appendCodeblock(
+      `${trait.label.slice(1).includes("(") ? trait.label : "@" + trait.insertText}`,
+      "holoscript"
+    );
+    return new vscode7.Hover(md, wordRange);
+  }
+};
+
+// src/services/McpOrchestratorClient.ts
+var vscode8 = __toESM(require("vscode"));
 var McpOrchestratorClient = class {
   constructor() {
-    this.output = vscode7.window.createOutputChannel("HoloScript MCP");
+    this.output = vscode8.window.createOutputChannel("HoloScript MCP");
     this.heartbeatTimer = null;
   }
   start(context) {
@@ -28278,13 +28780,15 @@ var McpOrchestratorClient = class {
       return;
     }
     if (!config.apiKey || !config.url) {
-      this.log("Missing MCP API configuration. Set holoscript.mcpOrchestratorUrl and holoscript.mcpApiKey.");
+      this.log(
+        "Missing MCP API configuration. Set holoscript.mcpOrchestratorUrl and holoscript.mcpApiKey."
+      );
       return;
     }
     this.register(config).catch((err) => this.log(`Register failed: ${err}`));
     this.startHeartbeat(config);
     context.subscriptions.push({ dispose: () => this.stopHeartbeat() });
-    vscode7.workspace.onDidChangeConfiguration((e) => {
+    vscode8.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration("holoscript.mcp")) {
         this.stopHeartbeat();
         const next = this.getConfig();
@@ -28296,7 +28800,7 @@ var McpOrchestratorClient = class {
     });
   }
   getConfig() {
-    const cfg = vscode7.workspace.getConfiguration("holoscript.mcp");
+    const cfg = vscode8.workspace.getConfiguration("holoscript.mcp");
     const url = cfg.get("orchestratorUrl") || "";
     let apiKey = cfg.get("apiKey") || "";
     const enabled = cfg.get("enabled", true);
@@ -28309,7 +28813,7 @@ var McpOrchestratorClient = class {
     return { url, apiKey, enabled, heartbeatSeconds, visibility, workspace: workspace7 };
   }
   buildRegistrationPayload(config) {
-    const machineId = vscode7.env.machineId?.slice(0, 8) || "local";
+    const machineId = vscode8.env.machineId?.slice(0, 8) || "local";
     const id = `holoscript-vscode-${machineId}`;
     return {
       id,
@@ -28406,7 +28910,7 @@ var McpOrchestratorClient = class {
 };
 
 // src/semanticTokensProvider.ts
-var vscode8 = __toESM(require("vscode"));
+var vscode9 = __toESM(require("vscode"));
 var TOKEN_TYPES = [
   "namespace",
   // composition names
@@ -28455,7 +28959,7 @@ var TOKEN_MODIFIERS = [
   "defaultLibrary"
   // built-in traits/keywords
 ];
-var SEMANTIC_TOKENS_LEGEND = new vscode8.SemanticTokensLegend(
+var SEMANTIC_TOKENS_LEGEND = new vscode9.SemanticTokensLegend(
   [...TOKEN_TYPES],
   [...TOKEN_MODIFIERS]
 );
@@ -28485,25 +28989,68 @@ var KEYWORDS = /* @__PURE__ */ new Set([
   "function"
 ]);
 var BUILTIN_TRAITS = /* @__PURE__ */ new Set([
-  "physics",
-  "static",
-  "kinematic",
-  "collidable",
+  // Interaction (11)
   "grabbable",
   "throwable",
+  "collidable",
+  "physics",
+  "gravity",
+  "trigger",
+  "pointable",
+  "hoverable",
+  "clickable",
   "draggable",
-  "visible",
-  "invisible",
-  "audio",
-  "spatial_audio",
-  "climbable",
-  "interactable",
+  "scalable",
+  // Visual (10)
   "glowing",
-  "animated",
+  "transparent",
+  "spinning",
+  "floating",
   "billboard",
-  "occluder",
-  "navmesh",
-  "trigger"
+  "pulse",
+  "animated",
+  "look_at",
+  "outline",
+  "proximity",
+  // AI/Behavior (5)
+  "behavior_tree",
+  "emotion",
+  "goal_oriented",
+  "perception",
+  "memory",
+  // Physics (9)
+  "cloth",
+  "soft_body",
+  "fluid",
+  "buoyancy",
+  "rope",
+  "wind",
+  "joint",
+  "rigidbody",
+  "destruction",
+  // Extended (11)
+  "rotatable",
+  "stackable",
+  "snappable",
+  "breakable",
+  "character",
+  "patrol",
+  "networked",
+  "anchor",
+  "spatial_audio",
+  "reverb_zone",
+  "voice_proximity",
+  // Advanced (10)
+  "teleport",
+  "ui_panel",
+  "particle_system",
+  "weather",
+  "day_night",
+  "lod",
+  "hand_tracking",
+  "haptic",
+  "portal",
+  "mirror"
 ]);
 var EVENT_HANDLERS = /* @__PURE__ */ new Set([
   "on_click",
@@ -28674,15 +29221,9 @@ var HoloScriptSemanticTokensProvider = class {
   provideDocumentSemanticTokens(document, _token) {
     const text = document.getText();
     const tokens = tokenize(text);
-    const builder = new vscode8.SemanticTokensBuilder(SEMANTIC_TOKENS_LEGEND);
+    const builder = new vscode9.SemanticTokensBuilder(SEMANTIC_TOKENS_LEGEND);
     for (const tok of tokens) {
-      builder.push(
-        tok.line,
-        tok.startChar,
-        tok.length,
-        tok.tokenType,
-        tok.tokenModifiers
-      );
+      builder.push(tok.line, tok.startChar, tok.length, tok.tokenType, tok.tokenModifiers);
     }
     return builder.build();
   }
@@ -28694,23 +29235,17 @@ var HoloScriptSemanticTokensRangeProvider = class {
   provideDocumentRangeSemanticTokens(document, range, _token) {
     const startLine = Math.max(0, range.start.line - 5);
     const endLine = Math.min(document.lineCount - 1, range.end.line + 5);
-    const rangeWithContext = new vscode8.Range(
-      new vscode8.Position(startLine, 0),
-      new vscode8.Position(endLine, document.lineAt(endLine).text.length)
+    const rangeWithContext = new vscode9.Range(
+      new vscode9.Position(startLine, 0),
+      new vscode9.Position(endLine, document.lineAt(endLine).text.length)
     );
     const text = document.getText(rangeWithContext);
     const tokens = tokenize(text);
-    const builder = new vscode8.SemanticTokensBuilder(SEMANTIC_TOKENS_LEGEND);
+    const builder = new vscode9.SemanticTokensBuilder(SEMANTIC_TOKENS_LEGEND);
     for (const tok of tokens) {
       const docLine = tok.line + startLine;
       if (docLine >= range.start.line && docLine <= range.end.line) {
-        builder.push(
-          docLine,
-          tok.startChar,
-          tok.length,
-          tok.tokenType,
-          tok.tokenModifiers
-        );
+        builder.push(docLine, tok.startChar, tok.length, tok.tokenType, tok.tokenModifiers);
       }
     }
     return builder.build();
@@ -28773,26 +29308,37 @@ function activate(context) {
   context.subscriptions.push(
     import_vscode.commands.registerCommand("holoscript.openExamples", async () => {
       const examplesPath = path4.join(context.extensionPath, "..", "..", "examples", "quickstart");
-      const uri = vscode9.Uri.file(examplesPath);
+      const uri = vscode10.Uri.file(examplesPath);
       try {
         if (fs3.existsSync(examplesPath)) {
           await import_vscode.commands.executeCommand("vscode.openFolder", uri, { forceNewWindow: false });
         } else {
-          vscode9.env.openExternal(vscode9.Uri.parse("https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart"));
+          vscode10.env.openExternal(
+            vscode10.Uri.parse(
+              "https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart"
+            )
+          );
         }
       } catch {
-        vscode9.env.openExternal(vscode9.Uri.parse("https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart"));
+        vscode10.env.openExternal(
+          vscode10.Uri.parse(
+            "https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart"
+          )
+        );
       }
     })
   );
   context.subscriptions.push(
     import_vscode.commands.registerCommand("holoscript.showWalkthrough", () => {
-      import_vscode.commands.executeCommand("workbench.action.openWalkthrough", "holoscript.holoscript-vscode#holoscript-getting-started");
+      import_vscode.commands.executeCommand(
+        "workbench.action.openWalkthrough",
+        "holoscript.holoscript-vscode#holoscript-getting-started"
+      );
     })
   );
   context.subscriptions.push(
     import_vscode.commands.registerCommand("holoscript.openDocumentation", () => {
-      vscode9.env.openExternal(vscode9.Uri.parse("https://holoscript.net/guides/"));
+      vscode10.env.openExternal(vscode10.Uri.parse("https://holoscript.net/guides/"));
     })
   );
   context.subscriptions.push(
@@ -28823,13 +29369,15 @@ function activate(context) {
       if (errors.length === 0) {
         import_vscode.window.showInformationMessage("\u2705 HoloScript syntax is valid!");
       } else {
-        import_vscode.window.showErrorMessage(`\u274C Found ${errors.length} error(s): ${errors.map((e) => e.message).join(", ")}`);
+        import_vscode.window.showErrorMessage(
+          `\u274C Found ${errors.length} error(s): ${errors.map((e) => e.message).join(", ")}`
+        );
       }
     })
   );
   context.subscriptions.push(
     import_vscode.commands.registerCommand("holoscript.createFirstScene", async () => {
-      const workspaceFolder = vscode9.workspace.workspaceFolders?.[0];
+      const workspaceFolder = vscode10.workspace.workspaceFolders?.[0];
       if (!workspaceFolder) {
         import_vscode.window.showWarningMessage("Open a folder first to create HoloScript files.");
         return;
@@ -28860,7 +29408,7 @@ function activate(context) {
 `;
       try {
         fs3.writeFileSync(filePath, defaultContent, "utf8");
-        const doc = await vscode9.workspace.openTextDocument(filePath);
+        const doc = await vscode10.workspace.openTextDocument(filePath);
         await import_vscode.window.showTextDocument(doc);
         import_vscode.window.showInformationMessage(`Created ${filename}.holo! \u{1F389} Try adding more objects.`);
       } catch (err) {
@@ -28889,7 +29437,15 @@ function activate(context) {
     // In workspace (monorepo development)
     path4.join(context.extensionPath, "..", "cli", "dist", "lsp", "server.js"),
     // Installed globally via npm
-    path4.join(context.extensionPath, "node_modules", "@holoscript", "cli", "dist", "lsp", "server.js"),
+    path4.join(
+      context.extensionPath,
+      "node_modules",
+      "@holoscript",
+      "cli",
+      "dist",
+      "lsp",
+      "server.js"
+    ),
     // From lsp package directly
     path4.join(context.extensionPath, "..", "lsp", "dist", "server.js")
   ];
@@ -28931,7 +29487,7 @@ function activate(context) {
   });
   context.subscriptions.push(SmartAssetEditorProvider.register(context));
   const holohubProvider = new HoloHubTreeDataProvider();
-  vscode9.window.registerTreeDataProvider("holohub.assets", holohubProvider);
+  vscode10.window.registerTreeDataProvider("holohub.assets", holohubProvider);
   context.subscriptions.push(
     import_vscode.commands.registerCommand("holoscript.holohub.importAsset", async (item) => {
       const assetName = item?.label || "Asset";
@@ -28944,58 +29500,61 @@ function activate(context) {
     const formatter = (init_dist(), __toCommonJS(dist_exports));
     const { loadConfig: loadConfig2 } = formatter;
     context.subscriptions.push(
-      vscode9.languages.registerDocumentFormattingEditProvider(
-        ["holoscript", "holoscriptplus"],
-        {
-          provideDocumentFormattingEdits(document) {
-            const config = vscode9.workspace.getConfiguration("holoscript");
-            const timeout = config.get("formatOnSaveTimeout", 1e3);
-            return new Promise((resolve) => {
-              const timer = setTimeout(() => {
-                console.warn("HoloScript: Formatting timed out");
-                resolve([]);
-              }, timeout);
-              const runFormat = () => {
-                try {
-                  const options = loadConfig2(document.fileName);
-                  const fmtr = formatter.createFormatter(options);
-                  const text = document.getText();
-                  const result = fmtr.format(text, document.languageId === "holoscriptplus" ? "hsplus" : "holo");
-                  clearTimeout(timer);
-                  if (result.errors.length > 0) {
-                    console.warn("HoloScript: Formatter errors:", result.errors);
-                  }
-                  if (!result.changed) {
-                    resolve([]);
-                    return;
-                  }
-                  const fullRange = new vscode9.Range(
-                    document.positionAt(0),
-                    document.positionAt(text.length)
-                  );
-                  resolve([vscode9.TextEdit.replace(fullRange, result.formatted)]);
-                } catch (err) {
-                  console.error("HoloScript: Formatting failed:", err);
-                  clearTimeout(timer);
-                  resolve([]);
+      vscode10.languages.registerDocumentFormattingEditProvider(["holoscript", "holoscriptplus"], {
+        provideDocumentFormattingEdits(document) {
+          const config = vscode10.workspace.getConfiguration("holoscript");
+          const timeout = config.get("formatOnSaveTimeout", 1e3);
+          return new Promise((resolve) => {
+            const timer = setTimeout(() => {
+              console.warn("HoloScript: Formatting timed out");
+              resolve([]);
+            }, timeout);
+            const runFormat = () => {
+              try {
+                const options = loadConfig2(document.fileName);
+                const fmtr = formatter.createFormatter(options);
+                const text = document.getText();
+                const result = fmtr.format(
+                  text,
+                  document.languageId === "holoscriptplus" ? "hsplus" : "holo"
+                );
+                clearTimeout(timer);
+                if (result.errors.length > 0) {
+                  console.warn("HoloScript: Formatter errors:", result.errors);
                 }
-              };
-              if (document.lineCount > 1e3) {
-                vscode9.window.withProgress({
-                  location: vscode9.ProgressLocation.Notification,
+                if (!result.changed) {
+                  resolve([]);
+                  return;
+                }
+                const fullRange = new vscode10.Range(
+                  document.positionAt(0),
+                  document.positionAt(text.length)
+                );
+                resolve([vscode10.TextEdit.replace(fullRange, result.formatted)]);
+              } catch (err) {
+                console.error("HoloScript: Formatting failed:", err);
+                clearTimeout(timer);
+                resolve([]);
+              }
+            };
+            if (document.lineCount > 1e3) {
+              vscode10.window.withProgress(
+                {
+                  location: vscode10.ProgressLocation.Notification,
                   title: "Formatting HoloScript...",
                   cancellable: false
-                }, async () => {
+                },
+                async () => {
                   runFormat();
-                });
-              } else {
-                runFormat();
-              }
-            });
-          }
+                }
+              );
+            } else {
+              runFormat();
+            }
+          });
         }
-      ),
-      vscode9.languages.registerDocumentRangeFormattingEditProvider(
+      }),
+      vscode10.languages.registerDocumentRangeFormattingEditProvider(
         ["holoscript", "holoscriptplus"],
         {
           provideDocumentRangeFormattingEdits(document, range) {
@@ -29010,7 +29569,7 @@ function activate(context) {
               };
               const result = fmtr.formatRange(text, rangeParams, fileType);
               if (!result.changed) return [];
-              return [vscode9.TextEdit.replace(range, result.formatted)];
+              return [vscode10.TextEdit.replace(range, result.formatted)];
             } catch (err) {
               console.error("HoloScript: Range formatting failed:", err);
               return [];
@@ -29024,7 +29583,7 @@ function activate(context) {
     console.warn("HoloScript: Formatter package not found or failed to load:", err);
   }
   context.subscriptions.push(
-    vscode9.languages.registerCompletionItemProvider(
+    vscode10.languages.registerCompletionItemProvider(
       ["holoscript", "holoscriptplus"],
       new HoloScriptCompletionItemProvider(),
       "@"
@@ -29032,14 +29591,21 @@ function activate(context) {
     )
   );
   context.subscriptions.push(
-    vscode9.languages.registerDocumentSemanticTokensProvider(
+    vscode10.languages.registerHoverProvider(
+      ["holoscript", "holoscriptplus"],
+      new HoloScriptHoverProvider()
+    )
+  );
+  console.log("HoloScript: Hover provider registered for trait documentation.");
+  context.subscriptions.push(
+    vscode10.languages.registerDocumentSemanticTokensProvider(
       ["holoscript", "holoscriptplus"],
       new HoloScriptSemanticTokensProvider(),
       SEMANTIC_TOKENS_LEGEND
     )
   );
   context.subscriptions.push(
-    vscode9.languages.registerDocumentRangeSemanticTokensProvider(
+    vscode10.languages.registerDocumentRangeSemanticTokensProvider(
       ["holoscript", "holoscriptplus"],
       new HoloScriptSemanticTokensRangeProvider(),
       SEMANTIC_TOKENS_LEGEND

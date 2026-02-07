@@ -103,7 +103,9 @@ export class WebhookVerificationError extends Error {
 /**
  * Webhook handler callback type
  */
-export type WebhookCallback<T = unknown> = (payload: WebhookPayload & { data: T }) => void | Promise<void>;
+export type WebhookCallback<T = unknown> = (
+  payload: WebhookPayload & { data: T }
+) => void | Promise<void>;
 
 /**
  * Webhook handler configuration
@@ -210,7 +212,11 @@ export class WebhookHandler {
 
       // Verify signature if provided
       if (signature && timestamp) {
-        this.verifySignature(typeof payload === 'string' ? payload : JSON.stringify(payload), signature, timestamp);
+        this.verifySignature(
+          typeof payload === 'string' ? payload : JSON.stringify(payload),
+          signature,
+          timestamp
+        );
       }
 
       // Validate timestamp
@@ -303,7 +309,9 @@ export class WebhookHandler {
     const age = Math.abs(now - webhookTime) / 1000;
 
     if (age > this.config.maxTimestampAge) {
-      throw new WebhookVerificationError(`Webhook timestamp too old: ${age}s > ${this.config.maxTimestampAge}s`);
+      throw new WebhookVerificationError(
+        `Webhook timestamp too old: ${age}s > ${this.config.maxTimestampAge}s`
+      );
     }
   }
 
@@ -374,7 +382,7 @@ export class WebhookHandler {
         } else {
           res.status?.(400).json?.({ error: result.error });
         }
-      } catch (error) {
+      } catch (_error) {
         res.status?.(500).json?.({ error: 'Internal server error' });
       }
     };

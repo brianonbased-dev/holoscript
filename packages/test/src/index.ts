@@ -1,6 +1,6 @@
 /**
  * @holoscript/test - Testing Framework for HoloScript
- * 
+ *
  * A comprehensive testing framework designed specifically for HoloScript applications,
  * supporting unit tests, scene tests, and VR/AR component testing.
  */
@@ -142,7 +142,7 @@ class Expectation<T> {
   private check(passed: boolean, message: string, expected?: unknown): void {
     const finalPassed = this.negated ? !passed : passed;
     const finalMessage = this.negated ? `NOT: ${message}` : message;
-    
+
     getContext().add({
       passed: finalPassed,
       message: finalMessage,
@@ -158,7 +158,11 @@ class Expectation<T> {
 
   toEqual(expected: T): void {
     const passed = deepEqual(this.actual, expected);
-    this.check(passed, `Expected ${stringify(this.actual)} to equal ${stringify(expected)}`, expected);
+    this.check(
+      passed,
+      `Expected ${stringify(this.actual)} to equal ${stringify(expected)}`,
+      expected
+    );
   }
 
   toBeDefined(): void {
@@ -215,7 +219,11 @@ class Expectation<T> {
     const diff = Math.abs(actual - expected);
     const epsilon = Math.pow(10, -precision) / 2;
     const passed = diff < epsilon;
-    this.check(passed, `Expected ${actual} to be close to ${expected} (precision: ${precision})`, expected);
+    this.check(
+      passed,
+      `Expected ${actual} to be close to ${expected} (precision: ${precision})`,
+      expected
+    );
   }
 
   toContain(item: unknown): void {
@@ -239,9 +247,13 @@ class Expectation<T> {
     const hasKey = key in actual;
     const valueMatches = value === undefined || deepEqual(actual[key], value);
     const passed = hasKey && valueMatches;
-    
+
     if (value !== undefined) {
-      this.check(passed, `Expected object to have property "${key}" with value ${stringify(value)}`, value);
+      this.check(
+        passed,
+        `Expected object to have property "${key}" with value ${stringify(value)}`,
+        value
+      );
     } else {
       this.check(passed, `Expected object to have property "${key}"`);
     }
@@ -258,13 +270,13 @@ class Expectation<T> {
     const fn = this.actual as unknown as () => unknown;
     let passed = false;
     let error: Error | undefined;
-    
+
     try {
       fn();
     } catch (e) {
       error = e as Error;
       passed = true;
-      
+
       if (expected) {
         if (typeof expected === 'string') {
           passed = error.message.includes(expected);
@@ -275,7 +287,7 @@ class Expectation<T> {
         }
       }
     }
-    
+
     this.check(passed, `Expected function to throw${expected ? ` ${expected}` : ''}`, expected);
   }
 
@@ -283,13 +295,13 @@ class Expectation<T> {
     const promise = this.actual as unknown as Promise<unknown>;
     let passed = false;
     let error: Error | undefined;
-    
+
     try {
       await promise;
     } catch (e) {
       error = e as Error;
       passed = true;
-      
+
       if (expected) {
         if (typeof expected === 'string') {
           passed = error.message.includes(expected);
@@ -300,68 +312,94 @@ class Expectation<T> {
         }
       }
     }
-    
-    this.check(passed, `Expected promise to reject${expected ? ` with ${expected}` : ''}`, expected);
+
+    this.check(
+      passed,
+      `Expected promise to reject${expected ? ` with ${expected}` : ''}`,
+      expected
+    );
   }
 
   toBeInstanceOf(expected: new (...args: unknown[]) => unknown): void {
     const passed = this.actual instanceof expected;
-    this.check(passed, `Expected ${stringify(this.actual)} to be instance of ${expected.name}`, expected.name);
+    this.check(
+      passed,
+      `Expected ${stringify(this.actual)} to be instance of ${expected.name}`,
+      expected.name
+    );
   }
 
   // HoloScript-specific assertions
   toHavePosition(x: number, y: number, z: number, tolerance = 0.001): void {
-    const actual = this.actual as unknown as { position: [number, number, number] | { x: number; y: number; z: number } };
+    const actual = this.actual as unknown as {
+      position: [number, number, number] | { x: number; y: number; z: number };
+    };
     let pos: { x: number; y: number; z: number };
-    
+
     if (Array.isArray(actual.position)) {
       pos = { x: actual.position[0], y: actual.position[1], z: actual.position[2] };
     } else {
       pos = actual.position;
     }
-    
-    const passed = 
+
+    const passed =
       Math.abs(pos.x - x) < tolerance &&
       Math.abs(pos.y - y) < tolerance &&
       Math.abs(pos.z - z) < tolerance;
-    
-    this.check(passed, `Expected position [${pos.x}, ${pos.y}, ${pos.z}] to be [${x}, ${y}, ${z}]`, [x, y, z]);
+
+    this.check(
+      passed,
+      `Expected position [${pos.x}, ${pos.y}, ${pos.z}] to be [${x}, ${y}, ${z}]`,
+      [x, y, z]
+    );
   }
 
   toHaveRotation(x: number, y: number, z: number, tolerance = 0.001): void {
-    const actual = this.actual as unknown as { rotation: [number, number, number] | { x: number; y: number; z: number } };
+    const actual = this.actual as unknown as {
+      rotation: [number, number, number] | { x: number; y: number; z: number };
+    };
     let rot: { x: number; y: number; z: number };
-    
+
     if (Array.isArray(actual.rotation)) {
       rot = { x: actual.rotation[0], y: actual.rotation[1], z: actual.rotation[2] };
     } else {
       rot = actual.rotation;
     }
-    
-    const passed = 
+
+    const passed =
       Math.abs(rot.x - x) < tolerance &&
       Math.abs(rot.y - y) < tolerance &&
       Math.abs(rot.z - z) < tolerance;
-    
-    this.check(passed, `Expected rotation [${rot.x}, ${rot.y}, ${rot.z}] to be [${x}, ${y}, ${z}]`, [x, y, z]);
+
+    this.check(
+      passed,
+      `Expected rotation [${rot.x}, ${rot.y}, ${rot.z}] to be [${x}, ${y}, ${z}]`,
+      [x, y, z]
+    );
   }
 
   toHaveScale(x: number, y: number, z: number, tolerance = 0.001): void {
-    const actual = this.actual as unknown as { scale: [number, number, number] | { x: number; y: number; z: number } };
+    const actual = this.actual as unknown as {
+      scale: [number, number, number] | { x: number; y: number; z: number };
+    };
     let scale: { x: number; y: number; z: number };
-    
+
     if (Array.isArray(actual.scale)) {
       scale = { x: actual.scale[0], y: actual.scale[1], z: actual.scale[2] };
     } else {
       scale = actual.scale;
     }
-    
-    const passed = 
+
+    const passed =
       Math.abs(scale.x - x) < tolerance &&
       Math.abs(scale.y - y) < tolerance &&
       Math.abs(scale.z - z) < tolerance;
-    
-    this.check(passed, `Expected scale [${scale.x}, ${scale.y}, ${scale.z}] to be [${x}, ${y}, ${z}]`, [x, y, z]);
+
+    this.check(
+      passed,
+      `Expected scale [${scale.x}, ${scale.y}, ${scale.z}] to be [${x}, ${y}, ${z}]`,
+      [x, y, z]
+    );
   }
 
   toHaveTrait(traitName: string): void {
@@ -397,9 +435,7 @@ interface MockState<T extends (...args: unknown[]) => unknown> {
   lastCall?: Parameters<T>;
 }
 
-export function fn<T extends (...args: unknown[]) => unknown>(
-  implementation?: T
-): MockFunction<T> {
+export function fn<T extends (...args: unknown[]) => unknown>(implementation?: T): MockFunction<T> {
   const state: MockState<T> = {
     calls: [],
     results: [],
@@ -410,14 +446,14 @@ export function fn<T extends (...args: unknown[]) => unknown>(
   const returnValues: ReturnType<T>[] = [];
   let defaultImpl = implementation;
 
-  const mockFn = function(this: unknown, ...args: Parameters<T>): ReturnType<T> {
+  const mockFn = function (this: unknown, ...args: Parameters<T>): ReturnType<T> {
     state.calls.push(args);
     state.lastCall = args;
     state.instances.push(this);
 
     let result: ReturnType<T>;
-    let impl = implementations.shift() ?? defaultImpl;
-    
+    const impl = implementations.shift() ?? defaultImpl;
+
     // Check for one-time return values first
     if (returnValues.length > 0) {
       result = returnValues.shift() as ReturnType<T>;
@@ -601,17 +637,18 @@ export class TestRunner {
 
   private filterTests(tests: TestCase[]): TestCase[] {
     // Check for .only tests
-    const onlyTests = tests.filter(t => t.only);
+    const onlyTests = tests.filter((t) => t.only);
     if (onlyTests.length > 0) {
       return onlyTests;
     }
 
     // Apply filter
     if (this.options.filter) {
-      const pattern = typeof this.options.filter === 'string'
-        ? new RegExp(this.options.filter, 'i')
-        : this.options.filter;
-      return tests.filter(t => pattern.test(t.name));
+      const pattern =
+        typeof this.options.filter === 'string'
+          ? new RegExp(this.options.filter, 'i')
+          : this.options.filter;
+      return tests.filter((t) => pattern.test(t.name));
     }
 
     return tests;
@@ -619,7 +656,7 @@ export class TestRunner {
 
   private async runTest(test: TestCase, suite: TestSuite): Promise<TestResult> {
     this.options.reporter.onTestStart(test);
-    
+
     const startTime = Date.now();
     currentContext = new AssertionContext();
 
@@ -695,7 +732,7 @@ export class ConsoleReporter implements TestReporter {
     const icon = result.passed ? '✅' : '❌';
     const time = `(${result.duration}ms)`;
     console.log(`${'  '.repeat(this.indent)}${icon} ${test.name} ${time}`);
-    
+
     if (!result.passed && result.error) {
       console.log(`${'  '.repeat(this.indent + 1)}└─ ${result.error.message}`);
     }
@@ -713,7 +750,7 @@ export class ConsoleReporter implements TestReporter {
 // DSL Functions
 // ============================================================================
 
-const suiteStack: TestSuite[] = [];
+const _suiteStack: TestSuite[] = [];
 let currentSuite: TestSuite | null = null;
 const registeredSuites: TestSuite[] = [];
 
@@ -815,7 +852,10 @@ export function createSceneTest(): SceneTestContext {
   };
 }
 
-export function addObject(ctx: SceneTestContext, obj: Partial<SceneObject> & { name: string }): SceneObject {
+export function addObject(
+  ctx: SceneTestContext,
+  obj: Partial<SceneObject> & { name: string }
+): SceneObject {
   const fullObj: SceneObject = {
     id: obj.id ?? `obj_${ctx.objects.size}`,
     name: obj.name,
@@ -834,7 +874,13 @@ export function getObject(ctx: SceneTestContext, name: string): SceneObject | un
   return ctx.objects.get(name);
 }
 
-export function emit(ctx: SceneTestContext, type: string, source: string, target?: string, data?: unknown): void {
+export function emit(
+  ctx: SceneTestContext,
+  type: string,
+  source: string,
+  target?: string,
+  data?: unknown
+): void {
   ctx.events.push({
     timestamp: ctx.time,
     type,
@@ -850,7 +896,7 @@ export function tick(ctx: SceneTestContext, delta: number): void {
 
 export function getEvents(ctx: SceneTestContext, type?: string): EventLog[] {
   if (type) {
-    return ctx.events.filter(e => e.type === type);
+    return ctx.events.filter((e) => e.type === type);
   }
   return [...ctx.events];
 }
@@ -895,18 +941,20 @@ function deepEqual(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) return true;
   if (typeof a !== typeof b) return false;
   if (a === null || b === null) return false;
-  
+
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) return false;
     return a.every((val, i) => deepEqual(val, b[i]));
   }
-  
+
   if (typeof a === 'object' && typeof b === 'object') {
-    const keysA = Object.keys(a as object);
-    const keysB = Object.keys(b as object);
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
     if (keysA.length !== keysB.length) return false;
-    return keysA.every(key => deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]));
+    return keysA.every((key) =>
+      deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key])
+    );
   }
-  
+
   return false;
 }

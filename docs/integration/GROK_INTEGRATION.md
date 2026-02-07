@@ -5,6 +5,7 @@ Complete guide for integrating HoloScript with Grok (xAI) to build VR scenes dir
 ## Overview
 
 HoloScript is designed to be AI-native, making it ideal for Grok to:
+
 1. **Generate** complete VR scenes from natural language
 2. **Validate** code before sharing
 3. **Render** preview images/GIFs
@@ -27,11 +28,11 @@ scene = hs.generate("a floating crystal in a mystical cave")
 result = hs.validate(scene.code)
 if result.valid:
     # Create X-optimized share
-    share = hs.share(scene.code, 
+    share = hs.share(scene.code,
         title="Mystical Cave",
         platform="x"
     )
-    
+
     print(f"🎮 Built with HoloScript!")
     print(f"Try it: {share.playground_url}")
     print(f"\n{share.tweet_text}")
@@ -61,7 +62,7 @@ If Grok has access to HoloScript MCP tools:
 
 ### Successful Scene Generation
 
-```
+````
 🎮 **{Scene Title}**
 
 I built this VR scene for you! Experience it:
@@ -75,16 +76,18 @@ I built this VR scene for you! Experience it:
 **Code:**
 ```holo
 {generated_code}
-```
+````
 
 Scan QR for mobile VR: {qr_url}
 
 #HoloScript #VR #XR
+
 ```
 
 ### With Preview Image
 
 ```
+
 🎮 Check out this VR scene!
 
 {preview_image}
@@ -95,20 +98,23 @@ Interactive demo: {playground_url}
 View in VR: {vr_url}
 
 #HoloScript #VR #Metaverse
+
 ```
 
 ### Error Response
 
 ```
+
 ❌ I found some issues with the code:
 
 • Line {n}: {error_message}
-  💡 {suggestion}
+💡 {suggestion}
 
 Let me fix that...
 
 {corrected_code}
-```
+
+````
 
 ## Workflow Patterns
 
@@ -162,7 +168,7 @@ Generated share links include proper meta tags:
 <meta name="twitter:player" content="{embed_url}">
 <meta name="twitter:player:width" content="800">
 <meta name="twitter:player:height" content="600">
-```
+````
 
 ### QR Code for Mobile XR
 
@@ -176,6 +182,7 @@ print(share.qr_code)  # URL to QR code image
 ### Optimized Preview Images
 
 For scenes shared on X, previews are:
+
 - 1200x630 for Twitter Cards
 - Animated GIF for motion
 - Includes XR call-to-action
@@ -258,11 +265,11 @@ composition "Treasure Discovery" {
   object "TreasureChest" @grabbable @spatial_audio {
     geometry: "model/treasure_chest.glb"
     position: [0, 0.5, -2]
-    
+
     state {
       isOpen: false
     }
-    
+
     onGrab: {
       if (!isOpen) {
         isOpen = true
@@ -271,7 +278,7 @@ composition "Treasure Discovery" {
       }
     }
   }
-  
+
   object "GoldCoin" @grabbable @glowing(color: "#ffd700") {
     geometry: "cylinder"
     scale: [0.2, 0.02, 0.2]
@@ -301,6 +308,7 @@ pip install holoscript --upgrade
 ### MCP tools not available
 
 Ensure the MCP server is running:
+
 ```bash
 npx @holoscript/mcp-server
 ```
@@ -308,6 +316,7 @@ npx @holoscript/mcp-server
 ### Preview not generating
 
 Check if the render service is available:
+
 ```python
 hs = HoloScript(api_url="https://api.holoscript.dev")
 ```

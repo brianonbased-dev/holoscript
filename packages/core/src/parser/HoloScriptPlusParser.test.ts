@@ -71,7 +71,10 @@ describe('HoloScriptPlusParser - Control Flow', () => {
 
 describe('HoloScriptPlusParser - Import Statements', () => {
   it('Parses @import with path', () => {
-    const parser = new HoloScriptPlusParser({ enableVRTraits: true, enableTypeScriptImports: true });
+    const parser = new HoloScriptPlusParser({
+      enableVRTraits: true,
+      enableTypeScriptImports: true,
+    });
     const source = `@import "./utils/helpers.ts"
     scene#main { size: 1 }`;
     const result = parser.parse(source);
@@ -82,7 +85,10 @@ describe('HoloScriptPlusParser - Import Statements', () => {
   });
 
   it('Parses @import with alias', () => {
-    const parser = new HoloScriptPlusParser({ enableVRTraits: true, enableTypeScriptImports: true });
+    const parser = new HoloScriptPlusParser({
+      enableVRTraits: true,
+      enableTypeScriptImports: true,
+    });
     const source = `@import "./utils/math-helpers.ts" as MathUtils
     scene#main { size: 1 }`;
     const result = parser.parse(source);
@@ -93,7 +99,10 @@ describe('HoloScriptPlusParser - Import Statements', () => {
   });
 
   it('Parses multiple @import statements', () => {
-    const parser = new HoloScriptPlusParser({ enableVRTraits: true, enableTypeScriptImports: true });
+    const parser = new HoloScriptPlusParser({
+      enableVRTraits: true,
+      enableTypeScriptImports: true,
+    });
     const source = `@import "./utils.ts"
     @import "./helpers.ts" as H
     @import "./config.ts"

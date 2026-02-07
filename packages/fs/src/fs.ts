@@ -155,7 +155,11 @@ export function writeTextSync(path: string, content: string, options: WriteOptio
 /**
  * Write bytes to a file
  */
-export async function writeBytes(path: string, content: Buffer, options: WriteOptions = {}): Promise<void> {
+export async function writeBytes(
+  path: string,
+  content: Buffer,
+  options: WriteOptions = {}
+): Promise<void> {
   const { mode, flag = options.append ? 'a' : 'w' } = options;
   await ensureDir(nodePath.dirname(path));
   await fsPromises.writeFile(path, content, { mode, flag });
@@ -199,7 +203,11 @@ export function writeJsonSync(
 /**
  * Append text to a file
  */
-export async function appendText(path: string, content: string, encoding: Encoding = 'utf-8'): Promise<void> {
+export async function appendText(
+  path: string,
+  content: string,
+  encoding: Encoding = 'utf-8'
+): Promise<void> {
   await writeText(path, content, { encoding, append: true });
 }
 
@@ -213,7 +221,11 @@ export function appendTextSync(path: string, content: string, encoding: Encoding
 /**
  * Append a line to a file
  */
-export async function appendLine(path: string, line: string, encoding: Encoding = 'utf-8'): Promise<void> {
+export async function appendLine(
+  path: string,
+  line: string,
+  encoding: Encoding = 'utf-8'
+): Promise<void> {
   await appendText(path, line + '\n', encoding);
 }
 
@@ -563,7 +575,10 @@ export async function* walk(
 /**
  * Find files matching a glob pattern
  */
-export async function glob(pattern: string, options: { cwd?: string; ignore?: string[] } = {}): Promise<string[]> {
+export async function glob(
+  pattern: string,
+  options: { cwd?: string; ignore?: string[] } = {}
+): Promise<string[]> {
   const { cwd = process.cwd(), ignore = [] } = options;
   return globAsync(pattern, { cwd, ignore, absolute: true });
 }
@@ -571,7 +586,10 @@ export async function glob(pattern: string, options: { cwd?: string; ignore?: st
 /**
  * Find files matching a glob pattern (sync)
  */
-export function globSync(pattern: string, options: { cwd?: string; ignore?: string[] } = {}): string[] {
+export function globSync(
+  pattern: string,
+  options: { cwd?: string; ignore?: string[] } = {}
+): string[] {
   const { cwd = process.cwd(), ignore = [] } = options;
   return globAsync.sync(pattern, { cwd, ignore, absolute: true });
 }
@@ -612,7 +630,9 @@ export async function createTempFile(
 /**
  * Create a temporary directory
  */
-export async function createTempDir(prefix = 'tmp-'): Promise<{ path: string; cleanup: () => Promise<void> }> {
+export async function createTempDir(
+  prefix = 'tmp-'
+): Promise<{ path: string; cleanup: () => Promise<void> }> {
   const tempDirectory = tempDir();
   const dirname = `${prefix}${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const dirPath = nodePath.join(tempDirectory, dirname);

@@ -261,56 +261,66 @@ describe('AssetManifest', () => {
 
   describe('findByType', () => {
     it('should return assets of specified type', () => {
-      manifest.addAsset(createAssetMetadata({
-        id: 'model-001',
-        name: 'cube',
-        format: 'gltf',
-        assetType: 'model',
-        sourcePath: '/models/cube.gltf',
-      }));
+      manifest.addAsset(
+        createAssetMetadata({
+          id: 'model-001',
+          name: 'cube',
+          format: 'gltf',
+          assetType: 'model',
+          sourcePath: '/models/cube.gltf',
+        })
+      );
 
-      manifest.addAsset(createAssetMetadata({
-        id: 'tex-001',
-        name: 'diffuse',
-        format: 'png',
-        assetType: 'texture',
-        sourcePath: '/textures/diffuse.png',
-      }));
+      manifest.addAsset(
+        createAssetMetadata({
+          id: 'tex-001',
+          name: 'diffuse',
+          format: 'png',
+          assetType: 'texture',
+          sourcePath: '/textures/diffuse.png',
+        })
+      );
 
-      manifest.addAsset(createAssetMetadata({
-        id: 'model-002',
-        name: 'sphere',
-        format: 'glb',
-        assetType: 'model',
-        sourcePath: '/models/sphere.glb',
-      }));
+      manifest.addAsset(
+        createAssetMetadata({
+          id: 'model-002',
+          name: 'sphere',
+          format: 'glb',
+          assetType: 'model',
+          sourcePath: '/models/sphere.glb',
+        })
+      );
 
       const models = manifest.findByType('model');
       expect(models.length).toBe(2);
-      expect(models.map(m => m.name)).toContain('cube');
-      expect(models.map(m => m.name)).toContain('sphere');
+      expect(models.map((m) => m.name)).toContain('cube');
+      expect(models.map((m) => m.name)).toContain('sphere');
     });
   });
 
   describe('findByTag', () => {
     it('should find assets by tag', () => {
-      manifest.addAsset(createAssetMetadata({
-        id: 'model-001',
-        name: 'cube',
-        format: 'gltf',
-        assetType: 'model',
-        sourcePath: '/models/cube.gltf',
-        tags: ['primitive', 'basic'],
-      }));
+      manifest.addAsset(
+        createAssetMetadata({
+          id: 'model-001',
+          name: 'cube',
+          format: 'gltf',
+          assetType: 'model',
+          sourcePath: '/models/cube.gltf',
+          tags: ['primitive', 'basic'],
+        })
+      );
 
-      manifest.addAsset(createAssetMetadata({
-        id: 'model-002',
-        name: 'character',
-        format: 'fbx',
-        assetType: 'model',
-        sourcePath: '/models/character.fbx',
-        tags: ['animated', 'humanoid'],
-      }));
+      manifest.addAsset(
+        createAssetMetadata({
+          id: 'model-002',
+          name: 'character',
+          format: 'fbx',
+          assetType: 'model',
+          sourcePath: '/models/character.fbx',
+          tags: ['animated', 'humanoid'],
+        })
+      );
 
       const primitives = manifest.findByTag('primitive');
       expect(primitives.length).toBe(1);
@@ -414,7 +424,7 @@ describe('AssetValidator', () => {
 
       const result = validator.validate(metadata);
       expect(result.valid).toBe(true);
-      expect(result.issues.filter(i => i.severity === 'error')).toHaveLength(0);
+      expect(result.issues.filter((i) => i.severity === 'error')).toHaveLength(0);
     });
 
     it('should return issues for metadata problems', () => {

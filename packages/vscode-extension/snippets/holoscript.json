@@ -1,11 +1,7 @@
 {
   "Composition": {
     "prefix": ["composition", "comp"],
-    "body": [
-      "composition \"${1:SceneName}\" {",
-      "\t${2:// Scene content}",
-      "}"
-    ],
+    "body": ["composition \"${1:SceneName}\" {", "\t${2:// Scene content}", "}"],
     "description": "Create a new composition (scene/world)"
   },
 
@@ -48,21 +44,13 @@
 
   "Spatial Group": {
     "prefix": ["spatialgroup", "sgroup", "sg"],
-    "body": [
-      "spatial_group \"${1:GroupName}\" {",
-      "\t${2:// Objects in this group}",
-      "}"
-    ],
+    "body": ["spatial_group \"${1:GroupName}\" {", "\t${2:// Objects in this group}", "}"],
     "description": "Create a spatial group for organizing objects"
   },
 
   "Logic Block": {
     "prefix": ["logic", "lgc"],
-    "body": [
-      "logic {",
-      "\t${1:// Event handlers and game logic}",
-      "}"
-    ],
+    "body": ["logic {", "\t${1:// Event handlers and game logic}", "}"],
     "description": "Define logic handlers for a composition"
   },
 
@@ -102,11 +90,7 @@
 
   "Gate (If Statement)": {
     "prefix": ["gate", "if"],
-    "body": [
-      "gate (${1:condition}) {",
-      "\t${2:// True branch}",
-      "}"
-    ],
+    "body": ["gate (${1:condition}) {", "\t${2:// True branch}", "}"],
     "description": "Conditional statement (gate/if)"
   },
 
@@ -134,81 +118,49 @@
 
   "ForEach Loop": {
     "prefix": ["foreach", "forin"],
-    "body": [
-      "forEach (${1:item} in ${2:collection}) {",
-      "\t${3:// Loop body}",
-      "}"
-    ],
+    "body": ["forEach (${1:item} in ${2:collection}) {", "\t${3:// Loop body}", "}"],
     "description": "ForEach loop over collection"
   },
 
   "While Loop": {
     "prefix": ["while", "whileloop"],
-    "body": [
-      "while (${1:condition}) {",
-      "\t${2:// Loop body}",
-      "}"
-    ],
+    "body": ["while (${1:condition}) {", "\t${2:// Loop body}", "}"],
     "description": "While loop"
   },
 
   "Event Handler": {
     "prefix": ["on", "onevent", "handler"],
-    "body": [
-      "on_${1:event_name}(${2:params}) {",
-      "\t${3:// Handle event}",
-      "}"
-    ],
+    "body": ["on_${1:event_name}(${2:params}) {", "\t${3:// Handle event}", "}"],
     "description": "Define an event handler"
   },
 
   "On Click Handler": {
     "prefix": ["onclick", "click"],
-    "body": [
-      "on_click {",
-      "\t${1:// Handle click}",
-      "}"
-    ],
+    "body": ["on_click {", "\t${1:// Handle click}", "}"],
     "description": "Click event handler"
   },
 
   "On Interact Handler": {
     "prefix": ["oninteract", "interact"],
-    "body": [
-      "on_interact {",
-      "\t${1:// Handle interaction}",
-      "}"
-    ],
+    "body": ["on_interact {", "\t${1:// Handle interaction}", "}"],
     "description": "Interact event handler"
   },
 
   "On Collision Handler": {
     "prefix": ["oncollision", "collision"],
-    "body": [
-      "on_collision(${1:other}) {",
-      "\t${2:// Handle collision}",
-      "}"
-    ],
+    "body": ["on_collision(${1:other}) {", "\t${2:// Handle collision}", "}"],
     "description": "Collision event handler"
   },
 
   "On Enter Trigger": {
     "prefix": ["onenter", "enter"],
-    "body": [
-      "on_enter(${1:entity}) {",
-      "\t${2:// Handle enter}",
-      "}"
-    ],
+    "body": ["on_enter(${1:entity}) {", "\t${2:// Handle enter}", "}"],
     "description": "Trigger enter event handler"
   },
 
   "On Exit Trigger": {
     "prefix": ["onexit", "exit"],
-    "body": [
-      "on_exit(${1:entity}) {",
-      "\t${2:// Handle exit}",
-      "}"
-    ],
+    "body": ["on_exit(${1:entity}) {", "\t${2:// Handle exit}", "}"],
     "description": "Trigger exit event handler"
   },
 
@@ -220,31 +172,19 @@
 
   "Modify Object": {
     "prefix": ["modify", "mod"],
-    "body": [
-      "modify ${1:target} {",
-      "\t${2:property}: ${3:value}",
-      "}"
-    ],
+    "body": ["modify ${1:target} {", "\t${2:property}: ${3:value}", "}"],
     "description": "Modify object properties"
   },
 
   "Every (Timer)": {
     "prefix": ["every", "timer", "interval"],
-    "body": [
-      "every(${1:1000}) {",
-      "\t${2:// Runs every N milliseconds}",
-      "}"
-    ],
+    "body": ["every(${1:1000}) {", "\t${2:// Runs every N milliseconds}", "}"],
     "description": "Periodic timer execution"
   },
 
   "After (Delay)": {
     "prefix": ["after", "delay", "timeout"],
-    "body": [
-      "after(${1:1000}) {",
-      "\t${2:// Runs once after N milliseconds}",
-      "}"
-    ],
+    "body": ["after(${1:1000}) {", "\t${2:// Runs once after N milliseconds}", "}"],
     "description": "Delayed execution"
   },
 
@@ -390,22 +330,13 @@
 
   "Settings Block": {
     "prefix": ["settings"],
-    "body": [
-      "settings {",
-      "\t${1:key}: ${2:value}",
-      "}"
-    ],
+    "body": ["settings {", "\t${1:key}: ${2:value}", "}"],
     "description": "Define settings"
   },
 
   "Parallel Execution": {
     "prefix": ["parallel", "par"],
-    "body": [
-      "parallel {",
-      "\t${1:// Task 1}",
-      "\t${2:// Task 2}",
-      "}"
-    ],
+    "body": ["parallel {", "\t${1:// Task 1}", "\t${2:// Task 2}", "}"],
     "description": "Run tasks in parallel"
   },
 
@@ -578,11 +509,7 @@
 
   "Comment Block": {
     "prefix": ["comment", "block"],
-    "body": [
-      "/*",
-      " * ${1:Description}",
-      " */"
-    ],
+    "body": ["/*", " * ${1:Description}", " */"],
     "description": "Multi-line comment block"
   },
 
@@ -866,12 +793,7 @@
 
   "Arrow Function Block": {
     "prefix": ["arrowblock", "=>{}"],
-    "body": [
-      "(${1:params}) => {",
-      "\t${2:// body}",
-      "\treturn ${3:result}",
-      "}"
-    ],
+    "body": ["(${1:params}) => {", "\t${2:// body}", "\treturn ${3:result}", "}"],
     "description": "Arrow function with block body"
   },
 

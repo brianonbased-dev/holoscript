@@ -13,7 +13,16 @@ import type { TraitHandler } from './TraitTypes';
 // TYPES
 // =============================================================================
 
-type ColorMap = 'viridis' | 'plasma' | 'inferno' | 'magma' | 'turbo' | 'jet' | 'hot' | 'cool' | 'rainbow';
+type ColorMap =
+  | 'viridis'
+  | 'plasma'
+  | 'inferno'
+  | 'magma'
+  | 'turbo'
+  | 'jet'
+  | 'hot'
+  | 'cool'
+  | 'rainbow';
 type Interpolation = 'nearest' | 'linear' | 'cubic';
 
 interface DataPoint {
@@ -33,18 +42,18 @@ interface Heatmap3DState {
 }
 
 interface Heatmap3DConfig {
-  data_source: string;  // URL or inline data
+  data_source: string; // URL or inline data
   color_map: ColorMap;
   opacity: number;
-  resolution: number;  // Grid resolution
+  resolution: number; // Grid resolution
   interpolation: Interpolation;
-  range: { min: number; max: number };  // Value range
+  range: { min: number; max: number }; // Value range
   auto_range: boolean;
   animated: boolean;
-  animation_duration: number;  // ms
+  animation_duration: number; // ms
   legend: boolean;
   legend_position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-  height_extrusion: number;  // 3D extrusion based on value
+  height_extrusion: number; // 3D extrusion based on value
 }
 
 // =============================================================================
@@ -81,7 +90,7 @@ export const heatmap3dHandler: TraitHandler<Heatmap3DConfig> = {
       previousData: null,
     };
     (node as any).__heatmap3dState = state;
-    
+
     // Create heatmap renderer
     context.emit?.('heatmap_create', {
       node,
@@ -91,14 +100,14 @@ export const heatmap3dHandler: TraitHandler<Heatmap3DConfig> = {
       interpolation: config.interpolation,
       heightExtrusion: config.height_extrusion,
     });
-    
+
     if (config.data_source) {
       context.emit?.('heatmap_load_data', {
         node,
         source: config.data_source,
       });
     }
-    
+
     if (config.legend) {
       context.emit?.('heatmap_show_legend', {
         node,
@@ -120,15 +129,15 @@ export const heatmap3dHandler: TraitHandler<Heatmap3DConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__heatmap3dState as Heatmap3DState;
     if (!state) return;
-    
+
     // Handle animated transitions
     if (config.animated && state.animationProgress < 1 && state.previousData) {
       state.animationProgress += delta / (config.animation_duration / 1000);
-      
+
       if (state.animationProgress >= 1) {
         state.animationProgress = 1;
         state.previousData = null;
-        
+
         context.emit?.('heatmap_render', {
           node,
           data: state.dataPoints,
@@ -141,7 +150,7 @@ export const heatmap3dHandler: TraitHandler<Heatmap3DConfig> = {
           state.dataPoints,
           state.animationProgress
         );
-        
+
         context.emit?.('heatmap_render', {
           node,
           data: interpolatedData,
@@ -150,13 +159,13 @@ export const heatmap3dHandler: TraitHandler<Heatmap3DConfig> = {
       }
     } else if (state.needsUpdate) {
       state.needsUpdate = false;
-      
+
       context.emit?.('heatmap_render', {
         node,
         data: state.dataPoints,
         range: { min: state.minValue, max: state.maxValue },
       });
-      
+
       context.emit?.('on_heatmap_update', {
         node,
         pointCount: state.dataPoints.length,
@@ -168,56 +177,56 @@ export const heatmap3dHandler: TraitHandler<Heatmap3DConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__heatmap3dState as Heatmap3DState;
     if (!state) return;
-    
+
     if (event.type === 'heatmap_data_loaded') {
       const newData = event.data as DataPoint[];
-      
+
       if (config.animated && state.dataPoints.length > 0) {
         state.previousData = [...state.dataPoints];
         state.animationProgress = 0;
       }
-      
+
       state.dataPoints = newData;
       state.isLoaded = true;
-      
+
       // Calculate auto range
       if (config.auto_range && newData.length > 0) {
-        state.minValue = Math.min(...newData.map(p => p.value));
-        state.maxValue = Math.max(...newData.map(p => p.value));
+        state.minValue = Math.min(...newData.map((p) => p.value));
+        state.maxValue = Math.max(...newData.map((p) => p.value));
       }
-      
+
       state.needsUpdate = true;
     } else if (event.type === 'heatmap_set_data') {
       const newData = event.data as DataPoint[];
-      
+
       if (config.animated && state.dataPoints.length > 0) {
         state.previousData = [...state.dataPoints];
         state.animationProgress = 0;
       }
-      
+
       state.dataPoints = newData;
-      
+
       if (config.auto_range && newData.length > 0) {
-        state.minValue = Math.min(...newData.map(p => p.value));
-        state.maxValue = Math.max(...newData.map(p => p.value));
+        state.minValue = Math.min(...newData.map((p) => p.value));
+        state.maxValue = Math.max(...newData.map((p) => p.value));
       }
-      
+
       state.needsUpdate = true;
     } else if (event.type === 'heatmap_add_point') {
       const point = event.point as DataPoint;
       state.dataPoints.push(point);
-      
+
       if (config.auto_range) {
         state.minValue = Math.min(state.minValue, point.value);
         state.maxValue = Math.max(state.maxValue, point.value);
       }
-      
+
       state.needsUpdate = true;
     } else if (event.type === 'heatmap_set_range') {
       state.minValue = event.min as number;
       state.maxValue = event.max as number;
       state.needsUpdate = true;
-      
+
       if (config.legend) {
         context.emit?.('heatmap_update_legend', {
           node,
@@ -247,18 +256,14 @@ export const heatmap3dHandler: TraitHandler<Heatmap3DConfig> = {
   },
 };
 
-function interpolateData(
-  from: DataPoint[],
-  to: DataPoint[],
-  t: number
-): DataPoint[] {
+function interpolateData(from: DataPoint[], to: DataPoint[], t: number): DataPoint[] {
   const result: DataPoint[] = [];
   const maxLen = Math.max(from.length, to.length);
-  
+
   for (let i = 0; i < maxLen; i++) {
     const fromPoint = from[i] || to[i];
     const toPoint = to[i] || from[i];
-    
+
     result.push({
       position: [
         fromPoint.position[0] + (toPoint.position[0] - fromPoint.position[0]) * t,
@@ -268,7 +273,7 @@ function interpolateData(
       value: fromPoint.value + (toPoint.value - fromPoint.value) * t,
     });
   }
-  
+
   return result;
 }
 

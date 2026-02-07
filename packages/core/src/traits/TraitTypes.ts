@@ -70,8 +70,14 @@ export interface PhysicsContext {
 }
 
 export interface AudioContext {
-  playSound: (source: string, options?: { position?: Vector3; volume?: number; spatial?: boolean }) => void;
-  updateSpatialSource?: (nodeId: string, options: { hrtfProfile?: string; occlusion?: number; reverbWet?: number }) => void;
+  playSound: (
+    source: string,
+    options?: { position?: Vector3; volume?: number; spatial?: boolean }
+  ) => void;
+  updateSpatialSource?: (
+    nodeId: string,
+    options: { hrtfProfile?: string; occlusion?: number; reverbWet?: number }
+  ) => void;
   registerAmbisonicSource?: (nodeId: string, order: number) => void;
   setAudioPortal?: (portalId: string, targetZone: string, openingSize: number) => void;
   updateAudioMaterial?: (nodeId: string, absorption: number, reflection: number) => void;

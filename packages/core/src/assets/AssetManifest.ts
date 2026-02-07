@@ -5,11 +5,7 @@
  * Enables smart asset loading, dependency resolution, and platform optimization.
  */
 
-import {
-  AssetMetadata,
-  AssetFormat,
-  AssetType,
-} from './AssetMetadata';
+import { AssetMetadata, AssetFormat, AssetType } from './AssetMetadata';
 
 // ============================================================================
 // Manifest Configuration
@@ -359,18 +355,14 @@ export class AssetManifest {
    * Find assets with validation errors
    */
   findWithErrors(): AssetMetadata[] {
-    return Array.from(this.assets.values()).filter(
-      (a) => a.validationErrors.length > 0
-    );
+    return Array.from(this.assets.values()).filter((a) => a.validationErrors.length > 0);
   }
 
   /**
    * Find assets with validation warnings
    */
   findWithWarnings(): AssetMetadata[] {
-    return Array.from(this.assets.values()).filter(
-      (a) => a.validationWarnings.length > 0
-    );
+    return Array.from(this.assets.values()).filter((a) => a.validationWarnings.length > 0);
   }
 
   /**

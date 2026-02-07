@@ -26,7 +26,7 @@ export interface VoiceConfig {
 export interface VoiceRequest {
   text: string;
   voiceId?: string;
-  
+
   /** Emotion parameters (0-1 intensity) */
   emotion?: {
     type: 'angry' | 'sad' | 'excited' | 'friendly' | 'scared' | 'neutral';
@@ -57,7 +57,7 @@ export interface VoiceSynthesizer {
   /** Initialize the synthesizer with config */
   initialize(config: VoiceConfig): Promise<void>;
 
-  /** 
+  /**
    * Generate audio buffer from text.
    * Runtimes should handle the actual networking/synthesis.
    */

@@ -84,7 +84,7 @@ export const device = {
     if (!this.isVRCapable) return false;
     try {
       // @ts-ignore - WebXR API
-      return await navigator.xr?.isSessionSupported?.('immersive-vr') ?? false;
+      return (await navigator.xr?.isSessionSupported?.('immersive-vr')) ?? false;
     } catch {
       return false;
     }
@@ -97,7 +97,7 @@ export const device = {
     if (!this.isARCapable) return false;
     try {
       // @ts-ignore - WebXR API
-      return await navigator.xr?.isSessionSupported?.('immersive-ar') ?? false;
+      return (await navigator.xr?.isSessionSupported?.('immersive-ar')) ?? false;
     } catch {
       return false;
     }

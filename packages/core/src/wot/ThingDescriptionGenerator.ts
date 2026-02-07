@@ -311,9 +311,7 @@ export class ThingDescriptionGenerator {
 
     // Find @state directive (use any for flexibility with directive variants)
     const stateDirective = node.directives.find(
-      (d) =>
-        d.type === 'state' ||
-        (d.type === 'directive' && (d as any).name === 'state')
+      (d) => d.type === 'state' || (d.type === 'directive' && (d as any).name === 'state')
     );
 
     if (!stateDirective || !stateDirective.body) {
@@ -325,17 +323,14 @@ export class ThingDescriptionGenerator {
     }
 
     // Parse state body
-    const stateBody =
-      typeof stateDirective.body === 'object' ? stateDirective.body : {};
+    const stateBody = typeof stateDirective.body === 'object' ? stateDirective.body : {};
     return this.mapStateToProperties(stateBody);
   }
 
   /**
    * Map state object to TD properties
    */
-  private mapStateToProperties(
-    state: Record<string, unknown>
-  ): Record<string, PropertyAffordance> {
+  private mapStateToProperties(state: Record<string, unknown>): Record<string, PropertyAffordance> {
     const properties: Record<string, PropertyAffordance> = {};
 
     for (const [key, value] of Object.entries(state)) {
@@ -571,9 +566,7 @@ export class ThingDescriptionGenerator {
   /**
    * Extract input schema from args object
    */
-  private extractInputSchema(
-    args: Record<string, unknown>
-  ): Record<string, DataSchema> {
+  private extractInputSchema(args: Record<string, unknown>): Record<string, DataSchema> {
     const schema: Record<string, DataSchema> = {};
 
     for (const [key, value] of Object.entries(args)) {
@@ -643,19 +636,17 @@ export function generateAllThingDescriptions(
 /**
  * Serialize Thing Description to JSON
  */
-export function serializeThingDescription(
-  td: ThingDescription,
-  pretty: boolean = true
-): string {
+export function serializeThingDescription(td: ThingDescription, pretty: boolean = true): string {
   return JSON.stringify(td, null, pretty ? 2 : 0);
 }
 
 /**
  * Validate a Thing Description (basic validation)
  */
-export function validateThingDescription(
-  td: ThingDescription
-): { valid: boolean; errors: string[] } {
+export function validateThingDescription(td: ThingDescription): {
+  valid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
 
   // Required fields

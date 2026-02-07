@@ -14,11 +14,18 @@ import type { TraitHandler } from './TraitTypes';
 // =============================================================================
 
 type AltitudeType = 'terrain' | 'wgs84' | 'egm96';
-type LocalizationState = 'idle' | 'initializing' | 'localizing' | 'localized' | 'tracking' | 'limited' | 'unavailable';
+type LocalizationState =
+  | 'idle'
+  | 'initializing'
+  | 'localizing'
+  | 'localized'
+  | 'tracking'
+  | 'limited'
+  | 'unavailable';
 
 interface GeospatialEnvState {
   state: LocalizationState;
-  accuracy: number;  // horizontal accuracy meters
+  accuracy: number; // horizontal accuracy meters
   verticalAccuracy: number;
   heading: number;
   headingAccuracy: number;
@@ -30,8 +37,8 @@ interface GeospatialEnvState {
 }
 
 interface GeospatialEnvConfig {
-  latitude: number;  // Origin latitude
-  longitude: number;  // Origin longitude
+  latitude: number; // Origin latitude
+  longitude: number; // Origin longitude
   altitude: number;
   altitude_type: AltitudeType;
   heading: number;
@@ -76,7 +83,7 @@ export const geospatialEnvHandler: TraitHandler<GeospatialEnvConfig> = {
       vpsAvailable: false,
     };
     (node as any).__geospatialEnvState = state;
-    
+
     if (config.auto_initialize) {
       state.state = 'initializing';
       context.emit?.('geospatial_env_initialize', {
@@ -100,9 +107,9 @@ export const geospatialEnvHandler: TraitHandler<GeospatialEnvConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__geospatialEnvState as GeospatialEnvState;
     if (!state) return;
-    
+
     state.lastUpdateTime += delta;
-    
+
     // Check for state transitions based on accuracy
     if (state.state === 'localizing' || state.state === 'localized') {
       if (state.accuracy <= config.accuracy_threshold) {
@@ -121,11 +128,11 @@ export const geospatialEnvHandler: TraitHandler<GeospatialEnvConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__geospatialEnvState as GeospatialEnvState;
     if (!state) return;
-    
+
     if (event.type === 'geospatial_initialized') {
       state.state = 'localizing';
       state.vpsAvailable = event.vpsAvailable as boolean;
-      
+
       context.emit?.('on_geospatial_initialized', {
         node,
         vpsAvailable: state.vpsAvailable,
@@ -134,14 +141,14 @@ export const geospatialEnvHandler: TraitHandler<GeospatialEnvConfig> = {
       state.accuracy = event.accuracy as number;
       state.verticalAccuracy = event.verticalAccuracy as number;
       state.headingAccuracy = event.headingAccuracy as number;
-      
+
       // Apply compass smoothing
       if (config.heading_alignment) {
         const newHeading = event.heading as number;
-        state.heading = state.heading * config.compass_smoothing +
-          newHeading * (1 - config.compass_smoothing);
+        state.heading =
+          state.heading * config.compass_smoothing + newHeading * (1 - config.compass_smoothing);
       }
-      
+
       if (state.state === 'localizing') {
         state.state = 'localized';
         context.emit?.('on_geospatial_localized', {
@@ -151,7 +158,7 @@ export const geospatialEnvHandler: TraitHandler<GeospatialEnvConfig> = {
       }
     } else if (event.type === 'geospatial_vps_result') {
       state.vpsAvailable = event.available as boolean;
-      
+
       if (state.vpsAvailable) {
         state.accuracy = Math.min(state.accuracy, event.accuracy as number);
       }
@@ -159,7 +166,7 @@ export const geospatialEnvHandler: TraitHandler<GeospatialEnvConfig> = {
       state.originLat = event.latitude as number;
       state.originLon = event.longitude as number;
       state.originAlt = event.altitude as number;
-      
+
       context.emit?.('geospatial_origin_update', {
         node,
         latitude: state.originLat,

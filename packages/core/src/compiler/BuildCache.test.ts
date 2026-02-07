@@ -109,7 +109,7 @@ describe('BuildCache', () => {
       expect(result.hit).toBe(true);
 
       // Modify source file (with slight delay to ensure different mtime)
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       writeFileSync(testSourceFile, 'orb "Test" { color: "blue" }');
 
       // Cache should now be stale
@@ -159,9 +159,14 @@ describe('BuildCache', () => {
       writeFileSync(mainFile, 'orb "Main" { ...Base }');
 
       // Cache main with dependency on base
-      await cache.set(mainFile, 'compiled', { main: true }, {
-        dependencies: [baseFile],
-      });
+      await cache.set(
+        mainFile,
+        'compiled',
+        { main: true },
+        {
+          dependencies: [baseFile],
+        }
+      );
 
       // Verify cache hit
       let result = await cache.get(mainFile, 'compiled');
@@ -263,7 +268,7 @@ describe('BuildCache', () => {
       await shortTTLCache.set(testSourceFile, 'ast', { test: true });
 
       // Wait for TTL to expire
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       const prunedCount = await shortTTLCache.prune();
       expect(prunedCount).toBeGreaterThanOrEqual(1);
@@ -317,11 +322,9 @@ describe('BuildCache', () => {
       // Pre-cache file1
       await cache.set(file1, 'ast', { pre: true });
 
-      const result = await cache.warmCache(
-        [file1, file2],
-        'ast',
-        async (path) => ({ computed: path })
-      );
+      const result = await cache.warmCache([file1, file2], 'ast', async (path) => ({
+        computed: path,
+      }));
 
       expect(result.cached).toBe(1);
       expect(result.computed).toBe(1);
@@ -440,7 +443,7 @@ describe('Build Manifest', () => {
     const manifest = createBuildManifest([sourceFile], []);
 
     // Wait and modify file
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
     writeFileSync(sourceFile, 'orb "Modified" {}');
 
     const result = validateBuildManifest(manifest);

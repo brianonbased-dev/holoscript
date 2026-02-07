@@ -30,7 +30,7 @@ interface SpectatorConfig {
   can_interact: boolean;
   visible_to_participants: boolean;
   max_spectators: number;
-  delay: number;  // ms stream delay
+  delay: number; // ms stream delay
   allowed_camera_modes: CameraMode[];
   broadcast_events: boolean;
 }
@@ -63,7 +63,7 @@ export const spectatorHandler: TraitHandler<SpectatorConfig> = {
       streamDelay: config.delay,
     };
     (node as any).__spectatorState = state;
-    
+
     // Initialize spectator system
     context.emit?.('spectator_init', {
       node,
@@ -81,10 +81,10 @@ export const spectatorHandler: TraitHandler<SpectatorConfig> = {
     delete (node as any).__spectatorState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__spectatorState as SpectatorState;
     if (!state) return;
-    
+
     // Update follow camera if active
     if (state.activeCamera === 'follow' && state.followTarget) {
       context.emit?.('spectator_update_follow', {
@@ -97,10 +97,10 @@ export const spectatorHandler: TraitHandler<SpectatorConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__spectatorState as SpectatorState;
     if (!state) return;
-    
+
     if (event.type === 'spectator_join') {
       const spectatorId = event.spectatorId as string;
-      
+
       if (state.spectatorCount >= config.max_spectators) {
         context.emit?.('spectator_rejected', {
           node,
@@ -109,13 +109,13 @@ export const spectatorHandler: TraitHandler<SpectatorConfig> = {
         });
         return;
       }
-      
+
       state.spectators.set(spectatorId, {
         joinTime: Date.now(),
         cameraMode: config.camera_mode,
       });
       state.spectatorCount++;
-      
+
       context.emit?.('spectator_setup', {
         node,
         spectatorId,
@@ -123,7 +123,7 @@ export const spectatorHandler: TraitHandler<SpectatorConfig> = {
         canInteract: config.can_interact,
         delay: config.delay,
       });
-      
+
       context.emit?.('on_spectator_join', {
         node,
         spectatorId,
@@ -131,11 +131,11 @@ export const spectatorHandler: TraitHandler<SpectatorConfig> = {
       });
     } else if (event.type === 'spectator_leave') {
       const spectatorId = event.spectatorId as string;
-      
+
       if (state.spectators.has(spectatorId)) {
         state.spectators.delete(spectatorId);
         state.spectatorCount--;
-        
+
         context.emit?.('on_spectator_leave', {
           node,
           spectatorId,
@@ -145,15 +145,15 @@ export const spectatorHandler: TraitHandler<SpectatorConfig> = {
     } else if (event.type === 'spectator_set_camera') {
       const spectatorId = event.spectatorId as string;
       const newMode = event.mode as CameraMode;
-      
+
       if (!config.allowed_camera_modes.includes(newMode)) {
         return;
       }
-      
+
       const spectator = state.spectators.get(spectatorId);
       if (spectator) {
         spectator.cameraMode = newMode;
-        
+
         context.emit?.('spectator_camera_change', {
           node,
           spectatorId,
@@ -164,7 +164,7 @@ export const spectatorHandler: TraitHandler<SpectatorConfig> = {
     } else if (event.type === 'spectator_set_follow') {
       const targetId = event.targetId as string;
       state.followTarget = targetId;
-      
+
       // Update all spectators in follow mode
       for (const [spectatorId, spectator] of state.spectators) {
         if (spectator.cameraMode === 'follow') {
@@ -177,9 +177,9 @@ export const spectatorHandler: TraitHandler<SpectatorConfig> = {
       }
     } else if (event.type === 'spectator_broadcast') {
       if (!config.broadcast_events) return;
-      
+
       const eventData = event.data;
-      
+
       // Broadcast to all spectators with optional delay
       if (state.streamDelay > 0) {
         setTimeout(() => {
@@ -200,7 +200,7 @@ export const spectatorHandler: TraitHandler<SpectatorConfig> = {
       state.streamDelay = event.delay as number;
     } else if (event.type === 'spectator_toggle_visibility') {
       const visible = event.visible as boolean;
-      
+
       context.emit?.('spectator_visibility_change', {
         node,
         visible,

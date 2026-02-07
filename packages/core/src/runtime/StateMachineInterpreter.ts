@@ -1,4 +1,4 @@
-import { StateMachineNode, StateNode, TransitionNode } from '../types';
+import { StateMachineNode } from '../types';
 import { logger } from '../logger';
 
 export interface StateMachineInstance {
@@ -27,22 +27,28 @@ export class StateMachineInterpreter {
   /**
    * Initialize a new state machine instance
    */
-  public createInstance(id: string, definition: StateMachineNode, context: Record<string, any>): StateMachineInstance {
+  public createInstance(
+    id: string,
+    definition: StateMachineNode,
+    context: Record<string, any>
+  ): StateMachineInstance {
     const instance: StateMachineInstance = {
       definition,
       currentState: definition.initialState,
-      context
+      context,
     };
-    
+
     this.instances.set(id, instance);
-    logger.debug(`[StateMachine] Initialized ${definition.name} for ${id} in state: ${definition.initialState}`);
-    
+    logger.debug(
+      `[StateMachine] Initialized ${definition.name} for ${id} in state: ${definition.initialState}`
+    );
+
     // Trigger initial state entry if it exists
-    const state = definition.states.find(s => s.name === definition.initialState);
+    const state = definition.states.find((s) => s.name === definition.initialState);
     if (state && state.onEntry) {
       this.executeHook(id, state.onEntry, instance.context);
     }
-    
+
     return instance;
   }
 
@@ -54,7 +60,7 @@ export class StateMachineInterpreter {
     if (!instance) return false;
 
     const transition = instance.definition.transitions.find(
-      t => t.from === instance.currentState && t.event === event
+      (t) => t.from === instance.currentState && t.event === event
     );
 
     if (transition) {
@@ -74,15 +80,21 @@ export class StateMachineInterpreter {
 
     if (instance.currentState === targetStateName) return;
 
-    const currentStateDef = instance.definition.states.find(s => s.name === instance.currentState);
-    const targetStateDef = instance.definition.states.find(s => s.name === targetStateName);
+    const currentStateDef = instance.definition.states.find(
+      (s) => s.name === instance.currentState
+    );
+    const targetStateDef = instance.definition.states.find((s) => s.name === targetStateName);
 
     if (!targetStateDef) {
-       logger.error(`[StateMachine] Target state ${targetStateName} not found in ${instance.definition.name}`);
-       return;
+      logger.error(
+        `[StateMachine] Target state ${targetStateName} not found in ${instance.definition.name}`
+      );
+      return;
     }
 
-    logger.debug(`[StateMachine] ${id} transitioning: ${instance.currentState} -> ${targetStateName}`);
+    logger.debug(
+      `[StateMachine] ${id} transitioning: ${instance.currentState} -> ${targetStateName}`
+    );
 
     // 1. Execute Exit Hook
     if (currentStateDef && currentStateDef.onExit) {

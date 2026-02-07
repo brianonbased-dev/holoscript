@@ -412,10 +412,10 @@ describe('R3FCompiler', () => {
 
       // Verify the spread is in the AST
       const firstChild = result.ast.children?.[0];
-      const config = (firstChild as any)?.properties?.config;
+      const config = (firstChild)?.properties?.config;
       expect(config).toBeDefined();
       // The spread should be stored with __spread_ key
-      const hasSpread = Object.keys(config).some(k => k.startsWith('__spread_'));
+      const hasSpread = Object.keys(config).some((k) => k.startsWith('__spread_'));
       expect(hasSpread).toBe(true);
     });
 
@@ -429,12 +429,12 @@ describe('R3FCompiler', () => {
       expect(result.success).toBe(true);
 
       const firstChild = result.ast.children?.[0];
-      const items = (firstChild as any)?.properties?.items;
+      const items = (firstChild)?.properties?.items;
       expect(items).toBeDefined();
       expect(Array.isArray(items)).toBe(true);
       // Should have spread element in array
-      const hasSpread = items.some((item: any) =>
-        item && typeof item === 'object' && item.type === 'spread'
+      const hasSpread = items.some(
+        (item: any) => item && typeof item === 'object' && item.type === 'spread'
       );
       expect(hasSpread).toBe(true);
     });

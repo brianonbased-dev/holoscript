@@ -25,9 +25,15 @@ export class RelayService {
 
     switch (message.type) {
       case 'transform':
-        await this.handleTransformUpdate(document, message.id, message.position, message.rotation, message.scale);
+        await this.handleTransformUpdate(
+          document,
+          message.id,
+          message.position,
+          message.rotation,
+          message.scale
+        );
         break;
-      
+
       case 'voice_command':
         await this.handleVoiceCommand(document, message.text);
         break;
@@ -43,17 +49,20 @@ export class RelayService {
    * Uses regex to find the object block and patch its properties.
    */
   private async handleTransformUpdate(
-    document: vscode.TextDocument, 
-    id: string, 
-    position?: number[], 
-    rotation?: number[], 
+    document: vscode.TextDocument,
+    id: string,
+    position?: number[],
+    rotation?: number[],
     scale?: number[]
   ) {
     const text = document.getText();
-    
+
     // Find the object block: @object "Name" { ... }
     // Handles various syntaxes: orb "Name", object "Name", object "Name" using "Template"
-    const objectRegex = new RegExp(`(?:orb|object)\\s+["']?${id}["']?(?:\\s+using\\s+["'][\\w_]+["'])?(?:\\s+@[\\w]+)*\\s*\\{`, 'g');
+    const objectRegex = new RegExp(
+      `(?:orb|object)\\s+["']?${id}["']?(?:\\s+using\\s+["'][\\w_]+["'])?(?:\\s+@[\\w]+)*\\s*\\{`,
+      'g'
+    );
     const match = objectRegex.exec(text);
 
     if (!match) {
@@ -63,28 +72,34 @@ export class RelayService {
 
     const startOffset = match.index;
     const blockStart = text.indexOf('{', startOffset);
-    
+
     // Find the end of the block (balanced braces)
     let depth = 1;
     let endOffset = blockStart + 1;
     for (let i = blockStart + 1; i < text.length; i++) {
-        if (text[i] === '{') depth++;
-        else if (text[i] === '}') depth--;
-        
-        if (depth === 0) {
-            endOffset = i;
-            break;
-        }
+      if (text[i] === '{') depth++;
+      else if (text[i] === '}') depth--;
+
+      if (depth === 0) {
+        endOffset = i;
+        break;
+      }
     }
 
     const blockContent = text.slice(blockStart + 1, endOffset);
     const editor = await vscode.window.showTextDocument(document);
 
-    await editor.edit(editBuilder => {
+    await editor.edit((editBuilder) => {
       // 1. Update Position
       if (position) {
-        this.updateProperty(editBuilder, document, blockStart, blockContent, 'position', 
-            `[${position.map(n => parseFloat(n.toFixed(3))).join(', ')}]`);
+        this.updateProperty(
+          editBuilder,
+          document,
+          blockStart,
+          blockContent,
+          'position',
+          `[${position.map((n) => parseFloat(n.toFixed(3))).join(', ')}]`
+        );
       }
 
       // 2. Update Rotation
@@ -92,18 +107,30 @@ export class RelayService {
         // Convert radians to degrees for readability if desired, or keep as array
         // Standard HoloScript often uses [x, y, z] in radians or degrees depending on implementation
         // Assuming Director Client sends appropriate values.
-        this.updateProperty(editBuilder, document, blockStart, blockContent, 'rotation', 
-            `[${rotation.map(n => parseFloat(n.toFixed(3))).join(', ')}]`);
+        this.updateProperty(
+          editBuilder,
+          document,
+          blockStart,
+          blockContent,
+          'rotation',
+          `[${rotation.map((n) => parseFloat(n.toFixed(3))).join(', ')}]`
+        );
       }
 
       // 3. Update Scale
       if (scale) {
-        this.updateProperty(editBuilder, document, blockStart, blockContent, 'scale', 
-            `[${scale.map(n => parseFloat(n.toFixed(3))).join(', ')}]`);
+        this.updateProperty(
+          editBuilder,
+          document,
+          blockStart,
+          blockContent,
+          'scale',
+          `[${scale.map((n) => parseFloat(n.toFixed(3))).join(', ')}]`
+        );
       }
     });
 
-    // Save automatically for "Live Sync" feel? 
+    // Save automatically for "Live Sync" feel?
     // Maybe too aggressive. Let's start with just editing.
   }
 
@@ -118,19 +145,21 @@ export class RelayService {
     propertyName: string,
     newValue: string
   ) {
-    const propRegex = new RegExp(`${propertyName}\\s*:\\s*(?:\\[[^\\]]+\\]|\\{[^\\}]+\\}|["'][^"']+["']|[\\d.-]+)`);
+    const propRegex = new RegExp(
+      `${propertyName}\\s*:\\s*(?:\\[[^\\]]+\\]|\\{[^\\}]+\\}|["'][^"']+["']|[\\d.-]+)`
+    );
     const propMatch = propRegex.exec(blockContent);
 
     if (propMatch) {
       // Property exists, replace it
       const propStartAbs = blockStart + 1 + propMatch.index;
       const propEndAbs = propStartAbs + propMatch[0].length;
-      
+
       const range = new vscode.Range(
         document.positionAt(propStartAbs),
         document.positionAt(propEndAbs)
       );
-      
+
       editBuilder.replace(range, `${propertyName}: ${newValue}`);
     } else {
       // Property missing, insert it at start of block
@@ -138,7 +167,7 @@ export class RelayService {
       // Determine indentation
       const line = document.lineAt(insertPos.line);
       const indentation = line.text.substring(0, line.firstNonWhitespaceCharacterIndex) + '  '; // Simple +2 space assumption
-      
+
       editBuilder.insert(insertPos, `\n${indentation}${propertyName}: ${newValue}`);
     }
   }
@@ -150,19 +179,23 @@ export class RelayService {
     // Phase 4: Mock implementation
     // Ideally this calls Brittney via MCP
     vscode.window.showInformationMessage(`Director Voice: "${commandText}"`);
-    
+
     // Quick demo handling
   }
 
   /*
    * Handle asset injection from Asset Browser.
    */
-  private async handleInjectAsset(document: vscode.TextDocument, assetId: string, assetType: string) {
+  private async handleInjectAsset(
+    document: vscode.TextDocument,
+    assetId: string,
+    assetType: string
+  ) {
     const editor = await vscode.window.showTextDocument(document);
     const uniqueName = `${assetId}_${Date.now().toString().slice(-4)}`;
-    
+
     let snippet = '';
-    
+
     switch (assetId) {
       case 'cube':
         snippet = `\n@object "${uniqueName}" {\n  model: "cube"\n  color: "cyan"\n  position: [0, 1, 0]\n  @physics\n  @grabbable\n}\n`;
@@ -186,15 +219,15 @@ export class RelayService {
         snippet = `\n@object "${uniqueName}" {\n  model: "cube"\n  position: [0, 0, 0]\n}\n`;
     }
 
-    await editor.edit(editBuilder => {
+    await editor.edit((editBuilder) => {
       const pos = document.positionAt(document.getText().length);
       editBuilder.insert(pos, snippet);
     });
-    
+
     vscode.window.showInformationMessage(`Director Mode: Injected ${uniqueName}`);
   }
 
   public dispose() {
-    this._disposables.forEach(d => d.dispose());
+    this._disposables.forEach((d) => d.dispose());
   }
 }

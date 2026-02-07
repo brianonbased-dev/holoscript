@@ -60,11 +60,7 @@ class ObjectPool<T extends object> {
   private resetFn: (obj: T) => void;
   private maxSize: number;
 
-  constructor(
-    createFn: () => T,
-    resetFn: (obj: T) => void,
-    maxSize = 100
-  ) {
+  constructor(createFn: () => T, resetFn: (obj: T) => void, maxSize = 100) {
     this.createFn = createFn;
     this.resetFn = resetFn;
     this.maxSize = maxSize;
@@ -100,13 +96,20 @@ class ObjectPool<T extends object> {
 // Token pool for reusing token objects
 const tokenPool = new ObjectPool<{ type: string; value: string; line: number; column: number }>(
   () => ({ type: '', value: '', line: 0, column: 0 }),
-  (t) => { t.type = ''; t.value = ''; t.line = 0; t.column = 0; }
+  (t) => {
+    t.type = '';
+    t.value = '';
+    t.line = 0;
+    t.column = 0;
+  }
 );
 
 // Array pool for reusing arrays
 const arrayPool = new ObjectPool<unknown[]>(
   () => [],
-  (arr) => { arr.length = 0; },
+  (arr) => {
+    arr.length = 0;
+  },
   50
 );
 
@@ -130,8 +133,16 @@ const CODE_SECURITY_CONFIG = {
   maxBlocks: 100,
   maxNestingDepth: 10,
   suspiciousKeywords: [
-    'process', 'require', 'eval', 'constructor',
-    'prototype', '__proto__', 'fs', 'child_process', 'exec', 'spawn',
+    'process',
+    'require',
+    'eval',
+    'constructor',
+    'prototype',
+    '__proto__',
+    'fs',
+    'child_process',
+    'exec',
+    'spawn',
   ],
 };
 
@@ -142,14 +153,14 @@ const CODE_SECURITY_CONFIG = {
 function stripCommentsAndStrings(code: string): string {
   let result = '';
   let i = 0;
-  
+
   while (i < code.length) {
     // Single-line comment
     if (code[i] === '/' && code[i + 1] === '/') {
       while (i < code.length && code[i] !== '\n') i++;
       continue;
     }
-    
+
     // Multi-line comment
     if (code[i] === '/' && code[i + 1] === '*') {
       i += 2;
@@ -157,7 +168,7 @@ function stripCommentsAndStrings(code: string): string {
       i += 2;
       continue;
     }
-    
+
     // Double-quoted string
     if (code[i] === '"') {
       i++;
@@ -168,7 +179,7 @@ function stripCommentsAndStrings(code: string): string {
       i++; // Skip closing quote
       continue;
     }
-    
+
     // Single-quoted string
     if (code[i] === "'") {
       i++;
@@ -179,11 +190,11 @@ function stripCommentsAndStrings(code: string): string {
       i++; // Skip closing quote
       continue;
     }
-    
+
     result += code[i];
     i++;
   }
-  
+
   return result;
 }
 
@@ -242,23 +253,98 @@ export class HoloScriptCodeParser {
   constructor() {
     // Pre-compute keyword set for O(1) lookup instead of O(n) array search
     this.keywordSet = new Set([
-      'orb', 'function', 'connect', 'to', 'as', 'gate', 'stream', 'from', 'through', 'return',
-      'if', 'else', 'nexus', 'building', 'pillar', 'foundation',
-      'for', 'while', 'forEach', 'in', 'of', 'break', 'continue',
-      'import', 'export', 'module', 'use',
-      'type', 'interface', 'extends', 'implements', 'is',
-      'async', 'await', 'spawn', 'parallel',
-      'class', 'new', 'this', 'super', 'static', 'private', 'public',
-      'try', 'catch', 'finally', 'throw',
-      'const', 'let', 'var',
-      'animate', 'modify', 'pulse', 'move', 'show', 'hide',
-      'scale', 'focus', 'environment', 'composition', 'template', 'settings', 'chat', 'migrate',
+      'orb',
+      'function',
+      'connect',
+      'to',
+      'as',
+      'gate',
+      'stream',
+      'from',
+      'through',
+      'return',
+      'if',
+      'else',
+      'nexus',
+      'building',
+      'pillar',
+      'foundation',
+      'for',
+      'while',
+      'forEach',
+      'in',
+      'of',
+      'break',
+      'continue',
+      'import',
+      'export',
+      'module',
+      'use',
+      'type',
+      'interface',
+      'extends',
+      'implements',
+      'is',
+      'async',
+      'await',
+      'spawn',
+      'parallel',
+      'class',
+      'new',
+      'this',
+      'super',
+      'static',
+      'private',
+      'public',
+      'try',
+      'catch',
+      'finally',
+      'throw',
+      'const',
+      'let',
+      'var',
+      'animate',
+      'modify',
+      'pulse',
+      'move',
+      'show',
+      'hide',
+      'scale',
+      'focus',
+      'environment',
+      'composition',
+      'template',
+      'settings',
+      'chat',
+      'migrate',
       // Shape keywords for 3D objects
-      'cube', 'sphere', 'plane', 'cylinder', 'cone', 'torus', 'pyramid',
-      'box', 'mesh', 'model', 'object', 'light', 'camera',
+      'cube',
+      'sphere',
+      'plane',
+      'cylinder',
+      'cone',
+      'torus',
+      'pyramid',
+      'box',
+      'mesh',
+      'model',
+      'object',
+      'light',
+      'camera',
       // Additional scene keywords
-      'npc', 'player', 'entity', 'trigger', 'zone', 'portal', 'spatial_group',
-      'interactive', 'traits', 'on_interact', 'on_collision', 'on_enter', 'on_exit'
+      'npc',
+      'player',
+      'entity',
+      'trigger',
+      'zone',
+      'portal',
+      'spatial_group',
+      'interactive',
+      'traits',
+      'on_interact',
+      'on_collision',
+      'on_enter',
+      'on_exit',
     ]);
   }
 
@@ -276,7 +362,7 @@ export class HoloScriptCodeParser {
   ): ParseError {
     const line = token?.line || 0;
     const column = token?.column || 0;
-    
+
     // Get source context (line before, current, line after)
     let context = '';
     if (this.sourceLines.length > 0 && line > 0) {
@@ -284,7 +370,8 @@ export class HoloScriptCodeParser {
       if (line > 1) lines.push(`${line - 1} | ${this.sourceLines[line - 2] || ''}`);
       lines.push(`${line} | ${this.sourceLines[line - 1] || ''}`);
       lines.push(`    ${' '.repeat(column)}^`);
-      if (line < this.sourceLines.length) lines.push(`${line + 1} | ${this.sourceLines[line] || ''}`);
+      if (line < this.sourceLines.length)
+        lines.push(`${line + 1} | ${this.sourceLines[line] || ''}`);
       context = lines.join('\n');
     }
 
@@ -324,7 +411,7 @@ export class HoloScriptCodeParser {
   private similarity(a: string, b: string): number {
     if (a === b) return 1;
     if (a.length === 0 || b.length === 0) return 0;
-    
+
     const len = Math.max(a.length, b.length);
     let matches = 0;
     for (let i = 0; i < Math.min(a.length, b.length); i++) {
@@ -342,7 +429,7 @@ export class HoloScriptCodeParser {
    */
   private addError(error: ParseError): void {
     // Avoid duplicate errors on same line
-    if (!this.errors.some(e => e.line === error.line && e.message === error.message)) {
+    if (!this.errors.some((e) => e.line === error.line && e.message === error.message)) {
       this.errors.push(error);
     }
   }
@@ -354,16 +441,29 @@ export class HoloScriptCodeParser {
     while (this.position < this.tokens.length) {
       const token = this.currentToken();
       if (!token) break;
-      
+
       // Stop at statement boundaries
       if (token.type === 'newline') {
         this.advance();
         break;
       }
-      if (token.type === 'keyword' && [
-        'orb', 'function', 'gate', 'for', 'while', 'if', 'return',
-        'object', 'template', 'composition', 'spatial_group', 'logic'
-      ].includes(token.value)) {
+      if (
+        token.type === 'keyword' &&
+        [
+          'orb',
+          'function',
+          'gate',
+          'for',
+          'while',
+          'if',
+          'return',
+          'object',
+          'template',
+          'composition',
+          'spatial_group',
+          'logic',
+        ].includes(token.value)
+      ) {
         break;
       }
       if (token.type === 'punctuation' && ['}', ';'].includes(token.value)) {
@@ -389,13 +489,15 @@ export class HoloScriptCodeParser {
       return {
         success: false,
         ast: [],
-        errors: [{
-          line: 0,
-          column: 0,
-          message: `Code exceeds max length (${CODE_SECURITY_CONFIG.maxCodeLength})`,
-          code: 'HS009',
-          severity: 'error'
-        }],
+        errors: [
+          {
+            line: 0,
+            column: 0,
+            message: `Code exceeds max length (${CODE_SECURITY_CONFIG.maxCodeLength})`,
+            code: 'HS009',
+            severity: 'error',
+          },
+        ],
         warnings: [],
       };
     }
@@ -410,13 +512,15 @@ export class HoloScriptCodeParser {
         return {
           success: false,
           ast: [],
-          errors: [{
-            line: 0,
-            column: 0,
-            message: `Suspicious keyword detected: ${keyword}`,
-            code: 'HS010',
-            severity: 'error'
-          }],
+          errors: [
+            {
+              line: 0,
+              column: 0,
+              message: `Suspicious keyword detected: ${keyword}`,
+              code: 'HS010',
+              severity: 'error',
+            },
+          ],
           warnings: [],
         };
       }
@@ -442,7 +546,7 @@ export class HoloScriptCodeParser {
         column: 0,
         message: String(error),
         code: 'HS004',
-        severity: 'error'
+        severity: 'error',
       });
       return {
         success: false,
@@ -553,7 +657,27 @@ export class HoloScriptCodeParser {
       }
 
       // Multi-character operators (must check before single-char)
-      const multiCharOps = ['===', '!==', '==', '!=', '>=', '<=', '&&', '||', '??', '?.', '++', '--', '+=', '-=', '*=', '/=', '%=', '=>', '->'];
+      const multiCharOps = [
+        '===',
+        '!==',
+        '==',
+        '!=',
+        '>=',
+        '<=',
+        '&&',
+        '||',
+        '??',
+        '?.',
+        '++',
+        '--',
+        '+=',
+        '-=',
+        '*=',
+        '/=',
+        '%=',
+        '=>',
+        '->',
+      ];
       let foundMultiOp = false;
       for (const op of multiCharOps) {
         if (code.substring(i, i + op.length) === op) {
@@ -567,7 +691,32 @@ export class HoloScriptCodeParser {
       if (foundMultiOp) continue;
 
       // Operators and punctuation
-      const punctuation = ['{', '}', '(', ')', '[', ']', ':', ',', '.', ';', '=', '<', '>', '+', '-', '*', '/', '%', '!', '&', '|', '?', '#', '@'];
+      const punctuation = [
+        '{',
+        '}',
+        '(',
+        ')',
+        '[',
+        ']',
+        ':',
+        ',',
+        '.',
+        ';',
+        '=',
+        '<',
+        '>',
+        '+',
+        '-',
+        '*',
+        '/',
+        '%',
+        '!',
+        '&',
+        '|',
+        '?',
+        '#',
+        '@',
+      ];
       if (punctuation.includes(char)) {
         tokens.push({ type: 'punctuation', value: char, line, column });
         i++;
@@ -600,7 +749,7 @@ export class HoloScriptCodeParser {
           column: 0,
           message: `Too many errors (${maxErrors}+), stopping parse`,
           code: 'HS009',
-          severity: 'error'
+          severity: 'error',
         });
         break;
       }
@@ -620,14 +769,14 @@ export class HoloScriptCodeParser {
           column: 0,
           message: 'Too many blocks in program',
           code: 'HS009',
-          severity: 'error'
+          severity: 'error',
         });
         break;
       }
 
       const errorCountBefore = this.errors.length;
       const node = this.parseDeclaration();
-      
+
       if (node) {
         nodes.push(node);
       } else if (this.errors.length > errorCountBefore) {
@@ -688,7 +837,7 @@ export class HoloScriptCodeParser {
         case 'row':
         case 'col':
         case 'text':
-           return this.parseUIElement();
+          return this.parseUIElement();
         case 'const':
         case 'let':
         case 'var':
@@ -753,14 +902,19 @@ export class HoloScriptCodeParser {
     this.advance();
 
     // Parse init, condition, update (simplified - collect as strings)
-    let init = '', condition = '', update = '';
+    let init = '',
+      condition = '',
+      update = '';
     let depth = 0;
 
     // Parse init (until first ;)
     while (this.position < this.tokens.length) {
       const t = this.currentToken();
       if (!t) break;
-      if (t.value === ';' && depth === 0) { this.advance(); break; }
+      if (t.value === ';' && depth === 0) {
+        this.advance();
+        break;
+      }
       if (t.value === '(') depth++;
       if (t.value === ')') depth--;
       init += t.value + ' ';
@@ -772,7 +926,10 @@ export class HoloScriptCodeParser {
     while (this.position < this.tokens.length) {
       const t = this.currentToken();
       if (!t) break;
-      if (t.value === ';' && depth === 0) { this.advance(); break; }
+      if (t.value === ';' && depth === 0) {
+        this.advance();
+        break;
+      }
       if (t.value === '(') depth++;
       if (t.value === ')') depth--;
       condition += t.value + ' ';
@@ -784,7 +941,10 @@ export class HoloScriptCodeParser {
     while (this.position < this.tokens.length) {
       const t = this.currentToken();
       if (!t) break;
-      if (t.value === ')' && depth === 0) { this.advance(); break; }
+      if (t.value === ')' && depth === 0) {
+        this.advance();
+        break;
+      }
       if (t.value === '(') depth++;
       if (t.value === ')') depth--;
       update += t.value + ' ';
@@ -827,7 +987,13 @@ export class HoloScriptCodeParser {
         const t = this.currentToken();
         if (!t) break;
         if (t.value === '(') depth++;
-        if (t.value === ')') { depth--; if (depth === 0) { this.advance(); break; } }
+        if (t.value === ')') {
+          depth--;
+          if (depth === 0) {
+            this.advance();
+            break;
+          }
+        }
         condition += t.value + ' ';
         this.advance();
       }
@@ -978,7 +1144,8 @@ export class HoloScriptCodeParser {
    */
   private parseVariableDeclaration(): VariableDeclarationNode | null {
     const kindToken = this.currentToken()?.value.toLowerCase();
-    const kind: 'const' | 'let' | 'var' = kindToken === 'let' ? 'let' : kindToken === 'var' ? 'var' : 'const';
+    const kind: 'const' | 'let' | 'var' =
+      kindToken === 'let' ? 'let' : kindToken === 'var' ? 'var' : 'const';
     this.advance();
 
     const name = this.expectIdentifier();
@@ -1001,7 +1168,7 @@ export class HoloScriptCodeParser {
 
     if (this.check('punctuation', '=')) {
       this.advance();
-      
+
       const valueToken = this.currentToken();
       if (valueToken?.type === 'string') {
         result.value = valueToken.value;
@@ -1043,12 +1210,12 @@ export class HoloScriptCodeParser {
    */
   private parseOrb(): OrbNode | null {
     const startToken = this.currentToken(); // Capture start token for line info
-    
+
     // Support both 'orb' and 'object' keywords
     if (this.check('keyword', 'orb') || this.check('keyword', 'object')) {
-        this.advance();
+      this.advance();
     } else {
-        this.expect('keyword', 'orb'); // Fallback to standard error
+      this.expect('keyword', 'orb'); // Fallback to standard error
     }
 
     let name = '';
@@ -1088,7 +1255,13 @@ export class HoloScriptCodeParser {
             if (prop.key === 'position' || prop.key === 'at') {
               position = this.parsePosition(prop.value);
             } else if (prop.key === 'color' || prop.key === 'glow' || prop.key === 'size') {
-              hologram = hologram || { shape: 'orb', color: '#00ffff', size: 0.5, glow: true, interactive: true };
+              hologram = hologram || {
+                shape: 'orb',
+                color: '#00ffff',
+                size: 0.5,
+                glow: true,
+                interactive: true,
+              };
               if (prop.key === 'color') hologram.color = String(prop.value);
               if (prop.key === 'glow') hologram.glow = Boolean(prop.value);
               if (prop.key === 'size') hologram.size = Number(prop.value);
@@ -1111,7 +1284,13 @@ export class HoloScriptCodeParser {
       type: 'orb',
       name,
       position: position || { x: 0, y: 0, z: 0 },
-      hologram: hologram || { shape: 'orb', color: '#00ffff', size: 0.5, glow: true, interactive: true },
+      hologram: hologram || {
+        shape: 'orb',
+        color: '#00ffff',
+        size: 0.5,
+        glow: true,
+        interactive: true,
+      },
       properties,
       directives: directives as any,
       methods: [],
@@ -1153,8 +1332,7 @@ export class HoloScriptCodeParser {
           if (braceDepth > 0) {
             const val = t.type === 'string' ? JSON.stringify(t.value) : t.value;
             body += val + ' ';
-          }
-          else if (braceDepth < 0) break; // Should not happen with valid syntax
+          } else if (braceDepth < 0) break; // Should not happen with valid syntax
         }
       } else {
         const t = this.advance();
@@ -1354,14 +1532,14 @@ export class HoloScriptCodeParser {
    */
   private parseScale(): ScaleNode | null {
     this.expect('keyword', 'scale');
-    const magnitude = (this.expectIdentifier() || 'standard') as ScaleNode['magnitude'];
-    
+    const magnitude = (this.expectIdentifier() || 'standard');
+
     const multipliers: Record<string, number> = {
-      'galactic': 1000000,
-      'macro': 1000,
-      'standard': 1,
-      'micro': 0.001,
-      'atomic': 0.000001
+      galactic: 1000000,
+      macro: 1000,
+      standard: 1,
+      micro: 0.001,
+      atomic: 0.000001,
     };
 
     const body: ASTNode[] = [];
@@ -1380,8 +1558,8 @@ export class HoloScriptCodeParser {
       type: 'scale',
       magnitude,
       multiplier: multipliers[magnitude] || 1,
-      body, 
-      position: { x: 0, y: 0, z: 0 }
+      body,
+      position: { x: 0, y: 0, z: 0 },
     };
   }
 
@@ -1391,7 +1569,7 @@ export class HoloScriptCodeParser {
   private parseFocus(): FocusNode | null {
     this.expect('keyword', 'focus');
     const target = this.expectIdentifier() || 'origin';
-    
+
     const body: ASTNode[] = [];
     if (this.check('punctuation', '{')) {
       this.advance();
@@ -1408,7 +1586,7 @@ export class HoloScriptCodeParser {
       type: 'focus',
       target,
       body,
-      position: { x: 0, y: 0, z: 0 }
+      position: { x: 0, y: 0, z: 0 },
     };
   }
 
@@ -1454,9 +1632,11 @@ export class HoloScriptCodeParser {
       this.expect('punctuation', '}');
     } else {
       // Legacy inline syntax: environment key value
-      while (this.position < this.tokens.length &&
-             this.currentToken()?.type !== 'newline' &&
-             !this.check('punctuation', '}')) {
+      while (
+        this.position < this.tokens.length &&
+        this.currentToken()?.type !== 'newline' &&
+        !this.check('punctuation', '}')
+      ) {
         const key = this.expectIdentifier();
         if (!key) break;
         settings[key] = this.parseLiteral() as HoloScriptValue;
@@ -1469,7 +1649,7 @@ export class HoloScriptCodeParser {
 
     return {
       type: 'environment',
-      settings
+      settings,
     };
   }
 
@@ -1545,7 +1725,13 @@ export class HoloScriptCodeParser {
       type: 'orb',
       name,
       position: position || { x: 0, y: 0, z: 0 },
-      hologram: { shape: primitiveType as HologramShape, color: '#00d4ff', size: 1, glow: false, interactive: true },
+      hologram: {
+        shape: primitiveType as HologramShape,
+        color: '#00d4ff',
+        size: 1,
+        glow: false,
+        interactive: true,
+      },
       properties,
       directives: directives as any,
       methods: [],
@@ -1559,7 +1745,7 @@ export class HoloScriptCodeParser {
    */
   private parseZone(): ZoneNode | null {
     this.expect('keyword', 'zone');
-    
+
     let name = '';
     let zoneId: string | undefined;
 
@@ -1579,7 +1765,7 @@ export class HoloScriptCodeParser {
       while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
         this.skipNewlines();
         if (this.check('punctuation', '}')) break;
-        
+
         const prop = this.parseProperty();
         if (prop) {
           if (prop.key === 'position') {
@@ -1590,12 +1776,18 @@ export class HoloScriptCodeParser {
             properties[prop.key] = prop.value;
           }
         } else {
-             // Fix: Advance if parseProperty failed to consume anything
-             const token = this.currentToken();
-             this.addError(this.createError('HS004', `Unexpected token in zone: ${token?.type || 'unknown'}`, token));
-             this.advance();
+          // Fix: Advance if parseProperty failed to consume anything
+          const token = this.currentToken();
+          this.addError(
+            this.createError(
+              'HS004',
+              `Unexpected token in zone: ${token?.type || 'unknown'}`,
+              token
+            )
+          );
+          this.advance();
         }
-        
+
         this.skipNewlines();
       }
       this.expect('punctuation', '}');
@@ -1607,7 +1799,7 @@ export class HoloScriptCodeParser {
       id: zoneId,
       position,
       events: {}, // Events are stored in properties for now
-      properties
+      properties,
     };
   }
 
@@ -1617,7 +1809,7 @@ export class HoloScriptCodeParser {
   private parseComposition(): CompositionNode | null {
     this.expect('keyword', 'composition');
     const name = this.expectName() || 'unnamed';
-    
+
     const children: ASTNode[] = [];
     if (this.check('punctuation', '{')) {
       this.advance();
@@ -1633,7 +1825,7 @@ export class HoloScriptCodeParser {
     return {
       type: 'composition',
       name,
-      children
+      children,
     };
   }
 
@@ -1643,7 +1835,7 @@ export class HoloScriptCodeParser {
   private parseTemplate(): TemplateNode | null {
     this.expect('keyword', 'template');
     const name = this.expectName() || 'template';
-    
+
     let version: number | undefined;
     const params: string[] = [];
     if (this.check('punctuation', '(')) {
@@ -1663,7 +1855,7 @@ export class HoloScriptCodeParser {
       this.advance();
       while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
         this.skipNewlines();
-        
+
         // Check for @version(n)
         const token = this.currentToken();
         if (token?.type === 'punctuation' && token.value === '@') {
@@ -1694,7 +1886,9 @@ export class HoloScriptCodeParser {
           }
         }
         this.skipNewlines();
-        console.log(`[Parser] Template "${name}" item parsed, current position: ${this.position}/${this.tokens.length}`);
+        console.log(
+          `[Parser] Template "${name}" item parsed, current position: ${this.position}/${this.tokens.length}`
+        );
       }
       this.expect('punctuation', '}');
     }
@@ -1705,7 +1899,7 @@ export class HoloScriptCodeParser {
       parameters: params,
       children,
       version,
-      migrations
+      migrations,
     };
   }
 
@@ -1716,7 +1910,7 @@ export class HoloScriptCodeParser {
     this.expect('keyword', 'migrate');
     this.expect('keyword', 'from');
     this.expect('punctuation', '(');
-    
+
     let fromVersion = 0;
     const vStr = this.currentToken();
     if (vStr?.type === 'number') {
@@ -1729,8 +1923,8 @@ export class HoloScriptCodeParser {
     if (this.check('punctuation', '{')) {
       this.advance(); // {
       let braceDepth = 1;
-      const startPos = this.position;
-      
+      const _startPos = this.position;
+
       while (braceDepth > 0 && this.position < this.tokens.length) {
         const t = this.advance()!;
         if (t.value === '{') braceDepth++;
@@ -1747,7 +1941,7 @@ export class HoloScriptCodeParser {
       type: 'migration',
       fromVersion,
       body: body.trim(),
-      position: { x: 0, y: 0, z: 0 }
+      position: { x: 0, y: 0, z: 0 },
     };
   }
 
@@ -1779,13 +1973,13 @@ export class HoloScriptCodeParser {
     const truePath: ASTNode[] = [];
     if (this.check('punctuation', '{')) {
       this.advance(); // {
-      
+
       while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
-         const node = this.parseDeclaration();
-         if (node) truePath.push(node);
-         else this.advance();
+        const node = this.parseDeclaration();
+        if (node) truePath.push(node);
+        else this.advance();
       }
-      
+
       this.expect('punctuation', '}');
     }
 
@@ -1796,9 +1990,9 @@ export class HoloScriptCodeParser {
       if (this.check('punctuation', '{')) {
         this.advance();
         while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
-           const node = this.parseDeclaration();
-           if (node) falsePath.push(node);
-           else this.advance();
+          const node = this.parseDeclaration();
+          if (node) falsePath.push(node);
+          else this.advance();
         }
         this.expect('punctuation', '}');
       } else {
@@ -1823,7 +2017,7 @@ export class HoloScriptCodeParser {
    */
   private parseReturn(): ASTNode | null {
     this.expect('keyword', 'return');
-    
+
     let expression = '';
     let parenDepth = 0;
     let braceDepth = 0;
@@ -1835,7 +2029,14 @@ export class HoloScriptCodeParser {
       if (!t) break;
 
       if (t.type === 'newline' && parenDepth === 0 && braceDepth === 0 && bracketDepth === 0) break;
-      if (t.type === 'punctuation' && t.value === ';' && parenDepth === 0 && braceDepth === 0 && bracketDepth === 0) break;
+      if (
+        t.type === 'punctuation' &&
+        t.value === ';' &&
+        parenDepth === 0 &&
+        braceDepth === 0 &&
+        bracketDepth === 0
+      )
+        break;
 
       if (t.type === 'punctuation') {
         if (t.value === '(') parenDepth++;
@@ -1871,7 +2072,14 @@ export class HoloScriptCodeParser {
       if (!t) break;
 
       if (t.type === 'newline' && parenDepth === 0 && braceDepth === 0 && bracketDepth === 0) break;
-      if (t.type === 'punctuation' && t.value === ';' && parenDepth === 0 && braceDepth === 0 && bracketDepth === 0) break;
+      if (
+        t.type === 'punctuation' &&
+        t.value === ';' &&
+        parenDepth === 0 &&
+        braceDepth === 0 &&
+        bracketDepth === 0
+      )
+        break;
 
       if (t.type === 'punctuation') {
         if (t.value === '(') parenDepth++;
@@ -1885,7 +2093,7 @@ export class HoloScriptCodeParser {
       expression += t.value + ' ';
       this.advance();
     }
-    
+
     if (expression.trim().length === 0) {
       this.advance(); // Skip empty line/unknown
       return null;
@@ -2059,7 +2267,9 @@ export class HoloScriptCodeParser {
         this.advance();
       } else {
         // Fix: Advance and report error to prevent infinite loop
-        this.addError(this.createError('HS004', `Unexpected token in array: ${token?.type || 'unknown'}`, token));
+        this.addError(
+          this.createError('HS004', `Unexpected token in array: ${token?.type || 'unknown'}`, token)
+        );
         this.advance();
       }
     }
@@ -2085,7 +2295,13 @@ export class HoloScriptCodeParser {
       } else {
         // Fix: Advance if parseProperty failed to consume anything
         const token = this.currentToken();
-        this.addError(this.createError('HS004', `Unexpected token in object: ${token?.type || 'unknown'}`, token));
+        this.addError(
+          this.createError(
+            'HS004',
+            `Unexpected token in object: ${token?.type || 'unknown'}`,
+            token
+          )
+        );
         this.advance();
       }
 
@@ -2145,7 +2361,7 @@ export class HoloScriptCodeParser {
       return true;
     }
     const token = this.currentToken();
-    
+
     // Build suggestion for keywords
     let suggestion: string | undefined;
     if (type === 'keyword' && value && token?.type === 'identifier') {
@@ -2154,13 +2370,15 @@ export class HoloScriptCodeParser {
         suggestion = `Did you mean '${similar}'?`;
       }
     }
-    
-    this.addError(this.createError(
-      type === 'keyword' ? 'HS001' : type === 'identifier' ? 'HS002' : 'HS003',
-      `Expected ${type}${value ? ` '${value}'` : ''}, got ${token?.type || 'EOF'} '${token?.value || ''}'`,
-      token,
-      suggestion
-    ));
+
+    this.addError(
+      this.createError(
+        type === 'keyword' ? 'HS001' : type === 'identifier' ? 'HS002' : 'HS003',
+        `Expected ${type}${value ? ` '${value}'` : ''}, got ${token?.type || 'EOF'} '${token?.value || ''}'`,
+        token,
+        suggestion
+      )
+    );
     return false;
   }
 
@@ -2170,13 +2388,15 @@ export class HoloScriptCodeParser {
       this.advance();
       return token.value;
     }
-    
-    this.addError(this.createError(
-      'HS002',
-      `Expected identifier, got ${token?.type || 'EOF'}`,
-      token,
-      token?.type === 'number' ? 'Identifiers cannot start with a number' : undefined
-    ));
+
+    this.addError(
+      this.createError(
+        'HS002',
+        `Expected identifier, got ${token?.type || 'EOF'}`,
+        token,
+        token?.type === 'number' ? 'Identifiers cannot start with a number' : undefined
+      )
+    );
     return null;
   }
 
@@ -2194,17 +2414,22 @@ export class HoloScriptCodeParser {
       this.advance();
       // Strip quotes from string value
       const val = token.value;
-      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
         return val.slice(1, -1);
       }
       return val;
     }
-    
-    this.addError(this.createError(
-      'HS002',
-      `Expected name (identifier or string), got ${token?.type || 'EOF'}`,
-      token
-    ));
+
+    this.addError(
+      this.createError(
+        'HS002',
+        `Expected name (identifier or string), got ${token?.type || 'EOF'}`,
+        token
+      )
+    );
     return null;
   }
 
@@ -2222,7 +2447,12 @@ export class HoloScriptCodeParser {
     while (this.position < this.tokens.length) {
       this.skipNewlines();
       const t = this.currentToken();
-      if (!t || t.type === 'newline' || (t.type === 'keyword' && this.keywordSet.has(t.value.toLowerCase()))) break;
+      if (
+        !t ||
+        t.type === 'newline' ||
+        (t.type === 'keyword' && this.keywordSet.has(t.value.toLowerCase()))
+      )
+        break;
 
       const prop = this.parseProperty();
       if (prop) {
@@ -2275,51 +2505,51 @@ export class HoloScriptCodeParser {
    * Parse UI Element: ui2d dashboard#id { ... }
    */
   private parseUIElement(): ASTNode | null {
-      const typeToken = this.currentToken();
-      if (!typeToken) return null;
-      
-      const elementType = typeToken.value;
+    const typeToken = this.currentToken();
+    if (!typeToken) return null;
+
+    const elementType = typeToken.value;
+    this.advance();
+
+    let elementId = `${elementType}_${Date.now()}`;
+
+    // Check for ID syntax
+    const token = this.currentToken();
+    if (token?.type === 'punctuation' && token.value === '#') {
       this.advance();
-      
-      let elementId = `${elementType}_${Date.now()}`;
-      
-      // Check for ID syntax
-      const token = this.currentToken();
-      if (token?.type === 'punctuation' && token.value === '#') {
-         this.advance(); 
-         const idToken = this.currentToken();
-         if (idToken) {
-             elementId = idToken.value;
-             this.advance();
-         }
-      } else if (token?.type === 'identifier' && token.value.startsWith('#')) {
-          elementId = token.value.slice(1) || elementId;
-          this.advance();
+      const idToken = this.currentToken();
+      if (idToken) {
+        elementId = idToken.value;
+        this.advance();
       }
-      
-      const properties: Record<string, HoloScriptValue> = {};
-      
-      if (this.check('punctuation', '{')) {
-          this.advance();
-          while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
-              this.skipNewlines();
-              if (this.check('punctuation', '}')) break;
-              
-              const prop = this.parseProperty();
-              if (prop) {
-                  properties[prop.key] = prop.value;
-              }
-              this.skipNewlines();
-          }
-          this.expect('punctuation', '}');
+    } else if (token?.type === 'identifier' && token.value.startsWith('#')) {
+      elementId = token.value.slice(1) || elementId;
+      this.advance();
+    }
+
+    const properties: Record<string, HoloScriptValue> = {};
+
+    if (this.check('punctuation', '{')) {
+      this.advance();
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+        this.skipNewlines();
+        if (this.check('punctuation', '}')) break;
+
+        const prop = this.parseProperty();
+        if (prop) {
+          properties[prop.key] = prop.value;
+        }
+        this.skipNewlines();
       }
-      
-      return {
-          type: 'ui2d', 
-          name: elementType,
-          properties: { id: elementId, ...properties },
-          position: { x: 0, y: 0, z: 0 }
-      } as ASTNode;
+      this.expect('punctuation', '}');
+    }
+
+    return {
+      type: 'ui2d',
+      name: elementType,
+      properties: { id: elementId, ...properties },
+      position: { x: 0, y: 0, z: 0 },
+    } as ASTNode;
   }
 
   /**
@@ -2351,7 +2581,7 @@ export class HoloScriptCodeParser {
     // Check for 'subject is "Type"' pattern
     const isPattern = /^([a-zA-Z_][a-zA-Z0-9_]*)\s+is\s+["']([^"']+)["']$/;
     const match = condition.match(isPattern);
-    
+
     if (match) {
       return {
         type: 'type-guard',
@@ -2361,7 +2591,7 @@ export class HoloScriptCodeParser {
         column: 0,
       };
     }
-    
+
     return condition;
   }
 

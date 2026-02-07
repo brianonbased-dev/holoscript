@@ -33,7 +33,15 @@ export interface Vector3 {
 /**
  * Movement mode
  */
-export type MovementMode = 'walking' | 'running' | 'sprinting' | 'crouching' | 'swimming' | 'flying' | 'climbing' | 'custom';
+export type MovementMode =
+  | 'walking'
+  | 'running'
+  | 'sprinting'
+  | 'crouching'
+  | 'swimming'
+  | 'flying'
+  | 'climbing'
+  | 'custom';
 
 /**
  * Ground state
@@ -426,9 +434,7 @@ export class CharacterTrait {
 
     // Update state
     this.state.isMoving = Math.abs(input.forward) > 0.01 || Math.abs(input.strafe) > 0.01;
-    this.state.currentSpeed = Math.sqrt(
-      this.state.velocity.x ** 2 + this.state.velocity.z ** 2
-    );
+    this.state.currentSpeed = Math.sqrt(this.state.velocity.x ** 2 + this.state.velocity.z ** 2);
 
     // Check for mode changes
     if (prevState.movementMode !== this.state.movementMode) {
@@ -697,9 +703,7 @@ export class CharacterTrait {
    * Get current height
    */
   public getCurrentHeight(): number {
-    return this.state.isCrouching
-      ? (this.config.crouchHeight ?? 1.0)
-      : (this.config.height ?? 1.8);
+    return this.state.isCrouching ? (this.config.crouchHeight ?? 1.0) : (this.config.height ?? 1.8);
   }
 
   // ============================================================================
@@ -794,9 +798,10 @@ export class CharacterTrait {
     });
 
     // Slide along walls
-    const dot = this.state.velocity.x * normal.x +
-                this.state.velocity.y * normal.y +
-                this.state.velocity.z * normal.z;
+    const dot =
+      this.state.velocity.x * normal.x +
+      this.state.velocity.y * normal.y +
+      this.state.velocity.z * normal.z;
 
     if (dot < 0) {
       this.state.velocity.x -= normal.x * dot;
@@ -809,8 +814,9 @@ export class CharacterTrait {
    * Check step
    */
   public canStepUp(obstacleHeight: number): boolean {
-    return obstacleHeight <= (this.config.stepHeight ?? 0.3) &&
-           this.state.groundState === 'grounded';
+    return (
+      obstacleHeight <= (this.config.stepHeight ?? 0.3) && this.state.groundState === 'grounded'
+    );
   }
 
   // ============================================================================

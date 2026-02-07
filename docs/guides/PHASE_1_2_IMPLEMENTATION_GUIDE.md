@@ -3,6 +3,7 @@
 ## 🎯 Overview
 
 This guide covers the implementation of critical Hololand ecosystem enhancements:
+
 - **Phase 1** (✅ Complete): Networking, Voice Input, AI NPCs, Performance Telemetry
 - **Phase 2** (⏳ In Progress): Advanced Commerce, Analytics, Avatars, Events
 
@@ -27,11 +28,11 @@ const voiceInput = createVoiceInputTrait({
       phrase: 'grab the sphere',
       aliases: ['pick up sphere', 'get sphere'],
       action: 'grab',
-      params: { target: 'sphere' }
-    }
+      params: { target: 'sphere' },
+    },
   ],
   showTranscript: true,
-  audioFeedback: true
+  audioFeedback: true,
 });
 
 // Listen for voice input
@@ -86,7 +87,7 @@ const npcAI = createAIDriverTrait({
     sociability: 0.8,
     aggression: 0.1,
     curiosity: 0.6,
-    loyalty: 0.9
+    loyalty: 0.9,
   },
   goals: [
     {
@@ -95,9 +96,9 @@ const npcAI = createAIDriverTrait({
       priority: 1.0,
       preconditions: new Map([['nearbyPlayers', true]]),
       effects: new Map([['engaged', true]]),
-      cost: 1
-    }
-  ]
+      cost: 1,
+    },
+  ],
 });
 
 npcAI.startAI();
@@ -155,15 +156,15 @@ telemetry.setBudget({
   metricName: 'frame_duration',
   maxValue: 16.67, // 60fps target
   severity: 'warning',
-  enabled: true
+  enabled: true,
 });
 
 // Record frame timing
 telemetry.recordFrame(
-  cpuTime,   // ms
-  gpuTime,   // ms
+  cpuTime, // ms
+  gpuTime, // ms
   renderTime, // ms
-  logicTime   // ms
+  logicTime // ms
 );
 
 // Record memory snapshot
@@ -178,7 +179,7 @@ class ConsoleExporter {
   async export(metrics) {
     console.log('Metrics:', metrics);
   }
-  async flush() { }
+  async flush() {}
 }
 
 telemetry.addExporter(new ConsoleExporter());
@@ -208,7 +209,7 @@ inventory.addItem({
   category: 'weapons',
   quantity: 5,
   basePrice: 1000,
-  currency: 'hololand-credits'
+  currency: 'hololand-credits',
 });
 
 // Reserve items during purchase
@@ -231,7 +232,7 @@ pricing.addRule({
   minPrice: 800,
   maxPrice: 2000,
   demandMultiplier: 1.5,
-  enabled: true
+  enabled: true,
 });
 
 // Calculate dynamic price
@@ -253,9 +254,9 @@ const shopkeeper = commerce.createShopkeeper({
     chattiness: 0.8,
     haggleWillingness: 0.5,
     fairness: 0.7,
-    uniqueness: 'Ah, another fine customer!'
+    uniqueness: 'Ah, another fine customer!',
   },
-  markupPercentage: 20
+  markupPercentage: 20,
 });
 
 // Get greeting
@@ -281,13 +282,13 @@ logger.recordTransaction({
   currency: 'hololand-credits',
   status: 'completed',
   timestamp: Date.now(),
-  shopId: 'shop_001'
+  shopId: 'shop_001',
 });
 
 // Generate sales report
 const report = logger.generateReport({
   start: Date.now() - 86400000,
-  end: Date.now()
+  end: Date.now(),
 });
 
 console.log('Revenue:', report.totalRevenue);
@@ -331,7 +332,7 @@ composition "VoiceInteraction" {
 npc.updatePerception(['player1'], ['player1']);
 
 // NPC speaks (integrated with speech synthesis)
-npc.speak("Welcome to my shop!");
+npc.speak('Welcome to my shop!');
 
 // Player voice-inputs response
 const player_response = await voiceInput.listen();
@@ -384,10 +385,10 @@ composition "VoiceCommerce" {
 
 ```typescript
 telemetry.recordFrame(
-  cpuTime,    // Keep < 10ms for 60fps target
-  gpuTime,    // Keep < 6ms
+  cpuTime, // Keep < 10ms for 60fps target
+  gpuTime, // Keep < 6ms
   renderTime, // Keep < 8ms
-  logicTime   // Keep < 5ms
+  logicTime // Keep < 5ms
 );
 
 // Total should be < 16.67ms for 60fps
@@ -400,6 +401,7 @@ telemetry.recordFrame(
 - **Desktop**: 500MB+ available
 
 Monitor with:
+
 ```typescript
 telemetry.getMemoryStats(); // Check heap usage
 telemetry.recordMemorySnapshot(); // Log snapshots
@@ -418,7 +420,7 @@ const mockRecognition = {
   stop: () => {},
   onresult: (e) => {
     e.results = [{ 0: { transcript: 'test', confidence: 0.95 }, isFinal: true }];
-  }
+  },
 };
 ```
 
@@ -426,9 +428,7 @@ const mockRecognition = {
 
 ```typescript
 // Test GOAP planning
-const goals = [
-  { id: 'greet', priority: 1.0, preconditions, effects }
-];
+const goals = [{ id: 'greet', priority: 1.0, preconditions, effects }];
 
 const planner = new GOAPPlanner(goals);
 const plan = planner.planGoal(currentState, goals[0]);

@@ -33,19 +33,19 @@ export interface Vector3 {
 export interface ShadowConfig {
   /** Shadow type */
   type: ShadowType;
-  
+
   /** Shadow map resolution */
   resolution?: number;
-  
+
   /** Shadow bias to prevent artifacts */
   bias?: number;
-  
+
   /** Softness/blur radius */
   softness?: number;
-  
+
   /** Max shadow distance */
   maxDistance?: number;
-  
+
   /** Cascade levels for directional lights */
   cascades?: number;
 }
@@ -56,40 +56,40 @@ export interface ShadowConfig {
 export interface LightSource {
   /** Light type */
   type: LightType;
-  
+
   /** Light name */
   name?: string;
-  
+
   /** Position in world space */
   position?: Vector3;
-  
+
   /** Direction (for directional/spot) */
   direction?: Vector3;
-  
+
   /** Color */
   color: Color;
-  
+
   /** Intensity/brightness 0-1+ */
   intensity: number;
-  
+
   /** Attenuation range (point/spot) */
   range?: number;
-  
+
   /** Spot angle in degrees */
   spotAngle?: number;
-  
+
   /** Inner spot angle */
   innerSpotAngle?: number;
-  
+
   /** Shadow configuration */
   shadow?: ShadowConfig;
-  
+
   /** Light cookie/projection */
   cookie?: string;
-  
+
   /** Enable volumetric fog interaction */
   volumetric?: boolean;
-  
+
   /** Light priority for batching */
   priority?: number;
 }
@@ -100,34 +100,34 @@ export interface LightSource {
 export interface GlobalIlluminationConfig {
   /** Enable global illumination */
   enabled: boolean;
-  
+
   /** Intensity multiplier */
   intensity?: number;
-  
+
   /** Sky color for ambient light */
   skyColor?: Color;
-  
+
   /** Sky intensity */
   skyIntensity?: number;
-  
+
   /** Ground color for ambient light */
   groundColor?: Color;
-  
+
   /** Ground intensity */
   groundIntensity?: number;
-  
+
   /** Use light probes */
   probes?: boolean;
-  
+
   /** Indirect diffuse intensity */
   indirectDiffuse?: number;
-  
+
   /** Indirect specular intensity */
   indirectSpecular?: number;
-  
+
   /** Ambient occlusion intensity */
   aoIntensity?: number;
-  
+
   /** Use screen-space AO */
   screenSpaceAO?: boolean;
 }
@@ -184,7 +184,7 @@ export class LightingTrait {
    * Get lights by type
    */
   public getLightsByType(type: LightType): LightSource[] {
-    return Array.from(this.lights.values()).filter(l => l.type === type);
+    return Array.from(this.lights.values()).filter((l) => l.type === type);
   }
 
   /**
@@ -221,9 +221,7 @@ export class LightingTrait {
   /**
    * Update global illumination
    */
-  public updateGlobalIllumination(
-    updates: Partial<GlobalIlluminationConfig>
-  ): void {
+  public updateGlobalIllumination(updates: Partial<GlobalIlluminationConfig>): void {
     this.globalIllumination = {
       ...this.globalIllumination,
       ...updates,
@@ -240,11 +238,7 @@ export class LightingTrait {
   /**
    * Set ambient light colors (skybox mode)
    */
-  public setAmbientLight(
-    skyColor: Color,
-    groundColor: Color,
-    intensity: number = 1.0
-  ): void {
+  public setAmbientLight(skyColor: Color, groundColor: Color, intensity: number = 1.0): void {
     this.globalIllumination.skyColor = skyColor;
     this.globalIllumination.groundColor = groundColor;
     this.globalIllumination.skyIntensity = intensity;
@@ -377,7 +371,7 @@ export class LightingTrait {
    * Get shadow-casting lights
    */
   public getShadowCastingLights(): LightSource[] {
-    return Array.from(this.lights.values()).filter(l => l.shadow && l.shadow.type !== 'none');
+    return Array.from(this.lights.values()).filter((l) => l.shadow && l.shadow.type !== 'none');
   }
 
   /**
@@ -428,8 +422,10 @@ export class LightingTrait {
   public getSceneInfo(): string {
     const counts = this.getLightCount();
     const impact = this.getPerformanceImpact();
-    return `Lighting: ${counts.directional} dir, ${counts.point} point, ${counts.spot} spot | ` +
-           `Shadows: ${impact.shadowCasters} | GPU: ${impact.estimatedGPUCost}`;
+    return (
+      `Lighting: ${counts.directional} dir, ${counts.point} point, ${counts.spot} spot | ` +
+      `Shadows: ${impact.shadowCasters} | GPU: ${impact.estimatedGPUCost}`
+    );
   }
 
   /**

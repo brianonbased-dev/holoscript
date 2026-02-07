@@ -52,7 +52,7 @@ orb "handler" {
       expect(result.success).toBe(true);
 
       const orb = result.ast.root || result.ast.children?.[0];
-      const matchExpr = orb.properties?.output as any;
+      const matchExpr = orb.properties?.output;
       expect(matchExpr.hasWildcard).toBe(true);
     });
 
@@ -69,7 +69,7 @@ orb "counter" {
       expect(result.success).toBe(true);
 
       const orb = result.ast.root || result.ast.children?.[0];
-      const matchExpr = orb.properties?.display as any;
+      const matchExpr = orb.properties?.display;
       expect(matchExpr.cases).toHaveLength(3);
       expect(matchExpr.cases[0].pattern.value).toBe(0);
       expect(matchExpr.cases[1].pattern.value).toBe(1);
@@ -87,7 +87,7 @@ orb "toggle" {
       expect(result.success).toBe(true);
 
       const orb = result.ast.root || result.ast.children?.[0];
-      const matchExpr = orb.properties?.label as any;
+      const matchExpr = orb.properties?.label;
       expect(matchExpr.cases).toHaveLength(2);
       expect(matchExpr.cases[0].pattern.value).toBe(true);
       expect(matchExpr.cases[1].pattern.value).toBe(false);
@@ -105,7 +105,7 @@ orb "processor" {
       expect(result.success).toBe(true);
 
       const orb = result.ast.root || result.ast.children?.[0];
-      const matchExpr = orb.properties?.result as any;
+      const matchExpr = orb.properties?.result;
       expect(matchExpr.cases[1].pattern.type).toBe('binding-pattern');
       expect(matchExpr.cases[1].pattern.name).toBe('x');
     });
@@ -135,7 +135,7 @@ orb "complex" {
       const result = parser.parse(code);
       expect(result.success).toBe(true);
       const orb = result.ast.root || result.ast.children?.[0];
-      const matchExpr = orb.properties?.x as any;
+      const matchExpr = orb.properties?.x;
       expect(matchExpr.sourceLocation).toBeDefined();
       expect(matchExpr.sourceLocation.line).toBeGreaterThan(0);
     });
@@ -266,9 +266,9 @@ orb "complex" {
 
       const result = typeChecker.check([matchNode as any]);
 
-      const errorDiagnostics = result.diagnostics.filter(d => d.severity === 'error');
-      expect(errorDiagnostics.some(d => d.message.includes('Non-exhaustive'))).toBe(true);
-      expect(errorDiagnostics.some(d => d.message.includes('error'))).toBe(true);
+      const errorDiagnostics = result.diagnostics.filter((d) => d.severity === 'error');
+      expect(errorDiagnostics.some((d) => d.message.includes('Non-exhaustive'))).toBe(true);
+      expect(errorDiagnostics.some((d) => d.message.includes('error'))).toBe(true);
     });
 
     it('should pass exhaustive match with all cases', () => {
@@ -298,8 +298,8 @@ orb "complex" {
 
       const result = typeChecker.check([matchNode as any]);
 
-      const errorDiagnostics = result.diagnostics.filter(d =>
-        d.severity === 'error' && d.message.includes('Non-exhaustive')
+      const errorDiagnostics = result.diagnostics.filter(
+        (d) => d.severity === 'error' && d.message.includes('Non-exhaustive')
       );
       expect(errorDiagnostics).toHaveLength(0);
     });
@@ -327,8 +327,8 @@ orb "complex" {
 
       const result = typeChecker.check([matchNode as any]);
 
-      const exhaustivenessErrors = result.diagnostics.filter(d =>
-        d.severity === 'error' && d.message.includes('Non-exhaustive')
+      const exhaustivenessErrors = result.diagnostics.filter(
+        (d) => d.severity === 'error' && d.message.includes('Non-exhaustive')
       );
       expect(exhaustivenessErrors).toHaveLength(0);
     });
@@ -359,8 +359,8 @@ orb "complex" {
 
       const result = typeChecker.check([matchNode as any]);
 
-      const unreachableWarnings = result.diagnostics.filter(d =>
-        d.severity === 'warning' && d.message.includes('Unreachable')
+      const unreachableWarnings = result.diagnostics.filter(
+        (d) => d.severity === 'warning' && d.message.includes('Unreachable')
       );
       expect(unreachableWarnings.length).toBeGreaterThan(0);
     });
@@ -385,8 +385,8 @@ orb "complex" {
 
       const result = typeChecker.check([matchNode as any]);
 
-      const duplicateWarnings = result.diagnostics.filter(d =>
-        d.severity === 'warning' && d.message.includes('Duplicate')
+      const duplicateWarnings = result.diagnostics.filter(
+        (d) => d.severity === 'warning' && d.message.includes('Duplicate')
       );
       expect(duplicateWarnings.length).toBeGreaterThan(0);
     });
@@ -400,8 +400,8 @@ orb "complex" {
 
       const result = typeChecker.check([matchNode as any]);
 
-      const errors = result.diagnostics.filter(d =>
-        d.severity === 'error' && d.message.includes('no cases')
+      const errors = result.diagnostics.filter(
+        (d) => d.severity === 'error' && d.message.includes('no cases')
       );
       expect(errors.length).toBeGreaterThan(0);
     });
@@ -421,8 +421,8 @@ orb "complex" {
 
       const result = typeChecker.check([matchNode as any]);
 
-      const errors = result.diagnostics.filter(d =>
-        d.severity === 'error' && d.message.includes('missing subject')
+      const errors = result.diagnostics.filter(
+        (d) => d.severity === 'error' && d.message.includes('missing subject')
       );
       expect(errors.length).toBeGreaterThan(0);
     });
@@ -444,11 +444,11 @@ orb "complex" {
 
       const result = typeChecker.check([matchNode as any]);
 
-      const errorWithSuggestions = result.diagnostics.find(d =>
-        d.severity === 'error' && d.suggestions && d.suggestions.length > 0
+      const errorWithSuggestions = result.diagnostics.find(
+        (d) => d.severity === 'error' && d.suggestions && d.suggestions.length > 0
       );
       expect(errorWithSuggestions).toBeDefined();
-      expect(errorWithSuggestions?.suggestions?.some(s => s.includes('Add case'))).toBe(true);
+      expect(errorWithSuggestions?.suggestions?.some((s) => s.includes('Add case'))).toBe(true);
     });
   });
 
@@ -520,9 +520,9 @@ orb "status_display" {
       const matchExpr = orb?.properties?.render;
 
       if (matchExpr && matchExpr.type === 'match') {
-        const checkResult = typeChecker.check([matchExpr as any]);
-        const exhaustivenessErrors = checkResult.diagnostics.filter(d =>
-          d.severity === 'error' && d.message.includes('Non-exhaustive')
+        const checkResult = typeChecker.check([matchExpr]);
+        const exhaustivenessErrors = checkResult.diagnostics.filter(
+          (d) => d.severity === 'error' && d.message.includes('Non-exhaustive')
         );
         expect(exhaustivenessErrors).toHaveLength(0);
       }
@@ -549,9 +549,9 @@ orb "status_display" {
       const matchExpr = orb?.properties?.render;
 
       if (matchExpr && matchExpr.type === 'match') {
-        const checkResult = typeChecker.check([matchExpr as any]);
-        const exhaustivenessErrors = checkResult.diagnostics.filter(d =>
-          d.severity === 'error' && d.message.includes('Non-exhaustive')
+        const checkResult = typeChecker.check([matchExpr]);
+        const exhaustivenessErrors = checkResult.diagnostics.filter(
+          (d) => d.severity === 'error' && d.message.includes('Non-exhaustive')
         );
         expect(exhaustivenessErrors.length).toBeGreaterThan(0);
         expect(exhaustivenessErrors[0].message).toContain('error');

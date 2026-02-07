@@ -20,7 +20,7 @@ interface PortableState {
   isExportReady: boolean;
   lastExportTime: number;
   exportedFormats: Set<ExportFormat>;
-  portabilityScore: number;  // 0-1, how portable the asset is
+  portabilityScore: number; // 0-1, how portable the asset is
   warnings: string[];
 }
 
@@ -62,7 +62,7 @@ export const portableHandler: TraitHandler<PortableConfig> = {
       warnings: [],
     };
     (node as any).__portableState = state;
-    
+
     // Analyze portability
     analyzePortability(node, state, config, context);
   },
@@ -71,17 +71,17 @@ export const portableHandler: TraitHandler<PortableConfig> = {
     delete (node as any).__portableState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(_node, _config, _context, _delta) {
     // Portability is event-driven, no per-frame updates
   },
 
   onEvent(node, config, context, event) {
     const state = (node as any).__portableState as PortableState;
     if (!state) return;
-    
+
     if (event.type === 'portable_export') {
-      const format = event.format as ExportFormat || config.export_formats[0];
-      
+      const format = (event.format as ExportFormat) || config.export_formats[0];
+
       if (!config.export_formats.includes(format)) {
         context.emit?.('on_portable_error', {
           node,
@@ -89,7 +89,7 @@ export const portableHandler: TraitHandler<PortableConfig> = {
         });
         return;
       }
-      
+
       context.emit?.('portable_generate_export', {
         node,
         format,
@@ -104,7 +104,7 @@ export const portableHandler: TraitHandler<PortableConfig> = {
       state.exportedFormats.add(format);
       state.lastExportTime = Date.now();
       state.isExportReady = true;
-      
+
       context.emit?.('on_asset_ported', {
         node,
         format,
@@ -114,12 +114,12 @@ export const portableHandler: TraitHandler<PortableConfig> = {
     } else if (event.type === 'portable_import') {
       const data = event.data as ArrayBuffer;
       const format = event.format as ExportFormat;
-      
+
       context.emit?.('portable_process_import', {
         node,
         data,
         format,
-        applyToNode: event.applyToNode as boolean ?? true,
+        applyToNode: (event.applyToNode as boolean) ?? true,
       });
     } else if (event.type === 'portable_import_complete') {
       context.emit?.('on_asset_imported', {
@@ -128,7 +128,7 @@ export const portableHandler: TraitHandler<PortableConfig> = {
       });
     } else if (event.type === 'portable_validate') {
       analyzePortability(node, state, config, context);
-      
+
       context.emit?.('portable_validation_result', {
         node,
         score: state.portabilityScore,
@@ -162,28 +162,28 @@ function analyzePortability(
 ): void {
   state.warnings = [];
   let score = 1.0;
-  
+
   // Check for non-portable features
   const nodeAny = node as Record<string, unknown>;
-  
+
   if (nodeAny.customShader) {
     state.warnings.push('Custom shaders may not be portable');
     score -= 0.2;
   }
-  
+
   if (nodeAny.scripts && !config.cross_platform) {
     state.warnings.push('Scripts require cross-platform mode');
     score -= 0.1;
   }
-  
+
   if (config.preserve_physics) {
     state.warnings.push('Physics preservation is experimental');
     score -= 0.1;
   }
-  
+
   state.portabilityScore = Math.max(0, score);
   state.isExportReady = score >= 0.5;
-  
+
   context.emit?.('portable_analysis_complete', {
     node,
     score: state.portabilityScore,

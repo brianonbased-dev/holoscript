@@ -1,11 +1,11 @@
 /**
  * HoloScript Package Manager
- * 
+ *
  * Manages HoloScript packages for projects, similar to npm but
  * with HoloScript-specific package resolution and validation.
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { spawn, SpawnOptions } from 'child_process';
 
@@ -119,7 +119,7 @@ export class PackageManager {
 
     // Run install
     const success = await this.runCommand(pm, args, options.verbose);
-    
+
     if (success) {
       console.log('\n\x1b[32m✓ Packages installed successfully!\x1b[0m');
       this.printUsageHint(validated);
@@ -151,7 +151,7 @@ export class PackageManager {
       ...Object.keys(pkgJson.devDependencies || {}),
     ]);
 
-    const toRemove = packages.filter(pkg => {
+    const toRemove = packages.filter((pkg) => {
       if (!installed.has(pkg)) {
         console.warn(`\x1b[33mWarning: ${pkg} is not installed.\x1b[0m`);
         return false;
@@ -174,7 +174,7 @@ export class PackageManager {
     console.log('');
 
     const success = await this.runCommand(pm, args, options.verbose);
-    
+
     if (success) {
       console.log('\n\x1b[32m✓ Packages removed successfully!\x1b[0m');
     }
@@ -255,14 +255,14 @@ export class PackageManager {
     for (const pkg of packages) {
       // Expand shorthand names
       const fullName = this.expandPackageName(pkg);
-      
+
       if (verbose) {
         console.log(`\x1b[2mValidating ${fullName}...\x1b[0m`);
       }
 
       // Check if it's an official package or exists on npm
       const isOfficial = PackageManager.HOLOSCRIPT_PACKAGES.includes(fullName);
-      
+
       if (isOfficial) {
         validated.push(fullName);
       } else if (fullName.startsWith('@holoscript/')) {
@@ -293,7 +293,7 @@ export class PackageManager {
     if (existsSync(join(this.cwd, 'yarn.lock'))) return 'yarn';
     if (existsSync(join(this.cwd, 'bun.lockb'))) return 'bun';
     if (existsSync(join(this.cwd, 'package-lock.json'))) return 'npm';
-    
+
     // Default to npm
     return 'npm';
   }
@@ -371,7 +371,7 @@ export class PackageManager {
 
   private printUsageHint(packages: string[]): void {
     console.log('\n\x1b[2mUsage hints:\x1b[0m');
-    
+
     for (const pkg of packages) {
       if (pkg === '@holoscript/std' || pkg === 'std') {
         console.log(`  import { Vec3, Color, Timer } from '@holoscript/std';`);

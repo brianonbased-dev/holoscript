@@ -2,29 +2,59 @@
  * MCP Tool Handlers for HoloScript
  *
  * Implements the logic for each MCP tool.
+ * Dispatches to specialized handlers for graph, IDE, and Brittney-Lite tools.
  */
 
-import {
-  HoloScriptPlusParser,
-  parseHolo,
-  parseHoloStrict,
-} from '@holoscript/core';
+import { HoloScriptPlusParser, parseHolo, parseHoloStrict } from '@holoscript/core';
 
 import { generateObject, generateScene, suggestTraits } from './generators';
 import { renderPreview, createShareLink } from './renderer';
 import { TRAIT_DOCS, SYNTAX_DOCS, EXAMPLES } from './documentation';
+import { handleGraphTool } from './graph-tools';
+import { handleIDETool } from './ide-tools';
+import { handleBrittneyLiteTool } from './brittney-lite';
 
 // Trait categories mapping
 const TRAIT_CATEGORIES: Record<string, string[]> = {
-  interaction: ['@grabbable', '@throwable', '@holdable', '@clickable', '@hoverable', '@draggable', '@pointable', '@scalable', '@rotatable', '@snappable'],
+  interaction: [
+    '@grabbable',
+    '@throwable',
+    '@holdable',
+    '@clickable',
+    '@hoverable',
+    '@draggable',
+    '@pointable',
+    '@scalable',
+    '@rotatable',
+    '@snappable',
+  ],
   physics: ['@collidable', '@physics', '@rigid', '@kinematic', '@trigger', '@gravity'],
   visual: ['@glowing', '@emissive', '@transparent', '@reflective', '@animated', '@billboard'],
   networking: ['@networked', '@synced', '@persistent', '@owned', '@host_only'],
-  behavior: ['@stackable', '@attachable', '@equippable', '@consumable', '@destructible', '@breakable', '@character'],
+  behavior: [
+    '@stackable',
+    '@attachable',
+    '@equippable',
+    '@consumable',
+    '@destructible',
+    '@breakable',
+    '@character',
+  ],
   spatial: ['@anchor', '@tracked', '@world_locked', '@hand_tracked', '@eye_tracked'],
   audio: ['@spatial_audio', '@ambient', '@voice_activated'],
   state: ['@state', '@reactive', '@observable', '@computed'],
-  advanced: ['@teleport', '@ui_panel', '@particle_system', '@weather', '@day_night', '@lod', '@hand_tracking', '@haptic', '@portal', '@mirror'],
+  advanced: [
+    '@teleport',
+    '@ui_panel',
+    '@particle_system',
+    '@weather',
+    '@day_night',
+    '@lod',
+    '@hand_tracking',
+    '@haptic',
+    '@portal',
+    '@mirror',
+  ],
 };
 
 const ALL_TRAITS = Object.values(TRAIT_CATEGORIES).flat();
@@ -33,6 +63,7 @@ const ALL_TRAITS = Object.values(TRAIT_CATEGORIES).flat();
  * Main handler dispatcher for all tools
  */
 export async function handleTool(name: string, args: Record<string, unknown>): Promise<unknown> {
+  // Core tools
   switch (name) {
     case 'parse_hs':
       return handleParseHs(args);
@@ -64,21 +95,41 @@ export async function handleTool(name: string, args: Record<string, unknown>): P
       return handleCreateShareLink(args);
     case 'convert_format':
       return handleConvertFormat(args);
-    default:
-      throw new Error(`Unknown tool: ${name}`);
   }
+
+  // Graph understanding tools (migrated from Hololand)
+  if (name.startsWith('holo_')) {
+    return handleGraphTool(name, args);
+  }
+
+  // IDE tools (migrated from Hololand/Brittney)
+  if (name.startsWith('hs_') && !name.startsWith('hs_ai_')) {
+    return handleIDETool(name, args);
+  }
+
+  // Brittney-Lite AI tools
+  if (name.startsWith('hs_ai_')) {
+    return handleBrittneyLiteTool(name, args);
+  }
+
+  // Text-to-3D pipeline
+  if (name === 'generate_3d_object') {
+    return handleGenerate3DObject(args);
+  }
+
+  throw new Error(`Unknown tool: ${name}`);
 }
 
 // === PARSING HANDLERS ===
 
 async function handleParseHs(args: Record<string, unknown>) {
   const code = args.code as string;
-  const format = (args.format as string) || 'hsplus';
-  
+  const _format = (args.format as string) || 'hsplus';
+
   try {
     const parser = new HoloScriptPlusParser();
     const result = parser.parse(code);
-    
+
     return {
       success: true,
       ast: result.ast,
@@ -97,10 +148,10 @@ async function handleParseHs(args: Record<string, unknown>) {
 async function handleParseHolo(args: Record<string, unknown>) {
   const code = args.code as string;
   const strict = args.strict as boolean;
-  
+
   try {
     const result = strict ? parseHoloStrict(code) : parseHolo(code);
-    
+
     return {
       success: true,
       composition: result,
@@ -121,11 +172,11 @@ async function handleValidate(args: Record<string, unknown>) {
   const format = (args.format as string) || 'auto';
   const includeWarnings = args.includeWarnings !== false;
   const includeSuggestions = args.includeSuggestions !== false;
-  
+
   try {
     // Detect format if auto
     const detectedFormat = format === 'auto' ? detectFormat(code) : format;
-    
+
     // Parse based on format
     let parseResult;
     if (detectedFormat === 'holo') {
@@ -134,10 +185,10 @@ async function handleValidate(args: Record<string, unknown>) {
       const parser = new HoloScriptPlusParser();
       parseResult = parser.parse(code);
     }
-    
+
     const errors: AIFriendlyError[] = [];
     const warnings: AIFriendlyError[] = [];
-    
+
     // Convert errors to AI-friendly format
     if (parseResult.errors) {
       for (const err of parseResult.errors) {
@@ -145,22 +196,21 @@ async function handleValidate(args: Record<string, unknown>) {
         errors.push(aiError);
       }
     }
-    
+
     if (includeWarnings && parseResult.warnings) {
       for (const warn of parseResult.warnings) {
         const aiWarn = toAIFriendlyError(warn, code, includeSuggestions);
         warnings.push(aiWarn);
       }
     }
-    
+
     return {
       valid: errors.length === 0,
       format: detectedFormat,
       errors,
       ...(includeWarnings && { warnings }),
-      summary: errors.length === 0 
-        ? '✅ Valid HoloScript code'
-        : `❌ Found ${errors.length} error(s)`,
+      summary:
+        errors.length === 0 ? '✅ Valid HoloScript code' : `❌ Found ${errors.length} error(s)`,
     };
   } catch (error) {
     return {
@@ -174,7 +224,7 @@ async function handleValidate(args: Record<string, unknown>) {
 
 async function handleListTraits(args: Record<string, unknown>) {
   const category = (args.category as string) || 'all';
-  
+
   if (category === 'all') {
     return {
       total: ALL_TRAITS.length,
@@ -182,7 +232,7 @@ async function handleListTraits(args: Record<string, unknown>) {
       list: ALL_TRAITS,
     };
   }
-  
+
   const traits = TRAIT_CATEGORIES[category];
   if (!traits) {
     return {
@@ -190,7 +240,7 @@ async function handleListTraits(args: Record<string, unknown>) {
       validCategories: Object.keys(TRAIT_CATEGORIES),
     };
   }
-  
+
   return {
     category,
     count: traits.length,
@@ -200,12 +250,12 @@ async function handleListTraits(args: Record<string, unknown>) {
 
 async function handleExplainTrait(args: Record<string, unknown>) {
   let trait = args.trait as string;
-  
+
   // Normalize trait name
   if (!trait.startsWith('@')) {
     trait = '@' + trait;
   }
-  
+
   const doc = TRAIT_DOCS[trait];
   if (!doc) {
     // Find similar traits
@@ -216,14 +266,14 @@ async function handleExplainTrait(args: Record<string, unknown>) {
       allTraits: ALL_TRAITS,
     };
   }
-  
+
   return doc;
 }
 
 async function handleSuggestTraits(args: Record<string, unknown>) {
   const description = args.description as string;
   const context = args.context as string | undefined;
-  
+
   return suggestTraits(description, context);
 }
 
@@ -233,7 +283,7 @@ async function handleGenerateObject(args: Record<string, unknown>) {
   const description = args.description as string;
   const format = (args.format as string) || 'hsplus';
   const includeDocs = args.includeDocs as boolean;
-  
+
   return generateObject(description, { format, includeDocs });
 }
 
@@ -241,7 +291,7 @@ async function handleGenerateScene(args: Record<string, unknown>) {
   const description = args.description as string;
   const style = (args.style as string) || 'detailed';
   const features = (args.features as string[]) || [];
-  
+
   return generateScene(description, { style, features });
 }
 
@@ -249,7 +299,7 @@ async function handleGenerateScene(args: Record<string, unknown>) {
 
 async function handleGetSyntaxReference(args: Record<string, unknown>) {
   const topic = args.topic as string;
-  
+
   const doc = SYNTAX_DOCS[topic];
   if (!doc) {
     return {
@@ -257,13 +307,13 @@ async function handleGetSyntaxReference(args: Record<string, unknown>) {
       availableTopics: Object.keys(SYNTAX_DOCS),
     };
   }
-  
+
   return doc;
 }
 
 async function handleGetExamples(args: Record<string, unknown>) {
   const pattern = args.pattern as string;
-  
+
   const example = EXAMPLES[pattern];
   if (!example) {
     return {
@@ -271,18 +321,18 @@ async function handleGetExamples(args: Record<string, unknown>) {
       availablePatterns: Object.keys(EXAMPLES),
     };
   }
-  
+
   return example;
 }
 
 async function handleExplainCode(args: Record<string, unknown>) {
   const code = args.code as string;
   const detail = (args.detail as string) || 'detailed';
-  
+
   // Parse the code first
   const format = detectFormat(code);
   let parsed;
-  
+
   try {
     if (format === 'holo') {
       parsed = parseHolo(code);
@@ -296,10 +346,10 @@ async function handleExplainCode(args: Record<string, unknown>) {
       parseError: error instanceof Error ? error.message : String(error),
     };
   }
-  
+
   // Generate explanation based on AST
   const explanation = generateExplanation(parsed, detail);
-  
+
   return {
     format,
     explanation,
@@ -310,7 +360,7 @@ async function handleExplainCode(args: Record<string, unknown>) {
 async function handleAnalyzeCode(args: Record<string, unknown>) {
   const code = args.code as string;
   const format = detectFormat(code);
-  
+
   let parsed;
   try {
     if (format === 'holo') {
@@ -325,7 +375,7 @@ async function handleAnalyzeCode(args: Record<string, unknown>) {
       parseError: error instanceof Error ? error.message : String(error),
     };
   }
-  
+
   return analyzeAST(parsed, code);
 }
 
@@ -357,7 +407,7 @@ async function handleConvertFormat(args: Record<string, unknown>) {
   const code = args.code as string;
   const from = args.from as string;
   const to = args.to as string;
-  
+
   try {
     const convertedCode = convertFormat(code, from, to);
     return {
@@ -384,7 +434,7 @@ async function handleConvertFormat(args: Record<string, unknown>) {
 function convertFormat(code: string, from: string, to: string): string {
   // First, parse the source format
   let ast: any;
-  
+
   if (from === 'holo') {
     ast = parseHolo(code);
   } else {
@@ -393,7 +443,7 @@ function convertFormat(code: string, from: string, to: string): string {
     const result = parser.parse(code);
     ast = result.ast;
   }
-  
+
   // Convert AST to target format
   if (to === 'holo') {
     return convertToHolo(ast, from);
@@ -404,24 +454,26 @@ function convertFormat(code: string, from: string, to: string): string {
   }
 }
 
-function convertToHolo(ast: any, from: string): string {
+function convertToHolo(ast: any, _from: string): string {
   const lines: string[] = [];
   lines.push('composition "Converted Scene" {');
-  
+
   // Add environment block
   lines.push('  environment {');
   lines.push('    skybox: "nebula"');
   lines.push('    ambient_light: 0.4');
   lines.push('  }');
   lines.push('');
-  
+
   // Extract objects from AST
   const objects = extractObjects(ast);
-  
+
   for (const obj of objects) {
-    const traits = obj.traits?.length ? obj.traits.map((t: string) => `@${t.replace('@', '')}`).join(' ') : '';
+    const traits = obj.traits?.length
+      ? obj.traits.map((t: string) => `@${t.replace('@', '')}`).join(' ')
+      : '';
     lines.push(`  object "${obj.name || 'obj'}" ${traits} {`.trim() + ' {');
-    lines.push(`    geometry: "${obj.type || 'cube'}"`);    
+    lines.push(`    geometry: "${obj.type || 'cube'}"`);
     if (obj.position) {
       lines.push(`    position: [${obj.position.join(', ')}]`);
     }
@@ -430,17 +482,19 @@ function convertToHolo(ast: any, from: string): string {
     }
     lines.push('  }');
   }
-  
+
   lines.push('}');
   return lines.join('\n');
 }
 
-function convertToHsPlus(ast: any, from: string): string {
+function convertToHsPlus(ast: any, _from: string): string {
   const lines: string[] = [];
   const objects = extractObjects(ast);
-  
+
   for (const obj of objects) {
-    const traits = obj.traits?.length ? obj.traits.map((t: string) => `  @${t.replace('@', '')}`).join('\n') : '';
+    const traits = obj.traits?.length
+      ? obj.traits.map((t: string) => `  @${t.replace('@', '')}`).join('\n')
+      : '';
     lines.push(`${obj.type || 'object'} ${obj.name || 'obj'} {`);
     if (traits) lines.push(traits);
     if (obj.position) {
@@ -452,18 +506,20 @@ function convertToHsPlus(ast: any, from: string): string {
     lines.push('}');
     lines.push('');
   }
-  
+
   return lines.join('\n').trim();
 }
 
-function convertToHs(ast: any, from: string): string {
+function convertToHs(ast: any, _from: string): string {
   const lines: string[] = [];
   const objects = extractObjects(ast);
-  
+
   for (const obj of objects) {
     lines.push(`${obj.type || 'orb'} ${obj.name || 'obj'} {`);
     if (obj.position) {
-      lines.push(`  position: { x: ${obj.position[0] || 0}, y: ${obj.position[1] || 0}, z: ${obj.position[2] || 0} }`);
+      lines.push(
+        `  position: { x: ${obj.position[0] || 0}, y: ${obj.position[1] || 0}, z: ${obj.position[2] || 0} }`
+      );
     }
     if (obj.color) {
       lines.push(`  color: "${obj.color}"`);
@@ -471,15 +527,15 @@ function convertToHs(ast: any, from: string): string {
     lines.push('}');
     lines.push('');
   }
-  
+
   return lines.join('\n').trim();
 }
 
 function extractObjects(ast: any): any[] {
   const objects: any[] = [];
-  
+
   if (!ast) return objects;
-  
+
   // Handle .holo composition format
   if (ast.objects && Array.isArray(ast.objects)) {
     for (const obj of ast.objects) {
@@ -492,7 +548,7 @@ function extractObjects(ast: any): any[] {
       });
     }
   }
-  
+
   // Handle .hsplus or .hs format
   if (ast.nodes && Array.isArray(ast.nodes)) {
     for (const node of ast.nodes) {
@@ -507,7 +563,7 @@ function extractObjects(ast: any): any[] {
       }
     }
   }
-  
+
   // Handle flat declaration list
   if (ast.declarations && Array.isArray(ast.declarations)) {
     for (const decl of ast.declarations) {
@@ -520,7 +576,7 @@ function extractObjects(ast: any): any[] {
       });
     }
   }
-  
+
   return objects;
 }
 
@@ -558,20 +614,20 @@ function toAIFriendlyError(
 ): AIFriendlyError {
   const message = error.message;
   const line = error.line || 1;
-  
+
   const aiError: AIFriendlyError = {
     code: extractErrorCode(message),
     line,
     column: error.column,
     message,
   };
-  
+
   // Add context from source
   const lines = code.split('\n');
   if (line > 0 && line <= lines.length) {
     aiError.context = lines[line - 1].trim();
   }
-  
+
   // Add suggestions if enabled
   if (includeSuggestions) {
     const suggestion = generateSuggestion(message);
@@ -580,7 +636,7 @@ function toAIFriendlyError(
       aiError.fix = suggestion.fix;
     }
   }
-  
+
   return aiError;
 }
 
@@ -588,7 +644,7 @@ function extractErrorCode(message: string): string {
   // Extract error code from message if present
   const match = message.match(/\[(E\d+|W\d+)\]/);
   if (match) return match[1];
-  
+
   // Generate a code based on error type
   if (message.includes('Unknown trait')) return 'E001';
   if (message.includes('syntax')) return 'E002';
@@ -597,7 +653,9 @@ function extractErrorCode(message: string): string {
   return 'E999';
 }
 
-function generateSuggestion(message: string): { message: string; fix?: AIFriendlyError['fix'] } | null {
+function generateSuggestion(
+  message: string
+): { message: string; fix?: AIFriendlyError['fix'] } | null {
   // Unknown trait
   const traitMatch = message.match(/Unknown trait:?\s*[@]?(\w+)/i);
   if (traitMatch) {
@@ -610,7 +668,7 @@ function generateSuggestion(message: string): { message: string; fix?: AIFriendl
       };
     }
   }
-  
+
   // Typo in geometry
   const geoMatch = message.match(/(spher|cub|cylinder|con|plan)/i);
   if (geoMatch) {
@@ -629,14 +687,14 @@ function generateSuggestion(message: string): { message: string; fix?: AIFriendl
       };
     }
   }
-  
+
   return null;
 }
 
 function findSimilarTraits(trait: string): string[] {
   const normalized = trait.replace('@', '').toLowerCase();
-  
-  return ALL_TRAITS.filter(t => {
+
+  return ALL_TRAITS.filter((t) => {
     const tName = t.replace('@', '').toLowerCase();
     // Simple Levenshtein-like matching
     if (tName.includes(normalized) || normalized.includes(tName)) return true;
@@ -649,10 +707,10 @@ function findSimilarTraits(trait: string): string[] {
 function generateExplanation(parsed: unknown, detail: string): string {
   const ast = parsed as any;
   const sections: string[] = [];
-  
+
   // Overview section
   sections.push('## Overview');
-  
+
   // Detect format and describe structure
   if (ast?.composition || ast?.type === 'composition') {
     sections.push('This is a **.holo** declarative composition file.');
@@ -666,7 +724,7 @@ function generateExplanation(parsed: unknown, detail: string): string {
   } else {
     sections.push('This is a **.hs** (Classic HoloScript) file.');
   }
-  
+
   // Environment description
   if (ast?.environment) {
     sections.push('');
@@ -676,13 +734,13 @@ function generateExplanation(parsed: unknown, detail: string): string {
     if (env.ambient_light !== undefined) sections.push(`- Ambient light: **${env.ambient_light}**`);
     if (env.theme) sections.push(`- Theme: **${env.theme}**`);
   }
-  
+
   // Objects description
   const objects = extractObjectsForExplanation(ast);
   if (objects.length > 0) {
     sections.push('');
     sections.push('### Objects');
-    
+
     if (detail === 'brief') {
       sections.push(`Contains **${objects.length}** objects.`);
     } else {
@@ -697,7 +755,7 @@ function generateExplanation(parsed: unknown, detail: string): string {
       }
     }
   }
-  
+
   // Traits summary
   const allTraits = new Set<string>();
   for (const obj of objects) {
@@ -710,22 +768,22 @@ function generateExplanation(parsed: unknown, detail: string): string {
     sections.push('### VR Traits Used');
     sections.push(Array.from(allTraits).join(', '));
   }
-  
+
   // Logic/behavior summary
   if (ast?.logic || ast?.actions) {
     sections.push('');
     sections.push('### Behavior');
     sections.push('Contains event handlers and/or action definitions for interactivity.');
   }
-  
+
   return sections.join('\n');
 }
 
 function extractObjectsForExplanation(ast: any): any[] {
   const objects: any[] = [];
-  
+
   if (!ast) return objects;
-  
+
   // Handle .holo format
   if (ast.objects && Array.isArray(ast.objects)) {
     for (const obj of ast.objects) {
@@ -736,7 +794,7 @@ function extractObjectsForExplanation(ast: any): any[] {
       });
     }
   }
-  
+
   // Handle .hsplus/.hs format
   const nodes = ast.nodes || ast.ast?.nodes || [];
   for (const node of nodes) {
@@ -748,7 +806,7 @@ function extractObjectsForExplanation(ast: any): any[] {
       });
     }
   }
-  
+
   return objects;
 }
 
@@ -757,7 +815,7 @@ function analyzeAST(parsed: unknown, code: string) {
   const objects = (code.match(/\b(orb|object|cube|sphere|model)\s+\w+/gi) || []).length;
   const traits = (code.match(/@\w+/g) || []).length;
   const functions = (code.match(/\b(function|action|on_\w+)\s*\(/gi) || []).length;
-  
+
   return {
     stats: {
       lines,
@@ -768,8 +826,12 @@ function analyzeAST(parsed: unknown, code: string) {
     },
     complexity: {
       score: Math.min(10, Math.round((objects + traits + functions) / 5)),
-      level: objects + traits + functions < 10 ? 'simple' :
-             objects + traits + functions < 30 ? 'moderate' : 'complex',
+      level:
+        objects + traits + functions < 10
+          ? 'simple'
+          : objects + traits + functions < 30
+            ? 'moderate'
+            : 'complex',
     },
     suggestions: [
       ...(traits === 0 ? ['Consider adding VR traits for interactivity'] : []),
@@ -777,4 +839,61 @@ function analyzeAST(parsed: unknown, code: string) {
       ...(lines > 200 ? ['Consider splitting into multiple composition files'] : []),
     ],
   };
+}
+
+// === TEXT-TO-3D HANDLER ===
+
+async function handleGenerate3DObject(args: Record<string, unknown>) {
+  const description = args.description as string;
+  const providerName = (args.provider as string) || 'meshy';
+  const style = (args.style as string) || 'pbr';
+  const objectName = args.objectName as string | undefined;
+
+  if (!description) {
+    return { success: false, error: 'description is required' };
+  }
+
+  try {
+    // Dynamic import to avoid loading heavy deps when not needed
+    const { MeshyProvider, TripoProvider, textTo3DToHolo } = await import(
+      '../../../cli/src/importers/text-to-3d-importer'
+    );
+
+    let provider;
+    if (providerName === 'tripo') {
+      provider = new TripoProvider();
+    } else {
+      provider = new MeshyProvider();
+    }
+
+    const result = await textTo3DToHolo({
+      description,
+      provider,
+      style: style as any,
+      objectName,
+    });
+
+    return {
+      success: true,
+      holoCode: result.holoCode,
+      holoFilePath: result.holoFilePath,
+      modelFilePath: result.modelFilePath,
+      traits: result.traits,
+      provider: result.metadata.provider,
+      generationTimeMs: result.metadata.generationTimeMs,
+    };
+  } catch (error: any) {
+    // Check for missing API key
+    if (error.message?.includes('API_KEY required')) {
+      return {
+        success: false,
+        error: error.message,
+        hint: 'Set MESHY_API_KEY or TRIPO_API_KEY in your environment',
+      };
+    }
+    return {
+      success: false,
+      error: error.message || 'Text-to-3D generation failed',
+    };
+  }
 }

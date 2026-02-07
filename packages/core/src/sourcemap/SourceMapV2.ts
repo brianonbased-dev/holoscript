@@ -214,11 +214,7 @@ export class SourceMapGeneratorV2 {
   /**
    * Start a new scope
    */
-  enterScope(options: {
-    type: ScopeType;
-    name: string;
-    range: Range;
-  }): string {
+  enterScope(options: { type: ScopeType; name: string; range: Range }): string {
     const id = `scope_${this.scopes.size}_${options.type}_${options.name}`;
     const parentId = this.currentScopeStack[this.currentScopeStack.length - 1];
 
@@ -278,7 +274,7 @@ export class SourceMapGeneratorV2 {
       const scope = this.scopes.get(this.currentScopeStack[i]);
       if (!scope) continue;
 
-      const symbol = scope.symbols.find(s => s.name === name);
+      const symbol = scope.symbols.find((s) => s.name === name);
       if (symbol) {
         symbol.references.push(position);
         break;
@@ -359,7 +355,7 @@ export class SourceMapGeneratorV2 {
    */
   private encodeVLQ(value: number): string {
     let encoded = '';
-    let vlq = value < 0 ? ((-value) << 1) + 1 : value << 1;
+    let vlq = value < 0 ? (-value << 1) + 1 : value << 1;
 
     do {
       let digit = vlq & 0x1f;
@@ -404,8 +400,10 @@ export class SourceMapGeneratorV2 {
       let encoded = '';
 
       // Generated column (delta from last segment in same line)
-      const lastColumn = lines[line].length === 0 ? 0 :
-        this.getLastGeneratedColumn(sortedMappings, line, lines[line].length);
+      const lastColumn =
+        lines[line].length === 0
+          ? 0
+          : this.getLastGeneratedColumn(sortedMappings, line, lines[line].length);
       encoded += this.encodeVLQ(segment.generated.column - lastColumn);
 
       if (segment.sourceIndex !== undefined && segment.original) {
@@ -431,10 +429,14 @@ export class SourceMapGeneratorV2 {
       lines[line].push(encoded);
     }
 
-    return lines.map(segments => segments.join(',')).join(';');
+    return lines.map((segments) => segments.join(',')).join(';');
   }
 
-  private getLastGeneratedColumn(mappings: EnhancedMappingSegment[], line: number, segmentIndex: number): number {
+  private getLastGeneratedColumn(
+    mappings: EnhancedMappingSegment[],
+    line: number,
+    segmentIndex: number
+  ): number {
     let lastColumn = 0;
     let count = 0;
     for (const m of mappings) {
@@ -463,7 +465,7 @@ export class SourceMapGeneratorV2 {
       sourceMap.sourceRoot = this.sourceRoot;
     }
 
-    if (this.sourcesContent.some(c => c !== null)) {
+    if (this.sourcesContent.some((c) => c !== null)) {
       sourceMap.sourcesContent = this.sourcesContent;
     }
 
@@ -474,15 +476,15 @@ export class SourceMapGeneratorV2 {
 
     // Add expression types
     const expressionTypes = this.mappings
-      .filter(m => m.expressionType)
-      .map(m => m.expressionType!);
+      .filter((m) => m.expressionType)
+      .map((m) => m.expressionType!);
     if (expressionTypes.length > 0) {
       sourceMap.x_expressionTypes = expressionTypes;
     }
 
     // Add breakpoints
     if (this.breakpoints.size > 0) {
-      sourceMap.x_breakpoints = Array.from(this.breakpoints).map(bp => {
+      sourceMap.x_breakpoints = Array.from(this.breakpoints).map((bp) => {
         const [line, column] = bp.split(':').map(Number);
         return { line, column };
       });
@@ -741,11 +743,7 @@ export class SourceMapConsumerV2 {
   /**
    * Get generated position for an original position
    */
-  generatedPositionFor(options: {
-    source: string;
-    line: number;
-    column: number;
-  }): Position | null {
+  generatedPositionFor(options: { source: string; line: number; column: number }): Position | null {
     const sourceIndex = this.sourceMap.sources.indexOf(options.source);
     if (sourceIndex === -1) return null;
 
@@ -770,7 +768,9 @@ export class SourceMapConsumerV2 {
     if (!original.source || original.line === null) return null;
 
     for (const scope of this.scopeIndex.values()) {
-      if (this.isPositionInRange({ line: original.line, column: original.column ?? 0 }, scope.range)) {
+      if (
+        this.isPositionInRange({ line: original.line, column: original.column ?? 0 }, scope.range)
+      ) {
         return scope;
       }
     }
@@ -842,7 +842,7 @@ export function createIndexMap(
   return {
     version: 3,
     file,
-    sections: sections.map(section => ({
+    sections: sections.map((section) => ({
       offset: section.offset,
       map: section.map,
     })),
@@ -852,10 +852,7 @@ export function createIndexMap(
 /**
  * Combine multiple source maps
  */
-export function combineSourceMapsV2(
-  maps: SourceMapV2[],
-  outputFile: string
-): SourceMapV2 {
+export function combineSourceMapsV2(maps: SourceMapV2[], outputFile: string): SourceMapV2 {
   const generator = new SourceMapGeneratorV2({ file: outputFile });
   let lineOffset = 0;
 
@@ -869,7 +866,7 @@ export function combineSourceMapsV2(
     }
 
     // Re-map with offset
-    for (const [key, mapping] of (consumer as any).decodedMappings) {
+    for (const [_key, mapping] of (consumer as any).decodedMappings) {
       if (mapping.original && mapping.sourceIndex !== undefined) {
         generator.addMapping({
           generated: {

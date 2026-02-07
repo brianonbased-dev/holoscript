@@ -22,16 +22,16 @@ interface BuoyancyState {
 }
 
 interface BuoyancyConfig {
-  fluid_density: number;      // kg/m³ (water = 1000)
-  fluid_level: number;        // Y position of water surface
-  drag: number;               // Linear drag in fluid
-  angular_drag: number;       // Angular drag in fluid
-  flow_direction: number[];   // Current direction [x, y, z]
-  flow_strength: number;      // Current strength
-  splash_effect: boolean;     // Emit splash events
+  fluid_density: number; // kg/m³ (water = 1000)
+  fluid_level: number; // Y position of water surface
+  drag: number; // Linear drag in fluid
+  angular_drag: number; // Angular drag in fluid
+  flow_direction: number[]; // Current direction [x, y, z]
+  flow_strength: number; // Current strength
+  splash_effect: boolean; // Emit splash events
   submerge_threshold: number; // Ratio for "fully submerged"
-  object_density: number;     // Object density (kg/m³)
-  object_volume: number;      // Object volume (m³)
+  object_density: number; // Object density (kg/m³)
+  object_volume: number; // Object volume (m³)
 }
 
 // =============================================================================
@@ -39,16 +39,16 @@ interface BuoyancyConfig {
 // =============================================================================
 
 function calculateSubmersionRatio(
-  objectY: number, 
-  objectHeight: number, 
+  objectY: number,
+  objectHeight: number,
   fluidLevel: number
 ): number {
   const objectTop = objectY + objectHeight / 2;
   const objectBottom = objectY - objectHeight / 2;
-  
+
   if (objectTop <= fluidLevel) return 1.0; // Fully submerged
   if (objectBottom >= fluidLevel) return 0.0; // Above water
-  
+
   // Partially submerged
   return (fluidLevel - objectBottom) / objectHeight;
 }
@@ -70,24 +70,24 @@ function calculateBuoyancyForce(
 export const buoyancyHandler: TraitHandler<BuoyancyConfig> = {
   name: 'buoyancy' as any,
 
-  defaultConfig: { 
-    fluid_density: 1000, 
-    fluid_level: 0, 
-    drag: 1.0, 
-    angular_drag: 0.5, 
-    flow_direction: [0, 0, 0], 
-    flow_strength: 0, 
-    splash_effect: true, 
+  defaultConfig: {
+    fluid_density: 1000,
+    fluid_level: 0,
+    drag: 1.0,
+    angular_drag: 0.5,
+    flow_direction: [0, 0, 0],
+    flow_strength: 0,
+    splash_effect: true,
     submerge_threshold: 0.9,
-    object_density: 500,  // Default: wood-like (floats)
-    object_volume: 1.0,   // 1 cubic meter
+    object_density: 500, // Default: wood-like (floats)
+    object_volume: 1.0, // 1 cubic meter
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const position = (node as any).position || { x: 0, y: 0, z: 0 };
-    const state: BuoyancyState = { 
-      isSubmerged: false, 
-      submersionRatio: 0, 
+    const state: BuoyancyState = {
+      isSubmerged: false,
+      submersionRatio: 0,
       buoyancyForce: 0,
       lastPosition: { ...position },
       velocity: { x: 0, y: 0, z: 0 },
@@ -107,7 +107,7 @@ export const buoyancyHandler: TraitHandler<BuoyancyConfig> = {
     const position = (node as any).position || { x: 0, y: 0, z: 0 };
     const scale = (node as any).scale || { x: 1, y: 1, z: 1 };
     const objectHeight = scale.y;
-    
+
     // Calculate velocity from position change
     state.velocity = {
       x: (position.x - state.lastPosition.x) / delta,
@@ -115,32 +115,28 @@ export const buoyancyHandler: TraitHandler<BuoyancyConfig> = {
       z: (position.z - state.lastPosition.z) / delta,
     };
     state.lastPosition = { ...position };
-    
+
     // Calculate submersion
     const prevSubmersion = state.submersionRatio;
-    state.submersionRatio = calculateSubmersionRatio(
-      position.y, 
-      objectHeight, 
-      config.fluid_level
-    );
-    
+    state.submersionRatio = calculateSubmersionRatio(position.y, objectHeight, config.fluid_level);
+
     const wasSubmerged = state.isSubmerged;
     state.isSubmerged = state.submersionRatio >= config.submerge_threshold;
-    
+
     // Calculate buoyancy force
     state.buoyancyForce = calculateBuoyancyForce(
       config.fluid_density,
       config.object_volume,
       state.submersionRatio
     );
-    
+
     // Apply physics via events
     if (state.submersionRatio > 0) {
       // Buoyancy force (upward)
       const objectWeight = config.object_density * config.object_volume * 9.81;
       const netForce = state.buoyancyForce - objectWeight;
       context.emit?.('apply_force', { node, force: { x: 0, y: netForce, z: 0 } });
-      
+
       // Fluid drag (opposes velocity)
       const dragCoeff = config.drag * state.submersionRatio;
       context.emit?.('apply_force', {
@@ -151,7 +147,7 @@ export const buoyancyHandler: TraitHandler<BuoyancyConfig> = {
           z: -state.velocity.z * dragCoeff,
         },
       });
-      
+
       // Current/flow force
       if (config.flow_strength > 0) {
         context.emit?.('apply_force', {
@@ -164,10 +160,10 @@ export const buoyancyHandler: TraitHandler<BuoyancyConfig> = {
         });
       }
     }
-    
+
     // Emit events
     state.splashCooldown = Math.max(0, state.splashCooldown - delta);
-    
+
     if (config.splash_effect && state.splashCooldown <= 0) {
       // Entering water
       if (prevSubmersion === 0 && state.submersionRatio > 0) {
@@ -181,7 +177,7 @@ export const buoyancyHandler: TraitHandler<BuoyancyConfig> = {
         state.splashCooldown = 0.5;
       }
     }
-    
+
     // Submersion state change
     if (!wasSubmerged && state.isSubmerged) {
       context.emit?.('on_submerge', { node, submersionRatio: state.submersionRatio });
@@ -193,7 +189,7 @@ export const buoyancyHandler: TraitHandler<BuoyancyConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__buoyancyState as BuoyancyState;
     if (!state) return;
-    
+
     // Handle external events that affect buoyancy
     if (event.type === 'set_fluid_level') {
       config.fluid_level = event.level;

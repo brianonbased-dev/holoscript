@@ -53,8 +53,20 @@ describe('HoloScriptRuntime', () => {
 
     it('should create a connection', async () => {
       // First create two orbs
-      const orb1: OrbNode = { type: 'orb', name: 'source', properties: {}, methods: [], position: { x: 0, y: 0, z: 0 } };
-      const orb2: OrbNode = { type: 'orb', name: 'target', properties: {}, methods: [], position: { x: 5, y: 0, z: 0 } };
+      const orb1: OrbNode = {
+        type: 'orb',
+        name: 'source',
+        properties: {},
+        methods: [],
+        position: { x: 0, y: 0, z: 0 },
+      };
+      const orb2: OrbNode = {
+        type: 'orb',
+        name: 'target',
+        properties: {},
+        methods: [],
+        position: { x: 5, y: 0, z: 0 },
+      };
 
       await runtime.executeNode(orb1);
       await runtime.executeNode(orb2);
@@ -270,9 +282,7 @@ describe('HoloScriptRuntime', () => {
         type: 'stream',
         name: 'testStream',
         source: 'numbers',
-        transformations: [
-          { type: 'transformation', operation: 'sum', parameters: {} },
-        ],
+        transformations: [{ type: 'transformation', operation: 'sum', parameters: {} }],
         position: { x: 0, y: 0, z: 0 },
       };
 
@@ -321,7 +331,9 @@ describe('HoloScriptRuntime', () => {
 
     it('should remove event handlers', async () => {
       let count = 0;
-      const handler = () => { count++; };
+      const handler = () => {
+        count++;
+      };
 
       runtime.on('counter', handler);
       await runtime.emit('counter');
@@ -379,7 +391,7 @@ describe('HoloScriptRuntime', () => {
       expect(parseResult.ast.length).toBe(3);
 
       const results = await runtime.executeProgram(parseResult.ast);
-      expect(results.every(r => r.success)).toBe(true);
+      expect(results.every((r) => r.success)).toBe(true);
 
       const context = runtime.getContext();
       expect(context.connections.length).toBe(1);
@@ -395,12 +407,17 @@ describe('HoloScriptRuntime', () => {
 
     it('should respect execution limits', async () => {
       // Create a very deep recursion scenario
-      const nodes = Array(2000).fill(null).map((_, i) => ({
-        type: 'orb',
-        name: `orb${i}`,
-        properties: {},
-        methods: [],
-      } as OrbNode));
+      const nodes = Array(2000)
+        .fill(null)
+        .map(
+          (_, i) =>
+            ({
+              type: 'orb',
+              name: `orb${i}`,
+              properties: {},
+              methods: [],
+            }) as OrbNode
+        );
 
       const results = await runtime.executeProgram(nodes);
 

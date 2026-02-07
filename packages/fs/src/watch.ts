@@ -10,7 +10,14 @@ import { EventEmitter } from 'events';
 /**
  * Watch event types
  */
-export type WatchEventType = 'add' | 'change' | 'unlink' | 'addDir' | 'unlinkDir' | 'error' | 'ready';
+export type WatchEventType =
+  | 'add'
+  | 'change'
+  | 'unlink'
+  | 'addDir'
+  | 'unlinkDir'
+  | 'error'
+  | 'ready';
 
 /**
  * Watch event
@@ -158,7 +165,10 @@ export class FileWatcher extends EventEmitter {
   /**
    * Register event handler
    */
-  on(event: 'add' | 'change' | 'unlink' | 'addDir' | 'unlinkDir' | 'all', listener: (event: WatchEvent) => void): this;
+  on(
+    event: 'add' | 'change' | 'unlink' | 'addDir' | 'unlinkDir' | 'all',
+    listener: (event: WatchEvent) => void
+  ): this;
   on(event: 'error', listener: (error: Error) => void): this;
   on(event: 'ready', listener: () => void): this;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,7 +176,11 @@ export class FileWatcher extends EventEmitter {
     return super.on(event, listener);
   }
 
-  private handleEvent(type: WatchEventType, path: string, stats?: { size: number; mtime: Date }): void {
+  private handleEvent(
+    type: WatchEventType,
+    path: string,
+    stats?: { size: number; mtime: Date }
+  ): void {
     const event: WatchEvent = {
       type,
       path,
@@ -181,7 +195,7 @@ export class FileWatcher extends EventEmitter {
     if (this.options.debounce && this.options.debounce > 0) {
       // Debounce the event
       if (this.debounceTimers.has(path)) {
-        clearTimeout(this.debounceTimers.get(path)!);
+        clearTimeout(this.debounceTimers.get(path));
       }
 
       this.debounceTimers.set(
@@ -250,7 +264,11 @@ export function watchFileTypes(
 /**
  * Watch a single file
  */
-export function watchFile(path: string, callback: WatchCallback, options?: WatchOptions): FileWatcher {
+export function watchFile(
+  path: string,
+  callback: WatchCallback,
+  options?: WatchOptions
+): FileWatcher {
   return watchCallback(path, callback, { ...options, depth: 0 });
 }
 
@@ -269,7 +287,10 @@ export function watchDebounced(
 /**
  * One-shot watch - stop after first event
  */
-export async function watchOnce(paths: string | string[], options?: WatchOptions): Promise<WatchEvent> {
+export async function watchOnce(
+  paths: string | string[],
+  options?: WatchOptions
+): Promise<WatchEvent> {
   return new Promise((resolve, reject) => {
     const watcher = watch(paths, { ...options, emitInitial: false });
 

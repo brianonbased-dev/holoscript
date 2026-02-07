@@ -20,51 +20,51 @@ npm install @holoscript/registry
 
 ### Workspaces
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/workspaces` | Create workspace |
-| GET | `/workspaces` | List user's workspaces |
-| GET | `/workspaces/:id` | Get workspace details |
-| PUT | `/workspaces/:id` | Update workspace |
-| DELETE | `/workspaces/:id` | Delete workspace |
+| Method | Endpoint          | Description            |
+| ------ | ----------------- | ---------------------- |
+| POST   | `/workspaces`     | Create workspace       |
+| GET    | `/workspaces`     | List user's workspaces |
+| GET    | `/workspaces/:id` | Get workspace details  |
+| PUT    | `/workspaces/:id` | Update workspace       |
+| DELETE | `/workspaces/:id` | Delete workspace       |
 
 ### Members
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/workspaces/:id/members` | List members |
-| POST | `/workspaces/:id/members` | Invite member |
-| PUT | `/workspaces/:id/members/:userId` | Update role |
+| Method | Endpoint                          | Description   |
+| ------ | --------------------------------- | ------------- |
+| GET    | `/workspaces/:id/members`         | List members  |
+| POST   | `/workspaces/:id/members`         | Invite member |
+| PUT    | `/workspaces/:id/members/:userId` | Update role   |
 | DELETE | `/workspaces/:id/members/:userId` | Remove member |
 
 ### Secrets
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/workspaces/:id/secrets` | List secrets |
-| POST | `/workspaces/:id/secrets` | Set secret |
+| Method | Endpoint                        | Description   |
+| ------ | ------------------------------- | ------------- |
+| GET    | `/workspaces/:id/secrets`       | List secrets  |
+| POST   | `/workspaces/:id/secrets`       | Set secret    |
 | DELETE | `/workspaces/:id/secrets/:name` | Delete secret |
 
 ### Activity
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/workspaces/:id/activity` | Activity feed |
+| Method | Endpoint                   | Description   |
+| ------ | -------------------------- | ------------- |
+| GET    | `/workspaces/:id/activity` | Activity feed |
 
 ## Roles & Permissions
 
-| Permission | Owner | Admin | Developer | Viewer |
-|------------|-------|-------|-----------|--------|
-| Read workspace | ✓ | ✓ | ✓ | ✓ |
-| Update workspace | ✓ | ✓ | | |
-| Delete workspace | ✓ | | | |
-| Invite members | ✓ | ✓ | | |
-| Remove members | ✓ | ✓ | | |
-| Update roles | ✓ | ✓ | | |
-| Publish packages | ✓ | ✓ | ✓ | |
-| Manage secrets | ✓ | ✓ | | |
-| Read secrets | ✓ | ✓ | ✓ | |
-| Manage billing | ✓ | | | |
+| Permission       | Owner | Admin | Developer | Viewer |
+| ---------------- | ----- | ----- | --------- | ------ |
+| Read workspace   | ✓     | ✓     | ✓         | ✓      |
+| Update workspace | ✓     | ✓     |           |        |
+| Delete workspace | ✓     |       |           |        |
+| Invite members   | ✓     | ✓     |           |        |
+| Remove members   | ✓     | ✓     |           |        |
+| Update roles     | ✓     | ✓     |           |        |
+| Publish packages | ✓     | ✓     | ✓         |        |
+| Manage secrets   | ✓     | ✓     |           |        |
+| Read secrets     | ✓     | ✓     | ✓         |        |
+| Manage billing   | ✓     |       |           |        |
 
 ## Configuration
 

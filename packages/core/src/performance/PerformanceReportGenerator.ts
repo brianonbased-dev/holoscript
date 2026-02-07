@@ -45,7 +45,10 @@ export class PerformanceReportGenerator {
 
     return {
       timestamp: new Date().toISOString(),
-      totalMetrics: Array.from(metrics.values() as IterableIterator<number[]>).reduce((sum, values) => sum + values.length, 0),
+      totalMetrics: Array.from(metrics.values() as IterableIterator<number[]>).reduce(
+        (sum, values) => sum + values.length,
+        0
+      ),
       summary: {
         categories,
       },
@@ -189,7 +192,9 @@ export class PerformanceReportGenerator {
 
     // Check code reduction
     if (categories['Code Metrics']) {
-      const reductionMetrics = categories['Code Metrics'].metrics.filter((m) => m.name.includes('Reduction'));
+      const reductionMetrics = categories['Code Metrics'].metrics.filter((m) =>
+        m.name.includes('Reduction')
+      );
       for (const metric of reductionMetrics) {
         if (metric.value < 50) {
           recommendations.push(

@@ -57,9 +57,9 @@ const linter = new HoloScriptLinter({
     'no-duplicate-ids': 'error',
     'composition-naming': 'warn',
     'no-deep-nesting': ['warn', { maxDepth: 5 }],
-    'no-unused-templates': 'warn'
+    'no-unused-templates': 'warn',
   },
-  maxErrors: 100
+  maxErrors: 100,
 });
 
 // Lint a file
@@ -70,7 +70,9 @@ console.log(`Warnings: ${result.warningCount}`);
 console.log(`Fixable: ${result.fixableCount}`);
 
 for (const diagnostic of result.diagnostics) {
-  console.log(`${diagnostic.line}:${diagnostic.column} [${diagnostic.severity}] ${diagnostic.message} (${diagnostic.ruleId})`);
+  console.log(
+    `${diagnostic.line}:${diagnostic.column} [${diagnostic.severity}] ${diagnostic.message} (${diagnostic.ruleId})`
+  );
 }
 
 // Convenience function (uses default config)
@@ -93,10 +95,7 @@ Create a `.holoscriptlintrc`, `.holoscriptlintrc.json`, or `holoscript-lint.conf
     "valid-trait-syntax": "error",
     "no-unused-templates": "warn"
   },
-  "ignorePatterns": [
-    "node_modules/**",
-    "dist/**"
-  ],
+  "ignorePatterns": ["node_modules/**", "dist/**"],
   "maxErrors": 100
 }
 ```
@@ -104,35 +103,40 @@ Create a `.holoscriptlintrc`, `.holoscriptlintrc.json`, or `holoscript-lint.conf
 ## Built-in Rules
 
 ### Syntax
-| Rule | Default | Description |
-|------|---------|-------------|
-| `no-duplicate-ids` | error | Ensure all object IDs are unique within a composition |
-| `valid-trait-syntax` | error | Ensure trait annotations use valid syntax |
+
+| Rule                 | Default | Description                                           |
+| -------------------- | ------- | ----------------------------------------------------- |
+| `no-duplicate-ids`   | error   | Ensure all object IDs are unique within a composition |
+| `valid-trait-syntax` | error   | Ensure trait annotations use valid syntax             |
 
 ### Naming
-| Rule | Default | Description |
-|------|---------|-------------|
-| `composition-naming` | warn | Composition names should use PascalCase |
-| `object-naming` | warn | Object names should follow conventions |
-| `template-naming` | warn | Template names should use PascalCase |
+
+| Rule                 | Default | Description                             |
+| -------------------- | ------- | --------------------------------------- |
+| `composition-naming` | warn    | Composition names should use PascalCase |
+| `object-naming`      | warn    | Object names should follow conventions  |
+| `template-naming`    | warn    | Template names should use PascalCase    |
 
 ### Best Practice
-| Rule | Default | Description |
-|------|---------|-------------|
-| `no-unused-templates` | warn | Templates should be used at least once |
-| `prefer-templates` | warn | Prefer templates for repeated patterns |
+
+| Rule                  | Default | Description                            |
+| --------------------- | ------- | -------------------------------------- |
+| `no-unused-templates` | warn    | Templates should be used at least once |
+| `prefer-templates`    | warn    | Prefer templates for repeated patterns |
 
 ### Performance
-| Rule | Default | Description |
-|------|---------|-------------|
-| `no-deep-nesting` | warn | Avoid deeply nested structures (default max: 5) |
-| `limit-objects-per-group` | warn | Limit objects per spatial group |
+
+| Rule                      | Default | Description                                     |
+| ------------------------- | ------- | ----------------------------------------------- |
+| `no-deep-nesting`         | warn    | Avoid deeply nested structures (default max: 5) |
+| `limit-objects-per-group` | warn    | Limit objects per spatial group                 |
 
 ### Style
-| Rule | Default | Description |
-|------|---------|-------------|
-| `consistent-spacing` | info | Use consistent spacing |
-| `sorted-properties` | info | Sort properties alphabetically |
+
+| Rule                 | Default | Description                    |
+| -------------------- | ------- | ------------------------------ |
+| `consistent-spacing` | info    | Use consistent spacing         |
+| `sorted-properties`  | info    | Sort properties alphabetically |
 
 ## Custom Rules
 
@@ -152,7 +156,7 @@ linter.registerRule({
   check(context: RuleContext): LintDiagnostic[] {
     const diagnostics: LintDiagnostic[] = [];
     const pattern = /\b\d{3,}\b/g;
-    
+
     for (let i = 0; i < context.lines.length; i++) {
       let match;
       while ((match = pattern.exec(context.lines[i])) !== null) {
@@ -161,13 +165,13 @@ linter.registerRule({
           message: `Magic number ${match[0]} - consider using a named constant`,
           severity: 'warning',
           line: i + 1,
-          column: match.index + 1
+          column: match.index + 1,
         });
       }
     }
-    
+
     return diagnostics;
-  }
+  },
 });
 
 // Get all registered rules
@@ -178,6 +182,7 @@ console.log(`${rules.length} rules registered`);
 ## Output Formats
 
 ### Stylish (default)
+
 ```
 src/scene.holo
   5:1  error  Duplicate ID "player" (first defined on line 2)  no-duplicate-ids
@@ -187,6 +192,7 @@ src/scene.holo
 ```
 
 ### JSON
+
 ```json
 [{
   "filePath": "src/scene.holo",
@@ -198,6 +204,7 @@ src/scene.holo
 ```
 
 ### Compact
+
 ```
 src/scene.holo:5:1: error - Duplicate ID "player" (no-duplicate-ids)
 src/scene.holo:12:1: warning - Composition name should use PascalCase (composition-naming)

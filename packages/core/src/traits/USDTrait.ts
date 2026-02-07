@@ -351,12 +351,7 @@ export const usdHandler: TraitHandler<USDConfig> = {
     delete (node as any).__usdState;
   },
 
-  onUpdate(
-    node: HSPlusNode,
-    config: USDConfig,
-    context: TraitContext,
-    delta: number
-  ) {
+  onUpdate(node: HSPlusNode, config: USDConfig, context: TraitContext, delta: number) {
     const state = (node as any).__usdState as USDState | undefined;
     if (!state || !state.isLoaded) return;
 
@@ -367,9 +362,10 @@ export const usdHandler: TraitHandler<USDConfig> = {
 
       if (state.currentTimeCode > state.animation.endTimeCode) {
         if (config.loop_animation) {
-          state.currentTimeCode = state.animation.startTimeCode +
+          state.currentTimeCode =
+            state.animation.startTimeCode +
             ((state.currentTimeCode - state.animation.startTimeCode) %
-             (state.animation.endTimeCode - state.animation.startTimeCode));
+              (state.animation.endTimeCode - state.animation.startTimeCode));
         } else {
           state.currentTimeCode = state.animation.endTimeCode;
           state.isPlaying = false;
@@ -393,12 +389,7 @@ export const usdHandler: TraitHandler<USDConfig> = {
     }
   },
 
-  onEvent(
-    node: HSPlusNode,
-    config: USDConfig,
-    context: TraitContext,
-    event: any
-  ) {
+  onEvent(node: HSPlusNode, config: USDConfig, context: TraitContext, event: any) {
     const state = (node as any).__usdState as USDState | undefined;
     if (!state) return;
 
@@ -546,7 +537,7 @@ async function loadUSDAsset(
       isUSDZ: state.isUSDZ,
       primCount: state.primCount,
       meshCount: state.meshCount,
-      variantSets: state.variantSets.map(vs => vs.name),
+      variantSets: state.variantSets.map((vs) => vs.name),
       hasAnimation: !!state.animation,
       hasSkeleton: !!state.skeleton,
       metadata: state.metadata,
@@ -637,28 +628,32 @@ function createMockUSDData(config: USDConfig): {
         default: 'plastic',
       },
     ],
-    animation: hasAnimation ? {
-      startTimeCode: 0,
-      endTimeCode: 120,
-      timeCodesPerSecond: 24,
-      framesPerSecond: config.frame_rate,
-      hasTimeSamples: true,
-      animatedPaths: ['/Root/Body', '/Root/Skeleton'],
-    } : null,
-    skeleton: config.enable_skeletal ? {
-      path: '/Root/Skeleton',
-      joints: ['Hips', 'Spine', 'Spine1', 'Spine2', 'Neck', 'Head'],
-      bindTransforms: new Map(),
-      restTransforms: new Map(),
-      topology: new Map([
-        ['Hips', null],
-        ['Spine', 'Hips'],
-        ['Spine1', 'Spine'],
-        ['Spine2', 'Spine1'],
-        ['Neck', 'Spine2'],
-        ['Head', 'Neck'],
-      ]),
-    } : null,
+    animation: hasAnimation
+      ? {
+          startTimeCode: 0,
+          endTimeCode: 120,
+          timeCodesPerSecond: 24,
+          framesPerSecond: config.frame_rate,
+          hasTimeSamples: true,
+          animatedPaths: ['/Root/Body', '/Root/Skeleton'],
+        }
+      : null,
+    skeleton: config.enable_skeletal
+      ? {
+          path: '/Root/Skeleton',
+          joints: ['Hips', 'Spine', 'Spine1', 'Spine2', 'Neck', 'Head'],
+          bindTransforms: new Map(),
+          restTransforms: new Map(),
+          topology: new Map([
+            ['Hips', null],
+            ['Spine', 'Hips'],
+            ['Spine1', 'Spine'],
+            ['Spine2', 'Spine1'],
+            ['Neck', 'Spine2'],
+            ['Head', 'Neck'],
+          ]),
+        }
+      : null,
     blendShapes: config.enable_blend_shapes ? ['smile', 'frown', 'blink'] : [],
     primCount: 50,
     meshCount: 8,
@@ -732,7 +727,7 @@ function setVariant(
   variantSetName: string,
   variantName: string
 ): void {
-  const variantSet = state.variantSets.find(vs => vs.name === variantSetName);
+  const variantSet = state.variantSets.find((vs) => vs.name === variantSetName);
   if (!variantSet || !variantSet.variants.includes(variantName)) return;
 
   state.activeVariants.set(variantSetName, variantName);
@@ -757,11 +752,7 @@ function setBlendShape(state: USDState, target: string, weight: number): void {
 // PAYLOAD FUNCTIONS
 // =============================================================================
 
-function loadPayload(
-  state: USDState,
-  context: TraitContext,
-  primPath: string
-): void {
+function loadPayload(state: USDState, context: TraitContext, primPath: string): void {
   const prim = findPrim(state.hierarchy, primPath);
   if (prim && prim.hasPayload) {
     // Would load payload data
@@ -769,11 +760,7 @@ function loadPayload(
   }
 }
 
-function unloadPayload(
-  state: USDState,
-  context: TraitContext,
-  primPath: string
-): void {
+function unloadPayload(state: USDState, context: TraitContext, primPath: string): void {
   const prim = findPrim(state.hierarchy, primPath);
   if (prim && prim.hasPayload) {
     // Would unload payload data
@@ -794,11 +781,7 @@ function findPrim(hierarchy: USDPrim[], path: string): USDPrim | null {
 // PURPOSE FUNCTIONS
 // =============================================================================
 
-function setPurpose(
-  state: USDState,
-  context: TraitContext,
-  purpose: USDPurpose
-): void {
+function setPurpose(state: USDState, context: TraitContext, purpose: USDPurpose): void {
   context.emit('usd:purpose_changed', { purpose });
 }
 
@@ -810,7 +793,7 @@ function exportStage(
   state: USDState,
   context: TraitContext,
   format: 'usda' | 'usdc' | 'usdz',
-  options: Record<string, unknown>
+  _options: Record<string, unknown>
 ): void {
   // Would export stage to specified format
   context.emit('usd:export_complete', {

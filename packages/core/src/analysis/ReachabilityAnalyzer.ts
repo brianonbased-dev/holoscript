@@ -13,12 +13,7 @@
  * @version 1.0.0
  */
 
-import {
-  ReferenceGraph,
-  GraphNode,
-  SymbolDefinition,
-  SymbolType,
-} from './ReferenceGraph';
+import { ReferenceGraph, GraphNode, SymbolDefinition, SymbolType } from './ReferenceGraph';
 
 /**
  * Dead code item
@@ -131,7 +126,7 @@ export class ReachabilityAnalyzer {
     const unreachable: SymbolDefinition[] = [];
     const deadCode: DeadCodeItem[] = [];
 
-    for (const [id, node] of nodes) {
+    for (const [_id, node] of nodes) {
       // Skip ignored types
       if (this.options.ignoreTypes.includes(node.definition.type)) {
         continue;
@@ -256,7 +251,7 @@ export class ReachabilityAnalyzer {
 
     // Check if only referenced by other dead code
     const nodes = this.graph.getNodes();
-    const liveReferences = Array.from(node.referencedBy).filter(refId => {
+    const liveReferences = Array.from(node.referencedBy).filter((refId) => {
       const refNode = nodes.get(refId);
       return refNode?.isReachable;
     });
@@ -364,7 +359,7 @@ export class ReachabilityAnalyzer {
    * Get dead code items filtered by type
    */
   getDeadCodeByType(result: ReachabilityResult, type: DeadCodeType): DeadCodeItem[] {
-    return result.deadCode.filter(item => item.type === type);
+    return result.deadCode.filter((item) => item.type === type);
   }
 
   /**
@@ -408,7 +403,9 @@ export class ReachabilityAnalyzer {
 
     // Summary
     lines.push(`Total symbols: ${result.stats.totalSymbols}`);
-    lines.push(`Reachable: ${result.stats.reachableCount} (${result.stats.coveragePercent.toFixed(1)}%)`);
+    lines.push(
+      `Reachable: ${result.stats.reachableCount} (${result.stats.coveragePercent.toFixed(1)}%)`
+    );
     lines.push(`Unreachable: ${result.stats.unreachableCount}`);
     lines.push('');
 

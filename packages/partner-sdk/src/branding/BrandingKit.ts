@@ -120,9 +120,21 @@ export const LOGO_ASSETS: BrandAsset[] = [
     description: 'Primary logo for HoloScript branding',
     formats: [
       { type: 'svg', url: 'https://cdn.holoscript.dev/brand/logo.svg' },
-      { type: 'png', size: { width: 512, height: 512 }, url: 'https://cdn.holoscript.dev/brand/logo-512.png' },
-      { type: 'png', size: { width: 256, height: 256 }, url: 'https://cdn.holoscript.dev/brand/logo-256.png' },
-      { type: 'png', size: { width: 128, height: 128 }, url: 'https://cdn.holoscript.dev/brand/logo-128.png' },
+      {
+        type: 'png',
+        size: { width: 512, height: 512 },
+        url: 'https://cdn.holoscript.dev/brand/logo-512.png',
+      },
+      {
+        type: 'png',
+        size: { width: 256, height: 256 },
+        url: 'https://cdn.holoscript.dev/brand/logo-256.png',
+      },
+      {
+        type: 'png',
+        size: { width: 128, height: 128 },
+        url: 'https://cdn.holoscript.dev/brand/logo-128.png',
+      },
     ],
     url: 'https://cdn.holoscript.dev/brand/logo.svg',
     usage: {
@@ -147,7 +159,11 @@ export const LOGO_ASSETS: BrandAsset[] = [
     description: 'Text-based logo for inline usage',
     formats: [
       { type: 'svg', url: 'https://cdn.holoscript.dev/brand/wordmark.svg' },
-      { type: 'png', size: { width: 400, height: 80 }, url: 'https://cdn.holoscript.dev/brand/wordmark.png' },
+      {
+        type: 'png',
+        size: { width: 400, height: 80 },
+        url: 'https://cdn.holoscript.dev/brand/wordmark.png',
+      },
     ],
     url: 'https://cdn.holoscript.dev/brand/wordmark.svg',
     usage: {
@@ -162,7 +178,11 @@ export const LOGO_ASSETS: BrandAsset[] = [
     description: 'Simplified icon for small spaces',
     formats: [
       { type: 'svg', url: 'https://cdn.holoscript.dev/brand/icon.svg' },
-      { type: 'png', size: { width: 64, height: 64 }, url: 'https://cdn.holoscript.dev/brand/icon-64.png' },
+      {
+        type: 'png',
+        size: { width: 64, height: 64 },
+        url: 'https://cdn.holoscript.dev/brand/icon-64.png',
+      },
       { type: 'ico', url: 'https://cdn.holoscript.dev/brand/favicon.ico' },
     ],
     url: 'https://cdn.holoscript.dev/brand/icon.svg',
@@ -328,11 +348,10 @@ module.exports = {
   /**
    * Validate logo usage
    */
-  validateLogoUsage(context: {
-    size: number;
-    background: string;
-    clearSpace: number;
-  }): { valid: boolean; issues: string[] } {
+  validateLogoUsage(context: { size: number; background: string; clearSpace: number }): {
+    valid: boolean;
+    issues: string[];
+  } {
     const issues: string[] = [];
 
     // Check minimum size
@@ -346,11 +365,13 @@ module.exports = {
     }
 
     // Check background contrast (simplified)
-    const isLightBg = context.background.toLowerCase() === '#ffffff' || 
-                       context.background.toLowerCase() === 'white';
-    const isDarkBg = context.background.toLowerCase() === '#000000' || 
-                      context.background.toLowerCase() === 'black';
-    
+    const isLightBg =
+      context.background.toLowerCase() === '#ffffff' ||
+      context.background.toLowerCase() === 'white';
+    const isDarkBg =
+      context.background.toLowerCase() === '#000000' ||
+      context.background.toLowerCase() === 'black';
+
     if (!isLightBg && !isDarkBg) {
       issues.push('Logo should be used on solid light or dark backgrounds');
     }

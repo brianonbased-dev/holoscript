@@ -140,7 +140,7 @@ export const mqttSinkHandler: TraitHandler<MQTTSinkConfig> = {
     }
   },
 
-  onDetach(node, config, context) {
+  onDetach(node, config, _context) {
     const state = (node as any).__mqttSinkState as MQTTSinkState | undefined;
     if (state?.client) {
       // Publish empty/null with retain to clear retained message
@@ -152,7 +152,7 @@ export const mqttSinkHandler: TraitHandler<MQTTSinkConfig> = {
     delete (node as any).__mqttSinkState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const sinkState = (node as any).__mqttSinkState as MQTTSinkState | undefined;
     if (!sinkState || !sinkState.client || !sinkState.connected) return;
 
@@ -253,7 +253,7 @@ function resolveTopic(topicTemplate: string, node: any): string {
 function buildPayload(
   state: Record<string, unknown>,
   config: MQTTSinkConfig,
-  node: any
+  _node: any
 ): Record<string, unknown> | string {
   let payload: Record<string, unknown> = {};
 
@@ -294,14 +294,14 @@ function hashState(payload: unknown): string {
  * Check if a node has the @mqtt_sink trait
  */
 export function hasMQTTSinkTrait(node: any): boolean {
-  return !!(node as any).__mqttSinkState;
+  return !!(node).__mqttSinkState;
 }
 
 /**
  * Get the MQTT sink state from a node
  */
 export function getMQTTSinkState(node: any): MQTTSinkState | null {
-  return (node as any).__mqttSinkState || null;
+  return (node).__mqttSinkState || null;
 }
 
 /**
@@ -323,17 +323,13 @@ export function isMQTTSinkConnected(node: any): boolean {
 /**
  * Manually trigger a publish
  */
-export function publishToMQTTSink(
-  node: any,
-  payload?: unknown,
-  topic?: string
-): Promise<void> {
+export function publishToMQTTSink(node: any, payload?: unknown, topic?: string): Promise<void> {
   const state = getMQTTSinkState(node);
   if (!state?.client || !state.connected) {
     return Promise.reject(new Error('MQTT sink not connected'));
   }
 
-  const nodeState = (node as any).__mqttSinkConfig as MQTTSinkConfig | undefined;
+  const nodeState = (node).__mqttSinkConfig as MQTTSinkConfig | undefined;
   const finalTopic = topic || resolveTopic(nodeState?.topic || '', node);
   const finalPayload = payload !== undefined && payload !== null ? payload : {};
 

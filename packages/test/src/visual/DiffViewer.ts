@@ -76,7 +76,12 @@ export class DiffViewer {
   /**
    * Generate and save HTML report
    */
-  save(result: SemanticDiffResult, outputPath?: string, oldSource?: string, newSource?: string): void {
+  save(
+    result: SemanticDiffResult,
+    outputPath?: string,
+    oldSource?: string,
+    newSource?: string
+  ): void {
     const html = this.generate(result, oldSource, newSource);
     const outPath = outputPath || path.join(this.options.outputDir, 'diff-report.html');
 
@@ -92,9 +97,10 @@ export class DiffViewer {
     const script = this.getScript();
     const summary = this.buildSummary(result);
     const changesList = this.buildChangesList(result.changes);
-    const sideBySide = this.options.includeSource && oldSource && newSource
-      ? this.buildSideBySide(oldSource, newSource, result.changes)
-      : '';
+    const sideBySide =
+      this.options.includeSource && oldSource && newSource
+        ? this.buildSideBySide(oldSource, newSource, result.changes)
+        : '';
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -122,12 +128,16 @@ export class DiffViewer {
       ${changesList}
     </section>
 
-    ${sideBySide ? `
+    ${
+      sideBySide
+        ? `
     <section class="source-section">
       <h2>📝 Side-by-Side Comparison</h2>
       ${sideBySide}
     </section>
-    ` : ''}
+    `
+        : ''
+    }
   </main>
 
   <footer>
@@ -152,22 +162,26 @@ export class DiffViewer {
     ];
 
     const statCards = stats
-      .filter(s => result.summary[s.type] > 0)
-      .map(s => `
+      .filter((s) => result.summary[s.type] > 0)
+      .map(
+        (s) => `
         <div class="stat-card" style="--card-color: ${s.color}">
           <span class="icon">${s.icon}</span>
           <span class="count">${result.summary[s.type]}</span>
           <span class="label">${s.type}</span>
         </div>
-      `)
+      `
+      )
       .join('');
 
     return `
     <section class="summary-section">
       <div class="status ${result.equivalent ? 'equivalent' : 'different'}">
-        ${result.equivalent
-          ? '✅ Files are semantically equivalent'
-          : `⚠️ Found ${result.changeCount} semantic change(s)`}
+        ${
+          result.equivalent
+            ? '✅ Files are semantically equivalent'
+            : `⚠️ Found ${result.changeCount} semantic change(s)`
+        }
       </div>
       <div class="stat-cards">
         ${statCards || '<div class="no-changes">No changes detected</div>'}
@@ -187,19 +201,27 @@ export class DiffViewer {
     const grouped = this.groupChangesByType(changes);
     const sections = Object.entries(grouped)
       .map(([type, typeChanges]) => {
-        const items = typeChanges.map(c => `
+        const items = typeChanges
+          .map(
+            (c) => `
           <li class="change-item change-${c.type}">
             <span class="change-path">${this.escapeHtml(c.path)}</span>
             ${c.oldLine ? `<span class="line-num">:${c.oldLine}</span>` : ''}
             <span class="change-desc">${this.escapeHtml(c.description)}</span>
-            ${c.oldValue !== undefined || c.newValue !== undefined ? `
+            ${
+              c.oldValue !== undefined || c.newValue !== undefined
+                ? `
               <div class="change-values">
                 ${c.oldValue !== undefined ? `<div class="old-value">- ${this.formatValue(c.oldValue)}</div>` : ''}
                 ${c.newValue !== undefined ? `<div class="new-value">+ ${this.formatValue(c.newValue)}</div>` : ''}
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </li>
-        `).join('');
+        `
+          )
+          .join('');
 
         return `
           <div class="change-group" data-type="${type}">

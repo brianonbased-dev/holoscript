@@ -28,7 +28,7 @@ export const HoloAIBehaviorSchema = z.object({
 
 /**
  * HoloSmartAsset
- * 
+ *
  * Represents a self-contained, portable HoloScript asset.
  * It packages code, assets, physics properties, and AI behaviors into a single unit.
  */
@@ -58,7 +58,7 @@ export interface HoloSmartAsset {
    * This allows the asset to be completely self-contained.
    */
   assets?: Record<string, string | Uint8Array>;
-  
+
   /**
    * Dependencies on other Smart Assets (by ID/Version).
    */

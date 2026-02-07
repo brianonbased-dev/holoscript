@@ -23,13 +23,13 @@ describe('LipSyncTrait - Phase 16 (Phoneme Method)', () => {
 
     // "h" -> kk
     expect(lipSync.samplePhonemeAtTime(0.05).viseme).toBe('kk');
-    
+
     // "eh" -> E
     expect(lipSync.samplePhonemeAtTime(0.2).viseme).toBe('E');
-    
+
     // "l" -> nn
     expect(lipSync.samplePhonemeAtTime(0.35).viseme).toBe('nn');
-    
+
     // "ow" -> O
     expect(lipSync.samplePhonemeAtTime(0.55).viseme).toBe('O');
   });
@@ -48,7 +48,9 @@ describe('LipSyncTrait - Phase 16 (Phoneme Method)', () => {
   });
 
   it('should implement co-articulation (fading at boundaries)', () => {
-    lipSync.startSession({ phonemeData: [{ phoneme: 'aa', time: 0.1, duration: 1.0, weight: 1.0 }] });
+    lipSync.startSession({
+      phonemeData: [{ phoneme: 'aa', time: 0.1, duration: 1.0, weight: 1.0 }],
+    });
 
     // Middle: full weight
     expect(lipSync.samplePhonemeAtTime(0.5).weight).toBe(0.85); // maxWeight cap
@@ -65,7 +67,7 @@ describe('LipSyncTrait - Phase 16 (Phoneme Method)', () => {
 
     // Simulate update at 0.2s ("eh" -> E -> viseme_E)
     const weights = lipSync.update(0.2);
-    
+
     // Oculus mapping for 'E' is 'viseme_E'
     expect(weights['viseme_E']).toBeGreaterThan(0);
     expect(weights['viseme_aa']).toBeUndefined();
@@ -74,7 +76,7 @@ describe('LipSyncTrait - Phase 16 (Phoneme Method)', () => {
   it('should work with binary search correctly for large data', () => {
     const manyPhonemes: PhonemeTimestamp[] = [];
     for (let i = 0; i < 1000; i++) {
-       manyPhonemes.push({ phoneme: 'aa', time: i * 0.1, duration: 0.1 });
+      manyPhonemes.push({ phoneme: 'aa', time: i * 0.1, duration: 0.1 });
     }
     lipSync.startSession({ phonemeData: manyPhonemes });
 

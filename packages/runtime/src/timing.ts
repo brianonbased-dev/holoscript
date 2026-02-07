@@ -105,11 +105,9 @@ export function nextFrame(): Promise<number> {
 /**
  * Create a repeating animation frame loop
  */
-export function createLoop(
-  callback: (deltaTime: number, elapsed: number) => void
-): CancelFn {
+export function createLoop(callback: (deltaTime: number, elapsed: number) => void): CancelFn {
   let lastTime = performance.now();
-  let startTime = lastTime;
+  const startTime = lastTime;
   let animationId: number;
   let running = true;
 

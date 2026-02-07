@@ -201,7 +201,9 @@ function checkTraits(
   ignoreIds: string[]
 ): LintDiagnostic[] {
   const diagnostics: LintDiagnostic[] = [];
-  const traitDeprecations = deprecations.filter((d) => d.type === 'trait' && !ignoreIds.includes(d.id));
+  const traitDeprecations = deprecations.filter(
+    (d) => d.type === 'trait' && !ignoreIds.includes(d.id)
+  );
 
   // Match @trait syntax
   const traitRegex = /@(\w+)/g;
@@ -312,18 +314,13 @@ export const deprecationWarningRule: Rule = {
     };
 
     // Combine built-in and custom deprecations
-    const allDeprecations = [
-      ...BUILT_IN_DEPRECATIONS,
-      ...(options.customDeprecations || []),
-    ];
+    const allDeprecations = [...BUILT_IN_DEPRECATIONS, ...(options.customDeprecations || [])];
 
     const ignoreIds = options.ignoreIds || [];
 
     // Check traits
     if (options.checkTraits) {
-      diagnostics.push(
-        ...checkTraits(context.source, context.lines, allDeprecations, ignoreIds)
-      );
+      diagnostics.push(...checkTraits(context.source, context.lines, allDeprecations, ignoreIds));
     }
 
     // Check properties

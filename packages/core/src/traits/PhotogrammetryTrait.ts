@@ -15,7 +15,14 @@ import type { TraitHandler } from './TraitTypes';
 
 type SourceType = 'images' | 'video' | 'depth_images' | 'lidar';
 type QualityLevel = 'preview' | 'low' | 'medium' | 'high' | 'ultra';
-type ProcessingStage = 'idle' | 'uploading' | 'aligning' | 'dense_cloud' | 'meshing' | 'texturing' | 'complete';
+type ProcessingStage =
+  | 'idle'
+  | 'uploading'
+  | 'aligning'
+  | 'dense_cloud'
+  | 'meshing'
+  | 'texturing'
+  | 'complete';
 
 interface PhotogrammetryState {
   isProcessing: boolean;
@@ -30,7 +37,7 @@ interface PhotogrammetryState {
 interface PhotogrammetryConfig {
   source_type: SourceType;
   quality: QualityLevel;
-  mesh_simplification: number;  // 0-1
+  mesh_simplification: number; // 0-1
   texture_resolution: number;
   auto_align: boolean;
   geo_reference: boolean;
@@ -69,7 +76,7 @@ export const photogrammetryHandler: TraitHandler<PhotogrammetryConfig> = {
       textureResolution: config.texture_resolution,
     };
     (node as any).__photogrammetryState = state;
-    
+
     // Initialize photogrammetry processor
     context.emit?.('photogrammetry_init', {
       node,
@@ -88,18 +95,18 @@ export const photogrammetryHandler: TraitHandler<PhotogrammetryConfig> = {
     delete (node as any).__photogrammetryState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(_node, _config, _context, _delta) {
     // Processing happens asynchronously via events
   },
 
   onEvent(node, config, context, event) {
     const state = (node as any).__photogrammetryState as PhotogrammetryState;
     if (!state) return;
-    
+
     if (event.type === 'photogrammetry_add_images') {
       const images = event.images as Array<string | ArrayBuffer>;
       state.imageCount += images.length;
-      
+
       context.emit?.('photogrammetry_upload', {
         node,
         images,
@@ -110,7 +117,7 @@ export const photogrammetryHandler: TraitHandler<PhotogrammetryConfig> = {
         state.isProcessing = true;
         state.stage = 'uploading';
         state.progress = 0;
-        
+
         context.emit?.('photogrammetry_process', {
           node,
           quality: config.quality,
@@ -122,7 +129,7 @@ export const photogrammetryHandler: TraitHandler<PhotogrammetryConfig> = {
     } else if (event.type === 'photogrammetry_progress') {
       state.stage = event.stage as ProcessingStage;
       state.progress = event.progress as number;
-      
+
       context.emit?.('on_photogrammetry_progress', {
         node,
         stage: state.stage,
@@ -134,13 +141,13 @@ export const photogrammetryHandler: TraitHandler<PhotogrammetryConfig> = {
       state.progress = 100;
       state.meshHandle = event.mesh;
       state.boundingBox = event.boundingBox as typeof state.boundingBox;
-      
+
       // Apply mesh to node
       context.emit?.('photogrammetry_apply_mesh', {
         node,
         mesh: event.mesh,
       });
-      
+
       context.emit?.('on_capture_complete', {
         node,
         vertexCount: event.vertexCount as number,
@@ -157,15 +164,15 @@ export const photogrammetryHandler: TraitHandler<PhotogrammetryConfig> = {
       state.isProcessing = false;
       state.stage = 'idle';
       state.progress = 0;
-      
+
       context.emit?.('photogrammetry_abort', { node });
     } else if (event.type === 'photogrammetry_export') {
-      const format = event.format as string || 'glb';
-      
+      const format = (event.format as string) || 'glb';
+
       context.emit?.('photogrammetry_export_mesh', {
         node,
         format,
-        includeTexture: event.includeTexture as boolean ?? true,
+        includeTexture: (event.includeTexture as boolean) ?? true,
       });
     } else if (event.type === 'photogrammetry_clear') {
       state.imageCount = 0;

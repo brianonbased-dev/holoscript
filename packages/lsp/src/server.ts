@@ -25,12 +25,9 @@ import {
   CompletionItemKind,
   Hover,
   MarkupKind,
-  Position,
   Location,
-  SymbolInformation,
   SymbolKind,
   DocumentSymbol,
-  Range,
   TextDocumentPositionParams,
   DefinitionParams,
   ReferenceParams,
@@ -55,15 +52,18 @@ import {
   createTypeChecker,
   HoloScriptTypeChecker,
   getDefaultAIAdapter,
-  registerAIAdapter,
   useGemini,
   type ASTProgram,
   type HSPlusASTNode as HSPlusNode,
   type HSPlusCompileResult,
 } from '@holoscript/core';
 
-import { getTraitDoc, formatTraitDocCompact, getAllTraitNames, TRAIT_DOCS } from './traitDocs';
-import { HoloScriptLinter, type LintDiagnostic, type Severity as LintSeverity } from '@holoscript/linter';
+import { getTraitDoc, formatTraitDocCompact, getAllTraitNames } from './traitDocs';
+import {
+  HoloScriptLinter,
+  type LintDiagnostic,
+  type Severity as LintSeverity,
+} from '@holoscript/linter';
 import { SemanticCompletionProvider } from './SemanticCompletionProvider';
 
 // Create connection and document manager
@@ -72,85 +72,182 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
 // Parser and validator instances
 const parser = new HoloScriptPlusParser();
-const validator = new HoloScriptValidator();
+const _validator = new HoloScriptValidator();
 const linter = new HoloScriptLinter();
 
 // Semantic intelligence
 let semanticCompletion: SemanticCompletionProvider | null = null;
 
 // Cache for parsed documents
-const documentCache = new Map<string, {
-  ast: ASTProgram;
-  version: number;
-  symbols: Map<string, { node: HSPlusNode; line: number; column: number }>;
-  typeChecker: HoloScriptTypeChecker;
-}>();
+const documentCache = new Map<
+  string,
+  {
+    ast: ASTProgram;
+    version: number;
+    symbols: Map<string, { node: HSPlusNode; line: number; column: number }>;
+    typeChecker: HoloScriptTypeChecker;
+  }
+>();
 
 // Semantic token types and modifiers - Enhanced for HoloScript
 const tokenTypes = [
-  'class',       // 0: object declarations (orb, world, composition, template)
-  'property',    // 1: properties (key:)
-  'function',    // 2: functions and event handlers
-  'variable',    // 3: variables
-  'number',      // 4: numeric literals
-  'string',      // 5: string literals
-  'keyword',     // 6: language keywords
-  'operator',    // 7: operators
-  'comment',     // 8: comments
-  'decorator',   // 9: traits (@grabbable, @networked, etc.)
-  'type',        // 10: geometry types (cube, sphere, cylinder, etc.)
-  'event',       // 11: event handlers (onGrab, onPoint, etc.)
-  'namespace',   // 12: namespaces and imports
-  'enum',        // 13: enum values
-  'parameter',   // 14: function parameters
+  'class', // 0: object declarations (orb, world, composition, template)
+  'property', // 1: properties (key:)
+  'function', // 2: functions and event handlers
+  'variable', // 3: variables
+  'number', // 4: numeric literals
+  'string', // 5: string literals
+  'keyword', // 6: language keywords
+  'operator', // 7: operators
+  'comment', // 8: comments
+  'decorator', // 9: traits (@grabbable, @networked, etc.)
+  'type', // 10: geometry types (cube, sphere, cylinder, etc.)
+  'event', // 11: event handlers (onGrab, onPoint, etc.)
+  'namespace', // 12: namespaces and imports
+  'enum', // 13: enum values
+  'parameter', // 14: function parameters
 ];
-const tokenModifiers = ['declaration', 'definition', 'readonly', 'static', 'deprecated', 'modification', 'defaultLibrary'];
+const tokenModifiers = [
+  'declaration',
+  'definition',
+  'readonly',
+  'static',
+  'deprecated',
+  'modification',
+  'defaultLibrary',
+];
 
 // HoloScript-specific syntax patterns
 const HOLOSCRIPT_KEYWORDS = [
   // Object declarations
-  'orb', 'world', 'composition', 'template', 'object', 'system', 'environment',
+  'orb',
+  'world',
+  'composition',
+  'template',
+  'object',
+  'system',
+  'environment',
   // Control flow
-  'if', 'else', 'while', 'for', 'return', 'break', 'continue',
+  'if',
+  'else',
+  'while',
+  'for',
+  'return',
+  'break',
+  'continue',
   // Modules
-  'import', 'from', 'export', 'as',
+  'import',
+  'from',
+  'export',
+  'as',
   // Values
-  'true', 'false', 'null', 'undefined',
+  'true',
+  'false',
+  'null',
+  'undefined',
   // Blocks
-  'state', 'logic', 'animation', 'physics', 'spatial_group', 'networked_object',
+  'state',
+  'logic',
+  'animation',
+  'physics',
+  'spatial_group',
+  'networked_object',
   // Modifiers
-  'using', 'extends', 'connect', 'execute'
+  'using',
+  'extends',
+  'connect',
+  'execute',
 ];
 
 const HOLOSCRIPT_TRAITS = [
   // Interaction traits
-  'grabbable', 'throwable', 'holdable', 'clickable', 'hoverable', 'draggable', 'pointable', 'scalable',
+  'grabbable',
+  'throwable',
+  'holdable',
+  'clickable',
+  'hoverable',
+  'draggable',
+  'pointable',
+  'scalable',
   // Physics traits
-  'collidable', 'physics', 'rigid', 'kinematic', 'trigger', 'gravity',
+  'collidable',
+  'physics',
+  'rigid',
+  'kinematic',
+  'trigger',
+  'gravity',
   // Visual traits
-  'glowing', 'emissive', 'transparent', 'reflective', 'animated', 'billboard',
+  'glowing',
+  'emissive',
+  'transparent',
+  'reflective',
+  'animated',
+  'billboard',
   // Networking traits
-  'networked', 'synced', 'persistent', 'owned', 'host_only',
+  'networked',
+  'synced',
+  'persistent',
+  'owned',
+  'host_only',
   // Behavior traits
-  'stackable', 'attachable', 'equippable', 'consumable', 'destructible',
+  'stackable',
+  'attachable',
+  'equippable',
+  'consumable',
+  'destructible',
   // Spatial traits
-  'anchor', 'tracked', 'world_locked', 'hand_tracked', 'eye_tracked',
+  'anchor',
+  'tracked',
+  'world_locked',
+  'hand_tracked',
+  'eye_tracked',
   // Audio traits
-  'spatial_audio', 'ambient', 'voice_activated',
+  'spatial_audio',
+  'ambient',
+  'voice_activated',
   // State traits
-  'state', 'reactive', 'observable', 'computed'
+  'state',
+  'reactive',
+  'observable',
+  'computed',
 ];
 
 const GEOMETRY_TYPES = [
-  'cube', 'sphere', 'cylinder', 'cone', 'torus', 'capsule', 'plane', 'box',
-  'model', 'mesh', 'primitive', 'custom'
+  'cube',
+  'sphere',
+  'cylinder',
+  'cone',
+  'torus',
+  'capsule',
+  'plane',
+  'box',
+  'model',
+  'mesh',
+  'primitive',
+  'custom',
 ];
 
 const EVENT_HANDLERS = [
-  'onPoint', 'onGrab', 'onRelease', 'onHoverEnter', 'onHoverExit',
-  'onTriggerEnter', 'onTriggerExit', 'onSwing', 'onGesture',
-  'onClick', 'onDrag', 'onDrop', 'onCollision', 'onMount', 'onUpdate', 'onUnmount',
-  'on_mount', 'on_update', 'on_unmount', 'on_player_attack'
+  'onPoint',
+  'onGrab',
+  'onRelease',
+  'onHoverEnter',
+  'onHoverExit',
+  'onTriggerEnter',
+  'onTriggerExit',
+  'onSwing',
+  'onGesture',
+  'onClick',
+  'onDrag',
+  'onDrop',
+  'onCollision',
+  'onMount',
+  'onUpdate',
+  'onUnmount',
+  'on_mount',
+  'on_update',
+  'on_unmount',
+  'on_player_attack',
 ];
 
 const legend: SemanticTokensLegend = {
@@ -158,7 +255,7 @@ const legend: SemanticTokensLegend = {
   tokenModifiers,
 };
 
-connection.onInitialize(async (params: InitializeParams): Promise<InitializeResult> => {
+connection.onInitialize(async (_params: InitializeParams): Promise<InitializeResult> => {
   // Initialize AI if configured
   const apiKey = process.env.GEMINI_API_KEY;
   if (apiKey) {
@@ -242,16 +339,17 @@ async function validateDocument(document: TextDocument): Promise<void> {
     if (parseResult.ast) {
       const ast = parseResult.ast;
       const typeChecker = createTypeChecker();
-      
+
       // Run type checker on the AST body
       const typeCheckResult = typeChecker.check(ast.children || []);
-      
+
       // Merge type diagnostics
       for (const diag of typeCheckResult.diagnostics) {
         diagnostics.push({
-          severity: diag.severity === 'error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+          severity:
+            diag.severity === 'error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
           range: {
-            start: { line: (diag.line || 1) - 1, character: (diag.column || 0) },
+            start: { line: (diag.line || 1) - 1, character: diag.column || 0 },
             end: { line: (diag.line || 1) - 1, character: (diag.column || 0) + 20 },
           },
           message: diag.message,
@@ -259,7 +357,7 @@ async function validateDocument(document: TextDocument): Promise<void> {
           code: diag.code,
         });
       }
-      
+
       // Build symbol table from all nodes in the program
       const findSymbols = (nodes: HSPlusNode[]) => {
         for (const node of nodes) {
@@ -292,14 +390,16 @@ async function validateDocument(document: TextDocument): Promise<void> {
         severity: mapLintSeverity(diag.severity),
         range: {
           start: { line: diag.line - 1, character: diag.column - 1 },
-          end: { line: (diag.endLine || diag.line) - 1, character: (diag.endColumn || diag.column + 20) - 1 },
+          end: {
+            line: (diag.endLine || diag.line) - 1,
+            character: (diag.endColumn || diag.column + 20) - 1,
+          },
         },
         message: diag.message,
         source: 'holoscript-linter',
         data: diag, // Store for code actions
       });
     }
-
   } catch (error) {
     diagnostics.push({
       severity: DiagnosticSeverity.Error,
@@ -330,40 +430,150 @@ connection.onCompletion(async (params: TextDocumentPositionParams): Promise<Comp
   if (linePrefix.match(/^\s*$/)) {
     // Start of line - suggest top-level keywords
     items.push(
-      { label: 'orb', kind: CompletionItemKind.Class, insertText: 'orb ${1:name} {\n  $0\n}', insertTextFormat: 2 },
-      { label: 'world', kind: CompletionItemKind.Module, insertText: 'world ${1:name} {\n  $0\n}', insertTextFormat: 2 },
-      { label: 'import', kind: CompletionItemKind.Keyword, insertText: 'import { $1 } from "$2"', insertTextFormat: 2 },
-      { label: 'system', kind: CompletionItemKind.Keyword, insertText: 'system ${1:name} {\n  $0\n}', insertTextFormat: 2 },
+      {
+        label: 'orb',
+        kind: CompletionItemKind.Class,
+        insertText: 'orb ${1:name} {\n  $0\n}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'world',
+        kind: CompletionItemKind.Module,
+        insertText: 'world ${1:name} {\n  $0\n}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'import',
+        kind: CompletionItemKind.Keyword,
+        insertText: 'import { $1 } from "$2"',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'system',
+        kind: CompletionItemKind.Keyword,
+        insertText: 'system ${1:name} {\n  $0\n}',
+        insertTextFormat: 2,
+      }
     );
   } else if (linePrefix.match(/^\s+\w*$/)) {
     // Inside a block - suggest properties
     items.push(
-      { label: 'position', kind: CompletionItemKind.Property, insertText: 'position: [${1:0}, ${2:0}, ${3:0}]', insertTextFormat: 2 },
-      { label: 'rotation', kind: CompletionItemKind.Property, insertText: 'rotation: [${1:0}, ${2:0}, ${3:0}]', insertTextFormat: 2 },
-      { label: 'scale', kind: CompletionItemKind.Property, insertText: 'scale: [${1:1}, ${2:1}, ${3:1}]', insertTextFormat: 2 },
-      { label: 'color', kind: CompletionItemKind.Property, insertText: 'color: "${1:#ffffff}"', insertTextFormat: 2 },
-      { label: 'opacity', kind: CompletionItemKind.Property, insertText: 'opacity: ${1:1.0}', insertTextFormat: 2 },
-      { label: 'visible', kind: CompletionItemKind.Property, insertText: 'visible: ${1:true}', insertTextFormat: 2 },
-      { label: 'interactive', kind: CompletionItemKind.Property, insertText: 'interactive: ${1:true}', insertTextFormat: 2 },
-      { label: 'model', kind: CompletionItemKind.Property, insertText: 'model: "${1:path/to/model.glb}"', insertTextFormat: 2 },
-      { label: 'material', kind: CompletionItemKind.Property, insertText: 'material: {\n  type: "${1:standard}"\n  $0\n}', insertTextFormat: 2 },
+      {
+        label: 'position',
+        kind: CompletionItemKind.Property,
+        insertText: 'position: [${1:0}, ${2:0}, ${3:0}]',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'rotation',
+        kind: CompletionItemKind.Property,
+        insertText: 'rotation: [${1:0}, ${2:0}, ${3:0}]',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'scale',
+        kind: CompletionItemKind.Property,
+        insertText: 'scale: [${1:1}, ${2:1}, ${3:1}]',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'color',
+        kind: CompletionItemKind.Property,
+        insertText: 'color: "${1:#ffffff}"',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'opacity',
+        kind: CompletionItemKind.Property,
+        insertText: 'opacity: ${1:1.0}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'visible',
+        kind: CompletionItemKind.Property,
+        insertText: 'visible: ${1:true}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'interactive',
+        kind: CompletionItemKind.Property,
+        insertText: 'interactive: ${1:true}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'model',
+        kind: CompletionItemKind.Property,
+        insertText: 'model: "${1:path/to/model.glb}"',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'material',
+        kind: CompletionItemKind.Property,
+        insertText: 'material: {\n  type: "${1:standard}"\n  $0\n}',
+        insertTextFormat: 2,
+      }
     );
 
     // Event handlers
     items.push(
-      { label: 'on_click', kind: CompletionItemKind.Event, insertText: 'on_click: {\n  $0\n}', insertTextFormat: 2 },
-      { label: 'on_hover', kind: CompletionItemKind.Event, insertText: 'on_hover: {\n  $0\n}', insertTextFormat: 2 },
-      { label: 'on_enter', kind: CompletionItemKind.Event, insertText: 'on_enter: {\n  $0\n}', insertTextFormat: 2 },
-      { label: 'on_exit', kind: CompletionItemKind.Event, insertText: 'on_exit: {\n  $0\n}', insertTextFormat: 2 },
-      { label: 'on_collision', kind: CompletionItemKind.Event, insertText: 'on_collision: {\n  $0\n}', insertTextFormat: 2 },
+      {
+        label: 'on_click',
+        kind: CompletionItemKind.Event,
+        insertText: 'on_click: {\n  $0\n}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'on_hover',
+        kind: CompletionItemKind.Event,
+        insertText: 'on_hover: {\n  $0\n}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'on_enter',
+        kind: CompletionItemKind.Event,
+        insertText: 'on_enter: {\n  $0\n}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'on_exit',
+        kind: CompletionItemKind.Event,
+        insertText: 'on_exit: {\n  $0\n}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'on_collision',
+        kind: CompletionItemKind.Event,
+        insertText: 'on_collision: {\n  $0\n}',
+        insertTextFormat: 2,
+      }
     );
 
     // HSPlus-specific
     items.push(
-      { label: 'networked', kind: CompletionItemKind.Property, insertText: 'networked: ${1:true}', insertTextFormat: 2 },
-      { label: 'physics', kind: CompletionItemKind.Property, insertText: 'physics: {\n  type: "${1:dynamic}"\n  mass: ${2:1.0}\n}', insertTextFormat: 2 },
-      { label: 'audio', kind: CompletionItemKind.Property, insertText: 'audio: {\n  src: "${1:sound.mp3}"\n  spatial: ${2:true}\n}', insertTextFormat: 2 },
-      { label: 'animation', kind: CompletionItemKind.Property, insertText: 'animation: {\n  name: "${1:idle}"\n  loop: ${2:true}\n}', insertTextFormat: 2 },
+      {
+        label: 'networked',
+        kind: CompletionItemKind.Property,
+        insertText: 'networked: ${1:true}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'physics',
+        kind: CompletionItemKind.Property,
+        insertText: 'physics: {\n  type: "${1:dynamic}"\n  mass: ${2:1.0}\n}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'audio',
+        kind: CompletionItemKind.Property,
+        insertText: 'audio: {\n  src: "${1:sound.mp3}"\n  spatial: ${2:true}\n}',
+        insertTextFormat: 2,
+      },
+      {
+        label: 'animation',
+        kind: CompletionItemKind.Property,
+        insertText: 'animation: {\n  name: "${1:idle}"\n  loop: ${2:true}\n}',
+        insertTextFormat: 2,
+      }
     );
   }
 
@@ -425,7 +635,7 @@ connection.onHover((params: TextDocumentPositionParams): Hover | null => {
   const lineStart = text.lastIndexOf('\n', offset) + 1;
   const lineText = text.substring(lineStart, text.indexOf('\n', offset) || text.length);
   const atMatch = lineText.match(/@(\w+)/);
-  
+
   if (atMatch) {
     const traitName = atMatch[1];
     const traitDoc = getTraitDoc(traitName);
@@ -453,17 +663,25 @@ connection.onHover((params: TextDocumentPositionParams): Hover | null => {
   // Check if it's a keyword
   const keywordDocs: Record<string, string> = {
     orb: '**orb** - A 3D object in the scene.\n\n```holoscript\norb my_cube {\n  position: [0, 1, 0]\n  scale: [1, 1, 1]\n}\n```',
-    world: '**world** - A container for orbs and scene configuration.\n\n```holoscript\nworld my_world {\n  sky: "sunset"\n  ground: true\n}\n```',
+    world:
+      '**world** - A container for orbs and scene configuration.\n\n```holoscript\nworld my_world {\n  sky: "sunset"\n  ground: true\n}\n```',
     position: '**position** - 3D coordinates [x, y, z]\n\nDefault: `[0, 0, 0]`',
     rotation: '**rotation** - Euler angles in degrees [x, y, z]\n\nDefault: `[0, 0, 0]`',
     scale: '**scale** - Size multiplier [x, y, z]\n\nDefault: `[1, 1, 1]`',
-    on_click: '**on_click** - Handler for click/tap events\n\n```holoscript\non_click: {\n  play_sound: "click.mp3"\n  animate: { scale: [1.2, 1.2, 1.2] }\n}\n```',
-    networked: '**networked** *(HSPlus)* - Enable multiplayer sync\n\nWhen `true`, this orb\'s state is synchronized across all connected clients.\n\nSee also: `@networked` trait for advanced options.',
-    physics: '**physics** *(HSPlus)* - Enable physics simulation\n\n```holoscript\nphysics: {\n  type: "dynamic"  // or "static", "kinematic"\n  mass: 1.0\n  friction: 0.5\n}\n```\n\nSee also: `@rigidbody` trait for advanced options.',
-    traits: '**traits** - List of trait annotations applied to this object.\n\nAvailable traits: `@rigidbody`, `@trigger`, `@ik`, `@skeleton`, `@networked`, `@material`, `@lighting`, etc.',
-    template: '**template** - Define a reusable object template.\n\n```holoscript\ntemplate "Enemy" {\n  state { health: 100 }\n  action attack(target) { }\n}\n```',
-    composition: '**composition** - A scene composition containing objects and logic.\n\n```holoscript\ncomposition "BattleScene" {\n  // objects, templates, and logic here\n}\n```',
-    spatial_group: '**spatial_group** - A group of spatially-related objects.\n\n```holoscript\nspatial_group "Arena" {\n  object "Platform" { position: [0, 0, 0] }\n}\n```',
+    on_click:
+      '**on_click** - Handler for click/tap events\n\n```holoscript\non_click: {\n  play_sound: "click.mp3"\n  animate: { scale: [1.2, 1.2, 1.2] }\n}\n```',
+    networked:
+      "**networked** *(HSPlus)* - Enable multiplayer sync\n\nWhen `true`, this orb's state is synchronized across all connected clients.\n\nSee also: `@networked` trait for advanced options.",
+    physics:
+      '**physics** *(HSPlus)* - Enable physics simulation\n\n```holoscript\nphysics: {\n  type: "dynamic"  // or "static", "kinematic"\n  mass: 1.0\n  friction: 0.5\n}\n```\n\nSee also: `@rigidbody` trait for advanced options.',
+    traits:
+      '**traits** - List of trait annotations applied to this object.\n\nAvailable traits: `@rigidbody`, `@trigger`, `@ik`, `@skeleton`, `@networked`, `@material`, `@lighting`, etc.',
+    template:
+      '**template** - Define a reusable object template.\n\n```holoscript\ntemplate "Enemy" {\n  state { health: 100 }\n  action attack(target) { }\n}\n```',
+    composition:
+      '**composition** - A scene composition containing objects and logic.\n\n```holoscript\ncomposition "BattleScene" {\n  // objects, templates, and logic here\n}\n```',
+    spatial_group:
+      '**spatial_group** - A group of spatially-related objects.\n\n```holoscript\nspatial_group "Arena" {\n  object "Platform" { position: [0, 0, 0] }\n}\n```',
   };
 
   if (keywordDocs[word]) {
@@ -482,7 +700,7 @@ connection.onHover((params: TextDocumentPositionParams): Hover | null => {
       const symbol = cached.symbols.get(word)!;
       const orbNode = symbol.node;
       const props = orbNode.properties ? Object.keys(orbNode.properties).join(', ') : 'none';
-      
+
       const typeInfo = cached.typeChecker.getType(word);
       const typeDisplay = typeInfo ? ` : \`${typeInfo.type}\`` : '';
 
@@ -623,11 +841,11 @@ connection.onRenameRequest((params: RenameParams): WorkspaceEdit | null => {
  */
 connection.onCodeAction((params: CodeActionParams): CodeAction[] => {
   const actions: CodeAction[] = [];
-  
+
   for (const diagnostic of params.context.diagnostics) {
     if (diagnostic.source === 'holoscript-linter' && diagnostic.data) {
       const lintDiag = diagnostic.data as LintDiagnostic;
-      
+
       if (lintDiag.fix) {
         actions.push({
           title: `Fix ${lintDiag.ruleId}: ${lintDiag.message}`,
@@ -639,10 +857,10 @@ connection.onCodeAction((params: CodeActionParams): CodeAction[] => {
                 {
                   range: diagnostic.range,
                   newText: lintDiag.fix.replacement,
-                }
-              ]
-            }
-          }
+                },
+              ],
+            },
+          },
         });
       }
     }
@@ -685,8 +903,14 @@ connection.onDocumentSymbol((params: DocumentSymbolParams): DocumentSymbol[] => 
           symbol.children!.push({
             name: key,
             kind: SymbolKind.Property,
-            range: { start: { line: line + 1, character: 2 }, end: { line: line + 1, character: 20 } },
-            selectionRange: { start: { line: line + 1, character: 2 }, end: { line: line + 1, character: 2 + key.length } },
+            range: {
+              start: { line: line + 1, character: 2 },
+              end: { line: line + 1, character: 20 },
+            },
+            selectionRange: {
+              start: { line: line + 1, character: 2 },
+              end: { line: line + 1, character: 2 + key.length },
+            },
           });
         }
       }
@@ -699,7 +923,10 @@ connection.onDocumentSymbol((params: DocumentSymbolParams): DocumentSymbol[] => 
       symbols.push({
         name: name,
         kind: SymbolKind.Module,
-        range: { start: { line, character: 0 }, end: { line: (node.loc?.end.line || line + 5) - 1, character: 0 } },
+        range: {
+          start: { line, character: 0 },
+          end: { line: (node.loc?.end.line || line + 5) - 1, character: 0 },
+        },
         selectionRange: { start: { line, character: 0 }, end: { line, character: 10 } },
       });
     }
@@ -711,118 +938,176 @@ connection.onDocumentSymbol((params: DocumentSymbolParams): DocumentSymbol[] => 
 /**
  * Semantic tokens for syntax highlighting - Enhanced for HoloScript
  */
-connection.onRequest('textDocument/semanticTokens/full', (params: SemanticTokensParams): SemanticTokens => {
-  const document = documents.get(params.textDocument.uri);
-  if (!document) return { data: [] };
+connection.onRequest(
+  'textDocument/semanticTokens/full',
+  (params: SemanticTokensParams): SemanticTokens => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) return { data: [] };
 
-  const builder = new SemanticTokensBuilder();
-  const text = document.getText();
-  const lines = text.split('\n');
+    const builder = new SemanticTokensBuilder();
+    const text = document.getText();
+    const lines = text.split('\n');
 
-  for (let lineNum = 0; lineNum < lines.length; lineNum++) {
-    const line = lines[lineNum];
+    for (let lineNum = 0; lineNum < lines.length; lineNum++) {
+      const line = lines[lineNum];
 
-    // Skip if line is empty
-    if (!line.trim()) continue;
+      // Skip if line is empty
+      if (!line.trim()) continue;
 
-    // Comments (check first to skip highlighting inside comments)
-    const commentIndex = line.indexOf('//');
-    const effectiveLine = commentIndex !== -1 ? line.substring(0, commentIndex) : line;
-    if (commentIndex !== -1) {
-      builder.push(lineNum, commentIndex, line.length - commentIndex, tokenTypes.indexOf('comment'), 0);
-    }
-
-    // Traits (@grabbable, @networked, etc.)
-    const traitRegex = /@(\w+)/g;
-    let traitMatch;
-    while ((traitMatch = traitRegex.exec(effectiveLine)) !== null) {
-      const traitName = traitMatch[1];
-      if (HOLOSCRIPT_TRAITS.includes(traitName)) {
-        builder.push(lineNum, traitMatch.index, traitMatch[0].length, tokenTypes.indexOf('decorator'), 0);
+      // Comments (check first to skip highlighting inside comments)
+      const commentIndex = line.indexOf('//');
+      const effectiveLine = commentIndex !== -1 ? line.substring(0, commentIndex) : line;
+      if (commentIndex !== -1) {
+        builder.push(
+          lineNum,
+          commentIndex,
+          line.length - commentIndex,
+          tokenTypes.indexOf('comment'),
+          0
+        );
       }
-    }
 
-    // Object declarations (orb, world, composition, template followed by name)
-    const objectDeclRegex = /\b(orb|world|composition|template|object|system|environment|spatial_group|networked_object)\s+["']?(\w+)/g;
-    let objectDeclMatch;
-    while ((objectDeclMatch = objectDeclRegex.exec(effectiveLine)) !== null) {
-      // Highlight the keyword
-      builder.push(lineNum, objectDeclMatch.index, objectDeclMatch[1].length, tokenTypes.indexOf('keyword'), 1); // declaration modifier
-      // Highlight the object name as class
-      const nameStart = objectDeclMatch.index + objectDeclMatch[0].indexOf(objectDeclMatch[2]);
-      builder.push(lineNum, nameStart, objectDeclMatch[2].length, tokenTypes.indexOf('class'), 1); // declaration modifier
-    }
-
-    // Event handlers (onGrab, onPoint, etc.)
-    for (const handler of EVENT_HANDLERS) {
-      const handlerRegex = new RegExp(`\\b${handler}\\b`, 'g');
-      let handlerMatch;
-      while ((handlerMatch = handlerRegex.exec(effectiveLine)) !== null) {
-        builder.push(lineNum, handlerMatch.index, handler.length, tokenTypes.indexOf('event'), 0);
-      }
-    }
-
-    // Geometry types
-    const geometryRegex = new RegExp(`\\b(geometry|type)\\s*:\\s*['"]?(${GEOMETRY_TYPES.join('|')})`, 'g');
-    let geometryMatch;
-    while ((geometryMatch = geometryRegex.exec(effectiveLine)) !== null) {
-      const typeStart = geometryMatch.index + geometryMatch[0].lastIndexOf(geometryMatch[2]);
-      builder.push(lineNum, typeStart, geometryMatch[2].length, tokenTypes.indexOf('type'), 0);
-    }
-
-    // Keywords (that weren't already handled as object declarations)
-    for (const keyword of HOLOSCRIPT_KEYWORDS) {
-      const regex = new RegExp(`\\b${keyword}\\b`, 'g');
-      let match;
-      while ((match = regex.exec(effectiveLine)) !== null) {
-        // Skip if this position is already part of an object declaration
-        if (!['orb', 'world', 'composition', 'template', 'object', 'system', 'environment', 'spatial_group', 'networked_object'].includes(keyword)) {
-          builder.push(lineNum, match.index, keyword.length, tokenTypes.indexOf('keyword'), 0);
+      // Traits (@grabbable, @networked, etc.)
+      const traitRegex = /@(\w+)/g;
+      let traitMatch;
+      while ((traitMatch = traitRegex.exec(effectiveLine)) !== null) {
+        const traitName = traitMatch[1];
+        if (HOLOSCRIPT_TRAITS.includes(traitName)) {
+          builder.push(
+            lineNum,
+            traitMatch.index,
+            traitMatch[0].length,
+            tokenTypes.indexOf('decorator'),
+            0
+          );
         }
       }
-    }
 
-    // Function declarations (function name() or action name())
-    const funcDeclRegex = /\b(function|action|behavior)\s+(\w+)/g;
-    let funcMatch;
-    while ((funcMatch = funcDeclRegex.exec(effectiveLine)) !== null) {
-      builder.push(lineNum, funcMatch.index, funcMatch[1].length, tokenTypes.indexOf('keyword'), 0);
-      const nameStart = funcMatch.index + funcMatch[0].indexOf(funcMatch[2]);
-      builder.push(lineNum, nameStart, funcMatch[2].length, tokenTypes.indexOf('function'), 1); // declaration modifier
-    }
+      // Object declarations (orb, world, composition, template followed by name)
+      const objectDeclRegex =
+        /\b(orb|world|composition|template|object|system|environment|spatial_group|networked_object)\s+["']?(\w+)/g;
+      let objectDeclMatch;
+      while ((objectDeclMatch = objectDeclRegex.exec(effectiveLine)) !== null) {
+        // Highlight the keyword
+        builder.push(
+          lineNum,
+          objectDeclMatch.index,
+          objectDeclMatch[1].length,
+          tokenTypes.indexOf('keyword'),
+          1
+        ); // declaration modifier
+        // Highlight the object name as class
+        const nameStart = objectDeclMatch.index + objectDeclMatch[0].indexOf(objectDeclMatch[2]);
+        builder.push(lineNum, nameStart, objectDeclMatch[2].length, tokenTypes.indexOf('class'), 1); // declaration modifier
+      }
 
-    // Properties (word followed by colon, but not URLs)
-    const propRegex = /(\w+)\s*:/g;
-    let propMatch;
-    while ((propMatch = propRegex.exec(effectiveLine)) !== null) {
-      // Skip if it looks like a URL scheme (http:, https:, file:)
-      if (!['http', 'https', 'file', 'ws', 'wss', 'ftp'].includes(propMatch[1])) {
-        builder.push(lineNum, propMatch.index, propMatch[1].length, tokenTypes.indexOf('property'), 0);
+      // Event handlers (onGrab, onPoint, etc.)
+      for (const handler of EVENT_HANDLERS) {
+        const handlerRegex = new RegExp(`\\b${handler}\\b`, 'g');
+        let handlerMatch;
+        while ((handlerMatch = handlerRegex.exec(effectiveLine)) !== null) {
+          builder.push(lineNum, handlerMatch.index, handler.length, tokenTypes.indexOf('event'), 0);
+        }
+      }
+
+      // Geometry types
+      const geometryRegex = new RegExp(
+        `\\b(geometry|type)\\s*:\\s*['"]?(${GEOMETRY_TYPES.join('|')})`,
+        'g'
+      );
+      let geometryMatch;
+      while ((geometryMatch = geometryRegex.exec(effectiveLine)) !== null) {
+        const typeStart = geometryMatch.index + geometryMatch[0].lastIndexOf(geometryMatch[2]);
+        builder.push(lineNum, typeStart, geometryMatch[2].length, tokenTypes.indexOf('type'), 0);
+      }
+
+      // Keywords (that weren't already handled as object declarations)
+      for (const keyword of HOLOSCRIPT_KEYWORDS) {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+        let match;
+        while ((match = regex.exec(effectiveLine)) !== null) {
+          // Skip if this position is already part of an object declaration
+          if (
+            ![
+              'orb',
+              'world',
+              'composition',
+              'template',
+              'object',
+              'system',
+              'environment',
+              'spatial_group',
+              'networked_object',
+            ].includes(keyword)
+          ) {
+            builder.push(lineNum, match.index, keyword.length, tokenTypes.indexOf('keyword'), 0);
+          }
+        }
+      }
+
+      // Function declarations (function name() or action name())
+      const funcDeclRegex = /\b(function|action|behavior)\s+(\w+)/g;
+      let funcMatch;
+      while ((funcMatch = funcDeclRegex.exec(effectiveLine)) !== null) {
+        builder.push(
+          lineNum,
+          funcMatch.index,
+          funcMatch[1].length,
+          tokenTypes.indexOf('keyword'),
+          0
+        );
+        const nameStart = funcMatch.index + funcMatch[0].indexOf(funcMatch[2]);
+        builder.push(lineNum, nameStart, funcMatch[2].length, tokenTypes.indexOf('function'), 1); // declaration modifier
+      }
+
+      // Properties (word followed by colon, but not URLs)
+      const propRegex = /(\w+)\s*:/g;
+      let propMatch;
+      while ((propMatch = propRegex.exec(effectiveLine)) !== null) {
+        // Skip if it looks like a URL scheme (http:, https:, file:)
+        if (!['http', 'https', 'file', 'ws', 'wss', 'ftp'].includes(propMatch[1])) {
+          builder.push(
+            lineNum,
+            propMatch.index,
+            propMatch[1].length,
+            tokenTypes.indexOf('property'),
+            0
+          );
+        }
+      }
+
+      // Strings
+      const stringRegex = /"[^"]*"|'[^']*'/g;
+      let stringMatch;
+      while ((stringMatch = stringRegex.exec(effectiveLine)) !== null) {
+        builder.push(
+          lineNum,
+          stringMatch.index,
+          stringMatch[0].length,
+          tokenTypes.indexOf('string'),
+          0
+        );
+      }
+
+      // Numbers (including decimals and negative)
+      const numRegex = /-?\b\d+(\.\d+)?\b/g;
+      let numMatch;
+      while ((numMatch = numRegex.exec(effectiveLine)) !== null) {
+        builder.push(lineNum, numMatch.index, numMatch[0].length, tokenTypes.indexOf('number'), 0);
       }
     }
 
-    // Strings
-    const stringRegex = /"[^"]*"|'[^']*'/g;
-    let stringMatch;
-    while ((stringMatch = stringRegex.exec(effectiveLine)) !== null) {
-      builder.push(lineNum, stringMatch.index, stringMatch[0].length, tokenTypes.indexOf('string'), 0);
-    }
-
-    // Numbers (including decimals and negative)
-    const numRegex = /-?\b\d+(\.\d+)?\b/g;
-    let numMatch;
-    while ((numMatch = numRegex.exec(effectiveLine)) !== null) {
-      builder.push(lineNum, numMatch.index, numMatch[0].length, tokenTypes.indexOf('number'), 0);
-    }
+    return builder.build();
   }
-
-  return builder.build();
-});
+);
 
 /**
  * Helper: Get word range at position
  */
-function getWordRangeAtPosition(text: string, offset: number): { start: number; end: number } | null {
+function getWordRangeAtPosition(
+  text: string,
+  offset: number
+): { start: number; end: number } | null {
   const wordPattern = /[a-zA-Z_][a-zA-Z0-9_]*/g;
   let match;
 
@@ -840,11 +1125,16 @@ function getWordRangeAtPosition(text: string, offset: number): { start: number; 
  */
 function mapLintSeverity(severity: LintSeverity): DiagnosticSeverity {
   switch (severity) {
-    case 'error': return DiagnosticSeverity.Error;
-    case 'warning': return DiagnosticSeverity.Warning;
-    case 'info': return DiagnosticSeverity.Information;
-    case 'hint': return DiagnosticSeverity.Hint;
-    default: return DiagnosticSeverity.Warning;
+    case 'error':
+      return DiagnosticSeverity.Error;
+    case 'warning':
+      return DiagnosticSeverity.Warning;
+    case 'info':
+      return DiagnosticSeverity.Information;
+    case 'hint':
+      return DiagnosticSeverity.Hint;
+    default:
+      return DiagnosticSeverity.Warning;
   }
 }
 

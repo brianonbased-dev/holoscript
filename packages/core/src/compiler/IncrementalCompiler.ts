@@ -8,13 +8,16 @@
  * - Dependency tracking between objects
  */
 
-import type { HoloComposition, HoloObjectDecl, HoloObjectProperty } from '../parser/HoloCompositionTypes';
+import type {
+  HoloComposition,
+  HoloObjectDecl,
+  HoloObjectProperty,
+} from '../parser/HoloCompositionTypes';
 import {
   TraitDependencyGraph,
   globalTraitGraph,
   type TraitUsage,
   type TraitChangeInfo,
-  type ObjectTraitInfo,
 } from './TraitDependencyGraph';
 
 /**
@@ -92,7 +95,7 @@ function hashContent(content: string): string {
   let hash = 0;
   for (let i = 0; i < content.length; i++) {
     const char = content.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
   return hash.toString(36);
@@ -170,7 +173,7 @@ export class IncrementalCompiler {
       const allObjects = this.collectObjectNames(newAST);
       return {
         hasChanges: true,
-        changes: allObjects.map(name => ({
+        changes: allObjects.map((name) => ({
           type: 'added' as ChangeType,
           path: [name],
           nodeName: name,
@@ -251,8 +254,8 @@ export class IncrementalCompiler {
     const changes: ASTChange[] = [];
 
     // Compare properties
-    const oldProps = new Map(oldObj.properties?.map(p => [p.key, p]) || []);
-    const newProps = new Map(newObj.properties?.map(p => [p.key, p]) || []);
+    const oldProps = new Map(oldObj.properties?.map((p) => [p.key, p]) || []);
+    const newProps = new Map(newObj.properties?.map((p) => [p.key, p]) || []);
 
     for (const [key, newProp] of newProps) {
       if (!oldProps.has(key)) {
@@ -294,8 +297,8 @@ export class IncrementalCompiler {
     const oldTraitUsages = this.extractTraitUsages(oldObj.traits || []);
     const newTraitUsages = this.extractTraitUsages(newObj.traits || []);
 
-    const oldTraitMap = new Map(oldTraitUsages.map(t => [t.name, t]));
-    const newTraitMap = new Map(newTraitUsages.map(t => [t.name, t]));
+    const oldTraitMap = new Map(oldTraitUsages.map((t) => [t.name, t]));
+    const newTraitMap = new Map(newTraitUsages.map((t) => [t.name, t]));
 
     // Check for added traits
     for (const [name, newTrait] of newTraitMap) {
@@ -351,8 +354,8 @@ export class IncrementalCompiler {
     }
 
     // Compare children recursively
-    const oldChildren = new Map((oldObj.children || []).map(c => [c.name, c]));
-    const newChildren = new Map((newObj.children || []).map(c => [c.name, c]));
+    const oldChildren = new Map((oldObj.children || []).map((c) => [c.name, c]));
+    const newChildren = new Map((newObj.children || []).map((c) => [c.name, c]));
 
     for (const [name, newChild] of newChildren) {
       if (!oldChildren.has(name)) {
@@ -389,7 +392,7 @@ export class IncrementalCompiler {
    * Handles both string traits and trait objects with config
    */
   private extractTraitUsages(traits: unknown[]): TraitUsage[] {
-    return traits.map(t => {
+    return traits.map((t) => {
       if (typeof t === 'string') {
         // Simple string trait: "@physics" → { name: "physics", config: {}, configHash: "..." }
         return {
@@ -451,7 +454,7 @@ export class IncrementalCompiler {
     };
 
     composition.objects?.forEach(collectFromObject);
-    composition.spatialGroups?.forEach(group => {
+    composition.spatialGroups?.forEach((group) => {
       names.push(group.name);
       group.objects?.forEach(collectFromObject);
     });
@@ -469,7 +472,7 @@ export class IncrementalCompiler {
     };
 
     composition.objects?.forEach(collectFromObject);
-    composition.spatialGroups?.forEach(group => {
+    composition.spatialGroups?.forEach((group) => {
       group.objects?.forEach(collectFromObject);
     });
   }
@@ -809,7 +812,7 @@ export function createIncrementalCompiler(): IncrementalCompiler {
  * Includes both object cache and trait graph
  */
 export function serializeCache(compiler: IncrementalCompiler): string {
-  const stats = compiler.getStats();
+  const _stats = compiler.getStats();
   const data: SerializedCache = {
     version: 1,
     entries: [],

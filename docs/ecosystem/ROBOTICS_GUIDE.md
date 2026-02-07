@@ -9,12 +9,12 @@ HoloScript's scene graph model maps directly to robotic workspace definitions. T
 ## Why HoloScript for Robotics?
 
 | HoloScript Feature | Robotics Application |
-|-------------------|---------------------|
-| Scene graph | Workspace definition |
-| `@physics` traits | Collision detection |
-| `@behavior_tree` | Robot behavior logic |
-| Spatial zones | Safety boundaries |
-| Animation system | Motion trajectories |
+| ------------------ | -------------------- |
+| Scene graph        | Workspace definition |
+| `@physics` traits  | Collision detection  |
+| `@behavior_tree`   | Robot behavior logic |
+| Spatial zones      | Safety boundaries    |
+| Animation system   | Motion trajectories  |
 
 ## Core Concepts
 

@@ -10,7 +10,6 @@
  * @version 1.0.0
  */
 
-import type { Vector3 } from '../types';
 import type { TraitHandler, TraitContext } from './TraitTypes';
 
 // =============================================================================
@@ -58,32 +57,56 @@ interface HapticState {
 const builtInPatterns: Record<string, HapticPattern> = {
   soft: {
     name: 'soft',
-    sequence: [[0.2, 50], [0.1, 50]],
+    sequence: [
+      [0.2, 50],
+      [0.1, 50],
+    ],
     loop: false,
   },
   hard: {
     name: 'hard',
-    sequence: [[0.8, 30], [0.4, 20], [0.2, 20]],
+    sequence: [
+      [0.8, 30],
+      [0.4, 20],
+      [0.2, 20],
+    ],
     loop: false,
   },
   metal: {
     name: 'metal',
-    sequence: [[1.0, 10], [0.6, 40], [0.3, 60], [0.1, 100]],
+    sequence: [
+      [1.0, 10],
+      [0.6, 40],
+      [0.3, 60],
+      [0.1, 100],
+    ],
     loop: false,
   },
   glass: {
     name: 'glass',
-    sequence: [[0.5, 20], [0.2, 80], [0.1, 100]],
+    sequence: [
+      [0.5, 20],
+      [0.2, 80],
+      [0.1, 100],
+    ],
     loop: false,
   },
   heartbeat: {
     name: 'heartbeat',
-    sequence: [[0.6, 100], [0, 100], [0.6, 100], [0, 500]],
+    sequence: [
+      [0.6, 100],
+      [0, 100],
+      [0.6, 100],
+      [0, 500],
+    ],
     loop: true,
   },
   rumble: {
     name: 'rumble',
-    sequence: [[0.5, 50], [0.3, 50]],
+    sequence: [
+      [0.5, 50],
+      [0.3, 50],
+    ],
     loop: true,
   },
 };
@@ -104,7 +127,7 @@ export const hapticHandler: TraitHandler<HapticTrait> = {
     duration: 100,
   },
 
-  onAttach(node, config, _context) {
+  onAttach(node, _config, _context) {
     const state: HapticState = {
       isPlaying: false,
       currentPattern: null,
@@ -127,20 +150,20 @@ export const hapticHandler: TraitHandler<HapticTrait> = {
     if (config.proximity_enabled && node.properties) {
       const pos = (node.properties as any).position || [0, 0, 0];
       const dominantHand = context.vr.getDominantHand();
-      
+
       if (dominantHand) {
         const handPos = dominantHand.position;
         const distance = Math.sqrt(
-          Math.pow((handPos as any)[0] - (pos as any)[0], 2) +
-          Math.pow((handPos as any)[1] - (pos as any)[1], 2) +
-          Math.pow((handPos as any)[2] - (pos as any)[2], 2)
+          Math.pow((handPos as any)[0] - (pos)[0], 2) +
+            Math.pow((handPos as any)[1] - (pos)[1], 2) +
+            Math.pow((handPos as any)[2] - (pos)[2], 2)
         );
 
         const maxDist = config.proximity_distance * context.getScaleMultiplier();
         if (distance < maxDist) {
-          const normalizedDist = 1 - (distance / maxDist);
+          const normalizedDist = 1 - distance / maxDist;
           state.proximityIntensity = normalizedDist * config.intensity;
-          
+
           // Apply gentle rumble based on proximity
           pulseHands(config.hands, state.proximityIntensity * 0.3, context);
         } else {
@@ -182,9 +205,10 @@ export const hapticHandler: TraitHandler<HapticTrait> = {
 
     // Handle collision haptics
     if (event.type === 'collision') {
-      const pattern = config.collision_pattern === 'custom'
-        ? config.custom_pattern
-        : builtInPatterns[config.collision_pattern];
+      const pattern =
+        config.collision_pattern === 'custom'
+          ? config.custom_pattern
+          : builtInPatterns[config.collision_pattern];
 
       if (pattern) {
         playPattern(state, pattern, config, context);
@@ -227,7 +251,7 @@ function pulseHands(
   duration: number = 50
 ): void {
   const clampedIntensity = Math.max(0, Math.min(1, intensity));
-  
+
   switch (hands) {
     case 'left':
       context.haptics.pulse('left', clampedIntensity, duration);

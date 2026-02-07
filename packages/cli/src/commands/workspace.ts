@@ -10,9 +10,7 @@ import { Command } from 'commander';
  * Create workspace commands
  */
 export function createWorkspaceCommands(): Command {
-  const workspace = new Command('workspace')
-    .description('Manage team workspaces')
-    .alias('ws');
+  const workspace = new Command('workspace').description('Manage team workspaces').alias('ws');
 
   // Create workspace
   workspace
@@ -158,15 +156,13 @@ Use --set key=value to update settings.
     });
 
   // Manage secrets
-  const secret = workspace
-    .command('secret')
-    .description('Manage workspace secrets');
+  const secret = workspace.command('secret').description('Manage workspace secrets');
 
   secret
     .command('set <name> [value]')
     .description('Set a secret (prompts for value if not provided)')
     .option('-w, --workspace <name>', 'Workspace name')
-    .action(async (name: string, value?: string) => {
+    .action(async (name: string, _value?: string) => {
       console.log(`Setting secret: ${name}`);
       console.log('✓ Secret saved (encrypted)');
     });
@@ -200,7 +196,7 @@ Secrets:
     .command('activity [name]')
     .description('Show workspace activity feed')
     .option('-n, --limit <count>', 'Number of entries to show', '20')
-    .action(async (name?: string, options?: { limit: string }) => {
+    .action(async (name?: string, _options?: { limit: string }) => {
       console.log(`
 Recent activity in ${name || 'my-team'}:
 

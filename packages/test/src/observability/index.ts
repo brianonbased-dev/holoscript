@@ -1,6 +1,6 @@
 /**
  * Runtime Observability for HoloScript
- * 
+ *
  * Provides metrics, health checks, and tracing for production monitoring.
  * Catches issues that unit tests miss:
  * - Memory leaks over time
@@ -32,16 +32,16 @@ export interface Metrics {
   validateErrors: number;
   generateRequests: number;
   generateErrors: number;
-  
+
   // Timing metrics (ms)
   avgParseLatency: number;
   maxParseLatency: number;
   p95ParseLatency: number;
-  
+
   // Resource metrics
   memoryUsageMB: number;
   heapUsedMB: number;
-  
+
   // Throughput
   requestsPerSecond: number;
 }
@@ -115,7 +115,9 @@ class Observability {
    */
   startSpan(operationName: string, parentSpanId?: string): TraceSpan {
     const span: TraceSpan = {
-      traceId: parentSpanId ? this.traces.get(parentSpanId)?.traceId || this.generateId() : this.generateId(),
+      traceId: parentSpanId
+        ? this.traces.get(parentSpanId)?.traceId || this.generateId()
+        : this.generateId(),
       spanId: this.generateId(),
       parentSpanId,
       operationName,
@@ -124,11 +126,11 @@ class Observability {
       tags: {},
       logs: [],
     };
-    
+
     if (this.isEnabled) {
       this.traces.set(span.spanId, span);
     }
-    
+
     return span;
   }
 
@@ -139,7 +141,7 @@ class Observability {
     span.endTime = Date.now();
     span.duration = span.endTime - span.startTime;
     span.status = status;
-    
+
     if (this.isEnabled) {
       this.recordLatency(`trace.${span.operationName}`, span.duration);
     }
@@ -171,12 +173,12 @@ class Observability {
    */
   async getHealth(): Promise<HealthStatus> {
     const checks: HealthCheck[] = [];
-    
+
     // Built-in checks
     checks.push(this.checkMemory());
     checks.push(this.checkLatency());
     checks.push(this.checkErrorRate());
-    
+
     // Run registered checks
     for (const check of this.healthChecks) {
       try {
@@ -189,12 +191,12 @@ class Observability {
         });
       }
     }
-    
+
     // Determine overall status
-    const hasFailure = checks.some(c => c.status === 'fail');
-    const hasWarning = checks.some(c => c.status === 'warn');
+    const hasFailure = checks.some((c) => c.status === 'fail');
+    const hasWarning = checks.some((c) => c.status === 'warn');
     const status = hasFailure ? 'unhealthy' : hasWarning ? 'degraded' : 'healthy';
-    
+
     return {
       status,
       timestamp: new Date().toISOString(),
@@ -209,9 +211,10 @@ class Observability {
   getMetrics(): Metrics {
     const parseLatencies = this.latencies.get('parse') || [];
     const uptimeSeconds = (Date.now() - this.startTime) / 1000;
-    const totalRequests = (this.counters.get('parse.requests') || 0) +
-                          (this.counters.get('validate.requests') || 0) +
-                          (this.counters.get('generate.requests') || 0);
+    const totalRequests =
+      (this.counters.get('parse.requests') || 0) +
+      (this.counters.get('validate.requests') || 0) +
+      (this.counters.get('generate.requests') || 0);
 
     return {
       parseRequests: this.counters.get('parse.requests') || 0,
@@ -220,14 +223,14 @@ class Observability {
       validateErrors: this.counters.get('validate.errors') || 0,
       generateRequests: this.counters.get('generate.requests') || 0,
       generateErrors: this.counters.get('generate.errors') || 0,
-      
+
       avgParseLatency: this.calculateAverage(parseLatencies),
       maxParseLatency: Math.max(...parseLatencies, 0),
       p95ParseLatency: this.calculatePercentile(parseLatencies, 95),
-      
+
       memoryUsageMB: process.memoryUsage().rss / 1024 / 1024,
       heapUsedMB: process.memoryUsage().heapUsed / 1024 / 1024,
-      
+
       requestsPerSecond: uptimeSeconds > 0 ? totalRequests / uptimeSeconds : 0,
     };
   }
@@ -240,11 +243,11 @@ class Observability {
     const heapUsedMB = memory.heapUsed / 1024 / 1024;
     const heapTotalMB = memory.heapTotal / 1024 / 1024;
     const usagePercent = (heapUsedMB / heapTotalMB) * 100;
-    
+
     let status: 'pass' | 'warn' | 'fail' = 'pass';
     if (usagePercent > 90) status = 'fail';
     else if (usagePercent > 70) status = 'warn';
-    
+
     return {
       name: 'memory',
       status,
@@ -265,13 +268,14 @@ class Observability {
     if (parseLatencies.length === 0) {
       return { name: 'latency', status: 'pass', message: 'No data yet' };
     }
-    
+
     const p95 = this.calculatePercentile(parseLatencies, 95);
-    
+
     let status: 'pass' | 'warn' | 'fail' = 'pass';
-    if (p95 > 1000) status = 'fail'; // > 1s is bad
+    if (p95 > 1000)
+      status = 'fail'; // > 1s is bad
     else if (p95 > 500) status = 'warn'; // > 500ms is concerning
-    
+
     return {
       name: 'latency',
       status,
@@ -286,17 +290,18 @@ class Observability {
   private checkErrorRate(): HealthCheck {
     const parseRequests = this.counters.get('parse.requests') || 0;
     const parseErrors = this.counters.get('parse.errors') || 0;
-    
+
     if (parseRequests === 0) {
       return { name: 'error_rate', status: 'pass', message: 'No requests yet' };
     }
-    
+
     const errorRate = (parseErrors / parseRequests) * 100;
-    
+
     let status: 'pass' | 'warn' | 'fail' = 'pass';
-    if (errorRate > 10) status = 'fail'; // > 10% error rate
+    if (errorRate > 10)
+      status = 'fail'; // > 10% error rate
     else if (errorRate > 5) status = 'warn'; // > 5% error rate
-    
+
     return {
       name: 'error_rate',
       status,
@@ -317,7 +322,7 @@ class Observability {
     this.counters.clear();
     this.latencies.clear();
     this.traces.clear();
-    
+
     // Re-initialize counters
     this.counters.set('parse.requests', 0);
     this.counters.set('parse.errors', 0);
@@ -328,8 +333,9 @@ class Observability {
   }
 
   private generateId(): string {
-    return Math.random().toString(36).substring(2, 15) + 
-           Math.random().toString(36).substring(2, 15);
+    return (
+      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    );
   }
 
   private calculateAverage(values: number[]): number {
@@ -359,12 +365,12 @@ export function traced(operationName?: string) {
   ): TypedPropertyDescriptor<T> {
     const originalMethod = descriptor.value!;
     const name = operationName || propertyKey;
-    
+
     descriptor.value = function (this: unknown, ...args: Parameters<T>): ReturnType<T> {
       const span = observability.startSpan(name);
       try {
         const result = originalMethod.apply(this, args);
-        
+
         // Handle async functions
         if (result instanceof Promise) {
           return result
@@ -378,7 +384,7 @@ export function traced(operationName?: string) {
               throw error;
             }) as ReturnType<T>;
         }
-        
+
         observability.endSpan(span, 'ok');
         return result as ReturnType<T>;
       } catch (error) {
@@ -389,7 +395,7 @@ export function traced(operationName?: string) {
         throw error;
       }
     } as T;
-    
+
     return descriptor;
   };
 }
@@ -397,10 +403,7 @@ export function traced(operationName?: string) {
 /**
  * Wrapper to instrument any async function
  */
-export async function withTracing<T>(
-  operationName: string,
-  fn: () => Promise<T>
-): Promise<T> {
+export async function withTracing<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
   const span = observability.startSpan(operationName);
   try {
     const result = await fn();
@@ -418,10 +421,7 @@ export async function withTracing<T>(
 /**
  * Wrapper to instrument sync functions
  */
-export function withTracingSync<T>(
-  operationName: string,
-  fn: () => T
-): T {
+export function withTracingSync<T>(operationName: string, fn: () => T): T {
   const span = observability.startSpan(operationName);
   try {
     const result = fn();

@@ -15,17 +15,17 @@ import type { TraitHandler } from './TraitTypes';
 
 interface AudioPortalState {
   isOpen: boolean;
-  openAmount: number;  // 0-1
+  openAmount: number; // 0-1
   currentTransmission: number;
   sourceZone: string;
   targetZone: string;
-  activeConnections: Set<string>;  // Audio sources passing through
+  activeConnections: Set<string>; // Audio sources passing through
 }
 
 interface AudioPortalConfig {
-  opening_size: number;  // meters
+  opening_size: number; // meters
   connected_zones: [string, string];
-  transmission_loss: number;  // dB
+  transmission_loss: number; // dB
   diffraction: boolean;
   frequency_filtering: boolean;
   low_pass_frequency: number;
@@ -61,7 +61,7 @@ export const audioPortalHandler: TraitHandler<AudioPortalConfig> = {
       activeConnections: new Set(),
     };
     (node as any).__audioPortalState = state;
-    
+
     context.emit?.('audio_portal_register', {
       node,
       zones: config.connected_zones,
@@ -79,21 +79,21 @@ export const audioPortalHandler: TraitHandler<AudioPortalConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__audioPortalState as AudioPortalState;
     if (!state) return;
-    
+
     // Smooth open/close transition
     const targetOpen = state.isOpen ? 1 : 0;
     const speed = delta * 3;
-    
+
     if (state.openAmount < targetOpen) {
       state.openAmount = Math.min(state.openAmount + speed, targetOpen);
     } else if (state.openAmount > targetOpen) {
       state.openAmount = Math.max(state.openAmount - speed, targetOpen);
     }
-    
+
     // Calculate transmission based on openness
     const dbLoss = config.transmission_loss * (1 - state.openAmount);
     state.currentTransmission = Math.pow(10, -dbLoss / 20);
-    
+
     // Update portal audio processing
     if (state.activeConnections.size > 0) {
       context.emit?.('audio_portal_update', {
@@ -109,7 +109,7 @@ export const audioPortalHandler: TraitHandler<AudioPortalConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__audioPortalState as AudioPortalState;
     if (!state) return;
-    
+
     if (event.type === 'audio_portal_open') {
       state.isOpen = true;
       context.emit?.('audio_portal_state_change', { node, isOpen: true });
@@ -123,14 +123,15 @@ export const audioPortalHandler: TraitHandler<AudioPortalConfig> = {
       const sourceId = event.sourceId as string;
       const fromZone = event.fromZone as string;
       const toZone = event.toZone as string;
-      
+
       // Check if source should pass through this portal
-      if ((fromZone === state.sourceZone && toZone === state.targetZone) ||
-          (fromZone === state.targetZone && toZone === state.sourceZone)) {
-        
+      if (
+        (fromZone === state.sourceZone && toZone === state.targetZone) ||
+        (fromZone === state.targetZone && toZone === state.sourceZone)
+      ) {
         if (state.activeConnections.size < config.max_sources) {
           state.activeConnections.add(sourceId);
-          
+
           context.emit?.('audio_portal_route_source', {
             node,
             sourceId,

@@ -134,7 +134,10 @@ export interface AudioService {
   setListenerPosition(position: { x: number; y: number; z: number }): void;
 
   /** Set listener orientation */
-  setListenerOrientation(forward: { x: number; y: number; z: number }, up: { x: number; y: number; z: number }): void;
+  setListenerOrientation(
+    forward: { x: number; y: number; z: number },
+    up: { x: number; y: number; z: number }
+  ): void;
 
   /** Set master volume */
   setMasterVolume(volume: number): void;
@@ -175,7 +178,11 @@ export interface PhysicsService {
   createBody(config: RigidBodyConfig): PhysicsBody;
 
   /** Raycast */
-  raycast(origin: { x: number; y: number; z: number }, direction: { x: number; y: number; z: number }, maxDistance: number): RaycastResult | null;
+  raycast(
+    origin: { x: number; y: number; z: number },
+    direction: { x: number; y: number; z: number },
+    maxDistance: number
+  ): RaycastResult | null;
 
   /** Overlap query */
   overlap(shape: ColliderShape, position: { x: number; y: number; z: number }): PhysicsBody[];

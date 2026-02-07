@@ -13,13 +13,7 @@
 // TYPES
 // =============================================================================
 
-export type ChangeType =
-  | 'added'
-  | 'removed'
-  | 'modified'
-  | 'renamed'
-  | 'moved'
-  | 'unchanged';
+export type ChangeType = 'added' | 'removed' | 'modified' | 'renamed' | 'moved' | 'unchanged';
 
 export interface DiffChange {
   /** Type of change */
@@ -232,8 +226,12 @@ export class SemanticDiffEngine {
     }
 
     // Compare properties
-    const oldKeys = new Set(Object.keys(oldNode!).filter((k) => !['type', 'line', 'loc'].includes(k)));
-    const newKeys = new Set(Object.keys(newNode!).filter((k) => !['type', 'line', 'loc'].includes(k)));
+    const oldKeys = new Set(
+      Object.keys(oldNode!).filter((k) => !['type', 'line', 'loc'].includes(k))
+    );
+    const newKeys = new Set(
+      Object.keys(newNode!).filter((k) => !['type', 'line', 'loc'].includes(k))
+    );
 
     // Check for added keys
     for (const key of newKeys) {

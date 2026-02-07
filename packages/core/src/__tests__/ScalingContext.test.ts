@@ -27,7 +27,7 @@ describe('HoloScript Scaling & Context', () => {
     const context = runtime.getContext();
     const star = context.variables.get('Star') as any;
     expect(star).toBeDefined();
-    
+
     expect(star.position.x).toBe(1000000); // 1 * 1,000,000
     expect(star.hologram.size).toBe(0.5 * 1000000);
   });

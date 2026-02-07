@@ -19,11 +19,10 @@
  * ```
  */
 
-import type { ParseError, ErrorSuggestion, QuickFix } from './ErrorRecovery';
-import { 
-  enrichErrorWithSuggestions, 
+import type { ParseError, QuickFix } from './ErrorRecovery';
+import {
+  enrichErrorWithSuggestions,
   generateQuickFixes,
-  HOLOSCHEMA_KEYWORDS,
   HOLOSCHEMA_TRAITS,
   HOLOSCHEMA_GEOMETRIES,
   HOLOSCHEMA_PROPERTIES,
@@ -305,7 +304,7 @@ export class ParserErrorCollector {
         return 'Check for typos or unexpected syntax';
 
       case 'UNKNOWN_KEYWORD':
-        return 'Verify keyword spelling and that you\'re in the correct context';
+        return "Verify keyword spelling and that you're in the correct context";
 
       case 'UNKNOWN_TRAIT':
         return `Valid traits include: ${HOLOSCHEMA_TRAITS.slice(0, 5).join(', ')}...`;

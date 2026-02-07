@@ -5,6 +5,7 @@ This guide helps you migrate from HoloScript 2.x to 3.0.
 ## Overview
 
 HoloScript 3.0 is a major release that introduces:
+
 - **Visual Scripting** - Build without writing code
 - **WASM Compiler** - 10x faster parsing
 - **AI Autocomplete** - Intelligent suggestions
@@ -18,13 +19,13 @@ HoloScript 3.0 is a major release that introduces:
 
 The following deprecated traits have been removed:
 
-| Removed Trait | Replacement |
-|--------------|-------------|
-| `@pickable` | `@grabbable` |
-| `@touchable` | `@pointable` |
-| `@soundEmitter` | `@spatial_audio` |
-| `@physicsEnabled` | `@physics` |
-| `@networkSync` | `@networked` |
+| Removed Trait     | Replacement      |
+| ----------------- | ---------------- |
+| `@pickable`       | `@grabbable`     |
+| `@touchable`      | `@pointable`     |
+| `@soundEmitter`   | `@spatial_audio` |
+| `@physicsEnabled` | `@physics`       |
+| `@networkSync`    | `@networked`     |
 
 **Migration:**
 
@@ -40,6 +41,7 @@ The following deprecated traits have been removed:
 The configuration file format has been updated for better organization.
 
 **Before (v2):**
+
 ```json
 {
   "holoscript": {
@@ -51,6 +53,7 @@ The configuration file format has been updated for better organization.
 ```
 
 **After (v3):**
+
 ```json
 {
   "$schema": "https://holoscript.dev/schemas/config.v3.json",
@@ -71,6 +74,7 @@ The configuration file format has been updated for better organization.
 ```
 
 **Auto-migration:**
+
 ```bash
 npx @holoscript/cli migrate-config
 ```
@@ -80,6 +84,7 @@ npx @holoscript/cli migrate-config
 The runtime API has been reorganized for consistency.
 
 **Before (v2):**
+
 ```typescript
 import { parse, validate, compile } from '@holoscript/core';
 
@@ -89,6 +94,7 @@ const output = compile(ast, { target: 'web' });
 ```
 
 **After (v3):**
+
 ```typescript
 import { HoloScript } from '@holoscript/core';
 
@@ -102,6 +108,7 @@ const result = await hs.compile(source);
 ```
 
 **Compatibility layer:**
+
 ```typescript
 // Use legacy API (deprecated, will be removed in 4.0)
 import { parse, validate, compile } from '@holoscript/core/legacy';
@@ -112,6 +119,7 @@ import { parse, validate, compile } from '@holoscript/core/legacy';
 Plugin system has been redesigned for better extensibility.
 
 **Before (v2):**
+
 ```typescript
 export default function myPlugin(api) {
   api.onParse((ast) => {
@@ -121,22 +129,23 @@ export default function myPlugin(api) {
 ```
 
 **After (v3):**
+
 ```typescript
 import { definePlugin, type PluginContext } from '@holoscript/core';
 
 export default definePlugin({
   name: 'my-plugin',
   version: '1.0.0',
-  
+
   hooks: {
     'parse:before': (source: string, ctx: PluginContext) => {
       return source; // Optionally transform
     },
-    
+
     'parse:after': (ast, ctx: PluginContext) => {
       return ast; // Optionally transform
     },
-    
+
     'compile:target': (output, target, ctx: PluginContext) => {
       return output;
     },
@@ -225,16 +234,17 @@ npx @holoscript/cli@3 migrate --verify
 
 ## Package Version Updates
 
-| Package | 2.x → 3.0 |
-|---------|-----------|
-| @holoscript/core | 2.x → 3.0.0 |
-| @holoscript/cli | 2.x → 3.0.0 |
-| @holoscript/lsp | 2.x → 3.0.0 |
-| @holoscript/linter | 2.x → 3.0.0 |
+| Package               | 2.x → 3.0   |
+| --------------------- | ----------- |
+| @holoscript/core      | 2.x → 3.0.0 |
+| @holoscript/cli       | 2.x → 3.0.0 |
+| @holoscript/lsp       | 2.x → 3.0.0 |
+| @holoscript/linter    | 2.x → 3.0.0 |
 | @holoscript/formatter | 2.x → 3.0.0 |
-| @holoscript/vscode | 2.x → 3.0.0 |
+| @holoscript/vscode    | 2.x → 3.0.0 |
 
 **New packages in 3.0:**
+
 - @holoscript/visual (1.0.0) - Visual scripting
 - @holoscript/wasm (1.0.0) - WASM compiler
 - @holoscript/intellij (1.0.0) - IntelliJ plugin

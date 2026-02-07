@@ -29,7 +29,7 @@ interface HeadTrackedAudioConfig {
   source: string;
   anchor_mode: AnchorMode;
   tracking_latency_compensation: boolean;
-  stabilization: number;  // 0-1
+  stabilization: number; // 0-1
   bypass_spatialization: boolean;
   volume: number;
   loop: boolean;
@@ -49,13 +49,13 @@ function applyInverseRotation(
   const qy = -rotation.y;
   const qz = -rotation.z;
   const qw = rotation.w;
-  
+
   // Rotate position by inverse
   const ix = qw * position.x + qy * position.z - qz * position.y;
   const iy = qw * position.y + qz * position.x - qx * position.z;
   const iz = qw * position.z + qx * position.y - qy * position.x;
   const iw = -qx * position.x - qy * position.y - qz * position.z;
-  
+
   return {
     x: ix * qw + iw * -qx + iy * -qz - iz * -qy,
     y: iy * qw + iw * -qy + iz * -qx - ix * -qz,
@@ -92,12 +92,12 @@ export const headTrackedAudioHandler: TraitHandler<HeadTrackedAudioConfig> = {
       audioSourceId: null,
     };
     (node as any).__headTrackedAudioState = state;
-    
+
     // Get initial world position
     if ((node as any).position) {
       state.worldPosition = { ...(node as any).position };
     }
-    
+
     // Load audio source
     if (config.source) {
       context.emit?.('audio_load_source', {
@@ -108,7 +108,7 @@ export const headTrackedAudioHandler: TraitHandler<HeadTrackedAudioConfig> = {
         volume: config.volume,
       });
     }
-    
+
     if (config.autoplay && config.source) {
       state.isPlaying = true;
     }
@@ -123,14 +123,14 @@ export const headTrackedAudioHandler: TraitHandler<HeadTrackedAudioConfig> = {
     delete (node as any).__headTrackedAudioState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__headTrackedAudioState as HeadTrackedAudioState;
     if (!state || !state.isPlaying) return;
-    
+
     if (config.anchor_mode === 'world') {
       // Apply inverse head rotation to maintain world position perception
       const compensated = applyInverseRotation(state.worldPosition, state.headRotation);
-      
+
       // Stabilization smoothing
       const s = config.stabilization;
       state.stabilizedPosition = {
@@ -138,7 +138,7 @@ export const headTrackedAudioHandler: TraitHandler<HeadTrackedAudioConfig> = {
         y: state.stabilizedPosition.y * s + compensated.y * (1 - s),
         z: state.stabilizedPosition.z * s + compensated.z * (1 - s),
       };
-      
+
       // Update audio source position
       context.emit?.('audio_set_position', {
         node,
@@ -154,13 +154,13 @@ export const headTrackedAudioHandler: TraitHandler<HeadTrackedAudioConfig> = {
       // Blend between world and head
       const worldCompensated = applyInverseRotation(state.worldPosition, state.headRotation);
       const blend = config.stabilization;
-      
+
       const hybridPos = {
         x: state.relativePosition.x * (1 - blend) + worldCompensated.x * blend,
         y: state.relativePosition.y * (1 - blend) + worldCompensated.y * blend,
         z: state.relativePosition.z * (1 - blend) + worldCompensated.z * blend,
       };
-      
+
       context.emit?.('audio_set_position', {
         node,
         position: hybridPos,
@@ -171,7 +171,7 @@ export const headTrackedAudioHandler: TraitHandler<HeadTrackedAudioConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__headTrackedAudioState as HeadTrackedAudioState;
     if (!state) return;
-    
+
     if (event.type === 'head_rotation_update') {
       state.headRotation = event.rotation as typeof state.headRotation;
     } else if (event.type === 'audio_source_loaded') {

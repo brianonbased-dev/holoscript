@@ -237,7 +237,9 @@ export class OpenXRCompiler {
     this.emit('');
 
     this.emit('XrInstanceCreateInfo createInfo{XR_TYPE_INSTANCE_CREATE_INFO};');
-    this.emit(`std::strncpy(createInfo.applicationInfo.applicationName, "${this.options.appName}", XR_MAX_APPLICATION_NAME_SIZE);`);
+    this.emit(
+      `std::strncpy(createInfo.applicationInfo.applicationName, "${this.options.appName}", XR_MAX_APPLICATION_NAME_SIZE);`
+    );
     this.emit('createInfo.applicationInfo.apiVersion = XR_CURRENT_API_VERSION;');
     this.emit('createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());');
     this.emit('createInfo.enabledExtensionNames = extensions.data();');
@@ -279,7 +281,9 @@ export class OpenXRCompiler {
       this.emit('graphicsBinding.queueIndex = 0;');
     } else {
       this.emit('// OpenGL ES graphics binding');
-      this.emit('XrGraphicsBindingOpenGLESAndroidKHR graphicsBinding{XR_TYPE_GRAPHICS_BINDING_OPENGL_ES_ANDROID_KHR};');
+      this.emit(
+        'XrGraphicsBindingOpenGLESAndroidKHR graphicsBinding{XR_TYPE_GRAPHICS_BINDING_OPENGL_ES_ANDROID_KHR};'
+      );
       this.emit('graphicsBinding.display = eglDisplay;');
       this.emit('graphicsBinding.config = eglConfig;');
       this.emit('graphicsBinding.context = eglContext;');
@@ -332,16 +336,35 @@ export class OpenXRCompiler {
     this.indent();
 
     this.emit('XrActionSetCreateInfo actionSetInfo{XR_TYPE_ACTION_SET_CREATE_INFO};');
-    this.emit('std::strncpy(actionSetInfo.actionSetName, "gameplay", XR_MAX_ACTION_SET_NAME_SIZE);');
-    this.emit('std::strncpy(actionSetInfo.localizedActionSetName, "Gameplay", XR_MAX_LOCALIZED_ACTION_SET_NAME_SIZE);');
+    this.emit(
+      'std::strncpy(actionSetInfo.actionSetName, "gameplay", XR_MAX_ACTION_SET_NAME_SIZE);'
+    );
+    this.emit(
+      'std::strncpy(actionSetInfo.localizedActionSetName, "Gameplay", XR_MAX_LOCALIZED_ACTION_SET_NAME_SIZE);'
+    );
     this.emit('xrCreateActionSet(instance, &actionSetInfo, &actionSet);');
     this.emit('');
 
     const actions = [
       { name: 'grabAction', id: 'grab', localized: 'Grab', type: 'XR_ACTION_TYPE_FLOAT_INPUT' },
-      { name: 'triggerAction', id: 'trigger', localized: 'Trigger', type: 'XR_ACTION_TYPE_FLOAT_INPUT' },
-      { name: 'aimPoseAction', id: 'aim_pose', localized: 'Aim Pose', type: 'XR_ACTION_TYPE_POSE_INPUT' },
-      { name: 'hapticAction', id: 'haptic', localized: 'Haptic', type: 'XR_ACTION_TYPE_VIBRATION_OUTPUT' },
+      {
+        name: 'triggerAction',
+        id: 'trigger',
+        localized: 'Trigger',
+        type: 'XR_ACTION_TYPE_FLOAT_INPUT',
+      },
+      {
+        name: 'aimPoseAction',
+        id: 'aim_pose',
+        localized: 'Aim Pose',
+        type: 'XR_ACTION_TYPE_POSE_INPUT',
+      },
+      {
+        name: 'hapticAction',
+        id: 'haptic',
+        localized: 'Haptic',
+        type: 'XR_ACTION_TYPE_VIBRATION_OUTPUT',
+      },
     ];
 
     for (const action of actions) {
@@ -350,7 +373,9 @@ export class OpenXRCompiler {
       this.emit('XrActionCreateInfo info{XR_TYPE_ACTION_CREATE_INFO};');
       this.emit(`info.actionType = ${action.type};`);
       this.emit(`std::strncpy(info.actionName, "${action.id}", XR_MAX_ACTION_NAME_SIZE);`);
-      this.emit(`std::strncpy(info.localizedActionName, "${action.localized}", XR_MAX_LOCALIZED_ACTION_NAME_SIZE);`);
+      this.emit(
+        `std::strncpy(info.localizedActionName, "${action.localized}", XR_MAX_LOCALIZED_ACTION_NAME_SIZE);`
+      );
       this.emit('info.countSubactionPaths = 0;');
       this.emit(`xrCreateAction(actionSet, &info, &${action.name});`);
       this.dedent();
@@ -382,7 +407,9 @@ export class OpenXRCompiler {
         this.emit(`glm::vec4 clearColor = ${color};`);
       } else if (prop.key === 'fog' && typeof prop.value === 'object') {
         const fog = prop.value as Record<string, any>;
-        const fogColor = fog.color ? this.toCppColor(fog.color) : 'glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)';
+        const fogColor = fog.color
+          ? this.toCppColor(fog.color)
+          : 'glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)';
         this.emit(`glm::vec4 fogColor = ${fogColor};`);
         this.emit(`float fogNear = ${fog.near ?? 10.0}f;`);
         this.emit(`float fogFar = ${fog.far ?? 100.0}f;`);
@@ -454,10 +481,14 @@ export class OpenXRCompiler {
       this.emit(`glGenBuffers(1, &${varName}_vbo);`);
       this.emit(`glBindVertexArray(${varName}_vao);`);
       this.emit(`glBindBuffer(GL_ARRAY_BUFFER, ${varName}_vbo);`);
-      this.emit(`glBufferData(GL_ARRAY_BUFFER, ${varName}_vertices.size() * sizeof(float), ${varName}_vertices.data(), GL_STATIC_DRAW);`);
+      this.emit(
+        `glBufferData(GL_ARRAY_BUFFER, ${varName}_vertices.size() * sizeof(float), ${varName}_vertices.data(), GL_STATIC_DRAW);`
+      );
       this.emit('glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);');
       this.emit('glEnableVertexAttribArray(0);');
-      this.emit('glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));');
+      this.emit(
+        'glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));'
+      );
       this.emit('glEnableVertexAttribArray(1);');
     }
 
@@ -472,11 +503,15 @@ export class OpenXRCompiler {
           this.emit('');
           this.emit(`// Trait: anchor -- XR_MSFT_spatial_anchor`);
           this.emit(`XrSpatialAnchorMSFT ${varName}_anchor = XR_NULL_HANDLE;`);
-          this.emit('XrSpatialAnchorCreateInfoMSFT anchorInfo{XR_TYPE_SPATIAL_ANCHOR_CREATE_INFO_MSFT};');
+          this.emit(
+            'XrSpatialAnchorCreateInfoMSFT anchorInfo{XR_TYPE_SPATIAL_ANCHOR_CREATE_INFO_MSFT};'
+          );
           this.emit('anchorInfo.space = appSpace;');
           this.emit('anchorInfo.time = predictedDisplayTime;');
           if (pos && Array.isArray(pos)) {
-            this.emit(`anchorInfo.pose.position = {${(pos[0] ?? 0)}f, ${(pos[1] ?? 0)}f, ${(pos[2] ?? 0)}f};`);
+            this.emit(
+              `anchorInfo.pose.position = {${pos[0] ?? 0}f, ${pos[1] ?? 0}f, ${pos[2] ?? 0}f};`
+            );
           } else {
             this.emit('anchorInfo.pose.position = {0.0f, 0.0f, 0.0f};');
           }
@@ -520,17 +555,29 @@ export class OpenXRCompiler {
     this.emit(`glm::mat4 ${varName}_transform = glm::mat4(1.0f);`);
     for (const prop of group.properties) {
       if (prop.key === 'position' && Array.isArray(prop.value)) {
-        this.emit(`${varName}_transform = glm::translate(${varName}_transform, ${this.toCppVec3(prop.value)});`);
+        this.emit(
+          `${varName}_transform = glm::translate(${varName}_transform, ${this.toCppVec3(prop.value)});`
+        );
       } else if (prop.key === 'rotation' && Array.isArray(prop.value)) {
         const r = prop.value as number[];
-        this.emit(`${varName}_transform = glm::rotate(${varName}_transform, glm::radians(${r[0] ?? 0}f), glm::vec3(1,0,0));`);
-        this.emit(`${varName}_transform = glm::rotate(${varName}_transform, glm::radians(${r[1] ?? 0}f), glm::vec3(0,1,0));`);
-        this.emit(`${varName}_transform = glm::rotate(${varName}_transform, glm::radians(${r[2] ?? 0}f), glm::vec3(0,0,1));`);
+        this.emit(
+          `${varName}_transform = glm::rotate(${varName}_transform, glm::radians(${r[0] ?? 0}f), glm::vec3(1,0,0));`
+        );
+        this.emit(
+          `${varName}_transform = glm::rotate(${varName}_transform, glm::radians(${r[1] ?? 0}f), glm::vec3(0,1,0));`
+        );
+        this.emit(
+          `${varName}_transform = glm::rotate(${varName}_transform, glm::radians(${r[2] ?? 0}f), glm::vec3(0,0,1));`
+        );
       } else if (prop.key === 'scale') {
         if (Array.isArray(prop.value)) {
-          this.emit(`${varName}_transform = glm::scale(${varName}_transform, ${this.toCppVec3(prop.value)});`);
+          this.emit(
+            `${varName}_transform = glm::scale(${varName}_transform, ${this.toCppVec3(prop.value)});`
+          );
         } else {
-          this.emit(`${varName}_transform = glm::scale(${varName}_transform, glm::vec3(${prop.value}f));`);
+          this.emit(
+            `${varName}_transform = glm::scale(${varName}_transform, glm::vec3(${prop.value}f));`
+          );
         }
       }
     }
@@ -565,9 +612,9 @@ export class OpenXRCompiler {
 
     this.emit(`LightUBO ${varName}_ubo;`);
 
-    const colorProp = light.properties.find(p => p.key === 'color');
-    const intensityProp = light.properties.find(p => p.key === 'intensity');
-    const posProp = light.properties.find(p => p.key === 'position');
+    const colorProp = light.properties.find((p) => p.key === 'color');
+    const intensityProp = light.properties.find((p) => p.key === 'intensity');
+    const posProp = light.properties.find((p) => p.key === 'position');
 
     if (posProp && Array.isArray(posProp.value)) {
       const p = posProp.value as number[];
@@ -613,7 +660,9 @@ export class OpenXRCompiler {
     this.emit('std::array<XrView, 2> views;');
     this.emit('views[0].type = XR_TYPE_VIEW;');
     this.emit('views[1].type = XR_TYPE_VIEW;');
-    this.emit('xrLocateViews(session, &viewLocateInfo, &viewState, viewCount, &viewCount, views.data());');
+    this.emit(
+      'xrLocateViews(session, &viewLocateInfo, &viewState, viewCount, &viewCount, views.data());'
+    );
     this.emit('');
     this.emit('// Per-eye projection and view matrices');
     this.emit('for (uint32_t eye = 0; eye < viewCount; eye++) {');
@@ -644,7 +693,9 @@ export class OpenXRCompiler {
 
   private emitRenderPass(): void {
     if (this.options.renderBackend === 'vulkan') {
-      this.emit('void beginRenderPass(VkCommandBuffer cmd, VkRenderPass renderPass, VkFramebuffer framebuffer, uint32_t width, uint32_t height) {');
+      this.emit(
+        'void beginRenderPass(VkCommandBuffer cmd, VkRenderPass renderPass, VkFramebuffer framebuffer, uint32_t width, uint32_t height) {'
+      );
       this.indent();
       this.emit('VkRenderPassBeginInfo rpInfo{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};');
       this.emit('rpInfo.renderPass = renderPass;');
@@ -681,7 +732,7 @@ export class OpenXRCompiler {
   // Render loop
   // ---------------------------------------------------------------------------
 
-  private emitRenderLoop(composition: HoloComposition): void {
+  private emitRenderLoop(_composition: HoloComposition): void {
     this.emit('void renderLoop() {');
     this.indent();
 
@@ -747,7 +798,9 @@ export class OpenXRCompiler {
     this.emit('std::array<XrView, 2> views;');
     this.emit('views[0].type = XR_TYPE_VIEW;');
     this.emit('views[1].type = XR_TYPE_VIEW;');
-    this.emit('xrLocateViews(session, &viewLocateInfo, &viewState, viewCount, &viewCount, views.data());');
+    this.emit(
+      'xrLocateViews(session, &viewLocateInfo, &viewState, viewCount, &viewCount, views.data());'
+    );
     this.emit('');
 
     this.emit('// Acquire and render to swapchain image');
@@ -891,7 +944,7 @@ export class OpenXRCompiler {
   }
 
   private findObjProp(obj: HoloObjectDecl, key: string): HoloValue | undefined {
-    return obj.properties?.find(p => p.key === key)?.value;
+    return obj.properties?.find((p) => p.key === key)?.value;
   }
 
   // ---------------------------------------------------------------------------
@@ -951,9 +1004,12 @@ export class OpenXRCompiler {
   private compositionUsesAnchor(composition: HoloComposition): boolean {
     const check = (objs: HoloObjectDecl[] | undefined): boolean => {
       if (!objs) return false;
-      return objs.some(o =>
-        o.traits?.some(t => t.name === 'anchor' || t.name === 'persistent_anchor' || t.name === 'shared_anchor') ||
-        check(o.children)
+      return objs.some(
+        (o) =>
+          o.traits?.some(
+            (t) =>
+              t.name === 'anchor' || t.name === 'persistent_anchor' || t.name === 'shared_anchor'
+          ) || check(o.children)
       );
     };
     return check(composition.objects);

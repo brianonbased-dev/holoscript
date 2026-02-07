@@ -16,18 +16,26 @@ import type { TraitHandler } from './TraitTypes';
 type BTStatus = 'success' | 'failure' | 'running';
 
 interface BTNode {
-  type: 'sequence' | 'selector' | 'parallel' | 'inverter' | 'repeater' | 'condition' | 'action' | 'wait';
+  type:
+    | 'sequence'
+    | 'selector'
+    | 'parallel'
+    | 'inverter'
+    | 'repeater'
+    | 'condition'
+    | 'action'
+    | 'wait';
   name?: string;
   children?: BTNode[];
   // For decorators
-  count?: number;        // Repeater count (-1 = infinite)
+  count?: number; // Repeater count (-1 = infinite)
   // For conditions
-  condition?: string;    // Expression or blackboard key
+  condition?: string; // Expression or blackboard key
   // For actions
-  action?: string;       // Action name to execute
+  action?: string; // Action name to execute
   params?: Record<string, unknown>;
   // For wait
-  duration?: number;     // Seconds to wait
+  duration?: number; // Seconds to wait
   // For parallel
   successThreshold?: number; // Number of children that must succeed
 }
@@ -52,7 +60,7 @@ interface BTState {
 
 interface BTConfig {
   root: BTNode;
-  tick_rate: number;           // Ticks per second
+  tick_rate: number; // Ticks per second
   debug_visualization: boolean;
   blackboard: Record<string, unknown>;
   restart_on_complete: boolean;
@@ -82,9 +90,9 @@ function tickNode(
     };
     state.nodeStates.set(node, nodeState);
   }
-  
+
   state.debug.nodesVisited++;
-  
+
   switch (node.type) {
     case 'sequence':
       return tickSequence(node, nodeState, state, context, owner, delta);
@@ -116,10 +124,10 @@ function tickSequence(
   delta: number
 ): BTStatus {
   const children = node.children || [];
-  
+
   for (let i = nodeState.childIndex; i < children.length; i++) {
     const result = tickNode(children[i], state, context, owner, delta);
-    
+
     if (result === 'running') {
       nodeState.childIndex = i;
       return 'running';
@@ -129,7 +137,7 @@ function tickSequence(
       return 'failure';
     }
   }
-  
+
   nodeState.childIndex = 0;
   return 'success';
 }
@@ -143,10 +151,10 @@ function tickSelector(
   delta: number
 ): BTStatus {
   const children = node.children || [];
-  
+
   for (let i = nodeState.childIndex; i < children.length; i++) {
     const result = tickNode(children[i], state, context, owner, delta);
-    
+
     if (result === 'running') {
       nodeState.childIndex = i;
       return 'running';
@@ -156,7 +164,7 @@ function tickSelector(
       return 'success';
     }
   }
-  
+
   nodeState.childIndex = 0;
   return 'failure';
 }
@@ -171,11 +179,11 @@ function tickParallel(
 ): BTStatus {
   const children = node.children || [];
   const threshold = node.successThreshold ?? children.length;
-  
+
   let successes = 0;
   let failures = 0;
-  let running = 0;
-  
+  let _running = 0;
+
   for (let i = 0; i < children.length; i++) {
     if (nodeState.childStatuses[i] === 'success') {
       successes++;
@@ -185,15 +193,15 @@ function tickParallel(
       failures++;
       continue;
     }
-    
+
     const result = tickNode(children[i], state, context, owner, delta);
     nodeState.childStatuses[i] = result;
-    
+
     if (result === 'success') successes++;
     else if (result === 'failure') failures++;
-    else running++;
+    else _running++;
   }
-  
+
   if (successes >= threshold) {
     nodeState.childStatuses = [];
     return 'success';
@@ -215,7 +223,7 @@ function tickInverter(
 ): BTStatus {
   const child = node.children?.[0];
   if (!child) return 'failure';
-  
+
   const result = tickNode(child, state, context, owner, delta);
   if (result === 'success') return 'failure';
   if (result === 'failure') return 'success';
@@ -232,55 +240,50 @@ function tickRepeater(
 ): BTStatus {
   const child = node.children?.[0];
   if (!child) return 'failure';
-  
+
   const maxCount = node.count ?? -1;
-  
+
   const result = tickNode(child, state, context, owner, delta);
-  
+
   if (result === 'running') return 'running';
-  
+
   nodeState.repeatCount++;
-  
+
   // Reset child state for next iteration
   state.nodeStates.delete(child);
-  
+
   if (maxCount > 0 && nodeState.repeatCount >= maxCount) {
     nodeState.repeatCount = 0;
     return 'success';
   }
-  
+
   return 'running'; // Keep repeating
 }
 
-function tickCondition(
-  node: BTNode,
-  state: BTState,
-  context: any,
-  owner: unknown
-): BTStatus {
+function tickCondition(node: BTNode, state: BTState, context: any, owner: unknown): BTStatus {
   const conditionKey = node.condition || '';
-  
+
   // Check blackboard value
   let result = state.blackboard[conditionKey];
-  
+
   // If starts with '!', invert
   if (conditionKey.startsWith('!')) {
     const key = conditionKey.substring(1);
     result = !state.blackboard[key];
   }
-  
+
   // Check owner properties
   if (result === undefined && (owner as any)[conditionKey] !== undefined) {
     result = (owner as any)[conditionKey];
   }
-  
+
   // Evaluate simple expressions
   if (typeof conditionKey === 'string' && conditionKey.includes('>')) {
-    const [key, value] = conditionKey.split('>').map(s => s.trim());
+    const [key, value] = conditionKey.split('>').map((s) => s.trim());
     const bbValue = state.blackboard[key];
     result = typeof bbValue === 'number' && bbValue > parseFloat(value);
   }
-  
+
   return result ? 'success' : 'failure';
 }
 
@@ -290,10 +293,10 @@ function tickAction(
   state: BTState,
   context: any,
   owner: unknown,
-  delta: number
+  _delta: number
 ): BTStatus {
   const actionName = node.action || '';
-  
+
   // Try to execute action via context
   if (context.executeAction) {
     const result = context.executeAction(owner, actionName, node.params || {});
@@ -301,7 +304,7 @@ function tickAction(
     if (result === false) return 'failure';
     if (result === 'running') return 'running';
   }
-  
+
   // Try to call method on owner
   const method = (owner as any)[actionName];
   if (typeof method === 'function') {
@@ -310,22 +313,24 @@ function tickAction(
     if (result === false) return 'failure';
     if (result instanceof Promise) {
       // Async action - mark as running
-      result.then((r: unknown) => {
-        nodeState.status = r ? 'success' : 'failure';
-      }).catch(() => {
-        nodeState.status = 'failure';
-      });
+      result
+        .then((r: unknown) => {
+          nodeState.status = r ? 'success' : 'failure';
+        })
+        .catch(() => {
+          nodeState.status = 'failure';
+        });
       return 'running';
     }
   }
-  
+
   // Set blackboard value
   if (actionName.startsWith('set:')) {
     const [, key, value] = actionName.split(':');
     state.blackboard[key] = value === 'true' ? true : value === 'false' ? false : value;
     return 'success';
   }
-  
+
   context.emit?.('bt_action', { owner, action: actionName, params: node.params });
   return 'success';
 }
@@ -333,7 +338,7 @@ function tickAction(
 function tickWait(node: BTNode, nodeState: BTNodeState, delta: number): BTStatus {
   nodeState.waitTimer += delta;
   const duration = node.duration ?? 1;
-  
+
   if (nodeState.waitTimer >= duration) {
     nodeState.waitTimer = 0;
     return 'success';
@@ -348,16 +353,16 @@ function tickWait(node: BTNode, nodeState: BTNodeState, delta: number): BTStatus
 export const behaviorTreeHandler: TraitHandler<BTConfig> = {
   name: 'behavior_tree' as any,
 
-  defaultConfig: { 
-    root: { type: 'sequence', children: [] }, 
-    tick_rate: 10, 
-    debug_visualization: false, 
-    blackboard: {}, 
-    restart_on_complete: true 
+  defaultConfig: {
+    root: { type: 'sequence', children: [] },
+    tick_rate: 10,
+    debug_visualization: false,
+    blackboard: {},
+    restart_on_complete: true,
   },
 
   onAttach(node, config, context) {
-    const state: BTState = { 
+    const state: BTState = {
       status: 'running',
       tickAccumulator: 0,
       blackboard: { ...config.blackboard },
@@ -366,7 +371,7 @@ export const behaviorTreeHandler: TraitHandler<BTConfig> = {
       debug: { lastTick: 0, nodesVisited: 0 },
     };
     (node as any).__behaviorTreeState = state;
-    
+
     context.emit?.('bt_started', { node });
   },
 
@@ -381,23 +386,23 @@ export const behaviorTreeHandler: TraitHandler<BTConfig> = {
     // Tick at configured rate
     const tickInterval = 1 / config.tick_rate;
     state.tickAccumulator += delta;
-    
+
     if (state.tickAccumulator >= tickInterval) {
       state.tickAccumulator -= tickInterval;
       state.debug.nodesVisited = 0;
-      
+
       // Tick the tree
       state.status = tickNode(config.root, state, context, node, delta);
       state.debug.lastTick = Date.now();
-      
+
       // Handle completion
       if (state.status !== 'running') {
-        context.emit?.('bt_complete', { 
-          node, 
+        context.emit?.('bt_complete', {
+          node,
           status: state.status,
           blackboard: state.blackboard,
         });
-        
+
         if (config.restart_on_complete) {
           // Reset for next run
           state.nodeStates.clear();
@@ -412,7 +417,7 @@ export const behaviorTreeHandler: TraitHandler<BTConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__behaviorTreeState as BTState;
     if (!state) return;
-    
+
     if (event.type === 'bt_set_blackboard') {
       Object.assign(state.blackboard, event.values);
     } else if (event.type === 'bt_pause') {

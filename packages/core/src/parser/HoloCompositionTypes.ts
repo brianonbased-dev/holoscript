@@ -368,6 +368,7 @@ export interface HoloSpatialGroup extends HoloNode {
   properties: HoloGroupProperty[];
   objects: HoloObjectDecl[];
   groups?: HoloSpatialGroup[]; // nested groups
+  body?: HoloStatement[];      // logic statements inside the group
 }
 
 export interface HoloGroupProperty extends HoloNode {
@@ -421,7 +422,13 @@ export type HoloStatement =
   | HoloReturnStatement
   | HoloEmitStatement
   | HoloAnimateStatement
+  | HoloOnErrorStatement
   | HoloExpressionStatement;
+
+export interface HoloOnErrorStatement extends HoloNode {
+  type: 'OnErrorStatement';
+  body: HoloStatement[];
+}
 
 export interface HoloAssignment extends HoloNode {
   type: 'Assignment';

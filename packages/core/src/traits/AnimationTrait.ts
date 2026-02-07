@@ -818,9 +818,7 @@ export class AnimationTrait {
    * Remove transitions
    */
   public removeTransition(from: string, to: string): void {
-    this.transitions = this.transitions.filter(
-      (t) => !(t.from === from && t.to === to)
-    );
+    this.transitions = this.transitions.filter((t) => !(t.from === from && t.to === to));
   }
 
   /**

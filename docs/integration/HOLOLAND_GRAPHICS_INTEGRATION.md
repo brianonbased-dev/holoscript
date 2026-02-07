@@ -99,7 +99,7 @@ export interface Scene {
   name: string;
   creatorId: string;
   orbs: Orb[];
-  graphics?: GraphicsConfiguration;  // NEW
+  graphics?: GraphicsConfiguration; // NEW
   metadata?: Record<string, unknown>;
 }
 ```
@@ -110,7 +110,9 @@ Create `packages/runtime/src/services/GraphicsPipelineService.ts`:
 
 ```typescript
 import {
-  MaterialTrait, LightingTrait, RenderingTrait,
+  MaterialTrait,
+  LightingTrait,
+  RenderingTrait,
   type GraphicsConfiguration,
 } from '@holoscript/core';
 
@@ -427,7 +429,7 @@ export class SceneRenderer {
 
   constructor(canvas: HTMLCanvasElement, scene: Scene) {
     this.gl = canvas.getContext('webgl')!;
-    
+
     // Initialize graphics pipeline
     if (scene.graphics) {
       this.graphicsPipeline = new GraphicsPipelineService(scene.graphics);
@@ -553,6 +555,7 @@ export class HoloScriptPlusParser {
 ## Performance Optimization Guidelines
 
 ### Mobile Optimization
+
 ```typescript
 // Use low quality preset
 rendering.optimizeForMobile();
@@ -565,10 +568,11 @@ rendering.setMaxTextureResolution(512);
 material.setCompression('astc');
 
 // Limit shadow casters
-lighting.getLights().filter(l => l.shadow).length <= 2;
+lighting.getLights().filter((l) => l.shadow).length <= 2;
 ```
 
 ### Desktop Optimization
+
 ```typescript
 // Use high quality preset
 rendering.optimizeForDesktop();
@@ -581,13 +585,14 @@ rendering.setMaxTextureResolution(4096);
 material.setCompression('none');
 
 // Allow multiple shadow casters
-lighting.getLights().filter(l => l.shadow).length <= 8;
+lighting.getLights().filter((l) => l.shadow).length <= 8;
 ```
 
 ### VR Optimization
+
 ```typescript
 // VR-specific settings
-rendering.optimizeForVRAR(90);  // 90 FPS
+rendering.optimizeForVRAR(90); // 90 FPS
 rendering.applyQualityPreset('high');
 
 // Balanced texture resolution
@@ -597,7 +602,7 @@ rendering.setMaxTextureResolution(2048);
 material.setCompression('basis');
 
 // Minimal shadow casters (performance critical)
-lighting.getLights().filter(l => l.shadow).length <= 4;
+lighting.getLights().filter((l) => l.shadow).length <= 4;
 ```
 
 ---
@@ -637,7 +642,7 @@ describe('Graphics Performance', () => {
     const pipeline = new GraphicsPipelineService(config);
     const memory = pipeline.getRendering().estimateGPUMemory();
 
-    expect(memory.estimatedTotal).toBeLessThan(256);  // 256 MB max
+    expect(memory.estimatedTotal).toBeLessThan(256); // 256 MB max
   });
 });
 ```

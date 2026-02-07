@@ -16,7 +16,6 @@ import {
   Hover,
   Definition,
   Location,
-  Diagnostic,
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -60,7 +59,7 @@ documents.onDidChangeContent((change) => {
   const diagnostics = server.getDiagnostics(uri);
   connection.sendDiagnostics({
     uri,
-    diagnostics: diagnostics as Diagnostic[],
+    diagnostics: diagnostics,
   });
 });
 

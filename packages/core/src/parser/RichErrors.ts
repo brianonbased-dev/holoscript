@@ -116,8 +116,8 @@ function levenshteinDistance(a: string, b: string): number {
       } else {
         matrix[i][j] = Math.min(
           matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
+          matrix[i][j - 1] + 1, // insertion
+          matrix[i - 1][j] + 1 // deletion
         );
       }
     }
@@ -172,12 +172,45 @@ export function findSimilarTrait(input: string, threshold = 0.5): string | undef
  */
 export function findSimilarKeyword(input: string, threshold = 0.5): string | undefined {
   const keywords = [
-    'composition', 'object', 'template', 'spatial_group', 'environment',
-    'state', 'logic', 'on_click', 'on_hover', 'on_enter', 'on_exit',
-    'position', 'rotation', 'scale', 'color', 'model', 'geometry',
-    'visible', 'opacity', 'material', 'physics', 'audio', 'animation',
-    'true', 'false', 'null', 'if', 'else', 'for', 'while', 'function',
-    'let', 'const', 'return', 'import', 'from', 'using', 'spawn', 'emit'
+    'composition',
+    'object',
+    'template',
+    'spatial_group',
+    'environment',
+    'state',
+    'logic',
+    'on_click',
+    'on_hover',
+    'on_enter',
+    'on_exit',
+    'position',
+    'rotation',
+    'scale',
+    'color',
+    'model',
+    'geometry',
+    'visible',
+    'opacity',
+    'material',
+    'physics',
+    'audio',
+    'animation',
+    'true',
+    'false',
+    'null',
+    'if',
+    'else',
+    'for',
+    'while',
+    'function',
+    'let',
+    'const',
+    'return',
+    'import',
+    'from',
+    'using',
+    'spawn',
+    'emit',
   ];
 
   let bestMatch: string | undefined;
@@ -281,13 +314,10 @@ export function createTraitError(
   const similar = findSimilarTrait(traitName);
   const suggestion = similar ? `Did you mean '@${similar}'?` : undefined;
 
-  return createRichError(
-    'HSP200',
-    `Unknown trait '@${traitName}'`,
-    line,
-    column,
-    { source, suggestion }
-  );
+  return createRichError('HSP200', `Unknown trait '@${traitName}'`, line, column, {
+    source,
+    suggestion,
+  });
 }
 
 /**
@@ -303,13 +333,10 @@ export function createKeywordError(
   const similar = findSimilarKeyword(found);
   const suggestion = similar ? `Did you mean '${similar}'?` : `Expected '${expected}'`;
 
-  return createRichError(
-    'HSP003',
-    `Expected '${expected}' but found '${found}'`,
-    line,
-    column,
-    { source, suggestion }
-  );
+  return createRichError('HSP003', `Expected '${expected}' but found '${found}'`, line, column, {
+    source,
+    suggestion,
+  });
 }
 
 // ============================================================================
@@ -355,8 +382,8 @@ export function formatRichErrors(errors: RichParseError[]): string {
   }
 
   const lines: string[] = [];
-  const errorCount = errors.filter(e => e.severity === 'error').length;
-  const warningCount = errors.filter(e => e.severity === 'warning').length;
+  const errorCount = errors.filter((e) => e.severity === 'error').length;
+  const warningCount = errors.filter((e) => e.severity === 'warning').length;
 
   // Summary header
   lines.push(`Found ${errorCount} error(s) and ${warningCount} warning(s):`);
@@ -381,7 +408,11 @@ export function formatRichErrors(errors: RichParseError[]): string {
 // Export All Error Codes for Documentation
 // ============================================================================
 
-export function getErrorCodeDocumentation(): Array<{ code: string; description: string; category: string }> {
+export function getErrorCodeDocumentation(): Array<{
+  code: string;
+  description: string;
+  category: string;
+}> {
   const docs: Array<{ code: string; description: string; category: string }> = [];
 
   for (const [code, description] of Object.entries(HSPLUS_ERROR_CODES)) {

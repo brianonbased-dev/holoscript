@@ -20,11 +20,11 @@ composition "Scene Name" {
     skybox: "<preset>"
     ambient_light: <0-1>
   }
-  
+
   template "TemplateName" {
     // Reusable object definitions
   }
-  
+
   spatial_group "GroupName" {
     object "ObjectName" @traits {
       geometry: "<type>"
@@ -32,7 +32,7 @@ composition "Scene Name" {
       position: [x, y, z]
     }
   }
-  
+
   logic {
     // Scene-level behavior
   }
@@ -52,18 +52,23 @@ composition "Scene Name" {
 ## Key Traits by Category
 
 ### Interaction
+
 `@grabbable` `@throwable` `@clickable` `@pointable` `@scalable`
 
 ### Physics
+
 `@collidable` `@physics` `@trigger` `@gravity`
 
 ### Visual
+
 `@glowing` `@emissive` `@transparent` `@animated`
 
 ### Networking
+
 `@networked` `@synced` `@persistent`
 
 ### Behavior
+
 `@stackable` `@equippable` `@destructible`
 
 ## Example Transformation
@@ -71,6 +76,7 @@ composition "Scene Name" {
 **Input:** "A mysterious crystal cave with glowing crystals and a treasure chest"
 
 **Output:**
+
 ```holo
 composition "Crystal Cave" {
   environment {
@@ -78,16 +84,16 @@ composition "Crystal Cave" {
     ambient_light: 0.1
     fog: { enabled: true, color: "#1a0030", density: 0.05 }
   }
-  
+
   template "Crystal" {
     @glowing(intensity: 0.8, pulse: true)
     @collidable
-    
+
     state {
       color: "#00ffff"
     }
   }
-  
+
   spatial_group "CaveEnvironment" {
     // Crystal formations
     object "Crystal_1" using "Crystal" {
@@ -96,7 +102,7 @@ composition "Crystal Cave" {
       rotation: [0, 45, 15]
       scale: [1.2, 1.5, 1.2]
     }
-    
+
     object "Crystal_2" using "Crystal" {
       geometry: "model/crystal.glb"
       position: [1.5, 0.3, -4]
@@ -104,7 +110,7 @@ composition "Crystal Cave" {
       scale: [0.8, 1.0, 0.8]
       state.color: "#ff00ff"
     }
-    
+
     object "Crystal_3" using "Crystal" {
       geometry: "model/crystal.glb"
       position: [3, 0.7, -2]
@@ -113,16 +119,16 @@ composition "Crystal Cave" {
       state.color: "#00ff88"
     }
   }
-  
+
   spatial_group "Treasure" {
     object "TreasureChest" @grabbable @spatial_audio {
       geometry: "model/treasure_chest.glb"
       position: [0, 0, -5]
-      
+
       state {
         isOpen: false
       }
-      
+
       onGrab: {
         if (!isOpen) {
           isOpen = true
@@ -133,7 +139,7 @@ composition "Crystal Cave" {
       }
     }
   }
-  
+
   logic {
     on_scene_start() {
       audio.playAmbient('cave_ambience.mp3', { volume: 0.4 })
@@ -156,12 +162,13 @@ composition "Crystal Cave" {
 ## Common Patterns
 
 ### Interactive Collectible
+
 ```holo
 object "Coin" @grabbable @glowing @spatial_audio {
   geometry: "cylinder"
   scale: [0.3, 0.05, 0.3]
   color: "#ffd700"
-  
+
   onGrab: {
     audio.play('coin.mp3')
     score += 10
@@ -171,17 +178,19 @@ object "Coin" @grabbable @glowing @spatial_audio {
 ```
 
 ### Teleportation Point
+
 ```holo
 object "TeleportPad" @pointable @glowing(pulse: true) {
   geometry: "cylinder"
   scale: [0.5, 0.1, 0.5]
   color: "#0088ff"
-  
+
   onPoint: { player.teleportTo(this.position) }
 }
 ```
 
 ### Physics Puzzle Object
+
 ```holo
 object "PuzzleBlock" @grabbable @physics @collidable @stackable {
   geometry: "cube"

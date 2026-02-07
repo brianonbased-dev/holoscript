@@ -58,7 +58,11 @@ export class LocalNetworkAdapter {
   /**
    * Broadcast a property or state update
    */
-  public broadcast(entityId: string, type: NetworkUpdate['type'], payload: Record<string, any>): void {
+  public broadcast(
+    entityId: string,
+    type: NetworkUpdate['type'],
+    payload: Record<string, any>
+  ): void {
     if (!this.channel) return;
 
     const update: NetworkUpdate = {
@@ -66,7 +70,7 @@ export class LocalNetworkAdapter {
       senderId: this.senderId,
       type,
       payload,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     this.channel.postMessage(update);

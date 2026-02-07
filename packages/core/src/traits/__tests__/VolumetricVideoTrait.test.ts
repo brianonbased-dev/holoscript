@@ -34,10 +34,15 @@ describe('VolumetricVideoTrait', () => {
     });
 
     it('should attach and initialize state', () => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-      }, ctx);
-      
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+        },
+        ctx
+      );
+
       const state = (node as any).__volumetricVideoState;
       expect(state).toBeDefined();
       expect(state.isLoaded).toBe(false);
@@ -47,10 +52,15 @@ describe('VolumetricVideoTrait', () => {
     });
 
     it('should emit volumetric_init on attach with source', () => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-      }, ctx);
-      
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+        },
+        ctx
+      );
+
       expect(getEventCount(ctx, 'volumetric_init')).toBe(1);
       const initEvent = getLastEvent(ctx, 'volumetric_init');
       expect(initEvent.source).toBe('video.4dgs');
@@ -59,9 +69,14 @@ describe('VolumetricVideoTrait', () => {
 
   describe('loading', () => {
     beforeEach(() => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-      }, ctx);
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+        },
+        ctx
+      );
       ctx.clearEvents();
     });
 
@@ -71,7 +86,7 @@ describe('VolumetricVideoTrait', () => {
         totalFrames: 900,
         fps: 30,
       });
-      
+
       const state = (node as any).__volumetricVideoState;
       expect(state.isLoaded).toBe(true);
       expect(state.totalFrames).toBe(900);
@@ -84,7 +99,7 @@ describe('VolumetricVideoTrait', () => {
         type: 'volumetric_error',
         error: 'File not found',
       });
-      
+
       const state = (node as any).__volumetricVideoState;
       expect(state.playbackState).toBe('error');
       expect(getEventCount(ctx, 'on_volume_error')).toBe(1);
@@ -93,9 +108,14 @@ describe('VolumetricVideoTrait', () => {
 
   describe('playback', () => {
     beforeEach(() => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-      }, ctx);
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+        },
+        ctx
+      );
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_loaded',
         totalFrames: 900,
@@ -108,7 +128,7 @@ describe('VolumetricVideoTrait', () => {
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_play',
       });
-      
+
       const state = (node as any).__volumetricVideoState;
       expect(state.playbackState).toBe('playing');
       expect(getEventCount(ctx, 'on_volume_play')).toBe(1);
@@ -119,11 +139,11 @@ describe('VolumetricVideoTrait', () => {
         type: 'volumetric_play',
       });
       ctx.clearEvents();
-      
+
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_pause',
       });
-      
+
       const state = (node as any).__volumetricVideoState;
       expect(state.playbackState).toBe('paused');
       expect(getEventCount(ctx, 'on_volume_pause')).toBe(1);
@@ -133,16 +153,16 @@ describe('VolumetricVideoTrait', () => {
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_play',
       });
-      
+
       const state = (node as any).__volumetricVideoState;
       state.currentTime = 15.0;
       state.currentFrame = 450;
       ctx.clearEvents();
-      
+
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_stop',
       });
-      
+
       expect(state.playbackState).toBe('stopped');
       expect(state.currentTime).toBe(0);
       expect(state.currentFrame).toBe(0);
@@ -152,9 +172,14 @@ describe('VolumetricVideoTrait', () => {
 
   describe('seeking', () => {
     beforeEach(() => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-      }, ctx);
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+        },
+        ctx
+      );
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_loaded',
         totalFrames: 900,
@@ -168,7 +193,7 @@ describe('VolumetricVideoTrait', () => {
         type: 'volumetric_seek',
         time: 15.0,
       });
-      
+
       const state = (node as any).__volumetricVideoState;
       expect(state.currentTime).toBe(15.0);
       expect(state.currentFrame).toBe(450); // 15 * 30 fps
@@ -180,7 +205,7 @@ describe('VolumetricVideoTrait', () => {
         type: 'volumetric_seek',
         time: 100.0, // Beyond 30s duration
       });
-      
+
       const state = (node as any).__volumetricVideoState;
       expect(state.currentTime).toBeLessThanOrEqual(30);
     });
@@ -188,31 +213,48 @@ describe('VolumetricVideoTrait', () => {
     it('should invalidate buffer on seek', () => {
       const state = (node as any).__volumetricVideoState;
       state.bufferedFrames = 60;
-      
+
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_seek',
         time: 15.0,
       });
-      
+
       expect(state.bufferedFrames).toBe(0);
     });
   });
 
   describe('looping', () => {
     beforeEach(() => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-        loop: true,
-        buffer_size: 30,
-      }, ctx);
-      sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs', loop: true, buffer_size: 30 }, ctx, {
-        type: 'volumetric_loaded',
-        totalFrames: 300,
-        fps: 30,
-      });
-      sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs', loop: true, buffer_size: 30 }, ctx, {
-        type: 'volumetric_play',
-      });
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+          loop: true,
+          buffer_size: 30,
+        },
+        ctx
+      );
+      sendEvent(
+        volumetricVideoHandler,
+        node,
+        { source: 'video.4dgs', loop: true, buffer_size: 30 },
+        ctx,
+        {
+          type: 'volumetric_loaded',
+          totalFrames: 300,
+          fps: 30,
+        }
+      );
+      sendEvent(
+        volumetricVideoHandler,
+        node,
+        { source: 'video.4dgs', loop: true, buffer_size: 30 },
+        ctx,
+        {
+          type: 'volumetric_play',
+        }
+      );
       ctx.clearEvents();
     });
 
@@ -222,10 +264,16 @@ describe('VolumetricVideoTrait', () => {
       state.currentFrame = 297;
       // Ensure enough frames are buffered
       state.bufferedFrames = 100;
-      
+
       // Advance past end
-      updateTrait(volumetricVideoHandler, node, { source: 'video.4dgs', loop: true, buffer_size: 30 }, ctx, 100);
-      
+      updateTrait(
+        volumetricVideoHandler,
+        node,
+        { source: 'video.4dgs', loop: true, buffer_size: 30 },
+        ctx,
+        100
+      );
+
       expect(state.currentTime).toBeLessThan(10);
       expect(getEventCount(ctx, 'on_volume_loop')).toBe(1);
     });
@@ -233,19 +281,36 @@ describe('VolumetricVideoTrait', () => {
 
   describe('completion', () => {
     beforeEach(() => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-        loop: false,
-        buffer_size: 30,
-      }, ctx);
-      sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs', loop: false, buffer_size: 30 }, ctx, {
-        type: 'volumetric_loaded',
-        totalFrames: 300,
-        fps: 30,
-      });
-      sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs', loop: false, buffer_size: 30 }, ctx, {
-        type: 'volumetric_play',
-      });
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+          loop: false,
+          buffer_size: 30,
+        },
+        ctx
+      );
+      sendEvent(
+        volumetricVideoHandler,
+        node,
+        { source: 'video.4dgs', loop: false, buffer_size: 30 },
+        ctx,
+        {
+          type: 'volumetric_loaded',
+          totalFrames: 300,
+          fps: 30,
+        }
+      );
+      sendEvent(
+        volumetricVideoHandler,
+        node,
+        { source: 'video.4dgs', loop: false, buffer_size: 30 },
+        ctx,
+        {
+          type: 'volumetric_play',
+        }
+      );
       ctx.clearEvents();
     });
 
@@ -255,10 +320,16 @@ describe('VolumetricVideoTrait', () => {
       state.currentFrame = 297;
       // Ensure enough frames are buffered to prevent buffering state
       state.bufferedFrames = 100;
-      
+
       // Advance past end
-      updateTrait(volumetricVideoHandler, node, { source: 'video.4dgs', loop: false, buffer_size: 30 }, ctx, 100);
-      
+      updateTrait(
+        volumetricVideoHandler,
+        node,
+        { source: 'video.4dgs', loop: false, buffer_size: 30 },
+        ctx,
+        100
+      );
+
       expect(state.playbackState).toBe('stopped');
       expect(getEventCount(ctx, 'on_volume_complete')).toBe(1);
     });
@@ -266,10 +337,15 @@ describe('VolumetricVideoTrait', () => {
 
   describe('update loop', () => {
     beforeEach(() => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-        playback_rate: 1.0,
-      }, ctx);
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+          playback_rate: 1.0,
+        },
+        ctx
+      );
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_loaded',
         totalFrames: 900,
@@ -284,21 +360,39 @@ describe('VolumetricVideoTrait', () => {
     it('should advance time on update', () => {
       const state = (node as any).__volumetricVideoState;
       const initialTime = state.currentTime;
-      
-      updateTrait(volumetricVideoHandler, node, { source: 'video.4dgs', playback_rate: 1.0 }, ctx, 100);
-      
+
+      updateTrait(
+        volumetricVideoHandler,
+        node,
+        { source: 'video.4dgs', playback_rate: 1.0 },
+        ctx,
+        100
+      );
+
       expect(state.currentTime).toBeGreaterThan(initialTime);
     });
 
     it('should emit render frame event', () => {
-      updateTrait(volumetricVideoHandler, node, { source: 'video.4dgs', playback_rate: 1.0 }, ctx, 33);
-      
+      updateTrait(
+        volumetricVideoHandler,
+        node,
+        { source: 'video.4dgs', playback_rate: 1.0 },
+        ctx,
+        33
+      );
+
       expect(getEventCount(ctx, 'volumetric_render_frame')).toBe(1);
     });
 
     it('should emit frame event with progress', () => {
-      updateTrait(volumetricVideoHandler, node, { source: 'video.4dgs', playback_rate: 1.0 }, ctx, 33);
-      
+      updateTrait(
+        volumetricVideoHandler,
+        node,
+        { source: 'video.4dgs', playback_rate: 1.0 },
+        ctx,
+        33
+      );
+
       expect(getEventCount(ctx, 'on_volume_frame')).toBe(1);
       const frameEvent = getLastEvent(ctx, 'on_volume_frame');
       expect(frameEvent.progress).toBeDefined();
@@ -307,30 +401,46 @@ describe('VolumetricVideoTrait', () => {
 
   describe('spatial audio', () => {
     it('should sync spatial audio on play', () => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-        spatial_audio: true,
-        audio_source: 'audio.mp3',
-      }, ctx);
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+          spatial_audio: true,
+          audio_source: 'audio.mp3',
+        },
+        ctx
+      );
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_loaded',
         totalFrames: 900,
         fps: 30,
       });
       ctx.clearEvents();
-      
-      sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs', spatial_audio: true, audio_source: 'audio.mp3' }, ctx, {
-        type: 'volumetric_play',
-      });
-      
+
+      sendEvent(
+        volumetricVideoHandler,
+        node,
+        { source: 'video.4dgs', spatial_audio: true, audio_source: 'audio.mp3' },
+        ctx,
+        {
+          type: 'volumetric_play',
+        }
+      );
+
       expect(getEventCount(ctx, 'volumetric_sync_audio')).toBe(1);
     });
 
     it('should pause audio on pause', () => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-        spatial_audio: true,
-      }, ctx);
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+          spatial_audio: true,
+        },
+        ctx
+      );
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_loaded',
         totalFrames: 900,
@@ -340,21 +450,26 @@ describe('VolumetricVideoTrait', () => {
         type: 'volumetric_play',
       });
       ctx.clearEvents();
-      
+
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs', spatial_audio: true }, ctx, {
         type: 'volumetric_pause',
       });
-      
+
       expect(getEventCount(ctx, 'volumetric_pause_audio')).toBe(1);
     });
   });
 
   describe('buffering', () => {
     beforeEach(() => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-        buffer_size: 30,
-      }, ctx);
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+          buffer_size: 30,
+        },
+        ctx
+      );
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs', buffer_size: 30 }, ctx, {
         type: 'volumetric_loaded',
         totalFrames: 900,
@@ -368,7 +483,7 @@ describe('VolumetricVideoTrait', () => {
         type: 'volumetric_buffered',
         count: 60,
       });
-      
+
       const state = (node as any).__volumetricVideoState;
       expect(state.bufferedFrames).toBe(60);
     });
@@ -376,45 +491,55 @@ describe('VolumetricVideoTrait', () => {
     it('should resume from buffering when enough buffered', () => {
       const state = (node as any).__volumetricVideoState;
       state.playbackState = 'buffering';
-      
+
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs', buffer_size: 30 }, ctx, {
         type: 'volumetric_buffered',
         count: 20, // >= buffer_size / 2
       });
-      
+
       expect(state.playbackState).toBe('playing');
     });
   });
 
   describe('cleanup', () => {
     it('should clean up on detach', () => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-      }, ctx);
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+        },
+        ctx
+      );
       ctx.clearEvents();
-      
+
       volumetricVideoHandler.onDetach?.(node, volumetricVideoHandler.defaultConfig, ctx);
-      
+
       expect((node as any).__volumetricVideoState).toBeUndefined();
       expect(getEventCount(ctx, 'volumetric_unload')).toBe(1);
     });
 
     it('should stop playback on detach if playing', () => {
-      attachTrait(volumetricVideoHandler, node, {
-        source: 'video.4dgs',
-      }, ctx);
+      attachTrait(
+        volumetricVideoHandler,
+        node,
+        {
+          source: 'video.4dgs',
+        },
+        ctx
+      );
       sendEvent(volumetricVideoHandler, node, { source: 'video.4dgs' }, ctx, {
         type: 'volumetric_loaded',
         totalFrames: 900,
         fps: 30,
       });
-      
+
       const state = (node as any).__volumetricVideoState;
       state.playbackState = 'playing';
       ctx.clearEvents();
-      
+
       volumetricVideoHandler.onDetach?.(node, volumetricVideoHandler.defaultConfig, ctx);
-      
+
       expect(getEventCount(ctx, 'volumetric_stop')).toBe(1);
     });
   });

@@ -168,14 +168,14 @@ export class SmartAssetLoader {
     const startTime = performance.now();
 
     // Resolve asset name/alias
-    const assetKey = typeof request.asset === 'string' 
-      ? resolveAssetAlias(request.asset) 
-      : request.asset.id;
+    const assetKey =
+      typeof request.asset === 'string' ? resolveAssetAlias(request.asset) : request.asset.id;
 
     // Resolve asset metadata
-    const metadata = typeof request.asset === 'string'
-      ? this.registry.getAsset(assetKey) ?? this.registry.getAssetByPath(assetKey)
-      : request.asset;
+    const metadata =
+      typeof request.asset === 'string'
+        ? (this.registry.getAsset(assetKey) ?? this.registry.getAssetByPath(assetKey))
+        : request.asset;
 
     if (!metadata) {
       throw new Error(`Asset not found: ${request.asset}`);
@@ -391,7 +391,11 @@ export class SmartAssetLoader {
       case 'script':
       case 'data':
         const text = new TextDecoder().decode(buffer);
-        if (metadata.format === 'holo' || metadata.format === 'hsplus' || metadata.format === 'hs') {
+        if (
+          metadata.format === 'holo' ||
+          metadata.format === 'hsplus' ||
+          metadata.format === 'hs'
+        ) {
           return text as T;
         }
         try {
@@ -484,13 +488,9 @@ export class SmartAssetLoader {
   /**
    * Build asset URL with LOD and quality parameters
    */
-  private buildAssetUrl(
-    metadata: AssetMetadata,
-    lodLevel: number,
-    quality: Quality
-  ): string {
+  private buildAssetUrl(metadata: AssetMetadata, lodLevel: number, quality: Quality): string {
     // Use CDN if available
-    let baseUrl = this.config.cdnUrl ?? this.config.baseUrl;
+    const baseUrl = this.config.cdnUrl ?? this.config.baseUrl;
 
     // Get LOD-specific path
     let assetPath = metadata.sourcePath;
@@ -505,7 +505,9 @@ export class SmartAssetLoader {
     } catch {
       // Fallback: If baseUrl is not absolute (e.g. '/'), try making it absolute with a placeholder
       // or just join paths if it's meant for local use (though fetch expects URL)
-      const absoluteBase = baseUrl.startsWith('http') ? baseUrl : `http://localhost${baseUrl.startsWith('/') ? '' : '/'}${baseUrl}`;
+      const absoluteBase = baseUrl.startsWith('http')
+        ? baseUrl
+        : `http://localhost${baseUrl.startsWith('/') ? '' : '/'}${baseUrl}`;
       try {
         url = new URL(assetPath, absoluteBase);
       } catch {
@@ -604,7 +606,7 @@ export class SmartAssetLoader {
   /**
    * Release memory by unloading assets
    */
-  releaseMemory(targetBytes: number): string[] {
+  releaseMemory(_targetBytes: number): string[] {
     const unloaded: string[] = [];
     // Delegate to registry's cache eviction
     // This is simplified - real implementation would track loaded assets

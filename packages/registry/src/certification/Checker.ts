@@ -4,7 +4,7 @@
  * Verifies packages meet quality, security, and maintenance standards.
  */
 
-import type { Package, PackageVersion } from '../types.js';
+import type { Package } from '../types.js';
 
 // ============================================================================
 // Certification Types
@@ -108,8 +108,8 @@ export class CertificationChecker {
     for (const level of ['platinum', 'gold', 'silver', 'bronze'] as CertificationLevel[]) {
       const criteria = CERTIFICATION_LEVELS[level];
       if (scorePercent >= criteria.minScore) {
-        const hasRequired = criteria.requiredCategories.every((cat) =>
-          categories.find((c) => c.name === cat)?.passed
+        const hasRequired = criteria.requiredCategories.every(
+          (cat) => categories.find((c) => c.name === cat)?.passed
         );
         if (hasRequired) {
           certifiedLevel = level;
@@ -198,8 +198,7 @@ export class CertificationChecker {
   private async checkLinting(): Promise<CheckResult> {
     // In a real implementation, run the linter
     const hasLintConfig =
-      this.packageFiles.has('.eslintrc.json') ||
-      this.packageFiles.has('holoscript.config.json');
+      this.packageFiles.has('.eslintrc.json') || this.packageFiles.has('holoscript.config.json');
 
     if (!hasLintConfig) {
       this.issues.push({
@@ -235,7 +234,8 @@ export class CertificationChecker {
     }
 
     const avgComplexity = fileCount > 0 ? totalComplexity / fileCount : 0;
-    const grade = avgComplexity < 5 ? 'A' : avgComplexity < 10 ? 'B' : avgComplexity < 15 ? 'C' : 'D';
+    const grade =
+      avgComplexity < 5 ? 'A' : avgComplexity < 10 ? 'B' : avgComplexity < 15 ? 'C' : 'D';
     const score = grade === 'A' ? 25 : grade === 'B' ? 20 : grade === 'C' ? 10 : 0;
 
     return {
@@ -248,8 +248,9 @@ export class CertificationChecker {
   }
 
   private async checkTestCoverage(): Promise<CheckResult> {
-    const hasTests =
-      [...this.packageFiles.keys()].some((f) => f.includes('test') || f.includes('spec'));
+    const hasTests = [...this.packageFiles.keys()].some(
+      (f) => f.includes('test') || f.includes('spec')
+    );
 
     if (!hasTests) {
       this.issues.push({
@@ -520,7 +521,8 @@ export class CertificationChecker {
       (Date.now() - new Date(lastUpdate).getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    const score = daysSinceUpdate < 30 ? 35 : daysSinceUpdate < 90 ? 25 : daysSinceUpdate < 180 ? 15 : 0;
+    const score =
+      daysSinceUpdate < 30 ? 35 : daysSinceUpdate < 90 ? 25 : daysSinceUpdate < 180 ? 15 : 0;
 
     return {
       name: 'recentUpdates',
@@ -557,12 +559,16 @@ export interface CertificationBadge {
   badgeUrl: string;
 }
 
-export function generateBadge(result: CertificationResult, packageName: string, version: string): CertificationBadge | null {
+export function generateBadge(
+  result: CertificationResult,
+  packageName: string,
+  version: string
+): CertificationBadge | null {
   if (!result.certified || !result.level) {
     return null;
   }
 
-  const colors: Record<CertificationLevel, string> = {
+  const _colors: Record<CertificationLevel, string> = {
     bronze: '#cd7f32',
     silver: '#c0c0c0',
     gold: '#ffd700',

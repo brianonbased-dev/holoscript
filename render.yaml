@@ -15,6 +15,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: BASE_URL
-        sync: false  # Set manually in Render dashboard
+        sync: false # Set manually in Render dashboard
       - key: PLAYGROUND_URL
-        sync: false  # Set manually in Render dashboard
+        sync: false # Set manually in Render dashboard

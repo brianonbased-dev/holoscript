@@ -485,4 +485,4 @@ export const LIFECYCLE_HOOKS = [
   'on_destruction_complete',
 ] as const;
 
-export type LifecycleHookName = typeof LIFECYCLE_HOOKS[number];
+export type LifecycleHookName = (typeof LIFECYCLE_HOOKS)[number];

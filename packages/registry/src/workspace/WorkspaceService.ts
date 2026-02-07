@@ -6,7 +6,6 @@ import crypto from 'crypto';
 import type {
   Workspace,
   WorkspaceMember,
-  WorkspaceSecret,
   WorkspaceRole,
   CreateWorkspaceRequest,
   UpdateWorkspaceRequest,
@@ -14,7 +13,6 @@ import type {
   SetSecretRequest,
   WorkspaceResponse,
   ActivityFeedResponse,
-  hasPermission,
   WorkspaceSettings,
 } from '../types.js';
 import { WorkspaceRepository, workspaceRepository } from './WorkspaceRepository.js';
@@ -144,45 +142,24 @@ export class WorkspaceService {
     // Check if already a member
     const existing = await this.repository.getMember(workspaceId, request.userId);
     if (existing) {
-      throw new WorkspaceServiceError(
-        'User is already a member',
-        'ALREADY_MEMBER',
-        409
-      );
+      throw new WorkspaceServiceError('User is already a member', 'ALREADY_MEMBER', 409);
     }
 
     // Cannot invite as owner
     if (request.role === 'owner') {
-      throw new WorkspaceServiceError(
-        'Cannot invite as owner',
-        'INVALID_ROLE',
-        400
-      );
+      throw new WorkspaceServiceError('Cannot invite as owner', 'INVALID_ROLE', 400);
     }
 
-    return this.repository.addMember(
-      workspaceId,
-      request.userId,
-      request.role,
-      invitedBy
-    );
+    return this.repository.addMember(workspaceId, request.userId, request.role, invitedBy);
   }
 
-  async removeMember(
-    workspaceId: string,
-    userId: string,
-    removedBy: string
-  ): Promise<void> {
+  async removeMember(workspaceId: string, userId: string, removedBy: string): Promise<void> {
     await this.requirePermission(workspaceId, removedBy, 'member.remove');
 
     // Cannot remove owner
     const member = await this.repository.getMember(workspaceId, userId);
     if (member?.role === 'owner') {
-      throw new WorkspaceServiceError(
-        'Cannot remove workspace owner',
-        'CANNOT_REMOVE_OWNER',
-        400
-      );
+      throw new WorkspaceServiceError('Cannot remove workspace owner', 'CANNOT_REMOVE_OWNER', 400);
     }
 
     const removed = await this.repository.removeMember(workspaceId, userId, removedBy);
@@ -202,27 +179,14 @@ export class WorkspaceService {
     // Cannot change owner role
     const member = await this.repository.getMember(workspaceId, userId);
     if (member?.role === 'owner') {
-      throw new WorkspaceServiceError(
-        'Cannot change owner role',
-        'CANNOT_CHANGE_OWNER',
-        400
-      );
+      throw new WorkspaceServiceError('Cannot change owner role', 'CANNOT_CHANGE_OWNER', 400);
     }
 
     if (newRole === 'owner') {
-      throw new WorkspaceServiceError(
-        'Cannot promote to owner',
-        'INVALID_ROLE',
-        400
-      );
+      throw new WorkspaceServiceError('Cannot promote to owner', 'INVALID_ROLE', 400);
     }
 
-    const updated = await this.repository.updateMemberRole(
-      workspaceId,
-      userId,
-      newRole,
-      updatedBy
-    );
+    const updated = await this.repository.updateMemberRole(workspaceId, userId, newRole, updatedBy);
 
     if (!updated) {
       throw new WorkspaceServiceError('Member not found', 'NOT_FOUND', 404);
@@ -265,21 +229,12 @@ export class WorkspaceService {
       await this.repository.deleteSecret(workspaceId, existing.id, userId);
     }
 
-    await this.repository.createSecret(
-      workspaceId,
-      request.name,
-      encryptedValue,
-      userId
-    );
+    await this.repository.createSecret(workspaceId, request.name, encryptedValue, userId);
 
     return { name: request.name };
   }
 
-  async deleteSecret(
-    workspaceId: string,
-    secretName: string,
-    userId: string
-  ): Promise<void> {
+  async deleteSecret(workspaceId: string, secretName: string, userId: string): Promise<void> {
     await this.requirePermission(workspaceId, userId, 'secret.delete');
 
     const secret = await this.repository.getSecretByName(workspaceId, secretName);
@@ -303,11 +258,7 @@ export class WorkspaceService {
     }));
   }
 
-  async getSecretValue(
-    workspaceId: string,
-    secretName: string,
-    userId: string
-  ): Promise<string> {
+  async getSecretValue(workspaceId: string, secretName: string, userId: string): Promise<string> {
     await this.requirePermission(workspaceId, userId, 'secret.read');
 
     const secret = await this.repository.getSecretByName(workspaceId, secretName);
@@ -330,11 +281,7 @@ export class WorkspaceService {
   ): Promise<ActivityFeedResponse> {
     await this.requirePermission(workspaceId, userId, 'workspace.read');
 
-    const { activities, total } = await this.repository.getActivities(
-      workspaceId,
-      limit,
-      offset
-    );
+    const { activities, total } = await this.repository.getActivities(workspaceId, limit, offset);
 
     return {
       activities,
@@ -349,7 +296,7 @@ export class WorkspaceService {
 
   private async toWorkspaceResponse(workspace: Workspace): Promise<WorkspaceResponse> {
     const members = await this.repository.getMembers(workspace.id);
-    const secrets = await this.repository.getSecrets(workspace.id);
+    const _secrets = await this.repository.getSecrets(workspace.id);
 
     return {
       ...workspace,
@@ -371,11 +318,7 @@ export class WorkspaceService {
 
     const { hasPermission } = await import('../types.js');
     if (!hasPermission(member.role, permission)) {
-      throw new WorkspaceServiceError(
-        `Insufficient permissions: ${permission}`,
-        'FORBIDDEN',
-        403
-      );
+      throw new WorkspaceServiceError(`Insufficient permissions: ${permission}`, 'FORBIDDEN', 403);
     }
   }
 

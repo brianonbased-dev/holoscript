@@ -24,7 +24,7 @@ interface MotionReducedConfig {
   disable_parallax: boolean;
   reduce_animations: boolean;
   static_ui: boolean;
-  max_velocity: number;  // m/s
+  max_velocity: number; // m/s
   disable_camera_shake: boolean;
   teleport_instead_of_smooth: boolean;
   fade_transitions: boolean;
@@ -57,12 +57,12 @@ export const motionReducedHandler: TraitHandler<MotionReducedConfig> = {
       velocityBuffer: [],
     };
     (node as any).__motionReducedState = state;
-    
+
     // Check system preference
     if (config.auto_detect) {
       context.emit?.('motion_reduced_check_system', { node });
     }
-    
+
     // Register with motion system
     context.emit?.('motion_reduced_register', {
       node,
@@ -79,7 +79,7 @@ export const motionReducedHandler: TraitHandler<MotionReducedConfig> = {
 
   onDetach(node, config, context) {
     const state = (node as any).__motionReducedState as MotionReducedState;
-    
+
     // Restore original animations
     if (state?.isActive && state.originalAnimations.size > 0) {
       context.emit?.('motion_reduced_restore', {
@@ -87,26 +87,26 @@ export const motionReducedHandler: TraitHandler<MotionReducedConfig> = {
         animations: Array.from(state.originalAnimations.entries()),
       });
     }
-    
+
     context.emit?.('motion_reduced_unregister', { node });
     delete (node as any).__motionReducedState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__motionReducedState as MotionReducedState;
     if (!state || !state.isActive) return;
-    
+
     // Velocity limiting
     if ((node as any).velocity) {
       const vel = (node as any).velocity;
       const speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
-      
+
       if (speed > config.max_velocity) {
         const scale = config.max_velocity / speed;
         vel.x *= scale;
         vel.y *= scale;
         vel.z *= scale;
-        
+
         context.emit?.('on_motion_clamped', {
           node,
           originalSpeed: speed,
@@ -114,7 +114,7 @@ export const motionReducedHandler: TraitHandler<MotionReducedConfig> = {
         });
       }
     }
-    
+
     // Camera shake detection and suppression
     if (config.disable_camera_shake && (node as any).position) {
       state.velocityBuffer.push(Date.now());
@@ -127,10 +127,10 @@ export const motionReducedHandler: TraitHandler<MotionReducedConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__motionReducedState as MotionReducedState;
     if (!state) return;
-    
+
     if (event.type === 'motion_reduced_system_preference') {
       state.systemPreference = event.prefersReducedMotion as boolean;
-      
+
       if (config.auto_detect && state.systemPreference) {
         state.isActive = true;
         applyMotionReduction(node, config, state, context);
@@ -153,7 +153,7 @@ export const motionReducedHandler: TraitHandler<MotionReducedConfig> = {
       if (state.isActive && config.reduce_animations) {
         const animId = event.animationId as string;
         state.originalAnimations.set(animId, event.animation);
-        
+
         // Replace with instant transition or fade
         context.emit?.('motion_reduced_replace_animation', {
           node,
@@ -170,7 +170,7 @@ export const motionReducedHandler: TraitHandler<MotionReducedConfig> = {
           fade: config.fade_transitions,
           fadeDuration: 200,
         });
-        return;  // Prevent smooth transition
+        return; // Prevent smooth transition
       }
     } else if (event.type === 'motion_reduced_query') {
       context.emit?.('motion_reduced_info', {
@@ -202,25 +202,21 @@ function applyMotionReduction(
     staticUI: config.static_ui,
     disableCameraShake: config.disable_camera_shake,
   });
-  
+
   context.emit?.('on_motion_reduce', {
     node,
     enabled: true,
   });
 }
 
-function restoreMotion(
-  node: any,
-  state: MotionReducedState,
-  context: any
-): void {
+function restoreMotion(node: any, state: MotionReducedState, context: any): void {
   context.emit?.('motion_reduced_restore', {
     node,
     animations: Array.from(state.originalAnimations.entries()),
   });
-  
+
   state.originalAnimations.clear();
-  
+
   context.emit?.('on_motion_reduce', {
     node,
     enabled: false,

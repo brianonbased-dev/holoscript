@@ -1,6 +1,6 @@
 /**
  * HoloScript Live Preview Panel
- * 
+ *
  * Provides a real-time 3D preview of HoloScript scenes in VS Code.
  * Uses a WebView with Three.js for rendering.
  */
@@ -46,7 +46,7 @@ export class HoloScriptPreviewPanel {
     );
 
     HoloScriptPreviewPanel.currentPanel = new HoloScriptPreviewPanel(panel, extensionUri);
-    
+
     if (document) {
       HoloScriptPreviewPanel.currentPanel.updateContent(document);
     }
@@ -68,7 +68,7 @@ export class HoloScriptPreviewPanel {
 
     // Update the content based on view state changes
     this._panel.onDidChangeViewState(
-      _e => {
+      (_e) => {
         if (this._panel.visible) {
           this._update();
         }
@@ -79,7 +79,7 @@ export class HoloScriptPreviewPanel {
 
     // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
-      message => {
+      (message) => {
         switch (message.command) {
           case 'error':
             vscode.window.showErrorMessage(message.text);
@@ -101,14 +101,19 @@ export class HoloScriptPreviewPanel {
             }
             return;
           case 'voice_start':
-            vscode.window.showInputBox({ 
-                prompt: "Say a command...", 
-                placeHolder: "e.g., 'Add a red cube at 0,1,0'" 
-            }).then(text => {
+            vscode.window
+              .showInputBox({
+                prompt: 'Say a command...',
+                placeHolder: "e.g., 'Add a red cube at 0,1,0'",
+              })
+              .then((text) => {
                 if (text && this._currentDocument) {
-                    RelayService.getInstance().handleMessage({ type: 'voice_command', text }, this._currentDocument);
+                  RelayService.getInstance().handleMessage(
+                    { type: 'voice_command', text },
+                    this._currentDocument
+                  );
                 }
-            });
+              });
             return;
         }
       },
@@ -118,7 +123,7 @@ export class HoloScriptPreviewPanel {
 
     // Watch for document changes
     vscode.workspace.onDidChangeTextDocument(
-      e => {
+      (e) => {
         if (this._currentDocument && e.document === this._currentDocument) {
           this._sendUpdate();
         }
@@ -136,10 +141,10 @@ export class HoloScriptPreviewPanel {
 
   private _sendUpdate() {
     if (!this._currentDocument) return;
-    
+
     const content = this._currentDocument.getText();
     const fileName = this._currentDocument.fileName;
-    
+
     this._panel.webview.postMessage({
       command: 'update',
       content,

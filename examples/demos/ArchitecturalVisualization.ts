@@ -1,6 +1,6 @@
 /**
  * Demo Application 2: Architectural Visualization
- * 
+ *
  * Shows a building walkthrough with real-time lighting simulation
  * accessible from mobile/desktop/VR without code changes.
  */
@@ -113,16 +113,16 @@ function onClientConnect(client) {
     lighting: getCurrentLighting()
   })
 }
-`
+`;
 
 /**
  * Architectural Visualization Demo
  * Showcases cross-platform deployment and lighting simulation
  */
 export class ArchitecturalVisualizationDemo {
-  private name: string = 'Building Walkthrough'
-  private hsCode: number = 80 // Lines of HoloScript+ code
-  private traditionalCode: number = 8000 // Lines of traditional code
+  private name: string = 'Building Walkthrough';
+  private hsCode: number = 80; // Lines of HoloScript+ code
+  private traditionalCode: number = 8000; // Lines of traditional code
 
   private scenarios: string[] = [
     'Modern Office Building',
@@ -130,7 +130,7 @@ export class ArchitecturalVisualizationDemo {
     'Shopping Center',
     'Hospital Campus',
     'Educational Institution',
-  ]
+  ];
 
   private platformCapabilities = {
     mobile: {
@@ -157,7 +157,7 @@ export class ArchitecturalVisualizationDemo {
       targetFPS: 90,
       compression: 'Basis',
     },
-  }
+  };
 
   constructor() {}
 
@@ -235,21 +235,21 @@ orb hospitalCampus {
   }
 }
       `,
-    }
+    };
 
-    return scenes[buildingType]
+    return scenes[buildingType];
   }
 
   /**
    * Create cross-platform deployment specification
    */
   getCrossPlatformDeployment(): {
-    platform: string
-    singleCodebase: boolean
-    autoOptimized: boolean
-    textureQuality: string
-    lightingQuality: string
-    estimatedDevelopment: string
+    platform: string;
+    singleCodebase: boolean;
+    autoOptimized: boolean;
+    textureQuality: string;
+    lightingQuality: string;
+    estimatedDevelopment: string;
   }[] {
     return [
       {
@@ -292,19 +292,19 @@ orb hospitalCampus {
         lightingQuality: '4 lights, spatial',
         estimatedDevelopment: 'Same code',
       },
-    ]
+    ];
   }
 
   /**
    * Lighting simulation parameters
    */
   getLightingSimulation(): Record<number, Record<string, unknown>> {
-    const times: Record<number, Record<string, unknown>> = {}
+    const times: Record<number, Record<string, unknown>> = {};
 
     for (let hour = 6; hour <= 22; hour++) {
-      const sunAngle = ((hour - 6) / 16) * Math.PI
-      const sunIntensity = Math.sin(sunAngle)
-      const sunColor = this.calculateSunColor(hour)
+      const sunAngle = ((hour - 6) / 16) * Math.PI;
+      const sunIntensity = Math.sin(sunAngle);
+      const sunColor = this.calculateSunColor(hour);
 
       times[hour] = {
         hour,
@@ -314,10 +314,10 @@ orb hospitalCampus {
         ambientLight: Math.max(0.2, sunIntensity * 0.3),
         shadowQuality: sunIntensity > 0.3 ? 'high' : 'low',
         atmosphericScattering: true,
-      }
+      };
     }
 
-    return times
+    return times;
   }
 
   /**
@@ -358,17 +358,17 @@ orb hospitalCampus {
         roughness: 0.2,
         color: { r: 0.99, g: 0.99, b: 0.99 },
       },
-    }
+    };
   }
 
   /**
    * Comparison: Traditional vs HoloScript+
    */
   getImplementationComparison(): {
-    aspect: string
-    traditional: string
-    holoscript: string
-    timeSaved: string
+    aspect: string;
+    traditional: string;
+    holoscript: string;
+    timeSaved: string;
   }[] {
     return [
       {
@@ -407,7 +407,7 @@ orb hospitalCampus {
         holoscript: 'Single codebase, system handles variants',
         timeSaved: '2 weeks',
       },
-    ]
+    ];
   }
 
   /**
@@ -425,7 +425,7 @@ orb hospitalCampus {
       '🎯 Quality: Consistent across all platforms',
       '🔧 Maintenance: Single codebase instead of 5',
       '📊 Analytics: Unified metrics across all platforms',
-    ]
+    ];
   }
 
   /**
@@ -458,7 +458,7 @@ orb hospitalCampus {
         Emergency procedures visualization.
         Maintenance reference with material properties visible.
       `,
-    }
+    };
   }
 
   /**
@@ -474,34 +474,34 @@ orb hospitalCampus {
       18: { r: 1.0, g: 0.6, b: 0.3 }, // Sunset
       21: { r: 0.3, g: 0.3, b: 0.5 }, // Dusk
       22: { r: 0.1, g: 0.1, b: 0.2 }, // Night
-    }
+    };
 
     // Interpolate between known times
     const timeKeys = Object.keys(sunColors)
       .map(Number)
-      .sort((a, b) => a - b)
+      .sort((a, b) => a - b);
 
     for (let i = 0; i < timeKeys.length - 1; i++) {
-      const t1 = timeKeys[i]
-      const t2 = timeKeys[i + 1]
+      const t1 = timeKeys[i];
+      const t2 = timeKeys[i + 1];
 
       if (hour >= t1 && hour <= t2) {
-        const blend = (hour - t1) / (t2 - t1)
-        const c1 = sunColors[t1]
-        const c2 = sunColors[t2]
+        const blend = (hour - t1) / (t2 - t1);
+        const c1 = sunColors[t1];
+        const c2 = sunColors[t2];
 
         return {
           r: c1.r + (c2.r - c1.r) * blend,
           g: c1.g + (c2.g - c1.g) * blend,
           b: c1.b + (c2.b - c1.b) * blend,
-        }
+        };
       }
     }
 
-    return sunColors[12] // Default to noon
+    return sunColors[12]; // Default to noon
   }
 }
 
 export function createArchitecturalDemo(): ArchitecturalVisualizationDemo {
-  return new ArchitecturalVisualizationDemo()
+  return new ArchitecturalVisualizationDemo();
 }

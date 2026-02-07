@@ -127,10 +127,7 @@ export interface AIAdapter {
    * @param prompt User's natural language description
    * @param options Generation options
    */
-  generateHoloScript?(
-    prompt: string,
-    options?: GenerateOptions
-  ): Promise<GenerateResult>;
+  generateHoloScript?(prompt: string, options?: GenerateOptions): Promise<GenerateResult>;
 
   /**
    * Explain what HoloScript code does
@@ -160,10 +157,7 @@ export interface AIAdapter {
    * @param holoScript Partial code
    * @param cursorPosition Position of cursor
    */
-  completeHoloScript?(
-    holoScript: string,
-    cursorPosition: number
-  ): Promise<string[]>;
+  completeHoloScript?(holoScript: string, cursorPosition: number): Promise<string[]>;
 
   /**
    * Chat with AI about HoloScript code
@@ -196,10 +190,7 @@ const _adapters = new Map<string, AIAdapter>();
  * @param adapter The adapter to register
  * @param setAsDefault Whether to set as the default adapter
  */
-export function registerAIAdapter(
-  adapter: AIAdapter,
-  setAsDefault = false
-): void {
+export function registerAIAdapter(adapter: AIAdapter, setAsDefault = false): void {
   _adapters.set(adapter.id, adapter);
   if (setAsDefault || _defaultAdapter === null) {
     _defaultAdapter = adapter;
@@ -274,9 +265,7 @@ export async function generateHoloScript(
     );
   }
   if (!_defaultAdapter.generateHoloScript) {
-    throw new Error(
-      `AI adapter "${_defaultAdapter.name}" does not support generateHoloScript`
-    );
+    throw new Error(`AI adapter "${_defaultAdapter.name}" does not support generateHoloScript`);
   }
   return _defaultAdapter.generateHoloScript(prompt, options);
 }
@@ -284,16 +273,12 @@ export async function generateHoloScript(
 /**
  * Explain HoloScript code using the default adapter
  */
-export async function explainHoloScript(
-  holoScript: string
-): Promise<ExplainResult> {
+export async function explainHoloScript(holoScript: string): Promise<ExplainResult> {
   if (!_defaultAdapter) {
     throw new Error('No AI adapter registered.');
   }
   if (!_defaultAdapter.explainHoloScript) {
-    throw new Error(
-      `AI adapter "${_defaultAdapter.name}" does not support explainHoloScript`
-    );
+    throw new Error(`AI adapter "${_defaultAdapter.name}" does not support explainHoloScript`);
   }
   return _defaultAdapter.explainHoloScript(holoScript);
 }
@@ -309,9 +294,7 @@ export async function optimizeHoloScript(
     throw new Error('No AI adapter registered.');
   }
   if (!_defaultAdapter.optimizeHoloScript) {
-    throw new Error(
-      `AI adapter "${_defaultAdapter.name}" does not support optimizeHoloScript`
-    );
+    throw new Error(`AI adapter "${_defaultAdapter.name}" does not support optimizeHoloScript`);
   }
   return _defaultAdapter.optimizeHoloScript(holoScript, target);
 }
@@ -319,17 +302,12 @@ export async function optimizeHoloScript(
 /**
  * Fix HoloScript errors using the default adapter
  */
-export async function fixHoloScript(
-  holoScript: string,
-  errors: string[]
-): Promise<FixResult> {
+export async function fixHoloScript(holoScript: string, errors: string[]): Promise<FixResult> {
   if (!_defaultAdapter) {
     throw new Error('No AI adapter registered.');
   }
   if (!_defaultAdapter.fixHoloScript) {
-    throw new Error(
-      `AI adapter "${_defaultAdapter.name}" does not support fixHoloScript`
-    );
+    throw new Error(`AI adapter "${_defaultAdapter.name}" does not support fixHoloScript`);
   }
   return _defaultAdapter.fixHoloScript(holoScript, errors);
 }

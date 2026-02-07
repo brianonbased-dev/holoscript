@@ -58,7 +58,7 @@ export const neuralLinkHandler: TraitHandler<NeuralLinkConfig> = {
     delete (node as any).__neuralLinkState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, _config, _context, _delta) {
     const state = (node as any).__neuralLinkState;
     if (!state) return;
     // Background heartbeat or thinking animation pulses could be driven here

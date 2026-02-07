@@ -350,7 +350,9 @@ describe('HoloScript Benchmarks', () => {
       );
 
       performanceTracker.recordMetric('Parse Simple Scene', result.avgMs, result.opsPerSecond);
-      console.log(`Parse Simple Scene: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`);
+      console.log(
+        `Parse Simple Scene: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`
+      );
       expect(result.avgMs).toBeLessThan(10);
     });
 
@@ -364,7 +366,9 @@ describe('HoloScript Benchmarks', () => {
       );
 
       performanceTracker.recordMetric('Parse Complex Scene', result.avgMs, result.opsPerSecond);
-      console.log(`Parse Complex Scene: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`);
+      console.log(
+        `Parse Complex Scene: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`
+      );
       expect(result.avgMs).toBeLessThan(20);
     });
 
@@ -378,7 +382,9 @@ describe('HoloScript Benchmarks', () => {
       );
 
       performanceTracker.recordMetric('Parse UI Scene', result.avgMs, result.opsPerSecond);
-      console.log(`Parse UI Scene: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`);
+      console.log(
+        `Parse UI Scene: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`
+      );
       expect(result.avgMs).toBeLessThan(15);
     });
   });
@@ -402,7 +408,9 @@ describe('HoloScript Benchmarks', () => {
       );
 
       performanceTracker.recordMetric('Compile to visionOS', result.avgMs, result.opsPerSecond);
-      console.log(`Compile to visionOS: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`);
+      console.log(
+        `Compile to visionOS: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`
+      );
       expect(result.avgMs).toBeLessThan(10);
     });
 
@@ -423,7 +431,9 @@ describe('HoloScript Benchmarks', () => {
       );
 
       performanceTracker.recordMetric('Generate USDA', result.avgMs, result.opsPerSecond);
-      console.log(`Generate USDA: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`);
+      console.log(
+        `Generate USDA: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`
+      );
       expect(result.avgMs).toBeLessThan(5);
     });
   });
@@ -443,7 +453,9 @@ describe('HoloScript Benchmarks', () => {
       );
 
       performanceTracker.recordMetric('Full Pipeline', result.avgMs, result.opsPerSecond);
-      console.log(`Full Pipeline: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`);
+      console.log(
+        `Full Pipeline: ${result.avgMs.toFixed(3)}ms avg (${result.opsPerSecond.toFixed(0)} ops/sec)`
+      );
       expect(result.avgMs).toBeLessThan(50);
     });
   });
@@ -488,7 +500,10 @@ describe('HoloScript Benchmarks', () => {
         times.push(result.avgMs);
       }
 
-      performanceTracker.recordMetric('Parse Scalability (avg)', times.reduce((a, b) => a + b) / times.length);
+      performanceTracker.recordMetric(
+        'Parse Scalability (avg)',
+        times.reduce((a, b) => a + b) / times.length
+      );
       console.log(`Parse times by complexity: ${times.map((t) => t.toFixed(2)).join('ms, ')}ms`);
 
       // Each scene should parse, regardless of complexity

@@ -72,9 +72,7 @@ export class EventBus {
 
     // Dispatch to window for cross-context communication
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent(`holoscript:${event}`, { detail: data })
-      );
+      window.dispatchEvent(new CustomEvent(`holoscript:${event}`, { detail: data }));
     }
   }
 

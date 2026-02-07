@@ -12,16 +12,16 @@ Sprint 3 focuses on implementing the ecosystem expansion capabilities identified
 
 ## Sprint 3 Priorities
 
-| Priority | Focus | Effort | Dependencies | Status |
-|----------|-------|--------|--------------|--------|
-| **1** | W3C WoT Thing Description | Medium | Sprint 2 complete | ✅ Complete |
-| **2** | MQTT Protocol Bindings | Medium | Priority 1 | ✅ Complete |
-| **3** | Headless Runtime Profile | High | Core stability | ✅ Complete |
-| **4** | WASM Compilation Target | High | Priority 3 | ✅ Complete |
-| **5** | URDF/SDF Export | Medium | Parser complete | ✅ Complete |
-| **6** | Azure DTDL Generation | Medium | Priority 1 | ✅ Complete |
-| **7** | Real-time Sync Protocol | High | Networking | ✅ Complete |
-| **8** | Edge Deployment Tools | Medium | Priority 4 | ✅ Complete |
+| Priority | Focus                     | Effort | Dependencies      | Status      |
+| -------- | ------------------------- | ------ | ----------------- | ----------- |
+| **1**    | W3C WoT Thing Description | Medium | Sprint 2 complete | ✅ Complete |
+| **2**    | MQTT Protocol Bindings    | Medium | Priority 1        | ✅ Complete |
+| **3**    | Headless Runtime Profile  | High   | Core stability    | ✅ Complete |
+| **4**    | WASM Compilation Target   | High   | Priority 3        | ✅ Complete |
+| **5**    | URDF/SDF Export           | Medium | Parser complete   | ✅ Complete |
+| **6**    | Azure DTDL Generation     | Medium | Priority 1        | ✅ Complete |
+| **7**    | Real-time Sync Protocol   | High   | Networking        | ✅ Complete |
+| **8**    | Edge Deployment Tools     | Medium | Priority 4        | ✅ Complete |
 
 ---
 
@@ -49,11 +49,13 @@ function generateThingDescription(object: HoloObject): ThingDescription {
 ```
 
 ### Files to Create
+
 - `packages/core/src/wot/ThingDescriptionGenerator.ts`
 - `packages/core/src/traits/WoTThingTrait.ts`
 - `packages/cli/src/commands/wot-export.ts`
 
 ### Acceptance Criteria
+
 - [x] `@wot_thing` trait generates valid TD 1.1 JSON
 - [x] Properties mapped from `@state` blocks
 - [x] Actions mapped from `@on_*` handlers
@@ -102,11 +104,13 @@ sensor#temperature {
 ```
 
 ### Files to Create
+
 - `packages/runtime/src/protocols/MQTTClient.ts`
 - `packages/core/src/traits/MQTTSourceTrait.ts`
 - `packages/core/src/traits/MQTTSinkTrait.ts`
 
 ### Acceptance Criteria
+
 - [x] Connect to MQTT 3.1.1 and 5.0 brokers
 - [x] Wildcard topic subscriptions (+, #)
 - [x] QoS 0, 1, 2 support
@@ -135,7 +139,7 @@ const headlessProfile: RuntimeProfile = {
   rendering: 'headless',
   physics: 'collision_only',
   audio: false,
-  network: true
+  network: true,
 };
 ```
 
@@ -150,11 +154,13 @@ holoscript run --config iot-edge.yaml scene.holo
 ```
 
 ### Files to Modify
+
 - `packages/runtime/src/HoloScriptRuntime.ts` - Add profile support
 - `packages/cli/src/cli.ts` - Add --profile flag
 - `packages/runtime/src/profiles/` - Profile definitions
 
 ### Acceptance Criteria
+
 - [x] Headless mode runs without GPU/display
 - [x] Memory footprint < 50MB for simple scenes
 - [x] Startup time < 500ms
@@ -190,10 +196,12 @@ wasmedge scene.wasm
 ```
 
 ### Files to Create
+
 - `packages/compiler/src/targets/WASMTarget.ts`
 - `packages/runtime-wasm/` - Minimal WASM runtime
 
 ### Acceptance Criteria
+
 - [x] Generate valid WASM module
 - [x] Run on WasmEdge runtime
 - [x] State management works
@@ -234,10 +242,12 @@ holoscript compile workspace.holo --target sdf -o world.sdf
 ```
 
 ### Files to Create
+
 - `packages/compiler/src/targets/URDFTarget.ts`
 - `packages/compiler/src/targets/SDFTarget.ts`
 
 ### Acceptance Criteria
+
 - [x] Valid URDF XML output
 - [x] Valid SDF XML output
 - [x] Collision geometry preserved
@@ -265,10 +275,12 @@ export class DTDLGenerator {
 ```
 
 ### Files to Create
+
 - `packages/compiler/src/targets/DTDLTarget.ts`
 - `packages/core/src/traits/DTDLModelTrait.ts`
 
 ### Acceptance Criteria
+
 - [x] Generate DTDL v3 compliant JSON
 - [x] Property types mapped correctly
 - [x] Telemetry from state changes
@@ -294,18 +306,20 @@ export interface SyncProtocol {
 
 // Optimizations
 export interface SyncOptimizations {
-  interestManagement: boolean;  // Only sync visible objects
-  distanceCulling: number;      // Don't sync far objects
-  updateThrottle: number;       // Max updates per second
+  interestManagement: boolean; // Only sync visible objects
+  distanceCulling: number; // Don't sync far objects
+  updateThrottle: number; // Max updates per second
 }
 ```
 
 ### Files to Create
+
 - `packages/core/src/network/SyncProtocol.ts` ✅
 - `packages/core/src/network/InterestManager.ts` ✅ (in SyncProtocol.ts)
 - `packages/core/src/network/DeltaEncoder.ts` ✅ (in SyncProtocol.ts)
 
 ### Acceptance Criteria
+
 - [x] < 50ms latency for local network
 - [x] Support 10+ concurrent users
 - [x] Bandwidth < 100 KB/s per user (delta encoding)
@@ -332,9 +346,11 @@ holoscript monitor 192.168.1.100 --dashboard
 ```
 
 ### Files to Create
+
 - `packages/cli/src/edge.ts` ✅ (contains package, deploy, monitor functions)
 
 ### Acceptance Criteria
+
 - [x] Single-file deployment package
 - [x] Support ARM64 (Raspberry Pi, Jetson)
 - [x] SSH-based deployment
@@ -381,26 +397,26 @@ Priority 7 (Sync) ── Requires networking refactor
 
 ## Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| Headless memory usage | < 50MB |
-| WASM module size | < 1MB |
-| MQTT message latency | < 10ms |
-| WoT TD validation | 100% compliant |
-| URDF ROS 2 compatibility | Verified |
-| Edge deployment time | < 30s |
+| Metric                   | Target         |
+| ------------------------ | -------------- |
+| Headless memory usage    | < 50MB         |
+| WASM module size         | < 1MB          |
+| MQTT message latency     | < 10ms         |
+| WoT TD validation        | 100% compliant |
+| URDF ROS 2 compatibility | Verified       |
+| Edge deployment time     | < 30s          |
 
 ---
 
 ## Timeline
 
-| Week | Priorities | Milestone |
-|------|------------|-----------|
-| 1-2 | 1, 2 | WoT + MQTT protocols |
-| 2-3 | 3 | Headless runtime |
-| 3-4 | 4, 5 | WASM + URDF export |
-| 4-5 | 6, 7 | DTDL + Sync protocol |
-| 5-6 | 8 | Edge deployment tools |
+| Week | Priorities | Milestone             |
+| ---- | ---------- | --------------------- |
+| 1-2  | 1, 2       | WoT + MQTT protocols  |
+| 2-3  | 3          | Headless runtime      |
+| 3-4  | 4, 5       | WASM + URDF export    |
+| 4-5  | 6, 7       | DTDL + Sync protocol  |
+| 5-6  | 8          | Edge deployment tools |
 
 ---
 

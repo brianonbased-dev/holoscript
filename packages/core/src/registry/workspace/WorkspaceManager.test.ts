@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  WorkspaceManager,
-  createWorkspaceManager,
-  ROLE_PERMISSIONS,
-} from './WorkspaceManager';
+import { WorkspaceManager, createWorkspaceManager, ROLE_PERMISSIONS } from './WorkspaceManager';
 
 describe('WorkspaceManager', () => {
   let manager: WorkspaceManager;
@@ -34,25 +30,23 @@ describe('WorkspaceManager', () => {
     });
 
     it('should reject invalid workspace names', () => {
-      expect(() =>
-        manager.createWorkspace(ownerId, { name: 'Invalid Name' })
-      ).toThrow('Invalid workspace name');
+      expect(() => manager.createWorkspace(ownerId, { name: 'Invalid Name' })).toThrow(
+        'Invalid workspace name'
+      );
 
-      expect(() =>
-        manager.createWorkspace(ownerId, { name: 'ab' })
-      ).toThrow('Invalid workspace name');
+      expect(() => manager.createWorkspace(ownerId, { name: 'ab' })).toThrow(
+        'Invalid workspace name'
+      );
 
-      expect(() =>
-        manager.createWorkspace(ownerId, { name: '-invalid' })
-      ).toThrow('Invalid workspace name');
+      expect(() => manager.createWorkspace(ownerId, { name: '-invalid' })).toThrow(
+        'Invalid workspace name'
+      );
     });
 
     it('should reject duplicate workspace names', () => {
       manager.createWorkspace(ownerId, { name: 'my-team' });
 
-      expect(() =>
-        manager.createWorkspace(ownerId, { name: 'my-team' })
-      ).toThrow('already exists');
+      expect(() => manager.createWorkspace(ownerId, { name: 'my-team' })).toThrow('already exists');
     });
 
     it('should record creation activity', () => {
@@ -97,13 +91,7 @@ describe('WorkspaceManager', () => {
     it('should invite a member with specified role', () => {
       manager.createWorkspace(ownerId, { name: 'my-team' });
 
-      const member = manager.inviteMember(
-        'my-team',
-        ownerId,
-        memberId,
-        'alice',
-        'developer'
-      );
+      const member = manager.inviteMember('my-team', ownerId, memberId, 'alice', 'developer');
 
       expect(member.userId).toBe(memberId);
       expect(member.username).toBe('alice');
@@ -114,12 +102,7 @@ describe('WorkspaceManager', () => {
     it('should default to developer role', () => {
       manager.createWorkspace(ownerId, { name: 'my-team' });
 
-      const member = manager.inviteMember(
-        'my-team',
-        ownerId,
-        memberId,
-        'alice'
-      );
+      const member = manager.inviteMember('my-team', ownerId, memberId, 'alice');
 
       expect(member.role).toBe('developer');
     });
@@ -127,18 +110,18 @@ describe('WorkspaceManager', () => {
     it('should not allow inviting as owner', () => {
       manager.createWorkspace(ownerId, { name: 'my-team' });
 
-      expect(() =>
-        manager.inviteMember('my-team', ownerId, memberId, 'alice', 'owner')
-      ).toThrow('Cannot invite as owner');
+      expect(() => manager.inviteMember('my-team', ownerId, memberId, 'alice', 'owner')).toThrow(
+        'Cannot invite as owner'
+      );
     });
 
     it('should not allow duplicate members', () => {
       manager.createWorkspace(ownerId, { name: 'my-team' });
       manager.inviteMember('my-team', ownerId, memberId, 'alice');
 
-      expect(() =>
-        manager.inviteMember('my-team', ownerId, memberId, 'alice')
-      ).toThrow('already a member');
+      expect(() => manager.inviteMember('my-team', ownerId, memberId, 'alice')).toThrow(
+        'already a member'
+      );
     });
 
     it('should add member to user workspaces', () => {
@@ -166,9 +149,9 @@ describe('WorkspaceManager', () => {
     it('should not allow removing the owner', () => {
       manager.createWorkspace(ownerId, { name: 'my-team' });
 
-      expect(() =>
-        manager.removeMember('my-team', ownerId, ownerId)
-      ).toThrow('Cannot remove the workspace owner');
+      expect(() => manager.removeMember('my-team', ownerId, ownerId)).toThrow(
+        'Cannot remove the workspace owner'
+      );
     });
 
     it('should remove from user workspaces', () => {
@@ -197,17 +180,17 @@ describe('WorkspaceManager', () => {
       manager.createWorkspace(ownerId, { name: 'my-team' });
       manager.inviteMember('my-team', ownerId, memberId, 'alice');
 
-      expect(() =>
-        manager.changeMemberRole('my-team', ownerId, memberId, 'owner')
-      ).toThrow('Cannot promote to owner');
+      expect(() => manager.changeMemberRole('my-team', ownerId, memberId, 'owner')).toThrow(
+        'Cannot promote to owner'
+      );
     });
 
     it('should not allow changing owner role', () => {
       manager.createWorkspace(ownerId, { name: 'my-team' });
 
-      expect(() =>
-        manager.changeMemberRole('my-team', ownerId, ownerId, 'admin')
-      ).toThrow('Cannot change the owner\'s role');
+      expect(() => manager.changeMemberRole('my-team', ownerId, ownerId, 'admin')).toThrow(
+        "Cannot change the owner's role"
+      );
     });
   });
 
@@ -230,9 +213,7 @@ describe('WorkspaceManager', () => {
       });
 
       const workspace = manager.getWorkspace('my-team')!;
-      const activity = workspace.activity.find(
-        (a) => a.type === 'settings:updated'
-      );
+      const activity = workspace.activity.find((a) => a.type === 'settings:updated');
       expect(activity).toBeDefined();
     });
   });
@@ -342,9 +323,7 @@ describe('WorkspaceManager', () => {
       manager.createWorkspace(ownerId, { name: 'my-team' });
       manager.inviteMember('my-team', ownerId, memberId, 'alice', 'admin');
 
-      expect(() =>
-        manager.deleteWorkspace('my-team', memberId)
-      ).toThrow('Permission denied');
+      expect(() => manager.deleteWorkspace('my-team', memberId)).toThrow('Permission denied');
     });
   });
 

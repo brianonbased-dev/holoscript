@@ -1,6 +1,6 @@
 /**
  * HoloScript Visual - Code Preview Component
- * 
+ *
  * Shows live-updating generated code from the visual graph.
  */
 
@@ -25,23 +25,23 @@ type OutputFormat = 'hsplus' | 'hs' | 'holo';
 /**
  * Code preview component
  */
-const CodePreview: React.FC<CodePreviewProps> = ({ 
-  graph, 
+const CodePreview: React.FC<CodePreviewProps> = ({
+  graph,
   width = 300,
-  objectName = 'myObject' 
+  objectName = 'myObject',
 }) => {
   const [format, setFormat] = useState<OutputFormat>('hsplus');
   const [copied, setCopied] = useState(false);
-  
+
   // Generate code whenever graph changes
   const result: CodeGenResult = useMemo(() => {
     return graphToCode(graph, {
       format,
       objectName,
-      includeComments: true
+      includeComments: true,
     });
   }, [graph, format, objectName]);
-  
+
   // Copy to clipboard
   const handleCopy = async () => {
     try {
@@ -52,7 +52,7 @@ const CodePreview: React.FC<CodePreviewProps> = ({
       console.error('Failed to copy:', err);
     }
   };
-  
+
   return (
     <div
       className="code-preview"
@@ -62,21 +62,21 @@ const CodePreview: React.FC<CodePreviewProps> = ({
         backgroundColor: '#1e1e2e',
         borderLeft: '1px solid #3d3d4d',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
       }}
     >
       {/* Header */}
-      <div style={{
-        padding: '12px',
-        borderBottom: '1px solid #3d3d4d',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <h3 style={{ margin: 0, fontSize: 14, color: '#e4e4e7' }}>
-          Generated Code
-        </h3>
-        
+      <div
+        style={{
+          padding: '12px',
+          borderBottom: '1px solid #3d3d4d',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <h3 style={{ margin: 0, fontSize: 14, color: '#e4e4e7' }}>Generated Code</h3>
+
         {/* Format selector */}
         <select
           value={format}
@@ -88,7 +88,7 @@ const CodePreview: React.FC<CodePreviewProps> = ({
             borderRadius: 4,
             color: '#e4e4e7',
             fontSize: 12,
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           <option value="hsplus">.hsplus</option>
@@ -96,20 +96,20 @@ const CodePreview: React.FC<CodePreviewProps> = ({
           <option value="holo">.holo</option>
         </select>
       </div>
-      
+
       {/* Errors and warnings */}
       {(result.errors.length > 0 || result.warnings.length > 0) && (
         <div style={{ padding: '8px 12px', borderBottom: '1px solid #3d3d4d' }}>
           {result.errors.map((error, i) => (
-            <div 
-              key={i} 
-              style={{ 
-                color: '#f87171', 
-                fontSize: 12, 
+            <div
+              key={i}
+              style={{
+                color: '#f87171',
+                fontSize: 12,
                 marginBottom: 4,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6
+                gap: 6,
               }}
             >
               <span>⛔</span>
@@ -117,15 +117,15 @@ const CodePreview: React.FC<CodePreviewProps> = ({
             </div>
           ))}
           {result.warnings.map((warning, i) => (
-            <div 
-              key={i} 
-              style={{ 
-                color: '#fbbf24', 
-                fontSize: 12, 
+            <div
+              key={i}
+              style={{
+                color: '#fbbf24',
+                fontSize: 12,
                 marginBottom: 4,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6
+                gap: 6,
               }}
             >
               <span>⚠️</span>
@@ -134,7 +134,7 @@ const CodePreview: React.FC<CodePreviewProps> = ({
           ))}
         </div>
       )}
-      
+
       {/* Code display */}
       <div style={{ flex: 1, overflow: 'auto', position: 'relative' }}>
         <pre
@@ -146,12 +146,12 @@ const CodePreview: React.FC<CodePreviewProps> = ({
             lineHeight: 1.5,
             color: '#e4e4e7',
             whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word'
+            wordBreak: 'break-word',
           }}
         >
           {result.code || '// Add nodes to generate code'}
         </pre>
-        
+
         {/* Copy button */}
         <button
           onClick={handleCopy}
@@ -166,22 +166,24 @@ const CodePreview: React.FC<CodePreviewProps> = ({
             color: '#e4e4e7',
             fontSize: 12,
             cursor: 'pointer',
-            transition: 'background-color 0.2s'
+            transition: 'background-color 0.2s',
           }}
         >
           {copied ? '✓ Copied' : 'Copy'}
         </button>
       </div>
-      
+
       {/* Footer */}
-      <div style={{
-        padding: '8px 12px',
-        borderTop: '1px solid #3d3d4d',
-        fontSize: 11,
-        color: '#71717a',
-        display: 'flex',
-        justifyContent: 'space-between'
-      }}>
+      <div
+        style={{
+          padding: '8px 12px',
+          borderTop: '1px solid #3d3d4d',
+          fontSize: 11,
+          color: '#71717a',
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <span>{graph.nodes.length} nodes</span>
         <span>{graph.edges.length} connections</span>
       </div>

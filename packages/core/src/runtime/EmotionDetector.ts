@@ -5,7 +5,7 @@
  * Runtimes implement this to bridge with ML models (ONNX/TFLite) for emotion inference.
  */
 
-import { Vector3 } from '../types/HoloScriptPlus';
+import type { Vector3 as _Vector3 } from '../types/HoloScriptPlus';
 
 /**
  * Multimodal signals for emotion inference
@@ -13,16 +13,16 @@ import { Vector3 } from '../types/HoloScriptPlus';
 export interface EmotionSignals {
   /** Head stability (1.0 = stable, 0.0 = high jitter/shaking) */
   headStability: number;
-  
+
   /** Dominant hand stability (1.0 = stable, 0.0 = tremors/jitter) */
   handStability: number;
-  
+
   /** Interaction intensity (e.g., clicks per second, force of movement) */
   interactionIntensity: number;
-  
+
   /** Task failure rate or repeated interaction patterns */
   behavioralStressing: number;
-  
+
   /** Optional audio-derived stress (from VoiceSynthesizer/SpeechRecognizer) */
   voiceStress?: number;
 }
@@ -33,13 +33,13 @@ export interface EmotionSignals {
 export interface EmotionInference {
   /** Frustration level (0.0 to 1.0) */
   frustration: number;
-  
+
   /** Confusion/Uncertainty level (0.0 to 1.0) */
   confusion: number;
-  
+
   /** User engagement/Focus level (0.0 to 1.0) */
   engagement: number;
-  
+
   /** Predicted primary affective state */
   primaryState: 'neutral' | 'happy' | 'angry' | 'sad' | 'scared' | 'confused' | 'frustrated';
 }
@@ -50,10 +50,10 @@ export interface EmotionInference {
 export interface EmotionConfig {
   /** Mode of detection (e.g., 'passive', 'active', 'calibrated') */
   mode: string;
-  
+
   /** Model identifier or path */
   modelId?: string;
-  
+
   /** Sensitivity adjustment (0.0 to 1.0) */
   sensitivity?: number;
 }
@@ -65,7 +65,7 @@ export interface EmotionDetector {
   /** Initialize the detector with config */
   initialize(config: EmotionConfig): Promise<void>;
 
-  /** 
+  /**
    * Infer emotional state from multimodal signals.
    * This is typically called at a lower frequency than the main loop (e.g., 5Hz).
    */

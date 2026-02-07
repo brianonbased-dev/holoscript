@@ -22,6 +22,7 @@ orb myObject {
 Located at `packages/core/src/HoloScriptPlusParser.ts` (1,000+ LOC), this extended parser adds:
 
 **Trait Annotation Types:**
+
 - `MaterialTraitAnnotation` - PBR material configuration
 - `LightingTraitAnnotation` - Light sources and illumination
 - `RenderingTraitAnnotation` - Quality and performance settings
@@ -65,6 +66,7 @@ createGraphicsTraits(config: GraphicsConfiguration): void
 ```
 
 **Supported Properties:**
+
 - `type: 'pbr' | 'standard' | 'unlit'` - Material model
 - `metallic: 0-1` - Surface metallic property
 - `roughness: 0-1` - Surface roughness (inverse of glossiness)
@@ -76,6 +78,7 @@ createGraphicsTraits(config: GraphicsConfiguration): void
 - `compression: 'astc' | 'basis' | 'none'` - Texture compression
 
 **Presets Available:**
+
 - `gold` - Gold material with high metallic value
 - `copper` - Copper with reddish tone
 - `steel` - Steel with high roughness
@@ -85,6 +88,7 @@ createGraphicsTraits(config: GraphicsConfiguration): void
 - `glass` - Transparent glass material
 
 **Validation Rules:**
+
 - `metallic` and `roughness` must be 0-1
 - `color` RGB values must be 0-1
 - `type` must be valid material model
@@ -105,6 +109,7 @@ createGraphicsTraits(config: GraphicsConfiguration): void
 ```
 
 **Supported Properties:**
+
 - `type: 'directional' | 'point' | 'spot'` - Light type
 - `intensity: number` - Light brightness (0+)
 - `color: { r, g, b }` - Light color (RGB 0-1)
@@ -117,6 +122,7 @@ createGraphicsTraits(config: GraphicsConfiguration): void
 - `angle: number` - Spot light cone angle
 
 **Presets Available:**
+
 - `studio` - Professional 3-point studio lighting
 - `outdoor` - Natural outdoor sunlight
 - `night` - Dark ambient with moonlight
@@ -124,6 +130,7 @@ createGraphicsTraits(config: GraphicsConfiguration): void
 - `dawn` - Golden hour sunrise lighting
 
 **Validation Rules:**
+
 - `intensity` must be positive
 - `shadowType` only valid if `shadows: true`
 - `angle` only valid for spot lights
@@ -145,6 +152,7 @@ createGraphicsTraits(config: GraphicsConfiguration): void
 ```
 
 **Supported Properties:**
+
 - `quality: 'low' | 'medium' | 'high' | 'ultra'` - Rendering quality
 - `platform: 'mobile' | 'vr' | 'desktop'` - Target platform
 - `lod: boolean` - Level-of-detail enabled
@@ -156,17 +164,20 @@ createGraphicsTraits(config: GraphicsConfiguration): void
 - `instancing: boolean` - GPU instancing for repeated geometry
 
 **Quality Presets:**
+
 - `low` - Mobile/low-end optimization (256MB budget, max 2 lights)
 - `medium` - Standard desktop optimization (512MB budget, max 4 lights)
 - `high` - High-end desktop optimization (1GB budget, max 8 lights)
 - `ultra` - High-end desktop with all features (2GB budget, max 16 lights)
 
 **Platform Presets:**
+
 - `mobile` - Mobile device optimization (256MB GPU memory)
 - `vr` - VR headset optimization (512MB GPU memory, 90 FPS target)
 - `desktop` - Desktop computer optimization (2GB GPU memory)
 
 **Validation Rules:**
+
 - `quality` must be valid preset
 - `platform` must be supported platform
 - `maxLights` must be positive integer
@@ -195,21 +206,21 @@ orb goldenStatue {
 ```holoscript
 orb sciFiCube {
   position: [0, 0, 0]
-  
+
   @material {
     type: pbr,
     metallic: 0.8,
     roughness: 0.15,
     baseTexture: "sci-fi-metal.png"
   }
-  
+
   @lighting {
     type: point,
     intensity: 2.0,
     color: { r: 0.0, g: 0.5, b: 1.0 },
     range: 10
   }
-  
+
   @rendering {
     quality: high,
     platform: desktop,
@@ -224,19 +235,19 @@ orb sciFiCube {
 ```holoscript
 orb mobileObject {
   position: [0, 0, 0]
-  
+
   @material {
     type: standard,
     color: { r: 1.0, g: 1.0, b: 1.0 },
     compression: astc
   }
-  
+
   @lighting {
     type: directional,
     intensity: 1.0,
     shadows: false
   }
-  
+
   @rendering {
     platform: mobile,
     quality: low,
@@ -252,14 +263,14 @@ orb mobileObject {
 ```holoscript
 orb vrObject {
   position: [0, 1.5, -1]
-  
+
   @material {
     type: pbr,
     metallic: 0.5,
     roughness: 0.5,
     compression: basis
   }
-  
+
   @rendering {
     platform: vr,
     quality: medium,
@@ -276,30 +287,30 @@ orb vrObject {
 ```typescript
 class HoloScriptPlusParser {
   // Extract annotations from code
-  extractTraitAnnotations(code: string, orbLine?: number): AnyTraitAnnotation[]
-  
+  extractTraitAnnotations(code: string, orbLine?: number): AnyTraitAnnotation[];
+
   // Parse object literal syntax
-  parseObjectLiteral(str: string): Record<string, unknown>
-  
+  parseObjectLiteral(str: string): Record<string, unknown>;
+
   // Parse individual values
-  parseValue(str: string): unknown
-  
+  parseValue(str: string): unknown;
+
   // Build complete graphics configuration
-  buildGraphicsConfig(traits: AnyTraitAnnotation[]): GraphicsConfiguration
-  
+  buildGraphicsConfig(traits: AnyTraitAnnotation[]): GraphicsConfiguration;
+
   // Validate trait annotation
-  validateTraitAnnotation(trait: AnyTraitAnnotation): { valid: boolean; errors: string[] }
-  
+  validateTraitAnnotation(trait: AnyTraitAnnotation): { valid: boolean; errors: string[] };
+
   // Validate specific trait type
-  validateMaterialTrait(trait: MaterialTraitAnnotation): { valid: boolean; errors: string[] }
-  validateLightingTrait(trait: LightingTraitAnnotation): { valid: boolean; errors: string[] }
-  validateRenderingTrait(trait: RenderingTraitAnnotation): { valid: boolean; errors: string[] }
-  
+  validateMaterialTrait(trait: MaterialTraitAnnotation): { valid: boolean; errors: string[] };
+  validateLightingTrait(trait: LightingTraitAnnotation): { valid: boolean; errors: string[] };
+  validateRenderingTrait(trait: RenderingTraitAnnotation): { valid: boolean; errors: string[] };
+
   // Create trait instances
-  createGraphicsTraits(config: GraphicsConfiguration): void
-  createMaterialTrait(config: MaterialTraitAnnotation['config']): MaterialTrait
-  createLightingTrait(config: LightingTraitAnnotation['config']): LightingTrait
-  createRenderingTrait(config: RenderingTraitAnnotation['config']): RenderingTrait
+  createGraphicsTraits(config: GraphicsConfiguration): void;
+  createMaterialTrait(config: MaterialTraitAnnotation['config']): MaterialTrait;
+  createLightingTrait(config: LightingTraitAnnotation['config']): LightingTrait;
+  createRenderingTrait(config: RenderingTraitAnnotation['config']): RenderingTrait;
 }
 ```
 
@@ -307,55 +318,55 @@ class HoloScriptPlusParser {
 
 ```typescript
 interface MaterialTraitAnnotation {
-  type: 'material'
+  type: 'material';
   config: {
-    type: 'pbr' | 'standard' | 'unlit'
-    metallic?: number
-    roughness?: number
-    color?: { r: number; g: number; b: number }
-    baseTexture?: string
-    normalMap?: string
-    metallicMap?: string
-    roughnessMap?: string
-    compression?: 'astc' | 'basis' | 'none'
-  }
+    type: 'pbr' | 'standard' | 'unlit';
+    metallic?: number;
+    roughness?: number;
+    color?: { r: number; g: number; b: number };
+    baseTexture?: string;
+    normalMap?: string;
+    metallicMap?: string;
+    roughnessMap?: string;
+    compression?: 'astc' | 'basis' | 'none';
+  };
 }
 
 interface LightingTraitAnnotation {
-  type: 'lighting'
+  type: 'lighting';
   config: {
-    type: 'directional' | 'point' | 'spot'
-    intensity: number
-    color?: { r: number; g: number; b: number }
-    shadows?: boolean
-    shadowType?: 'hard' | 'soft'
-    shadowResolution?: 'low' | 'medium' | 'high'
-    castShadows?: boolean
-    lightProbes?: boolean
-    range?: number
-    angle?: number
-  }
+    type: 'directional' | 'point' | 'spot';
+    intensity: number;
+    color?: { r: number; g: number; b: number };
+    shadows?: boolean;
+    shadowType?: 'hard' | 'soft';
+    shadowResolution?: 'low' | 'medium' | 'high';
+    castShadows?: boolean;
+    lightProbes?: boolean;
+    range?: number;
+    angle?: number;
+  };
 }
 
 interface RenderingTraitAnnotation {
-  type: 'rendering'
+  type: 'rendering';
   config: {
-    quality: 'low' | 'medium' | 'high' | 'ultra'
-    platform: 'mobile' | 'vr' | 'desktop'
-    lod?: boolean
-    culling?: boolean
-    compression?: 'astc' | 'basis' | 'none'
-    maxLights?: number
-    targetFPS?: number
-    batching?: boolean
-    instancing?: boolean
-  }
+    quality: 'low' | 'medium' | 'high' | 'ultra';
+    platform: 'mobile' | 'vr' | 'desktop';
+    lod?: boolean;
+    culling?: boolean;
+    compression?: 'astc' | 'basis' | 'none';
+    maxLights?: number;
+    targetFPS?: number;
+    batching?: boolean;
+    instancing?: boolean;
+  };
 }
 
 interface GraphicsConfiguration {
-  material?: MaterialTraitAnnotation['config']
-  lighting?: LightingTraitAnnotation['config']
-  rendering?: RenderingTraitAnnotation['config']
+  material?: MaterialTraitAnnotation['config'];
+  lighting?: LightingTraitAnnotation['config'];
+  rendering?: RenderingTraitAnnotation['config'];
 }
 ```
 
@@ -364,29 +375,34 @@ interface GraphicsConfiguration {
 Phase 3 includes comprehensive test coverage with 40 test cases:
 
 **Material Trait Tests (6):**
+
 - Parsing material annotations from code
 - PBR property validation
 - Compression format handling
 - Validation error reporting
 
 **Lighting Trait Tests (6):**
+
 - Parsing lighting annotations
 - Light type validation
 - Shadow configuration
 - Preset application
 
 **Rendering Trait Tests (8):**
+
 - Quality preset handling
 - Platform-specific optimization
 - Compression selection
 - Performance configuration
 
 **Combined Tests (3):**
+
 - Multiple traits on single object
 - Graphics configuration building
 - Edge case handling
 
 Run tests with:
+
 ```bash
 pnpm test -- HoloScriptPlusParser.test.ts
 ```
@@ -399,6 +415,7 @@ Phase 3 output feeds into:
 2. **Phase 5 (Performance Optimizer)** - Rendering settings guide adaptive quality decisions
 
 Example integration:
+
 ```typescript
 const parser = new HoloScriptPlusParser();
 const traits = parser.extractTraitAnnotations(holoScriptCode);
@@ -416,11 +433,13 @@ const optimized = optimizer.optimizeForDevice(config);
 ## Limitations and Future Work
 
 **Current Limitations:**
+
 - Object literal parsing doesn't support deeply nested structures
 - Texture loading is simulated (no actual WebGL implementation)
 - No real-time annotation modification
 
 **Future Enhancements:**
+
 - Support for computed properties and references
 - Constraint-based material selection
 - Performance budgeting system

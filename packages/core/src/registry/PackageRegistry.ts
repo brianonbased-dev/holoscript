@@ -280,7 +280,12 @@ export function satisfiesRange(version: string, range: string): boolean {
   }
 
   // Handle exact version
-  if (!range.includes('^') && !range.includes('~') && !range.includes('>') && !range.includes('<')) {
+  if (
+    !range.includes('^') &&
+    !range.includes('~') &&
+    !range.includes('>') &&
+    !range.includes('<')
+  ) {
     const rangeVer = parseSemVer(range);
     return rangeVer !== null && compareSemVer(ver, rangeVer) === 0;
   }
@@ -576,7 +581,7 @@ export class PackageRegistry {
    */
   async resolveDependencies(
     dependencies: Record<string, string>,
-    options: { includeDev?: boolean } = {}
+    _options: { includeDev?: boolean } = {}
   ): Promise<ResolvedDependency[]> {
     const resolved: ResolvedDependency[] = [];
     const visited = new Set<string>();
@@ -606,9 +611,7 @@ export class PackageRegistry {
         if (!manifest) continue;
 
         // Recursively resolve sub-dependencies
-        const subDeps = manifest.dependencies
-          ? await resolve(manifest.dependencies, false)
-          : [];
+        const subDeps = manifest.dependencies ? await resolve(manifest.dependencies, false) : [];
 
         result.push({
           name,
@@ -647,10 +650,7 @@ export class PackageRegistry {
   /**
    * Increment version
    */
-  incrementVersion(
-    version: string,
-    type: 'major' | 'minor' | 'patch'
-  ): string {
+  incrementVersion(version: string, type: 'major' | 'minor' | 'patch'): string {
     const ver = parseSemVer(version);
     if (!ver) return version;
 
@@ -693,7 +693,7 @@ export class PackageRegistry {
   // ============================================================================
   // Access Control (Sprint 6)
   // ============================================================================
-  
+
   private organizations: Map<string, Organization> = new Map();
   private tokens: Map<string, AuthToken> = new Map();
 
@@ -910,10 +910,7 @@ export class PackageRegistry {
   /**
    * Check if granted permission satisfies required permission
    */
-  private permissionSatisfies(
-    granted: PackagePermission,
-    required: PackagePermission
-  ): boolean {
+  private permissionSatisfies(granted: PackagePermission, required: PackagePermission): boolean {
     const levels: Record<PackagePermission, number> = {
       read: 1,
       write: 2,
@@ -976,7 +973,10 @@ export class PackageRegistry {
   /**
    * Revoke a token
    */
-  async revokeToken(tokenId: string, userId: string): Promise<{ success: boolean; error?: string }> {
+  async revokeToken(
+    tokenId: string,
+    userId: string
+  ): Promise<{ success: boolean; error?: string }> {
     const token = this.tokens.get(tokenId);
     if (!token) {
       return { success: false, error: 'Token not found' };

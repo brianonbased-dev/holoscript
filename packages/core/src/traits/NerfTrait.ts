@@ -31,7 +31,7 @@ interface NerfConfig {
   render_mode: RenderMode;
   quality: QualityLevel;
   cache_frames: boolean;
-  cache_size: number;  // Max cached views
+  cache_size: number; // Max cached views
   near_plane: number;
   far_plane: number;
   samples_per_ray: number;
@@ -68,7 +68,7 @@ export const nerfHandler: TraitHandler<NerfConfig> = {
       modelHandle: null,
     };
     (node as any).__nerfState = state;
-    
+
     if (config.model_url) {
       loadNerfModel(node, state, config, context);
     }
@@ -82,19 +82,19 @@ export const nerfHandler: TraitHandler<NerfConfig> = {
     delete (node as any).__nerfState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__nerfState as NerfState;
     if (!state || !state.isReady) return;
-    
+
     // Get camera position and check cache
     const camera = context.camera;
     if (!camera) return;
-    
+
     const cameraHash = getCameraHash(camera);
-    
+
     if (cameraHash !== state.lastCameraHash) {
       state.lastCameraHash = cameraHash;
-      
+
       // Check cache
       if (config.cache_frames && state.frameCache.has(cameraHash)) {
         context.emit?.('nerf_use_cached', {
@@ -104,7 +104,7 @@ export const nerfHandler: TraitHandler<NerfConfig> = {
       } else {
         // Request new render
         const startTime = Date.now();
-        
+
         context.emit?.('nerf_render', {
           node,
           camera: {
@@ -120,7 +120,7 @@ export const nerfHandler: TraitHandler<NerfConfig> = {
           farPlane: config.far_plane,
           cacheKey: config.cache_frames ? cameraHash : undefined,
         });
-        
+
         state.renderTime = Date.now() - startTime;
       }
     }
@@ -129,12 +129,12 @@ export const nerfHandler: TraitHandler<NerfConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__nerfState as NerfState;
     if (!state) return;
-    
+
     if (event.type === 'nerf_model_loaded') {
       state.isLoading = false;
       state.isReady = true;
       state.modelHandle = event.handle;
-      
+
       context.emit?.('on_nerf_ready', {
         node,
       });
@@ -146,7 +146,7 @@ export const nerfHandler: TraitHandler<NerfConfig> = {
       });
     } else if (event.type === 'nerf_frame_rendered') {
       state.renderTime = event.renderTime as number;
-      
+
       // Cache if enabled
       if (config.cache_frames && event.cacheKey) {
         // Evict old entries if cache full
@@ -197,7 +197,7 @@ function loadNerfModel(
   context: { emit?: (event: string, data: unknown) => void }
 ): void {
   state.isLoading = true;
-  
+
   context.emit?.('nerf_load', {
     node,
     url: config.model_url,
@@ -205,7 +205,10 @@ function loadNerfModel(
   });
 }
 
-function getCameraHash(camera: { position?: { x: number; y: number; z: number }; rotation?: { x: number; y: number; z: number } }): string {
+function getCameraHash(camera: {
+  position?: { x: number; y: number; z: number };
+  rotation?: { x: number; y: number; z: number };
+}): string {
   const pos = camera.position || { x: 0, y: 0, z: 0 };
   const rot = camera.rotation || { x: 0, y: 0, z: 0 };
   // Quantize to reduce cache misses for minor movements

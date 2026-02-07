@@ -118,7 +118,7 @@ export const ClothTrait: TraitHandler = {
 
   onUpdate(context: TraitContext, delta: number) {
     const mesh = context.object as THREE.Mesh;
-    const geometry = mesh.geometry as THREE.BufferGeometry;
+    const geometry = mesh.geometry;
     const posAttr = geometry.getAttribute('position') as THREE.BufferAttribute;
     if (!posAttr) return;
 
@@ -143,7 +143,9 @@ export const ClothTrait: TraitHandler = {
     for (let i = 0; i < count; i++) {
       if (pinned.has(i)) continue;
 
-      const ix = i * 3, iy = i * 3 + 1, iz = i * 3 + 2;
+      const ix = i * 3,
+        iy = i * 3 + 1,
+        iz = i * 3 + 2;
       const cx = posAttr.array[ix];
       const cy = posAttr.array[iy];
       const cz = posAttr.array[iz];
@@ -165,15 +167,23 @@ export const ClothTrait: TraitHandler = {
     const iterations = Math.ceil(stiffness * 5);
     for (let iter = 0; iter < iterations; iter++) {
       for (const [a, b, restLen] of constraints) {
-        const ax = posAttr.array[a * 3], ay = posAttr.array[a * 3 + 1], az = posAttr.array[a * 3 + 2];
-        const bx = posAttr.array[b * 3], by = posAttr.array[b * 3 + 1], bz = posAttr.array[b * 3 + 2];
+        const ax = posAttr.array[a * 3],
+          ay = posAttr.array[a * 3 + 1],
+          az = posAttr.array[a * 3 + 2];
+        const bx = posAttr.array[b * 3],
+          by = posAttr.array[b * 3 + 1],
+          bz = posAttr.array[b * 3 + 2];
 
-        const dx = bx - ax, dy = by - ay, dz = bz - az;
+        const dx = bx - ax,
+          dy = by - ay,
+          dz = bz - az;
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (dist < 0.0001) continue;
 
-        const diff = (dist - restLen) / dist * 0.5;
-        const ox = dx * diff, oy = dy * diff, oz = dz * diff;
+        const diff = ((dist - restLen) / dist) * 0.5;
+        const ox = dx * diff,
+          oy = dy * diff,
+          oz = dz * diff;
 
         const aPin = pinned.has(a);
         const bPin = pinned.has(b);
@@ -222,7 +232,7 @@ export const SoftBodyTrait: TraitHandler = {
     const damping = (cfg.damping as number) ?? 0.05;
     const pressure = (cfg.pressure as number) ?? 1.0;
 
-    const geometry = mesh.geometry as THREE.BufferGeometry;
+    const geometry = mesh.geometry;
     if (!geometry) return;
 
     const posAttr = geometry.getAttribute('position') as THREE.BufferAttribute;
@@ -240,8 +250,14 @@ export const SoftBodyTrait: TraitHandler = {
 
     if (index) {
       for (let i = 0; i < index.count; i += 3) {
-        const a = index.getX(i), b = index.getX(i + 1), c = index.getX(i + 2);
-        for (const [v1, v2] of [[a, b], [b, c], [a, c]]) {
+        const a = index.getX(i),
+          b = index.getX(i + 1),
+          c = index.getX(i + 2);
+        for (const [v1, v2] of [
+          [a, b],
+          [b, c],
+          [a, c],
+        ]) {
           const key = Math.min(v1, v2) + '_' + Math.max(v1, v2);
           if (!edgeSet.has(key)) {
             edgeSet.add(key);
@@ -264,7 +280,7 @@ export const SoftBodyTrait: TraitHandler = {
 
   onUpdate(context: TraitContext, delta: number) {
     const mesh = context.object as THREE.Mesh;
-    const geometry = mesh.geometry as THREE.BufferGeometry;
+    const geometry = mesh.geometry;
     const posAttr = geometry.getAttribute('position') as THREE.BufferAttribute;
     if (!posAttr) return;
 
@@ -280,9 +296,15 @@ export const SoftBodyTrait: TraitHandler = {
 
     // Spring forces
     for (const [a, b, restLen] of springs) {
-      const ax = posAttr.array[a * 3], ay = posAttr.array[a * 3 + 1], az = posAttr.array[a * 3 + 2];
-      const bx = posAttr.array[b * 3], by = posAttr.array[b * 3 + 1], bz = posAttr.array[b * 3 + 2];
-      const dx = bx - ax, dy = by - ay, dz = bz - az;
+      const ax = posAttr.array[a * 3],
+        ay = posAttr.array[a * 3 + 1],
+        az = posAttr.array[a * 3 + 2];
+      const bx = posAttr.array[b * 3],
+        by = posAttr.array[b * 3 + 1],
+        bz = posAttr.array[b * 3 + 2];
+      const dx = bx - ax,
+        dy = by - ay,
+        dz = bz - az;
       const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
       if (dist < 0.0001) continue;
 
@@ -291,19 +313,27 @@ export const SoftBodyTrait: TraitHandler = {
       const fy = (dy / dist) * force;
       const fz = (dz / dist) * force;
 
-      vel[a * 3] += fx * dt; vel[a * 3 + 1] += fy * dt; vel[a * 3 + 2] += fz * dt;
-      vel[b * 3] -= fx * dt; vel[b * 3 + 1] -= fy * dt; vel[b * 3 + 2] -= fz * dt;
+      vel[a * 3] += fx * dt;
+      vel[a * 3 + 1] += fy * dt;
+      vel[a * 3 + 2] += fz * dt;
+      vel[b * 3] -= fx * dt;
+      vel[b * 3 + 1] -= fy * dt;
+      vel[b * 3 + 2] -= fz * dt;
     }
 
     // Pressure force (push outward from center)
     if (pressure > 0) {
-      let cx = 0, cy = 0, cz = 0;
+      let cx = 0,
+        cy = 0,
+        cz = 0;
       for (let i = 0; i < count; i++) {
         cx += posAttr.array[i * 3];
         cy += posAttr.array[i * 3 + 1];
         cz += posAttr.array[i * 3 + 2];
       }
-      cx /= count; cy /= count; cz /= count;
+      cx /= count;
+      cy /= count;
+      cz /= count;
 
       for (let i = 0; i < count; i++) {
         const dx = posAttr.array[i * 3] - cx;
@@ -320,15 +350,17 @@ export const SoftBodyTrait: TraitHandler = {
 
     // Restore force toward rest shape
     for (let i = 0; i < count; i++) {
-      const ix = i * 3, iy = i * 3 + 1, iz = i * 3 + 2;
+      const ix = i * 3,
+        iy = i * 3 + 1,
+        iz = i * 3 + 2;
       vel[ix] += (rest[ix] - posAttr.array[ix]) * stiffness * 0.1 * dt;
       vel[iy] += (rest[iy] - posAttr.array[iy]) * stiffness * 0.1 * dt;
       vel[iz] += (rest[iz] - posAttr.array[iz]) * stiffness * 0.1 * dt;
 
       // Damping
-      vel[ix] *= (1 - damping);
-      vel[iy] *= (1 - damping);
-      vel[iz] *= (1 - damping);
+      vel[ix] *= 1 - damping;
+      vel[iy] *= 1 - damping;
+      vel[iz] *= 1 - damping;
 
       // Integrate
       (posAttr.array as Float32Array)[ix] += vel[ix];
@@ -343,7 +375,7 @@ export const SoftBodyTrait: TraitHandler = {
   onRemove(context: TraitContext) {
     // Restore rest positions
     const mesh = context.object as THREE.Mesh;
-    const geometry = mesh.geometry as THREE.BufferGeometry;
+    const geometry = mesh.geometry;
     const posAttr = geometry.getAttribute('position') as THREE.BufferAttribute;
     const rest = context.data.restPositions as Float32Array;
     if (posAttr && rest) {
@@ -424,7 +456,9 @@ export const FluidTrait: TraitHandler = {
     const halfBounds = bounds * 0.5;
 
     for (let i = 0; i < count; i++) {
-      const ix = i * 3, iy = i * 3 + 1, iz = i * 3 + 2;
+      const ix = i * 3,
+        iy = i * 3 + 1,
+        iz = i * 3 + 2;
 
       // Apply gravity
       vel[ix] += grav[0] * dt;
@@ -432,9 +466,9 @@ export const FluidTrait: TraitHandler = {
       vel[iz] += grav[2] * dt;
 
       // Viscosity damping
-      vel[ix] *= (1 - viscosity);
-      vel[iy] *= (1 - viscosity);
-      vel[iz] *= (1 - viscosity);
+      vel[ix] *= 1 - viscosity;
+      vel[iy] *= 1 - viscosity;
+      vel[iz] *= 1 - viscosity;
 
       // Integrate position
       (posAttr.array as Float32Array)[ix] += vel[ix] * dt;
@@ -446,7 +480,10 @@ export const FluidTrait: TraitHandler = {
         (posAttr.array as Float32Array)[iy] = -halfBounds;
         vel[iy] = Math.abs(vel[iy]) * 0.3; // Damped bounce
       }
-      for (const [axis, aix] of [[0, ix], [2, iz]] as [number, number][]) {
+      for (const [_axis, aix] of [
+        [0, ix],
+        [2, iz],
+      ] as [number, number][]) {
         if (posAttr.array[aix] < -halfBounds) {
           (posAttr.array as Float32Array)[aix] = -halfBounds;
           vel[aix] = Math.abs(vel[aix]) * 0.3;
@@ -569,8 +606,8 @@ export const RopeTrait: TraitHandler = {
     const segmentCount = (cfg.segments as number) ?? 20;
     const length = (cfg.length as number) ?? 3;
     const stiffness = (cfg.stiffness as number) ?? 0.9;
-    const damping = (cfg.damping as number) ?? 0.02;
-    const radius = (cfg.radius as number) ?? 0.03;
+    const _damping = (cfg.damping as number) ?? 0.02;
+    const _radius = (cfg.radius as number) ?? 0.03;
     const gravityScale = (cfg.gravity_scale as number) ?? 1.0;
     const color = (cfg.color as string) ?? '#886644';
 
@@ -590,7 +627,10 @@ export const RopeTrait: TraitHandler = {
     const lineGeometry = new THREE.BufferGeometry();
     lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
 
-    const lineMaterial = new THREE.LineBasicMaterial({ color: new THREE.Color(color), linewidth: 2 });
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: new THREE.Color(color),
+      linewidth: 2,
+    });
     const line = new THREE.Line(lineGeometry, lineMaterial);
     line.name = parent.name + '_rope';
 
@@ -653,11 +693,13 @@ export const RopeTrait: TraitHandler = {
         const a = positions[i];
         const b = positions[i + 1];
 
-        const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+        const dx = b.x - a.x,
+          dy = b.y - a.y,
+          dz = b.z - a.z;
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (dist < 0.0001) continue;
 
-        const diff = (dist - segmentLength) / dist * 0.5;
+        const diff = ((dist - segmentLength) / dist) * 0.5;
 
         if (i === 0) {
           // First is pinned
@@ -756,18 +798,20 @@ export const WindTrait: TraitHandler = {
 
     scene.traverse((child: THREE.Object3D) => {
       if (child === context.object) return;
-      const traits = (child as any)._traits as Array<{ name: string; context: TraitContext }> | undefined;
+      const traits = (child as any)._traits as
+        | Array<{ name: string; context: TraitContext }>
+        | undefined;
       if (!traits) return;
 
       // Check distance
       const dist = child.position.distanceTo(windPos);
       if (dist > radius) return;
 
-      const falloff = 1 - (dist / radius);
+      const falloff = 1 - dist / radius;
       const forceMag = strength * falloff;
 
       // Apply to cloth trait
-      const clothTrait = traits.find(t => t.name === 'cloth');
+      const clothTrait = traits.find((t) => t.name === 'cloth');
       if (clothTrait) {
         // Wind affects cloth via its internal wind response
         // We modify the cloth's position slightly
@@ -829,11 +873,13 @@ export const JointTrait: TraitHandler = {
 
     const jointType = context.data.jointType as string;
     const stiffness = context.data.stiffness as number;
-    const damping = context.data.damping as number;
+    const _damping = context.data.damping as number;
     const offset = context.data.anchorOffset as number[];
 
     const myPos = context.object.position;
-    const targetPos = target.position.clone().add(new THREE.Vector3(offset[0], offset[1], offset[2]));
+    const targetPos = target.position
+      .clone()
+      .add(new THREE.Vector3(offset[0], offset[1], offset[2]));
 
     const dx = targetPos.x - myPos.x;
     const dy = targetPos.y - myPos.y;
@@ -860,7 +906,9 @@ export const JointTrait: TraitHandler = {
       const force = displacement * stiffness * delta;
 
       if (dist > 0.001) {
-        const nx = dx / dist, ny = dy / dist, nz = dz / dist;
+        const nx = dx / dist,
+          ny = dy / dist,
+          nz = dz / dist;
         myPos.x += nx * force * delta;
         myPos.y += ny * force * delta;
         myPos.z += nz * force * delta;
@@ -874,7 +922,7 @@ export const JointTrait: TraitHandler = {
     } else if (jointType === 'hinge') {
       // Hinge: constrain to circular path around target
       if (dist > 0.001) {
-        const correction = (dist - restLen) / dist * 0.5;
+        const correction = ((dist - restLen) / dist) * 0.5;
         myPos.x += dx * correction;
         myPos.z += dz * correction;
         // Y is free to rotate
@@ -984,7 +1032,7 @@ export const DestructionTrait: TraitHandler = {
       frag.rotation.z += delta * (i + 0.5) * 0.3;
 
       // Fade out
-      const fadeRatio = 1 - (timers[i] / lifetime);
+      const fadeRatio = 1 - timers[i] / lifetime;
       if (fadeRatio <= 0) {
         frag.parent?.remove(frag);
         frag.geometry.dispose();
@@ -1012,10 +1060,12 @@ export const DestructionTrait: TraitHandler = {
  * Trigger destruction externally by calling this function
  */
 export function triggerDestruction(object: THREE.Object3D): void {
-  const traits = (object as any)._traits as Array<{ name: string; context: TraitContext }> | undefined;
+  const traits = (object as any)._traits as
+    | Array<{ name: string; context: TraitContext }>
+    | undefined;
   if (!traits) return;
 
-  const destructTrait = traits.find(t => t.name === 'destruction');
+  const destructTrait = traits.find((t) => t.name === 'destruction');
   if (!destructTrait || destructTrait.context.data.isBroken) return;
 
   const ctx = destructTrait.context;

@@ -9,6 +9,7 @@ We pledge to act and interact in ways that contribute to an open, welcoming, div
 ## Our Standards
 
 Examples of behavior that contributes to a positive environment:
+
 - Using welcoming and inclusive language
 - Being respectful of differing viewpoints and experiences
 - Gracefully accepting constructive criticism
@@ -16,6 +17,7 @@ Examples of behavior that contributes to a positive environment:
 - Showing empathy towards other community members
 
 Examples of unacceptable behavior:
+
 - The use of sexualized language or imagery
 - Trolling, insulting or derogatory comments, and personal or political attacks
 - Public or private harassment
@@ -29,7 +31,6 @@ Community leaders are responsible for clarifying and enforcing our standards of 
 ## Scope
 
 This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing the community in public spaces.
-
 
 ## Enforcement
 

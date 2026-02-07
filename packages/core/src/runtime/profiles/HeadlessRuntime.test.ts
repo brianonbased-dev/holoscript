@@ -18,19 +18,19 @@ import {
 import type { HSPlusAST, HSPlusNode } from '../../types/HoloScriptPlus';
 
 // Helper to create a simple test AST
-function createTestAST(options: {
-  state?: Record<string, unknown>;
-  children?: HSPlusNode[];
-} = {}): HSPlusAST {
+function createTestAST(
+  options: {
+    state?: Record<string, unknown>;
+    children?: HSPlusNode[];
+  } = {}
+): HSPlusAST {
   return {
     root: {
       type: 'scene',
       id: 'root',
       properties: {},
       traits: new Map(),
-      directives: options.state
-        ? [{ type: 'state', body: options.state }]
-        : [],
+      directives: options.state ? [{ type: 'state', body: options.state }] : [],
       children: options.children || [],
     },
     imports: [],
@@ -330,8 +330,22 @@ describe('HeadlessRuntime', () => {
     it('should estimate memory usage', () => {
       const ast = createTestAST({
         children: [
-          { type: 'object', id: 'obj1', properties: {}, traits: new Map(), directives: [], children: [] },
-          { type: 'object', id: 'obj2', properties: {}, traits: new Map(), directives: [], children: [] },
+          {
+            type: 'object',
+            id: 'obj1',
+            properties: {},
+            traits: new Map(),
+            directives: [],
+            children: [],
+          },
+          {
+            type: 'object',
+            id: 'obj2',
+            properties: {},
+            traits: new Map(),
+            directives: [],
+            children: [],
+          },
         ],
       });
       runtime = createHeadlessRuntime(ast);
@@ -349,8 +363,22 @@ describe('HeadlessRuntime', () => {
     it('should find nodes by ID', () => {
       const ast = createTestAST({
         children: [
-          { type: 'object', id: 'sensor', properties: { value: 42 }, traits: new Map(), directives: [], children: [] },
-          { type: 'object', id: 'actuator', properties: { state: 'off' }, traits: new Map(), directives: [], children: [] },
+          {
+            type: 'object',
+            id: 'sensor',
+            properties: { value: 42 },
+            traits: new Map(),
+            directives: [],
+            children: [],
+          },
+          {
+            type: 'object',
+            id: 'actuator',
+            properties: { state: 'off' },
+            traits: new Map(),
+            directives: [],
+            children: [],
+          },
         ],
       });
       runtime = createHeadlessRuntime(ast);
@@ -377,9 +405,7 @@ describe('HeadlessRuntime', () => {
       const ast = createTestAST({ state: { sensorReading: 0 } });
       runtime = createHeadlessRuntime(ast, {
         tickRate: 100,
-        stateProviders: new Map([
-          ['sensorReading', () => sensorValue++],
-        ]),
+        stateProviders: new Map([['sensorReading', () => sensorValue++]]),
       });
 
       runtime.start();
@@ -440,8 +466,22 @@ describe('HeadlessRuntime IoT Scenarios', () => {
     const ast = createTestAST({
       state: { temperature: 0, humidity: 0 },
       children: [
-        { type: 'sensor', id: 'temp_sensor', properties: {}, traits: new Map(), directives: [], children: [] },
-        { type: 'sensor', id: 'humidity_sensor', properties: {}, traits: new Map(), directives: [], children: [] },
+        {
+          type: 'sensor',
+          id: 'temp_sensor',
+          properties: {},
+          traits: new Map(),
+          directives: [],
+          children: [],
+        },
+        {
+          type: 'sensor',
+          id: 'humidity_sensor',
+          properties: {},
+          traits: new Map(),
+          directives: [],
+          children: [],
+        },
       ],
     });
 

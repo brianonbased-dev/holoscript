@@ -57,7 +57,7 @@ export class SourceMapGenerator {
   private sourcesContent: (string | null)[] = [];
   private names: string[] = [];
   private mappings: LineMapping[] = [];
-  
+
   // State for delta encoding
   private lastSourceIndex = 0;
   private lastOriginalLine = 0;
@@ -130,7 +130,7 @@ export class SourceMapGenerator {
    */
   private encodeVLQ(value: number): string {
     let encoded = '';
-    let vlq = value < 0 ? ((-value) << 1) + 1 : value << 1;
+    let vlq = value < 0 ? (-value << 1) + 1 : value << 1;
 
     do {
       let digit = vlq & 0x1f;
@@ -217,7 +217,7 @@ export class SourceMapGenerator {
       sourceMap.sourceRoot = this.sourceRoot;
     }
 
-    if (this.sourcesContent.some(c => c !== null)) {
+    if (this.sourcesContent.some((c) => c !== null)) {
       sourceMap.sourcesContent = this.sourcesContent;
     }
 
@@ -255,7 +255,10 @@ export class SourceMapGenerator {
  */
 export class SourceMapConsumer {
   private sourceMap: SourceMap;
-  private decodedMappings: Map<string, { source: string; line: number; column: number; name?: string }> = new Map();
+  private decodedMappings: Map<
+    string,
+    { source: string; line: number; column: number; name?: string }
+  > = new Map();
 
   constructor(sourceMap: SourceMap | string) {
     this.sourceMap = typeof sourceMap === 'string' ? JSON.parse(sourceMap) : sourceMap;
@@ -406,7 +409,7 @@ export class SourceMapConsumer {
 export function combineSourceMaps(maps: SourceMap[], outputFile: string): SourceMap {
   const generator = new SourceMapGenerator({ file: outputFile });
 
-  let lineOffset = 0;
+  let _lineOffset = 0;
   for (const map of maps) {
     const consumer = new SourceMapConsumer(map);
 
@@ -420,7 +423,7 @@ export function combineSourceMaps(maps: SourceMap[], outputFile: string): Source
     // In a full implementation, we would decode each mapping,
     // add the lineOffset, and re-encode
     const mappingLines = (map.mappings.match(/;/g) || []).length + 1;
-    lineOffset += mappingLines;
+    _lineOffset += mappingLines;
   }
 
   return generator.generate();

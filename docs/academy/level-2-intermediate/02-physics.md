@@ -127,7 +127,7 @@ orb platform {
   @physics { type: "kinematic" }
   geometry: "cube"
   scale: [3, 0.2, 3]
-  
+
   animation move {
     property: "position.y"
     from: 0
@@ -200,7 +200,7 @@ Apply continuous force:
 orb rocket {
   @physics { mass: 1.0 }
   geometry: "cylinder"
-  
+
   onUpdate: {
     if (this.isBoosting) {
       physics.applyForce(this, [0, 50, 0])  // Upward thrust
@@ -218,7 +218,7 @@ orb ball {
   @physics
   @grabbable
   @throwable
-  
+
   onRelease(event): {
     // Add extra kick when released
     physics.applyImpulse(this, event.velocity.multiply(1.5))
@@ -233,7 +233,7 @@ Spin the object:
 ```hs
 orb spinner {
   @physics
-  
+
   onGrab: {
     physics.applyTorque(this, [0, 100, 0])  // Spin when grabbed
   }
@@ -248,18 +248,18 @@ orb spinner {
 orb collider {
   @physics
   @collidable
-  
+
   onCollisionEnter(event): {
     console.log("Hit:", event.other.name)
     console.log("Force:", event.impulse)
     console.log("Point:", event.contactPoint)
     console.log("Normal:", event.contactNormal)
   }
-  
+
   onCollisionStay(event): {
     // Called every frame while colliding
   }
-  
+
   onCollisionExit(event): {
     console.log("Stopped touching:", event.other.name)
   }
@@ -276,7 +276,7 @@ orb triggerZone {
   geometry: "cube"
   scale: [3, 3, 3]
   opacity: 0.2
-  
+
   onTriggerEnter(event): {
     if (event.object.tag === "player") {
       this.activateEvent()
@@ -298,10 +298,10 @@ orb laser {
       100,                     // Max distance
       ["enemy", "environment"] // Layer mask
     )
-    
+
     if (hit) {
       laserEnd.position = hit.point
-      
+
       if (hit.object.tag === "enemy") {
         hit.object.damage(10)
       }
@@ -323,7 +323,7 @@ orb handle {
 
 orb blade {
   @physics
-  
+
   joint fixed {
     connectedTo: handle
     breakForce: 1000  // Breaks if force exceeds this
@@ -338,7 +338,7 @@ Rotational constraint (doors, wheels):
 ```hs
 orb door {
   @physics { type: "dynamic" }
-  
+
   joint hinge {
     connectedTo: doorFrame
     anchor: [-0.5, 0, 0]       // Pivot point
@@ -356,7 +356,7 @@ Elastic connection:
 ```hs
 orb pendulum {
   @physics
-  
+
   joint spring {
     connectedTo: anchor
     springConstant: 50
@@ -370,11 +370,11 @@ orb pendulum {
 
 ```holo
 composition "Physics Playground" {
-  
+
   environment {
     gravity: [0, -9.81, 0]
   }
-  
+
   // Static ground
   orb ground {
     @physics { type: "static" }
@@ -383,44 +383,44 @@ composition "Physics Playground" {
     rotation: [-90, 0, 0]
     material: { color: "#3a3a3a" }
   }
-  
+
   // Bouncy balls
   template BouncyBall {
     params {
       bounce: number = 0.8
       ballColor: string = "#ff0000"
     }
-    
+
     @physics {
       mass: 0.5
       restitution: params.bounce
     }
     @grabbable
     @throwable
-    
+
     geometry: "sphere"
     scale: 0.2
     color: params.ballColor
-    
+
     onCollision(event): {
       if (event.impulse > 2) {
         audio.play("bounce.mp3", { volume: event.impulse / 10 })
       }
     }
   }
-  
+
   object ball1 using BouncyBall {
     position: [0, 3, -2]
     bounce: 0.95
     ballColor: "#ff0000"
   }
-  
+
   object ball2 using BouncyBall {
     position: [0.5, 4, -2]
     bounce: 0.7
     ballColor: "#00ff00"
   }
-  
+
   // Dominoes
   group dominoes {
     for (let i = 0; i < 10; i++) {
@@ -432,21 +432,21 @@ composition "Physics Playground" {
       }
     }
   }
-  
+
   // Swinging pendulum
   orb pendulumAnchor {
     @physics { type: "static" }
     position: [3, 4, -3]
     scale: 0.1
   }
-  
+
   orb pendulumBall {
     @physics { mass: 2.0 }
     @grabbable
     geometry: "sphere"
     scale: 0.3
     position: [3, 2, -3]
-    
+
     joint spring {
       connectedTo: pendulumAnchor
       springConstant: 20

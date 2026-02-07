@@ -37,24 +37,27 @@ interface DestructionState {
 interface DestructionConfig {
   mode: 'voronoi' | 'shatter' | 'chunks' | 'dissolve';
   fragment_count: number;
-  impact_threshold: number;   // Minimum impulse to trigger destruction
-  damage_threshold: number;   // Health at which destruction occurs
-  fragment_lifetime: number;  // Seconds before fragments despawn
-  explosion_force: number;    // Outward force on fragments
-  chain_reaction: boolean;    // Can trigger destruction in nearby objects
-  chain_radius: number;       // Radius for chain reactions
-  chain_delay: number;        // Delay before chain reaction
-  debris_physics: boolean;    // Fragments have physics
-  sound_on_break: string;     // Sound to play
-  effect_on_break: string;    // Particle effect to spawn
-  fade_fragments: boolean;    // Fragments fade over time
+  impact_threshold: number; // Minimum impulse to trigger destruction
+  damage_threshold: number; // Health at which destruction occurs
+  fragment_lifetime: number; // Seconds before fragments despawn
+  explosion_force: number; // Outward force on fragments
+  chain_reaction: boolean; // Can trigger destruction in nearby objects
+  chain_radius: number; // Radius for chain reactions
+  chain_delay: number; // Delay before chain reaction
+  debris_physics: boolean; // Fragments have physics
+  sound_on_break: string; // Sound to play
+  effect_on_break: string; // Particle effect to spawn
+  fade_fragments: boolean; // Fragments fade over time
 }
 
 // =============================================================================
 // FRAGMENTATION HELPERS
 // =============================================================================
 
-function generateVoronoiPoints(count: number, bounds: { x: number; y: number; z: number }): { x: number; y: number; z: number }[] {
+function generateVoronoiPoints(
+  count: number,
+  bounds: { x: number; y: number; z: number }
+): { x: number; y: number; z: number }[] {
   const points: { x: number; y: number; z: number }[] = [];
   for (let i = 0; i < count; i++) {
     points.push({
@@ -74,7 +77,7 @@ function generateFragments(
 ): Fragment[] {
   const fragments: Fragment[] = [];
   const points = generateVoronoiPoints(config.fragment_count, scale);
-  
+
   for (let i = 0; i < points.length; i++) {
     // Direction from center (or impact point)
     const center = impactPoint || { x: 0, y: 0, z: 0 };
@@ -82,10 +85,10 @@ function generateFragments(
     const dy = points[i].y - center.y;
     const dz = points[i].z - center.z;
     const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
-    
+
     // Normalize and apply explosion force
     const explosionScale = config.explosion_force + Math.random() * config.explosion_force * 0.5;
-    
+
     fragments.push({
       id: `fragment_${i}_${Date.now()}`,
       position: {
@@ -108,7 +111,7 @@ function generateFragments(
       lifetime: config.fragment_lifetime,
     });
   }
-  
+
   return fragments;
 }
 
@@ -119,34 +122,34 @@ function generateFragments(
 export const destructionHandler: TraitHandler<DestructionConfig> = {
   name: 'destruction' as any,
 
-  defaultConfig: { 
-    mode: 'voronoi', 
-    fragment_count: 8, 
-    impact_threshold: 10, 
+  defaultConfig: {
+    mode: 'voronoi',
+    fragment_count: 8,
+    impact_threshold: 10,
     damage_threshold: 0,
-    fragment_lifetime: 5, 
-    explosion_force: 5, 
-    chain_reaction: false, 
+    fragment_lifetime: 5,
+    explosion_force: 5,
+    chain_reaction: false,
     chain_radius: 3,
     chain_delay: 0.1,
-    debris_physics: true, 
-    sound_on_break: '', 
+    debris_physics: true,
+    sound_on_break: '',
     effect_on_break: '',
     fade_fragments: true,
   },
 
   onAttach(node, config, context) {
-    const state: DestructionState = { 
-      currentHealth: 100, 
+    const state: DestructionState = {
+      currentHealth: 100,
       maxHealth: 100,
-      isDestroyed: false, 
+      isDestroyed: false,
       fragments: [],
       accumulatedDamage: 0,
       lastImpactTime: 0,
       chainReactionTriggered: false,
     };
     (node as any).__destructionState = state;
-    
+
     // Subscribe to collision events via emit
     context.emit?.('subscribe_collision', { node });
   },
@@ -172,32 +175,30 @@ export const destructionHandler: TraitHandler<DestructionConfig> = {
     if (state.isDestroyed && state.fragments.length > 0) {
       const gravity = 9.81;
       const remainingFragments: Fragment[] = [];
-      
+
       for (const frag of state.fragments) {
         frag.lifetime -= delta;
-        
+
         if (frag.lifetime > 0) {
           // Update physics
           frag.velocity.y -= gravity * delta;
-          
+
           frag.position.x += frag.velocity.x * delta;
           frag.position.y += frag.velocity.y * delta;
           frag.position.z += frag.velocity.z * delta;
-          
+
           frag.rotation.x += frag.angularVelocity.x * delta;
           frag.rotation.y += frag.angularVelocity.y * delta;
           frag.rotation.z += frag.angularVelocity.z * delta;
-          
+
           // Apply drag
           const drag = 0.98;
           frag.velocity.x *= drag;
           frag.velocity.z *= drag;
-          
+
           // Update visual via emit
           if (frag.mesh) {
-            const alpha = config.fade_fragments 
-              ? frag.lifetime / config.fragment_lifetime 
-              : 1;
+            const alpha = config.fade_fragments ? frag.lifetime / config.fragment_lifetime : 1;
             context.emit?.('update_object', {
               node: frag.mesh,
               position: frag.position,
@@ -205,7 +206,7 @@ export const destructionHandler: TraitHandler<DestructionConfig> = {
               opacity: alpha,
             });
           }
-          
+
           // Ground collision
           if (frag.position.y < 0) {
             frag.position.y = 0;
@@ -213,7 +214,7 @@ export const destructionHandler: TraitHandler<DestructionConfig> = {
             frag.velocity.x *= 0.8;
             frag.velocity.z *= 0.8;
           }
-          
+
           remainingFragments.push(frag);
         } else {
           // Remove fragment via emit
@@ -222,9 +223,9 @@ export const destructionHandler: TraitHandler<DestructionConfig> = {
           }
         }
       }
-      
+
       state.fragments = remainingFragments;
-      
+
       // Emit completion when all fragments gone
       if (remainingFragments.length === 0) {
         context.emit?.('on_destruction_complete', { node });
@@ -235,11 +236,11 @@ export const destructionHandler: TraitHandler<DestructionConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__destructionState as DestructionState;
     if (!state) return;
-    
+
     if (event.type === 'damage') {
       state.currentHealth -= event.amount || 10;
       state.accumulatedDamage += event.amount || 10;
-      
+
       if (state.currentHealth <= config.damage_threshold && !state.isDestroyed) {
         triggerDestruction(node, config, context, state, event.impactPoint);
       }
@@ -259,7 +260,7 @@ export const destructionHandler: TraitHandler<DestructionConfig> = {
 // HELPER FUNCTIONS
 // =============================================================================
 
-function handleImpact(
+function _handleImpact(
   node: unknown,
   config: DestructionConfig,
   context: any,
@@ -273,14 +274,14 @@ function handleImpact(
     state.currentHealth -= damage;
     state.accumulatedDamage += damage;
     state.lastImpactTime = Date.now();
-    
-    context.emit?.('on_damage', { 
-      node, 
-      damage, 
+
+    context.emit?.('on_damage', {
+      node,
+      damage,
       health: state.currentHealth,
       impactPoint,
     });
-    
+
     if (state.currentHealth <= config.damage_threshold) {
       triggerDestruction(node, config, context, state, impactPoint);
     }
@@ -295,24 +296,26 @@ function triggerDestruction(
   impactPoint: { x: number; y: number; z: number } | undefined
 ): void {
   if (state.isDestroyed) return;
-  
+
   state.isDestroyed = true;
-  
+
   const position = (node as any).position || { x: 0, y: 0, z: 0 };
   const scale = (node as any).scale || { x: 1, y: 1, z: 1 };
-  
+
   // Generate fragments
   state.fragments = generateFragments(
     position,
     scale,
-    impactPoint ? {
-      x: impactPoint.x - position.x,
-      y: impactPoint.y - position.y,
-      z: impactPoint.z - position.z,
-    } : null,
+    impactPoint
+      ? {
+          x: impactPoint.x - position.x,
+          y: impactPoint.y - position.y,
+          z: impactPoint.z - position.z,
+        }
+      : null,
     config
   );
-  
+
   // Create fragment meshes
   for (const frag of state.fragments) {
     if (context.createFragment) {
@@ -324,35 +327,35 @@ function triggerDestruction(
       });
     }
   }
-  
+
   // Hide original object
   context.setVisible?.(node, false);
-  
+
   // Play sound
   if (config.sound_on_break) {
     context.playSound?.(config.sound_on_break, position);
   }
-  
+
   // Spawn particle effect
   if (config.effect_on_break) {
     context.spawnEffect?.(config.effect_on_break, position);
   }
-  
+
   // Emit destruction event
-  context.emit?.('on_destruction', { 
-    node, 
+  context.emit?.('on_destruction', {
+    node,
     fragments: state.fragments.length,
     impactPoint,
   });
-  
+
   // Chain reaction
   if (config.chain_reaction && !state.chainReactionTriggered) {
     state.chainReactionTriggered = true;
-    
+
     setTimeout(() => {
       const nearbyDestructibles = context.getObjectsInRadius?.(position, config.chain_radius) || [];
       for (const other of nearbyDestructibles) {
-        if (other !== node && (other as any).__destructionState) {
+        if (other !== node && (other).__destructionState) {
           context.dispatchEvent?.(other, { type: 'destroy', impactPoint: position });
         }
       }

@@ -16,7 +16,7 @@ export interface NavigationConfig {
 
   /** Dimensions of the navigation grid */
   gridSize: [number, number, number];
-  
+
   /** Resolution of the grid (meters per cell) */
   resolution: number;
 
@@ -40,7 +40,7 @@ export interface NavigationEngine {
   /** Initialize the engine with config */
   initialize(config: NavigationConfig): Promise<void>;
 
-  /** 
+  /**
    * Generate or update a flow field for a destination.
    * This triggers a GPU compute pass.
    */

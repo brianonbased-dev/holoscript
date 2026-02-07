@@ -20,7 +20,7 @@ composition "Scene Name" {
       score: 0
       level: 1
     }
-    
+
     action add_score(points) {
       state.score += points
     }
@@ -30,10 +30,10 @@ composition "Scene Name" {
   template "Bumper" {
     @physics
     @collidable
-    
+
     geometry: "cylinder"
     state { points: 100 }
-    
+
     on_collision(ball) {
       GameState.add_score(state.points)
       flash_color("#ffffff", 100ms)
@@ -59,17 +59,17 @@ composition "Scene Name" {
 
 ### Key `.holo` Features
 
-| Feature | Syntax | Purpose |
-|---------|--------|---------|
-| **Environment** | `environment { ... }` | Scene settings, physics, skybox |
-| **Templates** | `template "Name" { ... }` | Reusable object blueprints |
-| **Objects** | `object "Name" using "Template" { ... }` | Instances with overrides |
-| **State** | `state { prop: value }` | Reactive state blocks |
-| **Actions** | `action name(args) { ... }` | Callable functions |
-| **Collisions** | `on_collision(other) { ... }` | Physics event handlers |
-| **Input** | `on_key_down("key") { ... }` | Keyboard bindings |
-| **Panels** | `panel "Name" { ... }` | UI definitions |
-| **Triggers** | `trigger "event_name"` | Emit named events |
+| Feature         | Syntax                                   | Purpose                         |
+| --------------- | ---------------------------------------- | ------------------------------- |
+| **Environment** | `environment { ... }`                    | Scene settings, physics, skybox |
+| **Templates**   | `template "Name" { ... }`                | Reusable object blueprints      |
+| **Objects**     | `object "Name" using "Template" { ... }` | Instances with overrides        |
+| **State**       | `state { prop: value }`                  | Reactive state blocks           |
+| **Actions**     | `action name(args) { ... }`              | Callable functions              |
+| **Collisions**  | `on_collision(other) { ... }`            | Physics event handlers          |
+| **Input**       | `on_key_down("key") { ... }`             | Keyboard bindings               |
+| **Panels**      | `panel "Name" { ... }`                   | UI definitions                  |
+| **Triggers**    | `trigger "event_name"`                   | Emit named events               |
 
 ## 2. Hybrid Code Blocks (`.hsplus`)
 
@@ -82,7 +82,7 @@ Supported blocks: `module`, `script`, `struct`, `enum`, `class`, `interface`.
 module PhysicsSystem {
   // Raw TypeScript allowed here
   import { Vector3 } from 'three';
-  
+
   export class Gravity {
     apply(body: RigidBody) {
        body.velocity.y -= 9.8;
@@ -149,6 +149,7 @@ value: calculate_offset(10, 20)
 ## Standardization Guide
 
 To ensure your `.hsplus` files are compatible with the v2.1 Parser:
+
 1. **Wrap Top-Level Code**: If you have raw TypeScript imports or logic at the top level, wrap them in a `module Name { ... }` block.
 2. **Use Structs for Types**: Use `struct Name { ... }` for type definitions where possible, or `interface` (now supported).
 3. **Prefer Arrow Functions**: Use `() => { }` for logic callbacks instead of legacy string interpolation.

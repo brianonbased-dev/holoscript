@@ -57,15 +57,15 @@ Hover over any trait to see:
 
 Quick templates for common patterns:
 
-| Prefix | Expands To |
-|--------|-----------|
-| `orb` | Basic orb object |
-| `comp` | Composition skeleton |
-| `temp` | Template definition |
-| `obj` | Object with traits |
-| `grp` | Spatial group |
-| `env` | Environment block |
-| `logic` | Logic block |
+| Prefix  | Expands To           |
+| ------- | -------------------- |
+| `orb`   | Basic orb object     |
+| `comp`  | Composition skeleton |
+| `temp`  | Template definition  |
+| `obj`   | Object with traits   |
+| `grp`   | Spatial group        |
+| `env`   | Environment block    |
+| `logic` | Logic block          |
 
 Type the prefix and press Tab.
 
@@ -84,13 +84,13 @@ Or right-click → Format Document.
 
 Access via Command Palette (`Ctrl/Cmd + Shift + P`):
 
-| Command | Description |
-|---------|-------------|
-| `HoloScript: Validate File` | Check current file for errors |
-| `HoloScript: Preview Scene` | Launch 3D preview (coming soon) |
-| `HoloScript: Compile to...` | Compile to target platform |
-| `HoloScript: Generate from Description` | AI-powered generation |
-| `HoloScript: Suggest Traits` | Get trait suggestions |
+| Command                                 | Description                     |
+| --------------------------------------- | ------------------------------- |
+| `HoloScript: Validate File`             | Check current file for errors   |
+| `HoloScript: Preview Scene`             | Launch 3D preview (coming soon) |
+| `HoloScript: Compile to...`             | Compile to target platform      |
+| `HoloScript: Generate from Description` | AI-powered generation           |
+| `HoloScript: Suggest Traits`            | Get trait suggestions           |
 
 ---
 
@@ -104,15 +104,15 @@ Configure in VS Code Settings (`Ctrl/Cmd + ,`):
   "holoscript.validation.enabled": true,
   "holoscript.formatting.enabled": true,
   "holoscript.intellisense.enabled": true,
-  
+
   // Validation settings
   "holoscript.validation.checkUnknownTraits": true,
   "holoscript.validation.checkDeprecated": true,
-  
+
   // Formatting settings
   "holoscript.formatting.indentSize": 2,
   "holoscript.formatting.insertSpaces": true,
-  
+
   // Default target for compilation
   "holoscript.compile.defaultTarget": "threejs"
 }
@@ -124,11 +124,11 @@ Configure in VS Code Settings (`Ctrl/Cmd + ,`):
 
 The extension automatically associates:
 
-| Extension | Language ID |
-|-----------|-------------|
-| `.hs` | `holoscript` |
+| Extension | Language ID       |
+| --------- | ----------------- |
+| `.hs`     | `holoscript`      |
 | `.hsplus` | `holoscript-plus` |
-| `.holo` | `holoscript-holo` |
+| `.holo`   | `holoscript-holo` |
 
 To manually set for a file:
 
@@ -174,14 +174,14 @@ Add to your `settings.json`:
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl/Cmd + Space` | Trigger IntelliSense |
-| `Ctrl/Cmd + .` | Quick fixes |
-| `F2` | Rename symbol |
-| `F12` | Go to definition |
-| `Shift + F12` | Find all references |
-| `Ctrl/Cmd + Shift + O` | Go to symbol |
+| Shortcut               | Action               |
+| ---------------------- | -------------------- |
+| `Ctrl/Cmd + Space`     | Trigger IntelliSense |
+| `Ctrl/Cmd + .`         | Quick fixes          |
+| `F2`                   | Rename symbol        |
+| `F12`                  | Go to definition     |
+| `Shift + F12`          | Find all references  |
+| `Ctrl/Cmd + Shift + O` | Go to symbol         |
 
 ---
 

@@ -54,21 +54,53 @@ export type BlendShapeSet = 'arkit' | 'oculus' | 'custom';
  * Viseme identifier (Oculus standard)
  */
 export type OculusViseme =
-  | 'sil' | 'PP' | 'FF' | 'TH' | 'DD'
-  | 'kk' | 'CH' | 'SS' | 'nn' | 'RR'
-  | 'aa' | 'E' | 'I' | 'O' | 'U';
+  | 'sil'
+  | 'PP'
+  | 'FF'
+  | 'TH'
+  | 'DD'
+  | 'kk'
+  | 'CH'
+  | 'SS'
+  | 'nn'
+  | 'RR'
+  | 'aa'
+  | 'E'
+  | 'I'
+  | 'O'
+  | 'U';
 
 /**
  * Viseme identifier (ARKit standard)
  */
 export type ARKitViseme =
-  | 'jawOpen' | 'jawForward' | 'jawLeft' | 'jawRight'
-  | 'mouthClose' | 'mouthFunnel' | 'mouthPucker' | 'mouthLeft' | 'mouthRight'
-  | 'mouthSmileLeft' | 'mouthSmileRight' | 'mouthFrownLeft' | 'mouthFrownRight'
-  | 'mouthDimpleLeft' | 'mouthDimpleRight' | 'mouthStretchLeft' | 'mouthStretchRight'
-  | 'mouthRollLower' | 'mouthRollUpper' | 'mouthShrugLower' | 'mouthShrugUpper'
-  | 'mouthPressLeft' | 'mouthPressRight' | 'mouthLowerDownLeft' | 'mouthLowerDownRight'
-  | 'mouthUpperUpLeft' | 'mouthUpperUpRight';
+  | 'jawOpen'
+  | 'jawForward'
+  | 'jawLeft'
+  | 'jawRight'
+  | 'mouthClose'
+  | 'mouthFunnel'
+  | 'mouthPucker'
+  | 'mouthLeft'
+  | 'mouthRight'
+  | 'mouthSmileLeft'
+  | 'mouthSmileRight'
+  | 'mouthFrownLeft'
+  | 'mouthFrownRight'
+  | 'mouthDimpleLeft'
+  | 'mouthDimpleRight'
+  | 'mouthStretchLeft'
+  | 'mouthStretchRight'
+  | 'mouthRollLower'
+  | 'mouthRollUpper'
+  | 'mouthShrugLower'
+  | 'mouthShrugUpper'
+  | 'mouthPressLeft'
+  | 'mouthPressRight'
+  | 'mouthLowerDownLeft'
+  | 'mouthLowerDownRight'
+  | 'mouthUpperUpLeft'
+  | 'mouthUpperUpRight';
 
 /**
  * Viseme data point with timing
@@ -93,13 +125,13 @@ export interface VisemeTimestamp {
 export interface PhonemeTimestamp {
   /** Phoneme identifier (IPA or ARPAbet) */
   phoneme: string;
-  
+
   /** Start time in seconds from audio start */
   time: number;
-  
+
   /** Duration in seconds */
   duration: number;
-  
+
   /** Intensity (0-1) */
   weight?: number;
 }
@@ -319,7 +351,7 @@ export class LipSyncTrait {
   private autoResetTimer: ReturnType<typeof setTimeout> | null = null;
   private isSpeaking: boolean = false;
   private sessionCounter: number = 0;
-  
+
   // Phoneme tracking state
   private currentPhonemeIndex: number = -1;
 
@@ -534,7 +566,8 @@ export class LipSyncTrait {
       }
 
       if (count > 0) {
-        const normalizedEnergy = (bandEnergy / count / 255) * sensitivity * (band.sensitivity ?? 1.0);
+        const normalizedEnergy =
+          (bandEnergy / count / 255) * sensitivity * (band.sensitivity ?? 1.0);
         const clampedWeight = Math.min(normalizedEnergy, this.config.maxWeight ?? 0.85);
         weights[band.target] = clampedWeight;
       }
@@ -571,7 +604,10 @@ export class LipSyncTrait {
   /**
    * Sample viseme at a given time from timestamp data
    */
-  public sampleVisemeAtTime(time: number, data?: VisemeTimestamp[]): {
+  public sampleVisemeAtTime(
+    time: number,
+    data?: VisemeTimestamp[]
+  ): {
     viseme: string;
     weight: number;
     nextViseme?: string;
@@ -608,7 +644,7 @@ export class LipSyncTrait {
       const transitionTime = next.time - (this.config.coArticulationLookahead ?? 0.05);
       if (time >= transitionTime) {
         const blendFactor = (time - transitionTime) / (next.time - transitionTime);
-        weight *= (1 - blendFactor);
+        weight *= 1 - blendFactor;
       }
     }
 
@@ -636,7 +672,10 @@ export class LipSyncTrait {
   /**
    * Sample phoneme at a given time and map it to a viseme
    */
-  public samplePhonemeAtTime(time: number, data?: PhonemeTimestamp[]): {
+  public samplePhonemeAtTime(
+    time: number,
+    data?: PhonemeTimestamp[]
+  ): {
     viseme: string;
     weight: number;
   } {
@@ -653,7 +692,7 @@ export class LipSyncTrait {
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
       const p = phonemeData[mid];
-      
+
       if (time >= p.time && time < p.time + p.duration) {
         foundIndex = mid;
         break;
@@ -673,16 +712,16 @@ export class LipSyncTrait {
 
     // Map phoneme to Oculus-compatible viseme using IPA/ARPAbet mapping
     const viseme = this.mapPhonemeToViseme(current.phoneme);
-    
+
     // Smooth blending within the phoneme duration
     let weight = Math.min(current.weight ?? 1.0, this.config.maxWeight ?? 0.85);
     const progress = (time - current.time) / current.duration;
-    
+
     // Fade in/out slightly at boundaries (co-articulation)
     if (progress < 0.1) {
-      weight *= (progress / 0.1);
+      weight *= progress / 0.1;
     } else if (progress > 0.9) {
-      weight *= ((1.0 - progress) / 0.1);
+      weight *= (1.0 - progress) / 0.1;
     }
 
     return {
@@ -696,14 +735,14 @@ export class LipSyncTrait {
    */
   private mapPhonemeToViseme(phoneme: string): string {
     const p = phoneme.toLowerCase();
-    
+
     // Core vowels
     if (['aa', 'ah', 'ax'].includes(p)) return 'aa';
     if (['ae', 'eh', 'ey'].includes(p)) return 'E';
     if (['ih', 'iy'].includes(p)) return 'I';
     if (['ao', 'ow', 'oy'].includes(p)) return 'O';
     if (['uh', 'uw'].includes(p)) return 'U';
-    
+
     // Consonants
     if (['p', 'b', 'm'].includes(p)) return 'PP';
     if (['f', 'v'].includes(p)) return 'FF';
@@ -714,7 +753,7 @@ export class LipSyncTrait {
     if (['s', 'z'].includes(p)) return 'SS';
     if (['r', 'er'].includes(p)) return 'RR';
     if (['l', 'el'].includes(p)) return 'nn';
-    
+
     return 'sil';
   }
 

@@ -36,11 +36,7 @@ import {
 describe('SemanticAnnotation', () => {
   describe('createAnnotation', () => {
     it('should create annotation with required fields', () => {
-      const annotation = createAnnotation(
-        'position',
-        'Position',
-        'spatial'
-      );
+      const annotation = createAnnotation('position', 'Position', 'spatial');
 
       expect(annotation.propertyPath).toBe('position');
       expect(annotation.label).toBe('Position');
@@ -239,12 +235,18 @@ describe('SemanticRegistry', () => {
   describe('findByIntent', () => {
     it('should find annotations by intent', () => {
       const schema = createSchema('Entity', 'entity', '1.0.0');
-      schema.annotations.set('config', createAnnotation('config', 'Config', 'behavioral', {
-        intent: 'config',
-      }));
-      schema.annotations.set('state', createAnnotation('state', 'State', 'behavioral', {
-        intent: 'state',
-      }));
+      schema.annotations.set(
+        'config',
+        createAnnotation('config', 'Config', 'behavioral', {
+          intent: 'config',
+        })
+      );
+      schema.annotations.set(
+        'state',
+        createAnnotation('state', 'State', 'behavioral', {
+          intent: 'state',
+        })
+      );
 
       registry.registerSchema(schema);
 
@@ -323,11 +325,14 @@ describe('SemanticRegistry', () => {
       const schema = createSchema('Player', 'player', '1.0.0', {
         description: 'A player entity',
       });
-      schema.annotations.set('health', createAnnotation('health', 'Health', 'behavioral', {
-        description: 'Player health points',
-        aiHint: 'Affects player survival',
-        unit: 'hp',
-      }));
+      schema.annotations.set(
+        'health',
+        createAnnotation('health', 'Health', 'behavioral', {
+          description: 'Player health points',
+          aiHint: 'Affects player survival',
+          unit: 'hp',
+        })
+      );
 
       registry.registerSchema(schema);
 

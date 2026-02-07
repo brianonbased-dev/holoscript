@@ -32,14 +32,14 @@ interface SoftBodyState {
 }
 
 interface SoftBodyConfig {
-  stiffness: number;  // 0-1
+  stiffness: number; // 0-1
   damping: number;
   mass: number;
-  pressure: number;  // Internal pressure
-  volume_conservation: number;  // 0-1
+  pressure: number; // Internal pressure
+  volume_conservation: number; // 0-1
   collision_margin: number;
   solver_iterations: number;
-  tetrahedral: boolean;  // Use tetrahedral mesh
+  tetrahedral: boolean; // Use tetrahedral mesh
   surface_stiffness: number;
   bending_stiffness: number;
 }
@@ -76,7 +76,7 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
       simulationHandle: null,
     };
     (node as any).__softBodyState = state;
-    
+
     // Create soft body physics
     context.emit?.('soft_body_create', {
       node,
@@ -91,7 +91,7 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
       surfaceStiffness: config.surface_stiffness,
       bendingStiffness: config.bending_stiffness,
     });
-    
+
     state.isSimulating = true;
   },
 
@@ -106,18 +106,18 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__softBodyState as SoftBodyState;
     if (!state || !state.isSimulating) return;
-    
+
     // Step simulation
     context.emit?.('soft_body_step', {
       node,
       deltaTime: delta,
     });
-    
+
     // Volume conservation pressure
     if (config.volume_conservation > 0 && state.restVolume > 0) {
       const volumeRatio = state.currentVolume / state.restVolume;
       const pressureCorrection = (1 - volumeRatio) * config.volume_conservation * config.pressure;
-      
+
       if (Math.abs(pressureCorrection) > 0.01) {
         context.emit?.('soft_body_apply_pressure', {
           node,
@@ -130,11 +130,11 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__softBodyState as SoftBodyState;
     if (!state) return;
-    
+
     if (event.type === 'soft_body_vertex_update') {
       const positions = event.positions as Array<{ x: number; y: number; z: number }>;
-      const normals = event.normals as Array<{ x: number; y: number; z: number }> || [];
-      
+      const normals = (event.normals as Array<{ x: number; y: number; z: number }>) || [];
+
       // Update vertices
       for (let i = 0; i < positions.length; i++) {
         if (!state.vertices[i]) {
@@ -151,7 +151,7 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
           }
         }
       }
-      
+
       // Calculate deformation
       let totalDeform = 0;
       for (const vert of state.vertices) {
@@ -162,17 +162,17 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
       }
       state.deformationAmount = state.vertices.length > 0 ? totalDeform / state.vertices.length : 0;
       state.isDeformed = state.deformationAmount > 0.01;
-      
-      state.currentVolume = event.volume as number || state.currentVolume;
-      state.centerOfMass = event.centerOfMass as typeof state.centerOfMass || state.centerOfMass;
-      
+
+      state.currentVolume = (event.volume as number) || state.currentVolume;
+      state.centerOfMass = (event.centerOfMass as typeof state.centerOfMass) || state.centerOfMass;
+
       // Update mesh
       context.emit?.('soft_body_mesh_update', {
         node,
-        vertices: state.vertices.map(v => v.position),
-        normals: state.vertices.map(v => v.normal),
+        vertices: state.vertices.map((v) => v.position),
+        normals: state.vertices.map((v) => v.normal),
       });
-      
+
       if (state.isDeformed) {
         context.emit?.('on_soft_body_deform', {
           node,
@@ -182,8 +182,8 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
     } else if (event.type === 'soft_body_apply_force') {
       const force = event.force as { x: number; y: number; z: number };
       const position = event.position as { x: number; y: number; z: number } | undefined;
-      const radius = event.radius as number || 0.1;
-      
+      const radius = (event.radius as number) || 0.1;
+
       context.emit?.('soft_body_external_force', {
         node,
         force,
@@ -192,9 +192,13 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
       });
     } else if (event.type === 'soft_body_poke') {
       const position = event.position as { x: number; y: number; z: number };
-      const force = event.force as number || 10;
-      const direction = event.direction as { x: number; y: number; z: number } || { x: 0, y: -1, z: 0 };
-      
+      const force = (event.force as number) || 10;
+      const direction = (event.direction as { x: number; y: number; z: number }) || {
+        x: 0,
+        y: -1,
+        z: 0,
+      };
+
       context.emit?.('soft_body_impulse', {
         node,
         position,
@@ -206,8 +210,10 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
       });
     } else if (event.type === 'soft_body_set_anchor') {
       const vertexIndex = event.vertexIndex as number;
-      const targetPosition = event.targetPosition as { x: number; y: number; z: number } | undefined;
-      
+      const targetPosition = event.targetPosition as
+        | { x: number; y: number; z: number }
+        | undefined;
+
       context.emit?.('soft_body_anchor_vertex', {
         node,
         vertexIndex,
@@ -215,7 +221,7 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
       });
     } else if (event.type === 'soft_body_release_anchor') {
       const vertexIndex = event.vertexIndex as number;
-      
+
       context.emit?.('soft_body_unanchor_vertex', {
         node,
         vertexIndex,
@@ -229,7 +235,7 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
       state.isDeformed = false;
       state.deformationAmount = 0;
       state.currentVolume = state.restVolume;
-      
+
       context.emit?.('soft_body_reset_shape', { node });
     } else if (event.type === 'soft_body_pause') {
       state.isSimulating = false;

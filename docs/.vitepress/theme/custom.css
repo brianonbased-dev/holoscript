@@ -3,11 +3,15 @@
   --vp-c-brand-2: #00cccc;
   --vp-c-brand-3: #009999;
   --vp-c-brand-soft: rgba(0, 255, 255, 0.14);
-  
+
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: linear-gradient(135deg, #00ffff 0%, #ff00ff 50%, #ffff00 100%);
-  
-  --vp-home-hero-image-background-image: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(255, 0, 255, 0.3) 100%);
+
+  --vp-home-hero-image-background-image: linear-gradient(
+    135deg,
+    rgba(0, 255, 255, 0.3) 0%,
+    rgba(255, 0, 255, 0.3) 100%
+  );
   --vp-home-hero-image-filter: blur(44px);
 }
 
@@ -19,9 +23,15 @@
 
 /* Hero gradient animation */
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .VPHero .name {

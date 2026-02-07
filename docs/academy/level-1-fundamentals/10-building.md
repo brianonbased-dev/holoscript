@@ -46,15 +46,15 @@ holoscript build --target web,oculus
 
 HoloScript compiles to multiple platforms:
 
-| Target | Description | Output |
-|--------|-------------|--------|
-| `web` | WebXR for browsers | `dist/web/` |
-| `oculus` | Oculus Quest | `dist/oculus/` APK |
-| `steamvr` | SteamVR/OpenVR | `dist/steamvr/` |
-| `pico` | Pico headsets | `dist/pico/` |
-| `visionpro` | Apple Vision Pro | `dist/visionpro/` |
-| `android` | Android AR | `dist/android/` |
-| `ios` | iOS AR | `dist/ios/` |
+| Target      | Description        | Output             |
+| ----------- | ------------------ | ------------------ |
+| `web`       | WebXR for browsers | `dist/web/`        |
+| `oculus`    | Oculus Quest       | `dist/oculus/` APK |
+| `steamvr`   | SteamVR/OpenVR     | `dist/steamvr/`    |
+| `pico`      | Pico headsets      | `dist/pico/`       |
+| `visionpro` | Apple Vision Pro   | `dist/visionpro/`  |
+| `android`   | Android AR         | `dist/android/`    |
+| `ios`       | iOS AR             | `dist/ios/`        |
 
 ## Configuration Options
 
@@ -66,25 +66,25 @@ HoloScript compiles to multiple platforms:
   "version": "1.0.0",
   "entry": "src/main.holo",
   "targets": ["web", "oculus"],
-  
+
   "build": {
     "outDir": "dist",
     "sourceMaps": true,
     "minify": true,
-    
+
     "optimizations": {
       "treeShaking": true,
       "deadCodeElimination": true,
       "assetCompression": true
     }
   },
-  
+
   "web": {
     "publicPath": "/",
     "pwa": true,
     "offline": true
   },
-  
+
   "oculus": {
     "packageName": "com.mycompany.myvrapp",
     "versionCode": 1,
@@ -219,18 +219,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-      
+
       - name: Install dependencies
         run: npm install
-      
+
       - name: Build
         run: npx holoscript build --target web
-      
+
       - name: Deploy to Netlify
         uses: netlify/actions/cli@master
         with:

@@ -181,7 +181,7 @@ export const mqttSourceHandler: TraitHandler<MQTTSourceConfig> = {
     }
   },
 
-  onDetach(node, config, context) {
+  onDetach(node, config, _context) {
     const state = (node as any).__mqttSourceState as MQTTSourceState | undefined;
     if (state?.client) {
       state.client.unsubscribe(config.topic);
@@ -189,7 +189,7 @@ export const mqttSourceHandler: TraitHandler<MQTTSourceConfig> = {
     delete (node as any).__mqttSourceState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, _context, _delta) {
     const state = (node as any).__mqttSourceState as MQTTSourceState | undefined;
     if (!state) return;
 
@@ -226,14 +226,14 @@ export const mqttSourceHandler: TraitHandler<MQTTSourceConfig> = {
  * Check if a node has the @mqtt_source trait
  */
 export function hasMQTTSourceTrait(node: any): boolean {
-  return !!(node as any).__mqttSourceState;
+  return !!(node).__mqttSourceState;
 }
 
 /**
  * Get the MQTT source state from a node
  */
 export function getMQTTSourceState(node: any): MQTTSourceState | null {
-  return (node as any).__mqttSourceState || null;
+  return (node).__mqttSourceState || null;
 }
 
 /**

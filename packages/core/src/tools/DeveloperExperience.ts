@@ -433,6 +433,8 @@ export class SourceMapGenerator {
    */
   private encodeMappings(): string {
     // Simplified VLQ encoding
-    return this.mappings.map((m) => `${m.generatedLine}:${m.generatedColumn}->${m.sourceLine}:${m.sourceColumn}`).join(';');
+    return this.mappings
+      .map((m) => `${m.generatedLine}:${m.generatedColumn}->${m.sourceLine}:${m.sourceColumn}`)
+      .join(';');
   }
 }

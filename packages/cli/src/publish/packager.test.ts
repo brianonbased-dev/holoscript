@@ -7,12 +7,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import {
-  PackagePackager,
-  createPackager,
-  packPackage,
-  getPackageManifest,
-} from './packager';
+import { PackagePackager, createPackager, packPackage, getPackageManifest } from './packager';
 
 describe('PackagePackager', () => {
   const testDir = join(__dirname, '__test_packager_fixtures__');
@@ -50,10 +45,7 @@ describe('PackagePackager', () => {
     });
 
     it('should fail without name field', async () => {
-      writeFileSync(
-        join(testDir, 'package.json'),
-        JSON.stringify({ version: '1.0.0' })
-      );
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ version: '1.0.0' }));
 
       const packager = createPackager(testDir);
       const result = await packager.pack();

@@ -39,7 +39,7 @@ export class ConfigLoader {
       console.error(`Failed to load config from ${configPath}:`, error);
       return { ...DEFAULT_CONFIG };
     }
-    
+
     // console.log(`Loaded ${configPath}:`, JSON.stringify(rawConfig));
     console.log(`Loaded ${configPath}:`, JSON.stringify(rawConfig));
 
@@ -48,14 +48,12 @@ export class ConfigLoader {
       ignorePatterns: [],
       maxErrors: 100,
       typeChecking: true,
-      ...rawConfig // Base config
+      ...rawConfig, // Base config
     };
 
     // Handle 'extends'
     if (rawConfig.extends) {
-      const extensions = Array.isArray(rawConfig.extends) 
-        ? rawConfig.extends 
-        : [rawConfig.extends];
+      const extensions = Array.isArray(rawConfig.extends) ? rawConfig.extends : [rawConfig.extends];
 
       for (const ext of extensions) {
         let extPath = ext;
@@ -65,13 +63,13 @@ export class ConfigLoader {
         } else {
           // Assume node module or absolute path (simplified)
           try {
-             extPath = require.resolve(ext, { paths: [path.dirname(configPath)] });
-          } catch (e) {
-             console.warn(`Could not resolve config extension: ${ext}`);
-             continue; // Skip if not found
+            extPath = require.resolve(ext, { paths: [path.dirname(configPath)] });
+          } catch (_e) {
+            console.warn(`Could not resolve config extension: ${ext}`);
+            continue; // Skip if not found
           }
         }
-        
+
         const baseConfig = this.loadConfigFromFile(extPath);
         combinedConfig = this.mergeConfigs(baseConfig, combinedConfig);
       }
@@ -97,7 +95,7 @@ export class ConfigLoader {
         '.hololintrc',
         '.hololintrc.json',
         '.hololintrc.js',
-        'hololint.config.js'
+        'hololint.config.js',
       ];
 
       for (const candidate of candidates) {
@@ -121,10 +119,7 @@ export class ConfigLoader {
         ...base.rules,
         ...override.rules,
       },
-      ignorePatterns: [
-        ...(base.ignorePatterns || []),
-        ...(override.ignorePatterns || [])
-      ],
+      ignorePatterns: [...(base.ignorePatterns || []), ...(override.ignorePatterns || [])],
       // Primitive types (maxErrors, typeChecking) are overwritten by spread above
     };
   }

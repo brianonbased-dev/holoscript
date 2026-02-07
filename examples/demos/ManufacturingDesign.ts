@@ -1,6 +1,6 @@
 /**
  * Demo Application 3: Manufacturing Design
- * 
+ *
  * Shows a product assembly walkthrough with real-time quality inspection
  * and stress visualization accessible from factory floor, office, and remote locations.
  */
@@ -109,16 +109,16 @@ function annotateIssue(position, severity, description) {
     userId: getCurrentUser()
   })
 }
-`
+`;
 
 /**
  * Manufacturing Design Demo
  * Showcases precision engineering, stress analysis, and remote collaboration
  */
 export class ManufacturingDesignDemo {
-  private name: string = 'Advanced Manufacturing'
-  private hsCode: number = 90 // Lines of HoloScript+ code
-  private traditionalCode: number = 12000 // Lines of traditional code
+  private name: string = 'Advanced Manufacturing';
+  private hsCode: number = 90; // Lines of HoloScript+ code
+  private traditionalCode: number = 12000; // Lines of traditional code
 
   private industries: string[] = [
     'Automotive',
@@ -126,7 +126,7 @@ export class ManufacturingDesignDemo {
     'Medical Devices',
     'Consumer Electronics',
     'Industrial Equipment',
-  ]
+  ];
 
   private deviceScenarios = {
     'factory-floor': {
@@ -161,7 +161,7 @@ export class ManufacturingDesignDemo {
       latency: '< 11ms',
       accuracy: 'Spatial accuracy',
     },
-  }
+  };
 
   constructor() {}
 
@@ -169,11 +169,11 @@ export class ManufacturingDesignDemo {
    * Generate product assembly specification
    */
   generateAssemblySpecification(productType: 'engine' | 'phone' | 'prosthetic' | 'turbine'): {
-    component: string
-    quantity: number
-    material: string
-    tolerance: string
-    estimatedTime: string
+    component: string;
+    quantity: number;
+    material: string;
+    tolerance: string;
+    estimatedTime: string;
   }[] {
     const specs = {
       engine: [
@@ -296,9 +296,9 @@ export class ManufacturingDesignDemo {
           estimatedTime: '60 minutes each',
         },
       ],
-    }
+    };
 
-    return specs[productType]
+    return specs[productType];
   }
 
   /**
@@ -334,26 +334,26 @@ export class ManufacturingDesignDemo {
         hotspots: true,
         coolingPaths: true,
       },
-      'deflection': {
+      deflection: {
         name: 'Deflection Magnitude',
         colorScale: 'magnitude',
         unit: 'Micrometers',
         vectors: true,
         exaggeration: 10,
       },
-    }
+    };
   }
 
   /**
    * Assembly step-by-step procedure
    */
   getAssemblyProcedure(productType: 'engine' | 'phone' | 'prosthetic' | 'turbine'): {
-    step: number
-    action: string
-    component: string
-    expectedTime: string
-    qualityCriteria: string[]
-    warningPoints: string[]
+    step: number;
+    action: string;
+    component: string;
+    expectedTime: string;
+    qualityCriteria: string[];
+    warningPoints: string[];
   }[] {
     const procedures = {
       engine: [
@@ -404,7 +404,11 @@ export class ManufacturingDesignDemo {
           action: 'Prepare',
           component: 'Main PCB',
           expectedTime: '5 min',
-          qualityCriteria: ['No visible corrosion', 'All components soldered', 'No cold solder joints'],
+          qualityCriteria: [
+            'No visible corrosion',
+            'All components soldered',
+            'No cold solder joints',
+          ],
           warningPoints: ['Static precautions required', 'Ground wrist strap before touching'],
         },
         {
@@ -420,7 +424,11 @@ export class ManufacturingDesignDemo {
           action: 'Install',
           component: 'Display Assembly',
           expectedTime: '8 min',
-          qualityCriteria: ['No dust under display', 'Color accuracy verified', 'Touch response good'],
+          qualityCriteria: [
+            'No dust under display',
+            'Color accuracy verified',
+            'Touch response good',
+          ],
           warningPoints: ['Handle by edges only', 'Verify 100% pixel coverage'],
         },
         {
@@ -454,7 +462,11 @@ export class ManufacturingDesignDemo {
           action: 'Program',
           component: 'Control Algorithm',
           expectedTime: '30 min',
-          qualityCriteria: ['User training complete', 'Response intuitive', 'Safety protocols active'],
+          qualityCriteria: [
+            'User training complete',
+            'Response intuitive',
+            'Safety protocols active',
+          ],
           warningPoints: ['Backup settings before update', 'Verify emergency stop'],
         },
       ],
@@ -485,7 +497,10 @@ export class ManufacturingDesignDemo {
           component: 'Bearing Assembly',
           expectedTime: '45 min',
           qualityCriteria: ['Preload correct', 'Axial float verified', 'Thermal growth calculated'],
-          warningPoints: ['Bearing temperature monitoring essential', 'Oil supply pressure checked'],
+          warningPoints: [
+            'Bearing temperature monitoring essential',
+            'Oil supply pressure checked',
+          ],
         },
         {
           step: 4,
@@ -496,19 +511,19 @@ export class ManufacturingDesignDemo {
           warningPoints: ['Run endurance test', 'Monitor for hot spots'],
         },
       ],
-    }
+    };
 
-    return procedures[productType]
+    return procedures[productType];
   }
 
   /**
    * Comparison: Traditional vs HoloScript+
    */
   getImplementationComparison(): {
-    aspect: string
-    traditional: string
-    holoscript: string
-    timeSaved: string
+    aspect: string;
+    traditional: string;
+    holoscript: string;
+    timeSaved: string;
   }[] {
     return [
       {
@@ -547,18 +562,18 @@ export class ManufacturingDesignDemo {
         holoscript: 'Works on any device user has',
         timeSaved: '5 weeks',
       },
-    ]
+    ];
   }
 
   /**
    * Cross-platform deployment
    */
   getCrossPlatformDeployment(): {
-    location: string
-    devices: string[]
-    buildTime: string
-    updateTime: string
-    trainTime: string
+    location: string;
+    devices: string[];
+    buildTime: string;
+    updateTime: string;
+    trainTime: string;
   }[] {
     return [
       {
@@ -596,7 +611,7 @@ export class ManufacturingDesignDemo {
         updateTime: 'Automatic',
         trainTime: '2 hours',
       },
-    ]
+    ];
   }
 
   /**
@@ -629,17 +644,17 @@ export class ManufacturingDesignDemo {
         See exploded views, part lists, common issues.
         Phone app works in customer locations.
       `,
-    }
+    };
   }
 
   /**
    * ROI Analysis
    */
   getROIAnalysis(): {
-    metric: string
-    traditional: string
-    holoscript: string
-    improvement: string
+    metric: string;
+    traditional: string;
+    holoscript: string;
+    improvement: string;
   }[] {
     return [
       {
@@ -678,10 +693,10 @@ export class ManufacturingDesignDemo {
         holoscript: 'Instant (cloud sync)',
         improvement: '100% faster',
       },
-    ]
+    ];
   }
 }
 
 export function createManufacturingDemo(): ManufacturingDesignDemo {
-  return new ManufacturingDesignDemo()
+  return new ManufacturingDesignDemo();
 }

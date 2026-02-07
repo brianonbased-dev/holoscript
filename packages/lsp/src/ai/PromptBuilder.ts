@@ -1,6 +1,6 @@
 /**
  * HoloScript LSP - Prompt Builder
- * 
+ *
  * Builds prompts for AI completion queries.
  */
 
@@ -30,7 +30,7 @@ Be concise. Provide code snippets without explanation unless asked.`;
     const existingTraits = context.existingTraits?.join(', ') || 'none';
     const objectType = context.objectType || 'object';
     const objectName = context.objectName || 'unnamed';
-    
+
     return `${this.systemPrompt}
 
 Context:
@@ -53,7 +53,7 @@ ${context.surroundingLines.join('\n')}
 
 Respond with a comma-separated list of trait names (without @):`;
   }
-  
+
   /**
    * Build prompt for code generation from comment
    */
@@ -74,13 +74,13 @@ ${context.surroundingLines.join('\n')}
 Generate HoloScript code that implements what the comment describes. Use .hsplus syntax.
 Respond with ONLY the code in a code block, no explanation:`;
   }
-  
+
   /**
    * Build prompt for property suggestions
    */
   public buildPropertyPrompt(context: CompletionContext): string {
     const existingProperties = context.existingProperties?.join(', ') || 'none';
-    
+
     return `${this.systemPrompt}
 
 Context:
@@ -99,13 +99,13 @@ Suggest the most likely property name and value based on:
 
 Respond with property suggestions in format "propertyName: value", one per line:`;
   }
-  
+
   /**
    * Build prompt for event handler suggestions
    */
   public buildEventPrompt(context: CompletionContext): string {
     const traits = context.existingTraits?.join(', ') || 'none';
-    
+
     return `${this.systemPrompt}
 
 Context:
@@ -121,11 +121,14 @@ Based on the traits, suggest appropriate event handlers:
 
 Respond with event handler names, one per line:`;
   }
-  
+
   /**
    * Build prompt for error fix suggestions
    */
-  public buildErrorFixPrompt(context: ErrorContext, error: { message: string; line: number; column: number }): string {
+  public buildErrorFixPrompt(
+    context: ErrorContext,
+    error: { message: string; line: number; column: number }
+  ): string {
     return `${this.systemPrompt}
 
 Error occurred:
@@ -148,7 +151,7 @@ Common fixes:
 
 Respond with the corrected code in a code block:`;
   }
-  
+
   /**
    * Build prompt for general completions
    */
@@ -170,7 +173,7 @@ What is the user most likely trying to type? Consider:
 
 Respond with the most likely completion (just the code, no explanation):`;
   }
-  
+
   /**
    * Build prompt for trait recommendations (proactive)
    */

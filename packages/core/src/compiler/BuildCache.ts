@@ -15,8 +15,16 @@
  */
 
 import { createHash } from 'crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync, readdirSync, statSync } from 'fs';
-import { join, dirname, basename } from 'path';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  unlinkSync,
+  readdirSync,
+  statSync,
+} from 'fs';
+import { join } from 'path';
 
 /**
  * Cache entry types
@@ -203,7 +211,9 @@ export class BuildCache {
 
         // Validate version
         if (parsed.version !== this.options.version) {
-          this.log(`Version mismatch (${parsed.version} vs ${this.options.version}), clearing cache`);
+          this.log(
+            `Version mismatch (${parsed.version} vs ${this.options.version}), clearing cache`
+          );
           await this.clear();
           return;
         }
@@ -403,8 +413,13 @@ export class BuildCache {
       await this.initialize();
     }
 
-    const typesToInvalidate: CacheEntryType[] =
-      types || ['ast', 'compiled', 'bundle', 'sourcemap', 'metadata'];
+    const typesToInvalidate: CacheEntryType[] = types || [
+      'ast',
+      'compiled',
+      'bundle',
+      'sourcemap',
+      'metadata',
+    ];
     let invalidatedCount = 0;
 
     for (const type of typesToInvalidate) {
@@ -475,7 +490,7 @@ export class BuildCache {
     const keysToRemove: string[] = [];
 
     for (const [key, meta] of this.index) {
-      if (meta.dependencies?.some(dep => dep.replace(/\\/g, '/') === normalizedPath)) {
+      if (meta.dependencies?.some((dep) => dep.replace(/\\/g, '/') === normalizedPath)) {
         keysToRemove.push(key);
       }
     }

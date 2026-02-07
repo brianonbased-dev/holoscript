@@ -6,7 +6,11 @@
 
 import { describe, it, expect } from 'vitest';
 // Import directly from rule module to avoid circular dependency issues
-import { noDeadCodeRule, createNoDeadCodeRule, type NoDeadCodeOptions } from '../rules/no-dead-code';
+import {
+  noDeadCodeRule,
+  createNoDeadCodeRule,
+  type NoDeadCodeOptions,
+} from '../rules/no-dead-code';
 import type { RuleContext } from '../types';
 
 /**

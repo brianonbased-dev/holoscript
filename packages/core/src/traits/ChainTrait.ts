@@ -31,12 +31,12 @@ interface ChainState {
 
 interface ChainConfig {
   links: number;
-  link_length: number;  // meters
-  link_mass: number;  // kg per link
-  stiffness: number;  // Joint stiffness
+  link_length: number; // meters
+  link_mass: number; // kg per link
+  stiffness: number; // Joint stiffness
   damping: number;
-  attach_start: string;  // node ID
-  attach_end: string;  // node ID
+  attach_start: string; // node ID
+  attach_end: string; // node ID
   collision_between_links: boolean;
   breakable: boolean;
   break_force: number;
@@ -75,7 +75,7 @@ export const chainHandler: TraitHandler<ChainConfig> = {
       totalLength: config.links * config.link_length,
     };
     (node as any).__chainState = state;
-    
+
     // Initialize links
     for (let i = 0; i < config.links; i++) {
       state.links.push({
@@ -84,7 +84,7 @@ export const chainHandler: TraitHandler<ChainConfig> = {
         bodyHandle: null,
       });
     }
-    
+
     // Create chain physics
     context.emit?.('chain_create', {
       node,
@@ -96,7 +96,7 @@ export const chainHandler: TraitHandler<ChainConfig> = {
       collisionBetweenLinks: config.collision_between_links,
       linkGeometry: config.link_geometry,
     });
-    
+
     // Attach endpoints
     if (config.attach_start) {
       context.emit?.('chain_attach', {
@@ -112,7 +112,7 @@ export const chainHandler: TraitHandler<ChainConfig> = {
         targetNodeId: config.attach_end,
       });
     }
-    
+
     state.isSimulating = true;
   },
 
@@ -124,10 +124,10 @@ export const chainHandler: TraitHandler<ChainConfig> = {
     delete (node as any).__chainState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, _config, _context, _delta) {
     const state = (node as any).__chainState as ChainState;
     if (!state || !state.isSimulating) return;
-    
+
     // Physics update is handled by physics engine
     // Just update visuals based on received positions
   },
@@ -135,17 +135,17 @@ export const chainHandler: TraitHandler<ChainConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__chainState as ChainState;
     if (!state) return;
-    
+
     if (event.type === 'chain_link_update') {
       const linkIndex = event.linkIndex as number;
       const position = event.position as { x: number; y: number; z: number };
       const rotation = event.rotation as { x: number; y: number; z: number; w: number };
-      
+
       if (state.links[linkIndex]) {
         state.links[linkIndex].position = position;
         state.links[linkIndex].rotation = rotation;
       }
-      
+
       // Update visual mesh
       context.emit?.('chain_mesh_update', {
         node,
@@ -156,12 +156,12 @@ export const chainHandler: TraitHandler<ChainConfig> = {
     } else if (event.type === 'chain_full_update') {
       const positions = event.positions as Array<{ x: number; y: number; z: number }>;
       const rotations = event.rotations as Array<{ x: number; y: number; z: number; w: number }>;
-      
+
       for (let i = 0; i < state.links.length && i < positions.length; i++) {
         state.links[i].position = positions[i];
         state.links[i].rotation = rotations[i] || state.links[i].rotation;
       }
-      
+
       context.emit?.('chain_full_mesh_update', {
         node,
         links: state.links,
@@ -169,7 +169,7 @@ export const chainHandler: TraitHandler<ChainConfig> = {
     } else if (event.type === 'chain_attach') {
       const endpoint = event.endpoint as 'start' | 'end';
       const targetNodeId = event.targetNodeId as string;
-      
+
       context.emit?.('chain_create_attachment', {
         node,
         endpoint,
@@ -178,29 +178,29 @@ export const chainHandler: TraitHandler<ChainConfig> = {
       });
     } else if (event.type === 'chain_detach') {
       const endpoint = event.endpoint as 'start' | 'end';
-      
+
       if (endpoint === 'start') {
         state.startAttachment = null;
       } else {
         state.endAttachment = null;
       }
-      
+
       context.emit?.('chain_remove_attachment', {
         node,
         endpoint,
       });
     } else if (event.type === 'chain_break') {
       if (config.breakable || event.force) {
-        const linkIndex = event.linkIndex as number || Math.floor(config.links / 2);
-        
+        const linkIndex = (event.linkIndex as number) || Math.floor(config.links / 2);
+
         state.isBroken = true;
         state.breakPoint = linkIndex;
-        
+
         context.emit?.('chain_break_at', {
           node,
           linkIndex,
         });
-        
+
         context.emit?.('on_chain_break', {
           node,
           breakPoint: linkIndex,
@@ -210,13 +210,13 @@ export const chainHandler: TraitHandler<ChainConfig> = {
       if (state.isBroken) {
         state.isBroken = false;
         state.breakPoint = null;
-        
+
         context.emit?.('chain_reconnect', { node });
       }
     } else if (event.type === 'chain_apply_force') {
       const linkIndex = event.linkIndex as number;
       const force = event.force as { x: number; y: number; z: number };
-      
+
       context.emit?.('chain_external_force', {
         node,
         linkIndex,

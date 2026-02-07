@@ -1,10 +1,10 @@
 /**
  * Social VR Traits for HoloScript
- * 
+ *
  * New traits for social sharing, collaboration, and X platform integration.
  * These traits enable AI-generated scenes to be easily shared and experienced
  * collaboratively on social platforms.
- * 
+ *
  * @version 1.0.0
  */
 
@@ -47,7 +47,7 @@ interface TweetableConfig {
 
 /**
  * @shareable - Auto-generates X-optimized previews for sharing
- * 
+ *
  * When applied to an object or scene, automatically generates:
  * - Preview image for social cards
  * - Animated GIF for engagement
@@ -66,7 +66,7 @@ export const shareableHandler: TraitHandler<ShareableConfig> = {
     includeQR: true,
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const state: Record<string, unknown> = {
       previewGenerated: false,
       previewUrl: null,
@@ -79,7 +79,7 @@ export const shareableHandler: TraitHandler<ShareableConfig> = {
     delete (node as any).__shareableState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(_node, _config, _context, _delta) {
     // Preview generation is handled externally
   },
 
@@ -96,7 +96,7 @@ export const shareableHandler: TraitHandler<ShareableConfig> = {
 
 /**
  * @collaborative - Real-time multi-user editing via WebRTC
- * 
+ *
  * Enables multiple users to interact with and modify objects
  * simultaneously. Perfect for building in X threads together.
  */
@@ -112,7 +112,7 @@ export const collaborativeHandler: TraitHandler<CollaborativeConfig> = {
     presence: true,
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const state: Record<string, unknown> = {
       users: new Map(),
       editHistory: [],
@@ -125,7 +125,7 @@ export const collaborativeHandler: TraitHandler<CollaborativeConfig> = {
     delete (node as any).__collaborativeState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, _config, _context, _delta) {
     const state = (node as any).__collaborativeState;
     if (!state) return;
     // Sync logic handled by WebRTC layer
@@ -155,7 +155,7 @@ export const collaborativeHandler: TraitHandler<CollaborativeConfig> = {
 
 /**
  * @tweetable - Generates tweet with preview when shared
- * 
+ *
  * Automatically creates X-optimized content when the object
  * or scene is shared, including hashtags and preview cards.
  */
@@ -170,7 +170,7 @@ export const tweetableHandler: TraitHandler<TweetableConfig> = {
     autoThread: false,
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const state: Record<string, unknown> = {
       tweetGenerated: false,
       tweetUrl: null,
@@ -182,7 +182,7 @@ export const tweetableHandler: TraitHandler<TweetableConfig> = {
     delete (node as any).__tweetableState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(_node, _config, _context, _delta) {
     // Tweet generation is handled externally
   },
 
@@ -203,14 +203,8 @@ export const tweetableHandler: TraitHandler<TweetableConfig> = {
 /**
  * Generate a tweet URL for sharing a HoloScript scene
  */
-export function generateTweetUrl(
-  name: string,
-  url: string,
-  config: TweetableConfig
-): string {
-  let text = config.template
-    .replace('{name}', name)
-    .replace('{url}', url);
+export function generateTweetUrl(name: string, url: string, config: TweetableConfig): string {
+  let text = config.template.replace('{name}', name).replace('{url}', url);
 
   if (config.mention) {
     text = `${config.mention} ${text}`;

@@ -98,12 +98,12 @@ This guide covers the **HoloScript features** used by Hololand:
 
 ### Key Distinction
 
-| Component | What It Is | Repository |
-|-----------|------------|------------|
-| **HoloScript** | Complete language + runtime | `github.com/brianonbased-dev/HoloScript` |
-| **Hololand** | VR social platform app | `github.com/brianonbased-dev/Hololand` (separate) |
+| Component      | What It Is                  | Repository                                        |
+| -------------- | --------------------------- | ------------------------------------------------- |
+| **HoloScript** | Complete language + runtime | `github.com/brianonbased-dev/HoloScript`          |
+| **Hololand**   | VR social platform app      | `github.com/brianonbased-dev/Hololand` (separate) |
 
-Hololand is built *with* HoloScript, similar to how Unity games are built with C#.
+Hololand is built _with_ HoloScript, similar to how Unity games are built with C#.
 
 ---
 
@@ -236,10 +236,7 @@ const loadOrder = graph.getLoadOrder('scene');
 Add semantic meaning to entities:
 
 ```typescript
-import {
-  SemanticAnnotation,
-  PropertyAnnotations
-} from '@holoscript/core';
+import { SemanticAnnotation, PropertyAnnotations } from '@holoscript/core';
 
 // Create an annotation
 const annotation = new SemanticAnnotation({
@@ -287,10 +284,7 @@ const all = registry.getAll();
 Create reactive data connections:
 
 ```typescript
-import {
-  createBinding,
-  BindingManager
-} from '@holoscript/core';
+import { createBinding, BindingManager } from '@holoscript/core';
 
 // Create a binding
 const binding = createBinding({
@@ -320,11 +314,7 @@ const matrix = new CapabilityMatrix();
 
 // Register platform capabilities
 matrix.registerPlatform('quest', {
-  features: [
-    CommonFeatures.PHYSICS,
-    CommonFeatures.SPATIAL_AUDIO,
-    CommonFeatures.HAND_TRACKING,
-  ],
+  features: [CommonFeatures.PHYSICS, CommonFeatures.SPATIAL_AUDIO, CommonFeatures.HAND_TRACKING],
   limits: {
     maxTriangles: 750000,
     maxTextureMB: 256,
@@ -343,11 +333,7 @@ const hasPhysics = matrix.hasFeature('quest', CommonFeatures.PHYSICS);
 ### Creating Worlds
 
 ```typescript
-import {
-  createWorldDefinition,
-  createWorldMetadata,
-  createWorldConfig
-} from '@holoscript/core';
+import { createWorldDefinition, createWorldMetadata, createWorldConfig } from '@holoscript/core';
 
 // Create a complete world
 const world = createWorldDefinition('my-world', 'My VR World');
@@ -433,11 +419,7 @@ const world = createWorldDefinition('arena', 'Battle Arena', {
 Connect to the Hololand runtime:
 
 ```typescript
-import {
-  getHololandClient,
-  connectToHololand,
-  disconnectFromHololand
-} from '@holoscript/core';
+import { getHololandClient, connectToHololand, disconnectFromHololand } from '@holoscript/core';
 
 // Get singleton client
 const client = getHololandClient();
@@ -520,11 +502,7 @@ const handle = services.audio.play('explosion', {
 ### Protocol Constants
 
 ```typescript
-import {
-  PROTOCOL_VERSION,
-  MAX_MESSAGE_SIZE,
-  HEARTBEAT_INTERVAL
-} from '@holoscript/core';
+import { PROTOCOL_VERSION, MAX_MESSAGE_SIZE, HEARTBEAT_INTERVAL } from '@holoscript/core';
 
 console.log(`Protocol v${PROTOCOL_VERSION}`);
 console.log(`Max message: ${MAX_MESSAGE_SIZE / 1024}KB`);
@@ -632,17 +610,21 @@ registry.register(playerSemantics);
 // Create UI bindings
 const bindingManager = new BindingManager();
 
-bindingManager.addBinding(createBinding({
-  source: 'player-1.health',
-  target: 'ui.healthBar.value',
-  transform: (health) => health / 100,
-}));
+bindingManager.addBinding(
+  createBinding({
+    source: 'player-1.health',
+    target: 'ui.healthBar.value',
+    transform: (health) => health / 100,
+  })
+);
 
-bindingManager.addBinding(createBinding({
-  source: 'player-1.isAlive',
-  target: 'ui.respawnButton.visible',
-  transform: (alive) => !alive,
-}));
+bindingManager.addBinding(
+  createBinding({
+    source: 'player-1.isAlive',
+    target: 'ui.respawnButton.visible',
+    transform: (alive) => !alive,
+  })
+);
 ```
 
 ---
@@ -651,44 +633,44 @@ bindingManager.addBinding(createBinding({
 
 ### Asset Modules
 
-| Export | Description |
-|--------|-------------|
-| `createAssetMetadata` | Create asset metadata object |
-| `inferAssetType` | Infer asset type from extension |
-| `getMimeType` | Get MIME type for extension |
-| `AssetManifest` | Asset collection management |
-| `AssetRegistry` | Global asset registry |
-| `AssetValidator` | Validate asset metadata |
-| `SmartAssetLoader` | Intelligent asset loading |
-| `AssetDependencyGraph` | Dependency resolution |
+| Export                 | Description                     |
+| ---------------------- | ------------------------------- |
+| `createAssetMetadata`  | Create asset metadata object    |
+| `inferAssetType`       | Infer asset type from extension |
+| `getMimeType`          | Get MIME type for extension     |
+| `AssetManifest`        | Asset collection management     |
+| `AssetRegistry`        | Global asset registry           |
+| `AssetValidator`       | Validate asset metadata         |
+| `SmartAssetLoader`     | Intelligent asset loading       |
+| `AssetDependencyGraph` | Dependency resolution           |
 
 ### Semantic Modules
 
-| Export | Description |
-|--------|-------------|
-| `SemanticAnnotation` | Entity semantic metadata |
-| `SemanticRegistry` | Annotation registry |
+| Export                | Description                 |
+| --------------------- | --------------------------- |
+| `SemanticAnnotation`  | Entity semantic metadata    |
+| `SemanticRegistry`    | Annotation registry         |
 | `PropertyAnnotations` | Property annotation helpers |
-| `createBinding` | Create data binding |
-| `BindingManager` | Manage bindings |
-| `CapabilityMatrix` | Platform capabilities |
+| `createBinding`       | Create data binding         |
+| `BindingManager`      | Manage bindings             |
+| `CapabilityMatrix`    | Platform capabilities       |
 
 ### Hololand Modules
 
-| Export | Description |
-|--------|-------------|
-| `createWorldDefinition` | Create world definition |
-| `createWorldMetadata` | Create world metadata |
-| `createWorldConfig` | Create world config |
-| `HololandClient` | Runtime client |
-| `getHololandClient` | Get client singleton |
-| `connectToHololand` | Connect to server |
-| `disconnectFromHololand` | Disconnect from server |
-| `StreamProtocol` | Streaming protocol |
-| `getStreamProtocol` | Get protocol singleton |
-| `PROTOCOL_VERSION` | Protocol version string |
-| `MAX_MESSAGE_SIZE` | Max message size (bytes) |
-| `HEARTBEAT_INTERVAL` | Heartbeat interval (ms) |
+| Export                   | Description              |
+| ------------------------ | ------------------------ |
+| `createWorldDefinition`  | Create world definition  |
+| `createWorldMetadata`    | Create world metadata    |
+| `createWorldConfig`      | Create world config      |
+| `HololandClient`         | Runtime client           |
+| `getHololandClient`      | Get client singleton     |
+| `connectToHololand`      | Connect to server        |
+| `disconnectFromHololand` | Disconnect from server   |
+| `StreamProtocol`         | Streaming protocol       |
+| `getStreamProtocol`      | Get protocol singleton   |
+| `PROTOCOL_VERSION`       | Protocol version string  |
+| `MAX_MESSAGE_SIZE`       | Max message size (bytes) |
+| `HEARTBEAT_INTERVAL`     | Heartbeat interval (ms)  |
 
 ---
 

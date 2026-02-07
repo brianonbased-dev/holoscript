@@ -13,11 +13,9 @@ describe('SemanticValidator', () => {
     const ast: any = {
       root: {
         id: 'test-node',
-        directives: [
-          { name: 'semantic_ref', args: ['missing-semantic'], type: 'directive' }
-        ],
-        children: []
-      }
+        directives: [{ name: 'semantic_ref', args: ['missing-semantic'], type: 'directive' }],
+        children: [],
+      },
     };
 
     const errors = validator.validate(ast);
@@ -30,64 +28,64 @@ describe('SemanticValidator', () => {
       root: {
         id: 'root',
         directives: [
-          { 
-            name: 'semantic', 
-            args: ['player'], 
+          {
+            name: 'semantic',
+            args: ['player'],
             type: 'directive',
-            config: { 
-              properties: { health: {} } 
-            } 
-          }
+            config: {
+              properties: { health: {} },
+            },
+          },
         ],
         children: [
           {
             id: 'my-player',
             properties: {}, // Missing health
-            directives: [
-              { name: 'semantic_ref', args: ['player'], type: 'directive' }
-            ],
-            children: []
-          }
-        ]
-      }
+            directives: [{ name: 'semantic_ref', args: ['player'], type: 'directive' }],
+            children: [],
+          },
+        ],
+      },
     };
 
     const errors = validator.validate(ast);
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors.find(e => e.message.includes('missing required property "health"'))).toBeDefined();
+    expect(
+      errors.find((e) => e.message.includes('missing required property "health"'))
+    ).toBeDefined();
   });
 
   it('should report error for missing required traits', () => {
-     const ast: any = {
+    const ast: any = {
       root: {
         id: 'root',
         directives: [
-          { 
-            name: 'semantic', 
-            args: ['interactable'], 
+          {
+            name: 'semantic',
+            args: ['interactable'],
             type: 'directive',
-            config: { 
-              traits: ['grabbable'] 
-            } 
-          }
+            config: {
+              traits: ['grabbable'],
+            },
+          },
         ],
         children: [
           {
             id: 'object-1',
             properties: {},
             traits: new Map(), // Missing grabbable
-            directives: [
-              { name: 'semantic_ref', args: ['interactable'], type: 'directive' }
-            ],
-            children: []
-          }
-        ]
-      }
+            directives: [{ name: 'semantic_ref', args: ['interactable'], type: 'directive' }],
+            children: [],
+          },
+        ],
+      },
     };
 
     const errors = validator.validate(ast);
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors.find(e => e.message.includes('missing required trait "@grabbable"'))).toBeDefined();
+    expect(
+      errors.find((e) => e.message.includes('missing required trait "@grabbable"'))
+    ).toBeDefined();
   });
 
   it('should pass when all requirements are met', () => {
@@ -95,28 +93,26 @@ describe('SemanticValidator', () => {
       root: {
         id: 'root',
         directives: [
-          { 
-            name: 'semantic', 
-            args: ['player'], 
+          {
+            name: 'semantic',
+            args: ['player'],
             type: 'directive',
-            config: { 
+            config: {
               properties: { health: {} },
-              traits: ['networked']
-            } 
-          }
+              traits: ['networked'],
+            },
+          },
         ],
         children: [
           {
             id: 'my-player',
             properties: { health: 100 },
             traits: new Map([['networked', {}]]),
-            directives: [
-              { name: 'semantic_ref', args: ['player'], type: 'directive' }
-            ],
-            children: []
-          }
-        ]
-      }
+            directives: [{ name: 'semantic_ref', args: ['player'], type: 'directive' }],
+            children: [],
+          },
+        ],
+      },
     };
 
     const errors = validator.validate(ast);
@@ -128,32 +124,30 @@ describe('SemanticValidator', () => {
       root: {
         id: 'root',
         directives: [
-          { 
-            name: 'semantic', 
-            args: ['player'], 
+          {
+            name: 'semantic',
+            args: ['player'],
             type: 'directive',
-            config: { 
-              properties: { health: 'number' } 
-            } 
-          }
+            config: {
+              properties: { health: 'number' },
+            },
+          },
         ],
         children: [
           {
             id: 'my-player',
-            properties: { health: "full" }, // Should be number
-            directives: [
-              { name: 'semantic_ref', args: ['player'], type: 'directive' }
-            ],
-            children: []
-          }
-        ]
-      }
+            properties: { health: 'full' }, // Should be number
+            directives: [{ name: 'semantic_ref', args: ['player'], type: 'directive' }],
+            children: [],
+          },
+        ],
+      },
     };
 
     const errors = validator.validate(ast);
     expect(errors.length).toBeGreaterThan(0);
     // Be flexible about the exact message formatting for now
-    expect(errors.some(e => e.message.includes('invalid type'))).toBe(true);
+    expect(errors.some((e) => e.message.includes('invalid type'))).toBe(true);
   });
 
   it('should report error for missing required methods', () => {
@@ -161,31 +155,31 @@ describe('SemanticValidator', () => {
       root: {
         id: 'root',
         directives: [
-          { 
-            name: 'semantic', 
-            args: ['interactable'], 
+          {
+            name: 'semantic',
+            args: ['interactable'],
             type: 'directive',
-            config: { 
-              methods: { on_grab: { params: [], returnType: 'void' } } 
-            } 
-          }
+            config: {
+              methods: { on_grab: { params: [], returnType: 'void' } },
+            },
+          },
         ],
         children: [
           {
             id: 'object-1',
             properties: {},
-            directives: [
-              { name: 'semantic_ref', args: ['interactable'], type: 'directive' }
-            ],
-            children: [] // Missing on_grab method
-          }
-        ]
-      }
+            directives: [{ name: 'semantic_ref', args: ['interactable'], type: 'directive' }],
+            children: [], // Missing on_grab method
+          },
+        ],
+      },
     };
 
     const errors = validator.validate(ast);
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors.find(e => e.message.includes('missing required method "on_grab"'))).toBeDefined();
+    expect(
+      errors.find((e) => e.message.includes('missing required method "on_grab"'))
+    ).toBeDefined();
   });
 
   it('should pass when method is present', () => {
@@ -193,28 +187,24 @@ describe('SemanticValidator', () => {
       root: {
         id: 'root',
         directives: [
-          { 
-            name: 'semantic', 
-            args: ['interactable'], 
+          {
+            name: 'semantic',
+            args: ['interactable'],
             type: 'directive',
-            config: { 
-              methods: { on_grab: { params: [], returnType: 'void' } } 
-            } 
-          }
+            config: {
+              methods: { on_grab: { params: [], returnType: 'void' } },
+            },
+          },
         ],
         children: [
           {
             id: 'object-1',
             properties: {},
-            directives: [
-              { name: 'semantic_ref', args: ['interactable'], type: 'directive' }
-            ],
-            children: [
-              { type: 'method', name: 'on_grab' }
-            ]
-          }
-        ]
-      }
+            directives: [{ name: 'semantic_ref', args: ['interactable'], type: 'directive' }],
+            children: [{ type: 'method', name: 'on_grab' }],
+          },
+        ],
+      },
     };
 
     const errors = validator.validate(ast);

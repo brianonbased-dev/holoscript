@@ -6,7 +6,14 @@
  */
 
 export type MaterialType = 'pbr' | 'standard' | 'unlit' | 'transparent' | 'custom';
-export type TextureChannel = 'baseColor' | 'normalMap' | 'roughnessMap' | 'metallicMap' | 'ambientOcclusionMap' | 'emissionMap' | 'heightMap';
+export type TextureChannel =
+  | 'baseColor'
+  | 'normalMap'
+  | 'roughnessMap'
+  | 'metallicMap'
+  | 'ambientOcclusionMap'
+  | 'emissionMap'
+  | 'heightMap';
 
 /**
  * Texture map configuration
@@ -14,19 +21,19 @@ export type TextureChannel = 'baseColor' | 'normalMap' | 'roughnessMap' | 'metal
 export interface TextureMap {
   /** Texture path or URL */
   path: string;
-  
+
   /** Channel this texture maps to */
   channel: TextureChannel;
-  
+
   /** UV scale (tiling) */
   scale?: { x: number; y: number };
-  
+
   /** UV offset */
   offset?: { x: number; y: number };
-  
+
   /** Texture filtering: linear, nearest, anisotropic */
   filter?: 'linear' | 'nearest' | 'anisotropic';
-  
+
   /** Anisotropic level (1-16) */
   anisotropy?: number;
 }
@@ -37,31 +44,31 @@ export interface TextureMap {
 export interface PBRMaterial {
   /** Base color in linear space [0-1] */
   baseColor: { r: number; g: number; b: number; a?: number };
-  
+
   /** Metallic value 0-1 */
   metallic: number;
-  
+
   /** Roughness value 0-1 */
   roughness: number;
-  
+
   /** Ambient occlusion 0-1 */
   ambientOcclusion?: number;
-  
+
   /** Emission color and intensity */
   emission?: {
     color: { r: number; g: number; b: number };
     intensity: number;
   };
-  
+
   /** Normal map strength */
   normalStrength?: number;
-  
+
   /** Parallax/height map strength */
   parallaxHeight?: number;
-  
+
   /** Index of refraction for transmission */
   ior?: number;
-  
+
   /** Transmission amount for transparent materials */
   transmission?: number;
 }
@@ -72,40 +79,40 @@ export interface PBRMaterial {
 export interface MaterialConfig {
   /** Material type */
   type: MaterialType;
-  
+
   /** Material name for reuse */
   name?: string;
-  
+
   /** PBR properties (for PBR materials) */
   pbr?: PBRMaterial;
-  
+
   /** Texture maps */
   textures?: TextureMap[];
-  
+
   /** Double-sided rendering */
   doubleSided?: boolean;
-  
+
   /** Blend mode for transparency */
   blendMode?: 'opaque' | 'blend' | 'additive' | 'multiply';
-  
+
   /** Custom shader code/reference */
   customShader?: {
     vertex?: string;
     fragment?: string;
     shaderLanguage?: 'glsl' | 'hlsl' | 'shadergraph';
   };
-  
+
   /** GPU memory optimization hints */
   optimization?: {
     /** Stream textures if needed */
     streamTextures?: boolean;
-    
+
     /** Compress textures */
     compression?: 'none' | 'dxt' | 'astc' | 'basis';
-    
+
     /** Instance this material */
     instanced?: boolean;
-    
+
     /** LOD bias for texture streaming */
     lodBias?: number;
   };

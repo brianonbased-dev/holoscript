@@ -5,6 +5,7 @@ Now that you have HoloScript installed, let's create your first VR scene! By the
 ## Learning Objectives
 
 By the end of this lesson, you will:
+
 - Create a new HoloScript project
 - Build a simple scene with multiple objects
 - Add interactivity with traits and event handlers
@@ -163,6 +164,7 @@ Environment settings affect the entire scene - lighting, skybox, fog, etc.
 ### Interactive Orbs
 
 Each orb has:
+
 - **Traits** (`@grabbable`, `@physics`) - behaviors
 - **Properties** (`position`, `scale`, `color`) - visual attributes
 - **Event handlers** (`onGrab`, `onClick`) - interactivity
@@ -176,17 +178,18 @@ holoscript dev
 ```
 
 This opens:
+
 - **Browser preview** at `http://localhost:3000`
 - **VR mode** accessible via headset browser
 
 ### Keyboard Controls (Desktop Preview)
 
-| Key | Action |
-|-----|--------|
-| WASD | Move |
-| Mouse | Look around |
-| E | Grab/Release |
-| Click | Interact |
+| Key   | Action       |
+| ----- | ------------ |
+| WASD  | Move         |
+| Mouse | Look around  |
+| E     | Grab/Release |
+| Click | Interact     |
 
 ## Adding More Objects
 
@@ -274,6 +277,7 @@ orb floor {
 ### Objects Not Grabbable
 
 Ensure you have:
+
 1. `@grabbable` trait on the object
 2. Correct collision bounds (scale matters!)
 
@@ -284,6 +288,7 @@ Keep the number of physics objects reasonable (~50 max for smooth VR).
 ## Summary
 
 In this lesson, you:
+
 - Created a new HoloScript project
 - Built a scene with multiple interactive objects
 - Used traits for physics, interaction, and visuals

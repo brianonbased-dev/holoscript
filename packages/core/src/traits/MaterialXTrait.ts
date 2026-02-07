@@ -26,12 +26,12 @@ interface MaterialXState {
 }
 
 interface MaterialXConfig {
-  source: string;  // URL to .mtlx file
-  material_name: string;  // Material to use from file
-  node_graph: string;  // Node graph to use
+  source: string; // URL to .mtlx file
+  material_name: string; // Material to use from file
+  node_graph: string; // Node graph to use
   color_space: ColorSpace;
   shading_model: ShadingModel;
-  texture_path: string;  // Base path for textures
+  texture_path: string; // Base path for textures
   compile_to_glsl: boolean;
 }
 
@@ -62,7 +62,7 @@ export const materialXHandler: TraitHandler<MaterialXConfig> = {
       compiledShader: null,
     };
     (node as any).__materialXState = state;
-    
+
     if (config.source) {
       loadMaterialX(node, state, config, context);
     }
@@ -76,26 +76,26 @@ export const materialXHandler: TraitHandler<MaterialXConfig> = {
     delete (node as any).__materialXState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(_node, _config, _context, _delta) {
     // MaterialX is mostly static, no per-frame updates needed
   },
 
   onEvent(node, config, context, event) {
     const state = (node as any).__materialXState as MaterialXState;
     if (!state) return;
-    
+
     if (event.type === 'materialx_loaded') {
       state.isLoading = false;
       state.isLoaded = true;
       state.materialId = event.materialId as string;
       state.compiledShader = event.shader;
-      
+
       // Apply material to geometry
       context.emit?.('materialx_apply', {
         node,
         materialId: state.materialId,
       });
-      
+
       context.emit?.('on_format_converted', {
         node,
         materialId: state.materialId,
@@ -109,9 +109,9 @@ export const materialXHandler: TraitHandler<MaterialXConfig> = {
     } else if (event.type === 'materialx_set_input') {
       const inputName = event.name as string;
       const value = event.value;
-      
+
       state.inputs.set(inputName, value);
-      
+
       context.emit?.('materialx_update_input', {
         node,
         materialId: state.materialId,
@@ -134,7 +134,7 @@ export const materialXHandler: TraitHandler<MaterialXConfig> = {
       }
       state.isLoaded = false;
       state.materialId = null;
-      
+
       loadMaterialX(node, state, { ...config, source: newSource }, context);
     } else if (event.type === 'materialx_query') {
       context.emit?.('materialx_info', {
@@ -156,7 +156,7 @@ function loadMaterialX(
   context: { emit?: (event: string, data: unknown) => void }
 ): void {
   state.isLoading = true;
-  
+
   context.emit?.('materialx_load', {
     node,
     source: config.source,

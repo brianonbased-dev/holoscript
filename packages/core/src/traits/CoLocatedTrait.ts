@@ -40,11 +40,11 @@ interface CoLocatedState {
 interface CoLocatedConfig {
   shared_anchor_id: string;
   alignment_method: AlignmentMethod;
-  alignment_timeout: number;  // ms
+  alignment_timeout: number; // ms
   visual_indicator: boolean;
   max_participants: number;
   auto_align: boolean;
-  realignment_threshold: number;  // meters
+  realignment_threshold: number; // meters
 }
 
 // =============================================================================
@@ -78,7 +78,7 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
       lastAlignmentTime: 0,
     };
     (node as any).__coLocatedState = state;
-    
+
     // Show visual indicator
     if (config.visual_indicator) {
       context.emit?.('co_located_show_indicator', {
@@ -86,11 +86,11 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
         state: 'searching',
       });
     }
-    
+
     // Start alignment process
     if (config.auto_align) {
       state.state = 'aligning';
-      
+
       context.emit?.('co_located_start_alignment', {
         node,
         method: config.alignment_method,
@@ -102,7 +102,7 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
 
   onDetach(node, config, context) {
     const state = (node as any).__coLocatedState as CoLocatedState;
-    
+
     // Leave session
     if (state?.isAligned) {
       context.emit?.('co_located_leave', {
@@ -110,29 +110,29 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
         anchorId: state.sharedAnchorId,
       });
     }
-    
+
     if (config.visual_indicator) {
       context.emit?.('co_located_hide_indicator', { node });
     }
-    
+
     delete (node as any).__coLocatedState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__coLocatedState as CoLocatedState;
     if (!state || !state.isAligned) return;
-    
+
     // Check for realignment need
     if (state.alignmentQuality < config.realignment_threshold && state.state === 'aligned') {
       state.state = 'aligning';
-      
+
       context.emit?.('co_located_realign', {
         node,
         method: config.alignment_method,
         anchorId: state.sharedAnchorId,
       });
     }
-    
+
     // Update visual indicator
     if (config.visual_indicator) {
       context.emit?.('co_located_update_indicator', {
@@ -146,19 +146,19 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__coLocatedState as CoLocatedState;
     if (!state) return;
-    
+
     if (event.type === 'co_located_aligned') {
       state.state = 'aligned';
       state.isAligned = true;
       state.sharedAnchorId = event.anchorId as string;
       state.alignmentTransform = event.transform as typeof state.alignmentTransform;
-      state.alignmentQuality = event.quality as number || 1.0;
+      state.alignmentQuality = (event.quality as number) || 1.0;
       state.lastAlignmentTime = Date.now();
-      
+
       if (config.visual_indicator) {
         context.emit?.('co_located_indicator_aligned', { node });
       }
-      
+
       context.emit?.('on_co_presence_aligned', {
         node,
         anchorId: state.sharedAnchorId,
@@ -166,14 +166,14 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
       });
     } else if (event.type === 'co_located_alignment_failed') {
       state.state = 'lost';
-      
+
       context.emit?.('on_co_located_failed', {
         node,
         reason: event.reason,
       });
     } else if (event.type === 'co_located_participant_joined') {
       const userId = event.userId as string;
-      
+
       if (state.participants.size < config.max_participants) {
         state.participants.set(userId, {
           userId,
@@ -182,7 +182,7 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
           lastSeen: Date.now(),
           position: { x: 0, y: 0, z: 0 },
         });
-        
+
         context.emit?.('on_co_presence_joined', {
           node,
           userId,
@@ -192,12 +192,12 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
     } else if (event.type === 'co_located_participant_aligned') {
       const userId = event.userId as string;
       const participant = state.participants.get(userId);
-      
+
       if (participant) {
         participant.isAligned = true;
         participant.alignedAt = Date.now();
         participant.position = event.position as typeof participant.position;
-        
+
         context.emit?.('on_participant_aligned', {
           node,
           userId,
@@ -207,7 +207,7 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
     } else if (event.type === 'co_located_participant_left') {
       const userId = event.userId as string;
       state.participants.delete(userId);
-      
+
       context.emit?.('on_co_presence_left', {
         node,
         userId,
@@ -216,14 +216,14 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
     } else if (event.type === 'co_located_participant_moved') {
       const userId = event.userId as string;
       const participant = state.participants.get(userId);
-      
+
       if (participant) {
         participant.position = event.position as typeof participant.position;
         participant.lastSeen = Date.now();
       }
     } else if (event.type === 'co_located_quality_update') {
       state.alignmentQuality = event.quality as number;
-      
+
       if (state.alignmentQuality < 0.3 && state.state === 'aligned') {
         state.state = 'lost';
         context.emit?.('on_co_located_lost', { node });
@@ -238,7 +238,7 @@ export const coLocatedHandler: TraitHandler<CoLocatedConfig> = {
       state.sharedAnchorId = event.anchorId as string;
       state.isAligned = true;
       state.state = 'aligned';
-      
+
       context.emit?.('on_anchor_created', {
         node,
         anchorId: state.sharedAnchorId,

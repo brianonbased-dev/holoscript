@@ -13,6 +13,12 @@ repositories {
 
 dependencies {
     implementation("com.github.nicerobot:lsp4intellij:0.5.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 intellij {

@@ -4,24 +4,24 @@ Structural directives are scene-level metadata and configuration blocks that def
 
 ## Quick Reference
 
-| Directive | Purpose |
-|-----------|---------|
-| `@manifest` | Scene metadata (title, version, author) |
-| `@semantic` | Semantic description blocks |
-| `@world_metadata` | World-level settings (theme, mood, time) |
-| `@zones` | Named spatial zones |
-| `@spawn_points` | Player spawn locations |
-| `@skybox` | Skybox configuration |
-| `@ambient_light` | Global ambient lighting |
-| `@directional_light` | Sun/moon directional lights |
-| `@fog` | Volumetric fog settings |
-| `@post_processing` | Post-process effects |
-| `@audio_zones` | 3D audio regions |
-| `@navigation` | NavMesh configuration |
-| `@physics_world` | Physics simulation settings |
-| `@network_config` | Multiplayer networking |
-| `@performance` | LOD and culling hints |
-| `@accessibility` | Accessibility configuration |
+| Directive            | Purpose                                  |
+| -------------------- | ---------------------------------------- |
+| `@manifest`          | Scene metadata (title, version, author)  |
+| `@semantic`          | Semantic description blocks              |
+| `@world_metadata`    | World-level settings (theme, mood, time) |
+| `@zones`             | Named spatial zones                      |
+| `@spawn_points`      | Player spawn locations                   |
+| `@skybox`            | Skybox configuration                     |
+| `@ambient_light`     | Global ambient lighting                  |
+| `@directional_light` | Sun/moon directional lights              |
+| `@fog`               | Volumetric fog settings                  |
+| `@post_processing`   | Post-process effects                     |
+| `@audio_zones`       | 3D audio regions                         |
+| `@navigation`        | NavMesh configuration                    |
+| `@physics_world`     | Physics simulation settings              |
+| `@network_config`    | Multiplayer networking                   |
+| `@performance`       | LOD and culling hints                    |
+| `@accessibility`     | Accessibility configuration              |
 
 ---
 
@@ -601,4 +601,4 @@ environment {
 
 ---
 
-*Last updated: 2026-01-28*
+_Last updated: 2026-01-28_

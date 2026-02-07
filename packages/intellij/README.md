@@ -13,11 +13,11 @@ Full HoloScript language support for IntelliJ IDEA, WebStorm, PyCharm, and other
 
 ## Supported File Types
 
-| Extension | Description |
-|-----------|-------------|
-| `.hs` | Classic HoloScript |
+| Extension | Description                      |
+| --------- | -------------------------------- |
+| `.hs`     | Classic HoloScript               |
 | `.hsplus` | HoloScript Plus (with VR traits) |
-| `.holo` | Declarative Composition |
+| `.holo`   | Declarative Composition          |
 
 ## Installation
 
@@ -88,16 +88,16 @@ The plugin ZIP will be in `build/distributions/`.
 
 The plugin provides custom colors for:
 
-| Element | Default Color |
-|---------|---------------|
-| Keywords | Purple |
-| Traits (@annotations) | Yellow |
-| Object names | Blue |
-| Properties | Cyan |
-| Events | Green |
-| Strings | Orange |
-| Numbers | Blue |
-| Comments | Gray |
+| Element               | Default Color |
+| --------------------- | ------------- |
+| Keywords              | Purple        |
+| Traits (@annotations) | Yellow        |
+| Object names          | Blue          |
+| Properties            | Cyan          |
+| Events                | Green         |
+| Strings               | Orange        |
+| Numbers               | Blue          |
+| Comments              | Gray          |
 
 Colors can be customized in **Settings** → **Editor** → **Color Scheme** → **HoloScript**.
 
@@ -105,18 +105,18 @@ Colors can be customized in **Settings** → **Editor** → **Color Scheme** →
 
 The plugin includes live templates for common patterns:
 
-| Abbreviation | Expansion |
-|--------------|-----------|
-| `orb` | New orb object |
-| `grab` | Grabbable object |
-| `anim` | Animation block |
-| `on` | Event handler |
+| Abbreviation | Expansion        |
+| ------------ | ---------------- |
+| `orb`        | New orb object   |
+| `grab`       | Grabbable object |
+| `anim`       | Animation block  |
+| `on`         | Event handler    |
 
 ## Keyboard Shortcuts
 
-| Action | Shortcut |
-|--------|----------|
-| Format File | `Ctrl+Alt+Shift+H` |
+| Action              | Shortcut              |
+| ------------------- | --------------------- |
+| Format File         | `Ctrl+Alt+Shift+H`    |
 | New HoloScript File | Available in New menu |
 
 ## Contributing

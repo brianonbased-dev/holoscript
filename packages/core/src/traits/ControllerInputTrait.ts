@@ -12,10 +12,17 @@ import type { TraitHandler } from './TraitTypes';
 // TYPES
 // =============================================================================
 
-type ControllerButton = 
-  | 'trigger' | 'grip' | 'thumbstick' | 'thumbstick_touch'
-  | 'a' | 'b' | 'x' | 'y'
-  | 'menu' | 'system';
+type ControllerButton =
+  | 'trigger'
+  | 'grip'
+  | 'thumbstick'
+  | 'thumbstick_touch'
+  | 'a'
+  | 'b'
+  | 'x'
+  | 'y'
+  | 'menu'
+  | 'system';
 
 type ControllerHand = 'left' | 'right';
 
@@ -29,7 +36,7 @@ interface ControllerPose {
 interface ButtonState {
   pressed: boolean;
   touched: boolean;
-  value: number;  // 0-1 for analog
+  value: number; // 0-1 for analog
 }
 
 interface ControllerData {
@@ -79,7 +86,7 @@ interface ControllerInputConfig {
 function applyDeadzone(value: number, deadzone: number): number {
   if (Math.abs(value) < deadzone) return 0;
   const sign = value > 0 ? 1 : -1;
-  return sign * (Math.abs(value) - deadzone) / (1 - deadzone);
+  return (sign * (Math.abs(value) - deadzone)) / (1 - deadzone);
 }
 
 function createEmptyControllerData(): ControllerData {
@@ -128,7 +135,7 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
       prevGrip: { left: false, right: false },
     };
     (node as any).__controllerInputState = state;
-    
+
     // Register for controller input
     context.emit?.('controller_register', { node });
   },
@@ -141,22 +148,22 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__controllerInputState as ControllerInputState;
     if (!state) return;
-    
+
     // Process each hand
     for (const hand of ['left', 'right'] as ControllerHand[]) {
       const controller = hand === 'left' ? state.left : state.right;
       if (!controller.connected) continue;
-      
+
       const prevButtons = state.prevButtons[hand];
-      
+
       // Check button mappings
       for (const mapping of config.button_mapping) {
         if (mapping.hand && mapping.hand !== hand) continue;
-        
+
         const buttonState = controller.buttons.get(mapping.button);
         const isPressed = buttonState?.pressed ?? false;
         const wasPressed = prevButtons.get(mapping.button) ?? false;
-        
+
         if (mapping.onPress && isPressed && !wasPressed) {
           context.emit?.('controller_action', {
             node,
@@ -165,7 +172,7 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
             button: mapping.button,
             type: 'press',
           });
-          
+
           if (config.haptic_on_button) {
             context.emit?.('haptic_pulse', {
               hand,
@@ -174,7 +181,7 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
             });
           }
         }
-        
+
         if (mapping.onRelease && !isPressed && wasPressed) {
           context.emit?.('controller_action', {
             node,
@@ -184,7 +191,7 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
             type: 'release',
           });
         }
-        
+
         if (mapping.onHold && isPressed) {
           context.emit?.('controller_action', {
             node,
@@ -196,16 +203,16 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
           });
         }
       }
-      
+
       // Update previous button states
       for (const [button, buttonState] of controller.buttons) {
         prevButtons.set(button, buttonState.pressed);
       }
-      
+
       // Trigger state changes
       const triggerPressed = controller.triggerValue >= config.trigger_threshold;
       const prevTrigger = state.prevTrigger[hand];
-      
+
       if (triggerPressed && !prevTrigger) {
         context.emit?.('controller_trigger_press', {
           node,
@@ -216,11 +223,11 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
         context.emit?.('controller_trigger_release', { node, hand });
       }
       state.prevTrigger[hand] = triggerPressed;
-      
+
       // Grip state changes
       const gripPressed = controller.gripValue >= config.grip_threshold;
       const prevGrip = state.prevGrip[hand];
-      
+
       if (gripPressed && !prevGrip) {
         context.emit?.('controller_grip_press', {
           node,
@@ -231,11 +238,15 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
         context.emit?.('controller_grip_release', { node, hand });
       }
       state.prevGrip[hand] = gripPressed;
-      
+
       // Thumbstick movement
-      const stickX = applyDeadzone(controller.thumbstick.x, config.deadzone) * config.thumbstick_sensitivity;
-      const stickY = applyDeadzone(controller.thumbstick.y, config.deadzone) * config.thumbstick_sensitivity * (config.invert_y ? -1 : 1);
-      
+      const stickX =
+        applyDeadzone(controller.thumbstick.x, config.deadzone) * config.thumbstick_sensitivity;
+      const stickY =
+        applyDeadzone(controller.thumbstick.y, config.deadzone) *
+        config.thumbstick_sensitivity *
+        (config.invert_y ? -1 : 1);
+
       if (stickX !== 0 || stickY !== 0) {
         context.emit?.('controller_thumbstick', {
           node,
@@ -251,15 +262,15 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__controllerInputState as ControllerInputState;
     if (!state) return;
-    
+
     if (event.type === 'controller_data') {
       // Receive controller data from XR system
       const hand = event.hand as ControllerHand;
       const data = event.data as Partial<ControllerData>;
-      
+
       const controller = hand === 'left' ? state.left : state.right;
       const wasConnected = controller.connected;
-      
+
       if (data.connected !== undefined) {
         controller.connected = data.connected;
       }
@@ -278,7 +289,7 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
       if (data.gripValue !== undefined) {
         controller.gripValue = data.gripValue;
       }
-      
+
       // Connection events
       if (controller.connected && !wasConnected) {
         context.emit?.('controller_connected', { node, hand });
@@ -290,12 +301,12 @@ export const controllerInputHandler: TraitHandler<ControllerInputConfig> = {
       const hand = event.hand as ControllerHand;
       const intensity = (event.intensity as number) ?? config.haptic_intensity;
       const duration = (event.duration as number) ?? 100;
-      
+
       context.emit?.('haptic_pulse', { hand, intensity, duration });
     } else if (event.type === 'get_controller_pose') {
       const hand = event.hand as ControllerHand;
       const controller = hand === 'left' ? state.left : state.right;
-      
+
       context.emit?.('controller_pose_result', {
         queryId: event.queryId,
         hand,

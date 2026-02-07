@@ -245,8 +245,12 @@ function getRequiredExtensions(config: GLTFConfig): GLTFExtension[] {
 
 function calculateBoundingBox(_meshData: unknown[]): GLTFState['boundingBox'] {
   // Simplified bounding box calculation
-  const minX = Infinity, minY = Infinity, minZ = Infinity;
-  const maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+  const minX = Infinity,
+    minY = Infinity,
+    minZ = Infinity;
+  const maxX = -Infinity,
+    maxY = -Infinity,
+    maxZ = -Infinity;
 
   // Would iterate through mesh positions in real implementation
 
@@ -263,24 +267,12 @@ function calculateBoundingBox(_meshData: unknown[]): GLTFState['boundingBox'] {
   return {
     min: [minX, minY, minZ],
     max: [maxX, maxY, maxZ],
-    center: [
-      (minX + maxX) / 2,
-      (minY + maxY) / 2,
-      (minZ + maxZ) / 2,
-    ],
-    size: [
-      maxX - minX,
-      maxY - minY,
-      maxZ - minZ,
-    ],
+    center: [(minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2],
+    size: [maxX - minX, maxY - minY, maxZ - minZ],
   };
 }
 
-function selectLODLevel(
-  distance: number,
-  lodDistances: number[],
-  maxLOD: number
-): number {
+function selectLODLevel(distance: number, lodDistances: number[], maxLOD: number): number {
   for (let i = 0; i < lodDistances.length; i++) {
     if (distance < lodDistances[i]) {
       return Math.min(i, maxLOD - 1);
@@ -326,12 +318,7 @@ export const gltfHandler: TraitHandler<GLTFConfig> = {
     delete (node as any).__gltfState;
   },
 
-  onUpdate(
-    node: HSPlusNode,
-    config: GLTFConfig,
-    context: TraitContext,
-    delta: number
-  ) {
+  onUpdate(node: HSPlusNode, config: GLTFConfig, context: TraitContext, delta: number) {
     const state = (node as any).__gltfState as GLTFState | undefined;
     if (!state || !state.isLoaded) return;
 
@@ -360,11 +347,7 @@ export const gltfHandler: TraitHandler<GLTFConfig> = {
     // Update LOD based on distance from camera
     if (config.lod_levels > 1) {
       const cameraDistance = calculateCameraDistance(node, context);
-      const newLOD = selectLODLevel(
-        cameraDistance,
-        config.lod_distances,
-        config.lod_levels
-      );
+      const newLOD = selectLODLevel(cameraDistance, config.lod_distances, config.lod_levels);
 
       if (newLOD !== state.currentLOD) {
         state.currentLOD = newLOD;
@@ -376,12 +359,7 @@ export const gltfHandler: TraitHandler<GLTFConfig> = {
     }
   },
 
-  onEvent(
-    node: HSPlusNode,
-    config: GLTFConfig,
-    context: TraitContext,
-    event: any
-  ) {
+  onEvent(node: HSPlusNode, config: GLTFConfig, context: TraitContext, event: any) {
     const state = (node as any).__gltfState as GLTFState | undefined;
     if (!state) return;
 
@@ -477,7 +455,11 @@ async function loadGLTFAsset(
     }
 
     // Auto-play animation if configured
-    if (config.auto_play && config.animation_clip && state.animationNames.includes(config.animation_clip)) {
+    if (
+      config.auto_play &&
+      config.animation_clip &&
+      state.animationNames.includes(config.animation_clip)
+    ) {
       playAnimation(state, config.animation_clip, {
         loop: config.loop_animations,
         speed: 1,
@@ -544,9 +526,7 @@ function createMockGLTFData(config: GLTFConfig): {
     animationNames: config.animation_clip
       ? [config.animation_clip, 'idle', 'walk', 'run']
       : ['idle', 'walk', 'run'],
-    morphTargetNames: config.enable_morphs
-      ? ['smile', 'frown', 'blink_L', 'blink_R']
-      : [],
+    morphTargetNames: config.enable_morphs ? ['smile', 'frown', 'blink_L', 'blink_R'] : [],
     textures: ['diffuse.ktx2', 'normal.ktx2', 'orm.ktx2'],
     hierarchy: [
       {
@@ -562,16 +542,13 @@ function createMockGLTFData(config: GLTFConfig): {
   };
 }
 
-function calculateCameraDistance(
-  node: HSPlusNode,
-  context: TraitContext
-): number {
+function calculateCameraDistance(node: HSPlusNode, context: TraitContext): number {
   const nodePos = (node as any).position || [0, 0, 0];
   const cameraPos = context.vr.headset.position;
 
-  const dx = (nodePos as any)[0] - (cameraPos as any)[0];
-  const dy = (nodePos as any)[1] - (cameraPos as any)[1];
-  const dz = (nodePos as any)[2] - (cameraPos as any)[2];
+  const dx = (nodePos)[0] - (cameraPos as any)[0];
+  const dy = (nodePos)[1] - (cameraPos as any)[1];
+  const dz = (nodePos)[2] - (cameraPos as any)[2];
 
   return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
@@ -613,11 +590,7 @@ function stopAnimation(state: GLTFState, name?: string): void {
   }
 }
 
-function setMorphWeight(
-  state: GLTFState,
-  target: string,
-  weight: number
-): void {
+function setMorphWeight(state: GLTFState, target: string, weight: number): void {
   if (state.morphTargetNames.includes(target)) {
     state.morphWeights.set(target, Math.max(0, Math.min(1, weight)));
   }

@@ -27,8 +27,8 @@ interface RoleConfig {
   permissions: Permission[];
   display_badge: boolean;
   badge_color: string;
-  inherits_from: string;  // Parent role to inherit from
-  role_hierarchy: Record<string, Permission[]>;  // Role definitions
+  inherits_from: string; // Parent role to inherit from
+  role_hierarchy: Record<string, Permission[]>; // Role definitions
 }
 
 // =============================================================================
@@ -60,10 +60,10 @@ export const roleHandler: TraitHandler<RoleConfig> = {
       pendingRoleChange: null,
     };
     (node as any).__roleState = state;
-    
+
     // Calculate effective permissions
     calculateEffectivePermissions(state, config);
-    
+
     if (config.display_badge) {
       context.emit?.('role_show_badge', {
         node,
@@ -77,28 +77,28 @@ export const roleHandler: TraitHandler<RoleConfig> = {
     delete (node as any).__roleState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__roleState as RoleState;
     if (!state) return;
-    
+
     // Process pending role change
     if (state.pendingRoleChange) {
       const newRole = state.pendingRoleChange;
       state.pendingRoleChange = null;
-      
+
       const previousRole = state.currentRole;
       state.currentRole = newRole;
       state.roleHistory.push({ role: newRole, timestamp: Date.now() });
-      
+
       calculateEffectivePermissions(state, config);
-      
+
       context.emit?.('on_role_change', {
         node,
         previousRole,
         newRole,
         permissions: Array.from(state.effectivePermissions),
       });
-      
+
       if (config.display_badge) {
         context.emit?.('role_update_badge', {
           node,
@@ -111,14 +111,14 @@ export const roleHandler: TraitHandler<RoleConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__roleState as RoleState;
     if (!state) return;
-    
+
     if (event.type === 'role_set') {
       const newRole = event.role as string;
       state.pendingRoleChange = newRole;
     } else if (event.type === 'role_check_permission') {
       const permission = event.permission as Permission;
       const hasPermission = state.effectivePermissions.has(permission);
-      
+
       context.emit?.('role_permission_result', {
         node,
         permission,
@@ -129,7 +129,7 @@ export const roleHandler: TraitHandler<RoleConfig> = {
     } else if (event.type === 'role_grant_permission') {
       const permission = event.permission as Permission;
       state.effectivePermissions.add(permission);
-      
+
       context.emit?.('on_permission_granted', {
         node,
         permission,
@@ -137,7 +137,7 @@ export const roleHandler: TraitHandler<RoleConfig> = {
     } else if (event.type === 'role_revoke_permission') {
       const permission = event.permission as Permission;
       state.effectivePermissions.delete(permission);
-      
+
       context.emit?.('on_permission_revoked', {
         node,
         permission,
@@ -151,13 +151,13 @@ export const roleHandler: TraitHandler<RoleConfig> = {
     } else if (event.type === 'role_can_perform') {
       const action = event.action as string;
       const requiredPermissions = getRequiredPermissions(action);
-      const canPerform = requiredPermissions.every(p => state.effectivePermissions.has(p));
-      
+      const canPerform = requiredPermissions.every((p) => state.effectivePermissions.has(p));
+
       context.emit?.('role_action_check_result', {
         node,
         action,
         canPerform,
-        missingPermissions: requiredPermissions.filter(p => !state.effectivePermissions.has(p)),
+        missingPermissions: requiredPermissions.filter((p) => !state.effectivePermissions.has(p)),
         callbackId: event.callbackId,
       });
     } else if (event.type === 'role_query') {
@@ -175,12 +175,12 @@ export const roleHandler: TraitHandler<RoleConfig> = {
 
 function calculateEffectivePermissions(state: RoleState, config: RoleConfig): void {
   state.effectivePermissions.clear();
-  
+
   // Add base permissions from config
   for (const perm of config.permissions) {
     state.effectivePermissions.add(perm);
   }
-  
+
   // Add permissions from role hierarchy
   const rolePerms = config.role_hierarchy[state.currentRole];
   if (rolePerms) {
@@ -188,7 +188,7 @@ function calculateEffectivePermissions(state: RoleState, config: RoleConfig): vo
       state.effectivePermissions.add(perm);
     }
   }
-  
+
   // Add inherited permissions
   if (config.inherits_from) {
     const inheritedPerms = config.role_hierarchy[config.inherits_from];

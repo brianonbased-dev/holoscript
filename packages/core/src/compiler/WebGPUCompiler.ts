@@ -85,18 +85,28 @@ export class WebGPUCompiler {
     this.emit('const format = navigator.gpu.getPreferredCanvasFormat();');
     this.emit('context.configure({ device, format, alphaMode: "premultiplied" });');
     this.emit(`const MSAA_COUNT = ${this.options.msaa};`);
-    this.emit('const msaaTexture = device.createTexture({ size: [canvas.width, canvas.height], sampleCount: MSAA_COUNT, format, usage: GPUTextureUsage.RENDER_ATTACHMENT });');
-    this.emit('const depthTexture = device.createTexture({ size: [canvas.width, canvas.height], sampleCount: MSAA_COUNT, format: "depth24plus", usage: GPUTextureUsage.RENDER_ATTACHMENT });');
+    this.emit(
+      'const msaaTexture = device.createTexture({ size: [canvas.width, canvas.height], sampleCount: MSAA_COUNT, format, usage: GPUTextureUsage.RENDER_ATTACHMENT });'
+    );
+    this.emit(
+      'const depthTexture = device.createTexture({ size: [canvas.width, canvas.height], sampleCount: MSAA_COUNT, format: "depth24plus", usage: GPUTextureUsage.RENDER_ATTACHMENT });'
+    );
     this.emit('');
-    this.emit('function createBuffer(device: GPUDevice, data: Float32Array, usage: number): GPUBuffer {');
+    this.emit(
+      'function createBuffer(device: GPUDevice, data: Float32Array, usage: number): GPUBuffer {'
+    );
     this.indent();
-    this.emit('const buf = device.createBuffer({ size: data.byteLength, usage: usage | GPUBufferUsage.COPY_DST });');
+    this.emit(
+      'const buf = device.createBuffer({ size: data.byteLength, usage: usage | GPUBufferUsage.COPY_DST });'
+    );
     this.emit('device.queue.writeBuffer(buf, 0, data); return buf;');
     this.dedent();
     this.emit('}');
     this.emit('function createStorageBuffer(device: GPUDevice, size: number): GPUBuffer {');
     this.indent();
-    this.emit('return device.createBuffer({ size, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });');
+    this.emit(
+      'return device.createBuffer({ size, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });'
+    );
     this.dedent();
     this.emit('}');
     this.emit('');
@@ -111,15 +121,21 @@ export class WebGPUCompiler {
 
     const bg = envData.background || envData.skybox || '#000000';
     const bgColor = this.parseColor(bg);
-    this.emit(`const clearColor: GPUColor = { r: ${bgColor[0]}, g: ${bgColor[1]}, b: ${bgColor[2]}, a: 1.0 };`);
+    this.emit(
+      `const clearColor: GPUColor = { r: ${bgColor[0]}, g: ${bgColor[1]}, b: ${bgColor[2]}, a: 1.0 };`
+    );
 
     if (envData.fog && typeof envData.fog === 'object') {
       const fog = envData.fog as Record<string, any>;
       const fc = this.parseColor(fog.color || '#cccccc');
-      this.emit(`const fogUniforms = createBuffer(device, new Float32Array([${fc[0]}, ${fc[1]}, ${fc[2]}, 1.0, ${fog.near ?? 10.0}, ${fog.far ?? 100.0}, 0.0, 0.0]), GPUBufferUsage.UNIFORM);`);
+      this.emit(
+        `const fogUniforms = createBuffer(device, new Float32Array([${fc[0]}, ${fc[1]}, ${fc[2]}, 1.0, ${fog.near ?? 10.0}, ${fog.far ?? 100.0}, 0.0, 0.0]), GPUBufferUsage.UNIFORM);`
+      );
     }
     if (envData.ambient_light !== undefined) {
-      this.emit(`const ambientIntensity = ${typeof envData.ambient_light === 'number' ? envData.ambient_light : 0.5};`);
+      this.emit(
+        `const ambientIntensity = ${typeof envData.ambient_light === 'number' ? envData.ambient_light : 0.5};`
+      );
     }
     this.emit('');
   }
@@ -129,14 +145,16 @@ export class WebGPUCompiler {
   private emitObject(obj: HoloObjectDecl): void {
     this.objectIndex++;
     const v = this.sanitizeName(obj.name);
-    const meshType = (this.findObjProp(obj, 'mesh') || this.findObjProp(obj, 'type') || 'cube') as string;
+    const meshType = (this.findObjProp(obj, 'mesh') ||
+      this.findObjProp(obj, 'type') ||
+      'cube') as string;
     const traits = obj.traits || [];
 
     this.emit(`// Object: ${obj.name}`);
 
-    const isGaussianSplat = traits.some(t => t.name === 'gaussian_splat');
-    const isPointCloud = traits.some(t => t.name === 'point_cloud');
-    const isGpuParticle = traits.some(t => t.name === 'gpu_particle');
+    const isGaussianSplat = traits.some((t) => t.name === 'gaussian_splat');
+    const isPointCloud = traits.some((t) => t.name === 'point_cloud');
+    const isGpuParticle = traits.some((t) => t.name === 'gpu_particle');
 
     if (isGaussianSplat) {
       this.emitGaussianSplatObject(v, obj);
@@ -148,12 +166,14 @@ export class WebGPUCompiler {
       this.emitMeshObject(v, obj, meshType);
     }
 
-    if (traits.some(t => t.name === 'gpu_physics')) {
+    if (traits.some((t) => t.name === 'gpu_physics')) {
       this.emit(`const ${v}PhysicsBuf = createStorageBuffer(device, 1024 * 16); // gpu_physics`);
     }
-    if (traits.some(t => t.name === 'compute' || t.name === 'gpu_buffer')) {
-      const ct = traits.find(t => t.name === 'compute' || t.name === 'gpu_buffer');
-      this.emit(`const ${v}ComputeBuf = createStorageBuffer(device, ${(ct?.config as any)?.buffer_size || 4096});`);
+    if (traits.some((t) => t.name === 'compute' || t.name === 'gpu_buffer')) {
+      const ct = traits.find((t) => t.name === 'compute' || t.name === 'gpu_buffer');
+      this.emit(
+        `const ${v}ComputeBuf = createStorageBuffer(device, ${(ct?.config as any)?.buffer_size || 4096});`
+      );
     }
     this.emit('');
     if (obj.children) {
@@ -169,11 +189,16 @@ export class WebGPUCompiler {
     // Model matrix
     const pos = this.findObjProp(obj, 'position');
     const scale = this.findObjProp(obj, 'scale') || this.findObjProp(obj, 'size');
-    const [px, py, pz] = Array.isArray(pos) ? pos as number[] : [0, 0, 0];
-    const [sx, sy, sz] = Array.isArray(scale) ? scale as number[]
-      : typeof scale === 'number' ? [scale, scale, scale] : [1, 1, 1];
+    const [px, py, pz] = Array.isArray(pos) ? (pos as number[]) : [0, 0, 0];
+    const [sx, sy, sz] = Array.isArray(scale)
+      ? (scale as number[])
+      : typeof scale === 'number'
+        ? [scale, scale, scale]
+        : [1, 1, 1];
 
-    this.emit(`const ${v}Model = createBuffer(device, new Float32Array([${sx},0,0,0, 0,${sy},0,0, 0,0,${sz},0, ${px},${py},${pz},1]), GPUBufferUsage.UNIFORM);`);
+    this.emit(
+      `const ${v}Model = createBuffer(device, new Float32Array([${sx},0,0,0, 0,${sy},0,0, 0,0,${sz},0, ${px},${py},${pz},1]), GPUBufferUsage.UNIFORM);`
+    );
 
     // Material
     const material = this.findObjProp(obj, 'material');
@@ -181,27 +206,41 @@ export class WebGPUCompiler {
     const [cr, cg, cb] = this.extractMaterialColor(material, color);
     const rough = this.extractMaterialProp(material, 'roughness', 0.5);
     const metal = this.extractMaterialProp(material, 'metalness', 0.0);
-    this.emit(`const ${v}Mat = createBuffer(device, new Float32Array([${cr},${cg},${cb},1.0, ${rough},${metal},0,0]), GPUBufferUsage.UNIFORM);`);
+    this.emit(
+      `const ${v}Mat = createBuffer(device, new Float32Array([${cr},${cg},${cb},1.0, ${rough},${metal},0,0]), GPUBufferUsage.UNIFORM);`
+    );
 
     // Pipeline
     this.emit(`const ${v}Pipeline = device.createRenderPipeline({`);
     this.indent();
     this.emit('layout: "auto",');
-    this.emit('vertex: { module: device.createShaderModule({ code: WGSL_VERTEX }), entryPoint: "vs_main",');
-    this.emit('  buffers: [{ arrayStride: 24, attributes: [{ shaderLocation: 0, offset: 0, format: "float32x3" }, { shaderLocation: 1, offset: 12, format: "float32x3" }] }] },');
-    this.emit('fragment: { module: device.createShaderModule({ code: WGSL_FRAGMENT }), entryPoint: "fs_main", targets: [{ format }] },');
+    this.emit(
+      'vertex: { module: device.createShaderModule({ code: WGSL_VERTEX }), entryPoint: "vs_main",'
+    );
+    this.emit(
+      '  buffers: [{ arrayStride: 24, attributes: [{ shaderLocation: 0, offset: 0, format: "float32x3" }, { shaderLocation: 1, offset: 12, format: "float32x3" }] }] },'
+    );
+    this.emit(
+      'fragment: { module: device.createShaderModule({ code: WGSL_FRAGMENT }), entryPoint: "fs_main", targets: [{ format }] },'
+    );
     this.emit('primitive: { topology: "triangle-list", cullMode: "back" },');
-    this.emit(`depthStencil: { format: "depth24plus", depthWriteEnabled: true, depthCompare: "less" }, multisample: { count: MSAA_COUNT },`);
+    this.emit(
+      `depthStencil: { format: "depth24plus", depthWriteEnabled: true, depthCompare: "less" }, multisample: { count: MSAA_COUNT },`
+    );
     this.dedent();
     this.emit('});');
 
     // Bind group
-    this.emit(`const ${v}Bind = device.createBindGroup({ layout: ${v}Pipeline.getBindGroupLayout(0), entries: [`);
-    this.emit(`  { binding: 0, resource: { buffer: ${v}Model } }, { binding: 1, resource: { buffer: ${v}Mat } }] });`);
+    this.emit(
+      `const ${v}Bind = device.createBindGroup({ layout: ${v}Pipeline.getBindGroupLayout(0), entries: [`
+    );
+    this.emit(
+      `  { binding: 0, resource: { buffer: ${v}Model } }, { binding: 1, resource: { buffer: ${v}Mat } }] });`
+    );
   }
 
   private emitGaussianSplatObject(v: string, obj: HoloObjectDecl): void {
-    const trait = obj.traits?.find(t => t.name === 'gaussian_splat');
+    const trait = obj.traits?.find((t) => t.name === 'gaussian_splat');
     const src = (trait?.config as any)?.src || 'scene.ply';
     const max = (trait?.config as any)?.max_splats || 500000;
     this.emit(`// Gaussian Splat — source: ${src}`);
@@ -210,17 +249,25 @@ export class WebGPUCompiler {
     this.emit(`const ${v}SplatPipeline = device.createRenderPipeline({`);
     this.indent();
     this.emit('layout: "auto",');
-    this.emit('vertex: { module: device.createShaderModule({ code: WGSL_SPLAT }), entryPoint: "vs_splat", buffers: [] },');
-    this.emit('fragment: { module: device.createShaderModule({ code: WGSL_SPLAT }), entryPoint: "fs_splat",');
-    this.emit('  targets: [{ format, blend: { color: { srcFactor: "one", dstFactor: "one-minus-src-alpha", operation: "add" }, alpha: { srcFactor: "one", dstFactor: "one-minus-src-alpha", operation: "add" } } }] },');
+    this.emit(
+      'vertex: { module: device.createShaderModule({ code: WGSL_SPLAT }), entryPoint: "vs_splat", buffers: [] },'
+    );
+    this.emit(
+      'fragment: { module: device.createShaderModule({ code: WGSL_SPLAT }), entryPoint: "fs_splat",'
+    );
+    this.emit(
+      '  targets: [{ format, blend: { color: { srcFactor: "one", dstFactor: "one-minus-src-alpha", operation: "add" }, alpha: { srcFactor: "one", dstFactor: "one-minus-src-alpha", operation: "add" } } }] },'
+    );
     this.emit('primitive: { topology: "triangle-strip" },');
-    this.emit('depthStencil: { format: "depth24plus", depthWriteEnabled: false, depthCompare: "less" },');
+    this.emit(
+      'depthStencil: { format: "depth24plus", depthWriteEnabled: false, depthCompare: "less" },'
+    );
     this.dedent();
     this.emit('});');
   }
 
   private emitPointCloudObject(v: string, obj: HoloObjectDecl): void {
-    const trait = obj.traits?.find(t => t.name === 'point_cloud');
+    const trait = obj.traits?.find((t) => t.name === 'point_cloud');
     const max = (trait?.config as any)?.max_points || 100000;
     this.emit(`// Point Cloud (${max} max points)`);
     this.emit(`const ${v}PointBuf = createStorageBuffer(device, ${max} * 16);`);
@@ -228,16 +275,24 @@ export class WebGPUCompiler {
     this.emit(`const ${v}PointPipeline = device.createRenderPipeline({`);
     this.indent();
     this.emit('layout: "auto",');
-    this.emit('vertex: { module: device.createShaderModule({ code: WGSL_POINT }), entryPoint: "vs_point",');
-    this.emit('  buffers: [{ arrayStride: 16, attributes: [{ shaderLocation: 0, offset: 0, format: "float32x3" }, { shaderLocation: 1, offset: 12, format: "unorm8x4" }] }] },');
-    this.emit('fragment: { module: device.createShaderModule({ code: WGSL_POINT }), entryPoint: "fs_point", targets: [{ format }] },');
-    this.emit(`primitive: { topology: "point-list" }, depthStencil: { format: "depth24plus", depthWriteEnabled: true, depthCompare: "less" }, multisample: { count: MSAA_COUNT },`);
+    this.emit(
+      'vertex: { module: device.createShaderModule({ code: WGSL_POINT }), entryPoint: "vs_point",'
+    );
+    this.emit(
+      '  buffers: [{ arrayStride: 16, attributes: [{ shaderLocation: 0, offset: 0, format: "float32x3" }, { shaderLocation: 1, offset: 12, format: "unorm8x4" }] }] },'
+    );
+    this.emit(
+      'fragment: { module: device.createShaderModule({ code: WGSL_POINT }), entryPoint: "fs_point", targets: [{ format }] },'
+    );
+    this.emit(
+      `primitive: { topology: "point-list" }, depthStencil: { format: "depth24plus", depthWriteEnabled: true, depthCompare: "less" }, multisample: { count: MSAA_COUNT },`
+    );
     this.dedent();
     this.emit('});');
   }
 
   private emitGpuParticleObject(v: string, obj: HoloObjectDecl): void {
-    const trait = obj.traits?.find(t => t.name === 'gpu_particle');
+    const trait = obj.traits?.find((t) => t.name === 'gpu_particle');
     const count = (trait?.config as any)?.count || 10000;
     this.emit(`// GPU Particles (${count})`);
     this.emit(`const ${v}ParticleCount = ${count};`);
@@ -246,11 +301,21 @@ export class WebGPUCompiler {
     this.emit(`const ${v}ParticlePipeline = device.createRenderPipeline({`);
     this.indent();
     this.emit('layout: "auto",');
-    this.emit('vertex: { module: device.createShaderModule({ code: WGSL_PARTICLE_RENDER }), entryPoint: "vs_particle",');
-    this.emit('  buffers: [{ arrayStride: 32, attributes: [{ shaderLocation: 0, offset: 0, format: "float32x3" }, { shaderLocation: 1, offset: 12, format: "float32x3" }, { shaderLocation: 2, offset: 24, format: "float32" }] }] },');
-    this.emit('fragment: { module: device.createShaderModule({ code: WGSL_PARTICLE_RENDER }), entryPoint: "fs_particle",');
-    this.emit('  targets: [{ format, blend: { color: { srcFactor: "src-alpha", dstFactor: "one", operation: "add" }, alpha: { srcFactor: "zero", dstFactor: "one", operation: "add" } } }] },');
-    this.emit('primitive: { topology: "point-list" }, depthStencil: { format: "depth24plus", depthWriteEnabled: false, depthCompare: "less" },');
+    this.emit(
+      'vertex: { module: device.createShaderModule({ code: WGSL_PARTICLE_RENDER }), entryPoint: "vs_particle",'
+    );
+    this.emit(
+      '  buffers: [{ arrayStride: 32, attributes: [{ shaderLocation: 0, offset: 0, format: "float32x3" }, { shaderLocation: 1, offset: 12, format: "float32x3" }, { shaderLocation: 2, offset: 24, format: "float32" }] }] },'
+    );
+    this.emit(
+      'fragment: { module: device.createShaderModule({ code: WGSL_PARTICLE_RENDER }), entryPoint: "fs_particle",'
+    );
+    this.emit(
+      '  targets: [{ format, blend: { color: { srcFactor: "src-alpha", dstFactor: "one", operation: "add" }, alpha: { srcFactor: "zero", dstFactor: "one", operation: "add" } } }] },'
+    );
+    this.emit(
+      'primitive: { topology: "point-list" }, depthStencil: { format: "depth24plus", depthWriteEnabled: false, depthCompare: "less" },'
+    );
     this.dedent();
     this.emit('});');
   }
@@ -260,9 +325,11 @@ export class WebGPUCompiler {
   private emitGroup(group: HoloSpatialGroup): void {
     const v = this.sanitizeName(group.name);
     this.emit(`// Spatial Group: ${group.name}`);
-    const pos = group.properties.find(p => p.key === 'position')?.value;
-    const [px, py, pz] = Array.isArray(pos) ? pos as number[] : [0, 0, 0];
-    this.emit(`const ${v}GroupXform = createBuffer(device, new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, ${px},${py},${pz},1]), GPUBufferUsage.UNIFORM);`);
+    const pos = group.properties.find((p) => p.key === 'position')?.value;
+    const [px, py, pz] = Array.isArray(pos) ? (pos as number[]) : [0, 0, 0];
+    this.emit(
+      `const ${v}GroupXform = createBuffer(device, new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, ${px},${py},${pz},1]), GPUBufferUsage.UNIFORM);`
+    );
     for (const obj of group.objects) this.emitObject(obj);
     if (group.groups) {
       for (const sub of group.groups) this.emitGroup(sub);
@@ -274,16 +341,23 @@ export class WebGPUCompiler {
 
   private emitLight(light: HoloLight): void {
     const v = this.sanitizeName(light.name);
-    let color = [1.0, 1.0, 1.0], intensity = 1.0, pos = [0, 10, 0], dir = [0, -1, 0];
+    let color = [1.0, 1.0, 1.0],
+      intensity = 1.0,
+      pos = [0, 10, 0],
+      dir = [0, -1, 0];
     for (const prop of light.properties) {
       if (prop.key === 'color') color = this.parseColor(prop.value);
       else if (prop.key === 'intensity') intensity = prop.value as number;
       else if (prop.key === 'position' && Array.isArray(prop.value)) pos = prop.value as number[];
       else if (prop.key === 'direction' && Array.isArray(prop.value)) dir = prop.value as number[];
     }
-    const ti = { directional: 0, point: 1, spot: 2, hemisphere: 3, ambient: 4, area: 5 }[light.lightType] ?? 0;
+    const ti =
+      { directional: 0, point: 1, spot: 2, hemisphere: 3, ambient: 4, area: 5 }[light.lightType] ??
+      0;
     this.emit(`// Light: ${light.name} (${light.lightType})`);
-    this.emit(`const ${v}Light = createBuffer(device, new Float32Array([${color[0] * intensity},${color[1] * intensity},${color[2] * intensity},${ti}, ${pos[0]},${pos[1]},${pos[2]},0, ${dir[0]},${dir[1]},${dir[2]},0]), GPUBufferUsage.UNIFORM);`);
+    this.emit(
+      `const ${v}Light = createBuffer(device, new Float32Array([${color[0] * intensity},${color[1] * intensity},${color[2] * intensity},${ti}, ${pos[0]},${pos[1]},${pos[2]},0, ${dir[0]},${dir[1]},${dir[2]},0]), GPUBufferUsage.UNIFORM);`
+    );
     this.emit('');
   }
 
@@ -291,13 +365,18 @@ export class WebGPUCompiler {
 
   private emitCamera(cam: HoloCamera): void {
     this.emit('// === Camera ===');
-    let fov = 60, near = 0.1, far = 1000, pos = [0, 1, 5], lookAt = [0, 0, 0];
+    let fov = 60,
+      near = 0.1,
+      far = 1000,
+      pos = [0, 1, 5],
+      lookAt = [0, 0, 0];
     for (const prop of cam.properties) {
       if (prop.key === 'fov' || prop.key === 'field_of_view') fov = prop.value as number;
       else if (prop.key === 'near') near = prop.value as number;
       else if (prop.key === 'far') far = prop.value as number;
       else if (prop.key === 'position' && Array.isArray(prop.value)) pos = prop.value as number[];
-      else if ((prop.key === 'look_at' || prop.key === 'lookAt') && Array.isArray(prop.value)) lookAt = prop.value as number[];
+      else if ((prop.key === 'look_at' || prop.key === 'lookAt') && Array.isArray(prop.value))
+        lookAt = prop.value as number[];
     }
     this.emit(`const cameraFov = ${fov} * Math.PI / 180;`);
     this.emit(`const cameraNear = ${near}, cameraFar = ${far};`);
@@ -307,18 +386,24 @@ export class WebGPUCompiler {
     this.emit('function buildViewProjection(): Float32Array {');
     this.indent();
     this.emit('const f = 1.0 / Math.tan(cameraFov / 2), ri = 1.0 / (cameraNear - cameraFar);');
-    this.emit('return new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(cameraNear+cameraFar)*ri,-1, 0,0,cameraNear*cameraFar*ri*2,0]);');
+    this.emit(
+      'return new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(cameraNear+cameraFar)*ri,-1, 0,0,cameraNear*cameraFar*ri*2,0]);'
+    );
     this.dedent();
     this.emit('}');
-    this.emit('const vpUniform = createBuffer(device, buildViewProjection(), GPUBufferUsage.UNIFORM);');
+    this.emit(
+      'const vpUniform = createBuffer(device, buildViewProjection(), GPUBufferUsage.UNIFORM);'
+    );
     this.emit('');
   }
 
   // ─── Compute Pipelines ────────────────────────────────────────────────────
 
   private emitComputeShaders(composition: HoloComposition): void {
-    const gpuObjs = (composition.objects || []).filter(o =>
-      o.traits?.some(t => t.name === 'gpu_particle' || t.name === 'gpu_physics' || t.name === 'compute')
+    const gpuObjs = (composition.objects || []).filter((o) =>
+      o.traits?.some(
+        (t) => t.name === 'gpu_particle' || t.name === 'gpu_physics' || t.name === 'compute'
+      )
     );
     if (gpuObjs.length === 0) return;
 
@@ -327,19 +412,26 @@ export class WebGPUCompiler {
       const v = this.sanitizeName(obj.name);
       const traits = obj.traits || [];
 
-      if (traits.some(t => t.name === 'gpu_particle')) {
-        const count = (traits.find(t => t.name === 'gpu_particle')?.config as any)?.count || 10000;
-        this.emit(`const ${v}ParticleCompute = device.createComputePipeline({ layout: "auto", compute: { module: device.createShaderModule({ code: WGSL_PARTICLE_COMPUTE }), entryPoint: "cs_particle_update" } });`);
+      if (traits.some((t) => t.name === 'gpu_particle')) {
+        const count =
+          (traits.find((t) => t.name === 'gpu_particle')?.config as any)?.count || 10000;
+        this.emit(
+          `const ${v}ParticleCompute = device.createComputePipeline({ layout: "auto", compute: { module: device.createShaderModule({ code: WGSL_PARTICLE_COMPUTE }), entryPoint: "cs_particle_update" } });`
+        );
         this.emit(`const ${v}ComputeDispatches = ${Math.ceil(count / 64)};`);
       }
-      if (traits.some(t => t.name === 'gpu_physics')) {
-        this.emit(`const ${v}PhysicsCompute = device.createComputePipeline({ layout: "auto", compute: { module: device.createShaderModule({ code: WGSL_PHYSICS_COMPUTE }), entryPoint: "cs_physics_step" } });`);
+      if (traits.some((t) => t.name === 'gpu_physics')) {
+        this.emit(
+          `const ${v}PhysicsCompute = device.createComputePipeline({ layout: "auto", compute: { module: device.createShaderModule({ code: WGSL_PHYSICS_COMPUTE }), entryPoint: "cs_physics_step" } });`
+        );
       }
-      if (traits.some(t => t.name === 'compute')) {
-        const ct = traits.find(t => t.name === 'compute');
+      if (traits.some((t) => t.name === 'compute')) {
+        const ct = traits.find((t) => t.name === 'compute');
         const entry = (ct?.config as any)?.shader || 'custom_compute';
         const wg = (ct?.config as any)?.workgroups || [64, 1, 1];
-        this.emit(`const ${v}CustomCompute = device.createComputePipeline({ layout: "auto", compute: { module: device.createShaderModule({ code: WGSL_CUSTOM_${v.toUpperCase()} }), entryPoint: "${entry}" } });`);
+        this.emit(
+          `const ${v}CustomCompute = device.createComputePipeline({ layout: "auto", compute: { module: device.createShaderModule({ code: WGSL_CUSTOM_${v.toUpperCase()} }), entryPoint: "${entry}" } });`
+        );
         this.emit(`const ${v}Workgroups: [number, number, number] = [${wg}];`);
       }
     }
@@ -355,10 +447,14 @@ export class WebGPUCompiler {
     this.emit('struct Uniforms { model: mat4x4<f32> };');
     this.emit('@group(0) @binding(0) var<uniform> u: Uniforms;');
     this.emit('struct VIn { @location(0) pos: vec3<f32>, @location(1) norm: vec3<f32> };');
-    this.emit('struct VOut { @builtin(position) clip: vec4<f32>, @location(0) wNorm: vec3<f32>, @location(1) wPos: vec3<f32> };');
+    this.emit(
+      'struct VOut { @builtin(position) clip: vec4<f32>, @location(0) wNorm: vec3<f32>, @location(1) wPos: vec3<f32> };'
+    );
     this.emit('@vertex fn vs_main(i: VIn) -> VOut {');
     this.emit('  var o: VOut; let w = u.model * vec4<f32>(i.pos, 1.0);');
-    this.emit('  o.clip = w; o.wNorm = (u.model * vec4<f32>(i.norm, 0.0)).xyz; o.wPos = w.xyz; return o; }`;');
+    this.emit(
+      '  o.clip = w; o.wNorm = (u.model * vec4<f32>(i.norm, 0.0)).xyz; o.wPos = w.xyz; return o; }`;'
+    );
     this.emit('');
     // Fragment shader (PBR)
     this.emit('const WGSL_FRAGMENT = /* wgsl */`');
@@ -372,12 +468,20 @@ export class WebGPUCompiler {
     this.emit('');
     // Gaussian splat shader
     this.emit('const WGSL_SPLAT = /* wgsl */`');
-    this.emit('struct Splat { center: vec3<f32>, opacity: f32, cov: array<f32,6>, sh: vec3<f32> };');
+    this.emit(
+      'struct Splat { center: vec3<f32>, opacity: f32, cov: array<f32,6>, sh: vec3<f32> };'
+    );
     this.emit('@group(0) @binding(0) var<storage, read> splats: array<Splat>;');
-    this.emit('struct SO { @builtin(position) p: vec4<f32>, @location(0) c: vec4<f32>, @location(1) uv: vec2<f32> };');
-    this.emit('@vertex fn vs_splat(@builtin(vertex_index) vi: u32, @builtin(instance_index) ii: u32) -> SO {');
+    this.emit(
+      'struct SO { @builtin(position) p: vec4<f32>, @location(0) c: vec4<f32>, @location(1) uv: vec2<f32> };'
+    );
+    this.emit(
+      '@vertex fn vs_splat(@builtin(vertex_index) vi: u32, @builtin(instance_index) ii: u32) -> SO {'
+    );
     this.emit('  var q = array<vec2<f32>,4>(vec2(-1,-1),vec2(1,-1),vec2(-1,1),vec2(1,1));');
-    this.emit('  var o: SO; let s = splats[ii]; o.p = vec4<f32>(s.center.xy + q[vi]*0.01, s.center.z, 1.0);');
+    this.emit(
+      '  var o: SO; let s = splats[ii]; o.p = vec4<f32>(s.center.xy + q[vi]*0.01, s.center.z, 1.0);'
+    );
     this.emit('  o.c = vec4<f32>(s.sh, s.opacity); o.uv = q[vi]; return o; }');
     this.emit('@fragment fn fs_splat(i: SO) -> @location(0) vec4<f32> {');
     this.emit('  let a = i.c.a * exp(-dot(i.uv, i.uv) * 4.0); if (a < 0.01) { discard; }');
@@ -386,15 +490,21 @@ export class WebGPUCompiler {
     // Point cloud shader
     this.emit('const WGSL_POINT = /* wgsl */`');
     this.emit('struct PO { @builtin(position) p: vec4<f32>, @location(0) c: vec4<f32> };');
-    this.emit('@vertex fn vs_point(@location(0) pos: vec3<f32>, @location(1) col: vec4<f32>) -> PO { var o: PO; o.p = vec4<f32>(pos, 1.0); o.c = col; return o; }');
+    this.emit(
+      '@vertex fn vs_point(@location(0) pos: vec3<f32>, @location(1) col: vec4<f32>) -> PO { var o: PO; o.p = vec4<f32>(pos, 1.0); o.c = col; return o; }'
+    );
     this.emit('@fragment fn fs_point(i: PO) -> @location(0) vec4<f32> { return i.c; }`;');
     this.emit('');
     // Particle render shader
     this.emit('const WGSL_PARTICLE_RENDER = /* wgsl */`');
     this.emit('struct PVO { @builtin(position) p: vec4<f32>, @location(0) life: f32 };');
-    this.emit('@vertex fn vs_particle(@location(0) pos: vec3<f32>, @location(1) vel: vec3<f32>, @location(2) life: f32) -> PVO { var o: PVO; o.p = vec4<f32>(pos, 1.0); o.life = life; return o; }');
+    this.emit(
+      '@vertex fn vs_particle(@location(0) pos: vec3<f32>, @location(1) vel: vec3<f32>, @location(2) life: f32) -> PVO { var o: PVO; o.p = vec4<f32>(pos, 1.0); o.life = life; return o; }'
+    );
     this.emit('@fragment fn fs_particle(i: PVO) -> @location(0) vec4<f32> {');
-    this.emit('  let t = clamp(i.life, 0.0, 1.0); return vec4<f32>(mix(vec3(1.0,0.2,0.0), vec3(1.0,1.0,0.5), t), t*0.8); }`;');
+    this.emit(
+      '  let t = clamp(i.life, 0.0, 1.0); return vec4<f32>(mix(vec3(1.0,0.2,0.0), vec3(1.0,1.0,0.5), t), t*0.8); }`;'
+    );
     this.emit('');
     // Particle compute shader
     this.emit('const WGSL_PARTICLE_COMPUTE = /* wgsl */`');
@@ -402,10 +512,14 @@ export class WebGPUCompiler {
     this.emit('@group(0) @binding(0) var<storage, read> pin: array<P>;');
     this.emit('@group(0) @binding(1) var<storage, read_write> pout: array<P>;');
     this.emit('@group(0) @binding(2) var<uniform> dt: f32;');
-    this.emit('@compute @workgroup_size(64) fn cs_particle_update(@builtin(global_invocation_id) gid: vec3<u32>) {');
+    this.emit(
+      '@compute @workgroup_size(64) fn cs_particle_update(@builtin(global_invocation_id) gid: vec3<u32>) {'
+    );
     this.emit('  let i = gid.x; if (i >= arrayLength(&pin)) { return; } var p = pin[i];');
     this.emit('  p.vel.y -= 9.81 * dt; p.pos += p.vel * dt; p.life -= dt;');
-    this.emit('  if (p.life <= 0.0) { p.pos = vec3(0.0); p.vel = vec3(0.0, 5.0, 0.0); p.life = 2.0; }');
+    this.emit(
+      '  if (p.life <= 0.0) { p.pos = vec3(0.0); p.vel = vec3(0.0, 5.0, 0.0); p.life = 2.0; }'
+    );
     this.emit('  pout[i] = p; }`;');
     this.emit('');
     // Physics compute shader
@@ -413,10 +527,14 @@ export class WebGPUCompiler {
     this.emit('struct Body { pos: vec3<f32>, mass: f32, vel: vec3<f32>, _p: f32 };');
     this.emit('@group(0) @binding(0) var<storage, read_write> bodies: array<Body>;');
     this.emit('@group(0) @binding(1) var<uniform> dt: f32;');
-    this.emit('@compute @workgroup_size(64) fn cs_physics_step(@builtin(global_invocation_id) gid: vec3<u32>) {');
+    this.emit(
+      '@compute @workgroup_size(64) fn cs_physics_step(@builtin(global_invocation_id) gid: vec3<u32>) {'
+    );
     this.emit('  let i = gid.x; if (i >= arrayLength(&bodies)) { return; } var b = bodies[i];');
     this.emit('  b.vel.y -= 9.81 * dt; b.pos += b.vel * dt;');
-    this.emit('  if (b.pos.y < 0.0) { b.pos.y = 0.0; b.vel.y = -b.vel.y * 0.6; } bodies[i] = b; }`;');
+    this.emit(
+      '  if (b.pos.y < 0.0) { b.pos.y = 0.0; b.vel.y = -b.vel.y * 0.6; } bodies[i] = b; }`;'
+    );
     this.emit('');
   }
 
@@ -433,20 +551,24 @@ export class WebGPUCompiler {
     this.emit('const enc = device.createCommandEncoder();');
 
     // Compute pass
-    const gpuObjs = (composition.objects || []).filter(o =>
-      o.traits?.some(t => t.name === 'gpu_particle' || t.name === 'gpu_physics' || t.name === 'compute')
+    const gpuObjs = (composition.objects || []).filter((o) =>
+      o.traits?.some(
+        (t) => t.name === 'gpu_particle' || t.name === 'gpu_physics' || t.name === 'compute'
+      )
     );
     if (gpuObjs.length > 0 && this.options.enableCompute) {
       this.emit('const cp = enc.beginComputePass();');
       for (const obj of gpuObjs) {
         const v = this.sanitizeName(obj.name);
-        if (obj.traits?.some(t => t.name === 'gpu_particle')) {
-          this.emit(`cp.setPipeline(${v}ParticleCompute); cp.dispatchWorkgroups(${v}ComputeDispatches);`);
+        if (obj.traits?.some((t) => t.name === 'gpu_particle')) {
+          this.emit(
+            `cp.setPipeline(${v}ParticleCompute); cp.dispatchWorkgroups(${v}ComputeDispatches);`
+          );
         }
-        if (obj.traits?.some(t => t.name === 'gpu_physics')) {
+        if (obj.traits?.some((t) => t.name === 'gpu_physics')) {
           this.emit(`cp.setPipeline(${v}PhysicsCompute); cp.dispatchWorkgroups(16);`);
         }
-        if (obj.traits?.some(t => t.name === 'compute')) {
+        if (obj.traits?.some((t) => t.name === 'compute')) {
           this.emit(`cp.setPipeline(${v}CustomCompute); cp.dispatchWorkgroups(...${v}Workgroups);`);
         }
       }
@@ -456,8 +578,12 @@ export class WebGPUCompiler {
     // Render pass
     this.emit('const rp = enc.beginRenderPass({');
     this.indent();
-    this.emit('colorAttachments: [{ view: msaaTexture.createView(), resolveTarget: context.getCurrentTexture().createView(), clearValue: clearColor, loadOp: "clear", storeOp: "store" }],');
-    this.emit('depthStencilAttachment: { view: depthTexture.createView(), depthClearValue: 1.0, depthLoadOp: "clear", depthStoreOp: "store" },');
+    this.emit(
+      'colorAttachments: [{ view: msaaTexture.createView(), resolveTarget: context.getCurrentTexture().createView(), clearValue: clearColor, loadOp: "clear", storeOp: "store" }],'
+    );
+    this.emit(
+      'depthStencilAttachment: { view: depthTexture.createView(), depthClearValue: 1.0, depthLoadOp: "clear", depthStoreOp: "store" },'
+    );
     this.dedent();
     this.emit('});');
 
@@ -483,14 +609,18 @@ export class WebGPUCompiler {
     const v = this.sanitizeName(obj.name);
     const traits = obj.traits || [];
 
-    if (traits.some(t => t.name === 'gaussian_splat')) {
+    if (traits.some((t) => t.name === 'gaussian_splat')) {
       this.emit(`rp.setPipeline(${v}SplatPipeline); rp.draw(4, ${v}SplatCount.value);`);
-    } else if (traits.some(t => t.name === 'point_cloud')) {
+    } else if (traits.some((t) => t.name === 'point_cloud')) {
       this.emit(`rp.setPipeline(${v}PointPipeline); rp.draw(${v}PointCount.value);`);
-    } else if (traits.some(t => t.name === 'gpu_particle')) {
-      this.emit(`rp.setPipeline(${v}ParticlePipeline); rp.setVertexBuffer(0, ${v}ParticleBufA); rp.draw(${v}ParticleCount);`);
+    } else if (traits.some((t) => t.name === 'gpu_particle')) {
+      this.emit(
+        `rp.setPipeline(${v}ParticlePipeline); rp.setVertexBuffer(0, ${v}ParticleBufA); rp.draw(${v}ParticleCount);`
+      );
     } else {
-      this.emit(`rp.setPipeline(${v}Pipeline); rp.setBindGroup(0, ${v}Bind); rp.setVertexBuffer(0, ${v}VBO); rp.draw(${v}VertexCount);`);
+      this.emit(
+        `rp.setPipeline(${v}Pipeline); rp.setBindGroup(0, ${v}Bind); rp.setVertexBuffer(0, ${v}VBO); rp.draw(${v}VertexCount);`
+      );
     }
     if (obj.children) {
       for (const child of obj.children) this.emitDrawCall(child);
@@ -503,15 +633,19 @@ export class WebGPUCompiler {
     this.lines.push(this.options.indent.repeat(this.indentLevel) + line);
   }
 
-  private indent(): void { this.indentLevel++; }
-  private dedent(): void { this.indentLevel = Math.max(0, this.indentLevel - 1); }
+  private indent(): void {
+    this.indentLevel++;
+  }
+  private dedent(): void {
+    this.indentLevel = Math.max(0, this.indentLevel - 1);
+  }
 
   private sanitizeName(name: string): string {
     return name.replace(/[^a-zA-Z0-9_]/g, '_');
   }
 
   private findObjProp(obj: HoloObjectDecl, key: string): HoloValue | undefined {
-    return obj.properties?.find(p => p.key === key)?.value;
+    return obj.properties?.find((p) => p.key === key)?.value;
   }
 
   private parseColor(value: any): [number, number, number] {
@@ -527,7 +661,10 @@ export class WebGPUCompiler {
     return [1.0, 1.0, 1.0];
   }
 
-  private extractMaterialColor(material: HoloValue | undefined, color: HoloValue | undefined): [number, number, number] {
+  private extractMaterialColor(
+    material: HoloValue | undefined,
+    color: HoloValue | undefined
+  ): [number, number, number] {
     if (color) return this.parseColor(color);
     if (material && typeof material === 'object' && !Array.isArray(material)) {
       const m = material as Record<string, any>;
@@ -536,7 +673,11 @@ export class WebGPUCompiler {
     return [0.8, 0.8, 0.8];
   }
 
-  private extractMaterialProp(material: HoloValue | undefined, key: string, fallback: number): number {
+  private extractMaterialProp(
+    material: HoloValue | undefined,
+    key: string,
+    fallback: number
+  ): number {
     if (material && typeof material === 'object' && !Array.isArray(material)) {
       const m = material as Record<string, any>;
       if (m[key] !== undefined) return m[key];

@@ -1,13 +1,13 @@
 /**
  * Benchmark Analysis Metrics
- * 
+ *
  * Calculates and compares benchmark results
  */
 
 export interface BenchmarkMetrics {
   name: string;
-  hz: number;  // operations per second
-  period: number;  // time per operation in ms
+  hz: number; // operations per second
+  period: number; // time per operation in ms
   samples: number;
   min: number;
   max: number;
@@ -24,12 +24,12 @@ export interface PerformanceRegression {
   isRegression: boolean;
 }
 
-export function calculateMetrics(
-  task: { result?: { mean?: number; hz?: number } }
-): BenchmarkMetrics {
+export function calculateMetrics(task: {
+  result?: { mean?: number; hz?: number };
+}): BenchmarkMetrics {
   const hz = task.result?.hz || 0;
   const period = hz > 0 ? 1000 / hz : 0;
-  
+
   return {
     name: '',
     hz,
@@ -49,7 +49,7 @@ export function compareMetrics(
   threshold: number = 5
 ): PerformanceRegression {
   const percentChange = ((current.hz - baseline.hz) / baseline.hz) * 100;
-  
+
   return {
     metric: current.name,
     baseline: baseline.hz,

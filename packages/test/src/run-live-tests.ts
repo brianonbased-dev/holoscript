@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * CLI for running live integration tests
- * 
+ *
  * Usage:
  *   npx tsx packages/test/src/run-live-tests.ts
  *   pnpm --filter @holoscript/test run live

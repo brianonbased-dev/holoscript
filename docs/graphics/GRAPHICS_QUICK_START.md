@@ -4,9 +4,14 @@
 
 ```typescript
 import {
-  MaterialTrait, createMaterialTrait, MATERIAL_PRESETS,
-  LightingTrait, createLightingTrait, LIGHTING_PRESETS,
-  RenderingTrait, createRenderingTrait,
+  MaterialTrait,
+  createMaterialTrait,
+  MATERIAL_PRESETS,
+  LightingTrait,
+  createLightingTrait,
+  LIGHTING_PRESETS,
+  RenderingTrait,
+  createRenderingTrait,
 } from '@holoscript/core';
 ```
 
@@ -15,6 +20,7 @@ import {
 ## MaterialTrait - Quick Start
 
 ### Create a Simple Material
+
 ```typescript
 const material = new MaterialTrait({
   type: 'pbr',
@@ -27,6 +33,7 @@ const material = new MaterialTrait({
 ```
 
 ### Use a Preset
+
 ```typescript
 const steel = MATERIAL_PRESETS.chrome();
 const wood = MATERIAL_PRESETS.wood();
@@ -34,6 +41,7 @@ const glass = MATERIAL_PRESETS.glass();
 ```
 
 ### Add Textures
+
 ```typescript
 material.addTexture({
   path: '/textures/diffuse.jpg',
@@ -47,6 +55,7 @@ material.addTexture({
 ```
 
 ### Optimize for GPU
+
 ```typescript
 material.setTextureStreaming(true);
 material.setCompression('basis');
@@ -58,43 +67,47 @@ material.setInstanced(true);
 ## LightingTrait - Quick Start
 
 ### Create Lighting
+
 ```typescript
 const lighting = new LightingTrait();
 
 // Add sun
 lighting.createDirectionalLight(
-  { x: 1, y: 1, z: 1 },        // direction
-  { r: 1, g: 0.95, b: 0.8 },   // color
-  1.0,                           // intensity
-  true                           // shadows
+  { x: 1, y: 1, z: 1 }, // direction
+  { r: 1, g: 0.95, b: 0.8 }, // color
+  1.0, // intensity
+  true // shadows
 );
 
 // Add fill light
 lighting.createPointLight(
-  { x: -5, y: 3, z: 0 },        // position
-  { r: 1, g: 1, b: 1 },         // color
-  0.5,                           // intensity
-  20,                            // range
-  false                          // shadows
+  { x: -5, y: 3, z: 0 }, // position
+  { r: 1, g: 1, b: 1 }, // color
+  0.5, // intensity
+  20, // range
+  false // shadows
 );
 ```
 
 ### Use a Preset
+
 ```typescript
 const outdoor = LIGHTING_PRESETS.outdoor();
 const lit = new LightingTrait(outdoor);
 ```
 
 ### Configure Global Illumination
+
 ```typescript
 lighting.setAmbientLight(
-  { r: 0.7, g: 0.8, b: 1.0 },   // sky color
-  { r: 0.3, g: 0.3, b: 0.2 },   // ground color
-  1.0                             // intensity
+  { r: 0.7, g: 0.8, b: 1.0 }, // sky color
+  { r: 0.3, g: 0.3, b: 0.2 }, // ground color
+  1.0 // intensity
 );
 ```
 
 ### Get Performance Info
+
 ```typescript
 const impact = lighting.getPerformanceImpact();
 console.log(`Lights: ${impact.totalLights}, GPU Cost: ${impact.estimatedGPUCost}`);
@@ -105,6 +118,7 @@ console.log(`Lights: ${impact.totalLights}, GPU Cost: ${impact.estimatedGPUCost}
 ## RenderingTrait - Quick Start
 
 ### Create and Configure
+
 ```typescript
 const rendering = new RenderingTrait();
 
@@ -121,13 +135,15 @@ rendering.setInstancing(true, 2000);
 ```
 
 ### Texture Optimization
+
 ```typescript
-rendering.setTextureStreaming(true, 512);  // 512 MB budget
+rendering.setTextureStreaming(true, 512); // 512 MB budget
 rendering.setTextureCompression('basis');
 rendering.setMaxTextureResolution(2048);
 ```
 
 ### Platform Optimization
+
 ```typescript
 // For VR/AR
 rendering.optimizeForVRAR(90);
@@ -140,6 +156,7 @@ rendering.optimizeForDesktop();
 ```
 
 ### Get GPU Memory Estimate
+
 ```typescript
 const memory = rendering.estimateGPUMemory();
 console.log(`GPU Memory: ${memory.estimatedTotal} MB`);
@@ -151,8 +168,10 @@ console.log(`GPU Memory: ${memory.estimatedTotal} MB`);
 
 ```typescript
 import {
-  MaterialTrait, MATERIAL_PRESETS,
-  LightingTrait, LIGHTING_PRESETS,
+  MaterialTrait,
+  MATERIAL_PRESETS,
+  LightingTrait,
+  LIGHTING_PRESETS,
   RenderingTrait,
 } from '@holoscript/core';
 
@@ -160,10 +179,10 @@ class RealisticScene {
   constructor() {
     // ===== MATERIALS =====
     this.setupMaterials();
-    
+
     // ===== LIGHTING =====
     this.setupLighting();
-    
+
     // ===== RENDERING =====
     this.setupRendering();
   }
@@ -194,37 +213,25 @@ class RealisticScene {
       { x: 0.5, y: 1, z: 0.5 },
       { r: 1, g: 0.95, b: 0.8 },
       1.2,
-      true  // shadows
+      true // shadows
     );
 
     // Key light
-    this.lighting.createPointLight(
-      { x: -5, y: 3, z: 0 },
-      { r: 1, g: 1, b: 1 },
-      0.7,
-      25,
-      false
-    );
+    this.lighting.createPointLight({ x: -5, y: 3, z: 0 }, { r: 1, g: 1, b: 1 }, 0.7, 25, false);
 
     // Fill light
-    this.lighting.createPointLight(
-      { x: 5, y: 2, z: -5 },
-      { r: 0.8, g: 0.8, b: 1 },
-      0.4,
-      15,
-      false
-    );
+    this.lighting.createPointLight({ x: 5, y: 2, z: -5 }, { r: 0.8, g: 0.8, b: 1 }, 0.4, 15, false);
   }
 
   setupRendering() {
     this.rendering = new RenderingTrait();
-    
+
     // High quality
     this.rendering.applyQualityPreset('high');
-    
+
     // Optimize for desktop
     this.rendering.optimizeForDesktop();
-    
+
     // Setup LOD
     this.rendering.setupLODLevels('automatic');
   }
@@ -249,6 +256,7 @@ console.log(scene.getSceneInfo());
 ## Common Patterns
 
 ### Mobile Optimization
+
 ```typescript
 // Material: Reduce textures
 material.setTextureCompression('astc');
@@ -263,6 +271,7 @@ rendering.applyQualityPreset('low');
 ```
 
 ### VR Optimization
+
 ```typescript
 // Material: Standard quality
 material.setCompression('dxt');
@@ -277,6 +286,7 @@ rendering.setFixedTimestep(1/90);
 ```
 
 ### High-End Desktop
+
 ```typescript
 // Material: Maximum quality
 material.setCompression('none');
@@ -298,18 +308,21 @@ rendering.setupLODLevels('manual');
 ## Performance Tips
 
 ### MaterialTrait
+
 1. Use presets for common materials (saves setup time)
 2. Compress textures (BASIS for 8x reduction)
 3. Enable instancing for repeated materials
 4. Use texture streaming for large scenes
 
-### LightingTrait  
+### LightingTrait
+
 1. Limit shadow-casting lights (max 4-8 realistic)
 2. Use presets for lighting setups
 3. Enable screen-space AO instead of baked
 4. Monitor impact with `getPerformanceImpact()`
 
 ### RenderingTrait
+
 1. Use quality presets as starting point
 2. Platform-specific optimization (mobile/desktop/VR)
 3. Enable LODs for complex scenes (40-50% GPU gain)
@@ -320,6 +333,7 @@ rendering.setupLODLevels('manual');
 ## API Quick Reference
 
 ### MaterialTrait Methods
+
 - `getMaterial()` - Get full configuration
 - `updatePBR(props)` - Update PBR properties
 - `addTexture(config)` - Add texture map
@@ -331,6 +345,7 @@ rendering.setupLODLevels('manual');
 - `setCustomShader(shader)` - Set custom shader
 
 ### LightingTrait Methods
+
 - `addLight(source)` - Add custom light
 - `getLight(id)` - Get light by ID
 - `getLights()` - Get all lights
@@ -347,6 +362,7 @@ rendering.setupLODLevels('manual');
 - `getSceneInfo()` - Get info string
 
 ### RenderingTrait Methods
+
 - `applyQualityPreset(quality)` - Apply preset
 - `setupLODLevels(strategy)` - Setup LODs
 - `getLODLevels()` - Get LOD config
@@ -367,16 +383,19 @@ rendering.setupLODLevels('manual');
 ## Troubleshooting
 
 ### Material Not Rendering
+
 - Check if shadows are enabled (shadows require specific setup)
 - Verify texture paths are correct
 - Check if material is compatible with renderer
 
 ### Lights Too Dark/Bright
+
 - Adjust `intensity` value (0-1 typically, can exceed for strong lights)
 - Check `skyColor` and `groundColor` for ambient
 - Verify light `range` is sufficient
 
 ### Performance Issues
+
 - Reduce quality preset (high → medium → low)
 - Disable occlusion culling for debugging
 - Reduce max texture resolution
@@ -384,4 +403,4 @@ rendering.setupLODLevels('manual');
 
 ---
 
-*For full documentation, see GRAPHICS_TRAITS.md*
+_For full documentation, see GRAPHICS_TRAITS.md_

@@ -93,11 +93,11 @@ export interface HSPlusAST {
   type: 'Program';
   body: HSPlusNode[];
   root: HSPlusNode;
-  imports?: Array<{ 
-    source: string; 
-    specifiers: string[]; 
-    path?: string; 
-    alias?: string; 
+  imports?: Array<{
+    source: string;
+    specifiers: string[];
+    path?: string;
+    alias?: string;
   }>;
 }
 
@@ -971,6 +971,6 @@ export type AllLifecycleHooks =
   | Web3LifecycleHook
   | PhysicsExpansionLifecycleHook;
 
-// Re-export VRTraitName for backward compatibility if needed, 
+// Re-export VRTraitName for backward compatibility if needed,
 // though top-level import is preferred.
 export type { VRTraitName };

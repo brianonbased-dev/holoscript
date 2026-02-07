@@ -17,15 +17,6 @@
 import type {
   HoloComposition,
   HoloObjectDecl,
-  HoloSpatialGroup,
-  HoloLight,
-  HoloEnvironment,
-  HoloCamera,
-  HoloTimeline,
-  HoloAudio,
-  HoloZone,
-  HoloTransition,
-  HoloEffects,
   HoloValue,
 } from '../parser/HoloCompositionTypes';
 
@@ -37,7 +28,7 @@ export interface AndroidCompilerOptions {
   targetSdk?: number;
   useJetpackCompose?: boolean;
   useSceneform?: boolean; // Deprecated but simpler
-  useFilament?: boolean;  // Modern but complex
+  useFilament?: boolean; // Modern but complex
 }
 
 export interface AndroidCompileResult {
@@ -120,7 +111,9 @@ export class AndroidCompiler {
     this.emit(`setContentView(R.layout.activity_ar_scene)`);
     this.emit('');
     this.emit('sceneState = ViewModelProvider(this)[SceneState::class.java]');
-    this.emit('arFragment = supportFragmentManager.findFragmentById(R.id.ar_fragment) as ArFragment');
+    this.emit(
+      'arFragment = supportFragmentManager.findFragmentById(R.id.ar_fragment) as ArFragment'
+    );
     this.emit('');
     this.emit('setupARSession()');
     this.emit('setupTapListener()');
@@ -157,7 +150,9 @@ export class AndroidCompiler {
     this.indentLevel++;
     this.emit('arFragment.setOnTapArPlaneListener { hitResult, plane, motionEvent ->');
     this.indentLevel++;
-    this.emit('if (plane.type != Plane.Type.HORIZONTAL_UPWARD_FACING) return@setOnTapArPlaneListener');
+    this.emit(
+      'if (plane.type != Plane.Type.HORIZONTAL_UPWARD_FACING) return@setOnTapArPlaneListener'
+    );
     this.emit('');
     this.emit('placeObject(hitResult)');
     this.indentLevel--;
@@ -203,7 +198,9 @@ export class AndroidCompiler {
     this.emit('private fun animateNodeTap(node: TransformableNode) {');
     this.indentLevel++;
     this.emit('val originalScale = node.localScale');
-    this.emit('val scaledUp = Vector3(originalScale.x * 1.2f, originalScale.y * 1.2f, originalScale.z * 1.2f)');
+    this.emit(
+      'val scaledUp = Vector3(originalScale.x * 1.2f, originalScale.y * 1.2f, originalScale.z * 1.2f)'
+    );
     this.emit('');
     this.emit('android.animation.ObjectAnimator.ofObject(');
     this.indentLevel++;
@@ -270,7 +267,9 @@ export class AndroidCompiler {
     this.emit('}');
     this.emit('if (!availability.isSupported) {');
     this.indentLevel++;
-    this.emit('Toast.makeText(this, "ARCore is not supported on this device", Toast.LENGTH_LONG).show()');
+    this.emit(
+      'Toast.makeText(this, "ARCore is not supported on this device", Toast.LENGTH_LONG).show()'
+    );
     this.emit('finish()');
     this.indentLevel--;
     this.emit('}');
@@ -413,7 +412,8 @@ export class AndroidCompiler {
       this.emit(').thenAccept { material ->');
       this.indentLevel++;
 
-      const meshType = this.findObjProp(firstObj, 'mesh') || this.findObjProp(firstObj, 'type') || 'cube';
+      const meshType =
+        this.findObjProp(firstObj, 'mesh') || this.findObjProp(firstObj, 'type') || 'cube';
       const geometry = this.getSceneformGeometry(meshType as string);
       this.emit(`${geometry}.thenAccept { renderable ->`);
       this.indentLevel++;
@@ -426,7 +426,9 @@ export class AndroidCompiler {
     } else {
       this.emit('MaterialFactory.makeOpaqueWithColor(context, Color(android.graphics.Color.BLUE))');
       this.emit('    .thenCompose { material ->');
-      this.emit('        ShapeFactory.makeCube(Vector3(0.1f, 0.1f, 0.1f), Vector3.zero(), material)');
+      this.emit(
+        '        ShapeFactory.makeCube(Vector3(0.1f, 0.1f, 0.1f), Vector3.zero(), material)'
+      );
       this.emit('    }');
       this.emit('    .thenAccept { renderable -> callback(renderable) }');
     }
@@ -446,7 +448,7 @@ export class AndroidCompiler {
   }
 
   private compileObjectFactory(obj: HoloObjectDecl): void {
-    const methodName = `create${this.sanitizeName(obj.name)}`; 
+    const methodName = `create${this.sanitizeName(obj.name)}`;
 
     this.emit(`fun ${methodName}(context: Context, callback: (Renderable) -> Unit) {`);
     this.indentLevel++;
@@ -573,10 +575,14 @@ dependencies {
     implementation 'com.gorisse.thomas:sceneform:1.22.0'
     
     // Optional: Jetpack Compose
-    ${this.options.useJetpackCompose ? `implementation platform('androidx.compose:compose-bom:2024.01.00')
+    ${
+      this.options.useJetpackCompose
+        ? `implementation platform('androidx.compose:compose-bom:2024.01.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.material3:material3'
-    implementation 'androidx.activity:activity-compose:1.8.2'` : '// Compose disabled'}
+    implementation 'androidx.activity:activity-compose:1.8.2'`
+        : '// Compose disabled'
+    }
 }`;
   }
 
@@ -600,7 +606,7 @@ dependencies {
   }
 
   private sanitizeName(name: string): string {
-    let result = name.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^[0-9]/, '_$&');
+    const result = name.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^[0-9]/, '_$&');
     return result.charAt(0).toUpperCase() + result.slice(1);
   }
 
@@ -611,11 +617,14 @@ dependencies {
       sphere: 'ShapeFactory.makeSphere(0.05f, Vector3.zero(), material)',
       cylinder: 'ShapeFactory.makeCylinder(0.05f, 0.1f, Vector3.zero(), material)',
     };
-    return geometries[meshType] || 'ShapeFactory.makeCube(Vector3(0.1f, 0.1f, 0.1f), Vector3.zero(), material)';
+    return (
+      geometries[meshType] ||
+      'ShapeFactory.makeCube(Vector3(0.1f, 0.1f, 0.1f), Vector3.zero(), material)'
+    );
   }
 
   private findObjProp(obj: HoloObjectDecl, key: string): HoloValue | undefined {
-    return obj.properties?.find(p => p.key === key)?.value;
+    return obj.properties?.find((p) => p.key === key)?.value;
   }
 
   private toKotlinType(value: HoloValue): string {
@@ -624,7 +633,7 @@ dependencies {
     if (typeof value === 'number') return Number.isInteger(value) ? 'Int' : 'Float';
     if (typeof value === 'string') return 'String';
     if (Array.isArray(value)) {
-      if (value.length === 3 && value.every(v => typeof v === 'number')) return 'Vector3';
+      if (value.length === 3 && value.every((v) => typeof v === 'number')) return 'Vector3';
       return 'List<Any>';
     }
     return 'Any';
@@ -638,10 +647,10 @@ dependencies {
     }
     if (typeof value === 'string') return `"${value}"`;
     if (Array.isArray(value)) {
-      if (value.length === 3 && value.every(v => typeof v === 'number')) {
+      if (value.length === 3 && value.every((v) => typeof v === 'number')) {
         return `Vector3(${value[0]}f, ${value[1]}f, ${value[2]}f)`;
       }
-      return `listOf(${value.map(v => this.toKotlinValue(v)).join(', ')})`;
+      return `listOf(${value.map((v) => this.toKotlinValue(v)).join(', ')})`;
     }
     return 'null';
   }

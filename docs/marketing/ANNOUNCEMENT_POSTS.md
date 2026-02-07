@@ -3,12 +3,14 @@
 ## Hacker News
 
 ### Title (80 chars max)
+
 ```
 Show HN: HoloScript – Write once, compile to 18 VR/AR platforms
 ```
 
 ### Content
-```
+
+````
 Hi HN,
 
 I've been working on HoloScript, a declarative language for VR/AR development that compiles to 18 different platforms from a single source file.
@@ -24,16 +26,17 @@ composition "VR Gallery" {
   object "Painting" @grabbable @networked {
     geometry: "model/frame.glb"
     position: [0, 1.6, -2]
-    
+
     onGrab: {
       network.sync(this.position)
       audio.play("pickup.mp3")
     }
   }
 }
-```
+````
 
 Then compile to any platform:
+
 ```bash
 holoscript compile gallery.holo --target vrchat
 holoscript compile gallery.holo --target unity
@@ -41,6 +44,7 @@ holoscript compile gallery.holo --target threejs
 ```
 
 **18 Compile Targets:**
+
 - Web: Three.js, Babylon.js, A-Frame, WebXR, WebGPU
 - Native: Unity, Unreal 5, Godot 4
 - VR: VRChat, OpenXR, visionOS
@@ -48,11 +52,13 @@ holoscript compile gallery.holo --target threejs
 - Other: WASM, URDF (ROS), SDF (Gazebo), DTDL (Azure)
 
 **Performance:**
+
 - Parser: 32,000 ops/s
 - Compiler: 2.4M ops/s
 - 50,000 lines of platform code → 500 lines of HoloScript
 
 **What makes it different:**
+
 1. VR-native traits: @grabbable, @throwable, @networked are first-class
 2. AI-friendly: Language designed for code generation
 3. Real compilers: Not transpiling to JS, generating native Unity C#, Unreal C++, Swift, Kotlin
@@ -63,6 +69,7 @@ GitHub: https://github.com/brianonbased-dev/Holoscript
 Docs: https://holoscript.dev
 
 Would love feedback from anyone building VR/AR experiences!
+
 ```
 
 ---
@@ -71,11 +78,14 @@ Would love feedback from anyone building VR/AR experiences!
 
 ### Title
 ```
+
 HoloScript 3.0: A declarative language that compiles to 18 VR/AR platforms (Unity, Unreal, VRChat, visionOS, etc.) from a single source
+
 ```
 
 ### Content
 ```
+
 I've released v3.0 of HoloScript, a programming language designed specifically for VR/AR development.
 
 ## What is it?
@@ -88,7 +98,7 @@ composition "Interactive Scene" {
     @grabbable
     @physics(mass: 1.0)
   }
-  
+
   object "Ball" using "Interactable" {
     geometry: "sphere"
     position: [0, 1, 0]
@@ -100,8 +110,9 @@ composition "Interactive Scene" {
 ## Why?
 
 VR development is fragmented. Every platform has its own SDK, language, and workflow:
+
 - VRChat: Unity + UdonSharp
-- Quest: Unity C# or Unreal C++  
+- Quest: Unity C# or Unreal C++
 - Web: Three.js or Babylon.js
 - visionOS: Swift + RealityKit
 
@@ -109,13 +120,13 @@ HoloScript abstracts this away. Write once, compile everywhere.
 
 ## 18 Compile Targets
 
-| Category | Targets |
-|----------|---------|
-| Web | Three.js, Babylon.js, A-Frame, WebXR, WebGPU |
-| Game Engines | Unity, Unreal 5, Godot 4 |
-| VR Platforms | VRChat, OpenXR, visionOS |
-| Mobile AR | iOS/ARKit, Android/ARCore, Android XR |
-| Industrial | WASM, URDF, SDF, DTDL |
+| Category     | Targets                                      |
+| ------------ | -------------------------------------------- |
+| Web          | Three.js, Babylon.js, A-Frame, WebXR, WebGPU |
+| Game Engines | Unity, Unreal 5, Godot 4                     |
+| VR Platforms | VRChat, OpenXR, visionOS                     |
+| Mobile AR    | iOS/ARKit, Android/ARCore, Android XR        |
+| Industrial   | WASM, URDF, SDF, DTDL                        |
 
 ## Cool Features
 
@@ -136,6 +147,7 @@ HoloScript abstracts this away. Write once, compile everywhere.
 - npm: `npm install -g @holoscript/cli`
 
 MIT licensed. Feedback welcome!
+
 ```
 
 ---
@@ -144,11 +156,14 @@ MIT licensed. Feedback welcome!
 
 ### Title
 ```
+
 Released HoloScript 3.0 – Write VR games once, export to Unity, Unreal, VRChat, Godot, and more
+
 ```
 
 ### Content
 ```
+
 Just shipped v3.0 of my side project. It's a domain-specific language for VR/AR that compiles to multiple game engines.
 
 **Example:**
@@ -159,18 +174,18 @@ composition "VR Escape Room" {
     @grabbable
     @collidable
     geometry: "model/key.glb"
-    
+
     state {
       collected: false
     }
-    
+
     onGrab: {
       this.state.collected = true
       audio.play("key_pickup.mp3")
       GameState.keysFound += 1
     }
   }
-  
+
   object "GoldenKey" using "Key" {
     position: [2, 0.5, -3]
     color: "#ffd700"
@@ -179,6 +194,7 @@ composition "VR Escape Room" {
 ```
 
 Then:
+
 ```bash
 holoscript compile escape-room.holo --target unity
 holoscript compile escape-room.holo --target vrchat
@@ -196,6 +212,7 @@ I was tired of rewriting the same VR interactions for different platforms. The s
 GitHub: https://github.com/brianonbased-dev/Holoscript
 
 Happy to answer questions!
+
 ```
 
 ---
@@ -203,6 +220,7 @@ Happy to answer questions!
 ## Twitter/X Thread
 
 ```
+
 🚀 Just released HoloScript 3.0!
 
 A language that compiles to 18 VR/AR platforms from one source file.
@@ -210,9 +228,11 @@ A language that compiles to 18 VR/AR platforms from one source file.
 Write once → Unity, Unreal, VRChat, visionOS, Three.js, and more.
 
 🧵 Thread:
+
 ```
 
 ```
+
 1/ The problem with VR dev today:
 
 - Unity uses C#
@@ -224,9 +244,11 @@ Write once → Unity, Unreal, VRChat, visionOS, Three.js, and more.
 Same VR experience = 5 rewrites.
 
 HoloScript fixes this.
+
 ```
 
 ```
+
 2/ The syntax is declarative and VR-native:
 
 ```holo
@@ -237,9 +259,11 @@ object "Ball" @grabbable @physics {
 ```
 
 That's it. The compiler handles the Unity components, Unreal actors, or Three.js objects.
+
 ```
 
 ```
+
 3/ 18 compile targets in v3.0:
 
 ✅ Three.js, Babylon.js, A-Frame, WebXR
@@ -247,17 +271,21 @@ That's it. The compiler handles the Unity components, Unreal actors, or Three.js
 ✅ VRChat, OpenXR, visionOS
 ✅ iOS/ARKit, Android/ARCore
 ✅ WASM, URDF, SDF, DTDL
+
 ```
 
 ```
+
 4/ Built for AI code generation.
 
 Every object, trait, and property follows predictable patterns.
 
 Includes an MCP server so Claude, Copilot, or any AI can generate valid .holo files.
+
 ```
 
 ```
+
 5/ Performance:
 
 📊 Parser: 32,000 ops/s
@@ -268,6 +296,7 @@ MIT licensed. Try it:
 npm install -g @holoscript/cli
 
 GitHub: https://github.com/brianonbased-dev/Holoscript
+
 ```
 
 ---
@@ -275,6 +304,7 @@ GitHub: https://github.com/brianonbased-dev/Holoscript
 ## Discord Announcement
 
 ```
+
 # 🚀 HoloScript 3.0 Released!
 
 The biggest release yet with **18 compile targets**!
@@ -301,4 +331,7 @@ holoscript compile scene.holo --target threejs
 📝 Release Notes: https://github.com/brianonbased-dev/Holoscript/releases/tag/v3.0.0
 
 Let us know what you build! 🎮
+
+```
+
 ```

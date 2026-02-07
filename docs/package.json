@@ -8,7 +8,12 @@
     "build": "vitepress build",
     "preview": "vitepress preview"
   },
-  "keywords": ["holoscript", "vr", "ar", "spatial-computing"],
+  "keywords": [
+    "holoscript",
+    "vr",
+    "ar",
+    "spatial-computing"
+  ],
   "author": "Hololand",
   "license": "MIT",
   "devDependencies": {

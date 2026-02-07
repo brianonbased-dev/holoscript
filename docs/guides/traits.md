@@ -4,14 +4,14 @@ HoloScript includes **55 built-in traits** that make objects spatial and interac
 
 ## Interaction Traits
 
-| Trait | Description |
-|-------|-------------|
+| Trait        | Description                                    |
+| ------------ | ---------------------------------------------- |
 | `@grabbable` | Object can be picked up with hands/controllers |
-| `@throwable` | Object can be thrown after grabbing |
-| `@holdable` | Object stays in hand until released |
-| `@clickable` | Object responds to click/tap events |
-| `@hoverable` | Object responds to hover/gaze events |
-| `@draggable` | Object can be dragged in 2D/3D space |
+| `@throwable` | Object can be thrown after grabbing            |
+| `@holdable`  | Object stays in hand until released            |
+| `@clickable` | Object responds to click/tap events            |
+| `@hoverable` | Object responds to hover/gaze events           |
+| `@draggable` | Object can be dragged in 2D/3D space           |
 
 ### Example
 
@@ -35,14 +35,14 @@ composition "WeaponDemo" {
 
 ## Physics Traits
 
-| Trait | Description |
-|-------|-------------|
-| `@collidable` | Object participates in collision detection |
-| `@physics` | Object has full physics simulation |
-| `@rigid` | Rigid body dynamics |
-| `@kinematic` | Scripted movement, affects other physics objects |
-| `@trigger` | Collision detection without physical response |
-| `@gravity` | Object affected by gravity |
+| Trait         | Description                                      |
+| ------------- | ------------------------------------------------ |
+| `@collidable` | Object participates in collision detection       |
+| `@physics`    | Object has full physics simulation               |
+| `@rigid`      | Rigid body dynamics                              |
+| `@kinematic`  | Scripted movement, affects other physics objects |
+| `@trigger`    | Collision detection without physical response    |
+| `@gravity`    | Object affected by gravity                       |
 
 ### Example
 
@@ -66,14 +66,14 @@ composition "PhysicsDemo" {
 
 ## Visual Traits
 
-| Trait | Description |
-|-------|-------------|
-| `@glowing` | Object emits light |
-| `@emissive` | Self-illuminating material |
-| `@transparent` | Object has transparency |
-| `@reflective` | Mirror-like surface |
-| `@animated` | Object has animation states |
-| `@billboard` | Always faces the camera |
+| Trait          | Description                 |
+| -------------- | --------------------------- |
+| `@glowing`     | Object emits light          |
+| `@emissive`    | Self-illuminating material  |
+| `@transparent` | Object has transparency     |
+| `@reflective`  | Mirror-like surface         |
+| `@animated`    | Object has animation states |
+| `@billboard`   | Always faces the camera     |
 
 ### Example
 
@@ -97,13 +97,13 @@ composition "VisualDemo" {
 
 ## Networking Traits
 
-| Trait | Description |
-|-------|-------------|
-| `@networked` | State syncs across network |
-| `@synced` | Specific properties sync |
+| Trait         | Description                     |
+| ------------- | ------------------------------- |
+| `@networked`  | State syncs across network      |
+| `@synced`     | Specific properties sync        |
 | `@persistent` | State persists between sessions |
-| `@owned` | Has network ownership |
-| `@host_only` | Only host can modify |
+| `@owned`      | Has network ownership           |
+| `@host_only`  | Only host can modify            |
 
 ### Example
 
@@ -126,40 +126,40 @@ composition "NetworkDemo" {
 
 ## Behavior Traits
 
-| Trait | Description |
-|-------|-------------|
-| `@stackable` | Objects can stack on each other |
-| `@attachable` | Object can attach to other objects |
-| `@equippable` | Can be equipped to avatar slots |
-| `@consumable` | Object can be consumed/used up |
-| `@destructible` | Object can be destroyed |
+| Trait           | Description                        |
+| --------------- | ---------------------------------- |
+| `@stackable`    | Objects can stack on each other    |
+| `@attachable`   | Object can attach to other objects |
+| `@equippable`   | Can be equipped to avatar slots    |
+| `@consumable`   | Object can be consumed/used up     |
+| `@destructible` | Object can be destroyed            |
 
 ## Spatial Traits
 
-| Trait | Description |
-|-------|-------------|
-| `@anchor` | Fixed position in world space |
-| `@tracked` | Follows a tracked point |
+| Trait           | Description                      |
+| --------------- | -------------------------------- |
+| `@anchor`       | Fixed position in world space    |
+| `@tracked`      | Follows a tracked point          |
 | `@world_locked` | Locked to world coordinates (AR) |
-| `@hand_tracked` | Follows hand position |
-| `@eye_tracked` | Responds to eye gaze |
+| `@hand_tracked` | Follows hand position            |
+| `@eye_tracked`  | Responds to eye gaze             |
 
 ## Audio Traits
 
-| Trait | Description |
-|-------|-------------|
-| `@spatial_audio` | 3D positional audio |
-| `@ambient` | Background audio source |
+| Trait              | Description             |
+| ------------------ | ----------------------- |
+| `@spatial_audio`   | 3D positional audio     |
+| `@ambient`         | Background audio source |
 | `@voice_activated` | Responds to voice input |
 
 ## State Traits
 
-| Trait | Description |
-|-------|-------------|
-| `@state` | Has reactive state |
-| `@reactive` | Automatically updates on state change |
+| Trait         | Description                            |
+| ------------- | -------------------------------------- |
+| `@state`      | Has reactive state                     |
+| `@reactive`   | Automatically updates on state change  |
 | `@observable` | State can be observed by other objects |
-| `@computed` | Derived state from other values |
+| `@computed`   | Derived state from other values        |
 
 ## Combining Traits
 
@@ -173,10 +173,10 @@ object "MagicSword" {
   @physics
   @spatial_audio
   @networked
-  
+
   position: [0, 1, -2]
   glow_color: "#00ffff"
-  
+
   on_grab: {
     play_sound("sword_draw")
     this.glow_intensity = 2.0

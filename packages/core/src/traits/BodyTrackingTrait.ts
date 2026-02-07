@@ -15,16 +15,29 @@ import type { TraitHandler } from './TraitTypes';
 
 type BodyTrackingMode = 'upper_body' | 'full_body' | 'hands_only' | 'custom';
 
-type BodyJoint = 
-  | 'head' | 'neck' | 'spine_chest' | 'spine_mid' | 'spine_base' | 'hips'
-  | 'shoulder_left' | 'shoulder_right'
-  | 'elbow_left' | 'elbow_right'
-  | 'wrist_left' | 'wrist_right'
-  | 'hand_left' | 'hand_right'
-  | 'hip_left' | 'hip_right'
-  | 'knee_left' | 'knee_right'
-  | 'ankle_left' | 'ankle_right'
-  | 'foot_left' | 'foot_right';
+type BodyJoint =
+  | 'head'
+  | 'neck'
+  | 'spine_chest'
+  | 'spine_mid'
+  | 'spine_base'
+  | 'hips'
+  | 'shoulder_left'
+  | 'shoulder_right'
+  | 'elbow_left'
+  | 'elbow_right'
+  | 'wrist_left'
+  | 'wrist_right'
+  | 'hand_left'
+  | 'hand_right'
+  | 'hip_left'
+  | 'hip_right'
+  | 'knee_left'
+  | 'knee_right'
+  | 'ankle_left'
+  | 'ankle_right'
+  | 'foot_left'
+  | 'foot_right';
 
 interface JointPose {
   position: { x: number; y: number; z: number };
@@ -59,28 +72,44 @@ interface BodyTrackingConfig {
 // =============================================================================
 
 const UPPER_BODY_JOINTS: BodyJoint[] = [
-  'head', 'neck', 'spine_chest', 'spine_mid',
-  'shoulder_left', 'shoulder_right',
-  'elbow_left', 'elbow_right',
-  'wrist_left', 'wrist_right',
-  'hand_left', 'hand_right',
+  'head',
+  'neck',
+  'spine_chest',
+  'spine_mid',
+  'shoulder_left',
+  'shoulder_right',
+  'elbow_left',
+  'elbow_right',
+  'wrist_left',
+  'wrist_right',
+  'hand_left',
+  'hand_right',
 ];
 
 const FULL_BODY_JOINTS: BodyJoint[] = [
   ...UPPER_BODY_JOINTS,
-  'spine_base', 'hips',
-  'hip_left', 'hip_right',
-  'knee_left', 'knee_right',
-  'ankle_left', 'ankle_right',
-  'foot_left', 'foot_right',
+  'spine_base',
+  'hips',
+  'hip_left',
+  'hip_right',
+  'knee_left',
+  'knee_right',
+  'ankle_left',
+  'ankle_right',
+  'foot_left',
+  'foot_right',
 ];
 
 function getTrackedJoints(mode: BodyTrackingMode, customJoints?: BodyJoint[]): BodyJoint[] {
   switch (mode) {
-    case 'full_body': return FULL_BODY_JOINTS;
-    case 'upper_body': return UPPER_BODY_JOINTS;
-    case 'hands_only': return ['wrist_left', 'wrist_right', 'hand_left', 'hand_right'];
-    case 'custom': return customJoints || UPPER_BODY_JOINTS;
+    case 'full_body':
+      return FULL_BODY_JOINTS;
+    case 'upper_body':
+      return UPPER_BODY_JOINTS;
+    case 'hands_only':
+      return ['wrist_left', 'wrist_right', 'hand_left', 'hand_right'];
+    case 'custom':
+      return customJoints || UPPER_BODY_JOINTS;
   }
 }
 
@@ -132,9 +161,9 @@ export const bodyTrackingHandler: TraitHandler<BodyTrackingConfig> = {
       calibrated: false,
     };
     (node as any).__bodyTrackingState = state;
-    
+
     const trackedJoints = getTrackedJoints(config.mode, config.custom_joints);
-    
+
     context.emit?.('body_tracking_start', {
       node,
       mode: config.mode,
@@ -151,12 +180,12 @@ export const bodyTrackingHandler: TraitHandler<BodyTrackingConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__bodyTrackingState as BodyTrackingState;
     if (!state) return;
-    
+
     if (!state.isTracking) {
       state.lostTime += delta * 1000;
       return;
     }
-    
+
     if (config.avatar_binding && state.joints.size > 0) {
       context.emit?.('avatar_pose_update', {
         node,
@@ -169,35 +198,36 @@ export const bodyTrackingHandler: TraitHandler<BodyTrackingConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__bodyTrackingState as BodyTrackingState;
     if (!state) return;
-    
+
     if (event.type === 'body_pose_update') {
       const jointData = event.joints as Record<string, JointPose>;
       const trackedJoints = getTrackedJoints(config.mode, config.custom_joints);
       const wasTracking = state.isTracking;
-      
+
       for (const [joint, pose] of state.joints) {
         state.prevJoints.set(joint, pose);
       }
-      
+
       let validJoints = 0;
-      
+
       for (const jointName of trackedJoints) {
         const pose = jointData[jointName];
         if (!pose) continue;
-        
+
         if (pose.confidence >= config.tracking_confidence_threshold) {
           validJoints++;
           const prevPose = state.prevJoints.get(jointName);
-          const finalPose = prevPose && config.joint_smoothing > 0
-            ? smoothPose(pose, prevPose, config.joint_smoothing)
-            : pose;
+          const finalPose =
+            prevPose && config.joint_smoothing > 0
+              ? smoothPose(pose, prevPose, config.joint_smoothing)
+              : pose;
           state.joints.set(jointName, finalPose);
         }
       }
-      
+
       state.isTracking = validJoints >= trackedJoints.length * 0.5;
       state.lastUpdateTime = Date.now();
-      
+
       if (state.isTracking) {
         state.lostTime = 0;
         if (!wasTracking) {
@@ -216,7 +246,7 @@ export const bodyTrackingHandler: TraitHandler<BodyTrackingConfig> = {
       const feet = state.joints.get('foot_left') || state.joints.get('ankle_left');
       const leftHand = state.joints.get('hand_left');
       const rightHand = state.joints.get('hand_right');
-      
+
       if (head && feet) {
         state.bodyHeight = head.position.y - feet.position.y;
       }
@@ -227,7 +257,11 @@ export const bodyTrackingHandler: TraitHandler<BodyTrackingConfig> = {
         state.armSpan = Math.sqrt(dx * dx + dy * dy + dz * dz);
       }
       state.calibrated = true;
-      context.emit?.('body_calibrated', { node, bodyHeight: state.bodyHeight, armSpan: state.armSpan });
+      context.emit?.('body_calibrated', {
+        node,
+        bodyHeight: state.bodyHeight,
+        armSpan: state.armSpan,
+      });
     }
   },
 };

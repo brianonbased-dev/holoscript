@@ -1,6 +1,6 @@
 /**
  * SemanticSearchService
- * 
+ *
  * Provides vector-based search for HoloScript traits.
  */
 
@@ -29,7 +29,7 @@ export class SemanticSearchService<T extends { name: string; description: string
       throw new Error(`AI Adapter ${this.adapter.name} does not support embeddings.`);
     }
 
-    const texts = this.items.map(item => `${item.name}: ${item.description}`);
+    const texts = this.items.map((item) => `${item.name}: ${item.description}`);
     const embeddings = await this.adapter.getEmbeddings(texts);
 
     this.items.forEach((item, i) => {
@@ -46,20 +46,18 @@ export class SemanticSearchService<T extends { name: string; description: string
     }
 
     const [queryEmbedding] = await this.adapter.getEmbeddings(query);
-    
-    const results: SearchResult<T>[] = this.items.map(item => {
+
+    const results: SearchResult<T>[] = this.items.map((item) => {
       const itemEmbedding = this.embeddings.get(item.name);
       if (!itemEmbedding) return { item, score: 0 };
-      
+
       return {
         item,
-        score: this.cosineSimilarity(queryEmbedding, itemEmbedding)
+        score: this.cosineSimilarity(queryEmbedding, itemEmbedding),
       };
     });
 
-    return results
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit);
+    return results.sort((a, b) => b.score - a.score).slice(0, limit);
   }
 
   /**
@@ -69,13 +67,13 @@ export class SemanticSearchService<T extends { name: string; description: string
     let dotProduct = 0;
     let normA = 0;
     let normB = 0;
-    
+
     for (let i = 0; i < vecA.length; i++) {
       dotProduct += vecA[i] * vecB[i];
       normA += vecA[i] * vecA[i];
       normB += vecB[i] * vecB[i];
     }
-    
+
     if (normA === 0 || normB === 0) return 0;
     return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
   }

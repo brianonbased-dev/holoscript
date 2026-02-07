@@ -211,11 +211,7 @@ class AvatarDemo {
   /**
    * Load a Ready Player Me avatar
    */
-  async loadRPMAvatar(
-    id: string,
-    avatarIdOrUrl: string,
-    position?: THREE.Vector3
-  ): Promise<void> {
+  async loadRPMAvatar(id: string, avatarIdOrUrl: string, position?: THREE.Vector3): Promise<void> {
     await this.loader.initialize();
 
     const config: HumanoidConfig = {
@@ -294,10 +290,14 @@ class AvatarDemo {
   /**
    * Play animation
    */
-  playAnimation(avatarId: string, animationName: string, options?: {
-    loop?: boolean;
-    crossFade?: number;
-  }): void {
+  playAnimation(
+    avatarId: string,
+    animationName: string,
+    options?: {
+      loop?: boolean;
+      crossFade?: number;
+    }
+  ): void {
     const mixer = this.avatarMixers.get(avatarId);
     if (!mixer) {
       console.warn(`No mixer found for avatar: ${avatarId}`);

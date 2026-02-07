@@ -33,4 +33,4 @@ HoloScript+ enables cross-platform VR/AR development with significant efficiency
 
 For full metrics, ROI analysis, and integration roadmaps, see the proprietary research documentation.
 
-*See also: [ROADMAP.md](../ROADMAP.md) for feature timeline*
+_See also: [ROADMAP.md](../ROADMAP.md) for feature timeline_

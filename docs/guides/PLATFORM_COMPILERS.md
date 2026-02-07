@@ -4,17 +4,17 @@ HoloScript compiles to **18 different platforms** from a single `.holo` source f
 
 ## Quick Reference
 
-| Target | Command | Output |
-| ------ | ------- | ------ |
-| VRChat | `holoscript compile scene.holo --target vrchat` | UdonSharp C# |
-| Unreal Engine | `holoscript compile scene.holo --target unreal` | C++ / Blueprint |
-| iOS | `holoscript compile scene.holo --target ios` | Swift / ARKit |
-| Android | `holoscript compile scene.holo --target android` | Kotlin / ARCore |
-| Godot | `holoscript compile scene.holo --target godot` | GDScript |
-| VisionOS | `holoscript compile scene.holo --target visionos` | Swift / RealityKit |
-| OpenXR | `holoscript compile scene.holo --target openxr` | C++ |
-| AndroidXR | `holoscript compile scene.holo --target androidxr` | Kotlin |
-| WebGPU | `holoscript compile scene.holo --target webgpu` | TypeScript |
+| Target        | Command                                            | Output             |
+| ------------- | -------------------------------------------------- | ------------------ |
+| VRChat        | `holoscript compile scene.holo --target vrchat`    | UdonSharp C#       |
+| Unreal Engine | `holoscript compile scene.holo --target unreal`    | C++ / Blueprint    |
+| iOS           | `holoscript compile scene.holo --target ios`       | Swift / ARKit      |
+| Android       | `holoscript compile scene.holo --target android`   | Kotlin / ARCore    |
+| Godot         | `holoscript compile scene.holo --target godot`     | GDScript           |
+| VisionOS      | `holoscript compile scene.holo --target visionos`  | Swift / RealityKit |
+| OpenXR        | `holoscript compile scene.holo --target openxr`    | C++                |
+| AndroidXR     | `holoscript compile scene.holo --target androidxr` | Kotlin             |
+| WebGPU        | `holoscript compile scene.holo --target webgpu`    | TypeScript         |
 
 ---
 
@@ -348,12 +348,12 @@ holoscript compile scene.holo --target webgpu --output ./src/
 
 All compilers support these options:
 
-| Option | Description |
-| ------ | ----------- |
-| `--output <path>` | Output directory |
-| `--verbose` | Show detailed compilation info |
-| `--watch` | Recompile on file changes |
-| `--sourcemap` | Generate source maps (where applicable) |
+| Option            | Description                             |
+| ----------------- | --------------------------------------- |
+| `--output <path>` | Output directory                        |
+| `--verbose`       | Show detailed compilation info          |
+| `--watch`         | Recompile on file changes               |
+| `--sourcemap`     | Generate source maps (where applicable) |
 
 ---
 

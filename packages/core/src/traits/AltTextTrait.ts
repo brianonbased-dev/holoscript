@@ -20,12 +20,12 @@ interface AltTextState {
 }
 
 interface AltTextConfig {
-  text: string;  // Brief description
-  verbose: string;  // Detailed description
+  text: string; // Brief description
+  verbose: string; // Detailed description
   language: string;
   auto_generate: boolean;
   context_aware: boolean;
-  include_spatial: boolean;  // Include position/orientation info
+  include_spatial: boolean; // Include position/orientation info
 }
 
 // =============================================================================
@@ -51,7 +51,7 @@ export const altTextHandler: TraitHandler<AltTextConfig> = {
       isGenerating: false,
     };
     (node as any).__altTextState = state;
-    
+
     // Register alt text
     if (config.text) {
       context.emit?.('alt_text_register', {
@@ -76,39 +76,39 @@ export const altTextHandler: TraitHandler<AltTextConfig> = {
     delete (node as any).__altTextState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(_node, _config, _context, _delta) {
     // Alt text is mostly static, no per-frame updates needed
   },
 
   onEvent(node, config, context, event) {
     const state = (node as any).__altTextState as AltTextState;
     if (!state) return;
-    
+
     if (event.type === 'alt_text_generated') {
       state.generatedText = event.text as string;
       state.isGenerating = false;
-      
+
       context.emit?.('alt_text_register', {
         node,
         text: state.generatedText,
-        verbose: event.verbose as string || '',
+        verbose: (event.verbose as string) || '',
         language: config.language,
       });
       state.isRegistered = true;
     } else if (event.type === 'alt_text_query') {
-      const verbosity = event.verbosity as 'brief' | 'verbose' || 'brief';
+      const verbosity = (event.verbosity as 'brief' | 'verbose') || 'brief';
       let text = verbosity === 'verbose' && config.verbose ? config.verbose : config.text;
-      
+
       if (!text && state.generatedText) {
         text = state.generatedText;
       }
-      
+
       // Add spatial context if requested
       if (config.include_spatial && (node as any).position) {
         const pos = (node as any).position;
         text += ` Located at ${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}, ${pos.z.toFixed(1)}.`;
       }
-      
+
       context.emit?.('alt_text_response', {
         queryId: event.queryId,
         node,
@@ -120,7 +120,7 @@ export const altTextHandler: TraitHandler<AltTextConfig> = {
       context.emit?.('alt_text_register', {
         node,
         text: event.text as string,
-        verbose: event.verbose as string || config.verbose,
+        verbose: (event.verbose as string) || config.verbose,
         language: config.language,
       });
     }

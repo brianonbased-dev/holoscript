@@ -16,22 +16,22 @@ interface Waypoint {
   x: number;
   y: number;
   z: number;
-  waitTime?: number;  // Override default wait time
-  action?: string;    // Action to perform at waypoint
+  waitTime?: number; // Override default wait time
+  action?: string; // Action to perform at waypoint
 }
 
 type PatrolMode = 'loop' | 'pingpong' | 'random' | 'once';
 
 interface PatrolState {
   currentIndex: number;
-  direction: 1 | -1;  // For pingpong
+  direction: 1 | -1; // For pingpong
   isPaused: boolean;
   isWaiting: boolean;
   waitTimer: number;
   isAlerted: boolean;
   alertPosition: { x: number; y: number; z: number } | null;
   completed: boolean;
-  visitedSet: Set<number>;  // For random mode
+  visitedSet: Set<number>; // For random mode
 }
 
 interface PatrolConfig {
@@ -54,11 +54,7 @@ function distance3D(
   a: { x: number; y: number; z: number },
   b: { x: number; y: number; z: number }
 ): number {
-  return Math.sqrt(
-    Math.pow(a.x - b.x, 2) +
-    Math.pow(a.y - b.y, 2) +
-    Math.pow(a.z - b.z, 2)
-  );
+  return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(a.z - b.z, 2));
 }
 
 function moveToward(
@@ -69,11 +65,11 @@ function moveToward(
 ): { x: number; y: number; z: number; reached: boolean } {
   const dist = distance3D(current, target);
   const step = speed * delta;
-  
+
   if (dist <= step) {
     return { ...target, reached: true };
   }
-  
+
   const ratio = step / dist;
   return {
     x: current.x + (target.x - current.x) * ratio,
@@ -86,11 +82,11 @@ function moveToward(
 function getNextIndex(state: PatrolState, config: PatrolConfig): number {
   const count = config.waypoints.length;
   if (count === 0) return 0;
-  
+
   switch (config.mode) {
     case 'loop':
       return (state.currentIndex + 1) % count;
-    
+
     case 'pingpong':
       const next = state.currentIndex + state.direction;
       if (next >= count - 1) {
@@ -101,7 +97,7 @@ function getNextIndex(state: PatrolState, config: PatrolConfig): number {
         return 0;
       }
       return next;
-    
+
     case 'random':
       if (state.visitedSet.size >= count) {
         state.visitedSet.clear();
@@ -112,14 +108,14 @@ function getNextIndex(state: PatrolState, config: PatrolConfig): number {
       } while (state.visitedSet.has(randomIndex) && state.visitedSet.size < count);
       state.visitedSet.add(randomIndex);
       return randomIndex;
-    
+
     case 'once':
       if (state.currentIndex >= count - 1) {
         state.completed = true;
         return state.currentIndex;
       }
       return state.currentIndex + 1;
-    
+
     default:
       return (state.currentIndex + 1) % count;
   }
@@ -157,7 +153,7 @@ export const patrolHandler: TraitHandler<PatrolConfig> = {
       visitedSet: new Set(),
     };
     (node as any).__patrolState = state;
-    
+
     if (config.waypoints.length > 0) {
       context.emit?.('patrol_started', { node, waypoints: config.waypoints.length });
     }
@@ -171,9 +167,9 @@ export const patrolHandler: TraitHandler<PatrolConfig> = {
     const state = (node as any).__patrolState as PatrolState;
     if (!state || state.isPaused || state.completed) return;
     if (config.waypoints.length === 0) return;
-    
+
     const position = (node as any).position || { x: 0, y: 0, z: 0 };
-    
+
     // Handle alert state
     if (state.isAlerted) {
       state.waitTimer += delta;
@@ -181,7 +177,7 @@ export const patrolHandler: TraitHandler<PatrolConfig> = {
         state.isAlerted = false;
         state.alertPosition = null;
         state.waitTimer = 0;
-        
+
         if (!config.resume_after_alert) {
           state.isPaused = true;
         }
@@ -189,17 +185,17 @@ export const patrolHandler: TraitHandler<PatrolConfig> = {
       }
       return;
     }
-    
+
     // Handle waiting at waypoint
     if (state.isWaiting) {
       state.waitTimer += delta;
       const waypoint = config.waypoints[state.currentIndex];
       const waitTime = waypoint?.waitTime ?? config.wait_time;
-      
+
       if (state.waitTimer >= waitTime) {
         state.isWaiting = false;
         state.waitTimer = 0;
-        
+
         // Execute waypoint action if any
         if (waypoint?.action) {
           context.emit?.('patrol_action', {
@@ -208,10 +204,10 @@ export const patrolHandler: TraitHandler<PatrolConfig> = {
             waypointIndex: state.currentIndex,
           });
         }
-        
+
         // Move to next waypoint
         state.currentIndex = getNextIndex(state, config);
-        
+
         context.emit?.('patrol_waypoint_left', {
           node,
           fromIndex: state.currentIndex,
@@ -220,19 +216,19 @@ export const patrolHandler: TraitHandler<PatrolConfig> = {
       }
       return;
     }
-    
+
     // Move toward current waypoint
     const target = config.waypoints[state.currentIndex];
     if (!target) return;
-    
+
     const result = moveToward(position, target, config.speed, delta);
-    
+
     // Update position
     context.emit?.('set_position', {
       node,
       position: { x: result.x, y: result.y, z: result.z },
     });
-    
+
     // Look toward movement direction
     if (config.look_ahead && !result.reached) {
       const dx = target.x - position.x;
@@ -243,12 +239,12 @@ export const patrolHandler: TraitHandler<PatrolConfig> = {
         rotation: { x: 0, y: angle, z: 0 },
       });
     }
-    
+
     // Reached waypoint
     if (result.reached) {
       state.isWaiting = true;
       state.waitTimer = 0;
-      
+
       context.emit?.('patrol_waypoint_reached', {
         node,
         waypointIndex: state.currentIndex,
@@ -260,7 +256,7 @@ export const patrolHandler: TraitHandler<PatrolConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__patrolState as PatrolState;
     if (!state) return;
-    
+
     if (event.type === 'patrol_pause') {
       state.isPaused = true;
       context.emit?.('patrol_paused', { node });

@@ -72,10 +72,7 @@ export {
 } from './SmartAssetLoader';
 
 // Asset Aliases
-export {
-  DEFAULT_ASSET_ALIASES,
-  resolveAssetAlias,
-} from './AssetAliases';
+export { DEFAULT_ASSET_ALIASES, resolveAssetAlias } from './AssetAliases';
 
 // Asset Dependency Graph
 export {

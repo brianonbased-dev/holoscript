@@ -5,7 +5,9 @@ Production-ready HoloScript examples demonstrating practical use cases.
 ## Examples
 
 ### [VR Showroom](vr-showroom.holo)
+
 E-commerce virtual shopping experience with:
+
 - Product displays with grab-to-inspect
 - Shopping cart system
 - Payment flow
@@ -14,7 +16,9 @@ E-commerce virtual shopping experience with:
 **Target:** Three.js, Unity, VRChat
 
 ### [Escape Room](escape-room.holo)
+
 Multiplayer puzzle game with:
+
 - Combination locks
 - Pressure plate sequences
 - Symbol matching puzzles
@@ -24,7 +28,9 @@ Multiplayer puzzle game with:
 **Target:** VRChat, OpenXR
 
 ### [Medical Training](medical-training.holo)
+
 AR surgical training simulator with:
+
 - Anatomical 3D models
 - Hand-tracked tool interaction
 - Step-by-step procedures
@@ -48,10 +54,10 @@ holoscript compile medical-training.holo --target ios
 
 ## Features Demonstrated
 
-| Example | Features |
-|---------|----------|
-| VR Showroom | @grabbable, @rotatable, UI panels, audio, state management |
-| Escape Room | @networked, @trigger, templates, puzzles, multiplayer sync |
+| Example          | Features                                                      |
+| ---------------- | ------------------------------------------------------------- |
+| VR Showroom      | @grabbable, @rotatable, UI panels, audio, state management    |
+| Escape Room      | @networked, @trigger, templates, puzzles, multiplayer sync    |
 | Medical Training | @hand_tracked, @anchor, gestures, haptics, precision tracking |
 
 ## Requirements

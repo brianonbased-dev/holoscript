@@ -172,19 +172,13 @@ describe('PhysicsWorld', () => {
     });
 
     it('should handle scaled meshes for box shapes', () => {
-      const mesh = createMockMesh(
-        { x: 0, y: 0, z: 0 },
-        { x: 2, y: 3, z: 4 }
-      );
+      const mesh = createMockMesh({ x: 0, y: 0, z: 0 }, { x: 2, y: 3, z: 4 });
       const body = physics.addBody('scaledBox', mesh, 'box', 1);
       expect(body).toBeDefined();
     });
 
     it('should handle scaled meshes for sphere shapes', () => {
-      const mesh = createMockMesh(
-        { x: 0, y: 0, z: 0 },
-        { x: 3, y: 2, z: 1 }
-      );
+      const mesh = createMockMesh({ x: 0, y: 0, z: 0 }, { x: 3, y: 2, z: 1 });
       const body = physics.addBody('scaledSphere', mesh, 'sphere', 1);
       expect(body).toBeDefined();
     });

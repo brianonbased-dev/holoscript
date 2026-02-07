@@ -143,9 +143,7 @@ export class WorkspaceManager {
   createWorkspace(ownerId: string, options: CreateWorkspaceOptions): Workspace {
     // Validate workspace name
     if (!this.isValidWorkspaceName(options.name)) {
-      throw new Error(
-        'Invalid workspace name. Use lowercase letters, numbers, and hyphens only.'
-      );
+      throw new Error('Invalid workspace name. Use lowercase letters, numbers, and hyphens only.');
     }
 
     // Check if workspace already exists
@@ -283,11 +281,7 @@ export class WorkspaceManager {
   /**
    * Remove a member from the workspace
    */
-  removeMember(
-    workspaceName: string,
-    actorId: string,
-    userId: string
-  ): void {
+  removeMember(workspaceName: string, actorId: string, userId: string): void {
     const workspace = this.getWorkspaceOrThrow(workspaceName);
     this.checkPermission(workspace, actorId, 'members:manage');
 
@@ -327,7 +321,7 @@ export class WorkspaceManager {
 
     // Cannot change owner's role
     if (userId === workspace.ownerId) {
-      throw new Error('Cannot change the owner\'s role. Transfer ownership instead.');
+      throw new Error("Cannot change the owner's role. Transfer ownership instead.");
     }
 
     // Cannot promote to owner
@@ -354,12 +348,7 @@ export class WorkspaceManager {
   /**
    * Add a secret to the workspace
    */
-  addSecret(
-    workspaceName: string,
-    actorId: string,
-    name: string,
-    value: string
-  ): void {
+  addSecret(workspaceName: string, actorId: string, name: string, value: string): void {
     const workspace = this.getWorkspaceOrThrow(workspaceName);
     this.checkPermission(workspace, actorId, 'secrets:manage');
 
@@ -398,11 +387,7 @@ export class WorkspaceManager {
   /**
    * Remove a secret from the workspace
    */
-  removeSecret(
-    workspaceName: string,
-    actorId: string,
-    name: string
-  ): void {
+  removeSecret(workspaceName: string, actorId: string, name: string): void {
     const workspace = this.getWorkspaceOrThrow(workspaceName);
     this.checkPermission(workspace, actorId, 'secrets:manage');
 
@@ -424,11 +409,7 @@ export class WorkspaceManager {
   /**
    * Get secret value (decrypted)
    */
-  getSecretValue(
-    workspaceName: string,
-    actorId: string,
-    name: string
-  ): string | undefined {
+  getSecretValue(workspaceName: string, actorId: string, name: string): string | undefined {
     const workspace = this.getWorkspaceOrThrow(workspaceName);
     this.checkPermission(workspace, actorId, 'secrets:read');
 
@@ -453,11 +434,7 @@ export class WorkspaceManager {
   /**
    * Get activity feed
    */
-  getActivity(
-    workspaceName: string,
-    actorId: string,
-    limit: number = 50
-  ): ActivityEntry[] {
+  getActivity(workspaceName: string, actorId: string, limit: number = 50): ActivityEntry[] {
     const workspace = this.getWorkspaceOrThrow(workspaceName);
     this.checkPermission(workspace, actorId, 'packages:read');
 
@@ -482,11 +459,7 @@ export class WorkspaceManager {
   /**
    * Check if user has permission
    */
-  hasPermission(
-    workspaceName: string,
-    userId: string,
-    permission: string
-  ): boolean {
+  hasPermission(workspaceName: string, userId: string, permission: string): boolean {
     const workspace = this.workspaces.get(workspaceName);
     if (!workspace) {
       return false;
@@ -510,11 +483,7 @@ export class WorkspaceManager {
     return workspace;
   }
 
-  private checkPermission(
-    workspace: Workspace,
-    userId: string,
-    permission: string
-  ): void {
+  private checkPermission(workspace: Workspace, userId: string, permission: string): void {
     const member = workspace.members.find((m) => m.userId === userId);
     if (!member) {
       throw new Error('You are not a member of this workspace');
@@ -536,10 +505,7 @@ export class WorkspaceManager {
     this.userWorkspaces.get(userId)?.delete(workspaceName);
   }
 
-  private addActivity(
-    workspace: Workspace,
-    entry: Omit<ActivityEntry, 'id' | 'timestamp'>
-  ): void {
+  private addActivity(workspace: Workspace, entry: Omit<ActivityEntry, 'id' | 'timestamp'>): void {
     workspace.activity.push({
       id: this.generateId(),
       timestamp: new Date().toISOString(),

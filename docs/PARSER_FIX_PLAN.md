@@ -4,8 +4,9 @@
 **Based on:** Live Integration Test Results (31/47 tests failing)
 
 ## Priority Levels
+
 - **P0**: Blocking - breaks core functionality
-- **P1**: High - breaks common use cases  
+- **P1**: High - breaks common use cases
 - **P2**: Medium - breaks advanced features
 - **P3**: Low - edge cases
 
@@ -14,6 +15,7 @@
 ## Phase 1: Critical API Fixes (P0)
 
 ### 1.1 Fix LiveTestRunner Parser Selection
+
 **File:** `packages/test/src/e2e/LiveTestRunner.ts`
 **Issue:** Using wrong parser for .hs files
 **Current:** `HoloScriptParser` (voice commands)
@@ -35,6 +37,7 @@ parser.parse(content); // Works
 ---
 
 ### 1.2 Export parseHoloScriptPlus Properly
+
 **File:** `packages/core/src/index.ts`
 **Status:** Already exported ✅
 **Verify:** `parseHoloScriptPlus` function is accessible
@@ -44,20 +47,24 @@ parser.parse(content); // Works
 ## Phase 2: .holo Parser Enhancements (P1)
 
 ### 2.1 Support Root-Level Decorators
+
 **Files affected:** 13/18 .holo files
 **Issue:** `@world {}` syntax not recognized outside `composition {}`
 
 **Current behavior:**
+
 ```holo
 @world { ... }  // ❌ Error: Expected COMPOSITION
 ```
 
 **Expected:**
+
 ```holo
 @world { ... }  // ✅ Works - implicit composition wrapper
 ```
 
 **Implementation:**
+
 ```typescript
 // In HoloCompositionParser.ts
 parseProgram() {
@@ -75,9 +82,11 @@ parseProgram() {
 ---
 
 ### 2.2 Support object at Root Level
+
 **Issue:** Objects declared outside `composition {}` fail
 
 **Pattern failing:**
+
 ```holo
 object "player" @grabbable { ... }  // ❌ Outside composition
 ```
@@ -90,6 +99,7 @@ object "player" @grabbable { ... }  // ❌ Outside composition
 ---
 
 ### 2.3 Add `audio` Block Support
+
 **Issue:** `audio` keyword not recognized
 **File:** `examples/hololand/enchanted-forest.holo`
 
@@ -110,16 +120,19 @@ audio "ambient_forest" {
 ## Phase 3: .hsplus Parser Fixes (P1)
 
 ### 3.1 Hash Color Literals
+
 **Issue:** `#ff0000` parsed as comment or error
 **Files:** 4/6 .hsplus fail
 
 **Pattern failing:**
+
 ```hsplus
 color: "#ff0000"  // ❌ Hash causes issues
 color: ${state.color}  // Also fails
 ```
 
 **Implementation:**
+
 ```typescript
 // In tokenizer
 if (char === '#' && this.isHexDigit(this.peek())) {
@@ -133,8 +146,10 @@ if (char === '#' && this.isHexDigit(this.peek())) {
 ---
 
 ### 3.2 Modern Object Syntax
+
 **Issue:** Legacy ID selector syntax deprecated
 **Modern pattern:**
+
 ```hsplus
 composition "Demo" {
   template "MainOrb" {
@@ -154,8 +169,10 @@ composition "Demo" {
 ---
 
 ### 3.3 Template String Interpolation
+
 **Issue:** `${state.color}` not evaluated
 **Pattern:**
+
 ```hsplus
 color: ${state.color}  // ❌ Not recognized
 ```
@@ -170,8 +187,10 @@ color: ${state.color}  // ❌ Not recognized
 ## Phase 4: Spread Operator Support (P2)
 
 ### 4.1 Object Spread
+
 **Issue:** `...defaults` not supported
 **Pattern failing:**
+
 ```holo
 environment {
   ...defaults
@@ -179,7 +198,8 @@ environment {
 }
 ```
 
-**Implementation:** 
+**Implementation:**
+
 - Add `DOT_DOT_DOT` token
 - Parse as SpreadExpression
 - Evaluate during composition merge
@@ -192,8 +212,10 @@ environment {
 ## Phase 5: Template Inheritance (P2)
 
 ### 5.1 Using Keyword for Templates
+
 **Issue:** `using "Parent"` syntax fails
 **Pattern:**
+
 ```holo
 template "Child" using "Base" { ... }
 ```
@@ -207,16 +229,16 @@ template "Child" using "Base" { ... }
 
 ## Execution Order
 
-| Phase | Task | Effort | Tests Fixed |
-|-------|------|--------|-------------|
-| 1.1 | Fix LiveTestRunner | 15 min | 10 |
-| 2.1 | Root decorators | 3 hours | 8 |
-| 3.1 | Hash colors | 2 hours | 4 |
-| 2.3 | Audio blocks | 1 hour | 1 |
-| 3.2 | Modern object syntax | 1 hour | 2 |
-| 3.3 | Template strings | 3 hours | 3 |
-| 4.1 | Spread operator | 4 hours | 2 |
-| 5.1 | Template using | 3 hours | 1 |
+| Phase | Task                 | Effort  | Tests Fixed |
+| ----- | -------------------- | ------- | ----------- |
+| 1.1   | Fix LiveTestRunner   | 15 min  | 10          |
+| 2.1   | Root decorators      | 3 hours | 8           |
+| 3.1   | Hash colors          | 2 hours | 4           |
+| 2.3   | Audio blocks         | 1 hour  | 1           |
+| 3.2   | Modern object syntax | 1 hour  | 2           |
+| 3.3   | Template strings     | 3 hours | 3           |
+| 4.1   | Spread operator      | 4 hours | 2           |
+| 5.1   | Template using       | 3 hours | 1           |
 
 **Total Estimated Effort:** ~18 hours
 **Expected Pass Rate After:** 90%+
@@ -232,6 +254,7 @@ template "Child" using "Base" { ... }
 ## Verification
 
 After each fix:
+
 ```bash
 pnpm --filter @holoscript/test run test:live
 ```
@@ -242,12 +265,12 @@ Target: Get from 34% → 90%+ pass rate
 
 ## Files to Modify
 
-| File | Changes |
-|------|---------|
-| `packages/test/src/e2e/LiveTestRunner.ts` | Use HoloScriptCodeParser |
-| `packages/core/src/parser/HoloCompositionParser.ts` | Root-level decorators, audio |
-| `packages/core/src/parser/HoloScriptPlusParser.ts` | Hash colors, ID selectors |
-| `packages/core/src/parser/Tokenizer.ts` | Hash color token, spread token |
+| File                                                | Changes                        |
+| --------------------------------------------------- | ------------------------------ |
+| `packages/test/src/e2e/LiveTestRunner.ts`           | Use HoloScriptCodeParser       |
+| `packages/core/src/parser/HoloCompositionParser.ts` | Root-level decorators, audio   |
+| `packages/core/src/parser/HoloScriptPlusParser.ts`  | Hash colors, ID selectors      |
+| `packages/core/src/parser/Tokenizer.ts`             | Hash color token, spread token |
 
 ---
 

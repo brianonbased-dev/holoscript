@@ -36,7 +36,7 @@ orb throwingBall {
   @grabbable
   @throwable
   geometry: "sphere"
-  
+
   onThrow: {
     // Called when released with velocity
   }
@@ -52,7 +52,7 @@ orb button {
   @pointable
   geometry: "cube"
   scale: [0.3, 0.1, 0.3]
-  
+
   onPoint: {
     this.color = "#00ff00"  // Highlight when pointed at
   }
@@ -67,11 +67,11 @@ Detects when the user's hand or pointer is near:
 orb hotspot {
   @hoverable
   geometry: "sphere"
-  
+
   onHoverEnter: {
     this.scale = 1.2
   }
-  
+
   onHoverExit: {
     this.scale = 1.0
   }
@@ -86,7 +86,7 @@ Responds to click/trigger actions:
 orb clickableButton {
   @clickable
   geometry: "cube"
-  
+
   onClick: {
     console.log("Clicked!")
   }
@@ -142,11 +142,11 @@ orb doorTrigger {
   geometry: "cube"
   scale: [2, 2, 1]
   opacity: 0.3
-  
+
   onTriggerEnter: {
     openDoor()
   }
-  
+
   onTriggerExit: {
     closeDoor()
   }
@@ -232,7 +232,7 @@ orb sharedBall {
   @networked
   @grabbable
   geometry: "sphere"
-  
+
   // Position and rotation sync automatically
 }
 ```
@@ -263,7 +263,7 @@ orb interactiveBall {
   }
   @collidable        // Collides with environment
   @networked         // Synced in multiplayer
-  
+
   geometry: "sphere"
   color: "#ff6600"
   position: [0, 1.5, -1]
@@ -296,6 +296,7 @@ Many traits accept parameters:
 Here's the complete list organized by category:
 
 ### Interaction (8)
+
 - `@grabbable` - Can be grabbed
 - `@throwable` - Can be thrown
 - `@holdable` - Must be held (like a tool)
@@ -306,6 +307,7 @@ Here's the complete list organized by category:
 - `@scalable` - Can be resized by user
 
 ### Physics (6)
+
 - `@collidable` - Has collision
 - `@physics` - Full physics simulation
 - `@rigid` - Rigid body physics
@@ -314,6 +316,7 @@ Here's the complete list organized by category:
 - `@gravity` - Gravity control
 
 ### Visual (6)
+
 - `@glowing` - Emits light
 - `@emissive` - Self-illuminated
 - `@transparent` - See-through
@@ -322,6 +325,7 @@ Here's the complete list organized by category:
 - `@billboard` - Faces camera
 
 ### Networking (5)
+
 - `@networked` - Multiplayer sync
 - `@synced` - Property sync
 - `@persistent` - Saved state
@@ -329,6 +333,7 @@ Here's the complete list organized by category:
 - `@host_only` - Host-only visibility
 
 ### Behavior (5)
+
 - `@stackable` - Can be stacked
 - `@attachable` - Attaches to other objects
 - `@equippable` - Can be equipped
@@ -336,6 +341,7 @@ Here's the complete list organized by category:
 - `@destructible` - Can be destroyed
 
 ### Spatial (5)
+
 - `@anchor` - AR world anchor
 - `@tracked` - Tracked object
 - `@world_locked` - Fixed in world space
@@ -343,11 +349,13 @@ Here's the complete list organized by category:
 - `@eye_tracked` - Follows gaze
 
 ### Audio (3)
+
 - `@spatial_audio` - 3D positioned sound
 - `@ambient` - Background audio
 - `@voice_activated` - Voice control
 
 ### State (4)
+
 - `@state` - State machine
 - `@reactive` - Reactive updates
 - `@observable` - Observable pattern
@@ -381,10 +389,10 @@ Create a basketball that can be grabbed, thrown, bounces on the floor, and makes
 ```hs
 orb basketball {
   // Add your traits here
-  
+
   geometry: "sphere"
   color: "#ff6600"
-  
+
   // Add event handlers
 }
 ```

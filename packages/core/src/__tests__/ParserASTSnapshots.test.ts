@@ -106,12 +106,12 @@ describe('Parser AST Visual Regression', () => {
   color: "red"
 }`;
       const result = parser.parse(source);
-      
+
       // Verify spread node structure
       expect(result.ast.root).toHaveProperty('type');
-      const composition = result.ast.root as any;
+      const composition = result.ast.root;
       expect(composition.properties).toBeDefined();
-      
+
       expect(result).toMatchSnapshot();
     });
 
@@ -129,10 +129,10 @@ describe('Parser AST Visual Regression', () => {
   size: userSize ?? 1.0
 }`;
       const result = parser.parse(source);
-      
+
       // Note: composition.properties structure may vary depending on parser implementation
       // Snapshot validation is the primary test focus
-      
+
       expect(result).toMatchSnapshot();
     });
 
@@ -144,10 +144,10 @@ describe('Parser AST Visual Regression', () => {
   }
 }`;
       const result = parser.parse(source);
-      
+
       // Verify assignment node structure
       expect(result.ast.root).toHaveProperty('type');
-      
+
       expect(result).toMatchSnapshot();
     });
 
@@ -157,10 +157,10 @@ describe('Parser AST Visual Regression', () => {
   opacity: isVisible ? 1.0 : 0.0
 }`;
       const result = parser.parse(source);
-      
+
       // Note: composition.properties structure may vary depending on parser implementation
       // Snapshot validation is the primary test focus
-      
+
       expect(result).toMatchSnapshot();
     });
 
@@ -378,8 +378,8 @@ composition Second {
   prop2: "value2"
 }`;
       const result = parser.parse(source);
-      const composition = result.ast.root as any;
-      
+      const composition = result.ast.root;
+
       // Verify location metadata exists (may be in loc object rather than direct properties)
       expect(composition).toHaveProperty('loc');
       expect(result).toMatchSnapshot();
@@ -391,7 +391,7 @@ composition Second {
   color: "cyan"
 }`;
       const ast = parser.parse(source);
-      
+
       // AST snapshot should include position metadata
       expect(ast).toMatchSnapshot();
     });
@@ -422,9 +422,9 @@ composition Second {
       const result2 = parser.parse(source2);
 
       // Structure should be the same (ignoring position metadata)
-      const composition1 = result1.ast.root as any;
-      const composition2 = result2.ast.root as any;
-      
+      const composition1 = result1.ast.root;
+      const composition2 = result2.ast.root;
+
       expect(composition1.type).toBe(composition2.type);
       expect(JSON.stringify(composition1.properties)).toBe(JSON.stringify(composition2.properties));
     });
@@ -507,16 +507,12 @@ composition Dashboard {
 }`;
 
       // Parse multiple times
-      const snapshots = [
-        parser.parse(source),
-        parser.parse(source),
-        parser.parse(source),
-      ];
+      const snapshots = [parser.parse(source), parser.parse(source), parser.parse(source)];
 
       // All snapshots should be identical
       expect(JSON.stringify(snapshots[0])).toBe(JSON.stringify(snapshots[1]));
       expect(JSON.stringify(snapshots[1])).toBe(JSON.stringify(snapshots[2]));
-      
+
       expect(snapshots[0]).toMatchSnapshot();
     });
   });

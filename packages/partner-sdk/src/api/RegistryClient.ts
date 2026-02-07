@@ -156,10 +156,7 @@ export class RegistryClient {
    * List all versions of a package
    */
   async listVersions(name: string): Promise<ApiResponse<VersionInfo[]>> {
-    return this.request<VersionInfo[]>(
-      'GET',
-      `/packages/${encodeURIComponent(name)}/versions`
-    );
+    return this.request<VersionInfo[]>('GET', `/packages/${encodeURIComponent(name)}/versions`);
   }
 
   /**
@@ -202,7 +199,9 @@ export class RegistryClient {
   /**
    * Check if a package name is available
    */
-  async checkNameAvailability(name: string): Promise<ApiResponse<{ available: boolean; reason?: string }>> {
+  async checkNameAvailability(
+    name: string
+  ): Promise<ApiResponse<{ available: boolean; reason?: string }>> {
     return this.request<{ available: boolean; reason?: string }>(
       'GET',
       `/packages/check-name/${encodeURIComponent(name)}`
@@ -212,9 +211,10 @@ export class RegistryClient {
   /**
    * Get partner's published packages
    */
-  async getMyPackages(
-    options?: { page?: number; pageSize?: number }
-  ): Promise<ApiResponse<{ packages: PackageInfo[]; total: number }>> {
+  async getMyPackages(options?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<{ packages: PackageInfo[]; total: number }>> {
     const params = new URLSearchParams();
     if (options?.page) params.set('page', options.page.toString());
     if (options?.pageSize) params.set('pageSize', options.pageSize.toString());
@@ -233,9 +233,13 @@ export class RegistryClient {
     version: string,
     reason: string
   ): Promise<ApiResponse<void>> {
-    return this.request<void>('POST', `/packages/${encodeURIComponent(name)}/versions/${encodeURIComponent(version)}/deprecate`, {
-      reason,
-    });
+    return this.request<void>(
+      'POST',
+      `/packages/${encodeURIComponent(name)}/versions/${encodeURIComponent(version)}/deprecate`,
+      {
+        reason,
+      }
+    );
   }
 
   /**
@@ -272,8 +276,13 @@ export class RegistryClient {
   /**
    * Validate partner credentials
    */
-  async validateCredentials(): Promise<ApiResponse<{ valid: boolean; partnerId: string; tier: string }>> {
-    return this.request<{ valid: boolean; partnerId: string; tier: string }>('GET', '/partner/validate');
+  async validateCredentials(): Promise<
+    ApiResponse<{ valid: boolean; partnerId: string; tier: string }>
+  > {
+    return this.request<{ valid: boolean; partnerId: string; tier: string }>(
+      'GET',
+      '/partner/validate'
+    );
   }
 
   /**
@@ -284,7 +293,7 @@ export class RegistryClient {
     endpoint: string,
     body?: unknown
   ): Promise<ApiResponse<T>> {
-    const url = `${this.config.baseUrl}${endpoint}`;
+    const _url = `${this.config.baseUrl}${endpoint}`;
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',

@@ -33,7 +33,7 @@ export class SceneSplitter {
     // Process objects
     for (const obj of composition.objects) {
       const chunkId = this.determineChunk(obj, zoneBounds);
-      
+
       if (!chunks.has(chunkId)) {
         const metadata: any = {};
         if (zoneBounds.has(chunkId)) {
@@ -41,20 +41,20 @@ export class SceneSplitter {
         }
         chunks.set(chunkId, { id: chunkId, objects: [], metadata });
       }
-      
+
       chunks.get(chunkId)!.objects.push(obj);
     }
 
     // Process spatial groups (recursive)
     for (const group of composition.spatialGroups || []) {
-       // For now, we keep groups in main or split them?
-       // Usually groups should remain together. 
-       // We'll treat groups like objects for chunk determination.
-       const chunkId = this.determineChunkForGroup(group, zoneBounds);
-       if (!chunks.has(chunkId)) {
-         chunks.set(chunkId, { id: chunkId, objects: [], metadata: {} });
-       }
-       // We might need to handle groups specifically in the output
+      // For now, we keep groups in main or split them?
+      // Usually groups should remain together.
+      // We'll treat groups like objects for chunk determination.
+      const chunkId = this.determineChunkForGroup(group, zoneBounds);
+      if (!chunks.has(chunkId)) {
+        chunks.set(chunkId, { id: chunkId, objects: [], metadata: {} });
+      }
+      // We might need to handle groups specifically in the output
     }
 
     return Array.from(chunks.values());
@@ -63,7 +63,7 @@ export class SceneSplitter {
   private extractZoneBounds(zones: HoloZone[]): Map<string, number[][]> {
     const boundsMap = new Map<string, number[][]>();
     for (const zone of zones) {
-      const boundsProp = zone.properties.find(p => p.key === 'bounds');
+      const boundsProp = zone.properties.find((p) => p.key === 'bounds');
       if (boundsProp && Array.isArray(boundsProp.value)) {
         boundsMap.set(zone.name, boundsProp.value as number[][]);
       }
@@ -73,13 +73,13 @@ export class SceneSplitter {
 
   private determineChunk(obj: HoloObjectDecl, zoneBounds: Map<string, number[][]>): string {
     // 1. Check for manual @chunk annotation
-    const chunkTrait = obj.traits?.find(t => t.name === 'chunk');
+    const chunkTrait = obj.traits?.find((t) => t.name === 'chunk');
     if (chunkTrait && chunkTrait.config.name) {
       return String(chunkTrait.config.name);
     }
 
     // 2. Spatial check
-    const posProp = obj.properties.find(p => p.key === 'position');
+    const posProp = obj.properties.find((p) => p.key === 'position');
     if (posProp && Array.isArray(posProp.value)) {
       const [x, y, z] = posProp.value as number[];
       for (const [zoneName, bounds] of zoneBounds.entries()) {
@@ -96,12 +96,12 @@ export class SceneSplitter {
     // Similar to object, but maybe based on group center
     const posProp = group.properties?.find((p: any) => p.key === 'position');
     if (posProp && Array.isArray(posProp.value)) {
-       const [x, y, z] = posProp.value as number[];
-       for (const [zoneName, bounds] of zoneBounds.entries()) {
-         if (this.isPointInBounds([x, y, z], bounds)) {
-           return zoneName;
-         }
-       }
+      const [x, y, z] = posProp.value as number[];
+      for (const [zoneName, bounds] of zoneBounds.entries()) {
+        if (this.isPointInBounds([x, y, z], bounds)) {
+          return zoneName;
+        }
+      }
     }
     return 'main';
   }
@@ -110,9 +110,12 @@ export class SceneSplitter {
     if (bounds.length < 2) return false;
     const [min, max] = bounds;
     return (
-      point[0] >= min[0] && point[0] <= max[0] &&
-      point[1] >= min[1] && point[1] <= max[1] &&
-      point[2] >= min[2] && point[2] <= max[2]
+      point[0] >= min[0] &&
+      point[0] <= max[0] &&
+      point[1] >= min[1] &&
+      point[1] <= max[1] &&
+      point[2] >= min[2] &&
+      point[2] <= max[2]
     );
   }
 }

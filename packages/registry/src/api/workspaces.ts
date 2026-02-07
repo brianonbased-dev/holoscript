@@ -101,12 +101,7 @@ function validate<T>(schema: z.ZodSchema<T>) {
   };
 }
 
-function handleError(
-  err: Error,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-) {
+function handleError(err: Error, _req: Request, res: Response, _next: NextFunction) {
   if (err instanceof WorkspaceServiceError) {
     return res.status(err.statusCode).json({
       error: err.message,
@@ -154,35 +149,26 @@ export function createWorkspaceRouter(): Router {
   /**
    * GET /workspaces - List user's workspaces
    */
-  router.get(
-    '/',
-    async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-      try {
-        const workspaces = await workspaceService.listUserWorkspaces(req.userId!);
-        res.json({ workspaces });
-      } catch (err) {
-        next(err);
-      }
+  router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const workspaces = await workspaceService.listUserWorkspaces(req.userId!);
+      res.json({ workspaces });
+    } catch (err) {
+      next(err);
     }
-  );
+  });
 
   /**
    * GET /workspaces/:id - Get workspace details
    */
-  router.get(
-    '/:id',
-    async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-      try {
-        const workspace = await workspaceService.getWorkspace(
-          req.params.id,
-          req.userId!
-        );
-        res.json(workspace);
-      } catch (err) {
-        next(err);
-      }
+  router.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const workspace = await workspaceService.getWorkspace(req.params.id, req.userId!);
+      res.json(workspace);
+    } catch (err) {
+      next(err);
     }
-  );
+  });
 
   /**
    * PUT /workspaces/:id - Update workspace
@@ -207,17 +193,14 @@ export function createWorkspaceRouter(): Router {
   /**
    * DELETE /workspaces/:id - Delete workspace
    */
-  router.delete(
-    '/:id',
-    async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-      try {
-        await workspaceService.deleteWorkspace(req.params.id, req.userId!);
-        res.status(204).send();
-      } catch (err) {
-        next(err);
-      }
+  router.delete('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      await workspaceService.deleteWorkspace(req.params.id, req.userId!);
+      res.status(204).send();
+    } catch (err) {
+      next(err);
     }
-  );
+  });
 
   // --------------------------------
   // Members
@@ -230,10 +213,7 @@ export function createWorkspaceRouter(): Router {
     '/:id/members',
     async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       try {
-        const members = await workspaceService.getMembers(
-          req.params.id,
-          req.userId!
-        );
+        const members = await workspaceService.getMembers(req.params.id, req.userId!);
         res.json({ members });
       } catch (err) {
         next(err);
@@ -289,11 +269,7 @@ export function createWorkspaceRouter(): Router {
     '/:id/members/:userId',
     async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       try {
-        await workspaceService.removeMember(
-          req.params.id,
-          req.params.userId,
-          req.userId!
-        );
+        await workspaceService.removeMember(req.params.id, req.params.userId, req.userId!);
         res.status(204).send();
       } catch (err) {
         next(err);
@@ -312,10 +288,7 @@ export function createWorkspaceRouter(): Router {
     '/:id/secrets',
     async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       try {
-        const secrets = await workspaceService.listSecrets(
-          req.params.id,
-          req.userId!
-        );
+        const secrets = await workspaceService.listSecrets(req.params.id, req.userId!);
         res.json({ secrets });
       } catch (err) {
         next(err);
@@ -350,11 +323,7 @@ export function createWorkspaceRouter(): Router {
     '/:id/secrets/:name',
     async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       try {
-        await workspaceService.deleteSecret(
-          req.params.id,
-          req.params.name,
-          req.userId!
-        );
+        await workspaceService.deleteSecret(req.params.id, req.params.name, req.userId!);
         res.status(204).send();
       } catch (err) {
         next(err);

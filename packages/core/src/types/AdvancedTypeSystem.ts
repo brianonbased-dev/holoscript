@@ -4,16 +4,9 @@
  * Union types, generics, type inference, exhaustiveness checking
  */
 import {
-  Vector3,
-  Color,
-  VRHand,
-  HSPlusBuiltins,
-  HSPlusRuntime,
   HSPlusNode,
 } from './HoloScriptPlus';
-import {
-  VRTraitName,
-} from '../types';
+import { VRTraitName } from '../types';
 export type { HSPlusNode, VRTraitName };
 
 export type HoloScriptType =
@@ -118,7 +111,8 @@ export class TypeInferenceEngine {
       return { kind: 'primitive', name: 'boolean' };
     }
     if (Array.isArray(value)) {
-      const elementType: HoloScriptType = value.length > 0 ? this.inferType(value[0]) : { kind: 'primitive', name: 'void' };
+      const elementType: HoloScriptType =
+        value.length > 0 ? this.inferType(value[0]) : { kind: 'primitive', name: 'void' };
       return { kind: 'array', elementType } as ArrayType;
     }
     return { kind: 'primitive', name: 'void' };
@@ -200,21 +194,21 @@ export class TypeInferenceEngine {
   }
 
   private substitute(type: HoloScriptType, subs: Map<string, HoloScriptType>): HoloScriptType {
-    if (type.kind === 'custom' && subs.has((type as CustomType).name)) {
-      return subs.get((type as CustomType).name)!;
+    if (type.kind === 'custom' && subs.has((type).name)) {
+      return subs.get((type).name)!;
     }
 
     if (type.kind === 'array') {
       return {
         kind: 'array',
-        elementType: this.substitute((type as ArrayType).elementType, subs),
+        elementType: this.substitute((type).elementType, subs),
       };
     }
 
     if (type.kind === 'union') {
       return {
         kind: 'union',
-        members: (type as UnionType).members.map((m) => this.substitute(m, subs)),
+        members: (type).members.map((m) => this.substitute(m, subs)),
       };
     }
 
@@ -229,7 +223,10 @@ export class ExhaustivenessChecker {
   /**
    * Check if all union members are covered in match statement
    */
-  checkMatch(unionType: UnionType, casePatterns: string[]): {
+  checkMatch(
+    unionType: UnionType,
+    casePatterns: string[]
+  ): {
     isExhaustive: boolean;
     uncoveredCases: string[];
   } {
@@ -251,10 +248,10 @@ export class ExhaustivenessChecker {
 
   private getCaseName(type: HoloScriptType): string {
     if (type.kind === 'literal') {
-      return String((type as LiteralType).value);
+      return String((type).value);
     }
     if (type.kind === 'custom') {
-      return (type as CustomType).name;
+      return (type).name;
     }
     return type.kind;
   }
@@ -358,17 +355,17 @@ export class AdvancedTypeChecker {
   public formatType(type: HoloScriptType): string {
     switch (type.kind) {
       case 'primitive':
-        return (type as PrimitiveType).name;
+        return (type).name;
       case 'array':
-        return `${this.formatType((type as ArrayType).elementType)}[]`;
+        return `${this.formatType((type).elementType)}[]`;
       case 'union':
-        return (type as UnionType).members.map((m) => this.formatType(m)).join(' | ');
+        return (type).members.map((m) => this.formatType(m)).join(' | ');
       case 'intersection':
-        return (type as IntersectionType).members.map((m) => this.formatType(m)).join(' & ');
+        return (type).members.map((m) => this.formatType(m)).join(' & ');
       case 'custom':
-        return (type as CustomType).name;
+        return (type).name;
       case 'literal':
-        return JSON.stringify((type as LiteralType).value);
+        return JSON.stringify((type).value);
       default:
         return 'unknown';
     }
@@ -577,7 +574,7 @@ export class OptionalChainingEvaluator {
           value = (value as unknown[])[index as number];
           break;
         case 'call':
-          const args = segment.args.map(arg => this.evaluateExpression(arg, context));
+          const args = segment.args.map((arg) => this.evaluateExpression(arg, context));
           value = (value as Function)(...args);
           break;
       }
@@ -589,7 +586,10 @@ export class OptionalChainingEvaluator {
   /**
    * Evaluate null coalescing expression
    */
-  evaluateNullCoalescing(expr: NullCoalescingExpression, context: Record<string, unknown>): unknown {
+  evaluateNullCoalescing(
+    expr: NullCoalescingExpression,
+    context: Record<string, unknown>
+  ): unknown {
     const left = this.evaluateExpression(expr.left, context);
     if (left != null) {
       return left;
@@ -615,7 +615,7 @@ export class OptionalChainingEvaluator {
         return (arr as unknown[])?.[idx as number];
       case 'call':
         const fn = this.evaluateExpression(expr.callee, context);
-        const args = expr.arguments.map(arg => this.evaluateExpression(arg, context));
+        const args = expr.arguments.map((arg) => this.evaluateExpression(arg, context));
         return (fn as Function)?.(...args);
       case 'optional-chain':
         return this.evaluate(expr, context);
@@ -638,22 +638,38 @@ export class OptionalChainingEvaluator {
     const right = this.evaluateExpression(expr.right, context);
 
     switch (expr.operator) {
-      case '+': return (left as number) + (right as number);
-      case '-': return (left as number) - (right as number);
-      case '*': return (left as number) * (right as number);
-      case '/': return (left as number) / (right as number);
-      case '%': return (left as number) % (right as number);
-      case '==': return left == right;
-      case '===': return left === right;
-      case '!=': return left != right;
-      case '!==': return left !== right;
-      case '<': return (left as number) < (right as number);
-      case '>': return (left as number) > (right as number);
-      case '<=': return (left as number) <= (right as number);
-      case '>=': return (left as number) >= (right as number);
-      case '&&': return left && right;
-      case '||': return left || right;
-      default: return undefined;
+      case '+':
+        return (left as number) + (right as number);
+      case '-':
+        return (left as number) - (right as number);
+      case '*':
+        return (left as number) * (right as number);
+      case '/':
+        return (left as number) / (right as number);
+      case '%':
+        return (left as number) % (right as number);
+      case '==':
+        return left == right;
+      case '===':
+        return left === right;
+      case '!=':
+        return left != right;
+      case '!==':
+        return left !== right;
+      case '<':
+        return (left as number) < (right as number);
+      case '>':
+        return (left as number) > (right as number);
+      case '<=':
+        return (left as number) <= (right as number);
+      case '>=':
+        return (left as number) >= (right as number);
+      case '&&':
+        return left && right;
+      case '||':
+        return left || right;
+      default:
+        return undefined;
     }
   }
 
@@ -664,11 +680,16 @@ export class OptionalChainingEvaluator {
     const operand = this.evaluateExpression(expr.operand, context);
 
     switch (expr.operator) {
-      case '!': return !operand;
-      case '-': return -(operand as number);
-      case '+': return +(operand as number);
-      case 'typeof': return typeof operand;
-      default: return undefined;
+      case '!':
+        return !operand;
+      case '-':
+        return -(operand as number);
+      case '+':
+        return +(operand as number);
+      case 'typeof':
+        return typeof operand;
+      default:
+        return undefined;
     }
   }
 }
@@ -1168,4 +1189,3 @@ export class TypeAnnotationParser {
     }
   }
 }
-

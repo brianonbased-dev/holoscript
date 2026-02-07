@@ -12,7 +12,7 @@
 
 import { existsSync, readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
 import { join, extname, resolve } from 'path';
-import { HoloScriptFormatter, FormatterConfig, DEFAULT_CONFIG } from './index.js';
+import { HoloScriptFormatter, FormatterConfig } from './index.js';
 
 interface CliOptions {
   check: boolean;
@@ -234,7 +234,9 @@ async function main(): Promise<void> {
   }
 
   if (!options.quiet) {
-    console.log(`\nProcessed ${files.length} file(s): ${formattedCount} formatted, ${unchangedCount} unchanged`);
+    console.log(
+      `\nProcessed ${files.length} file(s): ${formattedCount} formatted, ${unchangedCount} unchanged`
+    );
   }
 
   process.exit(hasErrors ? 1 : 0);

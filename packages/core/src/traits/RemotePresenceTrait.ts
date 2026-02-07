@@ -24,9 +24,18 @@ interface RemotePeer {
   latency: number;
   lastUpdate: number;
   pose: {
-    head: { position: { x: number; y: number; z: number }; rotation: { x: number; y: number; z: number; w: number } };
-    leftHand?: { position: { x: number; y: number; z: number }; rotation: { x: number; y: number; z: number; w: number } };
-    rightHand?: { position: { x: number; y: number; z: number }; rotation: { x: number; y: number; z: number; w: number } };
+    head: {
+      position: { x: number; y: number; z: number };
+      rotation: { x: number; y: number; z: number; w: number };
+    };
+    leftHand?: {
+      position: { x: number; y: number; z: number };
+      rotation: { x: number; y: number; z: number; w: number };
+    };
+    rightHand?: {
+      position: { x: number; y: number; z: number };
+      rotation: { x: number; y: number; z: number; w: number };
+    };
   };
 }
 
@@ -38,8 +47,8 @@ interface RemotePresenceState {
   peers: Map<string, RemotePeer>;
   voiceEnabled: boolean;
   videoEnabled: boolean;
-  qualityLevel: number;  // 0-1
-  bandwidthUsage: number;  // bytes/sec
+  qualityLevel: number; // 0-1
+  bandwidthUsage: number; // bytes/sec
 }
 
 interface RemotePresenceConfig {
@@ -48,9 +57,9 @@ interface RemotePresenceConfig {
   video_enabled: boolean;
   latency_compensation: boolean;
   quality_adaptive: boolean;
-  bandwidth_limit: number;  // bytes/sec, 0 = unlimited
-  interpolation_buffer: number;  // ms
-  sync_rate: number;  // Hz
+  bandwidth_limit: number; // bytes/sec, 0 = unlimited
+  interpolation_buffer: number; // ms
+  sync_rate: number; // Hz
 }
 
 // =============================================================================
@@ -84,7 +93,7 @@ export const remotePresenceHandler: TraitHandler<RemotePresenceConfig> = {
       bandwidthUsage: 0,
     };
     (node as any).__remotePresenceState = state;
-    
+
     // Initialize presence system
     context.emit?.('remote_presence_init', {
       node,
@@ -97,18 +106,18 @@ export const remotePresenceHandler: TraitHandler<RemotePresenceConfig> = {
 
   onDetach(node, config, context) {
     const state = (node as any).__remotePresenceState as RemotePresenceState;
-    
+
     if (state?.isConnected) {
       context.emit?.('remote_presence_disconnect', { node });
     }
-    
+
     delete (node as any).__remotePresenceState;
   },
 
   onUpdate(node, config, context, delta) {
     const state = (node as any).__remotePresenceState as RemotePresenceState;
     if (!state || !state.isConnected) return;
-    
+
     // Adaptive quality based on bandwidth
     if (config.quality_adaptive && config.bandwidth_limit > 0) {
       if (state.bandwidthUsage > config.bandwidth_limit * 0.9) {
@@ -117,21 +126,21 @@ export const remotePresenceHandler: TraitHandler<RemotePresenceConfig> = {
         state.qualityLevel = Math.min(1.0, state.qualityLevel + delta * 0.2);
       }
     }
-    
+
     // Update remote peer avatars with interpolation
     for (const peer of state.peers.values()) {
       const age = Date.now() - peer.lastUpdate;
-      
+
       // Skip stale peers
       if (age > 5000) {
         continue;
       }
-      
+
       // Latency compensation prediction
       if (config.latency_compensation && peer.latency > 0) {
         // Would apply prediction here based on velocity
       }
-      
+
       context.emit?.('remote_presence_update_avatar', {
         node,
         peerId: peer.peerId,
@@ -145,12 +154,12 @@ export const remotePresenceHandler: TraitHandler<RemotePresenceConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__remotePresenceState as RemotePresenceState;
     if (!state) return;
-    
+
     if (event.type === 'remote_presence_connected') {
       state.state = 'connected';
       state.isConnected = true;
       state.localPeerId = event.peerId as string;
-      
+
       context.emit?.('on_presence_connected', {
         node,
         peerId: state.localPeerId,
@@ -159,17 +168,17 @@ export const remotePresenceHandler: TraitHandler<RemotePresenceConfig> = {
       state.state = 'disconnected';
       state.isConnected = false;
       state.peers.clear();
-      
+
       context.emit?.('on_presence_disconnected', {
         node,
         reason: event.reason,
       });
     } else if (event.type === 'remote_presence_peer_joined') {
       const peerId = event.peerId as string;
-      
+
       state.peers.set(peerId, {
         peerId,
-        avatarType: event.avatarType as AvatarType || 'head_hands',
+        avatarType: (event.avatarType as AvatarType) || 'head_hands',
         isVoiceActive: false,
         isVideoActive: false,
         latency: 0,
@@ -181,13 +190,13 @@ export const remotePresenceHandler: TraitHandler<RemotePresenceConfig> = {
           },
         },
       });
-      
+
       context.emit?.('remote_presence_spawn_avatar', {
         node,
         peerId,
         avatarType: event.avatarType || 'head_hands',
       });
-      
+
       context.emit?.('on_peer_joined', {
         node,
         peerId,
@@ -196,12 +205,12 @@ export const remotePresenceHandler: TraitHandler<RemotePresenceConfig> = {
     } else if (event.type === 'remote_presence_peer_left') {
       const peerId = event.peerId as string;
       state.peers.delete(peerId);
-      
+
       context.emit?.('remote_presence_remove_avatar', {
         node,
         peerId,
       });
-      
+
       context.emit?.('on_peer_left', {
         node,
         peerId,
@@ -210,19 +219,19 @@ export const remotePresenceHandler: TraitHandler<RemotePresenceConfig> = {
     } else if (event.type === 'remote_presence_pose_update') {
       const peerId = event.peerId as string;
       const peer = state.peers.get(peerId);
-      
+
       if (peer) {
         peer.pose = event.pose as typeof peer.pose;
         peer.lastUpdate = Date.now();
-        peer.latency = event.latency as number || 0;
+        peer.latency = (event.latency as number) || 0;
       }
     } else if (event.type === 'remote_presence_voice_state') {
       const peerId = event.peerId as string;
       const peer = state.peers.get(peerId);
-      
+
       if (peer) {
         peer.isVoiceActive = event.isActive as boolean;
-        
+
         context.emit?.('remote_presence_voice_indicator', {
           node,
           peerId,
@@ -259,7 +268,7 @@ export const remotePresenceHandler: TraitHandler<RemotePresenceConfig> = {
         isConnected: state.isConnected,
         localPeerId: state.localPeerId,
         peerCount: state.peers.size,
-        peers: Array.from(state.peers.values()).map(p => ({
+        peers: Array.from(state.peers.values()).map((p) => ({
           peerId: p.peerId,
           avatarType: p.avatarType,
           isVoiceActive: p.isVoiceActive,

@@ -41,7 +41,10 @@ export class OllamaService {
         lastChecked: new Date().toISOString(),
       };
     } catch (error) {
-      logger.warn('Ollama status check failed:', error instanceof Error ? error.message : String(error));
+      logger.warn(
+        'Ollama status check failed:',
+        error instanceof Error ? error.message : String(error)
+      );
       return {
         available: false,
         baseUrl: this.baseUrl,

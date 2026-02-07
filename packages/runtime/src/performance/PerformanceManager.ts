@@ -133,7 +133,7 @@ export class TraitScheduler {
 
   constructor(
     private camera: THREE.Camera,
-    options?: TraitSchedulerOptions,
+    options?: TraitSchedulerOptions
   ) {
     this.updateRadius = options?.updateRadius ?? 50;
     this.frustumMargin = options?.frustumMargin ?? 1.2;
@@ -150,7 +150,7 @@ export class TraitScheduler {
     // Build the combined projection-view matrix
     this.projScreenMatrix.multiplyMatrices(
       this.camera.projectionMatrix,
-      this.camera.matrixWorldInverse,
+      this.camera.matrixWorldInverse
     );
 
     // Derive frustum planes from the matrix
@@ -394,7 +394,7 @@ export class RendererManager {
   private applyCommonSettings(): void {
     const pixelRatio = Math.min(
       typeof window !== 'undefined' ? window.devicePixelRatio : 1,
-      this.options.maxPixelRatio,
+      this.options.maxPixelRatio
     );
     this.renderer.setPixelRatio(pixelRatio);
 

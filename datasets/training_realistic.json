@@ -4,7 +4,18 @@
     "purpose": "Training data for Brittney AI - uses only working features",
     "supported_geometries": ["sphere", "cube", "cylinder", "cone", "torus", "plane"],
     "supported_properties": ["position", "scale", "rotation", "color", "geometry"],
-    "supported_traits": ["@grabbable", "@throwable", "@collidable", "@physics", "@glowing", "@pointable", "@clickable", "@hoverable", "@networked", "@billboard"]
+    "supported_traits": [
+      "@grabbable",
+      "@throwable",
+      "@collidable",
+      "@physics",
+      "@glowing",
+      "@pointable",
+      "@clickable",
+      "@hoverable",
+      "@networked",
+      "@billboard"
+    ]
   },
   "samples": [
     {

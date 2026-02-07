@@ -140,7 +140,7 @@ describe('IKTrait', () => {
         ],
       };
       trait.setChain(chain);
-      
+
       trait.solve({ x: 0.5, y: 0, z: 0 });
       const lastResult = trait.getLastResult();
       expect(lastResult).not.toBeNull();
@@ -150,7 +150,7 @@ describe('IKTrait', () => {
   describe('enable/disable', () => {
     it('should track enabled state', () => {
       expect(trait.isEnabled()).toBe(true);
-      
+
       trait.setEnabled(false);
       expect(trait.isEnabled()).toBe(false);
     });
@@ -160,7 +160,7 @@ describe('IKTrait', () => {
     it('should serialize for animation system', () => {
       trait.setTarget('hand');
       trait.setWeight(0.8);
-      
+
       const serialized = trait.serialize();
       expect(serialized.target).toBe('hand');
       expect(serialized.weight).toBe(0.8);

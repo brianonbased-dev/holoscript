@@ -16,25 +16,25 @@ console.log('╚═════════════════════�
 const results = {
   passed: 0,
   failed: 0,
-  errors: []
+  errors: [],
 };
 
 // Test 1: Parse all .hs files
 console.log('📁 Test 1: Parsing .hs files...\n');
 
-const hsFiles = readdirSync(EXAMPLES_DIR).filter(f => extname(f) === '.hs');
+const hsFiles = readdirSync(EXAMPLES_DIR).filter((f) => extname(f) === '.hs');
 const codeParser = new HoloScriptCodeParser();
 
 for (const file of hsFiles) {
   const filePath = join(EXAMPLES_DIR, file);
   const content = readFileSync(filePath, 'utf-8');
-  
+
   try {
     const result = codeParser.parse(content);
-    
+
     if (result.errors && result.errors.length > 0) {
       console.log(`  ⚠️  ${file}: Parsed with ${result.errors.length} errors`);
-      result.errors.forEach(e => console.log(`      - ${e.message}`));
+      result.errors.forEach((e) => console.log(`      - ${e.message}`));
       results.errors.push({ file, errors: result.errors });
     } else if (result.ast || result.nodes) {
       const nodeCount = result.ast?.body?.length || result.nodes?.length || 0;
@@ -55,25 +55,27 @@ for (const file of hsFiles) {
 // Test 2: Parse .hsplus files with timeout protection
 console.log('\n📁 Test 2: Parsing .hsplus files (with timeout)...\n');
 
-const hsplusFiles = readdirSync(EXAMPLES_DIR).filter(f => extname(f) === '.hsplus');
+const hsplusFiles = readdirSync(EXAMPLES_DIR).filter((f) => extname(f) === '.hsplus');
 const plusParser = new HoloScriptPlusParser();
 
 for (const file of hsplusFiles) {
   const filePath = join(EXAMPLES_DIR, file);
   const content = readFileSync(filePath, 'utf-8');
-  
+
   // Only test first 500 lines to avoid memory issues
   const truncatedContent = content.split('\n').slice(0, 500).join('\n');
-  
+
   try {
-    console.log(`  ⏳ ${file}: Parsing (${content.split('\\n').length} lines, testing first 500)...`);
+    console.log(
+      `  ⏳ ${file}: Parsing (${content.split('\\n').length} lines, testing first 500)...`
+    );
     const startTime = Date.now();
     const result = plusParser.parse(truncatedContent);
     const elapsed = Date.now() - startTime;
-    
+
     if (result.errors && result.errors.length > 0) {
       console.log(`  ⚠️  ${file}: Parsed in ${elapsed}ms with ${result.errors.length} errors`);
-      result.errors.slice(0, 3).forEach(e => console.log(`      - ${e.message || e}`));
+      result.errors.slice(0, 3).forEach((e) => console.log(`      - ${e.message || e}`));
     } else if (result.ast) {
       const nodeCount = result.ast?.body?.length || 0;
       console.log(`  ✅ ${file}: Parsed in ${elapsed}ms (${nodeCount} top-level nodes)`);

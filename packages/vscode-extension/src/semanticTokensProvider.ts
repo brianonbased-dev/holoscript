@@ -19,34 +19,34 @@ import * as vscode from 'vscode';
  * Semantic token types supported by HoloScript
  */
 export const TOKEN_TYPES = [
-  'namespace',        // composition names
-  'class',            // object/template names
-  'type',             // type annotations
-  'parameter',        // function parameters
-  'variable',         // variables and state refs
-  'property',         // object properties
-  'function',         // functions
-  'decorator',        // traits (@grabbable)
-  'keyword',          // keywords
-  'string',           // string literals
-  'number',           // numeric literals
-  'operator',         // operators
-  'comment',          // comments
-  'enumMember',       // enum values, constants
+  'namespace', // composition names
+  'class', // object/template names
+  'type', // type annotations
+  'parameter', // function parameters
+  'variable', // variables and state refs
+  'property', // object properties
+  'function', // functions
+  'decorator', // traits (@grabbable)
+  'keyword', // keywords
+  'string', // string literals
+  'number', // numeric literals
+  'operator', // operators
+  'comment', // comments
+  'enumMember', // enum values, constants
 ] as const;
 
 /**
  * Semantic token modifiers
  */
 export const TOKEN_MODIFIERS = [
-  'declaration',      // definition site
-  'definition',       // same as declaration
-  'readonly',         // const values
-  'static',           // static trait
-  'async',            // async operations
-  'modification',     // mutation
-  'documentation',    // doc comments
-  'defaultLibrary',   // built-in traits/keywords
+  'declaration', // definition site
+  'definition', // same as declaration
+  'readonly', // const values
+  'static', // static trait
+  'async', // async operations
+  'modification', // mutation
+  'documentation', // doc comments
+  'defaultLibrary', // built-in traits/keywords
 ] as const;
 
 /**
@@ -63,44 +63,127 @@ export const SEMANTIC_TOKENS_LEGEND = new vscode.SemanticTokensLegend(
 
 /** HoloScript keywords */
 const KEYWORDS = new Set([
-  'composition', 'object', 'template', 'spatial_group',
-  'environment', 'state', 'logic', 'using', 'import', 'from',
-  'if', 'else', 'for', 'while', 'return', 'spawn', 'emit',
-  'true', 'false', 'null', 'let', 'const', 'function',
+  'composition',
+  'object',
+  'template',
+  'spatial_group',
+  'environment',
+  'state',
+  'logic',
+  'using',
+  'import',
+  'from',
+  'if',
+  'else',
+  'for',
+  'while',
+  'return',
+  'spawn',
+  'emit',
+  'true',
+  'false',
+  'null',
+  'let',
+  'const',
+  'function',
 ]);
 
 /** Built-in traits - all 56 registered runtime traits */
 const BUILTIN_TRAITS = new Set([
   // Interaction (11)
-  'grabbable', 'throwable', 'collidable', 'physics', 'gravity',
-  'trigger', 'pointable', 'hoverable', 'clickable', 'draggable', 'scalable',
+  'grabbable',
+  'throwable',
+  'collidable',
+  'physics',
+  'gravity',
+  'trigger',
+  'pointable',
+  'hoverable',
+  'clickable',
+  'draggable',
+  'scalable',
   // Visual (10)
-  'glowing', 'transparent', 'spinning', 'floating', 'billboard',
-  'pulse', 'animated', 'look_at', 'outline', 'proximity',
+  'glowing',
+  'transparent',
+  'spinning',
+  'floating',
+  'billboard',
+  'pulse',
+  'animated',
+  'look_at',
+  'outline',
+  'proximity',
   // AI/Behavior (5)
-  'behavior_tree', 'emotion', 'goal_oriented', 'perception', 'memory',
+  'behavior_tree',
+  'emotion',
+  'goal_oriented',
+  'perception',
+  'memory',
   // Physics (9)
-  'cloth', 'soft_body', 'fluid', 'buoyancy', 'rope',
-  'wind', 'joint', 'rigidbody', 'destruction',
+  'cloth',
+  'soft_body',
+  'fluid',
+  'buoyancy',
+  'rope',
+  'wind',
+  'joint',
+  'rigidbody',
+  'destruction',
   // Extended (11)
-  'rotatable', 'stackable', 'snappable', 'breakable', 'character',
-  'patrol', 'networked', 'anchor', 'spatial_audio', 'reverb_zone', 'voice_proximity',
+  'rotatable',
+  'stackable',
+  'snappable',
+  'breakable',
+  'character',
+  'patrol',
+  'networked',
+  'anchor',
+  'spatial_audio',
+  'reverb_zone',
+  'voice_proximity',
   // Advanced (10)
-  'teleport', 'ui_panel', 'particle_system', 'weather', 'day_night',
-  'lod', 'hand_tracking', 'haptic', 'portal', 'mirror',
+  'teleport',
+  'ui_panel',
+  'particle_system',
+  'weather',
+  'day_night',
+  'lod',
+  'hand_tracking',
+  'haptic',
+  'portal',
+  'mirror',
 ]);
 
 /** Event handlers */
 const EVENT_HANDLERS = new Set([
-  'on_click', 'on_hover', 'on_enter', 'on_exit', 'on_grab',
-  'on_release', 'on_collision', 'on_trigger', 'on_update',
+  'on_click',
+  'on_hover',
+  'on_enter',
+  'on_exit',
+  'on_grab',
+  'on_release',
+  'on_collision',
+  'on_trigger',
+  'on_update',
 ]);
 
 /** Property names (commonly used) */
 const COMMON_PROPERTIES = new Set([
-  'position', 'rotation', 'scale', 'color', 'opacity',
-  'geometry', 'model', 'material', 'texture', 'skybox',
-  'ambient_light', 'mass', 'velocity', 'friction', 'restitution',
+  'position',
+  'rotation',
+  'scale',
+  'color',
+  'opacity',
+  'geometry',
+  'model',
+  'material',
+  'texture',
+  'skybox',
+  'ambient_light',
+  'mass',
+  'velocity',
+  'friction',
+  'restitution',
 ]);
 
 // =============================================================================
@@ -171,7 +254,7 @@ function tokenize(text: string): TokenInfo[] {
           startChar: pos,
           length: traitMatch[0].length,
           tokenType: TOKEN_TYPES.indexOf('decorator'),
-          tokenModifiers: isBuiltin ? (1 << TOKEN_MODIFIERS.indexOf('defaultLibrary')) : 0,
+          tokenModifiers: isBuiltin ? 1 << TOKEN_MODIFIERS.indexOf('defaultLibrary') : 0,
         });
         pos += traitMatch[0].length;
         continue;
@@ -285,9 +368,7 @@ function tokenize(text: string): TokenInfo[] {
 /**
  * Provides semantic tokens for HoloScript files
  */
-export class HoloScriptSemanticTokensProvider
-  implements vscode.DocumentSemanticTokensProvider
-{
+export class HoloScriptSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
   /**
    * Provide semantic tokens for the entire document
    */
@@ -301,13 +382,7 @@ export class HoloScriptSemanticTokensProvider
     const builder = new vscode.SemanticTokensBuilder(SEMANTIC_TOKENS_LEGEND);
 
     for (const tok of tokens) {
-      builder.push(
-        tok.line,
-        tok.startChar,
-        tok.length,
-        tok.tokenType,
-        tok.tokenModifiers
-      );
+      builder.push(tok.line, tok.startChar, tok.length, tok.tokenType, tok.tokenModifiers);
     }
 
     return builder.build();
@@ -348,13 +423,7 @@ export class HoloScriptSemanticTokensRangeProvider
 
       // Only include tokens within the requested range
       if (docLine >= range.start.line && docLine <= range.end.line) {
-        builder.push(
-          docLine,
-          tok.startChar,
-          tok.length,
-          tok.tokenType,
-          tok.tokenModifiers
-        );
+        builder.push(docLine, tok.startChar, tok.length, tok.tokenType, tok.tokenModifiers);
       }
     }
 

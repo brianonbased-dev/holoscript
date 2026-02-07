@@ -38,7 +38,7 @@ interface MarketplaceConfig {
   royalty_recipient: string;
   auction_support: boolean;
   min_price: number;
-  custom_api: string;  // For custom platform
+  custom_api: string; // For custom platform
 }
 
 // =============================================================================
@@ -73,7 +73,7 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
       ownerAddress: null,
     };
     (node as any).__marketplaceState = state;
-    
+
     // Connect to marketplace
     context.emit?.('marketplace_connect', {
       node,
@@ -87,20 +87,20 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
     delete (node as any).__marketplaceState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__marketplaceState as MarketplaceState;
     if (!state) return;
-    
+
     // Check auction end time
     if (state.status === 'auction_active' && state.auctionEndTime) {
       if (Date.now() >= state.auctionEndTime) {
         state.status = 'auction_ended';
-        
+
         context.emit?.('marketplace_auction_ended', {
           node,
           winningBid: state.highestBid,
         });
-        
+
         context.emit?.('on_auction_end', {
           node,
           winningBid: state.highestBid,
@@ -113,10 +113,10 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__marketplaceState as MarketplaceState;
     if (!state) return;
-    
+
     if (event.type === 'marketplace_list') {
       if (!config.listing_enabled) return;
-      
+
       const price = event.price as number;
       if (price < config.min_price) {
         context.emit?.('on_marketplace_error', {
@@ -125,10 +125,10 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
         });
         return;
       }
-      
+
       state.currentPrice = price;
       state.status = 'listed';
-      
+
       context.emit?.('marketplace_create_listing', {
         node,
         platform: config.platform,
@@ -140,7 +140,7 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
     } else if (event.type === 'marketplace_listing_created') {
       state.listingId = event.listingId as string;
       state.isListed = true;
-      
+
       context.emit?.('on_listed', {
         node,
         listingId: state.listingId,
@@ -152,7 +152,7 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
           node,
           listingId: state.listingId,
         });
-        
+
         state.isListed = false;
         state.listingId = null;
         state.status = 'unlisted';
@@ -160,10 +160,10 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
     } else if (event.type === 'marketplace_buy') {
       if (!config.buy_enabled) return;
       if (!state.isListed) return;
-      
+
       const buyerAddress = event.buyerAddress as string;
       const paymentProof = event.paymentProof as string;
-      
+
       context.emit?.('marketplace_execute_purchase', {
         node,
         listingId: state.listingId,
@@ -174,7 +174,7 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
       state.status = 'sold';
       state.isListed = false;
       state.ownerAddress = event.buyerAddress as string;
-      
+
       context.emit?.('on_purchase_complete', {
         node,
         price: state.currentPrice,
@@ -182,16 +182,16 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
       });
     } else if (event.type === 'marketplace_start_auction') {
       if (!config.auction_support) return;
-      
+
       const startingPrice = event.startingPrice as number;
-      const duration = event.duration as number;  // milliseconds
-      
+      const duration = event.duration as number; // milliseconds
+
       state.currentPrice = startingPrice;
       state.status = 'auction_active';
       state.auctionEndTime = Date.now() + duration;
       state.highestBid = 0;
       state.bidCount = 0;
-      
+
       context.emit?.('marketplace_create_auction', {
         node,
         platform: config.platform,
@@ -201,20 +201,20 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
       });
     } else if (event.type === 'marketplace_place_bid') {
       if (state.status !== 'auction_active') return;
-      
+
       const bidAmount = event.amount as number;
       const bidderAddress = event.bidderAddress as string;
-      
+
       if (bidAmount > state.highestBid) {
         state.highestBid = bidAmount;
         state.bidCount++;
-        
+
         context.emit?.('marketplace_record_bid', {
           node,
           amount: bidAmount,
           bidder: bidderAddress,
         });
-        
+
         context.emit?.('on_bid_received', {
           node,
           amount: bidAmount,
@@ -225,7 +225,7 @@ export const marketplaceHandler: TraitHandler<MarketplaceConfig> = {
     } else if (event.type === 'marketplace_update_price') {
       const newPrice = event.price as number;
       state.currentPrice = newPrice;
-      
+
       if (state.isListed) {
         context.emit?.('marketplace_update_listing', {
           node,

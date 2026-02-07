@@ -60,9 +60,7 @@ describe('HoloCompositionParser', () => {
       `;
       const result = parseHolo(source);
       expect(result.success).toBe(true);
-      const ps = result.ast?.environment?.properties.find(
-        p => p.key === 'stardust'
-      );
+      const ps = result.ast?.environment?.properties.find((p) => p.key === 'stardust');
       expect(ps).toBeDefined();
     });
   });

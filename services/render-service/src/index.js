@@ -1,6 +1,6 @@
 /**
  * HoloScript Render Service
- * 
+ *
  * Provides preview generation and sharing endpoints for HoloScript scenes.
  * Designed for X (Twitter) card previews and social sharing.
  */
@@ -19,10 +19,12 @@ const PLAYGROUND_URL = process.env.PLAYGROUND_URL || 'http://localhost:3000/play
 // Middleware
 app.use(cors());
 app.use(compression());
-app.use(helmet({
-  contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false,
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.text({ type: 'text/plain', limit: '1mb' }));
 
@@ -38,20 +40,20 @@ app.get('/health', (req, res) => {
 app.post('/share', async (req, res) => {
   try {
     const { code, title, description } = req.body;
-    
+
     if (!code) {
       return res.status(400).json({ error: 'code is required' });
     }
-    
+
     const id = generateId();
-    
+
     scenes.set(id, {
       code,
       title: title || 'HoloScript Scene',
       description: description || 'Interactive 3D scene built with HoloScript',
       createdAt: new Date().toISOString(),
     });
-    
+
     const urls = {
       id,
       playground: PLAYGROUND_URL + '?scene=' + id,
@@ -60,7 +62,7 @@ app.post('/share', async (req, res) => {
       qr: BASE_URL + '/qr/' + id,
       raw: BASE_URL + '/scene/' + id,
     };
-    
+
     res.json(urls);
   } catch (error) {
     console.error('Share error:', error);
@@ -115,10 +117,10 @@ app.get('/qr/:id', async (req, res) => {
       margin: 1,
       color: { dark: '#000', light: '#fff' },
     });
-    
+
     const base64 = qrDataUrl.split(',')[1];
     const buffer = Buffer.from(base64, 'base64');
-    
+
     res.type('image/png').send(buffer);
   } catch (error) {
     res.status(500).json({ error: 'Failed to generate QR code' });
@@ -141,20 +143,20 @@ app.get('/inline', (req, res) => {
   if (!code) {
     return res.status(400).send('code query param required');
   }
-  
+
   let decodedCode;
   try {
     decodedCode = Buffer.from(code, 'base64').toString('utf8');
   } catch {
     decodedCode = code;
   }
-  
+
   const html = generateRenderHTML('inline', {
     code: decodedCode,
     title: 'HoloScript Scene',
     description: 'Interactive 3D scene',
   });
-  
+
   res.type('text/html').send(html);
 });
 
@@ -189,7 +191,7 @@ function generateEmbedHTML(id, scene) {
   const desc = escapeHtml(scene.description);
   const renderUrl = BASE_URL + '/render/' + id;
   const playUrl = PLAYGROUND_URL + '?scene=' + id;
-  
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -231,7 +233,7 @@ function generateEmbedHTML(id, scene) {
 function generatePreviewHTML(id, scene) {
   const title = escapeHtml(scene.title);
   const codeJson = JSON.stringify(scene.code);
-  
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -330,7 +332,7 @@ function generatePreviewHTML(id, scene) {
 function generateRenderHTML(id, scene) {
   const title = escapeHtml(scene.title);
   const codeJson = JSON.stringify(scene.code);
-  
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

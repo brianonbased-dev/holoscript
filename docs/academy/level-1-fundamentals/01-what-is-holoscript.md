@@ -5,6 +5,7 @@ Welcome to HoloScript Academy! In this first lesson, you'll learn what HoloScrip
 ## Learning Objectives
 
 By the end of this lesson, you will:
+
 - Understand what HoloScript is and its purpose
 - Know the key features that make HoloScript unique
 - Understand when to use HoloScript vs. traditional game engines
@@ -99,6 +100,7 @@ orb button {
 ### Before HoloScript
 
 Creating a simple grabbable object in Unity or Unreal requires:
+
 - Setting up the XR Interaction Toolkit
 - Creating a C# script for grab behavior
 - Configuring Rigidbody physics
@@ -121,23 +123,25 @@ orb cube {
 
 HoloScript isn't just a language - it's an ecosystem:
 
-| Component | Description |
-|-----------|-------------|
-| `@holoscript/core` | Parser, compiler, and runtime |
-| `@holoscript/cli` | Command-line tools |
-| `@holoscript/lsp` | IDE support via Language Server Protocol |
-| VS Code Extension | Syntax highlighting, completions, debugging |
-| IntelliJ Plugin | JetBrains IDE support |
+| Component          | Description                                 |
+| ------------------ | ------------------------------------------- |
+| `@holoscript/core` | Parser, compiler, and runtime               |
+| `@holoscript/cli`  | Command-line tools                          |
+| `@holoscript/lsp`  | IDE support via Language Server Protocol    |
+| VS Code Extension  | Syntax highlighting, completions, debugging |
+| IntelliJ Plugin    | JetBrains IDE support                       |
 
 ## When to Use HoloScript
 
 **Use HoloScript when:**
+
 - Building social VR experiences
 - Creating multiplayer games
 - Prototyping VR ideas quickly
 - Building tools for non-programmers
 
 **Consider alternatives when:**
+
 - You need extremely low-level control
 - Building AAA game graphics
 - Working with existing Unity/Unreal projects

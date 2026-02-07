@@ -153,9 +153,9 @@ export interface AnalysisWarning {
 export interface BundleAnalyzerOptions {
   /** Size thresholds for warnings (in bytes) */
   sizeThresholds?: {
-    module?: number;      // default: 100KB
-    chunk?: number;       // default: 250KB
-    total?: number;       // default: 1MB
+    module?: number; // default: 100KB
+    chunk?: number; // default: 250KB
+    total?: number; // default: 1MB
     initialLoad?: number; // default: 500KB
   };
   /** Enable gzip size estimation */
@@ -301,7 +301,7 @@ export class BundleAnalyzer {
       const chunkInfo: ChunkInfo = {
         id: chunkInput.id,
         name: chunkInput.name,
-        files: chunkInput.files.map(f => f.path),
+        files: chunkInput.files.map((f) => f.path),
         modules,
         size: totalSize,
         gzipSize: this.options.estimateGzip ? totalGzipSize : undefined,
@@ -361,7 +361,7 @@ export class BundleAnalyzer {
       /Object\.assign\s*\(\s*(?:window|global)/,
     ];
 
-    return sideEffectPatterns.some(pattern => pattern.test(content));
+    return sideEffectPatterns.some((pattern) => pattern.test(content));
   }
 
   /**
@@ -431,7 +431,7 @@ export class BundleAnalyzer {
 
       module.exports = moduleExports;
       const used = usedExports[modulePath] ?? [];
-      module.unusedExports = moduleExports.filter(e => !used.includes(e));
+      module.unusedExports = moduleExports.filter((e) => !used.includes(e));
     }
   }
 
@@ -493,7 +493,7 @@ export class BundleAnalyzer {
 
         duplicates.push({
           name: modules[0].path.split('/').pop() ?? 'unknown',
-          instances: modules.map(m => ({
+          instances: modules.map((m) => ({
             path: m.path,
             size: m.size,
           })),
@@ -552,12 +552,12 @@ export class BundleAnalyzer {
     }
 
     // Find external modules that could be in a vendor chunk
-    const externalModules = Array.from(this.modules.values()).filter(m => m.type === 'external');
+    const externalModules = Array.from(this.modules.values()).filter((m) => m.type === 'external');
     if (externalModules.length > 3) {
       const totalSize = externalModules.reduce((sum, m) => sum + m.size, 0);
       recommendations.push({
         type: 'vendor',
-        modules: externalModules.map(m => m.path),
+        modules: externalModules.map((m) => m.path),
         currentSize: totalSize,
         estimatedSavings: Math.round(totalSize * 0.3), // Better caching
         priority: 'medium',
@@ -658,13 +658,13 @@ export class BundleAnalyzer {
     }
 
     // Side effects warnings
-    const modulesWithSideEffects = Array.from(this.modules.values()).filter(m => m.sideEffects);
+    const modulesWithSideEffects = Array.from(this.modules.values()).filter((m) => m.sideEffects);
     if (modulesWithSideEffects.length > this.modules.size * 0.3) {
       warnings.push({
         type: 'sideeffects',
         severity: 'info',
         message: `${modulesWithSideEffects.length} modules have side effects`,
-        modules: modulesWithSideEffects.map(m => m.path),
+        modules: modulesWithSideEffects.map((m) => m.path),
         recommendation: 'Review modules with side effects to improve treeshaking',
       });
     }
@@ -682,8 +682,8 @@ export class BundleAnalyzer {
     const totalSize = modules.reduce((sum, m) => sum + m.size, 0);
     const totalGzipSize = modules.reduce((sum, m) => sum + (m.gzipSize ?? 0), 0);
 
-    const entryChunks = chunks.filter(c => c.isEntry);
-    const asyncChunks = chunks.filter(c => c.isAsync);
+    const entryChunks = chunks.filter((c) => c.isEntry);
+    const asyncChunks = chunks.filter((c) => c.isAsync);
 
     const initialLoadSize = entryChunks.reduce((sum, c) => sum + c.size, 0);
     const asyncChunksSize = asyncChunks.reduce((sum, c) => sum + c.size, 0);
@@ -710,7 +710,10 @@ export class BundleAnalyzer {
         ? { path: sortedBySize[0].path, size: sortedBySize[0].size }
         : { path: '', size: 0 },
       smallestModule: sortedBySize[sortedBySize.length - 1]
-        ? { path: sortedBySize[sortedBySize.length - 1].path, size: sortedBySize[sortedBySize.length - 1].size }
+        ? {
+            path: sortedBySize[sortedBySize.length - 1].path,
+            size: sortedBySize[sortedBySize.length - 1].size,
+          }
         : { path: '', size: 0 },
       duplicateWaste,
       unusedCodeSize,
@@ -825,27 +828,35 @@ export class BundleAnalyzer {
   </div>
 
   <h2>Warnings (${report.warnings.length})</h2>
-  ${report.warnings.map(w => `
+  ${report.warnings
+    .map(
+      (w) => `
     <div class="warning ${w.severity}">
       <strong>${w.type.toUpperCase()}</strong>: ${w.message}
       ${w.recommendation ? `<br><em>${w.recommendation}</em>` : ''}
     </div>
-  `).join('')}
+  `
+    )
+    .join('')}
 
   <h2>Suggestions</h2>
-  ${report.suggestions.map(s => `<div class="suggestion">💡 ${s}</div>`).join('')}
+  ${report.suggestions.map((s) => `<div class="suggestion">💡 ${s}</div>`).join('')}
 
   <h2>Chunks</h2>
   <table>
     <tr><th>Name</th><th>Type</th><th>Size</th><th>Modules</th></tr>
-    ${report.chunks.map(c => `
+    ${report.chunks
+      .map(
+        (c) => `
       <tr>
         <td>${c.name}</td>
         <td>${c.isEntry ? 'Entry' : c.isAsync ? 'Async' : 'Normal'}</td>
         <td>${formatSize(c.size)}</td>
         <td>${c.modules.length}</td>
       </tr>
-    `).join('')}
+    `
+      )
+      .join('')}
   </table>
 
   <h2>Largest Modules</h2>
@@ -854,39 +865,58 @@ export class BundleAnalyzer {
     ${report.modules
       .sort((a, b) => b.size - a.size)
       .slice(0, 20)
-      .map(m => `
+      .map(
+        (m) => `
         <tr>
           <td>${m.path}</td>
           <td>${m.type}</td>
           <td>${formatSize(m.size)}</td>
           <td>${m.gzipSize ? formatSize(m.gzipSize) : '-'}</td>
         </tr>
-      `).join('')}
+      `
+      )
+      .join('')}
   </table>
 
-  ${report.duplicates.length > 0 ? `
+  ${
+    report.duplicates.length > 0
+      ? `
     <h2>Duplicates (${report.duplicates.length})</h2>
     <table>
       <tr><th>Module</th><th>Instances</th><th>Wasted</th></tr>
-      ${report.duplicates.map(d => `
+      ${report.duplicates
+        .map(
+          (d) => `
         <tr>
           <td>${d.name}</td>
           <td>${d.instances.length}</td>
           <td>${formatSize(d.totalWaste)}</td>
         </tr>
-      `).join('')}
+      `
+        )
+        .join('')}
     </table>
-  ` : ''}
+  `
+      : ''
+  }
 
-  ${report.splittingRecommendations.length > 0 ? `
+  ${
+    report.splittingRecommendations.length > 0
+      ? `
     <h2>Splitting Recommendations</h2>
-    ${report.splittingRecommendations.map(r => `
+    ${report.splittingRecommendations
+      .map(
+        (r) => `
       <div class="warning info">
         <strong>${r.type.toUpperCase()} (${r.priority})</strong>: ${r.description}
         <br>Potential savings: ${formatSize(r.estimatedSavings)}
       </div>
-    `).join('')}
-  ` : ''}
+    `
+      )
+      .join('')}
+  `
+      : ''
+  }
 </body>
 </html>`;
   }

@@ -105,7 +105,7 @@ export class VisualTestRunner {
           await page.waitForFunction('window.HOLO_RENDERED === true', {
             timeout: this.config.renderTimeout,
           });
-        } catch (e) {
+        } catch (_e) {
           if (attempt === this.config.retries) {
             console.warn('Timeout waiting for HOLO_RENDERED signal. Taking screenshot anyway.');
           }
@@ -117,7 +117,7 @@ export class VisualTestRunner {
         const screenshot = await page.screenshot({ type: 'png' });
         await page.close();
 
-        return screenshot as Buffer;
+        return screenshot;
       } catch (e) {
         lastError = e instanceof Error ? e : new Error(String(e));
         console.warn(`Render attempt ${attempt + 1} failed:`, lastError.message);

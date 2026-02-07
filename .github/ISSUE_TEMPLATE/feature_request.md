@@ -19,6 +19,7 @@ A clear and concise description of any alternative solutions or features you've 
 Describe the use case or scenario where this feature would be beneficial.
 
 **HoloScript Code Example (if applicable)**
+
 ```holoscript
 // Example of how you'd like to use this feature
 ```

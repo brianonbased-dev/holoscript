@@ -111,7 +111,11 @@ export class MQTTClient {
   private config: MQTTClientConfig;
   private state: MQTTClientState = 'disconnected';
   private subscriptions: Map<string, Set<(message: MQTTMessage) => void>> = new Map();
-  private messageQueue: Array<{ topic: string; payload: Buffer | string; options: MQTTPublishOptions }> = [];
+  private messageQueue: Array<{
+    topic: string;
+    payload: Buffer | string;
+    options: MQTTPublishOptions;
+  }> = [];
   private reconnectAttempts: number = 0;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private eventHandlers: Map<keyof MQTTClientEvents, Set<Function>> = new Map();
@@ -321,7 +325,7 @@ export class MQTTClient {
     if (handlers) {
       for (const handler of handlers) {
         try {
-          (handler as Function)(...args);
+          (handler)(...args);
         } catch (error) {
           console.error(`Error in MQTT event handler for ${event}:`, error);
         }
@@ -429,11 +433,11 @@ export class MQTTClient {
     this.deliverMessage(topic, message);
   }
 
-  private async simulateSubscribe(subscription: MQTTSubscription): Promise<void> {
+  private async simulateSubscribe(_subscription: MQTTSubscription): Promise<void> {
     // Subscription is tracked in memory
   }
 
-  private async simulateUnsubscribe(topic: string): Promise<void> {
+  private async simulateUnsubscribe(_topic: string): Promise<void> {
     // Unsubscription is tracked in memory
   }
 

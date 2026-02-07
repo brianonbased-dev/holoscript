@@ -5,10 +5,7 @@
     "input": "Create a ball with appropriate physics",
     "output": "orb ball_48 {\n  shape: \"sphere\"\n  physics: \"dynamic\"\n  @throwable\n  @grabbable\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "dynamic"
-      ],
+      "patterns": ["physics", "dynamic"],
       "complexity": 2
     }
   },
@@ -18,10 +15,7 @@
     "input": "orb cube_err_170 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb cube_err_170 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -31,10 +25,7 @@
     "input": "Place a cylinder in a comfortable ergonomic position",
     "output": "orb ergonomic_cylinder {\n  shape: \"cylinder\"\n  position: { x: 0, y: 1.57, z: -0.57 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -44,10 +35,7 @@
     "input": "orb sper_err_484 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb sphere_err_484 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -57,10 +45,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_17 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -70,10 +55,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -83,10 +65,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -96,10 +75,7 @@
     "input": "orb pyramid_err_973 {\n  shape: \"pyramid\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb pyramid_err_973 {\n  shape: \"pyramid\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -109,10 +85,7 @@
     "input": "Place a plane in a comfortable ergonomic position",
     "output": "orb ergonomic_plane {\n  shape: \"plane\"\n  position: { x: 0, y: 1.60, z: -0.65 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -122,10 +95,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -135,10 +105,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -148,10 +115,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_52 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -161,10 +125,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -174,10 +135,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -187,10 +145,7 @@
     "input": "Create a ball with appropriate physics",
     "output": "orb ball_66 {\n  shape: \"sphere\"\n  physics: \"dynamic\"\n  @throwable\n  @grabbable\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "dynamic"
-      ],
+      "patterns": ["physics", "dynamic"],
       "complexity": 2
     }
   },
@@ -200,10 +155,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_19 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -213,10 +165,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -226,10 +175,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -239,10 +185,7 @@
     "input": "Place a plane in a comfortable ergonomic position",
     "output": "orb ergonomic_plane {\n  shape: \"plane\"\n  position: { x: 0, y: 1.56, z: -1.38 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -252,10 +195,7 @@
     "input": "Place a sphere in a comfortable ergonomic position",
     "output": "orb ergonomic_sphere {\n  shape: \"sphere\"\n  position: { x: 0, y: 1.67, z: -1.44 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -265,10 +205,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -278,10 +215,7 @@
     "input": "orb cylinder_err_150 {\n  shape: \"cylinder\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb cylinder_err_150 {\n  shape: \"cylinder\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -291,10 +225,7 @@
     "input": "Create a sphere that is pointable",
     "output": "orb sphere_952 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n  @pointable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "pointable"
-      ],
+      "patterns": ["vr_trait", "pointable"],
       "complexity": 1
     }
   },
@@ -304,10 +235,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_75 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -317,10 +245,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -330,10 +255,7 @@
     "input": "Create a ball with appropriate physics",
     "output": "orb ball_2 {\n  shape: \"sphere\"\n  physics: \"dynamic\"\n  @throwable\n  @grabbable\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "dynamic"
-      ],
+      "patterns": ["physics", "dynamic"],
       "complexity": 2
     }
   },
@@ -343,10 +265,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -356,10 +275,7 @@
     "input": "orb cylinder_err_126 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb cylinder_err_126 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -369,10 +285,7 @@
     "input": "orb pyramid_err_976 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb pyramid_err_976 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -382,10 +295,7 @@
     "input": "Place a cylinder in a comfortable ergonomic position",
     "output": "orb ergonomic_cylinder {\n  shape: \"cylinder\"\n  position: { x: 0, y: 1.47, z: -1.19 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -395,10 +305,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -408,10 +315,7 @@
     "input": "Create a plane that is grabbable",
     "output": "orb plane_992 {\n  shape: \"plane\"\n  color: \"#ff0000\"\n  @grabbable\n  on_grab: {\n    haptic.pulse(0.5)\n  }\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "grabbable"
-      ],
+      "patterns": ["vr_trait", "grabbable"],
       "complexity": 1
     }
   },
@@ -421,10 +325,7 @@
     "input": "Create a pyramid that is networked",
     "output": "orb pyramid_23 {\n  shape: \"pyramid\"\n  color: \"#ff00ff\"\n  @networked\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "networked"
-      ],
+      "patterns": ["vr_trait", "networked"],
       "complexity": 1
     }
   },
@@ -434,10 +335,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -447,10 +345,7 @@
     "input": "orb cylinder_err_133 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb cylinder_err_133 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -460,10 +355,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -473,10 +365,7 @@
     "input": "orb cylinder_err_970 {\n  shape: \"cylinder\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb cylinder_err_970 {\n  shape: \"cylinder\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -486,10 +375,7 @@
     "input": "Create a ball with appropriate physics",
     "output": "orb ball_17 {\n  shape: \"sphere\"\n  physics: \"dynamic\"\n  @throwable\n  @grabbable\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "dynamic"
-      ],
+      "patterns": ["physics", "dynamic"],
       "complexity": 2
     }
   },
@@ -499,10 +385,7 @@
     "input": "Place a plane in a comfortable ergonomic position",
     "output": "orb ergonomic_plane {\n  shape: \"plane\"\n  position: { x: 0, y: 1.47, z: -1.14 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -512,10 +395,7 @@
     "input": "Create a plane that is hoverable",
     "output": "orb plane_670 {\n  shape: \"plane\"\n  color: \"#ff00ff\"\n  @hoverable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "hoverable"
-      ],
+      "patterns": ["vr_trait", "hoverable"],
       "complexity": 1
     }
   },
@@ -525,10 +405,7 @@
     "input": "Create a sphere that is hoverable",
     "output": "orb sphere_130 {\n  shape: \"sphere\"\n  color: \"#0000ff\"\n  @hoverable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "hoverable"
-      ],
+      "patterns": ["vr_trait", "hoverable"],
       "complexity": 1
     }
   },
@@ -538,10 +415,7 @@
     "input": "Create a ball with appropriate physics",
     "output": "orb ball_37 {\n  shape: \"sphere\"\n  physics: \"dynamic\"\n  @throwable\n  @grabbable\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "dynamic"
-      ],
+      "patterns": ["physics", "dynamic"],
       "complexity": 2
     }
   },
@@ -551,10 +425,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -564,10 +435,7 @@
     "input": "Create a pyramid that is pointable",
     "output": "orb pyramid_465 {\n  shape: \"pyramid\"\n  color: \"#ff00ff\"\n  @pointable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "pointable"
-      ],
+      "patterns": ["vr_trait", "pointable"],
       "complexity": 1
     }
   },
@@ -577,10 +445,7 @@
     "input": "orb cylinder_err_23 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb cylinder_err_23 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -590,10 +455,7 @@
     "input": "Create a ball with appropriate physics",
     "output": "orb ball_5 {\n  shape: \"sphere\"\n  physics: \"dynamic\"\n  @throwable\n  @grabbable\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "dynamic"
-      ],
+      "patterns": ["physics", "dynamic"],
       "complexity": 2
     }
   },
@@ -603,10 +465,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -616,10 +475,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_90 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -629,10 +485,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -642,10 +495,7 @@
     "input": "Place a plane in a comfortable ergonomic position",
     "output": "orb ergonomic_plane {\n  shape: \"plane\"\n  position: { x: 0, y: 1.53, z: -1.49 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -655,10 +505,7 @@
     "input": "orb plane_err_285 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb plane_err_285 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -668,10 +515,7 @@
     "input": "Place a cylinder in a comfortable ergonomic position",
     "output": "orb ergonomic_cylinder {\n  shape: \"cylinder\"\n  position: { x: 0, y: 1.61, z: -1.14 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -681,10 +525,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -694,10 +535,7 @@
     "input": "orb plane_err_20 {\n  shape: \"plane\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb plane_err_20 {\n  shape: \"plane\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -707,10 +545,7 @@
     "input": "Place a plane in a comfortable ergonomic position",
     "output": "orb ergonomic_plane {\n  shape: \"plane\"\n  position: { x: 0, y: 1.59, z: -1.29 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -720,10 +555,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -733,10 +565,7 @@
     "input": "orb sphere_err_185 {\n  shape: \"sphere\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb sphere_err_185 {\n  shape: \"sphere\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -746,10 +575,7 @@
     "input": "orb pyramid_err_836 {\n  shape: \"pyramid\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb pyramid_err_836 {\n  shape: \"pyramid\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -759,10 +585,7 @@
     "input": "Create a cylinder that is throwable",
     "output": "orb cylinder_259 {\n  shape: \"cylinder\"\n  color: \"#ff0000\"\n  @throwable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "throwable"
-      ],
+      "patterns": ["vr_trait", "throwable"],
       "complexity": 1
     }
   },
@@ -772,10 +595,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_50 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -785,10 +605,7 @@
     "input": "orb plane_err_645 {\n  shape: \"plane\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb plane_err_645 {\n  shape: \"plane\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -798,10 +615,7 @@
     "input": "orb plane_err_610 {\n  shape: \"plane\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb plane_err_610 {\n  shape: \"plane\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -811,10 +625,7 @@
     "input": "orb pyramid_err_507 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb pyramid_err_507 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -824,10 +635,7 @@
     "input": "orb sphere_err_842 {\n  shape: \"sphere\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb sphere_err_842 {\n  shape: \"sphere\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -837,10 +645,7 @@
     "input": "Place a pyramid in a comfortable ergonomic position",
     "output": "orb ergonomic_pyramid {\n  shape: \"pyramid\"\n  position: { x: 0, y: 1.61, z: -0.79 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -850,10 +655,7 @@
     "input": "orb cube_err_677 {\n  shape: \"cube\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb cube_err_677 {\n  shape: \"cube\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -863,10 +665,7 @@
     "input": "orb plane_err_476 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb plane_err_476 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -876,10 +675,7 @@
     "input": "Create a plane that is sync",
     "output": "orb plane_188 {\n  shape: \"plane\"\n  color: \"#0000ff\"\n  @sync\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "sync"
-      ],
+      "patterns": ["vr_trait", "sync"],
       "complexity": 1
     }
   },
@@ -889,10 +685,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_25 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -902,10 +695,7 @@
     "input": "Place a pyramid in a comfortable ergonomic position",
     "output": "orb ergonomic_pyramid {\n  shape: \"pyramid\"\n  position: { x: 0, y: 1.62, z: -1.13 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -915,10 +705,7 @@
     "input": "Place a pyramid in a comfortable ergonomic position",
     "output": "orb ergonomic_pyramid {\n  shape: \"pyramid\"\n  position: { x: 0, y: 1.59, z: -1.36 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -928,10 +715,7 @@
     "input": "Create a pyramid that is sync",
     "output": "orb pyramid_167 {\n  shape: \"pyramid\"\n  color: \"#0000ff\"\n  @sync\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "sync"
-      ],
+      "patterns": ["vr_trait", "sync"],
       "complexity": 1
     }
   },
@@ -941,10 +725,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_33 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -954,10 +735,7 @@
     "input": "Place a cube in a comfortable ergonomic position",
     "output": "orb ergonomic_cube {\n  shape: \"cube\"\n  position: { x: 0, y: 1.34, z: -0.94 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -967,10 +745,7 @@
     "input": "Place a cylinder in a comfortable ergonomic position",
     "output": "orb ergonomic_cylinder {\n  shape: \"cylinder\"\n  position: { x: 0, y: 1.67, z: -0.88 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -980,10 +755,7 @@
     "input": "Create a cube that is hoverable",
     "output": "orb cube_882 {\n  shape: \"cube\"\n  color: \"#00ffff\"\n  @hoverable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "hoverable"
-      ],
+      "patterns": ["vr_trait", "hoverable"],
       "complexity": 1
     }
   },
@@ -993,10 +765,7 @@
     "input": "orb pyramid_err_440 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb pyramid_err_440 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -1006,10 +775,7 @@
     "input": "Create a cylinder that is networked",
     "output": "orb cylinder_149 {\n  shape: \"cylinder\"\n  color: \"#ff00ff\"\n  @networked\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "networked"
-      ],
+      "patterns": ["vr_trait", "networked"],
       "complexity": 1
     }
   },
@@ -1019,10 +785,7 @@
     "input": "Create a cube that is sync",
     "output": "orb cube_555 {\n  shape: \"cube\"\n  color: \"#ff00ff\"\n  @sync\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "sync"
-      ],
+      "patterns": ["vr_trait", "sync"],
       "complexity": 1
     }
   },
@@ -1032,10 +795,7 @@
     "input": "orb pyramid_err_554 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb pyramid_err_554 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -1045,10 +805,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_38 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -1058,10 +815,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -1071,10 +825,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_3 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -1084,10 +835,7 @@
     "input": "Create a pyramid that is networked",
     "output": "orb pyramid_960 {\n  shape: \"pyramid\"\n  color: \"#00ff00\"\n  @networked\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "networked"
-      ],
+      "patterns": ["vr_trait", "networked"],
       "complexity": 1
     }
   },
@@ -1097,10 +845,7 @@
     "input": "Place a sphere in a comfortable ergonomic position",
     "output": "orb ergonomic_sphere {\n  shape: \"sphere\"\n  position: { x: 0, y: 1.32, z: -1.00 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -1110,10 +855,7 @@
     "input": "Place a cylinder in a comfortable ergonomic position",
     "output": "orb ergonomic_cylinder {\n  shape: \"cylinder\"\n  position: { x: 0, y: 1.33, z: -1.08 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -1123,10 +865,7 @@
     "input": "Create a pyramid that is grabbable",
     "output": "orb pyramid_479 {\n  shape: \"pyramid\"\n  color: \"#00ffff\"\n  @grabbable\n  on_grab: {\n    haptic.pulse(0.5)\n  }\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "grabbable"
-      ],
+      "patterns": ["vr_trait", "grabbable"],
       "complexity": 1
     }
   },
@@ -1136,10 +875,7 @@
     "input": "orb cylinder_err_778 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb cylinder_err_778 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -1149,10 +885,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -1162,10 +895,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -1175,10 +905,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_17 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   },
@@ -1188,10 +915,7 @@
     "input": "Place a cylinder in a comfortable ergonomic position",
     "output": "orb ergonomic_cylinder {\n  shape: \"cylinder\"\n  position: { x: 0, y: 1.61, z: -1.37 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -1201,10 +925,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -1214,10 +935,7 @@
     "input": "Create a cube that is hoverable",
     "output": "orb cube_441 {\n  shape: \"cube\"\n  color: \"#00ffff\"\n  @hoverable\n}",
     "metadata": {
-      "patterns": [
-        "vr_trait",
-        "hoverable"
-      ],
+      "patterns": ["vr_trait", "hoverable"],
       "complexity": 1
     }
   },
@@ -1227,10 +945,7 @@
     "input": "orb sper_err_708 {\n  shape: \"sper\"\n  color: \"red\"\n}",
     "output": "orb sphere_err_708 {\n  shape: \"sphere\"\n  color: \"#ff0000\"\n}",
     "metadata": {
-      "patterns": [
-        "typo",
-        "shape_name"
-      ],
+      "patterns": ["typo", "shape_name"],
       "complexity": 1
     }
   },
@@ -1240,10 +955,7 @@
     "input": "Place a sphere in a comfortable ergonomic position",
     "output": "orb ergonomic_sphere {\n  shape: \"sphere\"\n  position: { x: 0, y: 1.39, z: -1.40 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -1253,10 +965,7 @@
     "input": "Place a plane in a comfortable ergonomic position",
     "output": "orb ergonomic_plane {\n  shape: \"plane\"\n  position: { x: 0, y: 1.43, z: -0.85 }\n  // Best Practice: Keep objects within arm's reach (0.5m-1.5m)\n}",
     "metadata": {
-      "patterns": [
-        "ergonomics",
-        "sweet_spot"
-      ],
+      "patterns": ["ergonomics", "sweet_spot"],
       "complexity": 1
     }
   },
@@ -1266,10 +975,7 @@
     "input": "Make a grabbable cube that gives feedback",
     "output": "orb responsive_cube {\n  shape: \"cube\"\n  @grabbable\n  \n  // Best Practice: Always provide feedback\n  on_grab: {\n    haptic.pulse(0.5)\n    log(\"Cube grabbed!\")\n  }\n  \n  on_release: {\n    game.play_sound(\"drop.mp3\")\n  }\n}",
     "metadata": {
-      "patterns": [
-        "events",
-        "feedback"
-      ],
+      "patterns": ["events", "feedback"],
       "complexity": 2
     }
   },
@@ -1279,10 +985,7 @@
     "input": "orb cube_err_829 {\n  shape: \"cube\"\n  on_grab: { log(\"Grabbed\") }\n}",
     "output": "orb cube_err_829 {\n  shape: \"cube\"\n  @grabbable\n  on_grab: { log(\"Grabbed\") }\n}",
     "metadata": {
-      "patterns": [
-        "missing_trait",
-        "grabbable"
-      ],
+      "patterns": ["missing_trait", "grabbable"],
       "complexity": 2
     }
   },
@@ -1292,10 +995,7 @@
     "input": "Create a wall with appropriate physics",
     "output": "orb wall_93 {\n  shape: \"cube\"\n  physics: \"static\"\n}",
     "metadata": {
-      "patterns": [
-        "physics",
-        "static"
-      ],
+      "patterns": ["physics", "static"],
       "complexity": 2
     }
   }

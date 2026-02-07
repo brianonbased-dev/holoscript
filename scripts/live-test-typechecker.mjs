@@ -50,7 +50,7 @@ test('Infer number type', () => {
 });
 
 test('Infer string type', () => {
-  const result = typeChecker.inferType("hello");
+  const result = typeChecker.inferType('hello');
   if (result.type !== 'string') throw new Error(`Expected 'string', got '${result.type}'`);
 });
 
@@ -62,7 +62,8 @@ test('Infer boolean type', () => {
 test('Infer array type', () => {
   const result = typeChecker.inferType([1, 2, 3]);
   if (result.type !== 'array') throw new Error(`Expected 'array', got '${result.type}'`);
-  if (result.elementType !== 'number') throw new Error(`Expected elementType 'number', got '${result.elementType}'`);
+  if (result.elementType !== 'number')
+    throw new Error(`Expected elementType 'number', got '${result.elementType}'`);
 });
 
 test('Infer object type', () => {
@@ -89,7 +90,7 @@ test('Type check simple orb AST', () => {
   if (!result.success && result.errors.length > 0) {
     throw new Error('Parse failed: ' + result.errors[0].message);
   }
-  
+
   const checkResult = typeChecker.check(result.ast);
   if (!checkResult) throw new Error('Type check returned nothing');
   if (!checkResult.valid) {
@@ -106,7 +107,7 @@ orb#second { color: "#00ff00" }
   if (!result.success && result.errors.length > 0) {
     throw new Error('Parse failed: ' + result.errors[0].message);
   }
-  
+
   const checkResult = typeChecker.check(result.ast);
   if (!checkResult) throw new Error('Type check returned nothing');
 });

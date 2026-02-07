@@ -346,20 +346,35 @@ export function parseColor(color: Color): ColorRGBA {
     const c = (1 - Math.abs(2 * l - 1)) * s;
     const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
     const m = l - c / 2;
-    let r = 0, g = 0, b = 0;
+    let r = 0,
+      g = 0,
+      b = 0;
 
-    if (h < 60) { r = c; g = x; }
-    else if (h < 120) { r = x; g = c; }
-    else if (h < 180) { g = c; b = x; }
-    else if (h < 240) { g = x; b = c; }
-    else if (h < 300) { r = x; b = c; }
-    else { r = c; b = x; }
+    if (h < 60) {
+      r = c;
+      g = x;
+    } else if (h < 120) {
+      r = x;
+      g = c;
+    } else if (h < 180) {
+      g = c;
+      b = x;
+    } else if (h < 240) {
+      g = x;
+      b = c;
+    } else if (h < 300) {
+      r = x;
+      b = c;
+    } else {
+      r = c;
+      b = x;
+    }
 
     return { r: r + m, g: g + m, b: b + m, a: 1 };
   }
 
   if ('a' in color) {
-    return color as ColorRGBA;
+    return color;
   }
 
   return { ...color, a: 1 };
@@ -369,8 +384,14 @@ export function parseColor(color: Color): ColorRGBA {
  * Color to hex string
  */
 export function colorToHex(color: ColorRGB | ColorRGBA): string {
-  const r = Math.round(color.r * 255).toString(16).padStart(2, '0');
-  const g = Math.round(color.g * 255).toString(16).padStart(2, '0');
-  const b = Math.round(color.b * 255).toString(16).padStart(2, '0');
+  const r = Math.round(color.r * 255)
+    .toString(16)
+    .padStart(2, '0');
+  const g = Math.round(color.g * 255)
+    .toString(16)
+    .padStart(2, '0');
+  const b = Math.round(color.b * 255)
+    .toString(16)
+    .padStart(2, '0');
   return `#${r}${g}${b}`;
 }

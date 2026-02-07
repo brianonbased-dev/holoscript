@@ -4,18 +4,12 @@
   "mcpServers": {
     "holoscript": {
       "command": "npx",
-      "args": [
-        "tsx",
-        "packages/mcp-server/src/index.ts"
-      ],
+      "args": ["tsx", "packages/mcp-server/src/index.ts"],
       "cwd": "${workspaceFolder}"
     },
     "hololand": {
       "command": "npx",
-      "args": [
-        "tsx",
-        "../Hololand/packages/brittney/mcp-server/src/index.ts"
-      ],
+      "args": ["tsx", "../Hololand/packages/brittney/mcp-server/src/index.ts"],
       "cwd": "${workspaceFolder}",
       "env": {
         "HOLOLAND_API_URL": "http://localhost:3000",

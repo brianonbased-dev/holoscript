@@ -18,15 +18,8 @@
 import type {
   HoloComposition,
   HoloObjectDecl,
-  HoloSpatialGroup,
   HoloLight,
-  HoloEnvironment,
-  HoloCamera,
-  HoloTimeline,
   HoloAudio,
-  HoloZone,
-  HoloTransition,
-  HoloEffects,
   HoloValue,
 } from '../parser/HoloCompositionTypes';
 
@@ -91,7 +84,7 @@ export class IOSCompiler {
     // SwiftUI View
     this.emit(`struct ${this.options.className}View: View {`);
     this.indentLevel++;
-    
+
     this.emit('@StateObject private var sceneState = SceneState()');
     this.emit('@State private var arView: ARSCNView?');
     this.emit('');
@@ -157,11 +150,15 @@ export class IOSCompiler {
     this.emit('arView.session.run(configuration)');
     this.emit('');
     this.emit('// Add tap gesture');
-    this.emit('let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))');
+    this.emit(
+      'let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))'
+    );
     this.emit('arView.addGestureRecognizer(tapGesture)');
     this.emit('');
     this.emit('// Add pan gesture for dragging');
-    this.emit('let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePan(_:)))');
+    this.emit(
+      'let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePan(_:)))'
+    );
     this.emit('arView.addGestureRecognizer(panGesture)');
     this.emit('');
     this.emit('context.coordinator.arView = arView');
@@ -217,7 +214,9 @@ export class IOSCompiler {
     this.emit('}');
     this.emit('');
     this.emit('// Raycast to place new object');
-    this.emit('if let query = arView.raycastQuery(from: location, allowing: .estimatedPlane, alignment: .any) {');
+    this.emit(
+      'if let query = arView.raycastQuery(from: location, allowing: .estimatedPlane, alignment: .any) {'
+    );
     this.indentLevel++;
     this.emit('let results = arView.session.raycast(query)');
     this.emit('if let result = results.first {');
@@ -246,7 +245,9 @@ export class IOSCompiler {
     this.emit('case .changed:');
     this.indentLevel++;
     this.emit('guard let node = selectedNode else { return }');
-    this.emit('if let query = arView.raycastQuery(from: location, allowing: .estimatedPlane, alignment: .any),');
+    this.emit(
+      'if let query = arView.raycastQuery(from: location, allowing: .estimatedPlane, alignment: .any),'
+    );
     this.emit('   let result = arView.session.raycast(query).first {');
     this.indentLevel++;
     this.emit('node.simdWorldPosition = simd_make_float3(result.worldTransform.columns.3)');
@@ -267,7 +268,9 @@ export class IOSCompiler {
     this.emit('');
 
     // ARSCNView delegate methods
-    this.emit('func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {');
+    this.emit(
+      'func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {'
+    );
     this.indentLevel++;
     this.emit('if let planeAnchor = anchor as? ARPlaneAnchor {');
     this.indentLevel++;
@@ -278,7 +281,9 @@ export class IOSCompiler {
     this.emit('}');
     this.emit('');
 
-    this.emit('func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {');
+    this.emit(
+      'func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {'
+    );
     this.indentLevel++;
     this.emit('if let planeAnchor = anchor as? ARPlaneAnchor {');
     this.indentLevel++;
@@ -439,7 +444,9 @@ export class IOSCompiler {
     this.emit('let originalScale = node.scale');
     this.emit('SCNTransaction.begin()');
     this.emit('SCNTransaction.animationDuration = 0.1');
-    this.emit('node.scale = SCNVector3(originalScale.x * 1.2, originalScale.y * 1.2, originalScale.z * 1.2)');
+    this.emit(
+      'node.scale = SCNVector3(originalScale.x * 1.2, originalScale.y * 1.2, originalScale.z * 1.2)'
+    );
     this.emit('SCNTransaction.commit()');
     this.emit('');
     this.emit('DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {');
@@ -457,7 +464,9 @@ export class IOSCompiler {
     // Plane detection
     this.emit('func didDetectPlane(_ anchor: ARPlaneAnchor, node: SCNNode) {');
     this.indentLevel++;
-    this.emit('let plane = SCNPlane(width: CGFloat(anchor.planeExtent.width), height: CGFloat(anchor.planeExtent.height))');
+    this.emit(
+      'let plane = SCNPlane(width: CGFloat(anchor.planeExtent.width), height: CGFloat(anchor.planeExtent.height))'
+    );
     this.emit('plane.firstMaterial?.diffuse.contents = UIColor.white.withAlphaComponent(0.3)');
     this.emit('');
     this.emit('let planeNode = SCNNode(geometry: plane)');
@@ -498,7 +507,9 @@ export class IOSCompiler {
     this.emit('// Reset AR session');
     this.emit('let configuration = ARWorldTrackingConfiguration()');
     this.emit('configuration.planeDetection = [.horizontal, .vertical]');
-    this.emit('arView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])');
+    this.emit(
+      'arView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])'
+    );
     this.emit('');
     this.emit('print("[HoloScript] Scene reset")');
     this.indentLevel--;
@@ -602,15 +613,15 @@ export class IOSCompiler {
     }
 
     // Physics
-    if (obj.traits?.some(t => t.name === 'physics')) {
+    if (obj.traits?.some((t) => t.name === 'physics')) {
       this.emit('');
       this.emit('let physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)');
-      const physicsTrait = obj.traits.find(t => t.name === 'physics');
+      const physicsTrait = obj.traits.find((t) => t.name === 'physics');
       if (physicsTrait?.config?.mass) {
         this.emit(`physicsBody.mass = ${physicsTrait.config.mass}`);
       }
       this.emit('node.physicsBody = physicsBody');
-    } else if (obj.traits?.some(t => t.name === 'collidable')) {
+    } else if (obj.traits?.some((t) => t.name === 'collidable')) {
       this.emit('');
       this.emit('let physicsBody = SCNPhysicsBody(type: .static, shape: nil)');
       this.emit('node.physicsBody = physicsBody');
@@ -654,7 +665,7 @@ export class IOSCompiler {
     this.emit(`node.name = "${light.name}"`);
     this.emit('node.light = light');
 
-    const posProp = light.properties.find(p => p.key === 'position');
+    const posProp = light.properties.find((p) => p.key === 'position');
     if (posProp && Array.isArray(posProp.value)) {
       const pos = posProp.value as number[];
       this.emit(`node.position = SCNVector3(${pos[0]}, ${pos[1]}, ${pos[2]})`);
@@ -673,9 +684,11 @@ export class IOSCompiler {
     this.emit(`static func make${varName}() -> SCNAudioSource? {`);
     this.indentLevel++;
 
-    const srcProp = audio.properties.find(p => p.key === 'src' || p.key === 'source');
+    const srcProp = audio.properties.find((p) => p.key === 'src' || p.key === 'source');
     if (srcProp) {
-      this.emit(`guard let audioSource = SCNAudioSource(named: "${srcProp.value}") else { return nil }`);
+      this.emit(
+        `guard let audioSource = SCNAudioSource(named: "${srcProp.value}") else { return nil }`
+      );
     } else {
       this.emit('return nil');
       this.indentLevel--;
@@ -683,12 +696,12 @@ export class IOSCompiler {
       return;
     }
 
-    const loopProp = audio.properties.find(p => p.key === 'loop');
+    const loopProp = audio.properties.find((p) => p.key === 'loop');
     if (loopProp) {
       this.emit(`audioSource.loops = ${loopProp.value ? 'true' : 'false'}`);
     }
 
-    const volumeProp = audio.properties.find(p => p.key === 'volume');
+    const volumeProp = audio.properties.find((p) => p.key === 'volume');
     if (volumeProp) {
       this.emit(`audioSource.volume = ${volumeProp.value}`);
     }
@@ -720,7 +733,7 @@ export class IOSCompiler {
   }
 
   private sanitizeName(name: string): string {
-    let result = name.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^[0-9]/, '_$&');
+    const result = name.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^[0-9]/, '_$&');
     return result.charAt(0).toUpperCase() + result.slice(1);
   }
 
@@ -739,7 +752,7 @@ export class IOSCompiler {
   }
 
   private findObjProp(obj: HoloObjectDecl, key: string): HoloValue | undefined {
-    return obj.properties?.find(p => p.key === key)?.value;
+    return obj.properties?.find((p) => p.key === key)?.value;
   }
 
   private toSwiftType(value: HoloValue): string {
@@ -748,7 +761,7 @@ export class IOSCompiler {
     if (typeof value === 'number') return Number.isInteger(value) ? 'Int' : 'Double';
     if (typeof value === 'string') return 'String';
     if (Array.isArray(value)) {
-      if (value.length === 3 && value.every(v => typeof v === 'number')) return 'SCNVector3';
+      if (value.length === 3 && value.every((v) => typeof v === 'number')) return 'SCNVector3';
       return '[Any]';
     }
     return 'Any';
@@ -760,10 +773,10 @@ export class IOSCompiler {
     if (typeof value === 'number') return `${value}`;
     if (typeof value === 'string') return `"${value}"`;
     if (Array.isArray(value)) {
-      if (value.length === 3 && value.every(v => typeof v === 'number')) {
+      if (value.length === 3 && value.every((v) => typeof v === 'number')) {
         return `SCNVector3(${value[0]}, ${value[1]}, ${value[2]})`;
       }
-      return `[${value.map(v => this.toSwiftValue(v)).join(', ')}]`;
+      return `[${value.map((v) => this.toSwiftValue(v)).join(', ')}]`;
     }
     return 'nil';
   }

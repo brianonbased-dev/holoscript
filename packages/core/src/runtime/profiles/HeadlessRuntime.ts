@@ -17,14 +17,10 @@
  * @version 1.0.0
  */
 
-import type {
-  HSPlusAST,
-  HSPlusNode,
-  StateDeclaration,
-} from '../../types/HoloScriptPlus';
+import type { HSPlusAST, HSPlusNode, StateDeclaration } from '../../types/HoloScriptPlus';
 import type { HSPlusDirective } from '../../types';
 import { ReactiveState, createState, ExpressionEvaluator } from '../../state/ReactiveState';
-import { vrTraitRegistry, type TraitContext, type TraitEvent } from '../../traits/VRTraitSystem';
+import { vrTraitRegistry, type TraitContext } from '../../traits/VRTraitSystem';
 import { eventBus } from '../EventBus';
 import type { RuntimeProfile } from './RuntimeProfile';
 import { HEADLESS_PROFILE } from './RuntimeProfile';
@@ -116,10 +112,7 @@ export class HeadlessRuntime {
 
     // Initialize expression evaluator
     this.builtins = this.createBuiltins();
-    this.evaluator = new ExpressionEvaluator(
-      this.state.getSnapshot(),
-      this.builtins
-    );
+    this.evaluator = new ExpressionEvaluator(this.state.getSnapshot(), this.builtins);
 
     // Initialize state from AST
     this.initializeState();

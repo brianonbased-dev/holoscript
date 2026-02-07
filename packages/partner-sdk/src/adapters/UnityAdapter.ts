@@ -151,9 +151,7 @@ ${this.generateTraitMethods(node.traits)}
       const fieldType = this.getCSharpType(value);
       const defaultValue = this.getCSharpValue(value);
 
-      lines.push(
-        `        [SerializeField] private ${fieldType} ${fieldName} = ${defaultValue};`
-      );
+      lines.push(`        [SerializeField] private ${fieldType} ${fieldName} = ${defaultValue};`);
     }
 
     return lines.join('\n');
@@ -354,9 +352,7 @@ ${this.generateTraitMethods(node.traits)}
     for (const trait of traits) {
       switch (trait) {
         case '@grabbable':
-          components.push(
-            this.config.xrSupport ? 'XRGrabInteractable' : 'Rigidbody'
-          );
+          components.push(this.config.xrSupport ? 'XRGrabInteractable' : 'Rigidbody');
           break;
         case '@collidable':
           components.push('Collider');

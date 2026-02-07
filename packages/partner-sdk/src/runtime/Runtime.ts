@@ -333,10 +333,7 @@ export class HoloScriptRuntime {
   /**
    * Listen for runtime events
    */
-  on<E extends RuntimeEvent>(
-    event: E,
-    callback: (data: RuntimeEventData[E]) => void
-  ): () => void {
+  on<E extends RuntimeEvent>(event: E, callback: (data: RuntimeEventData[E]) => void): () => void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
@@ -412,23 +409,23 @@ export class HoloScriptRuntime {
       ambientLight: 0.5,
       gravity: { x: 0, y: -9.81, z: 0 },
     };
-    
+
     // Extract composition name
     let sceneName = 'Scene';
-    
+
     // Process AST body
     for (const node of ast.body || []) {
       const nodeAny = node as Record<string, unknown>;
-      
+
       // Handle composition node (root)
       if (nodeAny.type === 'Composition' || nodeAny.type === 'composition') {
         sceneName = (nodeAny.name as string) || 'Scene';
-        
+
         // Extract environment
         if (nodeAny.environment) {
           const env = nodeAny.environment as Record<string, unknown>;
           const props = (env.properties as Array<{ key: string; value: unknown }>) || [];
-          
+
           for (const prop of props) {
             if (prop.key === 'skybox') environment.skybox = prop.value as string;
             if (prop.key === 'ambient_light' || prop.key === 'ambientLight') {
@@ -442,13 +439,13 @@ export class HoloScriptRuntime {
             }
           }
         }
-        
+
         // Extract objects
         const compositionObjects = (nodeAny.objects as Array<Record<string, unknown>>) || [];
         for (const obj of compositionObjects) {
           objects.push(this.convertObject(obj));
         }
-        
+
         // Extract spatial groups
         const spatialGroups = (nodeAny.spatialGroups as Array<Record<string, unknown>>) || [];
         for (const group of spatialGroups) {
@@ -457,31 +454,31 @@ export class HoloScriptRuntime {
             objects.push(this.convertObject(obj));
           }
         }
-        
+
         continue;
       }
-      
+
       // Handle standalone object nodes
       if (nodeAny.type === 'object' || nodeAny.type === 'orb' || nodeAny.type === 'Object') {
         objects.push(this.convertObject(nodeAny));
       }
     }
-    
+
     return {
       name: sceneName,
       objects,
       environment,
     };
   }
-  
+
   private convertObject(obj: Record<string, unknown>): import('./types.js').SceneNode {
     const props = (obj.properties as Array<{ key: string; value: unknown }>) || [];
     const propsMap: Record<string, unknown> = {};
-    
+
     for (const prop of props) {
       propsMap[prop.key] = prop.value;
     }
-    
+
     // Extract position
     const posValue = propsMap.position;
     let position: [number, number, number] = [0, 0, 0];
@@ -491,7 +488,7 @@ export class HoloScriptRuntime {
       const p = posValue as { x?: number; y?: number; z?: number };
       position = [p.x || 0, p.y || 0, p.z || 0];
     }
-    
+
     // Extract rotation
     const rotValue = propsMap.rotation;
     let rotation: [number, number, number] = [0, 0, 0];
@@ -501,7 +498,7 @@ export class HoloScriptRuntime {
       const r = rotValue as { x?: number; y?: number; z?: number };
       rotation = [r.x || 0, r.y || 0, r.z || 0];
     }
-    
+
     // Extract scale
     const scaleValue = propsMap.scale;
     let scale: [number, number, number] | number = 1;
@@ -513,10 +510,10 @@ export class HoloScriptRuntime {
       const s = scaleValue as { x?: number; y?: number; z?: number };
       scale = [s.x || 1, s.y || 1, s.z || 1];
     }
-    
+
     // Extract geometry type
     const geometry = (propsMap.geometry || propsMap.type || 'box') as string;
-    
+
     // Extract traits
     const traits: string[] = [];
     if (Array.isArray(obj.traits)) {
@@ -528,13 +525,13 @@ export class HoloScriptRuntime {
         }
       }
     }
-    
+
     // Remove position, rotation, scale from properties
     delete propsMap.position;
     delete propsMap.rotation;
     delete propsMap.scale;
     delete propsMap.geometry;
-    
+
     return {
       id: (obj.name as string) || `object_${Math.random().toString(36).substring(7)}`,
       name: (obj.name as string) || 'Object',

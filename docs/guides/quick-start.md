@@ -26,10 +26,10 @@ composition "My First Scene" {
   object "FloatingOrb" {
     @grabbable
     @glowing
-    
+
     position: [0, 1.5, -2]
     color: "#00ffff"
-    
+
     on_grab: {
       this.glow_intensity = 2.0
     }
@@ -45,13 +45,13 @@ Press `Ctrl+Shift+V` (or `Cmd+Shift+V` on Mac) to open the 3D preview.
 
 Open the Command Palette (`Ctrl+Shift+P`) and type **"HoloScript: Open Examples"** to browse progressive tutorials:
 
-| # | Example | What You'll Learn |
-|---|---------|-------------------|
-| 1 | 1-floating-cyan-orb.holo | Basic scene structure with @grabbable and @glowing |
-| 2 | 2-red-cube-teal-button.holo | VR traits: @throwable, @physics, @clickable |
-| 3 | 3-ball-ramp-with-bouncy-spheres.holo | Physics simulation with @physics and @collidable |
-| 4 | 4-networked-spheres.holo | Multiplayer with @networked and state sync |
-| 5 | 5-color-button-panel.holo | Interactive UI with multiple clickable buttons |
+| #   | Example                              | What You'll Learn                                  |
+| --- | ------------------------------------ | -------------------------------------------------- |
+| 1   | 1-floating-cyan-orb.holo             | Basic scene structure with @grabbable and @glowing |
+| 2   | 2-red-cube-teal-button.holo          | VR traits: @throwable, @physics, @clickable        |
+| 3   | 3-ball-ramp-with-bouncy-spheres.holo | Physics simulation with @physics and @collidable   |
+| 4   | 4-networked-spheres.holo             | Multiplayer with @networked and state sync         |
+| 5   | 5-color-button-panel.holo            | Interactive UI with multiple clickable buttons     |
 
 ## 5. Compile to Target Platform
 

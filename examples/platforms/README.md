@@ -4,17 +4,17 @@ This directory contains example `.holo` files demonstrating HoloScript compilati
 
 ## Available Examples
 
-| File | Platform | Description |
-|------|----------|-------------|
-| [vrchat-world.holo](vrchat-world.holo) | VRChat | Social hub with grabbables, mirrors, portals |
-| [unreal-scene.holo](unreal-scene.holo) | Unreal Engine 5 | VR experience with physics, particles, audio |
-| [ios-ar-app.holo](ios-ar-app.holo) | iOS (ARKit) | AR product showroom with gestures |
-| [android-ar-app.holo](android-ar-app.holo) | Android (ARCore) | AR furniture placement app |
-| [visionos-app.holo](visionos-app.holo) | visionOS | Spatial productivity workspace |
-| [godot-scene.holo](godot-scene.holo) | Godot 4 | Puzzle game with physics |
-| [openxr-app.holo](openxr-app.holo) | OpenXR | VR training simulator |
-| [androidxr-app.holo](androidxr-app.holo) | Android XR | Spatial gallery with panels |
-| [webgpu-demo.holo](webgpu-demo.holo) | WebGPU | GPU compute particle system |
+| File                                       | Platform         | Description                                  |
+| ------------------------------------------ | ---------------- | -------------------------------------------- |
+| [vrchat-world.holo](vrchat-world.holo)     | VRChat           | Social hub with grabbables, mirrors, portals |
+| [unreal-scene.holo](unreal-scene.holo)     | Unreal Engine 5  | VR experience with physics, particles, audio |
+| [ios-ar-app.holo](ios-ar-app.holo)         | iOS (ARKit)      | AR product showroom with gestures            |
+| [android-ar-app.holo](android-ar-app.holo) | Android (ARCore) | AR furniture placement app                   |
+| [visionos-app.holo](visionos-app.holo)     | visionOS         | Spatial productivity workspace               |
+| [godot-scene.holo](godot-scene.holo)       | Godot 4          | Puzzle game with physics                     |
+| [openxr-app.holo](openxr-app.holo)         | OpenXR           | VR training simulator                        |
+| [androidxr-app.holo](androidxr-app.holo)   | Android XR       | Spatial gallery with panels                  |
+| [webgpu-demo.holo](webgpu-demo.holo)       | WebGPU           | GPU compute particle system                  |
 
 ## Compiling Examples
 

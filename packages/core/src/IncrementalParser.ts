@@ -110,9 +110,7 @@ export class IncrementalParser {
 
       // Find nodes that belong to this block
       const blockNodes = this.getNodesInRange(result.ast, startLine, endLine);
-      const blockErrors = result.errors.filter(
-        e => e.line >= startLine && e.line < endLine
-      );
+      const blockErrors = result.errors.filter((e) => e.line >= startLine && e.line < endLine);
 
       blocks.push({
         hash: fnv1aHash(blockSource),
@@ -176,9 +174,8 @@ export class IncrementalParser {
     }
 
     // Check if new lines were added beyond existing blocks
-    const maxExistingLine = existing.blocks.length > 0
-      ? existing.blocks[existing.blocks.length - 1].endLine
-      : 0;
+    const maxExistingLine =
+      existing.blocks.length > 0 ? existing.blocks[existing.blocks.length - 1].endLine : 0;
 
     const hasNewLines = newLines.length > maxExistingLine;
 
@@ -200,12 +197,15 @@ export class IncrementalParser {
       const newHash = fnv1aHash(blockSource);
 
       // Check if we have a cached block with same hash
-      const existingBlock = existing.blocks.find(b => b.hash === newHash);
+      const existingBlock = existing.blocks.find((b) => b.hash === newHash);
 
       if (existingBlock && !changedBlocks.includes(existing.blocks.indexOf(existingBlock))) {
         // Reuse cached block (adjusting line numbers if needed)
-        const adjustedNodes = this.adjustNodeLines(existingBlock.nodes, startLine - existingBlock.startLine);
-        const adjustedErrors = existingBlock.errors.map(e => ({
+        const adjustedNodes = this.adjustNodeLines(
+          existingBlock.nodes,
+          startLine - existingBlock.startLine
+        );
+        const adjustedErrors = existingBlock.errors.map((e) => ({
           ...e,
           line: e.line + (startLine - existingBlock.startLine),
         }));
@@ -227,7 +227,7 @@ export class IncrementalParser {
 
         // Adjust line numbers to be relative to full document
         const adjustedNodes = this.adjustNodeLines(blockResult.ast, startLine);
-        const adjustedErrors = blockResult.errors.map(e => ({
+        const adjustedErrors = blockResult.errors.map((e) => ({
           ...e,
           line: e.line + startLine,
         }));
@@ -271,7 +271,7 @@ export class IncrementalParser {
    */
   private getNodesInRange(nodes: ASTNode[], startLine: number, endLine: number): ASTNode[] {
     // For now, return all nodes - proper implementation would track line info in AST
-    return nodes.filter(node => {
+    return nodes.filter((node) => {
       const pos = node.position as { line?: number } | undefined;
       if (pos?.line !== undefined) {
         return pos.line >= startLine && pos.line < endLine;
@@ -285,7 +285,7 @@ export class IncrementalParser {
    */
   private adjustNodeLines(nodes: ASTNode[], offset: number): ASTNode[] {
     if (offset === 0) return nodes;
-    return nodes.map(node => {
+    return nodes.map((node) => {
       // Check if node has position with line property (from block tracking)
       const nodeAny = node as unknown as { position?: { line?: number } };
       if (nodeAny.position && typeof nodeAny.position.line === 'number') {
@@ -303,7 +303,10 @@ export class IncrementalParser {
   applyChange(
     uri: string,
     change: {
-      range: { start: { line: number; character: number }; end: { line: number; character: number } };
+      range: {
+        start: { line: number; character: number };
+        end: { line: number; character: number };
+      };
       text: string;
     },
     version: number
@@ -321,12 +324,14 @@ export class IncrementalParser {
     if (start.line === end.line) {
       // Single line change
       const line = lines[start.line] || '';
-      lines[start.line] = line.substring(0, start.character) + change.text + line.substring(end.character);
+      lines[start.line] =
+        line.substring(0, start.character) + change.text + line.substring(end.character);
     } else {
       // Multi-line change
       const startLine = lines[start.line] || '';
       const endLine = lines[end.line] || '';
-      const newContent = startLine.substring(0, start.character) + change.text + endLine.substring(end.character);
+      const newContent =
+        startLine.substring(0, start.character) + change.text + endLine.substring(end.character);
       const newLines = newContent.split('\n');
       lines.splice(start.line, end.line - start.line + 1, ...newLines);
     }

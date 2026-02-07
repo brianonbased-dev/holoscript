@@ -16,6 +16,7 @@ Demonstrates the **Asset Manifest System** for organizing and loading game asset
 - Asset gallery browser UI
 
 **Key concepts:**
+
 - `@manifest("name")` - Declare asset manifests
 - `@asset("id")` - Reference assets by ID
 - `@manifest.preload_all()` - Batch loading
@@ -31,6 +32,7 @@ Demonstrates the **Semantic Annotation Framework** for adding meaning to entitie
 - Reactive UI updates based on state changes
 
 **Key concepts:**
+
 - `@semantic("id")` - Define semantic annotations
 - `@annotate()` - Property-level annotations
 - `@bindings` - Reactive data binding declarations
@@ -48,6 +50,7 @@ Demonstrates the **World Definition Schema** for complete VR/AR worlds:
 - LOD configuration
 
 **Key concepts:**
+
 - `@world_metadata` - World identification and platform support
 - `@world_config` - Runtime configuration
 - `@zones` - Spatial regions with behaviors
@@ -66,6 +69,7 @@ Demonstrates the **World Definition Schema** for complete VR/AR worlds:
 - AI guide NPC with behaviors
 
 **Key concepts:**
+
 - All of the above, working together
 - `@hololand.connect()` - Connect to runtime
 - `@hololand.player_joined` - Multiplayer events
@@ -94,18 +98,18 @@ holoscript build examples/hololand/3-world-definition.holo --platform quest
 
 ## Feature Coverage
 
-| Feature | Example 1 | Example 2 | Example 3 | Example 4 |
-|---------|-----------|-----------|-----------|-----------|
-| Asset Manifest | ✓ | | | ✓ |
-| Asset Dependencies | ✓ | | | ✓ |
-| Semantic Annotations | | ✓ | | ✓ |
-| Property Annotations | | ✓ | | ✓ |
-| Data Bindings | | ✓ | | ✓ |
-| World Metadata | | | ✓ | ✓ |
-| World Config | | | ✓ | ✓ |
-| Zones | | | ✓ | ✓ |
-| Spawn Points | | | ✓ | ✓ |
-| Hololand Events | | | ✓ | ✓ |
-| NPC Behaviors | | | | ✓ |
-| LOD System | | | ✓ | ✓ |
-| Accessibility | | | | ✓ |
+| Feature              | Example 1 | Example 2 | Example 3 | Example 4 |
+| -------------------- | --------- | --------- | --------- | --------- |
+| Asset Manifest       | ✓         |           |           | ✓         |
+| Asset Dependencies   | ✓         |           |           | ✓         |
+| Semantic Annotations |           | ✓         |           | ✓         |
+| Property Annotations |           | ✓         |           | ✓         |
+| Data Bindings        |           | ✓         |           | ✓         |
+| World Metadata       |           |           | ✓         | ✓         |
+| World Config         |           |           | ✓         | ✓         |
+| Zones                |           |           | ✓         | ✓         |
+| Spawn Points         |           |           | ✓         | ✓         |
+| Hololand Events      |           |           | ✓         | ✓         |
+| NPC Behaviors        |           |           |           | ✓         |
+| LOD System           |           |           | ✓         | ✓         |
+| Accessibility        |           |           |           | ✓         |

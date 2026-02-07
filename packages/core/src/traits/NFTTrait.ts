@@ -40,7 +40,7 @@ interface NFTConfig {
   metadata_uri: string;
   display_ownership: boolean;
   transfer_enabled: boolean;
-  verification_interval: number;  // ms, 0 = once
+  verification_interval: number; // ms, 0 = once
   rpc_endpoint: string;
 }
 
@@ -72,7 +72,7 @@ export const nftHandler: TraitHandler<NFTConfig> = {
       lastVerificationTime: 0,
     };
     (node as any).__nftState = state;
-    
+
     if (config.contract_address && config.token_id) {
       verifyOwnership(node, state, config, context);
       loadMetadata(node, state, config, context);
@@ -83,10 +83,10 @@ export const nftHandler: TraitHandler<NFTConfig> = {
     delete (node as any).__nftState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__nftState as NFTState;
     if (!state) return;
-    
+
     // Periodic re-verification
     if (config.verification_interval > 0 && state.isVerified) {
       const now = Date.now();
@@ -99,20 +99,20 @@ export const nftHandler: TraitHandler<NFTConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__nftState as NFTState;
     if (!state) return;
-    
+
     if (event.type === 'nft_ownership_verified') {
       state.isLoading = false;
       state.isVerified = true;
       state.ownerAddress = event.ownerAddress as string;
       state.tokenStandard = event.standard as typeof state.tokenStandard;
       state.lastVerificationTime = Date.now();
-      
+
       context.emit?.('on_nft_verified', {
         node,
         owner: state.ownerAddress,
         standard: state.tokenStandard,
       });
-      
+
       if (config.display_ownership) {
         context.emit?.('nft_display_badge', {
           node,
@@ -122,14 +122,14 @@ export const nftHandler: TraitHandler<NFTConfig> = {
     } else if (event.type === 'nft_verification_failed') {
       state.isLoading = false;
       state.isVerified = false;
-      
+
       context.emit?.('on_nft_error', {
         node,
         error: event.error,
       });
     } else if (event.type === 'nft_metadata_loaded') {
       state.metadata = event.metadata as NFTMetadata;
-      
+
       context.emit?.('on_nft_metadata', {
         node,
         metadata: state.metadata,
@@ -142,10 +142,10 @@ export const nftHandler: TraitHandler<NFTConfig> = {
         });
         return;
       }
-      
+
       const toAddress = event.toAddress as string;
-      const fromAddress = event.fromAddress as string || state.ownerAddress;
-      
+      const fromAddress = (event.fromAddress as string) || state.ownerAddress;
+
       context.emit?.('nft_initiate_transfer', {
         node,
         chain: config.chain,
@@ -157,7 +157,7 @@ export const nftHandler: TraitHandler<NFTConfig> = {
     } else if (event.type === 'nft_transfer_complete') {
       const previousOwner = state.ownerAddress;
       state.ownerAddress = event.newOwner as string;
-      
+
       context.emit?.('on_nft_transferred', {
         node,
         from: previousOwner,
@@ -171,7 +171,7 @@ export const nftHandler: TraitHandler<NFTConfig> = {
     } else if (event.type === 'nft_check_owner') {
       const addressToCheck = event.address as string;
       const isOwner = state.ownerAddress?.toLowerCase() === addressToCheck.toLowerCase();
-      
+
       context.emit?.('nft_owner_check_result', {
         node,
         address: addressToCheck,
@@ -201,7 +201,7 @@ function verifyOwnership(
   context: { emit?: (event: string, data: unknown) => void }
 ): void {
   state.isLoading = true;
-  
+
   context.emit?.('nft_verify_ownership', {
     node,
     chain: config.chain,

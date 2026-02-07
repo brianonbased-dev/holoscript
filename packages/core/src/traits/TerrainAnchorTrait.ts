@@ -18,7 +18,7 @@ type AnchorState = 'unresolved' | 'resolving' | 'resolved' | 'tracking' | 'unava
 interface TerrainAnchorState {
   state: AnchorState;
   isResolved: boolean;
-  terrainHeight: number;  // meters above sea level
+  terrainHeight: number; // meters above sea level
   surfaceNormal: { x: number; y: number; z: number };
   localPosition: { x: number; y: number; z: number };
   localRotation: { x: number; y: number; z: number; w: number };
@@ -29,11 +29,11 @@ interface TerrainAnchorState {
 interface TerrainAnchorConfig {
   latitude: number;
   longitude: number;
-  elevation_offset: number;  // meters above terrain
-  terrain_following: boolean;  // Update with terrain changes
+  elevation_offset: number; // meters above terrain
+  terrain_following: boolean; // Update with terrain changes
   surface_normal_alignment: boolean;
   auto_resolve: boolean;
-  smoothing: number;  // 0-1
+  smoothing: number; // 0-1
 }
 
 // =============================================================================
@@ -65,10 +65,10 @@ export const terrainAnchorHandler: TraitHandler<TerrainAnchorConfig> = {
       anchorHandle: null,
     };
     (node as any).__terrainAnchorState = state;
-    
+
     if (config.auto_resolve) {
       state.state = 'resolving';
-      
+
       context.emit?.('terrain_anchor_request', {
         node,
         latitude: config.latitude,
@@ -87,17 +87,19 @@ export const terrainAnchorHandler: TraitHandler<TerrainAnchorConfig> = {
     delete (node as any).__terrainAnchorState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, _context, _delta) {
     const state = (node as any).__terrainAnchorState as TerrainAnchorState;
     if (!state) return;
-    
+
     if (state.state === 'tracking' || state.state === 'resolved') {
       // Apply position
       if ((node as any).position) {
         if (config.smoothing > 0) {
           const s = config.smoothing;
           (node as any).position.x = (node as any).position.x * s + state.localPosition.x * (1 - s);
-          (node as any).position.y = (node as any).position.y * s + (state.localPosition.y + config.elevation_offset) * (1 - s);
+          (node as any).position.y =
+            (node as any).position.y * s +
+            (state.localPosition.y + config.elevation_offset) * (1 - s);
           (node as any).position.z = (node as any).position.z * s + state.localPosition.z * (1 - s);
         } else {
           (node as any).position.x = state.localPosition.x;
@@ -105,7 +107,7 @@ export const terrainAnchorHandler: TraitHandler<TerrainAnchorConfig> = {
           (node as any).position.z = state.localPosition.z;
         }
       }
-      
+
       // Apply surface normal alignment
       if (config.surface_normal_alignment && (node as any).rotation) {
         if (config.smoothing > 0) {
@@ -114,7 +116,8 @@ export const terrainAnchorHandler: TraitHandler<TerrainAnchorConfig> = {
           (node as any).rotation.y = (node as any).rotation.y * s + state.localRotation.y * (1 - s);
           (node as any).rotation.z = (node as any).rotation.z * s + state.localRotation.z * (1 - s);
           if ((node as any).rotation.w !== undefined) {
-            (node as any).rotation.w = (node as any).rotation.w * s + state.localRotation.w * (1 - s);
+            (node as any).rotation.w =
+              (node as any).rotation.w * s + state.localRotation.w * (1 - s);
           }
         } else {
           (node as any).rotation.x = state.localRotation.x;
@@ -131,18 +134,18 @@ export const terrainAnchorHandler: TraitHandler<TerrainAnchorConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__terrainAnchorState as TerrainAnchorState;
     if (!state) return;
-    
+
     if (event.type === 'terrain_anchor_resolved') {
       state.state = 'resolved';
       state.isResolved = true;
       state.anchorHandle = event.handle;
       state.terrainHeight = event.terrainHeight as number;
-      state.confidence = event.confidence as number || 1.0;
+      state.confidence = (event.confidence as number) || 1.0;
       state.localPosition = event.position as typeof state.localPosition;
-      
+
       if (event.surfaceNormal) {
         state.surfaceNormal = event.surfaceNormal as typeof state.surfaceNormal;
-        
+
         // Calculate rotation from surface normal
         if (config.surface_normal_alignment) {
           const up = state.surfaceNormal;
@@ -150,7 +153,7 @@ export const terrainAnchorHandler: TraitHandler<TerrainAnchorConfig> = {
           const angle = Math.acos(up.y);
           const axis = { x: -up.z, y: 0, z: up.x };
           const len = Math.sqrt(axis.x * axis.x + axis.z * axis.z);
-          
+
           if (len > 0.001) {
             const halfAngle = angle / 2;
             const s = Math.sin(halfAngle) / len;
@@ -163,7 +166,7 @@ export const terrainAnchorHandler: TraitHandler<TerrainAnchorConfig> = {
           }
         }
       }
-      
+
       context.emit?.('on_terrain_resolved', {
         node,
         terrainHeight: state.terrainHeight,
@@ -172,22 +175,22 @@ export const terrainAnchorHandler: TraitHandler<TerrainAnchorConfig> = {
     } else if (event.type === 'terrain_pose_update') {
       state.localPosition = event.position as typeof state.localPosition;
       state.terrainHeight = event.terrainHeight as number;
-      
+
       if (event.surfaceNormal) {
         state.surfaceNormal = event.surfaceNormal as typeof state.surfaceNormal;
       }
-      
+
       state.state = 'tracking';
     } else if (event.type === 'terrain_anchor_unavailable') {
       state.state = 'unavailable';
-      
+
       context.emit?.('on_terrain_unavailable', {
         node,
         reason: event.reason,
       });
     } else if (event.type === 'terrain_anchor_resolve') {
       state.state = 'resolving';
-      
+
       context.emit?.('terrain_anchor_request', {
         node,
         latitude: config.latitude,

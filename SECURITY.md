@@ -16,6 +16,7 @@ If you discover a security vulnerability within HoloScript, please use one of th
 ### GitHub Security Advisories (Recommended)
 
 Use GitHub's private vulnerability reporting feature:
+
 1. Go to the [Security tab](https://github.com/brianonbased-dev/HoloScript/security)
 2. Click "Report a vulnerability"
 3. Fill out the security advisory form
@@ -27,6 +28,7 @@ For sensitive security issues, you may email: **security@holoscript.dev**
 ### What to Include
 
 Please include the following information:
+
 - Type of vulnerability
 - Full paths of source file(s) related to the vulnerability
 - Location of the affected source code (tag/branch/commit)
@@ -44,6 +46,7 @@ Please include the following information:
 ## Security Best Practices
 
 When contributing to HoloScript:
+
 - Keep dependencies up to date
 - Follow TypeScript strict mode guidelines
 - Validate all external inputs

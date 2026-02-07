@@ -50,10 +50,10 @@ export const gpuPhysicsHandler: TraitHandler<GPUPhysicsConfig> = {
     shapeParams: [1, 1, 1],
     friction: 0.5,
     restitution: 0.3,
-    isStatic: false
+    isStatic: false,
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, config, _context) {
     const engine = getPhysicsEngine('webgpu') || getPhysicsEngine('default');
     if (!engine) {
       console.warn('No GPU PhysicsEngine found. Physics will be disabled for', node.name);
@@ -64,7 +64,7 @@ export const gpuPhysicsHandler: TraitHandler<GPUPhysicsConfig> = {
       engineId: 'webgpu', // Fallback or from config
       isSimulating: true,
       lastPosition: [0, 0, 0],
-      islandDetector: new IslandDetector()
+      islandDetector: new IslandDetector(),
     };
     (node as any).__gpuPhysicsState = state;
 
@@ -77,7 +77,7 @@ export const gpuPhysicsHandler: TraitHandler<GPUPhysicsConfig> = {
       shape: config.shape ?? 'box',
       shapeParams: config.shapeParams ?? [1, 1, 1],
       friction: config.friction,
-      restitution: config.restitution
+      restitution: config.restitution,
     });
   },
 
@@ -90,14 +90,14 @@ export const gpuPhysicsHandler: TraitHandler<GPUPhysicsConfig> = {
     }
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, _config, _context, _delta) {
     const state = (node as any).__gpuPhysicsState as InternalState;
     if (!state || !state.isSimulating) return;
 
     const engine = getPhysicsEngine(state.engineId);
     if (!engine) return;
 
-    // The actual step happens globally in the runtime, 
+    // The actual step happens globally in the runtime,
     // here we just sync state back to the node if needed or apply per-node forces.
     const states = engine.getStates();
     const bodyState = states[node.name || ''];

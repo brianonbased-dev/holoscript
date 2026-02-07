@@ -35,7 +35,11 @@ export type BodyType = 'dynamic' | 'kinematic' | 'static';
 /**
  * Collision detection mode
  */
-export type CollisionDetectionMode = 'discrete' | 'continuous' | 'continuous-dynamic' | 'continuous-speculative';
+export type CollisionDetectionMode =
+  | 'discrete'
+  | 'continuous'
+  | 'continuous-dynamic'
+  | 'continuous-speculative';
 
 /**
  * Interpolation mode for smooth rendering
@@ -211,7 +215,13 @@ export interface RigidbodyState {
  * Collision event
  */
 export interface CollisionEvent {
-  type: 'collision-enter' | 'collision-stay' | 'collision-exit' | 'trigger-enter' | 'trigger-stay' | 'trigger-exit';
+  type:
+    | 'collision-enter'
+    | 'collision-stay'
+    | 'collision-exit'
+    | 'trigger-enter'
+    | 'trigger-stay'
+    | 'trigger-exit';
   other: string;
   contactPoint?: Vector3;
   contactNormal?: Vector3;
@@ -352,7 +362,7 @@ export class RigidbodyTrait {
     if (this.config.isKinematic) return;
 
     const mass = this.config.mass ?? 1.0;
-    
+
     switch (mode) {
       case 'force':
         // Add force (will be integrated over time)

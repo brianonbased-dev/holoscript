@@ -9,6 +9,7 @@ Since this is an open-source project, the login system has been completely remov
 ## What Changed
 
 ### Server (src/server.ts)
+
 ```diff
 - import { AuthService } from './services/AuthService';
 - const auth = new AuthService(storage);
@@ -32,6 +33,7 @@ Since this is an open-source project, the login system has been completely remov
 ```
 
 ### Web UI (public/index.html)
+
 ```diff
 - Removed login page redirect check
 - Removed localStorage token handling
@@ -45,6 +47,7 @@ Since this is an open-source project, the login system has been completely remov
 ```
 
 ### Files Removed (Conceptually)
+
 ```
 ❌ public/login.html        (Not needed - open source)
 ❌ src/services/AuthService.ts (Not used anymore)
@@ -55,6 +58,7 @@ Since this is an open-source project, the login system has been completely remov
 ## New User Experience
 
 ### Before (With Login)
+
 ```
 1. Open http://localhost:8000
 2. See login page
@@ -64,6 +68,7 @@ Since this is an open-source project, the login system has been completely remov
 ```
 
 ### After (Open Source)
+
 ```
 1. Open http://localhost:8000
 2. See builder directly
@@ -76,15 +81,15 @@ Since this is an open-source project, the login system has been completely remov
 
 ## API Endpoints Now
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|---------|
-| GET | /api/auth/me | ❌ | Returns {userId: 'anonymous'} |
-| POST | /api/generate | ❌ | Generate HoloScript |
-| POST | /api/builds | ❌ | Save build |
-| GET | /api/builds | ❌ | List builds |
-| GET | /api/builds/:id | ❌ | Get build |
-| DELETE | /api/builds/:id | ❌ | Delete build |
-| GET | /api/health | ❌ | Service health |
+| Method | Path            | Auth | Purpose                       |
+| ------ | --------------- | ---- | ----------------------------- |
+| GET    | /api/auth/me    | ❌   | Returns {userId: 'anonymous'} |
+| POST   | /api/generate   | ❌   | Generate HoloScript           |
+| POST   | /api/builds     | ❌   | Save build                    |
+| GET    | /api/builds     | ❌   | List builds                   |
+| GET    | /api/builds/:id | ❌   | Get build                     |
+| DELETE | /api/builds/:id | ❌   | Delete build                  |
+| GET    | /api/health     | ❌   | Service health                |
 
 **All endpoints are now open (no authorization required)**
 
@@ -93,6 +98,7 @@ Since this is an open-source project, the login system has been completely remov
 ## Build Sharing Model
 
 ### Before
+
 ```
 user1's builds    → Stored with userId='user1'
 user2's builds    → Stored with userId='user2'
@@ -100,6 +106,7 @@ user2's builds    → Stored with userId='user2'
 ```
 
 ### After (Open Source)
+
 ```
 All builds        → Stored with userId='anonymous'
 └─ Shared globally
@@ -112,6 +119,7 @@ All users see the same build library.
 ## Startup (Simplified)
 
 ### Before
+
 ```bash
 npm run dev
 # Browser redirects to /login.html
@@ -120,6 +128,7 @@ npm run dev
 ```
 
 ### After
+
 ```bash
 npm run dev
 # Browser opens http://localhost:8000
@@ -135,7 +144,7 @@ npm run dev
 ✅ **Collaborative** - Everyone sees everyone's builds  
 ✅ **Simple** - Easier code to maintain  
 ✅ **Open** - True open-source (no secrets/auth)  
-✅ **Local** - Still all data stored locally  
+✅ **Local** - Still all data stored locally
 
 ---
 
@@ -180,6 +189,7 @@ curl http://localhost:8000/api/builds
 ## What's Next?
 
 Since this is now fully open source:
+
 - All users access same build library
 - No authentication overhead
 - Perfect for:

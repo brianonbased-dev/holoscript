@@ -250,9 +250,7 @@ export class AsyncFunctionHandler {
   /**
    * Convert callback to promise
    */
-  callbackToPromise(
-    fn: (callback: (err: any, result: any) => void) => void
-  ): Promise<any> {
+  callbackToPromise(fn: (callback: (err: any, result: any) => void) => void): Promise<any> {
     return new Promise((resolve, reject) => {
       fn((err: any, result: any) => {
         if (err) {
@@ -402,7 +400,7 @@ export class TypeScriptTypeLoader {
   /**
    * Load types from TypeScript declaration file
    */
-  loadTypes(filePath: string): Map<string, any> {
+  loadTypes(_filePath: string): Map<string, any> {
     const types = new Map<string, any>();
 
     // In real implementation, would parse .d.ts file

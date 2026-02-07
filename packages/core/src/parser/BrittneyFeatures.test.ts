@@ -352,7 +352,7 @@ describe('Brittney AI Features', () => {
       const result = parseHolo(source);
       expect(result.success).toBe(true);
       expect(result.ast?.npcs).toHaveLength(1);
-      const servicesProperty = result.ast?.npcs[0].properties.find(p => p.key === 'services');
+      const servicesProperty = result.ast?.npcs[0].properties.find((p) => p.key === 'services');
       expect(servicesProperty).toBeDefined();
       expect(servicesProperty?.value).toEqual(['buy', 'sell', 'repair']);
     });

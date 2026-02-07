@@ -1,19 +1,26 @@
 /**
  * MCP Tool Definitions for HoloScript
- * 
+ *
  * Provides AI agents with tools to parse, validate, generate, and render HoloScript.
+ * Includes graph understanding, IDE features, and Brittney-Lite AI assistant (free tier).
  */
 
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
+import { graphTools } from './graph-tools';
+import { ideTools } from './ide-tools';
+import { brittneyLiteTools } from './brittney-lite';
 
 /**
  * All MCP tools for HoloScript
+ *
+ * Core tools (15) + Graph tools (6) + IDE tools (9) + Brittney-Lite AI (4) = 34 tools
  */
-export const tools: Tool[] = [
+export const coreTools: Tool[] = [
   // === PARSING ===
   {
     name: 'parse_hs',
-    description: 'Parse HoloScript (.hs) or HoloScript Plus (.hsplus) code into an AST. Use for understanding structure of existing code.',
+    description:
+      'Parse HoloScript (.hs) or HoloScript Plus (.hsplus) code into an AST. Use for understanding structure of existing code.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -36,7 +43,8 @@ export const tools: Tool[] = [
   },
   {
     name: 'parse_holo',
-    description: 'Parse a .holo composition file into an AST. Use for scene-centric declarative files with compositions.',
+    description:
+      'Parse a .holo composition file into an AST. Use for scene-centric declarative files with compositions.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -52,11 +60,12 @@ export const tools: Tool[] = [
       required: ['code'],
     },
   },
-  
+
   // === VALIDATION ===
   {
     name: 'validate_holoscript',
-    description: 'Validate HoloScript code for syntax errors, unknown traits, and best practices. Returns AI-friendly error messages with suggestions.',
+    description:
+      'Validate HoloScript code for syntax errors, unknown traits, and best practices. Returns AI-friendly error messages with suggestions.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -81,7 +90,7 @@ export const tools: Tool[] = [
       required: ['code'],
     },
   },
-  
+
   // === TRAITS ===
   {
     name: 'list_traits',
@@ -91,7 +100,18 @@ export const tools: Tool[] = [
       properties: {
         category: {
           type: 'string',
-          enum: ['interaction', 'physics', 'visual', 'networking', 'behavior', 'spatial', 'audio', 'state', 'advanced', 'all'],
+          enum: [
+            'interaction',
+            'physics',
+            'visual',
+            'networking',
+            'behavior',
+            'spatial',
+            'audio',
+            'state',
+            'advanced',
+            'all',
+          ],
           description: 'Filter by category. Defaults to all.',
         },
       },
@@ -99,7 +119,8 @@ export const tools: Tool[] = [
   },
   {
     name: 'explain_trait',
-    description: 'Get detailed documentation for a specific VR trait including parameters and example usage.',
+    description:
+      'Get detailed documentation for a specific VR trait including parameters and example usage.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -119,7 +140,8 @@ export const tools: Tool[] = [
       properties: {
         description: {
           type: 'string',
-          description: 'Description of the object (e.g., "a sword that can be picked up and thrown")',
+          description:
+            'Description of the object (e.g., "a sword that can be picked up and thrown")',
         },
         context: {
           type: 'string',
@@ -129,7 +151,7 @@ export const tools: Tool[] = [
       required: ['description'],
     },
   },
-  
+
   // === CODE GENERATION ===
   {
     name: 'generate_object',
@@ -178,7 +200,7 @@ export const tools: Tool[] = [
       required: ['description'],
     },
   },
-  
+
   // === DOCUMENTATION ===
   {
     name: 'get_syntax_reference',
@@ -188,8 +210,22 @@ export const tools: Tool[] = [
       properties: {
         topic: {
           type: 'string',
-          enum: ['composition', 'template', 'object', 'environment', 'logic', 'animation', 'physics', 'events', 'networking', 'traits', 'orb', 'spatial_group'],
-          description: 'The syntax topic to get documentation for. Prefer composition/template/object (modern) over orb/spatial_group (legacy).',
+          enum: [
+            'composition',
+            'template',
+            'object',
+            'environment',
+            'logic',
+            'animation',
+            'physics',
+            'events',
+            'networking',
+            'traits',
+            'orb',
+            'spatial_group',
+          ],
+          description:
+            'The syntax topic to get documentation for. Prefer composition/template/object (modern) over orb/spatial_group (legacy).',
         },
       },
       required: ['topic'],
@@ -256,11 +292,12 @@ export const tools: Tool[] = [
       required: ['code'],
     },
   },
-  
+
   // === RENDERING (NEW - for X/Grok integration) ===
   {
     name: 'render_preview',
-    description: 'Generate a static preview image or animated GIF of a HoloScript scene. Returns a URL that can be shared on X.',
+    description:
+      'Generate a static preview image or animated GIF of a HoloScript scene. Returns a URL that can be shared on X.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -305,7 +342,7 @@ export const tools: Tool[] = [
       required: ['code'],
     },
   },
-  
+
   // === SHARING (NEW - for X/Grok integration) ===
   {
     name: 'create_share_link',
@@ -334,7 +371,7 @@ export const tools: Tool[] = [
       required: ['code'],
     },
   },
-  
+
   // === TRANSFORMATION ===
   {
     name: 'convert_format',
@@ -362,10 +399,61 @@ export const tools: Tool[] = [
   },
 ];
 
+/**
+ * Text-to-3D pipeline tools (requires MESHY_API_KEY or TRIPO_API_KEY)
+ */
+export const textTo3DTools: Tool[] = [
+  {
+    name: 'generate_3d_object',
+    description:
+      'Generate a 3D object from a text description using AI (Meshy/Tripo). ' +
+      'Returns a .holo file with the model reference and auto-suggested traits. ' +
+      'Requires MESHY_API_KEY or TRIPO_API_KEY environment variable.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        description: {
+          type: 'string',
+          description: 'Text description of the 3D object to generate (e.g. "a glowing sword", "wooden treasure chest")',
+        },
+        provider: {
+          type: 'string',
+          enum: ['meshy', 'tripo'],
+          description: 'Which text-to-3D provider to use. Defaults to meshy.',
+        },
+        style: {
+          type: 'string',
+          enum: ['realistic', 'cartoon', 'low-poly', 'pbr'],
+          description: 'Art style for the generated model. Defaults to pbr.',
+        },
+        objectName: {
+          type: 'string',
+          description: 'Optional custom name for the generated object.',
+        },
+      },
+      required: ['description'],
+    },
+  },
+];
+
+/**
+ * All tools combined: core + graph + IDE + Brittney-Lite + text-to-3D
+ */
+export const tools: Tool[] = [
+  ...coreTools,
+  ...graphTools,
+  ...ideTools,
+  ...brittneyLiteTools,
+  ...textTo3DTools,
+];
+
 // Tool name type for type safety
-export type ToolName = typeof tools[number]['name'];
+export type ToolName = (typeof tools)[number]['name'];
 
 // Helper to get tool by name
 export function getTool(name: string): Tool | undefined {
-  return tools.find(t => t.name === name);
+  return tools.find((t) => t.name === name);
 }
+
+// Re-export tool arrays for selective registration
+export { graphTools, ideTools, brittneyLiteTools };

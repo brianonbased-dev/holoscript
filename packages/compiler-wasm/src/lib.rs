@@ -120,12 +120,76 @@ pub fn version() -> String {
 mod tests {
     use super::*;
 
+    // ===== parse() tests =====
+
     #[test]
     fn test_parse_simple_orb() {
         let source = r#"orb test { color: "red" }"#;
         let result = parse(source);
         assert!(!result.contains("error"));
     }
+
+    #[test]
+    fn test_parse_composition() {
+        let source = r#"
+            composition "VR Game" {
+                environment {
+                    skybox: "nebula"
+                    ambient_light: 0.5
+                }
+                orb player {
+                    @grabbable
+                    position: [0, 1.6, 0]
+                }
+            }
+        "#;
+        let result = parse(source);
+        assert!(!result.contains("\"error\""));
+        assert!(result.contains("VR Game"));
+    }
+
+    #[test]
+    fn test_parse_multiple_traits() {
+        let source = r#"orb cube { @grabbable @physics @networked color: "blue" }"#;
+        let result = parse(source);
+        assert!(!result.contains("\"error\""));
+    }
+
+    #[test]
+    fn test_parse_returns_json() {
+        let source = r#"orb test { position: [1, 2, 3] }"#;
+        let result = parse(source);
+        // Should be valid JSON
+        let parsed: Result<serde_json::Value, _> = serde_json::from_str(&result);
+        assert!(parsed.is_ok(), "Result should be valid JSON: {}", result);
+    }
+
+    #[test]
+    fn test_parse_syntax_error_returns_error_json() {
+        let source = r#"orb { missing name }"#;
+        let result = parse(source);
+        assert!(result.contains("errors"));
+    }
+
+    // ===== parse_pretty() tests =====
+
+    #[test]
+    fn test_parse_pretty_formatting() {
+        let source = r#"orb test { color: "red" }"#;
+        let result = parse_pretty(source);
+        // Pretty printed JSON should have newlines
+        assert!(result.contains("\n"));
+    }
+
+    #[test]
+    fn test_parse_pretty_valid_json() {
+        let source = r#"orb cube { position: [0, 0, 0] }"#;
+        let result = parse_pretty(source);
+        let parsed: Result<serde_json::Value, _> = serde_json::from_str(&result);
+        assert!(parsed.is_ok());
+    }
+
+    // ===== validate() tests =====
 
     #[test]
     fn test_validate_valid_source() {
@@ -138,4 +202,126 @@ mod tests {
         let source = r#"orb { missing name }"#;
         assert!(!validate(source));
     }
+
+    #[test]
+    fn test_validate_empty_source() {
+        let source = "";
+        // Empty source should be valid (empty AST)
+        assert!(validate(source));
+    }
+
+    #[test]
+    fn test_validate_unbalanced_braces() {
+        let source = r#"orb test { color: "red" "#;
+        assert!(!validate(source));
+    }
+
+    // ===== validate_detailed() tests =====
+
+    #[test]
+    fn test_validate_detailed_valid() {
+        let source = r#"orb test { color: "blue" }"#;
+        let result = validate_detailed(source);
+        assert!(result.contains("\"valid\": true"));
+    }
+
+    #[test]
+    fn test_validate_detailed_invalid() {
+        let source = r#"{{{{ invalid syntax"#;
+        let result = validate_detailed(source);
+        // Either valid=false or has errors
+        let has_errors = result.contains("\"valid\": false") || result.contains("error");
+        assert!(has_errors, "Expected validation to fail for invalid syntax: {}", result);
+    }
+
+    #[test]
+    fn test_validate_detailed_error_has_location() {
+        let source = "orb { }";
+        let result = validate_detailed(source);
+        // Should include line and column info
+        assert!(result.contains("line"));
+        assert!(result.contains("column"));
+    }
+
+    // ===== version() tests =====
+
+    #[test]
+    fn test_version_returns_string() {
+        let v = version();
+        assert!(!v.is_empty());
+        // Should be semver-like
+        assert!(v.contains('.'));
+    }
+
+    // ===== Complex parsing tests =====
+
+    #[test]
+    fn test_parse_nested_objects() {
+        let source = r#"
+            composition "Nested" {
+                group "Room" {
+                    orb light { color: "white" }
+                    orb table {
+                        @collidable
+                        geometry: "cube"
+                    }
+                }
+            }
+        "#;
+        let result = parse(source);
+        assert!(!result.contains("\"error\""));
+    }
+
+    #[test]
+    fn test_parse_state_machine() {
+        let source = r#"
+            state_machine "AI" {
+                initialState: "idle"
+                states: { "idle": { entry: "wait" } }
+            }
+        "#;
+        let result = parse(source);
+        assert!(!result.contains("\"error\""));
+    }
+
+    #[test]
+    fn test_parse_template_usage() {
+        let source = r#"
+            composition "Demo" {
+                template "Cube" { geometry: "cube" color: "red" }
+                object "MyCube" using "Cube" { position: [0, 0, 0] }
+            }
+        "#;
+        let result = parse(source);
+        assert!(!result.contains("\"error\""));
+    }
+
+    #[test]
+    fn test_parse_logic_block() {
+        let source = r#"
+            composition "Game" {
+                logic {
+                    on_start: { console.log("Started") }
+                }
+            }
+        "#;
+        let result = parse(source);
+        assert!(!result.contains("\"error\""));
+    }
+
+    #[test]
+    fn test_parse_npc_dialogue() {
+        let source = r#"
+            npc "Merchant" {
+                @llm_agent
+                personality: "friendly"
+                dialogue {
+                    greeting: "Welcome to my shop!"
+                }
+            }
+        "#;
+        let result = parse(source);
+        assert!(!result.contains("\"error\""));
+    }
 }
+

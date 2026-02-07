@@ -16,8 +16,8 @@ import type { TraitHandler } from './TraitTypes';
 type SourceType = 'rest' | 'websocket' | 'graphql' | 'mqtt' | 'custom';
 
 interface PropertyBinding {
-  source_path: string;  // JSON path in source data
-  target_property: string;  // Property on node
+  source_path: string; // JSON path in source data
+  target_property: string; // Property on node
   transform?: 'none' | 'scale' | 'normalize' | 'map' | 'custom';
   transform_params?: Record<string, unknown>;
 }
@@ -32,10 +32,10 @@ interface DataBindingState {
 }
 
 interface DataBindingConfig {
-  source: string;  // URL or connection string
+  source: string; // URL or connection string
   source_type: SourceType;
   bindings: PropertyBinding[];
-  refresh_rate: number;  // ms, 0 = push only
+  refresh_rate: number; // ms, 0 = push only
   interpolation: boolean;
   interpolation_speed: number;
   auth_header: string;
@@ -70,7 +70,7 @@ export const dataBindingHandler: TraitHandler<DataBindingConfig> = {
       errorCount: 0,
     };
     (node as any).__dataBindingState = state;
-    
+
     if (config.source) {
       connectDataSource(node, state, config, context);
     }
@@ -87,13 +87,16 @@ export const dataBindingHandler: TraitHandler<DataBindingConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__dataBindingState as DataBindingState;
     if (!state || !state.isConnected) return;
-    
+
     // Poll for REST/GraphQL sources
-    if ((config.source_type === 'rest' || config.source_type === 'graphql') && config.refresh_rate > 0) {
+    if (
+      (config.source_type === 'rest' || config.source_type === 'graphql') &&
+      config.refresh_rate > 0
+    ) {
       const now = Date.now();
       if (now - state.lastRefresh >= config.refresh_rate) {
         state.lastRefresh = now;
-        
+
         context.emit?.('data_binding_fetch', {
           node,
           source: config.source,
@@ -102,7 +105,7 @@ export const dataBindingHandler: TraitHandler<DataBindingConfig> = {
         });
       }
     }
-    
+
     // Apply interpolation to bound properties
     if (config.interpolation && Object.keys(state.currentData).length > 0) {
       for (const binding of config.bindings) {
@@ -110,7 +113,8 @@ export const dataBindingHandler: TraitHandler<DataBindingConfig> = {
         if (targetValue !== undefined && typeof targetValue === 'number') {
           const currentValue = getNodeProperty(node, binding.target_property);
           if (typeof currentValue === 'number') {
-            const interpolated = currentValue + (targetValue - currentValue) * config.interpolation_speed * delta;
+            const interpolated =
+              currentValue + (targetValue - currentValue) * config.interpolation_speed * delta;
             setNodeProperty(node, binding.target_property, interpolated);
           }
         }
@@ -121,43 +125,43 @@ export const dataBindingHandler: TraitHandler<DataBindingConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__dataBindingState as DataBindingState;
     if (!state) return;
-    
+
     if (event.type === 'data_binding_connected') {
       state.isConnected = true;
       state.connectionHandle = event.handle;
       state.errorCount = 0;
-      
+
       context.emit?.('on_data_connected', { node });
     } else if (event.type === 'data_binding_data') {
       const data = event.data as Record<string, unknown>;
       state.currentData = data;
       state.lastRefresh = Date.now();
-      
+
       // Apply bindings immediately for non-interpolated values
       for (const binding of config.bindings) {
         const value = getNestedValue(data, binding.source_path);
         if (value !== undefined) {
           const transformed = applyTransform(value, binding);
-          
+
           if (!config.interpolation || typeof transformed !== 'number') {
             setNodeProperty(node, binding.target_property, transformed);
           }
         }
       }
-      
+
       context.emit?.('on_data_change', {
         node,
         data: state.currentData,
       });
     } else if (event.type === 'data_binding_error') {
       state.errorCount++;
-      
+
       context.emit?.('on_data_error', {
         node,
         error: event.error,
         errorCount: state.errorCount,
       });
-      
+
       // Attempt reconnect
       if (config.reconnect_interval > 0) {
         setTimeout(() => {
@@ -177,14 +181,14 @@ export const dataBindingHandler: TraitHandler<DataBindingConfig> = {
       });
     } else if (event.type === 'data_binding_set_source') {
       const newSource = event.source as string;
-      
+
       if (state.connectionHandle) {
         context.emit?.('data_binding_disconnect', { node });
       }
-      
+
       state.isConnected = false;
       state.currentData = {};
-      
+
       connectDataSource(node, state, { ...config, source: newSource }, context);
     } else if (event.type === 'data_binding_query') {
       context.emit?.('data_binding_info', {
@@ -217,12 +221,12 @@ function connectDataSource(
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   const parts = path.split('.');
   let current: unknown = obj;
-  
+
   for (const part of parts) {
     if (current === null || current === undefined) return undefined;
     current = (current as Record<string, unknown>)[part];
   }
-  
+
   return current;
 }
 
@@ -238,19 +242,19 @@ function applyTransform(value: unknown, binding: PropertyBinding): unknown {
   if (!binding.transform || binding.transform === 'none') {
     return value;
   }
-  
+
   const params = binding.transform_params || {};
-  
+
   switch (binding.transform) {
     case 'scale':
       if (typeof value === 'number') {
-        return value * (params.factor as number || 1);
+        return value * ((params.factor as number) || 1);
       }
       break;
     case 'normalize':
       if (typeof value === 'number') {
-        const min = params.min as number || 0;
-        const max = params.max as number || 1;
+        const min = (params.min as number) || 0;
+        const max = (params.max as number) || 1;
         return (value - min) / (max - min);
       }
       break;
@@ -261,7 +265,7 @@ function applyTransform(value: unknown, binding: PropertyBinding): unknown {
       }
       break;
   }
-  
+
   return value;
 }
 

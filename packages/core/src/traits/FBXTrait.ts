@@ -271,19 +271,21 @@ function createInitialState(): FBXState {
 
 function getUnitScaleFactor(unit: FBXConfig['unit_scale']): number {
   switch (unit) {
-    case 'cm': return 0.01;
-    case 'm': return 1.0;
-    case 'inch': return 0.0254;
-    case 'foot': return 0.3048;
-    default: return 1.0;
+    case 'cm':
+      return 0.01;
+    case 'm':
+      return 1.0;
+    case 'inch':
+      return 0.0254;
+    case 'foot':
+      return 0.3048;
+    default:
+      return 1.0;
   }
 }
 
 /** @internal */
-export function applyFBXAxisConversion(
-  config: FBXConfig,
-  position: Vector3
-): Vector3 {
+export function applyFBXAxisConversion(config: FBXConfig, position: Vector3): Vector3 {
   // Convert from FBX coordinate system to HoloScript (Y-up, -Z forward)
   if (config.up_axis === 'z') {
     return [(position as any)[0], (position as any)[2], -(position as any)[1]];
@@ -343,12 +345,7 @@ export const fbxHandler: TraitHandler<FBXConfig> = {
     delete (node as any).__fbxState;
   },
 
-  onUpdate(
-    node: HSPlusNode,
-    config: FBXConfig,
-    context: TraitContext,
-    delta: number
-  ) {
+  onUpdate(node: HSPlusNode, config: FBXConfig, context: TraitContext, delta: number) {
     const state = (node as any).__fbxState as FBXState | undefined;
     if (!state || !state.isLoaded) return;
 
@@ -386,12 +383,7 @@ export const fbxHandler: TraitHandler<FBXConfig> = {
     }
   },
 
-  onEvent(
-    node: HSPlusNode,
-    config: FBXConfig,
-    context: TraitContext,
-    event: any
-  ) {
+  onEvent(node: HSPlusNode, config: FBXConfig, context: TraitContext, event: any) {
     const state = (node as any).__fbxState as FBXState | undefined;
     if (!state) return;
 
@@ -477,7 +469,8 @@ async function loadFBXAsset(
     const mockData = createMockFBXData(config);
 
     // Apply scale and axis conversion
-    const _scale = config.scale_factor * (config.unit_conversion ? getUnitScaleFactor(config.unit_scale) : 1);
+    const _scale =
+      config.scale_factor * (config.unit_conversion ? getUnitScaleFactor(config.unit_scale) : 1);
     void _scale; // Used in production for transform scaling
 
     // Update state with loaded data
@@ -498,20 +491,20 @@ async function loadFBXAsset(
 
     // Filter animations if needed
     if (config.animation_filter) {
-      state.animationStacks = state.animationStacks.filter(
-        stack => filterAnimationName(stack.name, config.animation_filter)
+      state.animationStacks = state.animationStacks.filter((stack) =>
+        filterAnimationName(stack.name, config.animation_filter)
       );
     }
 
     // Remove namespaces if configured
     if (config.remove_namespace) {
-      state.animationStacks = state.animationStacks.map(stack => ({
+      state.animationStacks = state.animationStacks.map((stack) => ({
         ...stack,
         name: removeNamespace(stack.name),
       }));
 
       if (state.skeleton) {
-        state.skeleton.bones = state.skeleton.bones.map(bone => ({
+        state.skeleton.bones = state.skeleton.bones.map((bone) => ({
           ...bone,
           name: removeNamespace(bone.name),
           parent: bone.parent ? removeNamespace(bone.parent) : null,
@@ -540,11 +533,13 @@ async function loadFBXAsset(
       node,
       source: config.source,
       meshCount: state.meshCount,
-      animationStacks: state.animationStacks.map(s => s.name),
-      skeleton: state.skeleton ? {
-        boneCount: state.skeleton.bones.length,
-        rootBone: state.skeleton.rootBone,
-      } : null,
+      animationStacks: state.animationStacks.map((s) => s.name),
+      skeleton: state.skeleton
+        ? {
+            boneCount: state.skeleton.bones.length,
+            rootBone: state.skeleton.rootBone,
+          }
+        : null,
       boundingBox: state.boundingBox,
       metadata: state.metadata,
     });
@@ -597,41 +592,73 @@ function createMockFBXData(config: FBXConfig): {
   hierarchy: FBXNode[];
   boundingBox: FBXState['boundingBox'];
 } {
-  const animationStacks: FBXAnimationStack[] = config.import_animations ? [
-    {
-      name: config.animation_stack || 'Take 001',
-      duration: 2.0,
-      frameRate: 30,
-      startFrame: 0,
-      endFrame: 60,
-      layers: [{ name: 'BaseLayer', weight: 1, blendMode: 'override' }],
-    },
-    {
-      name: 'idle',
-      duration: 3.0,
-      frameRate: 30,
-      startFrame: 0,
-      endFrame: 90,
-      layers: [{ name: 'BaseLayer', weight: 1, blendMode: 'override' }],
-    },
-    {
-      name: 'walk',
-      duration: 1.0,
-      frameRate: 30,
-      startFrame: 0,
-      endFrame: 30,
-      layers: [{ name: 'BaseLayer', weight: 1, blendMode: 'override' }],
-    },
-  ] : [];
+  const animationStacks: FBXAnimationStack[] = config.import_animations
+    ? [
+        {
+          name: config.animation_stack || 'Take 001',
+          duration: 2.0,
+          frameRate: 30,
+          startFrame: 0,
+          endFrame: 60,
+          layers: [{ name: 'BaseLayer', weight: 1, blendMode: 'override' }],
+        },
+        {
+          name: 'idle',
+          duration: 3.0,
+          frameRate: 30,
+          startFrame: 0,
+          endFrame: 90,
+          layers: [{ name: 'BaseLayer', weight: 1, blendMode: 'override' }],
+        },
+        {
+          name: 'walk',
+          duration: 1.0,
+          frameRate: 30,
+          startFrame: 0,
+          endFrame: 30,
+          layers: [{ name: 'BaseLayer', weight: 1, blendMode: 'override' }],
+        },
+      ]
+    : [];
 
   const skeleton: FBXSkeleton | null = {
     rootBone: 'Hips',
     bones: [
-      { name: 'Hips', parent: null, index: 0, length: 0.1, transform: { position: [0, 1, 0], rotation: [0, 0, 0], scale: [1, 1, 1] } },
-      { name: 'Spine', parent: 'Hips', index: 1, length: 0.2, transform: { position: [0, 0.1, 0], rotation: [0, 0, 0], scale: [1, 1, 1] } },
-      { name: 'Spine1', parent: 'Spine', index: 2, length: 0.2, transform: { position: [0, 0.2, 0], rotation: [0, 0, 0], scale: [1, 1, 1] } },
-      { name: 'Spine2', parent: 'Spine1', index: 3, length: 0.2, transform: { position: [0, 0.2, 0], rotation: [0, 0, 0], scale: [1, 1, 1] } },
-      { name: 'Head', parent: 'Spine2', index: 4, length: 0.15, transform: { position: [0, 0.3, 0], rotation: [0, 0, 0], scale: [1, 1, 1] } },
+      {
+        name: 'Hips',
+        parent: null,
+        index: 0,
+        length: 0.1,
+        transform: { position: [0, 1, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+      },
+      {
+        name: 'Spine',
+        parent: 'Hips',
+        index: 1,
+        length: 0.2,
+        transform: { position: [0, 0.1, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+      },
+      {
+        name: 'Spine1',
+        parent: 'Spine',
+        index: 2,
+        length: 0.2,
+        transform: { position: [0, 0.2, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+      },
+      {
+        name: 'Spine2',
+        parent: 'Spine1',
+        index: 3,
+        length: 0.2,
+        transform: { position: [0, 0.2, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+      },
+      {
+        name: 'Head',
+        parent: 'Spine2',
+        index: 4,
+        length: 0.15,
+        transform: { position: [0, 0.3, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+      },
     ],
     bindPose: new Map(),
   };
@@ -641,7 +668,18 @@ function createMockFBXData(config: FBXConfig): {
     materialCount: 2,
     textureCount: config.embed_textures ? 6 : 0,
     animationStacks,
-    morphTargetNames: config.import_morphs ? ['viseme_aa', 'viseme_E', 'viseme_I', 'viseme_O', 'viseme_U', 'brow_up_L', 'brow_up_R', 'smile'] : [],
+    morphTargetNames: config.import_morphs
+      ? [
+          'viseme_aa',
+          'viseme_E',
+          'viseme_I',
+          'viseme_O',
+          'viseme_U',
+          'brow_up_L',
+          'brow_up_R',
+          'smile',
+        ]
+      : [],
     skeleton,
     textures: config.embed_textures ? ['diffuse.png', 'normal.png', 'specular.png'] : [],
     metadata: {
@@ -686,7 +724,7 @@ function playAnimation(
     layer?: number;
   } = {}
 ): void {
-  const stack = state.animationStacks.find(s => s.name === stackName);
+  const stack = state.animationStacks.find((s) => s.name === stackName);
   if (!stack) return;
 
   const playback: FBXAnimationPlayback = {
@@ -738,17 +776,21 @@ function setMorphWeight(state: FBXState, target: string, weight: number): void {
   }
 }
 
-function updateSkeletonPose(state: FBXState, context: TraitContext): void {
+function updateSkeletonPose(state: FBXState, _context: TraitContext): void {
   if (!state.skeleton) return;
 
   // Would blend animation poses based on active playbacks
   // This is a simplified stub
 }
 
-function setBoneOverride(state: FBXState, boneName: string, transform: Partial<FBXTransform>): void {
+function setBoneOverride(
+  state: FBXState,
+  boneName: string,
+  transform: Partial<FBXTransform>
+): void {
   if (!state.skeleton) return;
 
-  const bone = state.skeleton.bones.find(b => b.name === boneName);
+  const bone = state.skeleton.bones.find((b) => b.name === boneName);
   if (bone) {
     if (transform.position) bone.transform.position = transform.position;
     if (transform.rotation) bone.transform.rotation = transform.rotation;
@@ -760,7 +802,7 @@ function clearBoneOverride(state: FBXState, boneName?: string): void {
   if (!state.skeleton) return;
 
   if (boneName) {
-    const bone = state.skeleton.bones.find(b => b.name === boneName);
+    const bone = state.skeleton.bones.find((b) => b.name === boneName);
     const bindPose = state.skeleton.bindPose.get(boneName);
     if (bone && bindPose) {
       bone.transform = { ...bindPose };
@@ -799,7 +841,7 @@ export function isFBXLoaded(node: HSPlusNode): boolean {
  */
 export function getFBXAnimationStacks(node: HSPlusNode): string[] {
   const state = getFBXState(node);
-  return state?.animationStacks.map(s => s.name) ?? [];
+  return state?.animationStacks.map((s) => s.name) ?? [];
 }
 
 /**
@@ -807,7 +849,7 @@ export function getFBXAnimationStacks(node: HSPlusNode): string[] {
  */
 export function getFBXBoneNames(node: HSPlusNode): string[] {
   const state = getFBXState(node);
-  return state?.skeleton?.bones.map(b => b.name) ?? [];
+  return state?.skeleton?.bones.map((b) => b.name) ?? [];
 }
 
 /**

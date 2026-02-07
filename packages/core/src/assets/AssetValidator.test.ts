@@ -384,9 +384,7 @@ describe('AssetValidator - Dependency Rules', () => {
 
   it('should error on required dependencies without fallback', () => {
     const asset = createValidAsset({
-      dependencies: [
-        { assetId: 'missing-texture', type: 'texture', required: true },
-      ],
+      dependencies: [{ assetId: 'missing-texture', type: 'texture', required: true }],
     });
 
     const result = validator.validate(asset);
@@ -409,9 +407,7 @@ describe('AssetValidator - Dependency Rules', () => {
 
   it('should pass for optional dependencies without fallback', () => {
     const asset = createValidAsset({
-      dependencies: [
-        { assetId: 'optional-texture', type: 'texture', required: false },
-      ],
+      dependencies: [{ assetId: 'optional-texture', type: 'texture', required: false }],
     });
 
     const result = validator.validate(asset);

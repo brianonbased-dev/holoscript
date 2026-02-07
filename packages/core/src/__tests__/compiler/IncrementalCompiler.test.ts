@@ -52,9 +52,7 @@ describe('IncrementalCompiler', () => {
     });
 
     it('should detect added objects', () => {
-      const oldComposition = createComposition([
-        createObject('Cube', { mesh: 'cube' }),
-      ]);
+      const oldComposition = createComposition([createObject('Cube', { mesh: 'cube' })]);
       const newComposition = createComposition([
         createObject('Cube', { mesh: 'cube' }),
         createObject('Sphere', { mesh: 'sphere' }),
@@ -74,9 +72,7 @@ describe('IncrementalCompiler', () => {
         createObject('Cube', { mesh: 'cube' }),
         createObject('Sphere', { mesh: 'sphere' }),
       ]);
-      const newComposition = createComposition([
-        createObject('Cube', { mesh: 'cube' }),
-      ]);
+      const newComposition = createComposition([createObject('Cube', { mesh: 'cube' })]);
 
       const result = compiler.diff(oldComposition, newComposition);
 
@@ -117,18 +113,14 @@ describe('IncrementalCompiler', () => {
     });
 
     it('should detect property additions', () => {
-      const oldComposition = createComposition([
-        createObject('Cube', { mesh: 'cube' }),
-      ]);
+      const oldComposition = createComposition([createObject('Cube', { mesh: 'cube' })]);
       const newComposition = createComposition([
         createObject('Cube', { mesh: 'cube', color: '#ff0000' }),
       ]);
 
       const result = compiler.diff(oldComposition, newComposition);
 
-      const colorChange = result.changes.find(
-        c => c.nodeName === 'color' && c.type === 'added'
-      );
+      const colorChange = result.changes.find((c) => c.nodeName === 'color' && c.type === 'added');
       expect(colorChange).toBeDefined();
     });
 
@@ -136,14 +128,12 @@ describe('IncrementalCompiler', () => {
       const oldComposition = createComposition([
         createObject('Cube', { mesh: 'cube', color: '#ff0000' }),
       ]);
-      const newComposition = createComposition([
-        createObject('Cube', { mesh: 'cube' }),
-      ]);
+      const newComposition = createComposition([createObject('Cube', { mesh: 'cube' })]);
 
       const result = compiler.diff(oldComposition, newComposition);
 
       const colorChange = result.changes.find(
-        c => c.nodeName === 'color' && c.type === 'removed'
+        (c) => c.nodeName === 'color' && c.type === 'removed'
       );
       expect(colorChange).toBeDefined();
     });
@@ -166,7 +156,7 @@ describe('IncrementalCompiler', () => {
       const result = compiler.diff(oldComposition, newComposition);
 
       const traitChange = result.changes.find(
-        c => c.nodeName === 'physics' && c.type === 'added'
+        (c) => c.nodeName === 'physics' && c.type === 'added'
       );
       expect(traitChange).toBeDefined();
     });
@@ -200,7 +190,7 @@ describe('IncrementalCompiler', () => {
 
       expect(result.hasChanges).toBe(true);
       const addedChild = result.changes.find(
-        c => c.nodeName === 'NewChild' && c.type === 'added'
+        (c) => c.nodeName === 'NewChild' && c.type === 'added'
       );
       expect(addedChild).toBeDefined();
     });
@@ -322,9 +312,7 @@ describe('IncrementalCompiler', () => {
     });
 
     it('should force recompile specified objects', () => {
-      const composition = createComposition([
-        createObject('Cube', { mesh: 'cube' }),
-      ]);
+      const composition = createComposition([createObject('Cube', { mesh: 'cube' })]);
 
       const mockCompile = (obj: HoloObject) => `function ${obj.name}() {}`;
 
@@ -342,9 +330,7 @@ describe('IncrementalCompiler', () => {
 
   describe('reset', () => {
     it('should clear all state', () => {
-      const composition = createComposition([
-        createObject('Cube', { mesh: 'cube' }),
-      ]);
+      const composition = createComposition([createObject('Cube', { mesh: 'cube' })]);
       compiler.compile(composition, () => 'code');
       compiler.saveState(new Map([['Test', { x: 1 }]]));
       compiler.updateDependencies('A', ['B']);
@@ -413,7 +399,7 @@ describe('IncrementalCompiler', () => {
 
       // Should have a trait modification change
       const traitChange = result.changes.find(
-        c => c.nodeName === 'physics' && c.type === 'modified'
+        (c) => c.nodeName === 'physics' && c.type === 'modified'
       );
       expect(traitChange).toBeDefined();
     });
@@ -454,7 +440,7 @@ describe('IncrementalCompiler', () => {
 
       expect(result.hasChanges).toBe(true);
       // grabbable should be unchanged, physics config should be modified
-      const physicsChange = result.changes.find(c => c.nodeName === 'physics');
+      const physicsChange = result.changes.find((c) => c.nodeName === 'physics');
       expect(physicsChange).toBeDefined();
       expect(physicsChange!.type).toBe('modified');
     });
@@ -477,7 +463,7 @@ describe('IncrementalCompiler', () => {
       const result = compiler.diff(oldComposition, newComposition);
 
       expect(result.hasChanges).toBe(true);
-      const physicsChange = result.changes.find(c => c.nodeName === 'physics');
+      const physicsChange = result.changes.find((c) => c.nodeName === 'physics');
       expect(physicsChange).toBeDefined();
       expect(physicsChange!.type).toBe('added');
     });
@@ -500,7 +486,7 @@ describe('IncrementalCompiler', () => {
       const result = compiler.diff(oldComposition, newComposition);
 
       expect(result.hasChanges).toBe(true);
-      const physicsChange = result.changes.find(c => c.nodeName === 'physics');
+      const physicsChange = result.changes.find((c) => c.nodeName === 'physics');
       expect(physicsChange).toBeDefined();
       expect(physicsChange!.type).toBe('removed');
     });
@@ -523,7 +509,7 @@ describe('IncrementalCompiler', () => {
       const result = compiler.diff(oldComposition, newComposition);
 
       expect(result.hasChanges).toBe(true);
-      const audioChange = result.changes.find(c => c.nodeName === 'audio');
+      const audioChange = result.changes.find((c) => c.nodeName === 'audio');
       expect(audioChange).toBeDefined();
       expect(audioChange!.type).toBe('modified');
     });
@@ -620,7 +606,8 @@ describe('IncrementalCompiler', () => {
         version: 99,
         entries: [],
         dependencies: [],
-        traitGraph: '{"version":1,"traitDependencies":[],"traitConflicts":[],"objectTraits":[],"timestamp":0}',
+        traitGraph:
+          '{"version":1,"traitDependencies":[],"traitConflicts":[],"objectTraits":[],"timestamp":0}',
         timestamp: Date.now(),
       });
 

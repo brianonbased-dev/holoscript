@@ -14,23 +14,23 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x, 20.x]
-    
+
     steps:
       - uses: actions/checkout@v6
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
-      
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      
+
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
         run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      
+
       - name: Setup pnpm cache
         uses: actions/cache@v3
         with:
@@ -38,40 +38,40 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-      
+
       - name: Install dependencies
         run: pnpm install
-      
+
       - name: Run tests
         run: pnpm test
         env:
           NODE_OPTIONS: --max-old-space-size=4096
-      
+
       - name: Build packages
         run: pnpm build
-  
+
   publish:
     needs: test
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 20.x
           registry-url: 'https://registry.npmjs.org'
-      
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      
+
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
         run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      
+
       - name: Setup pnpm cache
         uses: actions/cache@v3
         with:
@@ -79,34 +79,34 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-      
+
       - name: Install dependencies
         run: pnpm install
-      
+
       - name: Build packages
         run: pnpm build
-      
+
       - name: Publish @holoscript/core
         run: |
           cd packages/core
           pnpm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
+
       - name: Publish @holoscript/cli
         run: |
           cd packages/cli
           pnpm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
+
       - name: Publish @holoscript/infinityassistant
         run: |
           cd packages/infinityassistant
           pnpm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:

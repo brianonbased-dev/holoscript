@@ -35,7 +35,7 @@ interface PointCloudConfig {
   lod: boolean;
   lod_levels: number;
   streaming: boolean;
-  chunk_size: number;  // Points per chunk
+  chunk_size: number; // Points per chunk
   format: PointFormat;
   intensity_range: [number, number];
   height_range: [number, number];
@@ -76,7 +76,7 @@ export const pointCloudHandler: TraitHandler<PointCloudConfig> = {
       octreeHandle: null,
     };
     (node as any).__pointCloudState = state;
-    
+
     if (config.source) {
       loadPointCloud(node, state, config, context);
     }
@@ -90,10 +90,10 @@ export const pointCloudHandler: TraitHandler<PointCloudConfig> = {
     delete (node as any).__pointCloudState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__pointCloudState as PointCloudState;
     if (!state || !state.isLoaded) return;
-    
+
     // Update LOD based on camera distance if enabled
     if (config.lod) {
       const camera = context.camera;
@@ -108,16 +108,16 @@ export const pointCloudHandler: TraitHandler<PointCloudConfig> = {
         const dy = camera.position.y - center[1];
         const dz = camera.position.z - center[2];
         const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        
+
         // Calculate LOD level based on distance
         const lodLevel = Math.min(
           config.lod_levels - 1,
-          Math.floor(distance / 10)  // Adjust divisor for LOD sensitivity
+          Math.floor(distance / 10) // Adjust divisor for LOD sensitivity
         );
-        
+
         if (lodLevel !== state.lodLevel) {
           state.lodLevel = lodLevel;
-          
+
           context.emit?.('point_cloud_set_lod', {
             node,
             level: lodLevel,
@@ -130,7 +130,7 @@ export const pointCloudHandler: TraitHandler<PointCloudConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__pointCloudState as PointCloudState;
     if (!state) return;
-    
+
     if (event.type === 'point_cloud_loaded') {
       state.isLoading = false;
       state.isLoaded = true;
@@ -138,7 +138,7 @@ export const pointCloudHandler: TraitHandler<PointCloudConfig> = {
       state.boundingBox = event.boundingBox as typeof state.boundingBox;
       state.memoryUsage = event.memoryUsage as number;
       state.octreeHandle = event.octree;
-      
+
       context.emit?.('on_point_cloud_loaded', {
         node,
         pointCount: state.pointCount,
@@ -173,7 +173,7 @@ export const pointCloudHandler: TraitHandler<PointCloudConfig> = {
       });
     } else if (event.type === 'point_cloud_filter') {
       const filter = event.filter as { classification?: number[]; heightRange?: [number, number] };
-      
+
       context.emit?.('point_cloud_apply_filter', {
         node,
         classification: filter.classification,
@@ -188,12 +188,12 @@ export const pointCloudHandler: TraitHandler<PointCloudConfig> = {
       }
       state.isLoaded = false;
       state.pointCount = 0;
-      
+
       loadPointCloud(node, state, { ...config, source: newSource }, context);
     } else if (event.type === 'point_cloud_pick') {
       const screenX = event.x as number;
       const screenY = event.y as number;
-      
+
       context.emit?.('point_cloud_ray_pick', {
         node,
         screenX,
@@ -222,7 +222,7 @@ function loadPointCloud(
   context: { emit?: (event: string, data: unknown) => void }
 ): void {
   state.isLoading = true;
-  
+
   context.emit?.('point_cloud_load', {
     node,
     source: config.source,

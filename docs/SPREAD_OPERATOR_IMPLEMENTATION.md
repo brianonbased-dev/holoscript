@@ -88,15 +88,18 @@ orb item {
 **File**: `packages/core/src/parser/HoloScriptPlusParser.ts`
 
 #### Removed:
+
 - TODO comment (line ~566): "Implement Spread Operator"
 
 #### Enhanced:
+
 1. **`parseArray()` method**: Now recognizes `SPREAD` token and creates spread AST nodes
 2. **`parseObject()` method**: Enhanced error handling for spread expressions
 3. **`parseUnary()` method**: Already handled spread token recognition (no changes needed)
 4. **`parseExpression()` pipeline**: Unchanged - spreads integrate via parseUnary()
 
 #### Token Recognition:
+
 - `SPREAD` token ('...') already recognized by lexer
 - No lexer changes required
 
@@ -109,9 +112,9 @@ Updated `SpreadExpression` interface:
 ```typescript
 export interface SpreadExpression extends ASTNode {
   type: 'spread';
-  argument: unknown;           // What's being spread
-  target?: string;             // Backward compatibility
-  isValid?: boolean;           // Set by validator
+  argument: unknown; // What's being spread
+  target?: string; // Backward compatibility
+  isValid?: boolean; // Set by validator
   targetType?: 'object' | 'array' | 'template' | 'unknown';
 }
 ```
@@ -121,6 +124,7 @@ export interface SpreadExpression extends ASTNode {
 **File**: `packages/core/src/HoloScriptSpreadValidator.ts` (NEW)
 
 Provides:
+
 - `SpreadOperatorValidator` class for contextual validation
 - `validateArraySpread()` - ensures spread target is array-like
 - `validateObjectSpread()` - ensures spread target is object-like
@@ -133,6 +137,7 @@ Provides:
 Spreads are represented as objects within parent containers:
 
 **In Arrays:**
+
 ```
 children: [
   { type: 'spread', argument: { __ref: 'baseArray' } },
@@ -141,6 +146,7 @@ children: [
 ```
 
 **In Objects:**
+
 ```
 obj: {
   __spread_0: { type: 'spread', argument: { __ref: 'baseTemplate' } },
@@ -155,6 +161,7 @@ The `__spread_N` key naming preserves spread position information.
 **File**: `packages/core/src/parser/SpreadOperator.test.ts` (NEW)
 
 Covers:
+
 - Object spread (4 tests)
 - Array spread (5 tests)
 - Template and property spread (3 tests)
@@ -173,7 +180,7 @@ Covers:
 ✅ Spreads with function calls (`...getArray()`)  
 ✅ Error handling for invalid spreads  
 ✅ Error recovery for continued parsing  
-✅ Trailing commas after spreads  
+✅ Trailing commas after spreads
 
 ## Usage Examples
 
@@ -205,7 +212,7 @@ composition "Scene" {
     title: "My Game"
     version: "1.0.0"
   }
-  
+
   orb player {
     ...ActorTemplate
     @networked
@@ -226,7 +233,7 @@ environment {
     density: 0.005
     color: "#e0e0e0"
   }
-  
+
   lights: [
     ...ambientLights
     ...directionalLights
@@ -246,7 +253,7 @@ environment {
 The validator understands three primary contexts:
 
 - **Array Context**: Spreads must resolve to arrays, collections, or unknown types
-- **Object Context**: Spreads must resolve to objects, templates, or unknown types  
+- **Object Context**: Spreads must resolve to objects, templates, or unknown types
 - **Trait Config Context**: Spreads must resolve to objects or configuration objects
 
 ### Error Messages
@@ -260,6 +267,7 @@ The validator understands three primary contexts:
 ### Permissive Mode
 
 Unknown types are accepted (conservative) to avoid false positives. This allows for:
+
 - Future type inference improvements
 - Dynamic references not resolvable at parse time
 - Forward compatibility with new features
@@ -277,6 +285,7 @@ Unknown types are accepted (conservative) to avoid false positives. This allows 
 Existing HoloScript code without spreads is unaffected.
 
 ### Before (Still Supported)
+
 ```holoscript
 orb item {
   color: "blue"
@@ -285,6 +294,7 @@ orb item {
 ```
 
 ### After (With Spreads)
+
 ```holoscript
 orb item {
   ...BaseProperties  // New feature

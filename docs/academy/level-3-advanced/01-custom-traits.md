@@ -5,6 +5,7 @@ In this advanced lesson, you'll learn how to create your own traits - extending 
 ## Learning Objectives
 
 By the end of this lesson, you will:
+
 - Understand the trait system architecture
 - Create custom traits from scratch
 - Implement trait lifecycle methods
@@ -27,6 +28,7 @@ Traits in HoloScript follow a component-based architecture:
 ```
 
 Each trait:
+
 - Has its own **state** (configuration and runtime data)
 - Implements **lifecycle methods** (init, update, destroy)
 - Can emit and listen to **events**
@@ -41,12 +43,7 @@ Let's create a `@health` trait for damageable objects:
 Create `src/traits/HealthTrait.ts`:
 
 ```typescript
-import {
-  TraitDefinition,
-  TraitContext,
-  TraitConfig,
-  TraitEvent
-} from '@holoscript/core';
+import { TraitDefinition, TraitContext, TraitConfig, TraitEvent } from '@holoscript/core';
 
 // Configuration schema
 interface HealthConfig extends TraitConfig {
@@ -80,9 +77,9 @@ export const HealthTrait: TraitDefinition<HealthConfig, HealthState, HealthEvent
   // Default configuration
   defaultConfig: {
     maxHealth: 100,
-    currentHealth: undefined,  // Defaults to maxHealth
-    regeneration: 0,           // HP per second
-    invulnerableTime: 0.5      // Seconds after damage
+    currentHealth: undefined, // Defaults to maxHealth
+    regeneration: 0, // HP per second
+    invulnerableTime: 0.5, // Seconds after damage
   },
 
   // Initialize the trait
@@ -94,7 +91,7 @@ export const HealthTrait: TraitDefinition<HealthConfig, HealthState, HealthEvent
       maxHealth: config.maxHealth,
       isDead: false,
       isInvulnerable: false,
-      lastDamageTime: 0
+      lastDamageTime: 0,
     };
   },
 
@@ -112,10 +109,7 @@ export const HealthTrait: TraitDefinition<HealthConfig, HealthState, HealthEvent
     if (ctx.config.regeneration > 0 && !state.isDead) {
       const regenAmount = ctx.config.regeneration * deltaTime;
       if (state.currentHealth < state.maxHealth) {
-        state.currentHealth = Math.min(
-          state.maxHealth,
-          state.currentHealth + regenAmount
-        );
+        state.currentHealth = Math.min(state.maxHealth, state.currentHealth + regenAmount);
       }
     }
   },
@@ -135,7 +129,7 @@ export const HealthTrait: TraitDefinition<HealthConfig, HealthState, HealthEvent
       ctx.emit('health:damaged', {
         amount: actualDamage,
         source,
-        newHealth: state.currentHealth
+        newHealth: state.currentHealth,
       });
 
       if (state.currentHealth <= 0) {
@@ -156,7 +150,7 @@ export const HealthTrait: TraitDefinition<HealthConfig, HealthState, HealthEvent
 
       ctx.emit('health:healed', {
         amount: actualHeal,
-        newHealth: state.currentHealth
+        newHealth: state.currentHealth,
       });
 
       return actualHeal;
@@ -183,13 +177,13 @@ export const HealthTrait: TraitDefinition<HealthConfig, HealthState, HealthEvent
 
     isDead(ctx, state): boolean {
       return state.isDead;
-    }
+    },
   },
 
   // Cleanup when trait is removed
   destroy(ctx: TraitContext<HealthConfig>, state: HealthState): void {
     // Cleanup resources if needed
-  }
+  },
 };
 
 export default HealthTrait;
@@ -204,9 +198,7 @@ import { defineConfig } from '@holoscript/cli';
 import { HealthTrait } from './src/traits/HealthTrait';
 
 export default defineConfig({
-  traits: [
-    HealthTrait
-  ]
+  traits: [HealthTrait],
 });
 ```
 
@@ -268,7 +260,7 @@ Require other traits:
 ```typescript
 export const ArmorTrait: TraitDefinition = {
   name: 'armor',
-  requires: ['health'],  // Must have @health trait
+  requires: ['health'], // Must have @health trait
 
   init(ctx) {
     // Access health trait
@@ -279,7 +271,7 @@ export const ArmorTrait: TraitDefinition = {
       const reduction = ctx.config.damageReduction;
       return amount * (1 - reduction);
     });
-  }
+  },
 };
 ```
 
@@ -313,19 +305,15 @@ export const HealthTrait: TraitDefinition = {
   // Define which state syncs
   networked: {
     syncState: ['currentHealth', 'isDead'],
-    ownerAuthority: true,  // Only owner can modify
-    interpolate: true
+    ownerAuthority: true, // Only owner can modify
+    interpolate: true,
   },
 
   // Network-specific methods
   onNetworkSync(ctx, state, remoteState) {
     // Smooth interpolation
-    state.currentHealth = lerp(
-      state.currentHealth,
-      remoteState.currentHealth,
-      0.1
-    );
-  }
+    state.currentHealth = lerp(state.currentHealth, remoteState.currentHealth, 0.1);
+  },
 };
 ```
 
@@ -388,6 +376,7 @@ orb player {
 ## Exercise: Create a "Collectible" Trait
 
 Build a `@collectible` trait that:
+
 1. Makes objects collectible by the player
 2. Plays a collection sound
 3. Adds to an inventory system
@@ -402,6 +391,7 @@ Build a `@collectible` trait that:
 ## Summary
 
 In this lesson, you learned:
+
 - The trait architecture and lifecycle
 - Creating traits with TypeScript
 - Implementing state, methods, and events

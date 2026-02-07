@@ -5,6 +5,7 @@ Now that you understand the basics of traits, let's explore advanced usage patte
 ## Learning Objectives
 
 By the end of this lesson, you will:
+
 - Combine multiple traits effectively
 - Configure traits with complex options
 - Understand trait precedence and conflicts
@@ -232,13 +233,13 @@ orb eventfulObject {
 
 ### Trait Costs
 
-| Trait | CPU Impact | Network Impact |
-|-------|------------|----------------|
-| @physics | High | Medium (if synced) |
-| @networked | Low | High |
-| @animated | Medium | Low |
-| @grabbable | Low | Low |
-| @collidable | Low-Medium | None |
+| Trait       | CPU Impact | Network Impact     |
+| ----------- | ---------- | ------------------ |
+| @physics    | High       | Medium (if synced) |
+| @networked  | Low        | High               |
+| @animated   | Medium     | Low                |
+| @grabbable  | Low        | Low                |
+| @collidable | Low-Medium | None               |
 
 ### Optimization Tips
 
@@ -266,6 +267,7 @@ group debrisGroup {
 ## Exercise: Build a Physics Puzzle
 
 Create a puzzle where the user must:
+
 1. Stack three physics cubes
 2. Balance them for 3 seconds
 3. Trigger a victory effect
@@ -299,6 +301,7 @@ composition "Stacking Puzzle" {
 ## Summary
 
 In this lesson, you learned:
+
 - How to configure traits with complex options
 - Combining multiple traits effectively
 - Trait precedence and conflict resolution

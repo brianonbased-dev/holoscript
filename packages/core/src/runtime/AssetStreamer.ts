@@ -12,7 +12,7 @@ export enum StreamPriority {
   IMMEDIATE = 0,
   PREDICTIVE_HIGH = 1,
   PREDICTIVE_LOW = 2,
-  BACKGROUND = 3
+  BACKGROUND = 3,
 }
 
 /**
@@ -42,12 +42,9 @@ export interface StreamStatus {
  */
 export interface AssetStreamer {
   /** Initialize the streamer with config */
-  initialize(config: {
-    workerPoolSize?: number;
-    memoryLimitMB?: number;
-  }): Promise<void>;
+  initialize(config: { workerPoolSize?: number; memoryLimitMB?: number }): Promise<void>;
 
-  /** 
+  /**
    * Request an asset to be streamed.
    * If priority is PREDICTIVE, it will be loaded in the background.
    */

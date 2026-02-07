@@ -74,10 +74,7 @@ export class BadgeGenerator {
   /**
    * Generate a badge URL for shields.io style badges
    */
-  generateBadgeUrl(
-    packageName: string,
-    options: { style?: BadgeStyle } = {}
-  ): string {
+  generateBadgeUrl(packageName: string, options: { style?: BadgeStyle } = {}): string {
     const style = options.style || 'flat';
     const encodedName = encodeURIComponent(packageName);
     return `${this.baseUrl}/badge/${encodedName}.svg?style=${style}`;
@@ -196,7 +193,7 @@ export class BadgeGenerator {
 </div>`.trim();
   }
 
-  private generateSvgBadge(result: CertificationResult, options: BadgeOptions): string {
+  private generateSvgBadge(result: CertificationResult, _options: BadgeOptions): string {
     const width = 180;
     const height = 20;
     const labelWidth = 80;
@@ -234,11 +231,7 @@ export class BadgeGenerator {
         schemaVersion: 1,
         label: 'HoloScript',
         message: result.certified ? `Certified ${result.grade}` : 'Not Certified',
-        color: result.certified
-          ? result.grade === 'A'
-            ? 'brightgreen'
-            : 'green'
-          : 'red',
+        color: result.certified ? (result.grade === 'A' ? 'brightgreen' : 'green') : 'red',
         isError: !result.certified,
         namedLogo: 'holoscript',
         logoColor: 'white',

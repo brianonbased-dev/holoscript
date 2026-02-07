@@ -99,9 +99,9 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors.some(e => e.message.includes('Type mismatch'))).toBe(true);
+      expect(errors.some((e) => e.message.includes('Type mismatch'))).toBe(true);
     });
   });
 
@@ -232,8 +232,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
-      expect(errors.some(e => e.message.includes("Unknown source 'unknownSource'"))).toBe(true);
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
+      expect(errors.some((e) => e.message.includes("Unknown source 'unknownSource'"))).toBe(true);
     });
 
     it('should report error for unknown target in connection', () => {
@@ -253,8 +253,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
-      expect(errors.some(e => e.message.includes("Unknown target 'unknownTarget'"))).toBe(true);
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
+      expect(errors.some((e) => e.message.includes("Unknown target 'unknownTarget'"))).toBe(true);
     });
 
     it('should allow valid connections between orbs', () => {
@@ -280,7 +280,7 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
       expect(errors).toHaveLength(0);
     });
   });
@@ -301,8 +301,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
-      expect(errors.some(e => e.message.includes("Unknown variable 'unknownVar'"))).toBe(true);
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
+      expect(errors.some((e) => e.message.includes("Unknown variable 'unknownVar'"))).toBe(true);
     });
 
     it('should allow known variables in gate condition', () => {
@@ -322,8 +322,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d =>
-        d.severity === 'error' && d.message.includes('Unknown variable')
+      const errors = result.diagnostics.filter(
+        (d) => d.severity === 'error' && d.message.includes('Unknown variable')
       );
       expect(errors).toHaveLength(0);
     });
@@ -349,8 +349,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const infos = result.diagnostics.filter(d => d.severity === 'info');
-      expect(infos.some(i => i.message.includes("Type of 'value' is number"))).toBe(true);
+      const infos = result.diagnostics.filter((d) => d.severity === 'info');
+      expect(infos.some((i) => i.message.includes("Type of 'value' is number"))).toBe(true);
     });
   });
 
@@ -374,8 +374,10 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
-      expect(errors.some(e => e.message.includes("Unknown variable 'nonExistentVar'"))).toBe(true);
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
+      expect(errors.some((e) => e.message.includes("Unknown variable 'nonExistentVar'"))).toBe(
+        true
+      );
     });
   });
 
@@ -394,8 +396,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
-      expect(errors.some(e => e.message.includes('nonExistentObject'))).toBe(true);
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
+      expect(errors.some((e) => e.message.includes('nonExistentObject'))).toBe(true);
     });
 
     it('should error when spreading onto non-object type', () => {
@@ -414,8 +416,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
-      expect(errors.some(e => e.message.includes('number'))).toBe(true);
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
+      expect(errors.some((e) => e.message.includes('number'))).toBe(true);
     });
 
     it('should allow spread on object types', () => {
@@ -435,7 +437,7 @@ describe('HoloScriptTypeChecker', () => {
 
       const result = checker.check(ast);
       const spreadErrors = result.diagnostics.filter(
-        d => d.severity === 'error' && d.message.includes('spread')
+        (d) => d.severity === 'error' && d.message.includes('spread')
       );
       expect(spreadErrors).toHaveLength(0);
     });
@@ -456,8 +458,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
-      expect(errors.some(e => e.message.includes('subject'))).toBe(true);
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
+      expect(errors.some((e) => e.message.includes('subject'))).toBe(true);
     });
 
     it('should report error for match with no cases', () => {
@@ -476,8 +478,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
-      expect(errors.some(e => e.message.includes('case'))).toBe(true);
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
+      expect(errors.some((e) => e.message.includes('case'))).toBe(true);
     });
 
     it('should warn about duplicate case patterns', () => {
@@ -499,8 +501,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const warnings = result.diagnostics.filter(d => d.severity === 'warning');
-      expect(warnings.some(w => w.message.toLowerCase().includes('duplicate'))).toBe(true);
+      const warnings = result.diagnostics.filter((d) => d.severity === 'warning');
+      expect(warnings.some((w) => w.message.toLowerCase().includes('duplicate'))).toBe(true);
     });
 
     it('should warn about unreachable code after wildcard', () => {
@@ -522,8 +524,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const warnings = result.diagnostics.filter(d => d.severity === 'warning');
-      expect(warnings.some(w => w.message.toLowerCase().includes('unreachable'))).toBe(true);
+      const warnings = result.diagnostics.filter((d) => d.severity === 'warning');
+      expect(warnings.some((w) => w.message.toLowerCase().includes('unreachable'))).toBe(true);
     });
 
     it('should check exhaustiveness for union types', () => {
@@ -549,8 +551,8 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
-      expect(errors.some(e => e.message.toLowerCase().includes('exhaustive'))).toBe(true);
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
+      expect(errors.some((e) => e.message.toLowerCase().includes('exhaustive'))).toBe(true);
     });
 
     it('should accept exhaustive match with wildcard fallback', () => {
@@ -575,7 +577,7 @@ describe('HoloScriptTypeChecker', () => {
 
       const result = checker.check(ast);
       const exhaustivenessErrors = result.diagnostics.filter(
-        d => d.severity === 'error' && d.message.toLowerCase().includes('exhaustive')
+        (d) => d.severity === 'error' && d.message.toLowerCase().includes('exhaustive')
       );
       expect(exhaustivenessErrors).toHaveLength(0);
     });
@@ -686,7 +688,7 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      expect(result.diagnostics.some(d => d.code === 'E001')).toBe(true);
+      expect(result.diagnostics.some((d) => d.code === 'E001')).toBe(true);
     });
 
     it('should use E002 for unknown connection target', () => {
@@ -706,7 +708,7 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      expect(result.diagnostics.some(d => d.code === 'E002')).toBe(true);
+      expect(result.diagnostics.some((d) => d.code === 'E002')).toBe(true);
     });
 
     it('should use E003 for unknown variable in gate', () => {
@@ -719,7 +721,7 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      expect(result.diagnostics.some(d => d.code === 'E003')).toBe(true);
+      expect(result.diagnostics.some((d) => d.code === 'E003')).toBe(true);
     });
   });
 
@@ -752,7 +754,7 @@ describe('HoloScriptTypeChecker', () => {
       ];
 
       const result = checker.check(ast);
-      const errors = result.diagnostics.filter(d => d.severity === 'error');
+      const errors = result.diagnostics.filter((d) => d.severity === 'error');
       expect(errors).toHaveLength(0);
     });
 

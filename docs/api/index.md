@@ -4,11 +4,11 @@ Complete reference for HoloScript syntax across all three file formats.
 
 ## File Formats Overview
 
-| Extension | Style | Best For |
-|-----------|-------|----------|
-| `.hs` | Object-centric | Simple prototypes, learning |
-| `.hsplus` | Object + Traits | Production VR/AR apps |
-| `.holo` | Scene-centric | AI generation, full worlds |
+| Extension | Style           | Best For                    |
+| --------- | --------------- | --------------------------- |
+| `.hs`     | Object-centric  | Simple prototypes, learning |
+| `.hsplus` | Object + Traits | Production VR/AR apps       |
+| `.holo`   | Scene-centric   | AI generation, full worlds  |
 
 ---
 
@@ -24,6 +24,7 @@ orb objectName {
 ```
 
 **Common properties:**
+
 - `position` - `{ x: 0, y: 0, z: 0 }` or `[0, 0, 0]`
 - `rotation` - Euler angles or quaternion
 - `scale` - Number or `{ x, y, z }`
@@ -58,12 +59,13 @@ orb interactiveObject {
   @grabbable
   @throwable
   @physics
-  
+
   position: [0, 1, -2]
 }
 ```
 
 **Trait with parameters:**
+
 ```hsplus
 orb configuredObject {
   @grabbable(snap_to_hand: true, haptic_on_grab: 0.7)
@@ -83,7 +85,7 @@ orb configuredObject {
 
 orb player {
   health: ${state.health}
-  
+
   @on_damage => state.health -= 10
 }
 ```
@@ -95,7 +97,7 @@ networked_object syncedPlayer {
   sync_rate: 20hz
   position: synced
   rotation: synced
-  
+
   state {
     score: 0
   }
@@ -111,13 +113,13 @@ networked_object syncedPlayer {
 ```holo
 composition "Scene Name" {
   environment { }
-  
+
   template "TypeName" { }
-  
+
   object "ObjectName" { }
-  
+
   spatial_group "GroupName" { }
-  
+
   logic { }
 }
 ```
@@ -141,11 +143,11 @@ template "Enemy" {
     health: 100
     speed: 5
   }
-  
+
   action attack(target) {
     target.health -= 10
   }
-  
+
   action die() {
     this.destroy()
   }
@@ -159,10 +161,10 @@ object "PlayerSword" {
   @grabbable
   @throwable
   @glowing
-  
+
   position: [0, 1, -2]
   color: "#00ffff"
-  
+
   on_grab: { this.glow_intensity = 2.0 }
 }
 ```
@@ -173,7 +175,7 @@ object "PlayerSword" {
 object "Goblin_1" using "Enemy" {
   position: [5, 0, 10]
   color: "#00ff00"
-  
+
   state {
     health: 50  // Override template default
   }
@@ -185,7 +187,7 @@ object "Goblin_1" using "Enemy" {
 ```holo
 spatial_group "Battlefield" {
   position: [0, 0, 50]
-  
+
   object "Enemy_1" using "Enemy" { position: [0, 0, 0] }
   object "Enemy_2" using "Enemy" { position: [5, 0, 0] }
   object "Enemy_3" using "Enemy" { position: [10, 0, 0] }
@@ -199,11 +201,11 @@ logic {
   on_player_enter(zone) {
     spawn_enemies(5)
   }
-  
+
   on_enemy_death(enemy) {
     player.score += 10
   }
-  
+
   every 1s {
     check_win_condition()
   }
@@ -214,17 +216,17 @@ logic {
 
 ## Value Types
 
-| Type | Example |
-|------|---------|
-| Number | `42`, `3.14`, `-10` |
-| String | `"hello"`, `'world'` |
-| Boolean | `true`, `false` |
-| Array | `[1, 2, 3]`, `["a", "b"]` |
-| Object | `{ x: 0, y: 1, z: 2 }` |
-| Vector3 | `[x, y, z]` |
-| Color | `"#00ffff"`, `"rgb(0, 255, 255)"` |
-| Time | `1s`, `500ms`, `2min` |
-| Frequency | `30hz`, `60fps` |
+| Type      | Example                           |
+| --------- | --------------------------------- |
+| Number    | `42`, `3.14`, `-10`               |
+| String    | `"hello"`, `'world'`              |
+| Boolean   | `true`, `false`                   |
+| Array     | `[1, 2, 3]`, `["a", "b"]`         |
+| Object    | `{ x: 0, y: 1, z: 2 }`            |
+| Vector3   | `[x, y, z]`                       |
+| Color     | `"#00ffff"`, `"rgb(0, 255, 255)"` |
+| Time      | `1s`, `500ms`, `2min`             |
+| Frequency | `30hz`, `60fps`                   |
 
 ---
 
@@ -233,7 +235,7 @@ logic {
 ```hs
 // Single line comment
 
-/* 
+/*
   Multi-line
   comment
 */

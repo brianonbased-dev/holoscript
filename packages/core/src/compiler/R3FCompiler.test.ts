@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { R3FCompiler, R3FNode, MATERIAL_PRESETS, ENVIRONMENT_PRESETS, UI_COMPONENT_PRESETS } from './R3FCompiler';
+import {
+  R3FCompiler,
+  R3FNode,
+  MATERIAL_PRESETS,
+  ENVIRONMENT_PRESETS,
+  UI_COMPONENT_PRESETS,
+} from './R3FCompiler';
 import type { HSPlusAST, ASTNode } from '../types';
 
 // Helper to create a minimal AST node
@@ -92,9 +98,7 @@ describe('R3FCompiler', () => {
       const result = compiler.compile(ast);
 
       // Should have exactly one directionalLight from the AST, not additional default lights
-      const directionalLights = result.children?.filter(
-        (c) => c.type === 'directionalLight'
-      );
+      const directionalLights = result.children?.filter((c) => c.type === 'directionalLight');
       expect(directionalLights?.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -143,11 +147,7 @@ describe('R3FCompiler', () => {
 
     it('should compile nested children', () => {
       const childNode = createASTNode('sphere', {}, { id: 'child' });
-      const parentNode = createASTNode(
-        'group',
-        {},
-        { id: 'parent', children: [childNode] } as any
-      );
+      const parentNode = createASTNode('group', {}, { id: 'parent', children: [childNode] } as any);
 
       const result = compiler.compileNode(parentNode);
 

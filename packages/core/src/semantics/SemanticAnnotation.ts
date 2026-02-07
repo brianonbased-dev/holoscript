@@ -10,32 +10,32 @@
 // ============================================================================
 
 export type SemanticCategory =
-  | 'identity'      // Who/what something is
-  | 'spatial'       // Position, rotation, scale
-  | 'temporal'      // Time-related properties
-  | 'behavioral'    // Actions, states, transitions
-  | 'visual'        // Appearance, rendering
-  | 'audio'         // Sound-related
-  | 'physical'      // Physics properties
-  | 'interactive'   // User interaction
-  | 'narrative'     // Story, dialog, lore
-  | 'ai'            // AI-controlled properties
-  | 'network'       // Multiplayer sync
-  | 'performance'   // Optimization hints
+  | 'identity' // Who/what something is
+  | 'spatial' // Position, rotation, scale
+  | 'temporal' // Time-related properties
+  | 'behavioral' // Actions, states, transitions
+  | 'visual' // Appearance, rendering
+  | 'audio' // Sound-related
+  | 'physical' // Physics properties
+  | 'interactive' // User interaction
+  | 'narrative' // Story, dialog, lore
+  | 'ai' // AI-controlled properties
+  | 'network' // Multiplayer sync
+  | 'performance' // Optimization hints
   | 'accessibility' // A11y properties
-  | 'custom';       // User-defined
+  | 'custom'; // User-defined
 
 export type SemanticIntent =
-  | 'state'         // Current value/condition
-  | 'config'        // Configuration setting
-  | 'computed'      // Derived from other values
-  | 'input'         // User/system input
-  | 'output'        // Produced value
-  | 'reference'     // Points to another entity
-  | 'trigger'       // Causes an action
-  | 'constraint'    // Limits/rules
-  | 'metric'        // Measurement/statistic
-  | 'debug';        // Development only
+  | 'state' // Current value/condition
+  | 'config' // Configuration setting
+  | 'computed' // Derived from other values
+  | 'input' // User/system input
+  | 'output' // Produced value
+  | 'reference' // Points to another entity
+  | 'trigger' // Causes an action
+  | 'constraint' // Limits/rules
+  | 'metric' // Measurement/statistic
+  | 'debug'; // Development only
 
 // ============================================================================
 // Semantic Flags
@@ -117,16 +117,16 @@ export interface SemanticConstraints {
 // ============================================================================
 
 export type RelationType =
-  | 'owns'          // Has ownership
-  | 'references'    // Points to
-  | 'depends_on'    // Requires
-  | 'triggers'      // Causes
-  | 'observes'      // Watches
-  | 'parent_of'     // Hierarchy
-  | 'child_of'      // Hierarchy
-  | 'sibling_of'    // Same level
-  | 'instance_of'   // Type relationship
-  | 'extends';      // Inheritance
+  | 'owns' // Has ownership
+  | 'references' // Points to
+  | 'depends_on' // Requires
+  | 'triggers' // Causes
+  | 'observes' // Watches
+  | 'parent_of' // Hierarchy
+  | 'child_of' // Hierarchy
+  | 'sibling_of' // Same level
+  | 'instance_of' // Type relationship
+  | 'extends'; // Inheritance
 
 export interface SemanticRelation {
   /** Relation type */
@@ -318,63 +318,49 @@ export class SemanticRegistry {
    * Find annotations by category
    */
   findByCategory(category: SemanticCategory): SemanticAnnotation[] {
-    return Array.from(this.annotationIndex.values()).filter(
-      (a) => a.category === category
-    );
+    return Array.from(this.annotationIndex.values()).filter((a) => a.category === category);
   }
 
   /**
    * Find annotations by intent
    */
   findByIntent(intent: SemanticIntent): SemanticAnnotation[] {
-    return Array.from(this.annotationIndex.values()).filter(
-      (a) => a.intent === intent
-    );
+    return Array.from(this.annotationIndex.values()).filter((a) => a.intent === intent);
   }
 
   /**
    * Find annotations by tag
    */
   findByTag(tag: string): SemanticAnnotation[] {
-    return Array.from(this.annotationIndex.values()).filter((a) =>
-      a.tags.includes(tag)
-    );
+    return Array.from(this.annotationIndex.values()).filter((a) => a.tags.includes(tag));
   }
 
   /**
    * Find mutable properties
    */
   findMutable(): SemanticAnnotation[] {
-    return Array.from(this.annotationIndex.values()).filter(
-      (a) => a.flags.mutable
-    );
+    return Array.from(this.annotationIndex.values()).filter((a) => a.flags.mutable);
   }
 
   /**
    * Find networked properties
    */
   findNetworked(): SemanticAnnotation[] {
-    return Array.from(this.annotationIndex.values()).filter(
-      (a) => a.flags.networked
-    );
+    return Array.from(this.annotationIndex.values()).filter((a) => a.flags.networked);
   }
 
   /**
    * Find animatable properties
    */
   findAnimatable(): SemanticAnnotation[] {
-    return Array.from(this.annotationIndex.values()).filter(
-      (a) => a.flags.animatable
-    );
+    return Array.from(this.annotationIndex.values()).filter((a) => a.flags.animatable);
   }
 
   /**
    * Find deprecated properties
    */
   findDeprecated(): SemanticAnnotation[] {
-    return Array.from(this.annotationIndex.values()).filter(
-      (a) => a.flags.deprecated
-    );
+    return Array.from(this.annotationIndex.values()).filter((a) => a.flags.deprecated);
   }
 
   // ─── Validation ───────────────────────────────────────────────────────────
@@ -435,9 +421,7 @@ export class SemanticRegistry {
     // Enum constraints
     if (constraints.allowedValues && constraints.allowedValues.length > 0) {
       if (!constraints.allowedValues.includes(value)) {
-        errors.push(
-          `${annotation.label} must be one of: ${constraints.allowedValues.join(', ')}`
-        );
+        errors.push(`${annotation.label} must be one of: ${constraints.allowedValues.join(', ')}`);
       }
     }
 
@@ -453,17 +437,10 @@ export class SemanticRegistry {
     const schema = this.getSchemaForEntity(entityType);
     if (!schema) return '';
 
-    const lines: string[] = [
-      `Entity: ${schema.name}`,
-      schema.description ?? '',
-      '',
-      'Properties:',
-    ];
+    const lines: string[] = [`Entity: ${schema.name}`, schema.description ?? '', '', 'Properties:'];
 
     for (const annotation of schema.annotations.values()) {
-      const parts = [
-        `- ${annotation.label} (${annotation.category}/${annotation.intent})`,
-      ];
+      const parts = [`- ${annotation.label} (${annotation.category}/${annotation.intent})`];
 
       if (annotation.description) {
         parts.push(`  ${annotation.description}`);
@@ -490,10 +467,7 @@ export class SemanticRegistry {
   /**
    * Get property suggestions for AI code completion
    */
-  getPropertySuggestions(
-    entityType: string,
-    partialPath: string
-  ): SemanticAnnotation[] {
+  getPropertySuggestions(entityType: string, partialPath: string): SemanticAnnotation[] {
     const schema = this.getSchemaForEntity(entityType);
     if (!schema) return [];
 
@@ -575,7 +549,9 @@ export function createSchema(
   name: string,
   entityType: string,
   version: string,
-  options: Partial<Omit<SemanticSchema, 'id' | 'name' | 'entityType' | 'version' | 'annotations'>> = {}
+  options: Partial<
+    Omit<SemanticSchema, 'id' | 'name' | 'entityType' | 'version' | 'annotations'>
+  > = {}
 ): SemanticSchema {
   return {
     id: `schema_${entityType}_${version}`,

@@ -11,6 +11,7 @@ const result = parser.parse(source); // { success, ast, errors }
 ## Compilers
 
 ### R3FCompiler
+
 ```typescript
 import { R3FCompiler } from '@holoscript/core';
 const compiler = new R3FCompiler({ typescript: true });
@@ -18,6 +19,7 @@ const jsx = compiler.compile(composition);
 ```
 
 ### VisionOSCompiler
+
 ```typescript
 import { VisionOSCompiler } from '@holoscript/core';
 const compiler = new VisionOSCompiler();
@@ -25,12 +27,14 @@ const swift = compiler.compile(composition);
 ```
 
 ### USDZPipeline
+
 ```typescript
 import { generateUSDA } from '@holoscript/core';
 const usda = generateUSDA(composition, { upAxis: 'Y' });
 ```
 
 ### IncrementalCompiler
+
 ```typescript
 import { IncrementalCompiler } from '@holoscript/core';
 const compiler = new IncrementalCompiler();

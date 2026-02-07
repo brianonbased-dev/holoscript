@@ -15,12 +15,12 @@ describe('Null Coalescing Assignment (??=)', () => {
     `;
     const result = parser.parse(code);
     expect(result.success).toBe(true);
-    
+
     // For a single top-level node, it becomes the root
     const logicBlock = result.ast.root; // logic node
     // @ts-ignore
     const func = logicBlock.body.functions[0];
-    
+
     expect(func).toBeDefined();
     expect(func.name).toBe('init');
     expect(func.body).toContain('data ??= "default"');
@@ -34,18 +34,18 @@ describe('Null Coalescing Assignment (??=)', () => {
         prop ??= "value"
       }
     `;
-    // Current property parser might not support this syntax directly for properties, 
+    // Current property parser might not support this syntax directly for properties,
     // but we want to ensure it doesn't crash the parser and potentially support it for dynamic props if we chose to.
     // Actually, checking the parser logic, properties expect : or =. ??= might be invalid for declarative props.
     // So this test might expect failure or we only support it in imperative logic blocks.
-    
+
     // Let's assume for now it's mainly for logic blocks, but the tokenizer should recognize it.
   });
 
   it('should tokenize ??= correctly', () => {
     // Access private tokenizer if possible or just parse a simple expression
     // using a dummy logic block
-     const code = `
+    const code = `
       logic {
         function test() {
            x ??= 10

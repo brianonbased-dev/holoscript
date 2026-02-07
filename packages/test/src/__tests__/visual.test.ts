@@ -56,13 +56,13 @@ describe.skipIf(SKIP_VISUAL)('VisualTestRunner', () => {
     }
     const html = '<body style="background: green;"></body>';
     const screenshot = await runner.renderScene(html);
-    
+
     const baselinePath = path.join(process.cwd(), 'temp', 'baseline.png');
     const diffPath = path.join(process.cwd(), 'temp', 'diff.png');
-    
+
     // Ensure temp directory exists
     fs.mkdirSync(path.dirname(baselinePath), { recursive: true });
-    
+
     // Ensure clean state
     if (fs.existsSync(baselinePath)) fs.unlinkSync(baselinePath);
     if (fs.existsSync(diffPath)) fs.unlinkSync(diffPath);
@@ -84,10 +84,10 @@ describe.skipIf(SKIP_VISUAL)('VisualTestRunner', () => {
     }
     const baselineHtml = '<body style="background: white;"></body>';
     const actualHtml = '<body style="background: black;"></body>';
-    
+
     const baselineBuffer = await runner.renderScene(baselineHtml);
     const actualBuffer = await runner.renderScene(actualHtml);
-    
+
     const baselinePath = path.join(process.cwd(), 'temp', 'diff_baseline.png');
     const diffPath = path.join(process.cwd(), 'temp', 'diff_result.png');
 

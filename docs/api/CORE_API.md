@@ -52,10 +52,10 @@ if (result.success) {
 
 #### Methods
 
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `parse(source)` | `string` | `HoloParseResult` | Parse .holo source code |
-| `parseStrict(source)` | `string` | `HoloParseResult` | Parse with strict validation |
+| Method                | Parameters | Returns           | Description                  |
+| --------------------- | ---------- | ----------------- | ---------------------------- |
+| `parse(source)`       | `string`   | `HoloParseResult` | Parse .holo source code      |
+| `parseStrict(source)` | `string`   | `HoloParseResult` | Parse with strict validation |
 
 ### parseHolo()
 
@@ -107,7 +107,7 @@ Compile a HoloComposition to a target platform.
 import { compile } from '@holoscript/core';
 
 const output = compile(composition, {
-  target: 'threejs',  // | 'unity' | 'vrchat' | 'unreal' | etc.
+  target: 'threejs', // | 'unity' | 'vrchat' | 'unreal' | etc.
   optimize: true,
   minify: false,
 });
@@ -115,33 +115,41 @@ const output = compile(composition, {
 
 #### Compile Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `target` | `CompileTarget` | `'threejs'` | Target platform |
-| `optimize` | `boolean` | `true` | Enable optimizations |
-| `minify` | `boolean` | `false` | Minify output |
-| `sourceMap` | `boolean` | `false` | Generate source map |
+| Option      | Type            | Default     | Description          |
+| ----------- | --------------- | ----------- | -------------------- |
+| `target`    | `CompileTarget` | `'threejs'` | Target platform      |
+| `optimize`  | `boolean`       | `true`      | Enable optimizations |
+| `minify`    | `boolean`       | `false`     | Minify output        |
+| `sourceMap` | `boolean`       | `false`     | Generate source map  |
 
 #### Compile Targets
 
 ```typescript
-type CompileTarget = 
-  | 'threejs' | 'babylon' | 'aframe' | 'webxr' | 'webgpu'
-  | 'unity' | 'unreal' | 'godot'
-  | 'vrchat' | 'openxr' | 'visionos'
-  | 'ios' | 'android' | 'androidxr'
-  | 'wasm' | 'urdf' | 'sdf' | 'dtdl';
+type CompileTarget =
+  | 'threejs'
+  | 'babylon'
+  | 'aframe'
+  | 'webxr'
+  | 'webgpu'
+  | 'unity'
+  | 'unreal'
+  | 'godot'
+  | 'vrchat'
+  | 'openxr'
+  | 'visionos'
+  | 'ios'
+  | 'android'
+  | 'androidxr'
+  | 'wasm'
+  | 'urdf'
+  | 'sdf'
+  | 'dtdl';
 ```
 
 ### Platform Compilers
 
 ```typescript
-import { 
-  VRChatCompiler,
-  UnrealCompiler,
-  IOSCompiler,
-  AndroidCompiler,
-} from '@holoscript/core';
+import { VRChatCompiler, UnrealCompiler, IOSCompiler, AndroidCompiler } from '@holoscript/core';
 
 const compiler = new VRChatCompiler();
 const output = compiler.compile(composition);
@@ -169,16 +177,16 @@ runtime.dispose();
 
 #### Methods
 
-| Method | Description |
-|--------|-------------|
-| `mount(element)` | Mount to DOM element |
-| `play()` | Start execution |
-| `pause()` | Pause execution |
-| `reset()` | Reset to initial state |
-| `dispose()` | Clean up resources |
-| `getObject(name)` | Get object by name |
-| `setState(key, value)` | Update state |
-| `getState(key)` | Get state value |
+| Method                 | Description            |
+| ---------------------- | ---------------------- |
+| `mount(element)`       | Mount to DOM element   |
+| `play()`               | Start execution        |
+| `pause()`              | Pause execution        |
+| `reset()`              | Reset to initial state |
+| `dispose()`            | Clean up resources     |
+| `getObject(name)`      | Get object by name     |
+| `setState(key, value)` | Update state           |
+| `getState(key)`        | Get state value        |
 
 ### createRuntime()
 
@@ -226,8 +234,8 @@ Object declaration.
 ```typescript
 interface HoloObjectDecl {
   name: string;
-  template?: string;           // "using Template"
-  traits?: HoloObjectTrait[];  // @grabbable, @physics, etc.
+  template?: string; // "using Template"
+  traits?: HoloObjectTrait[]; // @grabbable, @physics, etc.
   properties: Record<string, HoloValue>;
   children?: HoloObjectDecl[];
 }

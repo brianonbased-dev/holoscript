@@ -1,4 +1,3 @@
-
 import { describe, it, expect } from 'vitest';
 import { HoloScriptPlusParser } from './HoloScriptPlusParser';
 
@@ -21,7 +20,7 @@ describe('Reproduction - Validation Failures', () => {
     }`;
     const result = parser.parse(source);
     if (!result.success) {
-        console.error(result.errors);
+      console.error(result.errors);
     }
     expect(result.success).toBe(true);
   });

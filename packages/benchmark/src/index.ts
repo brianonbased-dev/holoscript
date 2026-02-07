@@ -121,7 +121,8 @@ function detectRegressions(
       if (!baselineResult) continue;
 
       const changePercent =
-        ((baselineResult.opsPerSecond - currentResult.opsPerSecond) / baselineResult.opsPerSecond) * 100;
+        ((baselineResult.opsPerSecond - currentResult.opsPerSecond) / baselineResult.opsPerSecond) *
+        100;
 
       if (changePercent > threshold) {
         regressions.push({
@@ -205,4 +206,10 @@ async function main(): Promise<void> {
 main().catch(console.error);
 
 // Export for programmatic use
-export { extractResults, detectRegressions, type AllResults, type BenchmarkResult, type SuiteResults };
+export {
+  extractResults,
+  detectRegressions,
+  type AllResults,
+  type BenchmarkResult,
+  type SuiteResults,
+};

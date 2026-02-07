@@ -21,10 +21,13 @@ describe('Composition API Parsing', () => {
     }`;
     const result = parser.parse(source);
     if (!result.success) {
-      require('fs').writeFileSync('C:\\Users\\josep\\test_errors.json', JSON.stringify(result.errors, null, 2));
+      require('fs').writeFileSync(
+        'C:\\Users\\josep\\test_errors.json',
+        JSON.stringify(result.errors, null, 2)
+      );
     }
     expect(result.success).toBe(true);
-    
+
     const composition = result.ast.root;
     const networkingSystem = composition.body.systems.find((c: any) => c.id === 'Networking');
     expect(networkingSystem).toBeDefined();
@@ -39,7 +42,7 @@ describe('Composition API Parsing', () => {
     }`;
     const result = parser.parse(source);
     expect(result.success).toBe(true);
-    
+
     const composition = result.ast.root;
     const config = composition.body.configs.find((c: any) => c.type === 'core_config');
     expect(config).toBeDefined();

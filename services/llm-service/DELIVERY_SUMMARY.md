@@ -33,6 +33,7 @@ services/llm-service/
 ### Zero External Dependencies
 
 No calls to:
+
 - ❌ OpenAI, Claude, Gemini
 - ❌ Cloud storage services
 - ❌ External auth providers
@@ -45,6 +46,7 @@ Everything runs locally using **Ollama** (free, open-source).
 ## 🎯 What Users Get
 
 ### For Users
+
 1. **Click one button to start building**
 2. **Type what they want** (e.g., "red rotating cube")
 3. **AI generates HoloScript code instantly**
@@ -52,6 +54,7 @@ Everything runs locally using **Ollama** (free, open-source).
 5. **100% their data - nothing leaves their computer**
 
 ### For Developers
+
 - ✅ Complete REST API
 - ✅ Local storage (JSON files)
 - ✅ Session management
@@ -109,29 +112,34 @@ User Types Description
 ## 📊 Included Features
 
 ### Authentication
+
 - ✅ Simple login system
 - ✅ Session tokens
 - ✅ User isolation
 
 ### Build Management
+
 - ✅ Save builds (auto-generated IDs)
 - ✅ List all builds
 - ✅ Load previous builds
 - ✅ Delete builds
 
 ### Code Generation
+
 - ✅ Natural language → HoloScript
 - ✅ Multiple model support
 - ✅ Customizable parameters
 - ✅ Response parsing
 
 ### Storage
+
 - ✅ Local JSON file storage
 - ✅ No database required
 - ✅ Easy backup/export
 - ✅ Self-preserving (all history kept)
 
 ### UI/UX
+
 - ✅ Modern dark theme
 - ✅ Real-time line count
 - ✅ Status indicators
@@ -143,12 +151,14 @@ User Types Description
 ## 🔐 Security
 
 **Built-in Security**:
+
 - ✅ Session-based auth
 - ✅ User data isolation
 - ✅ CORS headers
 - ✅ Error handling
 
 **Production-Ready Additions** (documented in code):
+
 - [ ] Password hashing (bcrypt)
 - [ ] JWT tokens
 - [ ] Rate limiting
@@ -172,6 +182,7 @@ All data stored as JSON - **easy to backup, export, migrate**:
 ```
 
 **Example build**:
+
 ```json
 {
   "id": "uuid-here",
@@ -187,18 +198,18 @@ All data stored as JSON - **easy to backup, export, migrate**:
 
 ## 🔗 API Endpoints
 
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| POST | `/api/auth/login` | User login |
-| POST | `/api/auth/logout` | User logout |
-| GET | `/api/auth/me` | Get current user |
-| POST | `/api/generate` | Generate HoloScript from prompt |
-| POST | `/api/builds` | Save a new build |
-| GET | `/api/builds` | List user's builds |
-| GET | `/api/builds/:id` | Get specific build |
-| DELETE | `/api/builds/:id` | Delete a build |
-| GET | `/api/models` | List available LLM models |
-| GET | `/api/health` | Service health check |
+| Method | Endpoint           | Purpose                         |
+| ------ | ------------------ | ------------------------------- |
+| POST   | `/api/auth/login`  | User login                      |
+| POST   | `/api/auth/logout` | User logout                     |
+| GET    | `/api/auth/me`     | Get current user                |
+| POST   | `/api/generate`    | Generate HoloScript from prompt |
+| POST   | `/api/builds`      | Save a new build                |
+| GET    | `/api/builds`      | List user's builds              |
+| GET    | `/api/builds/:id`  | Get specific build              |
+| DELETE | `/api/builds/:id`  | Delete a build                  |
+| GET    | `/api/models`      | List available LLM models       |
+| GET    | `/api/health`      | Service health check            |
 
 All endpoints require authentication token in `Authorization: Bearer <token>` header.
 
@@ -207,12 +218,14 @@ All endpoints require authentication token in `Authorization: Bearer <token>` he
 ## 📈 Scalability
 
 **Single Machine** (current):
+
 - CPU: 4 cores minimum
 - RAM: 8GB minimum
 - Storage: 50GB for models
 - Users: 1-10 concurrent
 
 **To Scale** (future):
+
 - Add database backend
 - Implement API rate limiting
 - Use dedicated model server
@@ -233,6 +246,7 @@ The service automatically preserves:
 6. **Offline Support** - All previous builds accessible
 
 This enables:
+
 - ✅ Resume interrupted work
 - ✅ Learn from previous generations
 - ✅ Identify successful patterns
@@ -244,6 +258,7 @@ This enables:
 ## 🚀 Deployment Options
 
 ### Local (Current)
+
 ```bash
 npm run dev        # Development
 npm run build      # Production build
@@ -251,6 +266,7 @@ npm run start      # Production start
 ```
 
 ### Docker (Ready)
+
 ```dockerfile
 FROM node:20
 WORKDIR /app
@@ -260,6 +276,7 @@ CMD ["npm", "start"]
 ```
 
 ### Cloud (Supabase, AWS, etc)
+
 - Already structured for database migration
 - Environment-based configuration
 - Horizontal scaling ready
@@ -279,6 +296,7 @@ CMD ["npm", "start"]
 ## 🎯 Why This Approach?
 
 ### For Users
+
 - ✅ **Simple** - Login, describe, get code
 - ✅ **Private** - No data sharing with third parties
 - ✅ **Free** - No subscription or API costs
@@ -286,6 +304,7 @@ CMD ["npm", "start"]
 - ✅ **Offline** - Works without internet
 
 ### For Developers
+
 - ✅ **Extensible** - Easy to add features
 - ✅ **Open** - Complete source code
 - ✅ **Documented** - Every piece explained
@@ -297,6 +316,7 @@ CMD ["npm", "start"]
 ## 🔄 Integration Points
 
 This service integrates with:
+
 - **HoloScript Core** - Execute generated code
 - **HoloScript CLI** - Command-line interface
 - **Hololand** - Save to world/creator program
@@ -318,6 +338,7 @@ This service integrates with:
 - ⚠️ Authentication is demo (use JWT in production)
 
 **To Go Live**:
+
 1. Add proper password hashing
 2. Implement JWT tokens
 3. Add rate limiting
@@ -330,16 +351,16 @@ All documented in code with TODOs.
 
 ## 📊 Project Stats
 
-| Metric | Value |
-|--------|-------|
-| Total Files | 11 |
-| Lines of Code | ~1,500 |
-| Languages | TypeScript, HTML/CSS, JavaScript |
-| Dependencies | 7 (minimal) |
-| Build Time | <1s |
-| Startup Time | 1-2s |
-| No External APIs | ✓ |
-| Zero Config | ✗ (1 env file) |
+| Metric           | Value                            |
+| ---------------- | -------------------------------- |
+| Total Files      | 11                               |
+| Lines of Code    | ~1,500                           |
+| Languages        | TypeScript, HTML/CSS, JavaScript |
+| Dependencies     | 7 (minimal)                      |
+| Build Time       | <1s                              |
+| Startup Time     | 1-2s                             |
+| No External APIs | ✓                                |
+| Zero Config      | ✗ (1 env file)                   |
 
 ---
 
@@ -356,6 +377,7 @@ All documented in code with TODOs.
 ## 🔮 Future Enhancements
 
 **Phase 2** (if needed):
+
 - [ ] Database backend (Supabase)
 - [ ] Team collaboration
 - [ ] Version control

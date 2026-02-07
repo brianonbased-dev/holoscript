@@ -1,6 +1,6 @@
 /**
  * Demo Application 5: AR/VR Unified Experience
- * 
+ *
  * Shows seamless transitions between AR and VR modes,
  * physical-digital blending, and context-aware auto-optimization.
  */
@@ -147,16 +147,16 @@ function selectLODLevel() {
     (vr, any) -> selectLOD(high_detail, high_triangle_count)
   }
 }
-`
+`;
 
 /**
  * AR/VR Unified Demo
  * Seamless AR/VR transitions with physical environment awareness
  */
 export class ARVRUnifiedDemo {
-  private name: string = 'AR/VR Unified Platform'
-  private hsCode: number = 110 // Lines of HoloScript+ code
-  private traditionalCode: number = 18000 // Lines of traditional code
+  private name: string = 'AR/VR Unified Platform';
+  private hsCode: number = 110; // Lines of HoloScript+ code
+  private traditionalCode: number = 18000; // Lines of traditional code
 
   private useCases: string[] = [
     'Virtual Furniture in Physical Rooms',
@@ -164,7 +164,7 @@ export class ARVRUnifiedDemo {
     'Construction Site Visualization',
     'Product Customization',
     'Education and Training',
-  ]
+  ];
 
   private deviceCapabilities = {
     'phone-ar': {
@@ -195,7 +195,7 @@ export class ARVRUnifiedDemo {
       occlusionQuality: 'VR-grade',
       lightingEstimate: 'Photometric cameras',
     },
-  }
+  };
 
   constructor() {}
 
@@ -203,10 +203,10 @@ export class ARVRUnifiedDemo {
    * Mode detection and adaptation
    */
   getAutoModeDetection(): {
-    signal: string
-    threshold: string
-    confidence: string
-    action: string
+    signal: string;
+    threshold: string;
+    confidence: string;
+    action: string;
   }[] {
     return [
       {
@@ -239,18 +239,18 @@ export class ARVRUnifiedDemo {
         confidence: '85%',
         action: 'Optional mode change',
       },
-    ]
+    ];
   }
 
   /**
    * Seamless transition scenarios
    */
   getTransitionScenarios(): {
-    scenario: string
-    startMode: string
-    endMode: string
-    preservedState: string[]
-    transitionTime: string
+    scenario: string;
+    startMode: string;
+    endMode: string;
+    preservedState: string[];
+    transitionTime: string;
   }[] {
     return [
       {
@@ -288,7 +288,7 @@ export class ARVRUnifiedDemo {
         preservedState: ['all state maintained'],
         transitionTime: '0.2 seconds',
       },
-    ]
+    ];
   }
 
   /**
@@ -336,18 +336,18 @@ export class ARVRUnifiedDemo {
         shadowRendering: 'Technical overlay',
         recommendation: 'AR with grid assist',
       },
-    }
+    };
   }
 
   /**
    * Occlusion handling across devices
    */
   getOcclusionStrategy(): {
-    device: string
-    occlusionType: string
-    precision: string
-    updateRate: number
-    fallback: string
+    device: string;
+    occlusionType: string;
+    precision: string;
+    updateRate: number;
+    fallback: string;
   }[] {
     return [
       {
@@ -378,18 +378,18 @@ export class ARVRUnifiedDemo {
         updateRate: 90,
         fallback: 'Virtual environment only',
       },
-    ]
+    ];
   }
 
   /**
    * Lighting environment capture
    */
   getLightingEnvironmentSystem(): {
-    method: string
-    device: string
-    updateFrequency: string
-    parameters: string[]
-    fallback: string
+    method: string;
+    device: string;
+    updateFrequency: string;
+    parameters: string[];
+    fallback: string;
   }[] {
     return [
       {
@@ -428,7 +428,7 @@ export class ARVRUnifiedDemo {
         ],
         fallback: 'HDR environment map',
       },
-    ]
+    ];
   }
 
   /**
@@ -504,17 +504,17 @@ export class ARVRUnifiedDemo {
           'Better knowledge retention',
         ],
       },
-    }
+    };
   }
 
   /**
    * Comparison: Traditional vs HoloScript+
    */
   getImplementationComparison(): {
-    aspect: string
-    traditional: string
-    holoscript: string
-    timeSaved: string
+    aspect: string;
+    traditional: string;
+    holoscript: string;
+    timeSaved: string;
   }[] {
     return [
       {
@@ -553,17 +553,17 @@ export class ARVRUnifiedDemo {
         holoscript: 'Single codebase',
         timeSaved: '2 weeks',
       },
-    ]
+    ];
   }
 
   /**
    * Technical requirements comparison
    */
   getTechnicalComparison(): {
-    component: string
-    traditional: number | string
-    holoscript: number | string
-    reduction: string
+    component: string;
+    traditional: number | string;
+    holoscript: number | string;
+    reduction: string;
   }[] {
     return [
       {
@@ -608,19 +608,19 @@ export class ARVRUnifiedDemo {
         holoscript: '2 weeks',
         reduction: '90%',
       },
-    ]
+    ];
   }
 
   /**
    * Device matrix showing AR/VR capabilities
    */
   getDeviceMatrix(): {
-    device: string
-    nativeAR: boolean
-    nativeVR: boolean
-    autoMode: boolean
-    occlusionQuality: string
-    recommendedMode: string
+    device: string;
+    nativeAR: boolean;
+    nativeVR: boolean;
+    autoMode: boolean;
+    occlusionQuality: string;
+    recommendedMode: string;
   }[] {
     return [
       {
@@ -671,10 +671,10 @@ export class ARVRUnifiedDemo {
         occlusionQuality: 'N/A',
         recommendedMode: 'VR',
       },
-    ]
+    ];
   }
 }
 
 export function createARVRUnifiedDemo(): ARVRUnifiedDemo {
-  return new ARVRUnifiedDemo()
+  return new ARVRUnifiedDemo();
 }

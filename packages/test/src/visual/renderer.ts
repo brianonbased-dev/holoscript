@@ -1,4 +1,3 @@
-
 import puppeteer, { Browser, Page } from 'puppeteer';
 
 export interface RendererOptions {
@@ -96,7 +95,7 @@ export class HeadlessRenderer {
         await page.waitForFunction('window.HOLO_RENDERED === true', {
           timeout: this.options.renderTimeout,
         });
-      } catch (e) {
+      } catch (_e) {
         console.warn('Timeout waiting for HOLO_RENDERED signal. Proceeding anyway.');
       }
     }

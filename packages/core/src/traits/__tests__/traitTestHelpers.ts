@@ -40,7 +40,7 @@ export function getLastEvent(ctx: MockContext, eventType: string) {
 }
 
 export function getEventCount(ctx: MockContext, eventType: string): number {
-  return ctx.emittedEvents.filter(e => e.event === eventType).length;
+  return ctx.emittedEvents.filter((e) => e.event === eventType).length;
 }
 
 export function attachTrait<T>(

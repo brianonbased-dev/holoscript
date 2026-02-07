@@ -23,11 +23,17 @@ async function main() {
     console.error('❌ Gold data file not found!');
     process.exit(1);
   }
-  const goldLines = fs.readFileSync(GOLD_DATA_PATH, 'utf8').split('\n').filter(l => l.trim());
-  const goldExamples = goldLines.slice(0, 4).map(line => {
-    const json = JSON.parse(line);
-    return `PROMPT: ${json.prompt}\nCOMPLETION:\n${json.completion}\n---\n`;
-  }).join('\n');
+  const goldLines = fs
+    .readFileSync(GOLD_DATA_PATH, 'utf8')
+    .split('\n')
+    .filter((l) => l.trim());
+  const goldExamples = goldLines
+    .slice(0, 4)
+    .map((line) => {
+      const json = JSON.parse(line);
+      return `PROMPT: ${json.prompt}\nCOMPLETION:\n${json.completion}\n---\n`;
+    })
+    .join('\n');
 
   console.log(`✅ Loaded ${goldLines.length} Gold Examples for context.`);
 
@@ -41,36 +47,35 @@ async function main() {
 
   // 3. Generate Loop
   let validCount = 0;
-  
+
   // Clear or append? Let's append to avoid data loss on crash, but clear on start for now
   fs.writeFileSync(OUTPUT_PATH, '', 'utf8');
 
   for (const [i, prompt] of prompts.entries()) {
     console.log(`\n[${i + 1}/${prompts.length}] Generative Task: "${prompt}"`);
-    
+
     try {
       const generatedCode = await generateCode(prompt, goldExamples);
-      
+
       // 4. Validate
       const validation = parser.parse(generatedCode);
-      
+
       if (validation.success) {
         console.log('  ✅ VALID: Syntax Check Passed');
-        
+
         const entry = {
           prompt: prompt,
-          completion: generatedCode
+          completion: generatedCode,
         };
-        
+
         fs.appendFileSync(OUTPUT_PATH, JSON.stringify(entry) + '\n', 'utf8');
         validCount++;
         console.log(`  💾 Saved to ${path.basename(OUTPUT_PATH)}`);
       } else {
         console.warn('  ❌ INVALID: Syntax Errors found');
-        validation.errors.forEach(e => console.log(`     - Line ${e.line}: ${e.message}`));
+        validation.errors.forEach((e) => console.log(`     - Line ${e.line}: ${e.message}`));
         // Optional: specific retry logic could go here
       }
-
     } catch (e: any) {
       console.error(`  🔥 GENERATION FAILED: ${e.message}`);
     }
@@ -107,18 +112,18 @@ COMPLETION:
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
+        Authorization: `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
         model: MODEL,
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage }
+          { role: 'user', content: userMessage },
         ],
         temperature: 0.7,
         max_tokens: 2000,
-        stream: false
-      })
+        stream: false,
+      }),
     });
 
     if (!response.ok) {
@@ -129,12 +134,14 @@ COMPLETION:
     let content = data.choices[0].message.content;
 
     // Strip markdown code blocks if present
-    content = content.replace(/^```(holoscript|javascript|typescript)?\n/, '').replace(/\n```$/, '');
-    
+    content = content
+      .replace(/^```(holoscript|javascript|typescript)?\n/, '')
+      .replace(/\n```$/, '');
+
     return content.trim();
   } catch (err: any) {
-     // Fallback for different API shapes if needed, but assuming OpenAI compatible
-     throw err;
+    // Fallback for different API shapes if needed, but assuming OpenAI compatible
+    throw err;
   }
 }
 

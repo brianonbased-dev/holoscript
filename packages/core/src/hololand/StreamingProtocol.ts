@@ -440,7 +440,10 @@ export class StreamProtocol {
   private static instance: StreamProtocol | null = null;
   private connection: WebSocket | null = null;
   private handlers: Map<MessageType, Set<(message: StreamMessage) => void>> = new Map();
-  private pendingAcks: Map<number, { resolve: () => void; reject: (err: Error) => void; timeout: ReturnType<typeof setTimeout> }> = new Map();
+  private pendingAcks: Map<
+    number,
+    { resolve: () => void; reject: (err: Error) => void; timeout: ReturnType<typeof setTimeout> }
+  > = new Map();
   private sequenceNumber = 0;
   private lastAckSeq = 0;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
@@ -465,11 +468,14 @@ export class StreamProtocol {
   /**
    * Connect to streaming server
    */
-  async connect(url: string, options: {
-    clientId: string;
-    clientVersion: string;
-    capabilities?: string[];
-  }): Promise<void> {
+  async connect(
+    url: string,
+    options: {
+      clientId: string;
+      clientVersion: string;
+      capabilities?: string[];
+    }
+  ): Promise<void> {
     if (this.connectionState !== 'disconnected') {
       throw new Error('Already connected or connecting');
     }
@@ -496,7 +502,7 @@ export class StreamProtocol {
           }
         };
 
-        this.connection.onerror = (event) => {
+        this.connection.onerror = (_event) => {
           const error = new Error('WebSocket error');
           if (this.connectionState === 'connecting') {
             reject(error);
@@ -540,10 +546,7 @@ export class StreamProtocol {
   /**
    * Subscribe to message type
    */
-  on<T extends StreamMessage>(
-    type: MessageType,
-    handler: (message: T) => void
-  ): () => void {
+  on<T extends StreamMessage>(type: MessageType, handler: (message: T) => void): () => void {
     if (!this.handlers.has(type)) {
       this.handlers.set(type, new Set());
     }
@@ -730,11 +733,7 @@ export class StreamProtocol {
   /**
    * Send entity RPC
    */
-  async sendEntityRPC(
-    entityId: string,
-    method: string,
-    args: unknown[]
-  ): Promise<void> {
+  async sendEntityRPC(entityId: string, method: string, args: unknown[]): Promise<void> {
     const callId = `rpc_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
     await this.sendReliable({
@@ -841,7 +840,7 @@ export class StreamProtocol {
       return value;
     });
     const encoder = new TextEncoder();
-    return encoder.encode(json).buffer as ArrayBuffer;
+    return encoder.encode(json).buffer;
   }
 
   /**

@@ -1,11 +1,11 @@
 /**
  * HoloScript Generator
- * 
+ *
  * Generates HoloScript code from natural language descriptions.
  * Works locally with templates, optionally enhanced by Brittney AI.
  */
 
-import { suggestTraits, TRAITS, TraitInfo } from './traits';
+import { suggestTraits } from './traits';
 
 export interface GeneratorOptions {
   brittneyUrl?: string;
@@ -146,7 +146,7 @@ const OBJECT_TEMPLATES: Record<string, { traits: string[]; template: string }> =
  */
 function detectObjectType(description: string): string | null {
   const desc = description.toLowerCase();
-  
+
   const typeKeywords: Record<string, string[]> = {
     button: ['button', 'switch', 'toggle', 'control'],
     ball: ['ball', 'sphere', 'orb'],
@@ -159,13 +159,13 @@ function detectObjectType(description: string): string | null {
     crate: ['crate', 'box', 'container', 'barrel'],
     magic_orb: ['magic', 'magical', 'enchanted', 'mystical', 'arcane'],
   };
-  
+
   for (const [type, keywords] of Object.entries(typeKeywords)) {
-    if (keywords.some(kw => desc.includes(kw))) {
+    if (keywords.some((kw) => desc.includes(kw))) {
       return type;
     }
   }
-  
+
   return null;
 }
 
@@ -182,16 +182,18 @@ function extractProperties(description: string): Record<string, string> {
     color: '#00ffff',
     destination: 'world://default',
   };
-  
+
   // Extract name hints
   const nameMatch = description.match(/(?:called|named|for)\s+["']?(\w+)["']?/i);
   if (nameMatch) {
     props.name = nameMatch[1].toLowerCase();
     props.Name = nameMatch[1].charAt(0).toUpperCase() + nameMatch[1].slice(1);
   }
-  
+
   // Extract color hints
-  const colorMatch = description.match(/(red|blue|green|yellow|purple|orange|pink|white|black|cyan|magenta)/i);
+  const colorMatch = description.match(
+    /(red|blue|green|yellow|purple|orange|pink|white|black|cyan|magenta)/i
+  );
   if (colorMatch) {
     const colorMap: Record<string, string> = {
       red: '#ff0000',
@@ -208,7 +210,7 @@ function extractProperties(description: string): Record<string, string> {
     };
     props.color = colorMap[colorMatch[1].toLowerCase()] || '#00ffff';
   }
-  
+
   // Extract position hints
   const posMatch = description.match(/at\s*\(?(\d+)[,\s]+(\d+)[,\s]+(\d+)\)?/);
   if (posMatch) {
@@ -216,7 +218,7 @@ function extractProperties(description: string): Record<string, string> {
     props.y = posMatch[2];
     props.z = posMatch[3];
   }
-  
+
   return props;
 }
 
@@ -228,12 +230,12 @@ function generateFromTemplate(type: string, props: Record<string, string>): stri
   if (!template) {
     return generateGenericObject(props);
   }
-  
+
   let code = template.template;
   for (const [key, value] of Object.entries(props)) {
     code = code.replace(new RegExp(`{{${key}}}`, 'g'), value);
   }
-  
+
   return code;
 }
 
@@ -260,25 +262,27 @@ async function tryBrittneyGeneration(
   if (!options.brittneyUrl) {
     return null;
   }
-  
+
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), options.timeout || 5000);
-    
+
     const response = await fetch(`${options.brittneyUrl}/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: [{
-          role: 'user',
-          content: `Generate HoloScript code for: ${description}\n\nReturn ONLY the HoloScript code, no explanation.`
-        }],
+        messages: [
+          {
+            role: 'user',
+            content: `Generate HoloScript code for: ${description}\n\nReturn ONLY the HoloScript code, no explanation.`,
+          },
+        ],
       }),
       signal: controller.signal,
     });
-    
+
     clearTimeout(timeout);
-    
+
     if (response.ok) {
       const data = await response.json();
       if (data.content) {
@@ -287,12 +291,12 @@ async function tryBrittneyGeneration(
         return codeMatch ? codeMatch[1].trim() : data.content.trim();
       }
     }
-  } catch (error) {
+  } catch (_error) {
     if (options.verbose) {
       console.log('\x1b[2mBrittney unavailable, using local generation\x1b[0m');
     }
   }
-  
+
   return null;
 }
 
@@ -306,25 +310,25 @@ export async function generateObject(
   // Try Brittney first if available
   const brittneyCode = await tryBrittneyGeneration(description, options);
   if (brittneyCode) {
-    const traits = suggestTraits(description).map(t => t.name);
+    const traits = suggestTraits(description).map((t) => t.name);
     return {
       code: brittneyCode,
       traits,
       source: 'brittney',
     };
   }
-  
+
   // Fall back to local template generation
   const objectType = detectObjectType(description);
   const props = extractProperties(description);
-  const traits = suggestTraits(description);
-  
+  const traits = await suggestTraits(description);
+
   let code: string;
   if (objectType && OBJECT_TEMPLATES[objectType]) {
     code = generateFromTemplate(objectType, props);
   } else if (traits.length > 0) {
     // Generate from suggested traits
-    const traitLines = traits.map(t => `  @${t.name}`).join('\n');
+    const traitLines = traits.map((t) => `  @${t.name}`).join('\n');
     code = `orb ${props.name} {
 ${traitLines}
   position: [${props.x}, ${props.y}, ${props.z}]
@@ -333,10 +337,10 @@ ${traitLines}
   } else {
     code = generateGenericObject(props);
   }
-  
+
   return {
     code,
-    traits: traits.map(t => t.name),
+    traits: traits.map((t) => t.name),
     source: 'local',
   };
 }
@@ -356,11 +360,11 @@ export async function generateScene(
   if (brittneyCode) {
     return brittneyCode;
   }
-  
+
   // Local template-based generation
   const props = extractProperties(description);
   const name = description.slice(0, 50).replace(/[^a-zA-Z0-9\s]/g, '');
-  
+
   return `composition "${name}" {
   environment {
     skybox: "default"

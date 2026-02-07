@@ -13,12 +13,15 @@ Language support for HoloScript+ - a declarative language for spatial computing 
 ## Supported Syntax
 
 ### Primitives
+
 `orb`, `sphere`, `cube`, `box`, `cylinder`, `cone`, `plane`, `mesh`, `avatar`, `light`, `camera`, `scene`, `group`, `text`, `panel`, `button`, `slider`, `zone`
 
 ### VR Traits
+
 `@grabbable`, `@throwable`, `@hoverable`, `@scalable`, `@rotatable`, `@snappable`, `@breakable`, `@stretchable`, `@moldable`, `@skeleton`, `@body`, `@face`, `@expressive`, `@hands`, `@networked`, `@recordable`, `@streamable`, `@trackable`, `@shareable`, `@particle`, `@timeline`, and more...
 
 ### Lifecycle Hooks
+
 `@on_mount`, `@on_grab`, `@on_release`, `@on_hover_enter`, `@on_collision`, `@on_click`, `@on_stretch`, `@on_pose_change`, `@on_record_start`, `@on_share`, `@on_particle_spawn`, `@on_voice_command`, and more...
 
 ## Example
@@ -52,6 +55,7 @@ avatar#npc @skeleton(type: "humanoid", ik_enabled: true) @expressive {
 4. Click Install
 
 Or install manually:
+
 ```bash
 code --install-extension holoscript-vscode-1.0.0.vsix
 ```

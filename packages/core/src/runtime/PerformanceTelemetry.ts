@@ -73,12 +73,12 @@ export class PerformanceTelemetry {
   private frameTimings: FrameTiming[] = [];
   private memorySnapshots: MemorySnapshot[] = [];
   private exporters: AnalyticsExporter[] = [];
-  
+
   private frameCounter: number = 0;
   private lastFrameTime: number = Date.now();
   private frameTimes: number[] = [];
   private maxFrameHistory: number = 300; // ~5s at 60fps
-  
+
   private monitoringEnabled: boolean = false;
   private exportInterval: ReturnType<typeof setInterval> | null = null;
   private exportIntervalMs: number = 10000; // Export every 10s
@@ -281,11 +281,7 @@ export class PerformanceTelemetry {
   private checkBudgets(timing: FrameTiming): void {
     // Check frame duration budget
     const frameBudget = this.budgets.get('frame_duration');
-    if (
-      frameBudget &&
-      frameBudget.enabled &&
-      timing.frameDuration > frameBudget.maxValue
-    ) {
+    if (frameBudget && frameBudget.enabled && timing.frameDuration > frameBudget.maxValue) {
       this.emitBudgetViolation(
         'frame_duration',
         timing.frameDuration,
@@ -296,11 +292,7 @@ export class PerformanceTelemetry {
 
     // Check render time budget
     const renderBudget = this.budgets.get('render_time');
-    if (
-      renderBudget &&
-      renderBudget.enabled &&
-      timing.renderTime > renderBudget.maxValue
-    ) {
+    if (renderBudget && renderBudget.enabled && timing.renderTime > renderBudget.maxValue) {
       this.emitBudgetViolation(
         'render_time',
         timing.renderTime,
@@ -343,8 +335,7 @@ export class PerformanceTelemetry {
   public getAverageFPS(): number {
     if (this.frameTimes.length === 0) return 0;
 
-    const avgFrameTime =
-      this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
+    const avgFrameTime = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
     return Math.round(1000 / avgFrameTime);
   }
 
@@ -417,8 +408,7 @@ export class PerformanceTelemetry {
 
     if (recentFrames.length > 0) {
       const avgFrameTime =
-        recentFrames.reduce((sum, f) => sum + f.frameDuration, 0) /
-        recentFrames.length;
+        recentFrames.reduce((sum, f) => sum + f.frameDuration, 0) / recentFrames.length;
       const maxFrameTime = Math.max(...recentFrames.map((f) => f.frameDuration));
       const minFrameTime = Math.min(...recentFrames.map((f) => f.frameDuration));
 

@@ -33,14 +33,14 @@ interface AlertInstance {
 }
 
 interface AlertConfig {
-  condition: string;  // Expression to evaluate
+  condition: string; // Expression to evaluate
   severity: Severity;
   visual_effect: VisualEffect;
   sound: string;
   haptic: boolean;
   notification: boolean;
-  cooldown: number;  // ms
-  auto_dismiss: number;  // 0 = no auto-dismiss
+  cooldown: number; // ms
+  auto_dismiss: number; // 0 = no auto-dismiss
   max_active: number;
   message_template: string;
 }
@@ -65,7 +65,7 @@ export const alertHandler: TraitHandler<AlertConfig> = {
     message_template: 'Alert triggered',
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const state: AlertState = {
       isTriggered: false,
       lastTriggerTime: 0,
@@ -84,10 +84,10 @@ export const alertHandler: TraitHandler<AlertConfig> = {
     delete (node as any).__alertState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__alertState as AlertState;
     if (!state) return;
-    
+
     // Check cooldown
     if (state.isOnCooldown) {
       const now = Date.now();
@@ -95,7 +95,7 @@ export const alertHandler: TraitHandler<AlertConfig> = {
         state.isOnCooldown = false;
       }
     }
-    
+
     // Auto-dismiss expired alerts
     if (config.auto_dismiss > 0) {
       const now = Date.now();
@@ -111,13 +111,13 @@ export const alertHandler: TraitHandler<AlertConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__alertState as AlertState;
     if (!state) return;
-    
+
     if (event.type === 'alert_trigger') {
       // Check cooldown
       if (state.isOnCooldown) {
         return;
       }
-      
+
       // Check max active alerts
       if (state.activeAlerts.size >= config.max_active) {
         context.emit?.('alert_rejected', {
@@ -126,11 +126,11 @@ export const alertHandler: TraitHandler<AlertConfig> = {
         });
         return;
       }
-      
-      const alertId = event.id as string || `alert_${Date.now()}`;
-      const message = event.message as string || config.message_template;
-      const severity = event.severity as Severity || config.severity;
-      
+
+      const alertId = (event.id as string) || `alert_${Date.now()}`;
+      const message = (event.message as string) || config.message_template;
+      const severity = (event.severity as Severity) || config.severity;
+
       const alert: AlertInstance = {
         id: alertId,
         severity,
@@ -138,13 +138,13 @@ export const alertHandler: TraitHandler<AlertConfig> = {
         timestamp: Date.now(),
         acknowledged: false,
       };
-      
+
       state.activeAlerts.set(alertId, alert);
       state.isTriggered = true;
       state.lastTriggerTime = Date.now();
       state.triggerCount++;
       state.isOnCooldown = true;
-      
+
       // Visual effect
       if (config.visual_effect !== 'none') {
         context.emit?.('alert_visual_effect', {
@@ -153,7 +153,7 @@ export const alertHandler: TraitHandler<AlertConfig> = {
           severity,
         });
       }
-      
+
       // Sound
       if (config.sound) {
         context.emit?.('alert_play_sound', {
@@ -162,17 +162,24 @@ export const alertHandler: TraitHandler<AlertConfig> = {
           severity,
         });
       }
-      
+
       // Haptic
       if (config.haptic) {
-        const intensity = severity === 'critical' ? 1.0 : severity === 'error' ? 0.8 : severity === 'warning' ? 0.5 : 0.3;
+        const intensity =
+          severity === 'critical'
+            ? 1.0
+            : severity === 'error'
+              ? 0.8
+              : severity === 'warning'
+                ? 0.5
+                : 0.3;
         context.emit?.('alert_haptic', {
           node,
           intensity,
           duration: 200,
         });
       }
-      
+
       // Notification
       if (config.notification) {
         context.emit?.('alert_notification', {
@@ -182,7 +189,7 @@ export const alertHandler: TraitHandler<AlertConfig> = {
           severity,
         });
       }
-      
+
       context.emit?.('on_alert_triggered', {
         node,
         alertId,
@@ -193,21 +200,21 @@ export const alertHandler: TraitHandler<AlertConfig> = {
     } else if (event.type === 'alert_acknowledge') {
       const alertId = event.alertId as string;
       const alert = state.activeAlerts.get(alertId);
-      
+
       if (alert) {
         alert.acknowledged = true;
         context.emit?.('on_alert_acknowledged', { node, alertId });
       }
     } else if (event.type === 'alert_dismiss') {
       const alertId = event.alertId as string;
-      
+
       if (state.activeAlerts.has(alertId)) {
         state.activeAlerts.delete(alertId);
-        
+
         if (state.activeAlerts.size === 0) {
           state.isTriggered = false;
         }
-        
+
         context.emit?.('alert_dismissed', { node, alertId });
         context.emit?.('on_alert_cleared', { node, alertId });
       }
@@ -215,12 +222,12 @@ export const alertHandler: TraitHandler<AlertConfig> = {
       const count = state.activeAlerts.size;
       state.activeAlerts.clear();
       state.isTriggered = false;
-      
+
       context.emit?.('on_alerts_cleared', { node, count });
     } else if (event.type === 'alert_check_condition') {
       // External system checked condition and reports result
       const conditionMet = event.result as boolean;
-      
+
       if (conditionMet && !state.isOnCooldown) {
         context.emit?.('alert_trigger', {
           node,

@@ -76,10 +76,10 @@ export const highContrastHandler: TraitHandler<HighContrastConfig> = {
       systemPreference: 'auto',
     };
     (node as any).__highContrastState = state;
-    
+
     // Check system preference
     context.emit?.('high_contrast_check_system', { node });
-    
+
     // If mode is not auto or off, apply immediately
     if (config.mode !== 'auto' && config.mode !== 'off') {
       applyContrast(node, config, state, config.mode, context);
@@ -94,17 +94,17 @@ export const highContrastHandler: TraitHandler<HighContrastConfig> = {
     delete (node as any).__highContrastState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(_node, _config, _context, _delta) {
     // High contrast is event-driven, no per-frame updates
   },
 
   onEvent(node, config, context, event) {
     const state = (node as any).__highContrastState as HighContrastState;
     if (!state) return;
-    
+
     if (event.type === 'high_contrast_system_preference') {
       state.systemPreference = event.mode as ContrastMode;
-      
+
       if (config.mode === 'auto') {
         applyContrast(node, config, state, state.systemPreference, context);
       }
@@ -140,7 +140,7 @@ function applyContrast(
   context: any
 ): void {
   if (mode === 'off') return;
-  
+
   // Store original materials
   const materialId = node.id || 'default';
   if (!state.originalMaterials.has(materialId) && node.material) {
@@ -150,11 +150,11 @@ function applyContrast(
       opacity: node.material.opacity ?? 1,
     });
   }
-  
+
   const palette = config.forced_colors
     ? { fg: config.foreground_color, bg: config.background_color, accent: config.outline_color }
     : CONTRAST_PALETTES[mode];
-  
+
   // Apply high contrast materials
   context.emit?.('high_contrast_apply', {
     node,
@@ -165,10 +165,10 @@ function applyContrast(
     outlineColor: config.outline_color,
     preserveImages: config.preserve_images,
   });
-  
+
   state.isActive = true;
   state.activeMode = mode;
-  
+
   context.emit?.('on_contrast_change', {
     node,
     mode,
@@ -176,14 +176,10 @@ function applyContrast(
   });
 }
 
-function restoreOriginalMaterials(
-  node: any,
-  state: HighContrastState,
-  context: any
-): void {
+function restoreOriginalMaterials(node: any, state: HighContrastState, context: any): void {
   const materialId = node.id || 'default';
   const original = state.originalMaterials.get(materialId);
-  
+
   if (original) {
     context.emit?.('high_contrast_restore', {
       node,
@@ -192,10 +188,10 @@ function restoreOriginalMaterials(
       opacity: original.opacity,
     });
   }
-  
+
   state.isActive = false;
   state.activeMode = 'off';
-  
+
   context.emit?.('on_contrast_change', {
     node,
     mode: 'off',

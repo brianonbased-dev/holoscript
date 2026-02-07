@@ -89,7 +89,7 @@ export const eyeTrackedHandler: TraitHandler<EyeTrackedTrait> = {
 
   onDetach(node, config, context) {
     const state = (node as any).__eyeTrackedState as EyeTrackedState;
-    
+
     // Restore original properties
     if (state && node.properties) {
       (node.properties as any).scale = state.originalScale;
@@ -173,7 +173,7 @@ export const eyeTrackedHandler: TraitHandler<EyeTrackedTrait> = {
       if (state.dwellProgress >= 1) {
         context.emit('dwell_activate', { node });
         context.emit('click', { node, method: 'dwell' });
-        
+
         // Reset dwell
         state.gazeStartTime = Date.now();
         state.dwellProgress = 0;
@@ -184,13 +184,13 @@ export const eyeTrackedHandler: TraitHandler<EyeTrackedTrait> = {
     if (config.smooth_pursuit && state.isGazed) {
       const gazePoint = rayPointAtDistance(gazeRay, 2.0); // 2m in front
       const smoothSpeed = 5 * delta;
-      
+
       state.smoothPosition = [
         lerp((state.smoothPosition as any)[0], (gazePoint as any)[0], smoothSpeed),
         lerp((state.smoothPosition as any)[1], (gazePoint as any)[1], smoothSpeed),
         lerp((state.smoothPosition as any)[2], (gazePoint as any)[2], smoothSpeed),
       ];
-      
+
       if (node.properties) {
         (node.properties as any).position = state.smoothPosition;
       }
@@ -231,11 +231,11 @@ function getEyeGazeRay(context: TraitContext): GazeRay | null {
   // This would integrate with device-specific eye tracking APIs
   const headPos = context.vr.headset.position;
   const headRot = context.vr.headset.rotation;
-  
+
   // Calculate forward direction from head rotation
   const radY = ((headRot as any)[1] * Math.PI) / 180;
   const radX = ((headRot as any)[0] * Math.PI) / 180;
-  
+
   const direction: Vector3 = [
     -Math.sin(radY) * Math.cos(radX),
     -Math.sin(radX),
@@ -264,8 +264,8 @@ function isPointGazedAt(
   // Distance to point
   const distance = Math.sqrt(
     (toPoint as any)[0] * (toPoint as any)[0] +
-    (toPoint as any)[1] * (toPoint as any)[1] +
-    (toPoint as any)[2] * (toPoint as any)[2]
+      (toPoint as any)[1] * (toPoint as any)[1] +
+      (toPoint as any)[2] * (toPoint as any)[2]
   );
 
   if (distance === 0) return true;

@@ -74,13 +74,13 @@ export const seatedHandler: TraitHandler<SeatedTrait> = {
     delete (node as any).__seatedState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__seatedState as SeatedState;
     if (!state) return;
 
     const headPos = context.vr.headset.position as any;
     const origin = state.originalPosition as any;
-    
+
     // Calculate reach distance from center
     const dx = headPos[0] - origin[0];
     const dz = headPos[2] - origin[2];
@@ -123,10 +123,10 @@ export const seatedHandler: TraitHandler<SeatedTrait> = {
       const angle = config.snap_turn_angle || 45;
       const direction = (event as any).type === 'turn_left' ? -1 : 1;
       const currentRot = (node.properties?.rotation as any) || [0, 0, 0];
-      
+
       (node.properties as any).rotation = [
         currentRot[0],
-        currentRot[1] + (angle * direction),
+        currentRot[1] + angle * direction,
         currentRot[2],
       ];
 

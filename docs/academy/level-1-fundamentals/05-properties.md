@@ -6,13 +6,13 @@ Welcome to Lesson 1.5! In this lesson, you'll master all the properties availabl
 
 Properties in HoloScript are organized into categories:
 
-| Category | Examples |
-|----------|----------|
-| **Transform** | position, rotation, scale |
-| **Visual** | color, opacity, material, visible |
-| **Geometry** | width, height, depth, radius |
-| **Behavior** | castShadow, receiveShadow |
-| **Custom** | Any user-defined property |
+| Category      | Examples                          |
+| ------------- | --------------------------------- |
+| **Transform** | position, rotation, scale         |
+| **Visual**    | color, opacity, material, visible |
+| **Geometry**  | width, height, depth, radius      |
+| **Behavior**  | castShadow, receiveShadow         |
+| **Custom**    | Any user-defined property         |
 
 ## Transform Properties
 
@@ -30,6 +30,7 @@ orb cube {
 ```
 
 **Coordinate System:**
+
 - **X** - Left (-) to Right (+)
 - **Y** - Down (-) to Up (+)
 - **Z** - In front (-) to Behind (+)
@@ -118,25 +119,25 @@ orb detailed {
   material: {
     // Base color
     color: "#4a90d9"
-    
+
     // PBR properties
     metalness: 0.8       // 0-1, how metallic
     roughness: 0.2       // 0-1, surface roughness
-    
+
     // Emission (glow)
     emissive: "#0066ff"
     emissiveIntensity: 0.5
-    
+
     // Textures
     map: "textures/diffuse.jpg"
     normalMap: "textures/normal.jpg"
     roughnessMap: "textures/roughness.jpg"
     metalnessMap: "textures/metalness.jpg"
-    
+
     // Transparency
     transparent: true
     opacity: 0.9
-    
+
     // Additional
     side: "double"       // "front", "back", "double"
     wireframe: false
@@ -231,11 +232,11 @@ orb player {
   score: 0
   isAlive: true
   inventory: []
-  
+
   // Settings
   speed: 5.0
   jumpHeight: 2.0
-  
+
   // Nested state
   stats: {
     strength: 10
@@ -250,7 +251,7 @@ Access state in event handlers:
 ```hs
 orb enemy {
   health: 100
-  
+
   onHit: {
     this.health -= 10
     if (this.health <= 0) {
@@ -282,7 +283,7 @@ template Button {
     color: string = "#0066ff"
     size: number = 1
   }
-  
+
   orb button {
     geometry: "cube"
     scale: params.size
@@ -301,7 +302,7 @@ Properties that change over time:
 ```hs
 orb spinner {
   geometry: "cube"
-  
+
   animation spin {
     property: "rotation.y"
     from: 0
@@ -314,6 +315,7 @@ orb spinner {
 ```
 
 Animatable properties:
+
 - `position.x`, `position.y`, `position.z`
 - `rotation.x`, `rotation.y`, `rotation.z`
 - `scale` (uniform) or `scale.x`, `scale.y`, `scale.z`
@@ -323,16 +325,16 @@ Animatable properties:
 
 ## Property Type Reference
 
-| Type | Example | Description |
-|------|---------|-------------|
-| `number` | `1.5` | Numeric value |
-| `string` | `"hello"` | Text value |
-| `boolean` | `true` | True/false |
-| `array` | `[1, 2, 3]` | List of values |
-| `object` | `{ x: 1, y: 2 }` | Key-value pairs |
-| `color` | `"#ff0000"` | Hex color code |
-| `vector3` | `[x, y, z]` | 3D coordinate |
-| `quaternion` | `[x, y, z, w]` | Rotation quaternion |
+| Type         | Example          | Description         |
+| ------------ | ---------------- | ------------------- |
+| `number`     | `1.5`            | Numeric value       |
+| `string`     | `"hello"`        | Text value          |
+| `boolean`    | `true`           | True/false          |
+| `array`      | `[1, 2, 3]`      | List of values      |
+| `object`     | `{ x: 1, y: 2 }` | Key-value pairs     |
+| `color`      | `"#ff0000"`      | Hex color code      |
+| `vector3`    | `[x, y, z]`      | 3D coordinate       |
+| `quaternion` | `[x, y, z, w]`   | Rotation quaternion |
 
 ## Complete Example
 
@@ -342,7 +344,7 @@ orb interactiveObject {
   position: [0, 1.5, -2]
   rotation: [0, 45, 0]
   scale: 0.5
-  
+
   // Visual
   geometry: "sphere"
   material: {
@@ -353,23 +355,23 @@ orb interactiveObject {
   }
   castShadow: true
   receiveShadow: true
-  
+
   // State
   isActivated: false
   pulseSpeed: 1.0
-  
+
   // Behavior
   @grabbable
   @hoverable
-  
+
   onHoverEnter: {
     this.material.emissive = "#4a90d9"
   }
-  
+
   onHoverExit: {
     this.material.emissive = "#000000"
   }
-  
+
   onGrab: {
     this.isActivated = true
   }

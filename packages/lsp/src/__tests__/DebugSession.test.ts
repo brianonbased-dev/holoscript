@@ -9,7 +9,7 @@ describe('HoloScriptDebugSession', () => {
   beforeEach(() => {
     session = new HoloScriptDebugSession();
     responses = [];
-    
+
     // Mock sendResponse to capture responses
     (session as any).sendResponse = (response: any) => {
       responses.push(response);
@@ -28,8 +28,8 @@ describe('HoloScriptDebugSession', () => {
       command: 'initialize',
       arguments: {
         adapterID: 'holoscript',
-        pathFormat: 'path'
-      }
+        pathFormat: 'path',
+      },
     };
 
     const response: DebugProtocol.InitializeResponse = {
@@ -38,7 +38,7 @@ describe('HoloScriptDebugSession', () => {
       request_seq: 1,
       command: 'initialize',
       success: true,
-      body: {}
+      body: {},
     };
 
     (session as any).initializeRequest(response, request.arguments);
@@ -49,13 +49,13 @@ describe('HoloScriptDebugSession', () => {
   });
 
   it('should handle threads request', () => {
-     const response: DebugProtocol.ThreadsResponse = {
+    const response: DebugProtocol.ThreadsResponse = {
       seq: 0,
       type: 'response',
       request_seq: 2,
       command: 'threads',
       success: true,
-      body: { threads: [] }
+      body: { threads: [] },
     };
 
     (session as any).threadsRequest(response);
@@ -68,10 +68,7 @@ describe('HoloScriptDebugSession', () => {
   it('should handle setBreakpoints request', () => {
     const requestArgs: DebugProtocol.SetBreakpointsArguments = {
       source: { path: 'test.holo' },
-      breakpoints: [
-        { line: 10 },
-        { line: 20 }
-      ]
+      breakpoints: [{ line: 10 }, { line: 20 }],
     };
 
     const response: DebugProtocol.SetBreakpointsResponse = {
@@ -80,7 +77,7 @@ describe('HoloScriptDebugSession', () => {
       request_seq: 3,
       command: 'setBreakpoints',
       success: true,
-      body: { breakpoints: [] }
+      body: { breakpoints: [] },
     };
 
     (session as any).setBreakPointsRequest(response, requestArgs);

@@ -276,7 +276,7 @@ export class PartnerAnalytics {
   /**
    * Get aggregated stats across all partner packages
    */
-  async getPortfolioStats(period: AnalyticsPeriod = 'month'): Promise<{
+  async getPortfolioStats(_period: AnalyticsPeriod = 'month'): Promise<{
     totalPackages: number;
     totalDownloads: number;
     certifiedPackages: number;
@@ -329,7 +329,10 @@ export class PartnerAnalytics {
 
   // Simulation helpers (for SDK testing without backend)
 
-  private async simulateDownloadStats(packageName: string, period: AnalyticsPeriod): Promise<DownloadStats> {
+  private async simulateDownloadStats(
+    packageName: string,
+    period: AnalyticsPeriod
+  ): Promise<DownloadStats> {
     await this.delay(50);
 
     const multiplier = this.getPeriodMultiplier(period);
@@ -350,9 +353,9 @@ export class PartnerAnalytics {
         US: Math.floor(total * 0.35),
         DE: Math.floor(total * 0.15),
         GB: Math.floor(total * 0.12),
-        CN: Math.floor(total * 0.10),
+        CN: Math.floor(total * 0.1),
         IN: Math.floor(total * 0.08),
-        Other: Math.floor(total * 0.20),
+        Other: Math.floor(total * 0.2),
       },
       byDate: this.generateDateSeries(period, total),
       trend: {
@@ -362,7 +365,10 @@ export class PartnerAnalytics {
     };
   }
 
-  private async simulateEngagementMetrics(packageName: string, period: AnalyticsPeriod): Promise<EngagementMetrics> {
+  private async simulateEngagementMetrics(
+    packageName: string,
+    period: AnalyticsPeriod
+  ): Promise<EngagementMetrics> {
     await this.delay(50);
 
     const views = Math.floor(5000 * (Math.random() + 0.5));
@@ -389,7 +395,7 @@ export class PartnerAnalytics {
     const factors = {
       downloads: { score: Math.floor(70 + Math.random() * 30), weight: 0.25 },
       maintenance: { score: Math.floor(60 + Math.random() * 40), weight: 0.25 },
-      security: { score: Math.floor(80 + Math.random() * 20), weight: 0.20 },
+      security: { score: Math.floor(80 + Math.random() * 20), weight: 0.2 },
       quality: { score: Math.floor(75 + Math.random() * 25), weight: 0.15 },
       community: { score: Math.floor(50 + Math.random() * 50), weight: 0.15 },
     };
@@ -411,7 +417,10 @@ export class PartnerAnalytics {
     };
   }
 
-  private async simulateRevenueMetrics(packageName: string, period: AnalyticsPeriod): Promise<RevenueMetrics> {
+  private async simulateRevenueMetrics(
+    packageName: string,
+    period: AnalyticsPeriod
+  ): Promise<RevenueMetrics> {
     await this.delay(50);
 
     const multiplier = this.getPeriodMultiplier(period);
@@ -470,11 +479,7 @@ export class PartnerAnalytics {
         'More comprehensive documentation',
         'Active community support',
       ],
-      opportunities: [
-        'Add WebXR 2.0 support',
-        'Improve bundle size',
-        'Add more example projects',
-      ],
+      opportunities: ['Add WebXR 2.0 support', 'Improve bundle size', 'Add more example projects'],
     };
   }
 
@@ -490,7 +495,10 @@ export class PartnerAnalytics {
     return multipliers[period];
   }
 
-  private generateDateSeries(period: AnalyticsPeriod, total: number): Array<{ date: string; downloads: number; unique: number }> {
+  private generateDateSeries(
+    period: AnalyticsPeriod,
+    total: number
+  ): Array<{ date: string; downloads: number; unique: number }> {
     const days = this.getPeriodMultiplier(period);
     const result: Array<{ date: string; downloads: number; unique: number }> = [];
     const now = new Date();
@@ -559,6 +567,9 @@ export class PartnerAnalytics {
 /**
  * Create a partner analytics instance
  */
-export function createPartnerAnalytics(credentials: PartnerCredentials, baseUrl?: string): PartnerAnalytics {
+export function createPartnerAnalytics(
+  credentials: PartnerCredentials,
+  baseUrl?: string
+): PartnerAnalytics {
   return new PartnerAnalytics(credentials, baseUrl);
 }

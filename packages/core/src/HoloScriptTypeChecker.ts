@@ -24,11 +24,9 @@ import type {
   TemplateNode,
   HoloScriptValue,
   MatchExpression,
-  MatchCase,
-  MatchPattern,
 } from './types';
 import { BUILTIN_CONSTRAINTS } from './traits/traitConstraints';
-import { ExhaustivenessChecker, UnionType, LiteralType } from './types/AdvancedTypeSystem';
+import { ExhaustivenessChecker, UnionType } from './types/AdvancedTypeSystem';
 
 // Type system types
 export type HoloScriptType =
@@ -87,24 +85,122 @@ export interface TypeCheckResult {
 
 // Built-in type definitions
 const BUILTIN_FUNCTIONS: Map<string, TypeInfo> = new Map([
-  ['add', { type: 'function', parameters: [{ name: 'a', type: 'number' }, { name: 'b', type: 'number' }], returnType: 'number' }],
-  ['subtract', { type: 'function', parameters: [{ name: 'a', type: 'number' }, { name: 'b', type: 'number' }], returnType: 'number' }],
-  ['multiply', { type: 'function', parameters: [{ name: 'a', type: 'number' }, { name: 'b', type: 'number' }], returnType: 'number' }],
-  ['divide', { type: 'function', parameters: [{ name: 'a', type: 'number' }, { name: 'b', type: 'number' }], returnType: 'number' }],
-  ['concat', { type: 'function', parameters: [{ name: 'a', type: 'string' }, { name: 'b', type: 'string' }], returnType: 'string' }],
-  ['length', { type: 'function', parameters: [{ name: 'value', type: 'any' }], returnType: 'number' }],
-  ['push', { type: 'function', parameters: [{ name: 'arr', type: 'array' }, { name: 'item', type: 'any' }], returnType: 'array' }],
+  [
+    'add',
+    {
+      type: 'function',
+      parameters: [
+        { name: 'a', type: 'number' },
+        { name: 'b', type: 'number' },
+      ],
+      returnType: 'number',
+    },
+  ],
+  [
+    'subtract',
+    {
+      type: 'function',
+      parameters: [
+        { name: 'a', type: 'number' },
+        { name: 'b', type: 'number' },
+      ],
+      returnType: 'number',
+    },
+  ],
+  [
+    'multiply',
+    {
+      type: 'function',
+      parameters: [
+        { name: 'a', type: 'number' },
+        { name: 'b', type: 'number' },
+      ],
+      returnType: 'number',
+    },
+  ],
+  [
+    'divide',
+    {
+      type: 'function',
+      parameters: [
+        { name: 'a', type: 'number' },
+        { name: 'b', type: 'number' },
+      ],
+      returnType: 'number',
+    },
+  ],
+  [
+    'concat',
+    {
+      type: 'function',
+      parameters: [
+        { name: 'a', type: 'string' },
+        { name: 'b', type: 'string' },
+      ],
+      returnType: 'string',
+    },
+  ],
+  [
+    'length',
+    { type: 'function', parameters: [{ name: 'value', type: 'any' }], returnType: 'number' },
+  ],
+  [
+    'push',
+    {
+      type: 'function',
+      parameters: [
+        { name: 'arr', type: 'array' },
+        { name: 'item', type: 'any' },
+      ],
+      returnType: 'array',
+    },
+  ],
   ['pop', { type: 'function', parameters: [{ name: 'arr', type: 'array' }], returnType: 'any' }],
   ['log', { type: 'function', parameters: [{ name: 'message', type: 'any' }], returnType: 'void' }],
-  ['print', { type: 'function', parameters: [{ name: 'message', type: 'any' }], returnType: 'void' }],
+  [
+    'print',
+    { type: 'function', parameters: [{ name: 'message', type: 'any' }], returnType: 'void' },
+  ],
   ['show', { type: 'function', parameters: [{ name: 'target', type: 'orb' }], returnType: 'void' }],
   ['hide', { type: 'function', parameters: [{ name: 'target', type: 'orb' }], returnType: 'void' }],
-  ['pulse', { type: 'function', parameters: [{ name: 'target', type: 'orb' }], returnType: 'void' }],
-  ['animate', { type: 'function', parameters: [{ name: 'target', type: 'orb' }, { name: 'config', type: 'object' }], returnType: 'void' }],
-  ['spawn', { type: 'function', parameters: [{ name: 'type', type: 'string' }, { name: 'position', type: 'object' }], returnType: 'orb' }],
-  ['isNumber', { type: 'function', parameters: [{ name: 'value', type: 'any' }], returnType: 'boolean' }],
-  ['isString', { type: 'function', parameters: [{ name: 'value', type: 'any' }], returnType: 'boolean' }],
-  ['isArray', { type: 'function', parameters: [{ name: 'value', type: 'any' }], returnType: 'boolean' }],
+  [
+    'pulse',
+    { type: 'function', parameters: [{ name: 'target', type: 'orb' }], returnType: 'void' },
+  ],
+  [
+    'animate',
+    {
+      type: 'function',
+      parameters: [
+        { name: 'target', type: 'orb' },
+        { name: 'config', type: 'object' },
+      ],
+      returnType: 'void',
+    },
+  ],
+  [
+    'spawn',
+    {
+      type: 'function',
+      parameters: [
+        { name: 'type', type: 'string' },
+        { name: 'position', type: 'object' },
+      ],
+      returnType: 'orb',
+    },
+  ],
+  [
+    'isNumber',
+    { type: 'function', parameters: [{ name: 'value', type: 'any' }], returnType: 'boolean' },
+  ],
+  [
+    'isString',
+    { type: 'function', parameters: [{ name: 'value', type: 'any' }], returnType: 'boolean' },
+  ],
+  [
+    'isArray',
+    { type: 'function', parameters: [{ name: 'value', type: 'any' }], returnType: 'boolean' },
+  ],
 ]);
 
 export class HoloScriptTypeChecker {
@@ -142,7 +238,7 @@ export class HoloScriptTypeChecker {
     this.checkBlock(ast);
 
     return {
-      valid: this.diagnostics.filter(d => d.severity === 'error').length === 0,
+      valid: this.diagnostics.filter((d) => d.severity === 'error').length === 0,
       diagnostics: this.diagnostics,
       typeMap: new Map(this.typeMap),
     };
@@ -172,13 +268,13 @@ export class HoloScriptTypeChecker {
   }
 
   private collectTemplateDeclaration(node: TemplateNode): void {
-     // Register template as a known identifier with type 'object' (or a new 'template' type)
-     // For now, treat as object so it can be spread
-     this.typeMap.set(node.name, {
-       type: 'object',
-       // We could try to infer properties from body if structure allows, 
-       // but for now simple registration is enough to pass "Unknown variable" checks
-     });
+    // Register template as a known identifier with type 'object' (or a new 'template' type)
+    // For now, treat as object so it can be spread
+    this.typeMap.set(node.name, {
+      type: 'object',
+      // We could try to infer properties from body if structure allows,
+      // but for now simple registration is enough to pass "Unknown variable" checks
+    });
   }
 
   private collectOrbDeclaration(node: OrbNode): void {
@@ -206,7 +302,7 @@ export class HoloScriptTypeChecker {
   }
 
   private collectMethodDeclaration(node: MethodNode): void {
-    const parameters: ParameterType[] = node.parameters.map(p => ({
+    const parameters: ParameterType[] = node.parameters.map((p) => ({
       name: p.name,
       type: this.parseTypeString(p.dataType),
       optional: p.defaultValue !== undefined,
@@ -311,19 +407,24 @@ export class HoloScriptTypeChecker {
     }
 
     // Check if target is assignable (variable or member expression)
-    const targetStr = typeof node.target === 'string' 
-      ? node.target 
-      : (node.target as any).__ref || (node.target as any).name;
-    
+    const targetStr =
+      typeof node.target === 'string'
+        ? node.target
+        : (node.target as any).__ref || (node.target as any).name;
+
     if (!targetStr) {
-      this.addDiagnostic('error', `Null coalescing assignment to non-assignable expression`, 'E105');
+      this.addDiagnostic(
+        'error',
+        `Null coalescing assignment to non-assignable expression`,
+        'E105'
+      );
       return;
     }
 
     // Type of target should be nullable for ??= to make sense
     const targetType = this.typeMap.get(targetStr);
     const valueType = node.value ? this.inferType(node.value) : 'unknown';
-    
+
     // Assign the union of target and value types
     this.typeMap.set(targetStr, targetType || { type: valueType as any, nullable: false });
   }
@@ -334,12 +435,16 @@ export class HoloScriptTypeChecker {
       return;
     }
     if (!this.typeMap.has(node.target)) {
-       this.addDiagnostic('error', `Unknown template or object '${node.target}' in spread`, 'E102');
+      this.addDiagnostic('error', `Unknown template or object '${node.target}' in spread`, 'E102');
     } else {
-       const type = this.typeMap.get(node.target);
-       if (type && type.type !== 'object' && type.type !== 'orb' && type.type !== 'any') {
-          this.addDiagnostic('error', `Cannot spread '${node.target}' type '${type.type}', must be object or template`, 'E103');
-       }
+      const type = this.typeMap.get(node.target);
+      if (type && type.type !== 'object' && type.type !== 'orb' && type.type !== 'any') {
+        this.addDiagnostic(
+          'error',
+          `Cannot spread '${node.target}' type '${type.type}', must be object or template`,
+          'E103'
+        );
+      }
     }
   }
 
@@ -362,9 +467,10 @@ export class HoloScriptTypeChecker {
     }
 
     // Extract the subject identifier for type lookup
-    const subjectId = typeof node.subject === 'string'
-      ? node.subject
-      : (node.subject as any)?.__ref || (node.subject as any)?.name;
+    const subjectId =
+      typeof node.subject === 'string'
+        ? node.subject
+        : (node.subject as any)?.__ref || (node.subject as any)?.name;
 
     // Try to find a registered union type for the subject
     let unionType: UnionType | undefined;
@@ -389,7 +495,8 @@ export class HoloScriptTypeChecker {
       // Check for wildcard pattern
       if (pattern.type === 'wildcard-pattern') {
         if (hasWildcard) {
-          this.addDiagnostic('warning',
+          this.addDiagnostic(
+            'warning',
             `Duplicate wildcard pattern at case ${i + 1} - only the first wildcard will be reached`,
             'W200'
           );
@@ -403,7 +510,8 @@ export class HoloScriptTypeChecker {
 
         // Check for duplicate patterns
         if (casePatterns.includes(value)) {
-          this.addDiagnostic('warning',
+          this.addDiagnostic(
+            'warning',
             `Duplicate pattern "${value}" at case ${i + 1} - this case will never be reached`,
             'W201'
           );
@@ -416,7 +524,8 @@ export class HoloScriptTypeChecker {
 
       // Check for unreachable patterns after wildcard
       if (hasWildcard && i > wildcardIndex) {
-        this.addDiagnostic('warning',
+        this.addDiagnostic(
+          'warning',
           `Unreachable pattern at case ${i + 1} - previous wildcard (_) matches all remaining cases`,
           'W202',
           ['Remove this case or reorder patterns']
@@ -434,16 +543,18 @@ export class HoloScriptTypeChecker {
       const result = this.exhaustivenessChecker.checkMatch(unionType, casePatterns);
 
       if (!result.isExhaustive && !hasWildcard) {
-        const missingCases = result.uncoveredCases.map(c => `"${c}"`).join(', ');
-        this.addDiagnostic('error',
+        const missingCases = result.uncoveredCases.map((c) => `"${c}"`).join(', ');
+        this.addDiagnostic(
+          'error',
           `Non-exhaustive match. Missing cases: ${missingCases}`,
           'E203',
-          result.uncoveredCases.map(c => `Add case: "${c}" => ...`)
+          result.uncoveredCases.map((c) => `Add case: "${c}" => ...`)
         );
       }
     } else if (!hasWildcard && subjectId) {
       // No known union type and no wildcard - warn about potential non-exhaustiveness
-      this.addDiagnostic('info',
+      this.addDiagnostic(
+        'info',
         `Match expression on '${subjectId}' may be non-exhaustive. Consider adding a wildcard (_) case.`,
         'I200'
       );
@@ -455,7 +566,7 @@ export class HoloScriptTypeChecker {
    * Example: type State = "idle" | "loading" | "success" | "error"
    */
   public registerUnionType(name: string, members: (string | number | boolean)[]): void {
-    const unionMembers = members.map(m => ({
+    const unionMembers = members.map((m) => ({
       kind: 'literal' as const,
       value: m,
     }));
@@ -477,7 +588,7 @@ export class HoloScriptTypeChecker {
     if (!nodes) return;
     for (const node of nodes) {
       this.checkNode(node);
-      
+
       // Special case for tests: if it's an expression statement with a single identifier,
       // emit a debug diagnostic showing its current type.
       if (node.type === 'expression-statement' && typeof (node as any).expression === 'string') {
@@ -524,7 +635,8 @@ export class HoloScriptTypeChecker {
     // Check if types are compatible
     if (fromType && toType && node.dataType !== 'any') {
       if (!this.isCompatible(fromType, toType)) {
-        this.addDiagnostic('warning',
+        this.addDiagnostic(
+          'warning',
           `Connection from '${node.from}' (${fromType.type}) to '${node.to}' (${toType.type}) may be incompatible`,
           'W001',
           [`Consider using 'as "any"' to bypass type checking`]
@@ -555,10 +667,10 @@ export class HoloScriptTypeChecker {
     if (narrowedVar && narrowedType) {
       const originalType = this.typeMap.get(narrowedVar);
       this.typeMap.set(narrowedVar, narrowedType);
-      
+
       // Add debug diagnostic for testing narrowing
       this.addDiagnostic('info', `Type of '${narrowedVar}' is ${narrowedType.type}`, 'DEBUG');
-      
+
       this.checkBlock(node.truePath);
       if (originalType) this.typeMap.set(narrowedVar, originalType);
       else this.typeMap.delete(narrowedVar);
@@ -582,14 +694,15 @@ export class HoloScriptTypeChecker {
 
   private checkVariableDeclaration(node: VariableDeclarationNode): void {
     const typeInfo = this.typeMap.get(node.name);
-    
+
     if (typeInfo && node.value !== undefined && !node.isExpression) {
       const inferredValueType = this.inferTypeWithContext(node.value, typeInfo);
-      
+
       // Use isCompatible to check if the value matches the declared/inferred type
       if (!this.isCompatible(inferredValueType, typeInfo)) {
-        this.addDiagnostic('error', 
-          `Type mismatch: cannot assign ${inferredValueType.type} to ${typeInfo.type}`, 
+        this.addDiagnostic(
+          'error',
+          `Type mismatch: cannot assign ${inferredValueType.type} to ${typeInfo.type}`,
           'E102'
         );
       }
@@ -599,7 +712,11 @@ export class HoloScriptTypeChecker {
       const vars = this.extractVariables(node.value);
       for (const v of vars) {
         if (!this.typeMap.has(v) && !this.isLiteral(v) && !BUILTIN_FUNCTIONS.has(v)) {
-           this.addDiagnostic('warning', `Reference to potentially undeclared variable '${v}'`, 'W101');
+          this.addDiagnostic(
+            'warning',
+            `Reference to potentially undeclared variable '${v}'`,
+            'W101'
+          );
         }
       }
     }
@@ -620,7 +737,11 @@ export class HoloScriptTypeChecker {
       const condVars = this.extractVariables(node.condition);
       for (const varName of condVars) {
         if (!this.typeMap.has(varName) && !this.isLiteral(varName)) {
-          this.addDiagnostic('error', `Unknown variable '${varName}' in for loop condition`, 'E004');
+          this.addDiagnostic(
+            'error',
+            `Unknown variable '${varName}' in for loop condition`,
+            'E004'
+          );
         }
       }
     } else {
@@ -636,7 +757,11 @@ export class HoloScriptTypeChecker {
       const condVars = this.extractVariables(node.condition);
       for (const varName of condVars) {
         if (!this.typeMap.has(varName) && !this.isLiteral(varName)) {
-          this.addDiagnostic('error', `Unknown variable '${varName}' in while loop condition`, 'E005');
+          this.addDiagnostic(
+            'error',
+            `Unknown variable '${varName}' in while loop condition`,
+            'E005'
+          );
         }
       }
     } else {
@@ -650,24 +775,35 @@ export class HoloScriptTypeChecker {
   private checkForEachLoop(node: ForEachLoopNode): void {
     // Check collection exists
     if (!this.typeMap.has(node.collection)) {
-      this.addDiagnostic('error', `Unknown collection '${node.collection}' in forEach loop`, 'E006');
+      this.addDiagnostic(
+        'error',
+        `Unknown collection '${node.collection}' in forEach loop`,
+        'E006'
+      );
     } else {
       const collectionType = this.typeMap.get(node.collection);
       if (collectionType && collectionType.type !== 'array' && collectionType.type !== 'any') {
-        this.addDiagnostic('error', `'${node.collection}' is not iterable (type: ${collectionType.type})`, 'E007');
+        this.addDiagnostic(
+          'error',
+          `'${node.collection}' is not iterable (type: ${collectionType.type})`,
+          'E007'
+        );
       }
     }
 
     // Add loop variable to scope
     const collectionType = this.typeMap.get(node.collection);
-    const itemType: HoloScriptType = (collectionType?.type === 'array' && collectionType.elementType) ? collectionType.elementType : 'any';
-    
+    const itemType: HoloScriptType =
+      collectionType?.type === 'array' && collectionType.elementType
+        ? collectionType.elementType
+        : 'any';
+
     const originalType = this.typeMap.get(node.variable);
     this.typeMap.set(node.variable, { type: itemType });
-    
+
     // Check body
     this.checkBlock(node.body);
-    
+
     if (originalType) this.typeMap.set(node.variable, originalType);
     else this.typeMap.delete(node.variable);
   }
@@ -722,10 +858,10 @@ export class HoloScriptTypeChecker {
     }
 
     if (Array.isArray(value)) {
-      if (value.length === 2 && value.every(v => typeof v === 'number')) return { type: 'vec2' };
-      if (value.length === 3 && value.every(v => typeof v === 'number')) return { type: 'vec3' };
-      if (value.length === 4 && value.every(v => typeof v === 'number')) return { type: 'vec4' };
-      
+      if (value.length === 2 && value.every((v) => typeof v === 'number')) return { type: 'vec2' };
+      if (value.length === 3 && value.every((v) => typeof v === 'number')) return { type: 'vec3' };
+      if (value.length === 4 && value.every((v) => typeof v === 'number')) return { type: 'vec4' };
+
       const elementType = value.length > 0 ? this.inferType(value[0]).type : 'any';
       return { type: 'array', elementType };
     }
@@ -781,10 +917,27 @@ export class HoloScriptTypeChecker {
   private parseTypeString(typeStr: string): HoloScriptType {
     const normalized = typeStr.toLowerCase().trim();
     const validTypes: HoloScriptType[] = [
-      'number', 'string', 'boolean', 'array', 'object',
-      'function', 'void', 'any', 'unknown', 'never',
-      'orb', 'stream', 'connection', 'gate',
-      'vec2', 'vec3', 'vec4', 'color', 'euler', 'quat', 'mat4'
+      'number',
+      'string',
+      'boolean',
+      'array',
+      'object',
+      'function',
+      'void',
+      'any',
+      'unknown',
+      'never',
+      'orb',
+      'stream',
+      'connection',
+      'gate',
+      'vec2',
+      'vec3',
+      'vec4',
+      'color',
+      'euler',
+      'quat',
+      'mat4',
     ];
 
     if (validTypes.includes(normalized as HoloScriptType)) {
@@ -801,7 +954,7 @@ export class HoloScriptTypeChecker {
     const varPattern = /\b([a-zA-Z_][a-zA-Z0-9_]*)\b/g;
     const matches = expr.match(varPattern) || [];
     const keywords = ['true', 'false', 'null', 'undefined', 'if', 'else', 'for', 'while', 'return'];
-    return matches.filter(m => !keywords.includes(m));
+    return matches.filter((m) => !keywords.includes(m));
   }
 
   /**
@@ -851,11 +1004,12 @@ export class HoloScriptTypeChecker {
           }
         }
       } else if (constraint.type === 'oneof') {
-        const matches = traitNames.filter(t => constraint.targets.includes(t));
+        const matches = traitNames.filter((t) => constraint.targets.includes(t));
         if (matches.length > 1) {
           this.addDiagnostic(
             'error',
-            constraint.message || `Only one of the following traits can be used at a time: ${constraint.targets.map(t => '@' + t).join(', ')}.`,
+            constraint.message ||
+              `Only one of the following traits can be used at a time: ${constraint.targets.map((t) => '@' + t).join(', ')}.`,
             'HSP014'
           );
         }

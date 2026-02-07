@@ -78,8 +78,8 @@ export type ReferenceContext =
 export interface GraphNode {
   id: string;
   definition: SymbolDefinition;
-  references: Set<string>;    // IDs of nodes this symbol references
-  referencedBy: Set<string>;  // IDs of nodes that reference this symbol
+  references: Set<string>; // IDs of nodes this symbol references
+  referencedBy: Set<string>; // IDs of nodes that reference this symbol
   isReachable: boolean;
 }
 
@@ -396,7 +396,11 @@ export class ReferenceGraph {
   /**
    * Scan logic block for references
    */
-  private scanLogicBlockForReferences(body: Record<string, unknown>, filePath: string, line: number): void {
+  private scanLogicBlockForReferences(
+    body: Record<string, unknown>,
+    filePath: string,
+    line: number
+  ): void {
     // Functions
     if (Array.isArray(body.functions)) {
       for (const func of body.functions) {

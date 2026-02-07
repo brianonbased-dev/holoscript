@@ -30,9 +30,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const talkableWarning = diagnostics.find((d) =>
-        d.message.includes('talkable')
-      );
+      const talkableWarning = diagnostics.find((d) => d.message.includes('talkable'));
       expect(talkableWarning).toBeDefined();
       expect(talkableWarning?.message).toContain('@voice');
     });
@@ -48,9 +46,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const collisionWarning = diagnostics.find((d) =>
-        d.message.includes('collision')
-      );
+      const collisionWarning = diagnostics.find((d) => d.message.includes('collision'));
       expect(collisionWarning).toBeDefined();
       expect(collisionWarning?.message).toContain('@physics or @trigger');
     });
@@ -65,9 +61,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const interactiveWarning = diagnostics.find((d) =>
-        d.message.includes('interactive')
-      );
+      const interactiveWarning = diagnostics.find((d) => d.message.includes('interactive'));
       expect(interactiveWarning).toBeDefined();
       expect(interactiveWarning?.message).toContain('@grabbable');
     });
@@ -82,9 +76,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const collidableWarning = diagnostics.find((d) =>
-        d.message.includes('collidable')
-      );
+      const collidableWarning = diagnostics.find((d) => d.message.includes('collidable'));
       expect(collidableWarning).toBeDefined();
       expect(collidableWarning?.message).toContain('@physics');
     });
@@ -115,9 +107,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const posWarning = diagnostics.find((d) =>
-        d.message.includes('"pos"')
-      );
+      const posWarning = diagnostics.find((d) => d.message.includes('"pos"'));
       expect(posWarning).toBeDefined();
       expect(posWarning?.message).toContain('position');
     });
@@ -132,9 +122,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const rotWarning = diagnostics.find((d) =>
-        d.message.includes('"rot"')
-      );
+      const rotWarning = diagnostics.find((d) => d.message.includes('"rot"'));
       expect(rotWarning).toBeDefined();
       expect(rotWarning?.message).toContain('rotation');
     });
@@ -149,9 +137,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const sclWarning = diagnostics.find((d) =>
-        d.message.includes('"scl"')
-      );
+      const sclWarning = diagnostics.find((d) => d.message.includes('"scl"'));
       expect(sclWarning).toBeDefined();
       expect(sclWarning?.message).toContain('scale');
     });
@@ -169,9 +155,7 @@ describe('deprecationWarningRule', () => {
       const diagnostics = deprecationWarningRule.check(context);
 
       // Should not have any property deprecations
-      const propWarnings = diagnostics.filter((d) =>
-        d.message.includes('property')
-      );
+      const propWarnings = diagnostics.filter((d) => d.message.includes('property'));
       expect(propWarnings.length).toBe(0);
     });
   });
@@ -187,9 +171,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const spawnWarning = diagnostics.find((d) =>
-        d.message.includes('spawn()')
-      );
+      const spawnWarning = diagnostics.find((d) => d.message.includes('spawn()'));
       expect(spawnWarning).toBeDefined();
       expect(spawnWarning?.message).toContain('create()');
     });
@@ -204,9 +186,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const destroyWarning = diagnostics.find((d) =>
-        d.message.includes('destroy()')
-      );
+      const destroyWarning = diagnostics.find((d) => d.message.includes('destroy()'));
       expect(destroyWarning).toBeDefined();
       expect(destroyWarning?.message).toContain('remove()');
     });
@@ -222,9 +202,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const varWarning = diagnostics.find((d) =>
-        d.message.includes('"var"')
-      );
+      const varWarning = diagnostics.find((d) => d.message.includes('"var"'));
       expect(varWarning).toBeDefined();
       expect(varWarning?.message).toContain('const or let');
       expect(varWarning?.severity).toBe('error');
@@ -240,9 +218,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const objectWarning = diagnostics.find((d) =>
-        d.message.includes('"object"')
-      );
+      const objectWarning = diagnostics.find((d) => d.message.includes('"object"'));
       expect(objectWarning).toBeDefined();
       expect(objectWarning?.message).toContain('orb');
     });
@@ -257,9 +233,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const eventWarning = diagnostics.find((d) =>
-        d.message.includes('on_event()')
-      );
+      const eventWarning = diagnostics.find((d) => d.message.includes('on_event()'));
       expect(eventWarning).toBeDefined();
       expect(eventWarning?.message).toContain('@on_*');
     });
@@ -277,9 +251,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source, { checkTraits: false });
       const diagnostics = deprecationWarningRule.check(context);
 
-      const traitWarnings = diagnostics.filter((d) =>
-        d.message.includes('trait')
-      );
+      const traitWarnings = diagnostics.filter((d) => d.message.includes('trait'));
       expect(traitWarnings.length).toBe(0);
     });
 
@@ -294,9 +266,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source, { checkProperties: false });
       const diagnostics = deprecationWarningRule.check(context);
 
-      const propWarnings = diagnostics.filter((d) =>
-        d.message.includes('property')
-      );
+      const propWarnings = diagnostics.filter((d) => d.message.includes('property'));
       expect(propWarnings.length).toBe(0);
     });
 
@@ -311,9 +281,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source, { checkFunctions: false });
       const diagnostics = deprecationWarningRule.check(context);
 
-      const funcWarnings = diagnostics.filter((d) =>
-        d.message.includes('function')
-      );
+      const funcWarnings = diagnostics.filter((d) => d.message.includes('function'));
       expect(funcWarnings.length).toBe(0);
     });
 
@@ -326,8 +294,8 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source, { checkSyntax: false });
       const diagnostics = deprecationWarningRule.check(context);
 
-      const syntaxWarnings = diagnostics.filter((d) =>
-        d.message.includes('keyword') || d.message.includes('syntax')
+      const syntaxWarnings = diagnostics.filter(
+        (d) => d.message.includes('keyword') || d.message.includes('syntax')
       );
       expect(syntaxWarnings.length).toBe(0);
     });
@@ -342,9 +310,7 @@ describe('deprecationWarningRule', () => {
       const context = createContext(source, { ignoreIds: ['trait-talkable'] });
       const diagnostics = deprecationWarningRule.check(context);
 
-      const talkableWarning = diagnostics.find((d) =>
-        d.message.includes('talkable')
-      );
+      const talkableWarning = diagnostics.find((d) => d.message.includes('talkable'));
       expect(talkableWarning).toBeUndefined();
     });
   });
@@ -371,9 +337,7 @@ describe('deprecationWarningRule', () => {
       });
       const diagnostics = deprecationWarningRule.check(context);
 
-      const customWarning = diagnostics.find((d) =>
-        d.message.includes('legacy_trait')
-      );
+      const customWarning = diagnostics.find((d) => d.message.includes('legacy_trait'));
       expect(customWarning).toBeDefined();
       expect(customWarning?.message).toContain('@new_trait');
     });
@@ -389,9 +353,7 @@ line4`;
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const talkableWarning = diagnostics.find((d) =>
-        d.message.includes('talkable')
-      );
+      const talkableWarning = diagnostics.find((d) => d.message.includes('talkable'));
       expect(talkableWarning?.line).toBe(3);
     });
 
@@ -401,9 +363,7 @@ line4`;
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const talkableWarning = diagnostics.find((d) =>
-        d.message.includes('talkable')
-      );
+      const talkableWarning = diagnostics.find((d) => d.message.includes('talkable'));
       expect(talkableWarning).toBeDefined();
       expect(talkableWarning?.column).toBeGreaterThan(0);
     });
@@ -420,9 +380,7 @@ line4`;
       const context = createContext(source);
       const diagnostics = deprecationWarningRule.check(context);
 
-      const talkableWarning = diagnostics.find((d) =>
-        d.message.includes('talkable')
-      );
+      const talkableWarning = diagnostics.find((d) => d.message.includes('talkable'));
       expect(talkableWarning?.message).toContain('deprecated since');
       expect(talkableWarning?.message).toContain('will be removed');
     });
@@ -474,12 +432,8 @@ describe('createDeprecationWarningRule', () => {
     const diagnostics = customRule.check(context);
 
     // Should only find trait deprecations
-    const traitWarnings = diagnostics.filter((d) =>
-      d.message.includes('talkable')
-    );
-    const propWarnings = diagnostics.filter((d) =>
-      d.message.includes('property')
-    );
+    const traitWarnings = diagnostics.filter((d) => d.message.includes('talkable'));
+    const propWarnings = diagnostics.filter((d) => d.message.includes('property'));
 
     expect(traitWarnings.length).toBeGreaterThan(0);
     expect(propWarnings.length).toBe(0);
@@ -506,9 +460,7 @@ describe('createDeprecationWarningRule', () => {
 
     const diagnostics = customRule.check(context);
 
-    const propWarnings = diagnostics.filter((d) =>
-      d.message.includes('property')
-    );
+    const propWarnings = diagnostics.filter((d) => d.message.includes('property'));
     expect(propWarnings.length).toBe(0);
   });
 });

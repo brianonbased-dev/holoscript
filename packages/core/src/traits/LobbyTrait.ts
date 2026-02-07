@@ -570,7 +570,7 @@ export class LobbyTrait {
    * Get team players
    */
   public getTeamPlayers(team: string | number): PlayerInfo[] {
-    return Array.from(this.players.values()).filter(p => p.team === team);
+    return Array.from(this.players.values()).filter((p) => p.team === team);
   }
 
   /**
@@ -771,7 +771,7 @@ export class LobbyTrait {
       gameMode: this.config.gameMode,
       map: this.config.map,
       properties: this.config.properties,
-      players: Array.from(this.players.values()).map(p => ({
+      players: Array.from(this.players.values()).map((p) => ({
         id: p.id,
         name: p.name,
         isHost: p.isHost,

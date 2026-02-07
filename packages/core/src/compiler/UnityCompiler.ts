@@ -219,7 +219,9 @@ export class UnityCompiler {
       } else if (prop.key === 'position' && Array.isArray(prop.value)) {
         this.emit(`${varName}GO.transform.position = ${this.toVector3(prop.value)};`);
       } else if (prop.key === 'cast_shadow' || prop.key === 'castShadow') {
-        this.emit(`${varName}.shadows = ${prop.value ? 'LightShadows.Soft' : 'LightShadows.None'};`);
+        this.emit(
+          `${varName}.shadows = ${prop.value ? 'LightShadows.Soft' : 'LightShadows.None'};`
+        );
       } else if (prop.key === 'angle') {
         this.emit(`${varName}.spotAngle = ${(prop.value as number) * (180 / Math.PI)}f;`);
       } else if (prop.key === 'distance') {
@@ -235,7 +237,8 @@ export class UnityCompiler {
     this.emit(`cam.fieldOfView = ${this.findProp(camera.properties, 'fov') || 60}f;`);
     const pos = this.findProp(camera.properties, 'position');
     if (pos) this.emit(`cam.transform.position = ${this.toVector3(pos as any)};`);
-    const lookAt = this.findProp(camera.properties, 'look_at') || this.findProp(camera.properties, 'lookAt');
+    const lookAt =
+      this.findProp(camera.properties, 'look_at') || this.findProp(camera.properties, 'lookAt');
     if (lookAt) this.emit(`cam.transform.LookAt(${this.toVector3(lookAt as any)});`);
     const near = this.findProp(camera.properties, 'near');
     if (near) this.emit(`cam.nearClipPlane = ${near}f;`);
@@ -275,9 +278,12 @@ export class UnityCompiler {
       this.emit(`${varName}GO.AddComponent<ParticleSystem>();`);
     } else {
       const primitiveMap: Record<string, string> = {
-        cube: 'PrimitiveType.Cube', box: 'PrimitiveType.Cube',
-        sphere: 'PrimitiveType.Sphere', cylinder: 'PrimitiveType.Cylinder',
-        plane: 'PrimitiveType.Plane', capsule: 'PrimitiveType.Capsule',
+        cube: 'PrimitiveType.Cube',
+        box: 'PrimitiveType.Cube',
+        sphere: 'PrimitiveType.Sphere',
+        cylinder: 'PrimitiveType.Cylinder',
+        plane: 'PrimitiveType.Plane',
+        capsule: 'PrimitiveType.Capsule',
       };
       const primitive = primitiveMap[meshType as string] || 'PrimitiveType.Cube';
       this.emit(`var ${varName}GO = GameObject.CreatePrimitive(${primitive});`);
@@ -307,8 +313,10 @@ export class UnityCompiler {
       this.emit(`var ${varName}Mat = ${varName}GO.GetComponent<Renderer>().material;`);
       const mat = material as Record<string, any>;
       if (mat.color) this.emit(`${varName}Mat.color = ${this.toColor(mat.color)};`);
-      if (mat.roughness !== undefined) this.emit(`${varName}Mat.SetFloat("_Smoothness", ${1 - mat.roughness}f);`);
-      if (mat.metalness !== undefined) this.emit(`${varName}Mat.SetFloat("_Metallic", ${mat.metalness}f);`);
+      if (mat.roughness !== undefined)
+        this.emit(`${varName}Mat.SetFloat("_Smoothness", ${1 - mat.roughness}f);`);
+      if (mat.metalness !== undefined)
+        this.emit(`${varName}Mat.SetFloat("_Metallic", ${mat.metalness}f);`);
       if (mat.emissive) {
         this.emit(`${varName}Mat.EnableKeyword("_EMISSION");`);
         this.emit(`${varName}Mat.SetColor("_EmissionColor", ${this.toColor(mat.emissive)});`);
@@ -324,7 +332,9 @@ export class UnityCompiler {
           this.emit(`var ${varName}RB = ${varName}GO.AddComponent<Rigidbody>();`);
           if (trait.config?.mass) this.emit(`${varName}RB.mass = ${trait.config.mass}f;`);
         } else if (trait.name === 'portal') {
-          this.emit(`// Portal: "${trait.config?.destination}" — implement via SceneManager.LoadScene()`);
+          this.emit(
+            `// Portal: "${trait.config?.destination}" — implement via SceneManager.LoadScene()`
+          );
         }
         // Environment Understanding
         else if (trait.name === 'plane_detection') {
@@ -339,35 +349,68 @@ export class UnityCompiler {
         } else if (trait.name === 'occlusion') {
           this.emit(`// @occlusion — AR Foundation: AROcclusionManager`);
         } else if (trait.name === 'light_estimation') {
-          this.emit(`// @light_estimation — AR Foundation: ARCameraManager.requestedLightEstimation`);
-        } else if (trait.name === 'geospatial' || trait.name === 'geospatial_anchor' || trait.name === 'terrain_anchor' || trait.name === 'rooftop_anchor') {
+          this.emit(
+            `// @light_estimation — AR Foundation: ARCameraManager.requestedLightEstimation`
+          );
+        } else if (
+          trait.name === 'geospatial' ||
+          trait.name === 'geospatial_anchor' ||
+          trait.name === 'terrain_anchor' ||
+          trait.name === 'rooftop_anchor'
+        ) {
           this.emit(`// @${trait.name} — ARCore Geospatial API`);
         }
         // Physics Expansion
         else if (trait.name === 'cloth') {
           this.emit(`var ${varName}Cloth = ${varName}GO.AddComponent<Cloth>();`);
-          if (trait.config?.stiffness) this.emit(`${varName}Cloth.stretchingStiffness = ${trait.config.stiffness}f;`);
-          if (trait.config?.damping) this.emit(`${varName}Cloth.damping = ${trait.config.damping}f;`);
+          if (trait.config?.stiffness)
+            this.emit(`${varName}Cloth.stretchingStiffness = ${trait.config.stiffness}f;`);
+          if (trait.config?.damping)
+            this.emit(`${varName}Cloth.damping = ${trait.config.damping}f;`);
         } else if (trait.name === 'wind') {
           this.emit(`var ${varName}Wind = ${varName}GO.AddComponent<WindZone>();`);
-          if (trait.config?.strength) this.emit(`${varName}Wind.windMain = ${trait.config.strength}f;`);
-          if (trait.config?.turbulence) this.emit(`${varName}Wind.windTurbulence = ${trait.config.turbulence}f;`);
-        } else if (trait.name === 'fluid' || trait.name === 'soft_body' || trait.name === 'rope' || trait.name === 'chain' || trait.name === 'buoyancy' || trait.name === 'destruction') {
+          if (trait.config?.strength)
+            this.emit(`${varName}Wind.windMain = ${trait.config.strength}f;`);
+          if (trait.config?.turbulence)
+            this.emit(`${varName}Wind.windTurbulence = ${trait.config.turbulence}f;`);
+        } else if (
+          trait.name === 'fluid' ||
+          trait.name === 'soft_body' ||
+          trait.name === 'rope' ||
+          trait.name === 'chain' ||
+          trait.name === 'buoyancy' ||
+          trait.name === 'destruction'
+        ) {
           this.emit(`// @${trait.name} — custom physics: ${JSON.stringify(trait.config || {})}`);
         }
         // Spatial Audio
         else if (trait.name === 'reverb_zone') {
           this.emit(`var ${varName}Reverb = ${varName}GO.AddComponent<AudioReverbZone>();`);
-          if (trait.config?.decay_time) this.emit(`${varName}Reverb.decayTime = ${trait.config.decay_time}f;`);
+          if (trait.config?.decay_time)
+            this.emit(`${varName}Reverb.decayTime = ${trait.config.decay_time}f;`);
         } else if (trait.name === 'audio_occlusion') {
           this.emit(`${varName}GO.AddComponent<AudioLowPassFilter>();`);
           this.emit(`// @audio_occlusion — raycast-based low-pass filter`);
-        } else if (trait.name === 'ambisonics' || trait.name === 'hrtf' || trait.name === 'audio_portal' || trait.name === 'audio_material' || trait.name === 'head_tracked_audio') {
+        } else if (
+          trait.name === 'ambisonics' ||
+          trait.name === 'hrtf' ||
+          trait.name === 'audio_portal' ||
+          trait.name === 'audio_material' ||
+          trait.name === 'head_tracked_audio'
+        ) {
           this.emit(`// @${trait.name} — spatial audio: ${JSON.stringify(trait.config || {})}`);
         }
         // Volumetric Content
-        else if (trait.name === 'gaussian_splat' || trait.name === 'nerf' || trait.name === 'volumetric_video' || trait.name === 'point_cloud' || trait.name === 'photogrammetry') {
-          this.emit(`// @${trait.name} — volumetric renderer: ${JSON.stringify(trait.config || {})}`);
+        else if (
+          trait.name === 'gaussian_splat' ||
+          trait.name === 'nerf' ||
+          trait.name === 'volumetric_video' ||
+          trait.name === 'point_cloud' ||
+          trait.name === 'photogrammetry'
+        ) {
+          this.emit(
+            `// @${trait.name} — volumetric renderer: ${JSON.stringify(trait.config || {})}`
+          );
         }
         // Input Modalities
         else if (trait.name === 'eye_tracking') {
@@ -381,7 +424,9 @@ export class UnityCompiler {
         }
         // Accessibility
         else if (trait.name === 'accessible') {
-          this.emit(`// @accessible(role: "${trait.config?.role || 'generic'}") — Unity Accessibility`);
+          this.emit(
+            `// @accessible(role: "${trait.config?.role || 'generic'}") — Unity Accessibility`
+          );
         }
         // Catch-all for remaining expansion traits
         else {
@@ -467,14 +512,18 @@ export class UnityCompiler {
         this.emit(`var ${varName}Col = ${varName}GO.AddComponent<SphereCollider>();`);
         this.emit(`${varName}Col.isTrigger = true;`);
       } else if (prop.key === 'size' && Array.isArray(prop.value)) {
-        this.emit(`${varName}GO.GetComponent<Collider>().bounds.size == ${this.toVector3(prop.value)}; // Set via scale`);
+        this.emit(
+          `${varName}GO.GetComponent<Collider>().bounds.size == ${this.toVector3(prop.value)}; // Set via scale`
+        );
       } else if (prop.key === 'radius') {
         this.emit(`${varName}GO.GetComponent<SphereCollider>().radius = ${prop.value}f;`);
       }
     }
 
     if (zone.handlers?.length) {
-      this.emit(`// Zone handlers: ${zone.handlers.map(h => h.event).join(', ')} — implement via OnTriggerEnter/Exit`);
+      this.emit(
+        `// Zone handlers: ${zone.handlers.map((h) => h.event).join(', ')} — implement via OnTriggerEnter/Exit`
+      );
     }
     this.emit('');
   }
@@ -558,7 +607,7 @@ export class UnityCompiler {
 
     for (const el of ui.elements) {
       const varName = this.sanitizeName(el.name);
-      const elType = el.properties.find(p => p.key === 'type')?.value;
+      const elType = el.properties.find((p) => p.key === 'type')?.value;
 
       this.emit(`// UI Element: ${el.name} (${elType})`);
       this.emit(`var ${varName}GO = new GameObject("${el.name}");`);
@@ -566,7 +615,7 @@ export class UnityCompiler {
 
       if (elType === 'text') {
         this.emit(`var ${varName}Text = ${varName}GO.AddComponent<Text>();`);
-        const text = el.properties.find(p => p.key === 'text')?.value;
+        const text = el.properties.find((p) => p.key === 'text')?.value;
         if (text) this.emit(`${varName}Text.text = "${text}";`);
       } else if (elType === 'progress') {
         this.emit(`var ${varName}Slider = ${varName}GO.AddComponent<Slider>();`);
@@ -627,6 +676,6 @@ export class UnityCompiler {
   }
 
   private findObjProp(obj: HoloObjectDecl, key: string): HoloValue | undefined {
-    return obj.properties?.find(p => p.key === key)?.value;
+    return obj.properties?.find((p) => p.key === key)?.value;
   }
 }

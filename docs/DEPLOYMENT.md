@@ -43,10 +43,10 @@ aws cloudfront create-invalidation --distribution-id XXXXX --paths "/*"
 
 ### DNS Records
 
-| Type | Name | Value |
-|------|------|-------|
-| A | @ | (platform IP) |
-| CNAME | www | holoscript.net |
+| Type  | Name | Value          |
+| ----- | ---- | -------------- |
+| A     | @    | (platform IP)  |
+| CNAME | www  | holoscript.net |
 
 ### SSL
 
@@ -76,12 +76,12 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      
+
       - name: Install and Build
         run: |
           cd docs
           pnpm install
           pnpm build
-      
+
       # Add deployment step for your platform
 ```

@@ -55,7 +55,7 @@ export class IslandDetector {
       }
       // Path compression
       while (parent.get(id) !== root) {
-        let next = parent.get(id)!;
+        const next = parent.get(id)!;
         parent.set(id, root);
         id = next;
       }

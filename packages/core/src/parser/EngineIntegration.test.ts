@@ -24,7 +24,7 @@ describe('Engine Integration - Composition API', () => {
 
     const result = await runtime.execute(parseResult.ast.root);
     expect(result.success).toBe(true);
-    
+
     expect(logger.info).toHaveBeenCalledWith(
       expect.stringContaining('[Zero-Config] Provisioning system: Networking'),
       expect.objectContaining({ type: 'p2p', room: 'lobby' })
@@ -45,7 +45,7 @@ describe('Engine Integration - Composition API', () => {
 
     const result = await runtime.execute(parseResult.ast.root);
     expect(result.success).toBe(true);
-    
+
     expect(logger.info).toHaveBeenCalledWith(
       expect.stringContaining('[Zero-Config] Provisioning system: Physics'),
       expect.objectContaining({ solver: 'standard' })
@@ -65,9 +65,9 @@ describe('Engine Integration - Composition API', () => {
 
     const result = await runtime.execute(parseResult.ast.root);
     expect(result.success).toBe(true);
-    
+
     // Check if context environment was updated
-    // Note: this assumes we can access the internal context for testing if needed, 
+    // Note: this assumes we can access the internal context for testing if needed,
     // or we check the logs.
     expect(logger.info).toHaveBeenCalledWith(
       expect.stringContaining('[Zero-Config] Applying core configuration'),
@@ -90,9 +90,13 @@ describe('Engine Integration - Composition API', () => {
 
     // Verify ordering by checking log sequence
     const infoCalls = (logger.info as any).mock.calls;
-    const provisioningIdx = infoCalls.findIndex(call => call[0].includes('Provisioning system: Networking'));
-    const configIdx = infoCalls.findIndex(call => call[0].includes('Applying core configuration'));
-    const orbIdx = infoCalls.findIndex(call => call[0].includes('Orb created'));
+    const provisioningIdx = infoCalls.findIndex((call) =>
+      call[0].includes('Provisioning system: Networking')
+    );
+    const configIdx = infoCalls.findIndex((call) =>
+      call[0].includes('Applying core configuration')
+    );
+    const orbIdx = infoCalls.findIndex((call) => call[0].includes('Orb created'));
 
     expect(provisioningIdx).toBeLessThan(configIdx);
     expect(configIdx).toBeLessThan(orbIdx);

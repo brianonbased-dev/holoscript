@@ -3,6 +3,7 @@
 ### Added
 
 #### New Platform Compilers
+
 - **VRChatCompiler** - Compile to VRChat SDK3 worlds with UdonSharp scripts
   - VRC_Pickup, VRC_Trigger, VRC_ObjectSync components
   - Avatar pedestals, mirrors, portals
@@ -30,6 +31,7 @@
   - CLI: `holoscript compile --target android`
 
 #### Additional Compile Targets
+
 - **GodotCompiler** - CLI: `holoscript compile --target godot`
 - **VisionOSCompiler** - CLI: `holoscript compile --target visionos`
 - **OpenXRCompiler** - CLI: `holoscript compile --target openxr`
@@ -37,6 +39,7 @@
 - **WebGPUCompiler** - CLI: `holoscript compile --target webgpu`
 
 #### Editor Support
+
 - **Neovim Plugin** - Native Neovim support with Tree-sitter
   - Syntax highlighting for .hs, .hsplus, .holo files
   - LSP integration for completions and diagnostics
@@ -44,6 +47,7 @@
   - Located in `packages/neovim-plugin/`
 
 ### Changed
+
 - Updated CLI `compile` command to support all 18 compile targets
 - Added 71 unit tests for new VRChat, Unreal, iOS, and Android compilers
 
@@ -58,6 +62,7 @@ This is a major release bringing WASM compilation, certified packages, partner S
 ### Added
 
 #### Embedded Runtime & Game Engine Adapters (Sprint 9-10)
+
 - **HoloScriptRuntime** - Embeddable runtime for partner applications
   - Scene loading and management
   - Plugin system for custom extensions
@@ -68,6 +73,7 @@ This is a major release bringing WASM compilation, certified packages, partner S
 - **BrandingKit** - Partner branding assets (badges, colors, typography)
 
 #### WASM Compilation (Sprint 3)
+
 - **WebAssembly Target** - Compile HoloScript to WAT format
 - JavaScript bindings generation with TypeScript types
 - Memory layout management (state, objects, events, strings)
@@ -75,6 +81,7 @@ This is a major release bringing WASM compilation, certified packages, partner S
 - CLI: `holoscript compile --target wasm`
 
 #### Certified Packages Program (Sprint 9-10)
+
 - **CertificationChecker** - Automated package quality verification
 - Checks across 4 categories: code quality, documentation, security, maintenance
 - Letter grades (A-F) based on comprehensive scoring
@@ -82,6 +89,7 @@ This is a major release bringing WASM compilation, certified packages, partner S
 - One-year certification validity with certificate IDs
 
 #### Partner SDK (Sprint 9-10)
+
 - **@holoscript/partner-sdk** - Full ecosystem integration SDK
 - **RegistryClient** - Programmatic registry access
 - **WebhookHandler** - Event processing for package/version/certification events
@@ -90,6 +98,7 @@ This is a major release bringing WASM compilation, certified packages, partner S
 - Rate limiting and retry handling
 
 #### Team Workspaces (Sprint 8)
+
 - **WorkspaceManager** - Collaborative environments
 - Role-based access control (Owner, Admin, Developer, Viewer)
 - Shared secrets management
@@ -97,6 +106,7 @@ This is a major release bringing WASM compilation, certified packages, partner S
 - CLI commands: `holoscript workspace create/invite/secret`
 
 #### HoloScript Academy (Sprint 8)
+
 - 30 lessons across 3 levels
 - Level 1: Fundamentals (10 lessons)
 - Level 2: Intermediate (10 lessons)
@@ -104,52 +114,62 @@ This is a major release bringing WASM compilation, certified packages, partner S
 - Hands-on exercises and projects
 
 #### Visual Scripting (Sprint 7)
+
 - Node-based visual programming
 - 95+ node types
 - Real-time preview
 - Export to HoloScript code
 
 #### AI-Powered Autocomplete (Sprint 7)
+
 - Context-aware code completion
 - Multi-line suggestions
 - Trait and property inference
 
 #### IntelliJ Plugin (Sprint 7)
+
 - Full JetBrains IDE support
 - Syntax highlighting
 - Code completion
 - Error checking
 
 #### VS Code Extension Enhancements (Sprint 2)
+
 - Semantic token highlighting
 - 72 code snippets
 - Inline error diagnostics
 - Quick fixes
 
 #### Dead Code Detection (Sprint 5)
+
 - Find unused functions, variables, imports
 - Configurable detection rules
 
 #### Deprecation Warnings (Sprint 5)
+
 - Linter rules for deprecated APIs
 - Migration suggestions
 
 #### Migration Assistant (Sprint 5)
+
 - Automated version migration
 - Code transformation rules
 - Detailed migration reports
 
 #### Complexity Metrics (Sprint 5)
+
 - Cyclomatic complexity
 - Cognitive complexity
 - Maintainability index
 
 #### Package Registry MVP (Sprint 5)
+
 - Scoped packages (@org/name)
 - Semantic versioning
 - Dependency resolution
 
 ### Changed
+
 - Minimum Node.js version: 18.0.0
 - TypeScript 5.0+ required
 - `parse()` now returns `HSPlusAST` format
@@ -157,17 +177,20 @@ This is a major release bringing WASM compilation, certified packages, partner S
 - Improved error messages with suggestions
 
 ### Deprecated
+
 - `@legacy_physics` trait - use `@physics` instead
 - `compile({ format: 'cjs' })` - CommonJS output
 - `HoloScriptParser` class - use `HoloScriptPlusParser`
 
 ### Performance
+
 - 50% faster parsing with incremental parsing
 - 3x faster rebuilds with compilation caching
 - Reduced memory usage in large projects
 - Parallel compilation for multi-file projects
 
 ### Fixed
+
 - Spread operator in nested objects
 - Trait dependency resolution cycles
 - Source map generation for complex expressions
@@ -190,6 +213,7 @@ Full package publishing and registry integration with access control.
 ### Added
 
 #### Package Publishing
+
 - **`holoscript publish`** - Publish packages to HoloScript registry
   - Pre-publish validations (package.json, README, LICENSE, semver)
   - Tarball packaging with USTAR format and gzip compression
@@ -200,28 +224,33 @@ Full package publishing and registry integration with access control.
   - `--otp <code>` - 2FA one-time password
 
 #### Authentication
+
 - **`holoscript login`** - Log in to HoloScript registry
 - **`holoscript logout`** - Log out from registry
 - **`holoscript whoami`** - Display current logged-in user
 
 #### Access Control
+
 - **`holoscript access grant <pkg> <user>`** - Grant access to a package
 - **`holoscript access revoke <pkg> <user>`** - Revoke access
 - **`holoscript access list <pkg>`** - List package access
 
 #### Organization Management
+
 - **`holoscript org create <name>`** - Create an organization
 - **`holoscript org add-member <org> <user>`** - Add member with role
 - **`holoscript org remove-member <org> <user>`** - Remove member
 - **`holoscript org list-members <org>`** - List organization members
 
 #### Token Management
+
 - **`holoscript token create`** - Create API token for CI/CD
 - **`holoscript token revoke <id>`** - Revoke a token
 - **`holoscript token list`** - List your tokens
 - Token options: `--name`, `--readonly`, `--scope`, `--expires`
 
 ### Changed
+
 - Updated all package versions to 2.5.0
 - Unified CLI help text with comprehensive examples for all commands
 
@@ -234,6 +263,7 @@ Full package publishing and registry integration with access control.
 Enable Grok (xAI) to build, validate, and share HoloScript VR scenes directly in X conversations.
 
 ### Added
+
 - **MCP Server** (`@holoscript/mcp-server@1.0.1`) - Full Model Context Protocol server with 16 tools for AI agents
 - **Python Bindings** (`pip install holoscript`) - Python package for Grok's execution environment
 - **Render Service** (`services/render-service/`) - Preview generation and X sharing endpoints
@@ -241,16 +271,18 @@ Enable Grok (xAI) to build, validate, and share HoloScript VR scenes directly in
 - **Social Traits** - 3 new traits: `@shareable`, `@collaborative`, `@tweetable`
 
 ### MCP Tools
-| Tool | Purpose |
-|------|---------|  
-| `parse_hs` / `parse_holo` | Parse HoloScript files |
-| `validate_holoscript` | AI-friendly validation |
+
+| Tool                                 | Purpose                 |
+| ------------------------------------ | ----------------------- |
+| `parse_hs` / `parse_holo`            | Parse HoloScript files  |
+| `validate_holoscript`                | AI-friendly validation  |
 | `generate_object` / `generate_scene` | Natural language → code |
-| `list_traits` / `explain_trait` | Trait documentation |
-| `render_preview` | Generate preview images |
-| `create_share_link` | X-optimized share links |
+| `list_traits` / `explain_trait`      | Trait documentation     |
+| `render_preview`                     | Generate preview images |
+| `create_share_link`                  | X-optimized share links |
 
 ### Python Usage
+
 ```python
 from holoscript import HoloScript
 
@@ -261,6 +293,7 @@ print(share.playground_url)
 ```
 
 ### Links
+
 - npm: https://www.npmjs.com/package/@holoscript/mcp-server
 - PyPI: https://pypi.org/project/holoscript/
 - Docs: [Grok/X Integration Guide](./docs/GROK_X_IMPLEMENTATION_SUMMARY.md)
@@ -274,6 +307,7 @@ print(share.playground_url)
 Major addition of game development constructs for Brittney AI content generation:
 
 ### Added
+
 - **7 New Language Constructs** - RPG and game content definition blocks:
   - `npc "name" { }` - NPC Behavior Trees with types, models, and dialogue references
   - `quest "name" { }` - Quest Definition System with objectives, rewards, and branching
@@ -297,10 +331,12 @@ Major addition of game development constructs for Brittney AI content generation
   - `brittney-features-training.jsonl` - 20 prompt/completion pairs
 
 ### Changed
+
 - Parser now supports 46 tests (12 new Brittney feature tests)
 - HoloComposition interface extended with: `npcs`, `quests`, `abilities`, `dialogues`, `stateMachines`, `achievements`, `talentTrees` arrays
 
 ### Example
+
 ```hsplus
 composition "Starting Village" {
   npc "Elder Aldric" {
@@ -343,6 +379,7 @@ composition "Starting Village" {
 Major HoloScript+ parser improvements for semantic scene descriptions:
 
 ### Added
+
 - **16 Structural Directives** - Scene-level metadata and configuration
   - `@manifest` - Scene manifest with title, version, author
   - `@semantic` - Semantic description blocks
@@ -388,11 +425,13 @@ Major HoloScript+ parser improvements for semantic scene descriptions:
   - Ambient and directional light settings
 
 ### Fixed
+
 - Child node parsing for `logic`, `template`, `environment` blocks
   - Blocks now correctly parsed as children instead of properties
   - Fixed disambiguation between `logic: value` and `logic { ... }`
 
 ### Changed
+
 - Parser now supports 687 tests (up from 679)
 - Removed 3 outdated todo tests (features implemented in new parser)
 - Unskipped 4 `parseObjectLiteral` tests
@@ -430,6 +469,7 @@ Major HoloScript+ parser improvements for semantic scene descriptions:
 Three major new packages for building production VR experiences:
 
 ### Added
+
 - **@holoscript/spatial-audio** - 3D positional audio for VR/AR
   - HRTF binaural processing with multiple datasets (CIPIC, KEMAR)
   - Room acoustics simulation (reflections, reverb, occlusion)
@@ -456,6 +496,7 @@ Three major new packages for building production VR experiences:
 - **AI Assistant Configuration** - Claude Desktop and Copilot integration
 
 ### Removed
+
 - **@holoscript/llm** - Migrated to `@hololand/ai` (LLM inference is a platform service, not language tooling). AI trait definitions (`@llm_agent`, `@dialogue`, etc.) remain in `@holoscript/core`.
 
 ---
@@ -467,6 +508,7 @@ Three major new packages for building production VR experiences:
 Major structural change: HoloScript is now the dedicated language repository, separate from Hololand platform.
 
 ### Added
+
 - **Dev Tools** - Consolidated all language tooling in this repo:
   - `@holoscript/formatter` - Code formatting (from Hololand)
   - `@holoscript/linter` - Static analysis (from Hololand)
@@ -475,6 +517,7 @@ Major structural change: HoloScript is now the dedicated language repository, se
   - `@holoscript/fs` - File system utilities (from Hololand)
 
 ### Removed
+
 - Platform adapters moved to Hololand repo:
   - `@holoscript/babylon-adapter` → `@hololand/babylon-adapter`
   - `@holoscript/three-adapter` → `@hololand/three-adapter`
@@ -484,26 +527,31 @@ Major structural change: HoloScript is now the dedicated language repository, se
   - `@holoscript/creator-tools` → `@hololand/creator-tools`
 
 ### Changed
+
 - HoloScript is now the **language repo** (parser, runtime, dev tools)
 - Hololand is now the **platform repo** (adapters, Brittney AI, apps)
 - Updated LSP dependency from `@hololand/core` to `@holoscript/core`
 
 ### Fixed
+
 - Runtime timing.ts TypeScript error with `requestIdleCallback` narrowing
 
 ## [2.0.2] - 2026-01-18
 
 ### Fixed
+
 - Minor bug fixes and stability improvements following 2.0.0 release
 
 ## [2.0.1] - 2026-01-18
 
 ### Fixed
+
 - Post-release patch for 2.0.0
 
 ## [2.0.0] - 2026-01-17
 
 ### Added
+
 - Comprehensive test suite with 108+ tests (VoiceInputTrait, AIDriverTrait, TypeChecker, Runtime)
 - VoiceInputTrait with Web Speech API integration, fuzzy matching, and event handling
 - AIDriverTrait with behavior trees, GOAP planning, and 4 decision modes (reactive, goal-driven, learning, hybrid)
@@ -515,44 +563,52 @@ Major structural change: HoloScript is now the dedicated language repository, se
 - Complete NPM publishing infrastructure
 
 ### Changed
+
 - Improved error messaging with source code context
 - Enhanced CLI with better formatting and help text
 - Optimized parser with better error recovery
 - Type system now supports complex inference patterns
 
 ### Fixed
+
 - Parser duplicate return statement (line 1067)
 - Test suite alignment with actual implementation APIs
 - Web Speech API graceful degradation in test environments
 
 ### Removed
+
 - Removed aspirational test files that referenced non-existent APIs
 - Cleaned up hanging test implementations
 
 ## [1.0.0-alpha.2] - 2026-01-16
 
 ### Changed
+
 - Improved error messaging and source code context
 - Enhanced CLI with better formatting
 
 ### Fixed
+
 - Parser error handling and recovery
 
 ## [1.0.0-alpha.2] - 2026-01-16
 
 ### Added
+
 - AIDriverTrait implementation with behavior trees
 - Enhanced type system with inference
 - Performance telemetry system
 - Commerce system integration
 
 ### Fixed
+
 - Test suite alignment with actual APIs
 - Parser duplicate return statement
 
 ## [1.0.0-alpha.1] - 2026-01-16
 
 ### Added
+
 - Initial HoloScript+ release
 - VoiceInputTrait with Web Speech API
 - Type checker with inference

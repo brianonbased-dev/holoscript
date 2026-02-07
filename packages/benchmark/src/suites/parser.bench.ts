@@ -1,6 +1,6 @@
 /**
  * Parser Benchmarks
- * 
+ *
  * Measures parsing speed for different file sizes
  */
 
@@ -8,7 +8,11 @@ import { readFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { Bench } from 'tinybench';
-import { HoloScriptPlusParser, ChunkBasedIncrementalParser, globalParseCache } from '@holoscript/core';
+import {
+  HoloScriptPlusParser,
+  ChunkBasedIncrementalParser,
+  globalParseCache,
+} from '@holoscript/core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

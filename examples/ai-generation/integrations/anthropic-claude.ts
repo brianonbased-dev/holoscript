@@ -1,6 +1,6 @@
 /**
  * Anthropic Claude Integration for HoloScript
- * 
+ *
  * Use Claude to generate, validate, and iterate on HoloScript scenes
  * with advanced reasoning and multi-turn conversations.
  */
@@ -44,7 +44,7 @@ export async function generateWithClaude(request: SceneRequest): Promise<Generat
   const interactivityHint = {
     low: 'Use minimal traits, focus on static visuals',
     medium: 'Add @hoverable, @pointable for basic interactions',
-    high: 'Include @grabbable, @physics, @networked for full interactivity'
+    high: 'Include @grabbable, @physics, @networked for full interactivity',
   }[request.interactivity || 'medium'];
 
   const response = await anthropic.messages.create({
@@ -62,9 +62,9 @@ Interactivity: ${interactivityHint}
 Respond with:
 1. The complete .holo code
 2. Brief explanation of the scene
-3. List of traits used`
-      }
-    ]
+3. List of traits used`,
+      },
+    ],
   });
 
   const content = response.content[0];
@@ -75,11 +75,11 @@ Respond with:
   // Parse the response
   const codeMatch = content.text.match(/```holo\n([\s\S]*?)```/);
   const code = codeMatch ? codeMatch[1].trim() : '';
-  
+
   // Extract traits from code
   const traitMatches = code.match(/@\w+/g) || [];
   const traits = [...new Set(traitMatches)];
-  
+
   // Count objects
   const objectCount = (code.match(/object\s+"/g) || []).length;
 
@@ -87,17 +87,14 @@ Respond with:
     code,
     explanation: content.text.split('```')[0].trim(),
     traits,
-    objectCount
+    objectCount,
   };
 }
 
 /**
  * Iterative refinement - improve a scene based on feedback
  */
-export async function refineScene(
-  currentCode: string,
-  feedback: string
-): Promise<GeneratedScene> {
+export async function refineScene(currentCode: string, feedback: string): Promise<GeneratedScene> {
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4096,
@@ -113,9 +110,9 @@ ${currentCode}
 
 Please improve it based on this feedback: ${feedback}
 
-Respond with the updated code and explain what you changed.`
-      }
-    ]
+Respond with the updated code and explain what you changed.`,
+      },
+    ],
   });
 
   const content = response.content[0];
@@ -131,7 +128,7 @@ Respond with the updated code and explain what you changed.`
     code,
     explanation: content.text.split('```')[2]?.trim() || 'Scene refined',
     traits: [...new Set(traitMatches)],
-    objectCount: (code.match(/object\s+"/g) || []).length
+    objectCount: (code.match(/object\s+"/g) || []).length,
   };
 }
 
@@ -140,12 +137,10 @@ Respond with the updated code and explain what you changed.`
  */
 export class ClaudeSceneBuilder {
   private messages: Anthropic.MessageParam[] = [];
-  
+
   async start(initialPrompt: string): Promise<GeneratedScene> {
-    this.messages = [
-      { role: 'user', content: initialPrompt }
-    ];
-    
+    this.messages = [{ role: 'user', content: initialPrompt }];
+
     return this.sendAndParse();
   }
 
@@ -159,7 +154,7 @@ export class ClaudeSceneBuilder {
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
       system: HOLOSCRIPT_SYSTEM,
-      messages: this.messages
+      messages: this.messages,
     });
 
     const content = response.content[0];
@@ -178,7 +173,7 @@ export class ClaudeSceneBuilder {
       code,
       explanation: content.text.split('```')[0].trim(),
       traits: [...new Set(traitMatches)],
-      objectCount: (code.match(/object\s+"/g) || []).length
+      objectCount: (code.match(/object\s+"/g) || []).length,
     };
   }
 }
@@ -189,9 +184,9 @@ async function main() {
   const scene = await generateWithClaude({
     description: 'A zen garden with a koi pond and stone lanterns',
     style: 'stylized',
-    interactivity: 'medium'
+    interactivity: 'medium',
   });
-  
+
   console.log('Generated scene:');
   console.log(scene.code);
   console.log(`\nTraits used: ${scene.traits.join(', ')}`);

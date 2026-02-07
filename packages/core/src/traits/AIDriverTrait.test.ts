@@ -5,7 +5,12 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { AIDriverTrait, type AIDriverConfig, type BehaviorNode, type NPCGoal } from '../traits/AIDriverTrait';
+import {
+  AIDriverTrait,
+  type AIDriverConfig,
+  type BehaviorNode,
+  type NPCGoal,
+} from '../traits/AIDriverTrait';
 
 describe('AIDriverTrait', () => {
   let trait: AIDriverTrait;
@@ -275,7 +280,9 @@ describe('AIDriverTrait', () => {
         enableLearning: true,
         learningRate: 0.01,
       };
-      expect((fastLearning as any).learningRate).toBeGreaterThan((slowLearning as any).learningRate);
+      expect((fastLearning as any).learningRate).toBeGreaterThan(
+        (slowLearning as any).learningRate
+      );
     });
   });
 

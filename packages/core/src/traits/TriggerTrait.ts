@@ -235,7 +235,10 @@ export class TriggerTrait {
   /**
    * Set shape
    */
-  public setShape(shape: TriggerShape, params?: { size?: Vector3; radius?: number; height?: number }): void {
+  public setShape(
+    shape: TriggerShape,
+    params?: { size?: Vector3; radius?: number; height?: number }
+  ): void {
     this.config.shape = shape;
     if (params?.size) this.config.size = params.size;
     if (params?.radius) this.config.radius = params.radius;
@@ -440,7 +443,7 @@ export class TriggerTrait {
     }
 
     const objectTags = tags || [];
-    const hasMatchingTag = this.config.filterTags.some(t => objectTags.includes(t));
+    const hasMatchingTag = this.config.filterTags.some((t) => objectTags.includes(t));
 
     return this.config.filterMode === 'include' ? hasMatchingTag : !hasMatchingTag;
   }

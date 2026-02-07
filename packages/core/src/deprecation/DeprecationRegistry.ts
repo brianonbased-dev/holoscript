@@ -94,7 +94,7 @@ export class DeprecationRegistry {
         // Syntax deprecations use pattern matching
         if (entry.metadata?.pattern instanceof RegExp) {
           this.syntaxPatterns.push({
-            pattern: entry.metadata.pattern as RegExp,
+            pattern: entry.metadata.pattern,
             entry,
           });
         }

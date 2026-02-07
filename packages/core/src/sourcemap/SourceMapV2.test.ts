@@ -563,10 +563,7 @@ describe('Combining Source Maps', () => {
       source: 'src/b.holo',
     });
 
-    const combined = combineSourceMapsV2(
-      [gen1.generate(), gen2.generate()],
-      'combined.js'
-    );
+    const combined = combineSourceMapsV2([gen1.generate(), gen2.generate()], 'combined.js');
 
     expect(combined.file).toBe('combined.js');
     expect(combined.sources).toContain('src/a.holo');

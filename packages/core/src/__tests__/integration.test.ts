@@ -75,7 +75,7 @@ describe('HoloScript Integration Tests', () => {
       expect(parseResult.ast.length).toBe(3);
 
       const results = await runtime.executeProgram(parseResult.ast);
-      expect(results.every(r => r.success)).toBe(true);
+      expect(results.every((r) => r.success)).toBe(true);
     });
 
     it('should handle program with multiple orbs', async () => {
@@ -173,7 +173,7 @@ describe('HoloScript Integration Tests', () => {
 
       // Stage 3: Execute
       const execResults = await runtime.executeProgram(parseResult.ast);
-      expect(execResults.every(r => r.success)).toBe(true);
+      expect(execResults.every((r) => r.success)).toBe(true);
     });
   });
 

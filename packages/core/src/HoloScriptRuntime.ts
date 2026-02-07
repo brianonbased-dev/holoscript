@@ -112,7 +112,7 @@ export class HoloScriptRuntime {
     this.builtinFunctions = this.initBuiltins(customFunctions);
 
     // Wire up state machine hook executor to this runtime's expression evaluator
-    stateMachineInterpreter.setHookExecutor((code: string, context: Record<string, any>) => {
+    stateMachineInterpreter.setHookExecutor((code: string, context: Record<string, HoloScriptValue>) => {
       // Merge hook context into variables temporarily
       for (const [key, value] of Object.entries(context)) {
         this.context.variables.set(key, value);
@@ -159,9 +159,9 @@ export class HoloScriptRuntime {
     });
 
     // Animation commands
-    builtins.set('pulsate', (args): any => {
+    builtins.set('pulsate', (args): HoloScriptValue => {
       const target = String(args[0]);
-      const options = (args[1] as any) || {};
+      const options = (args[1] as Record<string, HoloScriptValue>) || {};
       const duration = Number(options.duration) || 1000;
       const color = String(options.color || '#ffffff');
 
@@ -171,11 +171,11 @@ export class HoloScriptRuntime {
       return { pulsing: target, duration };
     });
 
-    builtins.set('animate', (args): any => {
+    builtins.set('animate', (args): HoloScriptValue => {
       const target = String(args[0]);
-      const options = (args[1] as any) || {};
+      const options = (args[1] as Record<string, HoloScriptValue>) || {};
 
-      const animation: any = {
+      const animation: Animation = {
         target,
         property: String(options.property || 'position.y'),
         from: Number(options.from || 0),
@@ -192,9 +192,9 @@ export class HoloScriptRuntime {
     });
 
     // Spatial commands
-    builtins.set('spawn', (args): any => {
+    builtins.set('spawn', (args): HoloScriptValue => {
       const target = String(args[0]);
-      const position: any = (args[1] as any) || { x: 0, y: 0, z: 0 };
+      const position = (args[1] as SpatialPosition) || { x: 0, y: 0, z: 0 };
 
       this.context.spatialMemory.set(target, position);
       this.createParticleEffect(`${target}_spawn`, position, '#00ff00', 25);
@@ -202,9 +202,9 @@ export class HoloScriptRuntime {
       return { spawned: target, at: position };
     });
 
-    builtins.set('move', (args): any => {
+    builtins.set('move', (args): HoloScriptValue => {
       const target = String(args[0]);
-      const position: any = (args[1] as any) || { x: 0, y: 0, z: 0 };
+      const position = (args[1] as SpatialPosition) || { x: 0, y: 0, z: 0 };
 
       const current = this.context.spatialMemory.get(target);
       if (current) {
@@ -216,50 +216,50 @@ export class HoloScriptRuntime {
     });
 
     // Data commands
-    builtins.set('set', (args): any => {
+    builtins.set('set', (args): HoloScriptValue => {
       const target = String(args[0]);
       const value = args[1];
       this.setVariable(target, value);
       return { set: target, value };
     });
 
-    builtins.set('get', (args): any => {
+    builtins.set('get', (args): HoloScriptValue => {
       const target = String(args[0]);
       return this.getVariable(target);
     });
 
     // Math functions
-    builtins.set('add', (args): any => Number(args[0]) + Number(args[1]));
-    builtins.set('subtract', (args): any => Number(args[0]) - Number(args[1]));
-    builtins.set('multiply', (args): any => Number(args[0]) * Number(args[1]));
-    builtins.set('divide', (args): any =>
+    builtins.set('add', (args): HoloScriptValue => Number(args[0]) + Number(args[1]));
+    builtins.set('subtract', (args): HoloScriptValue => Number(args[0]) - Number(args[1]));
+    builtins.set('multiply', (args): HoloScriptValue => Number(args[0]) * Number(args[1]));
+    builtins.set('divide', (args): HoloScriptValue =>
       Number(args[1]) !== 0 ? Number(args[0]) / Number(args[1]) : 0
     );
-    builtins.set('mod', (args): any => Number(args[0]) % Number(args[1]));
-    builtins.set('abs', (args): any => Math.abs(Number(args[0])));
-    builtins.set('floor', (args): any => Math.floor(Number(args[0])));
-    builtins.set('ceil', (args): any => Math.ceil(Number(args[0])));
-    builtins.set('round', (args): any => Math.round(Number(args[0])));
-    builtins.set('min', (args): any => Math.min(...args.map(Number)));
-    builtins.set('max', (args): any => Math.max(...args.map(Number)));
-    builtins.set('random', (): any => Math.random());
+    builtins.set('mod', (args): HoloScriptValue => Number(args[0]) % Number(args[1]));
+    builtins.set('abs', (args): HoloScriptValue => Math.abs(Number(args[0])));
+    builtins.set('floor', (args): HoloScriptValue => Math.floor(Number(args[0])));
+    builtins.set('ceil', (args): HoloScriptValue => Math.ceil(Number(args[0])));
+    builtins.set('round', (args): HoloScriptValue => Math.round(Number(args[0])));
+    builtins.set('min', (args): HoloScriptValue => Math.min(...args.map(Number)));
+    builtins.set('max', (args): HoloScriptValue => Math.max(...args.map(Number)));
+    builtins.set('random', (): HoloScriptValue => Math.random());
 
     // String functions
-    builtins.set('concat', (args): any => args.map(String).join(''));
-    builtins.set('length', (args): any => {
+    builtins.set('concat', (args): HoloScriptValue => args.map(String).join(''));
+    builtins.set('length', (args): HoloScriptValue => {
       const val = args[0];
       if (typeof val === 'string') return val.length;
       if (Array.isArray(val)) return val.length;
       return 0;
     });
-    builtins.set('substring', (args): any =>
+    builtins.set('substring', (args): HoloScriptValue =>
       String(args[0]).substring(Number(args[1]), Number(args[2]))
     );
-    builtins.set('uppercase', (args): any => String(args[0]).toUpperCase());
-    builtins.set('lowercase', (args): any => String(args[0]).toLowerCase());
+    builtins.set('uppercase', (args): HoloScriptValue => String(args[0]).toUpperCase());
+    builtins.set('lowercase', (args): HoloScriptValue => String(args[0]).toLowerCase());
 
     // Array functions
-    builtins.set('push', (args): any => {
+    builtins.set('push', (args): HoloScriptValue => {
       const arr = args[0];
       if (Array.isArray(arr)) {
         arr.push(args[1]);
@@ -267,45 +267,45 @@ export class HoloScriptRuntime {
       }
       return [args[0], args[1]];
     });
-    builtins.set('pop', (args): any => {
+    builtins.set('pop', (args): HoloScriptValue => {
       const arr = args[0];
       if (Array.isArray(arr)) return arr.pop();
       return undefined;
     });
-    builtins.set('at', (args): any => {
+    builtins.set('at', (args): HoloScriptValue => {
       const arr = args[0];
       const index = Number(args[1]);
       if (Array.isArray(arr)) return arr[index];
       return undefined;
     });
 
-    builtins.set('showSettings', (): any => {
+    builtins.set('showSettings', (): HoloScriptValue => {
       this.emit('show-settings');
       return true;
     });
 
-    builtins.set('openChat', (args): any => {
+    builtins.set('openChat', (args): HoloScriptValue => {
       const config = args[0] || {};
       this.emit('show-chat', config);
       return true;
     });
 
     // Console/Debug
-    builtins.set('log', (args): any => {
+    builtins.set('log', (args): HoloScriptValue => {
       logger.info('HoloScript log', { args });
       return args[0];
     });
-    builtins.set('print', (args): any => {
+    builtins.set('print', (args): HoloScriptValue => {
       const message = args.map(String).join(' ');
       logger.info('print', { message });
       return message;
     });
 
     // Type checking
-    builtins.set('typeof', (args): any => typeof args[0]);
-    builtins.set('isArray', (args): any => Array.isArray(args[0]));
-    builtins.set('isNumber', (args): any => typeof args[0] === 'number' && !isNaN(args[0]));
-    builtins.set('isString', (args): any => typeof args[0] === 'string');
+    builtins.set('typeof', (args): HoloScriptValue => typeof args[0]);
+    builtins.set('isArray', (args): HoloScriptValue => Array.isArray(args[0]));
+    builtins.set('isNumber', (args): HoloScriptValue => typeof args[0] === 'number' && !isNaN(args[0]));
+    builtins.set('isString', (args): HoloScriptValue => typeof args[0] === 'string');
 
     // New Primitives
     builtins.set('shop', (args) => this.handleShop(args));
@@ -1710,7 +1710,7 @@ export class HoloScriptRuntime {
         try {
           const keys = JSON.parse(savedKeys);
           configuredCount = Object.values(keys).filter((k) => !!k).length;
-        } catch (e) {}
+        } catch (_e) {}
       }
 
       this.setVariable('$ai_config', {

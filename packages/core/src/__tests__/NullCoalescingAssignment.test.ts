@@ -25,7 +25,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
       expect(result.ast.root).toBeDefined();
       expect(result.ast.root.type).toBe('logic');
@@ -38,7 +38,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
       expect(result.ast.root.type).toBe('logic');
     });
@@ -50,7 +50,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
       expect(result.ast.root.type).toBe('logic');
     });
@@ -62,7 +62,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
       expect(result.ast.root.type).toBe('logic');
     });
@@ -76,7 +76,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
       expect(result.ast.root.type).toBe('logic');
     });
@@ -88,7 +88,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
       expect(result.ast.root.type).toBe('logic');
     });
@@ -100,7 +100,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
       expect(result.ast.root.type).toBe('logic');
     });
@@ -112,7 +112,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
       expect(result.ast.root.type).toBe('logic');
     });
@@ -277,7 +277,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
       expect(result.ast.root.type).toBe('logic');
     });
@@ -289,7 +289,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
     });
   });
@@ -302,7 +302,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.success).toBe(true);
     });
 
@@ -323,7 +323,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.ast).toBeDefined();
@@ -337,7 +337,7 @@ describe('Null Coalescing Assignment (??=)', () => {
         }
       }`;
       const result = parser.parse(code);
-      
+
       expect(result.ast.root.type).toBe('logic');
     });
   });

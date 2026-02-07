@@ -13,7 +13,7 @@ async function testCircularDependency() {
   fs.writeFileSync(path.join(testDir, 'configB.json'), JSON.stringify(configB, null, 2));
 
   console.log('Testing circular dependency detection...');
-  
+
   try {
     const loader = new ConfigLoader();
     await loader.loadConfig(path.join(testDir, 'configA.json'));

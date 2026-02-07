@@ -40,13 +40,7 @@ const REQUIRED_PACKAGES = [
   'mcp-server',
 ];
 
-const NEW_PACKAGES = [
-  'visual',
-  'compiler-wasm',
-  'intellij',
-  'partner-sdk',
-  'registry',
-];
+const NEW_PACKAGES = ['visual', 'compiler-wasm', 'intellij', 'partner-sdk', 'registry'];
 
 // Packages that use different build systems (Rust, Gradle)
 const NON_TYPESCRIPT_PACKAGES = ['compiler-wasm', 'intellij'];
@@ -68,12 +62,17 @@ function checkPackage(pkgDir: string, pkgBaseName: string): CheckResult {
   if (isNonTs) {
     // Check for Cargo.toml (Rust) or build.gradle (Java)
     const hasCargoToml = existsSync(join(pkgDir, 'Cargo.toml'));
-    const hasBuildGradle = existsSync(join(pkgDir, 'build.gradle.kts')) || existsSync(join(pkgDir, 'build.gradle'));
+    const hasBuildGradle =
+      existsSync(join(pkgDir, 'build.gradle.kts')) || existsSync(join(pkgDir, 'build.gradle'));
     const hasBuildFile = hasCargoToml || hasBuildGradle;
     checks.push({
       name: 'Build config exists',
       passed: hasBuildFile,
-      message: hasBuildFile ? (hasCargoToml ? 'Cargo.toml found' : 'build.gradle found') : 'Missing build config',
+      message: hasBuildFile
+        ? hasCargoToml
+          ? 'Cargo.toml found'
+          : 'build.gradle found'
+        : 'Missing build config',
     });
   } else {
     checks.push({
@@ -115,9 +114,7 @@ function checkPackage(pkgDir: string, pkgBaseName: string): CheckResult {
     checks.push({
       name: 'No deprecated deps',
       passed: !hasDeprecatedTraits,
-      message: hasDeprecatedTraits
-        ? 'Uses deprecated package'
-        : 'Clean dependencies',
+      message: hasDeprecatedTraits ? 'Uses deprecated package' : 'Clean dependencies',
     });
   }
 
@@ -163,16 +160,11 @@ function main() {
   console.log('\n📊 Release Readiness Summary\n');
 
   const totalChecks = results.reduce((acc, r) => acc + r.checks.length, 0);
-  const passedChecks = results.reduce(
-    (acc, r) => acc + r.checks.filter((c) => c.passed).length,
-    0
-  );
+  const passedChecks = results.reduce((acc, r) => acc + r.checks.filter((c) => c.passed).length, 0);
 
   console.log(`  Total packages: ${results.length}`);
   console.log(`  Checks passed: ${passedChecks}/${totalChecks}`);
-  console.log(
-    `  Release ready: ${allPassed ? '✅ YES' : '❌ NO - Fix issues above'}`
-  );
+  console.log(`  Release ready: ${allPassed ? '✅ YES' : '❌ NO - Fix issues above'}`);
 
   // Release checklist
   console.log('\n📋 Release Checklist:\n');

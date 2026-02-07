@@ -1,4 +1,3 @@
-
 import { describe, it, expect } from 'vitest';
 import { HoloScriptPlusParser } from './HoloScriptPlusParser';
 
@@ -8,7 +7,7 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
   const parser = new HoloScriptPlusParser({ strict: false });
 
   it('Recovers from invalid property syntax within a node', () => {
-    // 'color:' with no value is invalid if followed by invalid token, 
+    // 'color:' with no value is invalid if followed by invalid token,
     // but here we use '???' which should trigger error in value parsing
     const source = `
     object "Test" {
@@ -16,15 +15,15 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
       size: 10
     }`;
     const result = parser.parse(source);
-    
+
     // DEBUG LOG
     // fs.writeFileSync('recovery_debug.json', JSON.stringify(result, null, 2));
 
     expect(result.success).toBe(false);
     expect(result.errors.length).toBeGreaterThan(0);
-    
-    const node = result.ast.children?.[0] || (result.ast.root as any);
-    
+
+    const node = result.ast.children?.[0] || (result.ast.root);
+
     expect(node.properties.size).toBe(10);
   });
 
@@ -38,10 +37,10 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
     const result = parser.parse(source);
 
     expect(result.success).toBe(false);
-    
+
     const root = result.ast.root;
     const node = root.type === 'fragment' ? root.children![0] : root;
-    
+
     expect(node.properties.visible).toBe(true);
   });
 
@@ -56,10 +55,10 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
     const result = parser.parse(source);
 
     expect(result.success).toBe(false);
-    
+
     const root = result.ast.root;
     const node = root.type === 'fragment' ? root.children![0] : root;
-    
+
     // Expect opacity to be parsed
     expect(node.properties.opacity).toBe(0.5);
   });
@@ -73,13 +72,13 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
     const result = parser.parse(source);
 
     expect(result.success).toBe(false);
-    
+
     const root = result.ast.root;
     const node = root.type === 'fragment' ? root.children![0] : root;
-    
+
     // Debug info
     if (!node.children || node.children.length === 0) {
-        console.log('Node properties:', node.properties);
+      console.log('Node properties:', node.properties);
     }
 
     expect(node.children).toBeDefined();
@@ -98,9 +97,9 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
 
     expect(result.success).toBe(false);
     expect(result.errors.length).toBeGreaterThan(0);
-    
-    const node = result.ast.children?.[0] || (result.ast.root as any);
-    
+
+    const node = result.ast.children?.[0] || (result.ast.root);
+
     // Should still parse the valid property despite preceding errors
     expect(node.properties.prop3).toBe(42);
   });
@@ -118,11 +117,11 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
     const result = parser.parse(source);
 
     expect(result.success).toBe(false);
-    
-    const outer = result.ast.children?.[0] || (result.ast.root as any);
+
+    const outer = result.ast.children?.[0] || (result.ast.root);
     const middle = outer.children?.[0];
     const inner = middle?.children?.[0];
-    
+
     expect(inner).toBeDefined();
     expect(inner?.properties.working).toBe(true);
   });
@@ -136,9 +135,9 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
     const result = parser.parse(source);
 
     expect(result.success).toBe(false);
-    
-    const node = result.ast.children?.[0] || (result.ast.root as any);
-    
+
+    const node = result.ast.children?.[0] || (result.ast.root);
+
     // Should still parse the valid property even though array had an error
     expect(node.properties.color).toBe('blue');
   });
@@ -152,7 +151,7 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
     const result = parser.parse(source);
 
     // This may or may not process the first line, but valid prop should parse
-    const node = result.ast.children?.[0] || (result.ast.root as any);
+    const node = result.ast.children?.[0] || (result.ast.root);
     expect(node.properties.validProp).toBe(20);
   });
 
@@ -164,7 +163,7 @@ describe('HoloScriptPlusParser - Error Recovery', () => {
     }`;
     const result = parser.parse(source);
 
-    const node = result.ast.children?.[0] || (result.ast.root as any);
+    const node = result.ast.children?.[0] || (result.ast.root);
     expect(node.properties.size).toBe(5);
   });
 });

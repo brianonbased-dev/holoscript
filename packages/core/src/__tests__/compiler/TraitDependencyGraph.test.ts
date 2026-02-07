@@ -65,9 +65,7 @@ describe('TraitDependencyGraph', () => {
       const info: ObjectTraitInfo = {
         objectName: 'Cube',
         sourceId: 'scene.holo',
-        traits: [
-          { name: 'physics', config: { mass: 2.0 }, configHash: '' },
-        ],
+        traits: [{ name: 'physics', config: { mass: 2.0 }, configHash: '' }],
       };
 
       graph.registerObject(info);
@@ -158,9 +156,7 @@ describe('TraitDependencyGraph', () => {
     });
 
     it('should detect removed traits', () => {
-      const newTraits: TraitUsage[] = [
-        { name: 'physics', config: { mass: 1.0 }, configHash: '' },
-      ];
+      const newTraits: TraitUsage[] = [{ name: 'physics', config: { mass: 1.0 }, configHash: '' }];
 
       const changes = graph.detectTraitChanges('Ball', newTraits);
 
@@ -192,9 +188,9 @@ describe('TraitDependencyGraph', () => {
       const changes = graph.detectTraitChanges('Ball', newTraits);
 
       expect(changes.length).toBe(3);
-      expect(changes.some(c => c.changeType === 'added')).toBe(true);
-      expect(changes.some(c => c.changeType === 'removed')).toBe(true);
-      expect(changes.some(c => c.changeType === 'config_changed')).toBe(true);
+      expect(changes.some((c) => c.changeType === 'added')).toBe(true);
+      expect(changes.some((c) => c.changeType === 'removed')).toBe(true);
+      expect(changes.some((c) => c.changeType === 'config_changed')).toBe(true);
     });
 
     it('should detect no changes when traits are same', () => {
@@ -249,9 +245,7 @@ describe('TraitDependencyGraph', () => {
     });
 
     it('should provide reasons for affected objects', () => {
-      const affected = graph.calculateAffectedSet([
-        { traitName: 'physics', changeType: 'added' },
-      ]);
+      const affected = graph.calculateAffectedSet([{ traitName: 'physics', changeType: 'added' }]);
 
       const reason = affected.reasons.get('Ball1');
       expect(reason).toBeDefined();
@@ -335,9 +329,7 @@ describe('TraitDependencyGraph', () => {
       graph.registerObject({
         objectName: 'Ball',
         sourceId: 'scene.holo',
-        traits: [
-          { name: 'physics', config: { mass: 1.0 }, configHash: '' },
-        ],
+        traits: [{ name: 'physics', config: { mass: 1.0 }, configHash: '' }],
       });
 
       const json = graph.serialize();
@@ -349,7 +341,12 @@ describe('TraitDependencyGraph', () => {
     });
 
     it('should throw on unsupported version', () => {
-      const badJson = JSON.stringify({ version: 99, traitDependencies: [], traitConflicts: [], objectTraits: [] });
+      const badJson = JSON.stringify({
+        version: 99,
+        traitDependencies: [],
+        traitConflicts: [],
+        objectTraits: [],
+      });
       expect(() => TraitDependencyGraph.deserialize(badJson)).toThrow('Unsupported');
     });
   });

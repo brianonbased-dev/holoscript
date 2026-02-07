@@ -53,15 +53,15 @@ const formatter = new HoloScriptFormatter({
   braceStyle: 'same-line',
   trailingComma: 'multi-line',
   bracketSpacing: true,
-  sortImports: true
+  sortImports: true,
 });
 
 // Format code
 const result = formatter.format(code, 'holo');
 
-console.log(result.formatted);      // Formatted code
-console.log(result.changed);        // true if code was modified
-console.log(result.errors);         // Array of formatting errors
+console.log(result.formatted); // Formatted code
+console.log(result.changed); // true if code was modified
+console.log(result.errors); // Array of formatting errors
 
 // Check if formatted (returns boolean)
 const isFormatted = formatter.check(code, 'holo');
@@ -96,23 +96,24 @@ Create a `.holoscriptrc`, `.holoscriptrc.json`, or `holoscript.config.json`:
 
 ## Options
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `indentSize` | 2 | Spaces per indent level |
-| `useTabs` | false | Use tabs instead of spaces |
-| `maxLineLength` | 100 | Maximum line length |
-| `braceStyle` | "same-line" | Brace style: "same-line", "next-line", "stroustrup" |
-| `trailingComma` | "multi-line" | Trailing commas: "none", "multi-line", "all" |
-| `bracketSpacing` | true | Spaces inside brackets `[ 1, 2, 3 ]` |
-| `semicolons` | false | Add semicolons (HSPlus) |
-| `singleQuote` | false | Use single quotes |
-| `sortImports` | true | Sort import statements alphabetically |
-| `maxBlankLines` | 1 | Maximum consecutive blank lines |
-| `blankLineBeforeComposition` | true | Blank line before composition blocks |
+| Option                       | Default      | Description                                         |
+| ---------------------------- | ------------ | --------------------------------------------------- |
+| `indentSize`                 | 2            | Spaces per indent level                             |
+| `useTabs`                    | false        | Use tabs instead of spaces                          |
+| `maxLineLength`              | 100          | Maximum line length                                 |
+| `braceStyle`                 | "same-line"  | Brace style: "same-line", "next-line", "stroustrup" |
+| `trailingComma`              | "multi-line" | Trailing commas: "none", "multi-line", "all"        |
+| `bracketSpacing`             | true         | Spaces inside brackets `[ 1, 2, 3 ]`                |
+| `semicolons`                 | false        | Add semicolons (HSPlus)                             |
+| `singleQuote`                | false        | Use single quotes                                   |
+| `sortImports`                | true         | Sort import statements alphabetically               |
+| `maxBlankLines`              | 1            | Maximum consecutive blank lines                     |
+| `blankLineBeforeComposition` | true         | Blank line before composition blocks                |
 
 ## Examples
 
 ### Before
+
 ```holo
 composition "Example"{
 template "Enemy"{
@@ -125,6 +126,7 @@ object "Goblin" using "Enemy"{position:[0,0,5]}
 ```
 
 ### After
+
 ```holo
 composition "Example" {
   template "Enemy" {

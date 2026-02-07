@@ -35,60 +35,245 @@ import {
 } from 'vscode-languageserver/node';
 
 // Dynamic Trait Completions
-const TRAIT_COMPLETIONS: CompletionItem[] = VR_TRAITS.map(trait => ({
+const TRAIT_COMPLETIONS: CompletionItem[] = VR_TRAITS.map((trait) => ({
   label: `@${trait}`,
   kind: CompletionItemKind.Keyword,
   detail: `Apply ${trait} trait`,
-  insertText: `@${trait}(${'${1}'})`
+  insertText: `@${trait}(${'${1}'})`,
 }));
 
 // HoloScript keywords and snippets
 const KEYWORDS: CompletionItem[] = [
   ...TRAIT_COMPLETIONS,
-  { label: 'generate', kind: CompletionItemKind.Keyword, detail: 'AI Generation Directive', insertText: '@generate(prompt: "${1:prompt}")' },
-  { label: 'orb', kind: CompletionItemKind.Keyword, detail: 'Create a spatial orb', insertText: 'orb ${1:name} {\n\t$0\n}' },
-  { label: 'function', kind: CompletionItemKind.Keyword, detail: 'Define a function', insertText: 'function ${1:name}(${2:params}) {\n\t$0\n}' },
-  { label: 'connect', kind: CompletionItemKind.Keyword, detail: 'Connect two orbs', insertText: 'connect ${1:from} to ${2:to} as "${3:type}"' },
-  { label: 'gate', kind: CompletionItemKind.Keyword, detail: 'Conditional gate', insertText: 'gate ${1:name} {\n\tcondition: ${2:condition}\n\tonTrue: ${3:handler}\n}' },
-  { label: 'stream', kind: CompletionItemKind.Keyword, detail: 'Data stream', insertText: 'stream ${1:name} {\n\tsource: ${2:source}\n\tthrough: [$0]\n}' },
-  { label: 'const', kind: CompletionItemKind.Keyword, detail: 'Constant declaration', insertText: 'const ${1:name} = ${0}' },
-  { label: 'let', kind: CompletionItemKind.Keyword, detail: 'Variable declaration', insertText: 'let ${1:name} = ${0}' },
-  { label: 'for', kind: CompletionItemKind.Keyword, detail: 'For loop', insertText: 'for (${1:i} = 0; ${1:i} < ${2:count}; ${1:i}++) {\n\t$0\n}' },
-  { label: 'while', kind: CompletionItemKind.Keyword, detail: 'While loop', insertText: 'while (${1:condition}) {\n\t$0\n}' },
-  { label: 'forEach', kind: CompletionItemKind.Keyword, detail: 'ForEach loop', insertText: 'forEach ${1:item} in ${2:collection} {\n\t$0\n}' },
-  { label: 'import', kind: CompletionItemKind.Keyword, detail: 'Import module', insertText: 'import { ${1:name} } from "${2:module}"' },
-  { label: 'export', kind: CompletionItemKind.Keyword, detail: 'Export declaration', insertText: 'export ${0}' },
-  { label: 'return', kind: CompletionItemKind.Keyword, detail: 'Return statement', insertText: 'return ${0}' },
-  { label: 'if', kind: CompletionItemKind.Keyword, detail: 'Conditional', insertText: 'if (${1:condition}) {\n\t$0\n}' },
+  {
+    label: 'generate',
+    kind: CompletionItemKind.Keyword,
+    detail: 'AI Generation Directive',
+    insertText: '@generate(prompt: "${1:prompt}")',
+  },
+  {
+    label: 'orb',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Create a spatial orb',
+    insertText: 'orb ${1:name} {\n\t$0\n}',
+  },
+  {
+    label: 'function',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Define a function',
+    insertText: 'function ${1:name}(${2:params}) {\n\t$0\n}',
+  },
+  {
+    label: 'connect',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Connect two orbs',
+    insertText: 'connect ${1:from} to ${2:to} as "${3:type}"',
+  },
+  {
+    label: 'gate',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Conditional gate',
+    insertText: 'gate ${1:name} {\n\tcondition: ${2:condition}\n\tonTrue: ${3:handler}\n}',
+  },
+  {
+    label: 'stream',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Data stream',
+    insertText: 'stream ${1:name} {\n\tsource: ${2:source}\n\tthrough: [$0]\n}',
+  },
+  {
+    label: 'const',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Constant declaration',
+    insertText: 'const ${1:name} = ${0}',
+  },
+  {
+    label: 'let',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Variable declaration',
+    insertText: 'let ${1:name} = ${0}',
+  },
+  {
+    label: 'for',
+    kind: CompletionItemKind.Keyword,
+    detail: 'For loop',
+    insertText: 'for (${1:i} = 0; ${1:i} < ${2:count}; ${1:i}++) {\n\t$0\n}',
+  },
+  {
+    label: 'while',
+    kind: CompletionItemKind.Keyword,
+    detail: 'While loop',
+    insertText: 'while (${1:condition}) {\n\t$0\n}',
+  },
+  {
+    label: 'forEach',
+    kind: CompletionItemKind.Keyword,
+    detail: 'ForEach loop',
+    insertText: 'forEach ${1:item} in ${2:collection} {\n\t$0\n}',
+  },
+  {
+    label: 'import',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Import module',
+    insertText: 'import { ${1:name} } from "${2:module}"',
+  },
+  {
+    label: 'export',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Export declaration',
+    insertText: 'export ${0}',
+  },
+  {
+    label: 'return',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Return statement',
+    insertText: 'return ${0}',
+  },
+  {
+    label: 'if',
+    kind: CompletionItemKind.Keyword,
+    detail: 'Conditional',
+    insertText: 'if (${1:condition}) {\n\t$0\n}',
+  },
 ];
 
 const BUILTIN_FUNCTIONS: CompletionItem[] = [
-  { label: 'show', kind: CompletionItemKind.Function, detail: 'Show an orb', documentation: 'Make an orb visible' },
-  { label: 'hide', kind: CompletionItemKind.Function, detail: 'Hide an orb', documentation: 'Make an orb invisible' },
-  { label: 'pulse', kind: CompletionItemKind.Function, detail: 'Pulse animation', documentation: 'Apply pulse animation to orb' },
-  { label: 'animate', kind: CompletionItemKind.Function, detail: 'Animate property', documentation: 'Animate an orb property' },
-  { label: 'spawn', kind: CompletionItemKind.Function, detail: 'Spawn object', documentation: 'Spawn a new object at position' },
-  { label: 'move', kind: CompletionItemKind.Function, detail: 'Move object', documentation: 'Move object to new position' },
-  { label: 'add', kind: CompletionItemKind.Function, detail: 'Add numbers', documentation: 'Add two numbers' },
-  { label: 'subtract', kind: CompletionItemKind.Function, detail: 'Subtract numbers', documentation: 'Subtract two numbers' },
-  { label: 'multiply', kind: CompletionItemKind.Function, detail: 'Multiply numbers', documentation: 'Multiply two numbers' },
-  { label: 'divide', kind: CompletionItemKind.Function, detail: 'Divide numbers', documentation: 'Divide two numbers' },
-  { label: 'concat', kind: CompletionItemKind.Function, detail: 'Concatenate strings', documentation: 'Join strings together' },
-  { label: 'length', kind: CompletionItemKind.Function, detail: 'Get length', documentation: 'Get length of string or array' },
-  { label: 'push', kind: CompletionItemKind.Function, detail: 'Push to array', documentation: 'Add item to array' },
-  { label: 'pop', kind: CompletionItemKind.Function, detail: 'Pop from array', documentation: 'Remove last item from array' },
-  { label: 'log', kind: CompletionItemKind.Function, detail: 'Log message', documentation: 'Log a message to console' },
-  { label: 'print', kind: CompletionItemKind.Function, detail: 'Print message', documentation: 'Print a message' },
+  {
+    label: 'show',
+    kind: CompletionItemKind.Function,
+    detail: 'Show an orb',
+    documentation: 'Make an orb visible',
+  },
+  {
+    label: 'hide',
+    kind: CompletionItemKind.Function,
+    detail: 'Hide an orb',
+    documentation: 'Make an orb invisible',
+  },
+  {
+    label: 'pulse',
+    kind: CompletionItemKind.Function,
+    detail: 'Pulse animation',
+    documentation: 'Apply pulse animation to orb',
+  },
+  {
+    label: 'animate',
+    kind: CompletionItemKind.Function,
+    detail: 'Animate property',
+    documentation: 'Animate an orb property',
+  },
+  {
+    label: 'spawn',
+    kind: CompletionItemKind.Function,
+    detail: 'Spawn object',
+    documentation: 'Spawn a new object at position',
+  },
+  {
+    label: 'move',
+    kind: CompletionItemKind.Function,
+    detail: 'Move object',
+    documentation: 'Move object to new position',
+  },
+  {
+    label: 'add',
+    kind: CompletionItemKind.Function,
+    detail: 'Add numbers',
+    documentation: 'Add two numbers',
+  },
+  {
+    label: 'subtract',
+    kind: CompletionItemKind.Function,
+    detail: 'Subtract numbers',
+    documentation: 'Subtract two numbers',
+  },
+  {
+    label: 'multiply',
+    kind: CompletionItemKind.Function,
+    detail: 'Multiply numbers',
+    documentation: 'Multiply two numbers',
+  },
+  {
+    label: 'divide',
+    kind: CompletionItemKind.Function,
+    detail: 'Divide numbers',
+    documentation: 'Divide two numbers',
+  },
+  {
+    label: 'concat',
+    kind: CompletionItemKind.Function,
+    detail: 'Concatenate strings',
+    documentation: 'Join strings together',
+  },
+  {
+    label: 'length',
+    kind: CompletionItemKind.Function,
+    detail: 'Get length',
+    documentation: 'Get length of string or array',
+  },
+  {
+    label: 'push',
+    kind: CompletionItemKind.Function,
+    detail: 'Push to array',
+    documentation: 'Add item to array',
+  },
+  {
+    label: 'pop',
+    kind: CompletionItemKind.Function,
+    detail: 'Pop from array',
+    documentation: 'Remove last item from array',
+  },
+  {
+    label: 'log',
+    kind: CompletionItemKind.Function,
+    detail: 'Log message',
+    documentation: 'Log a message to console',
+  },
+  {
+    label: 'print',
+    kind: CompletionItemKind.Function,
+    detail: 'Print message',
+    documentation: 'Print a message',
+  },
 ];
 
 const ORB_PROPERTIES: CompletionItem[] = [
-  { label: 'color', kind: CompletionItemKind.Property, detail: 'Orb color', insertText: 'color: "${1:#00ffff}"' },
-  { label: 'glow', kind: CompletionItemKind.Property, detail: 'Glow effect', insertText: 'glow: ${1:true}' },
-  { label: 'position', kind: CompletionItemKind.Property, detail: 'Position', insertText: 'position: { x: ${1:0}, y: ${2:0}, z: ${3:0} }' },
+  {
+    label: 'color',
+    kind: CompletionItemKind.Property,
+    detail: 'Orb color',
+    insertText: 'color: "${1:#00ffff}"',
+  },
+  {
+    label: 'glow',
+    kind: CompletionItemKind.Property,
+    detail: 'Glow effect',
+    insertText: 'glow: ${1:true}',
+  },
+  {
+    label: 'position',
+    kind: CompletionItemKind.Property,
+    detail: 'Position',
+    insertText: 'position: { x: ${1:0}, y: ${2:0}, z: ${3:0} }',
+  },
   { label: 'size', kind: CompletionItemKind.Property, detail: 'Size', insertText: 'size: ${1:1}' },
-  { label: 'interactive', kind: CompletionItemKind.Property, detail: 'Interactive', insertText: 'interactive: ${1:true}' },
-  { label: 'onClick', kind: CompletionItemKind.Property, detail: 'Click handler', insertText: 'onClick: ${1:handler}' },
-  { label: 'onGaze', kind: CompletionItemKind.Property, detail: 'Gaze handler', insertText: 'onGaze: ${1:handler}' },
+  {
+    label: 'interactive',
+    kind: CompletionItemKind.Property,
+    detail: 'Interactive',
+    insertText: 'interactive: ${1:true}',
+  },
+  {
+    label: 'onClick',
+    kind: CompletionItemKind.Property,
+    detail: 'Click handler',
+    insertText: 'onClick: ${1:handler}',
+  },
+  {
+    label: 'onGaze',
+    kind: CompletionItemKind.Property,
+    detail: 'Gaze handler',
+    insertText: 'onGaze: ${1:handler}',
+  },
 ];
 
 /**
@@ -112,7 +297,7 @@ export class HoloScriptLanguageServer {
   updateDocument(uri: string, content: string, version: number): void {
     const isHolo = uri.endsWith('.holo');
     const parseResult = isHolo ? this.holoParser.parse(content) : this.parser.parse(content);
-    
+
     this.documentCache.set(uri, {
       content,
       ast: parseResult.ast,
@@ -192,8 +377,8 @@ export class HoloScriptLanguageServer {
 
     // 1. Common Typos & "Did you mean"
     const typos: Record<string, string> = {
-      'sper': 'sphere',
-      'box': 'cube',
+      sper: 'sphere',
+      box: 'cube',
       'rotate.y': 'rotation.y',
       'rotate.x': 'rotation.x',
       'rotate.z': 'rotation.z',
@@ -219,7 +404,7 @@ export class HoloScriptLanguageServer {
     // 2. Missing Trait Validations
     // Check if on_grab is used but @grabbable trait is missing
     const findNodes = (nodes: any[]): any[] => {
-      let results: any[] = [];
+      const results: any[] = [];
       for (const node of nodes) {
         results.push(node);
         if (node.children) results.push(...findNodes(node.children));
@@ -231,8 +416,10 @@ export class HoloScriptLanguageServer {
     for (const node of allNodes) {
       if (node.directives) {
         const hasGrabHook = node.directives.some((d: any) => d.hook === 'on_grab');
-        const hasGrabbableTrait = node.directives.some((d: any) => d.type === 'trait' && d.name === 'grabbable');
-        
+        const hasGrabbableTrait = node.directives.some(
+          (d: any) => d.type === 'trait' && d.name === 'grabbable'
+        );
+
         if (hasGrabHook && !hasGrabbableTrait) {
           diagnostics.push({
             range: {
@@ -249,7 +436,6 @@ export class HoloScriptLanguageServer {
 
     return diagnostics;
   }
-
 
   /**
    * Get completions at position
@@ -271,7 +457,7 @@ export class HoloScriptLanguageServer {
       const varName = this.getVariableBeforeDot(beforeCursor);
       const typeInfo = this.typeChecker.getType(varName);
       if (typeInfo?.properties) {
-        return Array.from(typeInfo.properties.keys()).map(prop => ({
+        return Array.from(typeInfo.properties.keys()).map((prop) => ({
           label: prop,
           kind: CompletionItemKind.Property,
         }));
@@ -282,11 +468,7 @@ export class HoloScriptLanguageServer {
     // Get declared variables
     const variables = this.getDeclaredVariables(doc.ast);
 
-    return [
-      ...KEYWORDS,
-      ...BUILTIN_FUNCTIONS,
-      ...variables,
-    ];
+    return [...KEYWORDS, ...BUILTIN_FUNCTIONS, ...variables];
   }
 
   /**
@@ -300,7 +482,7 @@ export class HoloScriptLanguageServer {
     if (!word) return null;
 
     // Check built-in functions
-    const builtinFunc = BUILTIN_FUNCTIONS.find(f => f.label === word);
+    const builtinFunc = BUILTIN_FUNCTIONS.find((f) => f.label === word);
     if (builtinFunc) {
       return {
         contents: `**${builtinFunc.label}**\n\n${builtinFunc.documentation || builtinFunc.detail || ''}`,
@@ -308,7 +490,7 @@ export class HoloScriptLanguageServer {
     }
 
     // Check keywords
-    const keyword = KEYWORDS.find(k => k.label === word);
+    const keyword = KEYWORDS.find((k) => k.label === word);
     if (keyword) {
       return {
         contents: `**${keyword.label}** (keyword)\n\n${keyword.detail || ''}`,
@@ -414,8 +596,8 @@ export class HoloScriptLanguageServer {
     if (!word) return null;
 
     // Don't allow renaming keywords or built-ins
-    if (KEYWORDS.some(k => k.label === word)) return null;
-    if (BUILTIN_FUNCTIONS.some(f => f.label === word)) return null;
+    if (KEYWORDS.some((k) => k.label === word)) return null;
+    if (BUILTIN_FUNCTIONS.some((f) => f.label === word)) return null;
 
     // Find the range of the word at cursor
     const lines = doc.content.split('\n');
@@ -451,7 +633,7 @@ export class HoloScriptLanguageServer {
     if (locations.length === 0) return null;
 
     // Create text edits for each location
-    const edits: TextEdit[] = locations.map(loc => ({
+    const edits: TextEdit[] = locations.map((loc) => ({
       range: loc.range,
       newText: newName,
     }));
@@ -481,10 +663,12 @@ export class HoloScriptLanguageServer {
           diagnostics: [diagnostic],
           edit: {
             changes: {
-              [uri]: [{
-                range: diagnostic.range,
-                newText: 'let',
-              }],
+              [uri]: [
+                {
+                  range: diagnostic.range,
+                  newText: 'let',
+                },
+              ],
             },
           },
           isPreferred: true,
@@ -495,10 +679,12 @@ export class HoloScriptLanguageServer {
           diagnostics: [diagnostic],
           edit: {
             changes: {
-              [uri]: [{
-                range: diagnostic.range,
-                newText: 'const',
-              }],
+              [uri]: [
+                {
+                  range: diagnostic.range,
+                  newText: 'const',
+                },
+              ],
             },
           },
         });
@@ -512,10 +698,12 @@ export class HoloScriptLanguageServer {
           diagnostics: [diagnostic],
           edit: {
             changes: {
-              [uri]: [{
-                range: diagnostic.range,
-                newText: '{ /* TODO */ }',
-              }],
+              [uri]: [
+                {
+                  range: diagnostic.range,
+                  newText: '{ /* TODO */ }',
+                },
+              ],
             },
           },
           isPreferred: true,
@@ -534,13 +722,15 @@ export class HoloScriptLanguageServer {
             diagnostics: [diagnostic],
             edit: {
               changes: {
-                [uri]: [{
-                  range: {
-                    start: { line: diagnostic.range.start.line, character: letStart },
-                    end: { line: diagnostic.range.start.line, character: letStart + 3 },
+                [uri]: [
+                  {
+                    range: {
+                      start: { line: diagnostic.range.start.line, character: letStart },
+                      end: { line: diagnostic.range.start.line, character: letStart + 3 },
+                    },
+                    newText: 'const',
                   },
-                  newText: 'const',
-                }],
+                ],
               },
             },
             isPreferred: true,
@@ -559,10 +749,12 @@ export class HoloScriptLanguageServer {
             diagnostics: [diagnostic],
             edit: {
               changes: {
-                [uri]: [{
-                  range: diagnostic.range,
-                  newText: camelCase,
-                }],
+                [uri]: [
+                  {
+                    range: diagnostic.range,
+                    newText: camelCase,
+                  },
+                ],
               },
             },
           });
@@ -579,10 +771,12 @@ export class HoloScriptLanguageServer {
             diagnostics: [diagnostic],
             edit: {
               changes: {
-                [uri]: [{
-                  range: diagnostic.range,
-                  newText: `${paramName}: any`,
-                }],
+                [uri]: [
+                  {
+                    range: diagnostic.range,
+                    newText: `${paramName}: any`,
+                  },
+                ],
               },
             },
           });
@@ -600,10 +794,12 @@ export class HoloScriptLanguageServer {
             diagnostics: [diagnostic],
             edit: {
               changes: {
-                [uri]: [{
-                  range: diagnostic.range,
-                  newText: suggestion,
-                }],
+                [uri]: [
+                  {
+                    range: diagnostic.range,
+                    newText: suggestion,
+                  },
+                ],
               },
             },
             isPreferred: true,
@@ -631,11 +827,12 @@ export class HoloScriptLanguageServer {
         start: { line: diagnostic.line, character: diagnostic.column },
         end: { line: diagnostic.line, character: diagnostic.column + 1 },
       },
-      severity: diagnostic.severity === 'error'
-        ? DiagnosticSeverity.Error
-        : diagnostic.severity === 'warning'
-          ? DiagnosticSeverity.Warning
-          : DiagnosticSeverity.Information,
+      severity:
+        diagnostic.severity === 'error'
+          ? DiagnosticSeverity.Error
+          : diagnostic.severity === 'warning'
+            ? DiagnosticSeverity.Warning
+            : DiagnosticSeverity.Information,
       code: diagnostic.code,
       source: 'holoscript-types',
       message: diagnostic.message,
@@ -682,11 +879,16 @@ export class HoloScriptLanguageServer {
 
   private getCompletionKind(nodeType: string): CompletionItemKind {
     switch (nodeType) {
-      case 'orb': return CompletionItemKind.Class;
-      case 'method': return CompletionItemKind.Function;
-      case 'variable-declaration': return CompletionItemKind.Variable;
-      case 'stream': return CompletionItemKind.Module;
-      default: return CompletionItemKind.Value;
+      case 'orb':
+        return CompletionItemKind.Class;
+      case 'method':
+        return CompletionItemKind.Function;
+      case 'variable-declaration':
+        return CompletionItemKind.Variable;
+      case 'stream':
+        return CompletionItemKind.Module;
+      default:
+        return CompletionItemKind.Value;
     }
   }
 
@@ -720,7 +922,7 @@ export class HoloScriptLanguageServer {
     let result = `**${name}**: ${info.type}`;
 
     if (info.type === 'function' && info.parameters) {
-      const params = info.parameters.map(p => `${p.name}: ${p.type}`).join(', ');
+      const params = info.parameters.map((p) => `${p.name}: ${p.type}`).join(', ');
       result = `**${name}**(${params}): ${info.returnType || 'void'}`;
     }
 
@@ -737,7 +939,7 @@ export class HoloScriptLanguageServer {
   private getWordFromMessage(message: string): string | null {
     // Extract word in quotes like: Variable "MyVar" should use camelCase
     const match = message.match(/"(\w+)"|'(\w+)'|Parameter "?(\w+)"?/);
-    return match ? (match[1] || match[2] || match[3]) : null;
+    return match ? match[1] || match[2] || match[3] : null;
   }
 
   private toCamelCase(str: string): string {

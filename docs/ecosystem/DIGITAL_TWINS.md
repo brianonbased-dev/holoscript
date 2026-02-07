@@ -8,13 +8,13 @@ HoloScript's reactive state system provides the foundation for digital twins - l
 
 ## Why HoloScript for Digital Twins?
 
-| HoloScript Feature | Digital Twin Application |
-|-------------------|-------------------------|
-| Scene graph | Asset hierarchy modeling |
-| `@state` reactive | Real-time sync |
+| HoloScript Feature    | Digital Twin Application  |
+| --------------------- | ------------------------- |
+| Scene graph           | Asset hierarchy modeling  |
+| `@state` reactive     | Real-time sync            |
 | `@digital_twin` trait | Twin lifecycle management |
-| `@data_binding` | External data connection |
-| Templates | Asset type definitions |
+| `@data_binding`       | External data connection  |
+| Templates             | Asset type definitions    |
 
 ## Core Concepts
 
@@ -150,6 +150,7 @@ twin#asset {
 ```
 
 Generated DTDL:
+
 ```json
 {
   "@context": "dtmi:dtdl:context;3",

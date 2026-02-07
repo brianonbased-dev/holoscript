@@ -5,6 +5,7 @@ You now know the basics of HoloScript. Here's where to go next:
 ## Explore Examples
 
 Open the Command Palette (`Ctrl+Shift+P`) and type:
+
 - **"HoloScript: Open Example"** - Browse ready-made examples
 
 ## Learn More
@@ -35,6 +36,7 @@ holoscript compile scene.holo --target vrchat
 ## Need Help?
 
 Use the command palette to access:
+
 - **HoloScript: Show Documentation**
 - **HoloScript: Report Issue**
 - **HoloScript: Join Discord**
@@ -43,4 +45,4 @@ Happy building! 🎉
 
 ---
 
-📹 *Full Video Course: [Coming Soon - HoloScript Masterclass]*
+📹 _Full Video Course: [Coming Soon - HoloScript Masterclass]_

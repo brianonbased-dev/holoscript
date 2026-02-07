@@ -13,7 +13,7 @@ describe('FlowFieldTrait - Phase 18 (NPC Pathfinding)', () => {
       updateFlowField: vi.fn(),
       sampleDirection: vi.fn().mockReturnValue([1, 0, 0]), // Always steer right
       updateObstacle: vi.fn(),
-      dispose: vi.fn()
+      dispose: vi.fn(),
     };
     registerNavigationEngine('default', mockEngine);
 
@@ -23,9 +23,9 @@ describe('FlowFieldTrait - Phase 18 (NPC Pathfinding)', () => {
       type: 'object',
       traits: new Map([['flow_field', { destinationId: 'target_1' }]]),
       properties: {
-        position: [0, 0, 0]
+        position: [0, 0, 0],
       },
-      children: []
+      children: [],
     } as any as HSPlusNode;
   });
 
@@ -37,16 +37,21 @@ describe('FlowFieldTrait - Phase 18 (NPC Pathfinding)', () => {
 
   it('should sample direction and update position on update', () => {
     flowFieldHandler.onAttach!(node, flowFieldHandler.defaultConfig as any, {} as any);
-    
+
     // Mock delta of 1.0 for simplicity
-    flowFieldHandler.onUpdate!(node, { 
-      destinationId: 'target_1', 
-      speed: 10, 
-      steeringWeight: 1 
-    } as any, {} as any, 1.0);
+    flowFieldHandler.onUpdate!(
+      node,
+      {
+        destinationId: 'target_1',
+        speed: 10,
+        steeringWeight: 1,
+      } as any,
+      {} as any,
+      1.0
+    );
 
     expect(mockEngine.sampleDirection).toHaveBeenCalledWith('target_1', [0, 0, 0]);
-    
+
     // Position should have moved from [0,0,0] to [10,0,0] because sampleDirection returned [1,0,0]
     const pos = node.properties.position as number[];
     expect(pos[0]).toBeCloseTo(10);
@@ -56,12 +61,12 @@ describe('FlowFieldTrait - Phase 18 (NPC Pathfinding)', () => {
 
   it('should handle missing navigation engine gracefully', () => {
     registerNavigationEngine('default', null as any); // Remove engine
-    
+
     flowFieldHandler.onAttach!(node, flowFieldHandler.defaultConfig as any, {} as any);
     const initialPos = [...(node.properties.position as number[])];
-    
+
     flowFieldHandler.onUpdate!(node, { destinationId: 'target_1' } as any, {} as any, 1.0);
-    
+
     // Position should not have changed
     expect(node.properties.position).toEqual(initialPos);
   });

@@ -1,9 +1,9 @@
 /**
  * NeuralStreamingService - Phase 14: Neural Streaming
- * 
+ *
  * Orchestrates the high-speed relay of cognitive signals (uAAL) to the visual substrate.
  * Enables real-time feedback loops between agent reasoning and avatar expression.
- * 
+ *
  * Pattern: P.SIGNAL.NEURAL.01
  */
 
@@ -46,10 +46,12 @@ export class NeuralStreamingService extends BaseService {
    * Optimized for sub-10ms delivery to visual consumers.
    */
   public exportCognition(packet: NeuralPacket): void {
-    logger.debug(`[NeuralStream] Ôöì Exporting Packet ${packet.packetId} (${UAALOpCode[packet.opCode]}) from ${packet.personaId}`);
-    
+    logger.debug(
+      `[NeuralStream] Ôöì Exporting Packet ${packet.packetId} (${UAALOpCode[packet.opCode]}) from ${packet.personaId}`
+    );
+
     // Relay to all active listeners (e.g. WebSocket handlers, Avatar Managers)
-    this.activeStreams.forEach(listener => listener(packet));
+    this.activeStreams.forEach((listener) => listener(packet));
   }
 
   /**
@@ -67,9 +69,11 @@ export class NeuralStreamingService extends BaseService {
     if (opCode === UAALOpCode.REFLECT) return 'analytical';
     if (opCode === UAALOpCode.INTAKE) return 'curious';
     if (opCode === UAALOpCode.EXEC) return 'focused';
-    if (intent.toLowerCase().includes('error') || intent.toLowerCase().includes('fail')) return 'troubled';
-    if (intent.toLowerCase().includes('success') || intent.toLowerCase().includes('achieved')) return 'excited';
-    
+    if (intent.toLowerCase().includes('error') || intent.toLowerCase().includes('fail'))
+      return 'troubled';
+    if (intent.toLowerCase().includes('success') || intent.toLowerCase().includes('achieved'))
+      return 'excited';
+
     return 'neutral';
   }
 }

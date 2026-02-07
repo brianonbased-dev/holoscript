@@ -146,7 +146,9 @@ describe('Platform Compiler Integration Tests', () => {
 
       expect(result.sceneFile).toBeDefined();
       // ARKit configuration should be in scene or view file
-      expect(result.viewFile + result.sceneFile).toMatch(/ARSCNView|ARWorldTrackingConfiguration|ARSession/);
+      expect(result.viewFile + result.sceneFile).toMatch(
+        /ARSCNView|ARWorldTrackingConfiguration|ARSession/
+      );
     });
 
     it('should handle positions in Swift', () => {
@@ -192,7 +194,7 @@ describe('Platform Compiler Integration Tests', () => {
   describe('Cross-Platform Consistency', () => {
     it('should preserve object names across all platforms', () => {
       const parseResult = parser.parse(sampleHoloSource);
-      
+
       const vrchat = new VRChatCompiler().compile(parseResult.ast!);
       const unreal = new UnrealCompiler().compile(parseResult.ast!);
       const ios = new IOSCompiler().compile(parseResult.ast!);
@@ -216,7 +218,7 @@ describe('Platform Compiler Integration Tests', () => {
       `;
 
       const parseResult = parser.parse(positionSource);
-      
+
       const vrchat = new VRChatCompiler().compile(parseResult.ast!);
       const unreal = new UnrealCompiler().compile(parseResult.ast!);
 
@@ -272,7 +274,7 @@ describe('Platform Compiler Integration Tests', () => {
     it('should compile complex scene to VRChat', () => {
       const parseResult = parser.parse(complexScene);
       expect(parseResult.success).toBe(true);
-      
+
       const compiler = new VRChatCompiler();
       const result = compiler.compile(parseResult.ast!);
 
@@ -285,7 +287,7 @@ describe('Platform Compiler Integration Tests', () => {
     it('should compile complex scene to Unreal', () => {
       const parseResult = parser.parse(complexScene);
       expect(parseResult.success).toBe(true);
-      
+
       const compiler = new UnrealCompiler();
       const result = compiler.compile(parseResult.ast!);
 
@@ -297,7 +299,7 @@ describe('Platform Compiler Integration Tests', () => {
     it('should compile complex scene to iOS', () => {
       const parseResult = parser.parse(complexScene);
       expect(parseResult.success).toBe(true);
-      
+
       const compiler = new IOSCompiler();
       const result = compiler.compile(parseResult.ast!);
 
@@ -310,7 +312,7 @@ describe('Platform Compiler Integration Tests', () => {
     it('should compile complex scene to Android', () => {
       const parseResult = parser.parse(complexScene);
       expect(parseResult.success).toBe(true);
-      
+
       const compiler = new AndroidCompiler();
       const result = compiler.compile(parseResult.ast!);
 
@@ -347,7 +349,7 @@ describe('Platform Compiler Integration Tests', () => {
 
       const parseResult = parser.parse(minimalSource);
       expect(parseResult.success).toBe(true);
-      
+
       const result = new VRChatCompiler().compile(parseResult.ast!);
       expect(result.mainScript).toContain('Box');
     });

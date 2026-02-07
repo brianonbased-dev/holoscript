@@ -89,15 +89,7 @@ export interface AdaptiveQualitySettings {
 // Compression & Recommendations
 // ============================================================================
 
-export type CompressionFormat =
-  | 'none'
-  | 'lz4'
-  | 'zstd'
-  | 'bc1'
-  | 'bc7'
-  | 'astc'
-  | 'etc2'
-  | 'pvrtc';
+export type CompressionFormat = 'none' | 'lz4' | 'zstd' | 'bc1' | 'bc7' | 'astc' | 'etc2' | 'pvrtc';
 
 export interface PerformanceRecommendation {
   category: 'texture' | 'geometry' | 'shader' | 'memory' | 'rendering';
@@ -323,7 +315,7 @@ export class PlatformPerformanceOptimizer {
   /**
    * Update frame metrics for adaptive quality
    */
-  updateFrameMetrics(fps: number, gpuMemoryUsed: number, gpuFrameTime: number): void {
+  updateFrameMetrics(fps: number, gpuMemoryUsed: number, _gpuFrameTime: number): void {
     this.currentFPS = fps;
     this.frameHistory.push(fps);
 
@@ -430,7 +422,15 @@ export class PlatformPerformanceOptimizer {
    */
   async runBenchmark(
     name: string,
-    renderFunc: (iterations: number) => Promise<{ fps: number; gpuTime: number; cpuTime: number; triangles: number; drawCalls: number }>
+    renderFunc: (
+      iterations: number
+    ) => Promise<{
+      fps: number;
+      gpuTime: number;
+      cpuTime: number;
+      triangles: number;
+      drawCalls: number;
+    }>
   ): Promise<BenchmarkResult> {
     const iterations = this.getBenchmarkIterations();
 

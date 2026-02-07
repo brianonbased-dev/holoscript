@@ -59,7 +59,7 @@ template TemplateName {
   // Properties and traits that all instances share
   geometry: "cube"
   @grabbable
-  
+
   onGrab: {
     // Shared behavior
   }
@@ -86,7 +86,7 @@ template ColoredBox {
     boxColor: string = "#ffffff"
     boxSize: number = 1.0
   }
-  
+
   geometry: "cube"
   color: params.boxColor
   scale: params.boxSize
@@ -128,11 +128,11 @@ Templates can extend other templates:
 template Interactable {
   @hoverable
   @clickable
-  
+
   onHoverEnter: {
     this.scale = 1.1
   }
-  
+
   onHoverExit: {
     this.scale = 1.0
   }
@@ -141,7 +141,7 @@ template Interactable {
 template Button extends Interactable {
   geometry: "cube"
   scale: [0.3, 0.1, 0.3]
-  
+
   onClick: {
     audio.play("click.mp3")
   }
@@ -149,7 +149,7 @@ template Button extends Interactable {
 
 template ToggleButton extends Button {
   isOn: false
-  
+
   onClick: {
     this.isOn = !this.isOn
     this.color = this.isOn ? "#00ff00" : "#ff0000"
@@ -167,28 +167,28 @@ template Table {
   geometry: "cube"
   scale: [1, 0.05, 0.6]
   color: "#8B4513"
-  
+
   orb leg1 {
     geometry: "cylinder"
     scale: [0.05, 0.4, 0.05]
     position: [-0.4, -0.22, -0.25]
     color: "#8B4513"
   }
-  
+
   orb leg2 {
     geometry: "cylinder"
     scale: [0.05, 0.4, 0.05]
     position: [0.4, -0.22, -0.25]
     color: "#8B4513"
   }
-  
+
   orb leg3 {
     geometry: "cylinder"
     scale: [0.05, 0.4, 0.05]
     position: [-0.4, -0.22, 0.25]
     color: "#8B4513"
   }
-  
+
   orb leg4 {
     geometry: "cylinder"
     scale: [0.05, 0.4, 0.05]
@@ -212,15 +212,15 @@ template Panel {
   geometry: "plane"
   scale: [1, 0.5, 1]
   color: "#333333"
-  
+
   slot header {
     position: [0, 0.2, 0.01]
   }
-  
+
   slot content {
     position: [0, 0, 0.01]
   }
-  
+
   slot footer {
     position: [0, -0.2, 0.01]
   }
@@ -228,14 +228,14 @@ template Panel {
 
 object infoPanel using Panel {
   position: [0, 1.5, -2]
-  
+
   header: {
     orb title {
       @billboard
       text: "Welcome"
     }
   }
-  
+
   content: {
     orb description {
       @billboard
@@ -250,12 +250,13 @@ object infoPanel using Panel {
 Templates can be imported from other files:
 
 ### templates/ui.hs
+
 ```hs
 export template Button {
   @clickable
   geometry: "cube"
   scale: [0.2, 0.1, 0.2]
-  
+
   onClick: {
     audio.play("click.mp3")
   }
@@ -268,6 +269,7 @@ export template Slider {
 ```
 
 ### main.hs
+
 ```hs
 import { Button, Slider } from "./templates/ui.hs"
 
@@ -345,11 +347,11 @@ template GameUI {
 ```hs
 /**
  * Interactive button for VR interfaces
- * 
+ *
  * @param label - Button text
  * @param color - Button color (hex)
  * @param onClick - Handler function
- * 
+ *
  * @example
  * object btn using Button { label: "Start", color: "#00ff00" }
  */
@@ -371,20 +373,20 @@ template Target {
     points: number = 10
     hitSound: string = "hit.mp3"
   }
-  
+
   @collidable
   @destructible
-  
+
   geometry: "sphere"
   scale: 0.3
   color: "#ff0000"
   health: 1
-  
+
   onCollision(event): {
     if (event.object.tag === "projectile") {
       this.health -= 1
       audio.play(params.hitSound)
-      
+
       if (this.health <= 0) {
         score.add(params.points)
         particles.emit("explosion", this.position)
@@ -399,7 +401,7 @@ template TargetRow {
     count: number = 5
     spacing: number = 0.8
   }
-  
+
   // Programmatically create targets
   onCreate: {
     for (let i = 0; i < params.count; i++) {
@@ -418,7 +420,7 @@ composition "Shooting Gallery" {
     spacing: 1.0
     position: [0, 2, -5]
   }
-  
+
   object row2 using TargetRow {
     count: 7
     spacing: 0.8

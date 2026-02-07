@@ -4,12 +4,12 @@ Pre-built HTML templates for rendering HoloScript scenes in browsers. Perfect fo
 
 ## Templates
 
-| Template | Description | Use Case |
-|----------|-------------|----------|
-| `minimal.html` | Simplest possible setup | Quick previews |
-| `scene.html` | Full scene with controls | Interactive demos |
-| `vr.html` | WebXR-enabled with fallbacks | VR/AR experiences |
-| `embed.html` | X-optimized with OG tags | Social sharing |
+| Template       | Description                  | Use Case          |
+| -------------- | ---------------------------- | ----------------- |
+| `minimal.html` | Simplest possible setup      | Quick previews    |
+| `scene.html`   | Full scene with controls     | Interactive demos |
+| `vr.html`      | WebXR-enabled with fallbacks | VR/AR experiences |
+| `embed.html`   | X-optimized with OG tags     | Social sharing    |
 
 ## Quick Start
 
@@ -19,7 +19,7 @@ Pre-built HTML templates for rendering HoloScript scenes in browsers. Perfect fo
 <!-- Include in your HTML -->
 <script type="module">
   import { renderHoloScript } from 'https://unpkg.com/@holoscript/browser-adapter';
-  
+
   renderHoloScript(document.getElementById('container'), {
     code: `
       composition "Demo" {
@@ -28,7 +28,7 @@ Pre-built HTML templates for rendering HoloScript scenes in browsers. Perfect fo
           color: "#00ffff"
         }
       }
-    `
+    `,
   });
 </script>
 ```
@@ -42,12 +42,14 @@ Pre-built HTML templates for rendering HoloScript scenes in browsers. Perfect fo
 ## Template Features
 
 ### minimal.html
+
 - Three.js scene setup
 - Basic lighting
 - Mouse orbit controls
 - ~50 lines
 
 ### scene.html
+
 - Full scene parsing
 - Animation support
 - Object interaction
@@ -55,6 +57,7 @@ Pre-built HTML templates for rendering HoloScript scenes in browsers. Perfect fo
 - ~150 lines
 
 ### vr.html
+
 - WebXR initialization
 - VR/AR mode switching
 - Controller input
@@ -62,6 +65,7 @@ Pre-built HTML templates for rendering HoloScript scenes in browsers. Perfect fo
 - ~250 lines
 
 ### embed.html
+
 - Twitter Card meta tags
 - Open Graph tags
 - QR code for mobile XR
@@ -71,21 +75,29 @@ Pre-built HTML templates for rendering HoloScript scenes in browsers. Perfect fo
 ## Customization
 
 ### Camera Position
+
 ```javascript
 camera.position.set(x, y, z);
 camera.lookAt(targetX, targetY, targetZ);
 ```
 
 ### Background
+
 ```javascript
 scene.background = new THREE.Color(0x1a1a2e);
 // or
 scene.background = new THREE.CubeTextureLoader().load([
-  'px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'
+  'px.jpg',
+  'nx.jpg',
+  'py.jpg',
+  'ny.jpg',
+  'pz.jpg',
+  'nz.jpg',
 ]);
 ```
 
 ### Lighting
+
 ```javascript
 // Ambient
 const ambient = new THREE.AmbientLight(0xffffff, 0.5);
@@ -124,7 +136,7 @@ For VR/AR rendering:
 ```html
 <script type="module">
   import { VRButton } from 'three/addons/webxr/VRButton.js';
-  
+
   // Enable WebXR
   renderer.xr.enabled = true;
   document.body.appendChild(VRButton.createButton(renderer));
@@ -132,6 +144,7 @@ For VR/AR rendering:
 ```
 
 Supported devices:
+
 - Meta Quest 2/3/Pro
 - Apple Vision Pro
 - HTC Vive

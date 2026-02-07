@@ -17,7 +17,7 @@ export type TrailingComma = 'none' | 'all' | 'multi-line';
 
 export interface Range {
   startLine: number; // 0-based
-  endLine: number;   // 0-based, inclusive
+  endLine: number; // 0-based, inclusive
 }
 
 export type ImportSortOrder = 'alphabetical' | 'grouped';
@@ -156,30 +156,30 @@ export class HoloScriptFormatter {
   formatRange(source: string, range: Range, fileType: 'holo' | 'hsplus' = 'holo'): FormatResult {
     // 1. Format entire source to calculate correct context
     const fullResult = this.format(source, fileType);
-    
+
     // 2. Extract the lines for the range
     const sourceLines = source.split('\n');
     const formattedLines = fullResult.formatted.split('\n');
-    
+
     // Ensure range is valid
     const start = Math.max(0, range.startLine);
     const end = Math.min(formattedLines.length - 1, range.endLine);
-    
+
     if (start > end) {
-       return { formatted: '', changed: false, errors: [] };
+      return { formatted: '', changed: false, errors: [] };
     }
 
     // 3. Construct result substring
     // We strictly return the formatted content for the range lines
     const resultLines = formattedLines.slice(start, end + 1);
     const resultString = resultLines.join('\n');
-    
+
     const originalSlice = sourceLines.slice(start, end + 1).join('\n');
 
     return {
       formatted: resultString,
       changed: resultString !== originalSlice,
-      errors: fullResult.errors
+      errors: fullResult.errors,
     };
   }
 
@@ -197,12 +197,20 @@ export class HoloScriptFormatter {
   private identifyRawBlocks(source: string): Range[] {
     const ranges: Range[] = [];
     const lines = source.split('\n');
-    
+
     // Look for lines that start a raw block: nodeType [name] {
     // and find the matching closing brace.
     const rawBlockStarters = [
-      'logic', 'module', 'script', 'struct', 'enum',
-      'class', 'interface', 'spatial_group', 'scene', 'group'
+      'logic',
+      'module',
+      'script',
+      'struct',
+      'enum',
+      'class',
+      'interface',
+      'spatial_group',
+      'scene',
+      'group',
     ];
 
     let braceCount = 0;
@@ -211,9 +219,9 @@ export class HoloScriptFormatter {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
-      
+
       if (!inRawBlock) {
-        const isStarter = rawBlockStarters.some(s => line.startsWith(s)) && line.includes('{');
+        const isStarter = rawBlockStarters.some((s) => line.startsWith(s)) && line.includes('{');
         if (isStarter) {
           inRawBlock = true;
           startLine = i;
@@ -227,7 +235,7 @@ export class HoloScriptFormatter {
       } else {
         braceCount += (line.match(/\{/g) || []).length;
         braceCount -= (line.match(/\}/g) || []).length;
-        
+
         if (braceCount <= 0) {
           ranges.push({ startLine: startLine + 1, endLine: i - 1 });
           inRawBlock = false;
@@ -254,7 +262,7 @@ export class HoloScriptFormatter {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const isInRaw = rawRanges.some(r => i >= r.startLine && i <= r.endLine);
+      const isInRaw = rawRanges.some((r) => i >= r.startLine && i <= r.endLine);
 
       if (isInRaw) {
         result.push(line);
@@ -262,7 +270,7 @@ export class HoloScriptFormatter {
       }
 
       const content = line.trim();
-      
+
       // Skip empty lines
       if (content === '') {
         result.push('');
@@ -275,7 +283,7 @@ export class HoloScriptFormatter {
         if (char === '}') closingAtStart++;
         else break; // Stop at first non-}
       }
-      
+
       // Dedent before this line if it starts with closing braces
       blockDepth = Math.max(0, blockDepth - closingAtStart);
 
@@ -301,13 +309,13 @@ export class HoloScriptFormatter {
   private formatBraces(source: string, rawRanges: Range[] = []): string {
     // Simple brace formatting based on style
     if (rawRanges.length > 0) {
-      // If we have raw ranges, we must be careful. 
-      // For now, if there are any raw ranges, we skip global regex replace 
+      // If we have raw ranges, we must be careful.
+      // For now, if there are any raw ranges, we skip global regex replace
       // and do it more surgical or skip entirely.
       // HSPlus files with heavy TS should probably maintain their brace style.
       return source;
     }
-    
+
     if (this.config.braceStyle === 'same-line') {
       return source.replace(/\n\s*\{/g, ' {');
     } else if (this.config.braceStyle === 'next-line') {
@@ -331,7 +339,7 @@ export class HoloScriptFormatter {
 
   private handleTrailingCommas(source: string, rawRanges: Range[] = []): string {
     if (rawRanges.length > 0) return source; // Skip in hybrid files
-    
+
     if (this.config.trailingComma === 'none') {
       // Remove trailing commas
       return source.replace(/,(\s*[\]}])/g, '$1');
@@ -439,9 +447,10 @@ export class HoloScriptFormatter {
    */
   private categorizeImport(line: string): ImportGroupOrder {
     // Extract module path from import statement
-    const match = line.match(/from\s+["']([^"']+)["']/) ||
-                  line.match(/import\s+["']([^"']+)["']/) ||
-                  line.match(/@import\s+["']([^"']+)["']/);
+    const match =
+      line.match(/from\s+["']([^"']+)["']/) ||
+      line.match(/import\s+["']([^"']+)["']/) ||
+      line.match(/@import\s+["']([^"']+)["']/);
 
     if (!match) {
       return 'external';
@@ -460,7 +469,33 @@ export class HoloScriptFormatter {
     }
 
     // Builtin/core imports
-    const builtins = ['fs', 'path', 'os', 'util', 'events', 'stream', 'http', 'https', 'crypto', 'buffer', 'url', 'querystring', 'zlib', 'child_process', 'cluster', 'dgram', 'dns', 'net', 'readline', 'tls', 'vm', 'assert', 'console', 'timers', 'worker_threads'];
+    const builtins = [
+      'fs',
+      'path',
+      'os',
+      'util',
+      'events',
+      'stream',
+      'http',
+      'https',
+      'crypto',
+      'buffer',
+      'url',
+      'querystring',
+      'zlib',
+      'child_process',
+      'cluster',
+      'dgram',
+      'dns',
+      'net',
+      'readline',
+      'tls',
+      'vm',
+      'assert',
+      'console',
+      'timers',
+      'worker_threads',
+    ];
     const moduleBaseName = modulePath.split('/')[0];
     if (builtins.includes(moduleBaseName) || modulePath.startsWith('node:')) {
       return 'builtin';
@@ -475,7 +510,7 @@ export class HoloScriptFormatter {
     return source
       .split('\n')
       .map((line, i) => {
-        const isInRaw = rawRanges.some(r => i >= r.startLine && i <= r.endLine);
+        const isInRaw = rawRanges.some((r) => i >= r.startLine && i <= r.endLine);
         return isInRaw ? line : line.trimEnd();
       })
       .join('\n');
@@ -516,7 +551,11 @@ export function format(source: string, fileType: 'holo' | 'hsplus' = 'holo'): Fo
 /**
  * Format a specific range of HoloScript code
  */
-export function formatRange(source: string, range: Range, fileType: 'holo' | 'hsplus' = 'holo'): FormatResult {
+export function formatRange(
+  source: string,
+  range: Range,
+  fileType: 'holo' | 'hsplus' = 'holo'
+): FormatResult {
   const formatter = new HoloScriptFormatter();
   return formatter.formatRange(source, range, fileType);
 }
@@ -586,13 +625,7 @@ export async function formatFilesParallel(
   files: string[],
   options: Partial<ParallelFormatOptions> = {}
 ): Promise<ParallelFormatResult> {
-  const {
-    concurrency = 4,
-    config = {},
-    write = false,
-    onProgress,
-    onError,
-  } = options;
+  const { concurrency = 4, config = {}, write = false, onProgress, onError } = options;
 
   const fs = await import('fs/promises');
   const formatter = new HoloScriptFormatter(config);
@@ -681,11 +714,13 @@ export async function* formatFilesStream(
         result: {
           formatted: '',
           changed: false,
-          errors: [{
-            message: err instanceof Error ? err.message : String(err),
-            line: 0,
-            column: 0,
-          }],
+          errors: [
+            {
+              message: err instanceof Error ? err.message : String(err),
+              line: 0,
+              column: 0,
+            },
+          ],
         },
       };
     }

@@ -75,8 +75,8 @@ export interface PhysicsEngine {
   /** Step the simulation */
   step(dt: number): void;
 
-  /** 
-   * Get the current state of all bodies. 
+  /**
+   * Get the current state of all bodies.
    * This is typically called once per frame to sync GPU state back to CPU objects.
    */
   getStates(): Record<string, BodyState>;

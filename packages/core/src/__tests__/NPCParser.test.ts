@@ -1,4 +1,3 @@
-
 import { describe, it, expect } from 'vitest';
 import { HoloScriptPlusParser } from '../parser/HoloScriptPlusParser';
 
@@ -16,7 +15,7 @@ describe('HoloScript+ NPC & Dialog System', () => {
     `;
     const result = parser.parse(source);
     expect(result.success).toBe(true);
-    
+
     // Assert structure
     const directives = (result.ast.root.directives || result.ast.body) as any[];
     const npc = directives.find((d: any) => d.type === 'npc');

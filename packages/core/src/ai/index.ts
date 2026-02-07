@@ -107,7 +107,4 @@ export {
   useNVIDIA,
 } from './adapters';
 
-export {
-  SemanticSearchService,
-  type SearchResult,
-} from './SemanticSearchService';
+export { SemanticSearchService, type SearchResult } from './SemanticSearchService';

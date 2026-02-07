@@ -7,10 +7,8 @@
  */
 
 import { existsSync, readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from 'fs';
-import { join, relative, basename, dirname } from 'path';
+import { join, basename, dirname } from 'path';
 import { createGzip } from 'zlib';
-import { createWriteStream, createReadStream } from 'fs';
-import { pipeline } from 'stream/promises';
 
 // ============================================================================
 // Types
@@ -291,10 +289,7 @@ export class PackagePackager {
     }
 
     // 6. Filter out excluded files
-    const excludePatterns = [
-      ...PackagePackager.DEFAULT_EXCLUDE,
-      ...(this.options.exclude || []),
-    ];
+    const excludePatterns = [...PackagePackager.DEFAULT_EXCLUDE, ...(this.options.exclude || [])];
 
     const filtered = Array.from(files).filter((file) => {
       return !this.isExcluded(file, excludePatterns);
@@ -322,9 +317,7 @@ export class PackagePackager {
     if (pattern.includes('*')) {
       const dir = dirname(pattern);
       const filePattern = basename(pattern);
-      const regex = new RegExp(
-        '^' + filePattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
-      );
+      const regex = new RegExp('^' + filePattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
 
       const searchDir = dir === '.' ? this.cwd : join(this.cwd, dir);
       if (existsSync(searchDir)) {
@@ -389,9 +382,7 @@ export class PackagePackager {
 
       // Check simple glob
       if (pattern.includes('*')) {
-        const regex = new RegExp(
-          '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
-        );
+        const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
         if (regex.test(file) || regex.test(basename(file))) {
           return true;
         }
@@ -429,7 +420,7 @@ export class PackagePackager {
     return gzipBuffer.length;
   }
 
-  private createTarArchive(files: string[], packageName: string): Buffer {
+  private createTarArchive(files: string[], _packageName: string): Buffer {
     const blocks: Buffer[] = [];
 
     for (const file of files) {
@@ -438,12 +429,7 @@ export class PackagePackager {
       const stat = statSync(fullPath);
 
       // Create tar header (512 bytes)
-      const header = this.createTarHeader(
-        `package/${file}`,
-        content.length,
-        stat.mode,
-        stat.mtime
-      );
+      const header = this.createTarHeader(`package/${file}`, content.length, stat.mode, stat.mtime);
       blocks.push(header);
 
       // Add content (padded to 512 bytes)
@@ -460,12 +446,7 @@ export class PackagePackager {
     return Buffer.concat(blocks);
   }
 
-  private createTarHeader(
-    name: string,
-    size: number,
-    mode: number,
-    mtime: Date
-  ): Buffer {
+  private createTarHeader(name: string, size: number, mode: number, mtime: Date): Buffer {
     const header = Buffer.alloc(512, 0);
 
     // Name (100 bytes)
@@ -541,10 +522,7 @@ export function createPackager(cwd?: string, options?: PackagerOptions): Package
   return new PackagePackager(cwd, options);
 }
 
-export async function packPackage(
-  cwd?: string,
-  options?: PackagerOptions
-): Promise<PackageResult> {
+export async function packPackage(cwd?: string, options?: PackagerOptions): Promise<PackageResult> {
   const packager = createPackager(cwd, options);
   return packager.pack();
 }

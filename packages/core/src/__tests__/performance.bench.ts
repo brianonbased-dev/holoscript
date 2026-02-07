@@ -20,13 +20,16 @@ orb testOrb {
 }
 `;
 
-const MULTIPLE_ORBS = Array.from({ length: 10 }, (_, i) => `
+const MULTIPLE_ORBS = Array.from(
+  { length: 10 },
+  (_, i) => `
 orb orb${i} {
   name: "Orb${i}"
   color: "#${i.toString(16).padStart(6, '0')}"
   value: ${i * 10}
 }
-`).join('\n');
+`
+).join('\n');
 
 const COMPLEX_PROGRAM = `
 orb dataSource {
@@ -56,11 +59,14 @@ connect dataSource to processor as "raw"
 connect processor to output as "processed"
 `;
 
-const FUNCTIONS_PROGRAM = Array.from({ length: 20 }, (_, i) => `
+const FUNCTIONS_PROGRAM = Array.from(
+  { length: 20 },
+  (_, i) => `
 function func${i}(x: number): number {
   return x + ${i}
 }
-`).join('\n');
+`
+).join('\n');
 
 describe('Parser Performance', () => {
   let parser: HoloScriptCodeParser;
@@ -222,21 +228,27 @@ describe('Memory and Scalability', () => {
   });
 
   bench('parse 100 orbs', () => {
-    const largeProgram = Array.from({ length: 100 }, (_, i) => `
+    const largeProgram = Array.from(
+      { length: 100 },
+      (_, i) => `
       orb orb${i} {
         name: "Orb${i}"
         value: ${i}
       }
-    `).join('\n');
+    `
+    ).join('\n');
     parser.parse(largeProgram);
   });
 
   bench('execute 50 orbs', async () => {
-    const program = Array.from({ length: 50 }, (_, i) => `
+    const program = Array.from(
+      { length: 50 },
+      (_, i) => `
       orb orb${i} {
         name: "Orb${i}"
       }
-    `).join('\n');
+    `
+    ).join('\n');
 
     const result = parser.parse(program);
     runtime.reset();

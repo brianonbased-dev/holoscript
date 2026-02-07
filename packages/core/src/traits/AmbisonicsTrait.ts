@@ -65,7 +65,7 @@ export const ambisonicsHandler: TraitHandler<AmbisonicsConfig> = {
       gain: config.volume,
     };
     (node as any).__ambisonicsState = state;
-    
+
     // Initialize decoder
     context.emit?.('ambisonics_init_decoder', {
       node,
@@ -74,7 +74,7 @@ export const ambisonicsHandler: TraitHandler<AmbisonicsConfig> = {
       channelOrdering: config.channel_ordering,
       decoderType: config.decoder,
     });
-    
+
     // Load source if provided
     if (config.source) {
       context.emit?.('ambisonics_load_source', {
@@ -94,10 +94,10 @@ export const ambisonicsHandler: TraitHandler<AmbisonicsConfig> = {
     delete (node as any).__ambisonicsState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__ambisonicsState as AmbisonicsState;
     if (!state) return;
-    
+
     // Update scene rotation for head tracking
     if (!config.scene_rotation_lock && state.isPlaying) {
       context.emit?.('ambisonics_update_rotation', {
@@ -110,7 +110,7 @@ export const ambisonicsHandler: TraitHandler<AmbisonicsConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__ambisonicsState as AmbisonicsState;
     if (!state) return;
-    
+
     if (event.type === 'ambisonics_source_loaded') {
       state.sourceLoaded = true;
       context.emit?.('ambisonics_ready', { node });

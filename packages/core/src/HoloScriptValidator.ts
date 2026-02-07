@@ -1,4 +1,3 @@
-
 /**
  * HoloScript Validator
  * Performs static analysis on HoloScript code to detect syntax and semantic errors.
@@ -15,16 +14,21 @@ export interface ValidationError {
 
 export class HoloScriptValidator {
   private parser: HoloScriptCodeParser;
-  
+
   // Whitelists
   private static VALID_DIRECTIVES = [
-    'trait', 'state', 'on_enter', 'on_exit', 'on_mount', 'on_tick', 'on_create',
-    'bot_config', 'lifecycle'
+    'trait',
+    'state',
+    'on_enter',
+    'on_exit',
+    'on_mount',
+    'on_tick',
+    'on_create',
+    'bot_config',
+    'lifecycle',
   ];
 
-  private static VALID_KEYWORDS = [
-    'world', 'scene', 'prefab', 'object', 'import', 'export'
-  ];
+  private static VALID_KEYWORDS = ['world', 'scene', 'prefab', 'object', 'import', 'export'];
 
   constructor() {
     this.parser = new HoloScriptCodeParser();
@@ -39,32 +43,32 @@ export class HoloScriptValidator {
     // 1. Basic Syntax Check (Lexer/Parser)
     try {
       this.parser.parse(code);
-    } catch (e: any) {
+    } catch (e: unknown) {
       // If the parser throws, catch it and convert to a validation error
-      // Assuming parser error messages contain some line info if possible, 
+      // Assuming parser error messages contain some line info if possible,
       // otherwise default to line 1.
       // Note: Our current parser might just throw a string or simple error.
-      // We'll try to extract line numbers if the parser supports it, 
+      // We'll try to extract line numbers if the parser supports it,
       // or standard Regex matching for common syntax errors.
-      
+      const err = e as { line?: number; column?: number; message?: string };
       errors.push({
-        line: e.line || 1, // Fallback if parser doesn't provide line
-        column: e.column || 1,
-        message: e.message || "Syntax Error",
-        severity: 'error'
+        line: err.line || 1, // Fallback if parser doesn't provide line
+        column: err.column || 1,
+        message: err.message || 'Syntax Error',
+        severity: 'error',
       });
       return errors; // syntax error usually stops further analysis
     }
 
     // 2. Semantic Analysis (Regex-based for now since AST isn't fully exposed via parse() return in v1)
-    // In a robust implementation, parser.parse would return the AST. 
+    // In a robust implementation, parser.parse would return the AST.
     // For now we will scan strict patterns.
 
     const lines = code.split('\n');
     lines.forEach((line, index) => {
       const lineNum = index + 1;
       const trimmed = line.trim();
-      
+
       if (!trimmed || trimmed.startsWith('//')) return;
 
       // Check Directives
@@ -77,23 +81,26 @@ export class HoloScriptValidator {
               line: lineNum,
               column: line.indexOf('@') + 1,
               message: `Unknown directive '@${directive}'. Allowed: ${HoloScriptValidator.VALID_DIRECTIVES.join(', ')}`,
-              severity: 'warning' // directives might be custom, so warning for now
+              severity: 'warning', // directives might be custom, so warning for now
             });
           }
         }
       }
-      
+
       // Check unknown top-level keywords (heuristic)
-      // This is harder without AST, but we can check lines that end with '{' 
+      // This is harder without AST, but we can check lines that end with '{'
       // and look like definitions.
       if (trimmed.endsWith('{')) {
         const firstWord = trimmed.split(' ')[0];
         // If it looks like a definition "type name {"
         if (line.match(/^[a-z]+\s+[\w#]+\s*\{$/)) {
-           if (!HoloScriptValidator.VALID_KEYWORDS.includes(firstWord) && !trimmed.startsWith('trait')) {
-             // 'trait' is valid inside object, need context. 
-             // We'll skip strict keyword check without full AST context for now to avoid false positives.
-           }
+          if (
+            !HoloScriptValidator.VALID_KEYWORDS.includes(firstWord) &&
+            !trimmed.startsWith('trait')
+          ) {
+            // 'trait' is valid inside object, need context.
+            // We'll skip strict keyword check without full AST context for now to avoid false positives.
+          }
         }
       }
     });

@@ -20,6 +20,7 @@ holoscript dev
 ## Prerequisites
 
 Before migrating, ensure you have:
+
 - Node.js 18.0.0 or later
 - TypeScript 5.0.0 or later (if using TypeScript)
 - All tests passing on 2.x
@@ -29,6 +30,7 @@ Before migrating, ensure you have:
 ### 1. Parser API Changes
 
 **Before (2.x):**
+
 ```typescript
 import { HoloScriptParser } from '@holoscript/core';
 
@@ -37,6 +39,7 @@ const ast = parser.parse(code);
 ```
 
 **After (3.0):**
+
 ```typescript
 import { HoloScriptPlusParser } from '@holoscript/core';
 
@@ -49,6 +52,7 @@ The `HoloScriptPlusParser` returns an enhanced AST with additional metadata.
 ### 2. Networked Trait Configuration
 
 **Before (2.x):**
+
 ```hsplus
 orb player {
   @networked { sync: "position,rotation" }
@@ -56,6 +60,7 @@ orb player {
 ```
 
 **After (3.0):**
+
 ```hsplus
 orb player {
   @networked {
@@ -68,6 +73,7 @@ orb player {
 ### 3. Physics Trait Configuration
 
 **Before (2.x):**
+
 ```hsplus
 orb ball {
   @physics { gravity: true }
@@ -75,6 +81,7 @@ orb ball {
 ```
 
 **After (3.0):**
+
 ```hsplus
 orb ball {
   @physics {
@@ -87,24 +94,27 @@ orb ball {
 ### 4. Compile Options
 
 **Before (2.x):**
+
 ```typescript
 compile(ast, {
   format: 'cjs',
-  target: 'es5'
+  target: 'es5',
 });
 ```
 
 **After (3.0):**
+
 ```typescript
 compile(ast, {
   format: 'esm', // CJS no longer supported
-  target: 'es2022'
+  target: 'es2022',
 });
 ```
 
 ### 5. Event Handler Syntax
 
 **Before (2.x):**
+
 ```hsplus
 orb button {
   onClick: () => {
@@ -115,6 +125,7 @@ orb button {
 
 **After (3.0):**
 Both syntaxes are supported, but the block syntax is preferred:
+
 ```hsplus
 orb button {
   onClick: {
@@ -246,6 +257,7 @@ holoscript dev
 ### Issue: "Cannot find module '@holoscript/core'"
 
 **Solution:** Clear node_modules and reinstall:
+
 ```bash
 rm -rf node_modules
 npm install
@@ -254,6 +266,7 @@ npm install
 ### Issue: Parser errors after migration
 
 **Solution:** Run the migration assistant with verbose output:
+
 ```bash
 holoscript migrate --to 3.0.0 --verbose
 ```
@@ -261,6 +274,7 @@ holoscript migrate --to 3.0.0 --verbose
 ### Issue: Trait configuration errors
 
 **Solution:** Check the trait documentation for new config format:
+
 ```bash
 holoscript docs @physics
 ```

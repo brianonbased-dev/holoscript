@@ -5,7 +5,11 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
-import { ParserErrorCollector, withErrorCollection, SynchronizationStrategies } from '../parser/ParserErrorCollector';
+import {
+  ParserErrorCollector,
+  withErrorCollection,
+  SynchronizationStrategies,
+} from '../parser/ParserErrorCollector';
 
 describe('ParserErrorCollector', () => {
   let collector: ParserErrorCollector;
@@ -17,7 +21,7 @@ describe('ParserErrorCollector', () => {
   describe('Error Collection', () => {
     test('should collect single error', () => {
       collector.collectError('Test error', { line: 1, column: 0 });
-      
+
       expect(collector.hasErrors()).toBe(true);
       const report = collector.getReport();
       expect(report.errorCount).toBe(1);
@@ -303,12 +307,7 @@ describe('ParserErrorCollector', () => {
         { type: 'IDENTIFIER', value: 'after' },
       ];
 
-      const closing = SynchronizationStrategies.findMatchingBracket(
-        tokens,
-        0,
-        'LBRACE',
-        'RBRACE'
-      );
+      const closing = SynchronizationStrategies.findMatchingBracket(tokens, 0, 'LBRACE', 'RBRACE');
       expect(closing).toBe(5);
     });
   });
@@ -329,14 +328,12 @@ describe('ParserErrorCollector', () => {
 
     test('should preserve error context and suggestions', () => {
       collector.collectError(
-        { 
+        {
           code: 'MISSING_BRACE',
           message: 'Missing closing brace',
           line: 10,
           column: 5,
-          suggestions: [
-            { description: 'Add }', fix: '}' }
-          ]
+          suggestions: [{ description: 'Add }', fix: '}' }],
         },
         { token: '}' }
       );

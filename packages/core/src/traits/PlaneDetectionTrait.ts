@@ -76,7 +76,7 @@ export const planeDetectionHandler: TraitHandler<PlaneDetectionConfig> = {
       hitTestResults: [],
     };
     (node as any).__planeDetectionState = state;
-    
+
     // Start plane detection
     context.emit?.('plane_detection_start', {
       node,
@@ -94,16 +94,16 @@ export const planeDetectionHandler: TraitHandler<PlaneDetectionConfig> = {
     delete (node as any).__planeDetectionState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__planeDetectionState as PlaneDetectionState;
     if (!state || !state.isDetecting) return;
-    
+
     const now = Date.now();
-    
+
     // Rate-limited update check
     if (now - state.lastUpdateTime < config.update_interval) return;
     state.lastUpdateTime = now;
-    
+
     // Remove stale planes
     const toRemove: string[] = [];
     for (const [id, plane] of state.planes) {
@@ -111,22 +111,22 @@ export const planeDetectionHandler: TraitHandler<PlaneDetectionConfig> = {
         toRemove.push(id);
       }
     }
-    
+
     for (const id of toRemove) {
       const plane = state.planes.get(id);
       state.planes.delete(id);
-      
+
       context.emit?.('plane_lost', {
         node,
         planeId: id,
         classification: plane?.classification,
       });
-      
+
       if (config.visual_mesh) {
         context.emit?.('plane_mesh_remove', { planeId: id });
       }
     }
-    
+
     // Update visual meshes if enabled
     if (config.visual_mesh) {
       for (const [id, plane] of state.planes) {
@@ -143,20 +143,20 @@ export const planeDetectionHandler: TraitHandler<PlaneDetectionConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__planeDetectionState as PlaneDetectionState;
     if (!state) return;
-    
+
     if (event.type === 'plane_detected') {
       const planeData = event.plane as DetectedPlane;
-      
+
       // Filter by mode
       if (config.mode === 'horizontal') {
         if (Math.abs(planeData.normal.y) < 0.8) return;
       } else if (config.mode === 'vertical') {
         if (Math.abs(planeData.normal.y) > 0.2) return;
       }
-      
+
       // Filter by area
       if (planeData.area < config.min_area) return;
-      
+
       // Limit plane count
       if (state.planes.size >= config.max_planes && !state.planes.has(planeData.id)) {
         // Find smallest plane to replace
@@ -173,11 +173,11 @@ export const planeDetectionHandler: TraitHandler<PlaneDetectionConfig> = {
           return; // Don't add new plane
         }
       }
-      
+
       const isNew = !state.planes.has(planeData.id);
       planeData.lastUpdated = Date.now();
       state.planes.set(planeData.id, planeData);
-      
+
       if (isNew) {
         context.emit?.('plane_found', {
           node,
@@ -186,7 +186,7 @@ export const planeDetectionHandler: TraitHandler<PlaneDetectionConfig> = {
           center: planeData.center,
           area: planeData.area,
         });
-        
+
         if (config.visual_mesh) {
           context.emit?.('plane_mesh_create', {
             planeId: planeData.id,
@@ -204,39 +204,53 @@ export const planeDetectionHandler: TraitHandler<PlaneDetectionConfig> = {
       }
     } else if (event.type === 'plane_hit_test') {
       // Perform hit test against planes
-      const ray = event.ray as { origin: { x: number; y: number; z: number }; direction: { x: number; y: number; z: number } };
-      const results: Array<{ planeId: string; point: { x: number; y: number; z: number }; distance: number }> = [];
-      
+      const ray = event.ray as {
+        origin: { x: number; y: number; z: number };
+        direction: { x: number; y: number; z: number };
+      };
+      const results: Array<{
+        planeId: string;
+        point: { x: number; y: number; z: number };
+        distance: number;
+      }> = [];
+
       for (const [id, plane] of state.planes) {
         // Simple plane-ray intersection
-        const denom = plane.normal.x * ray.direction.x + 
-                      plane.normal.y * ray.direction.y + 
-                      plane.normal.z * ray.direction.z;
-        
+        const denom =
+          plane.normal.x * ray.direction.x +
+          plane.normal.y * ray.direction.y +
+          plane.normal.z * ray.direction.z;
+
         if (Math.abs(denom) < 0.0001) continue;
-        
-        const d = -(plane.normal.x * plane.center.x + 
-                    plane.normal.y * plane.center.y + 
-                    plane.normal.z * plane.center.z);
-        
-        const t = -(plane.normal.x * ray.origin.x + 
-                    plane.normal.y * ray.origin.y + 
-                    plane.normal.z * ray.origin.z + d) / denom;
-        
+
+        const d = -(
+          plane.normal.x * plane.center.x +
+          plane.normal.y * plane.center.y +
+          plane.normal.z * plane.center.z
+        );
+
+        const t =
+          -(
+            plane.normal.x * ray.origin.x +
+            plane.normal.y * ray.origin.y +
+            plane.normal.z * ray.origin.z +
+            d
+          ) / denom;
+
         if (t < 0) continue;
-        
+
         const point = {
           x: ray.origin.x + t * ray.direction.x,
           y: ray.origin.y + t * ray.direction.y,
           z: ray.origin.z + t * ray.direction.z,
         };
-        
+
         results.push({ planeId: id, point, distance: t });
       }
-      
+
       results.sort((a, b) => a.distance - b.distance);
-      state.hitTestResults = results.map(r => ({ planeId: r.planeId, point: r.point }));
-      
+      state.hitTestResults = results.map((r) => ({ planeId: r.planeId, point: r.point }));
+
       context.emit?.('plane_hit_test_result', {
         node,
         results: state.hitTestResults,

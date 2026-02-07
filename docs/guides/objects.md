@@ -46,7 +46,7 @@ orb myObject {
   color: [0, 255, 255]       // RGB array
   opacity: 0.8               // 0.0 - 1.0
   visible: true              // Show/hide
-  
+
   model: "path/to/model.glb" // 3D model
   material: "metal"          // Material preset
   texture: "wood.jpg"        // Texture map
@@ -99,7 +99,7 @@ orb ball {
   @physics             // Has physics
   @collidable          // Detects collisions
   @glowing             // Emits light
-  
+
   position: [0, 1, -2]
 }
 ```
@@ -111,7 +111,7 @@ orb ball {
   @grabbable(snap_to_hand: true, haptic_on_grab: 0.5)
   @throwable(velocity_multiplier: 1.5)
   @glowing(color: "#00ffff", intensity: 2.0, range: 5)
-  
+
   position: [0, 1, -2]
 }
 ```
@@ -129,9 +129,9 @@ For object-specific reactive state:
 ```hsplus
 orb enemy {
   @destructible
-  
+
   position: [10, 0, 10]
-  
+
   state {
     health: 100
     isAlive: true
@@ -168,20 +168,20 @@ Objects respond to events:
 orb button {
   @clickable
   @hoverable
-  
+
   position: [0, 1, -2]
   color: "#ffffff"
-  
+
   on_click: {
     play_sound("click.wav")
     toggle_door()
   }
-  
+
   on_hover_enter: {
     this.color = "#00ffff"
     this.scale = 1.1
   }
-  
+
   on_hover_exit: {
     this.color = "#ffffff"
     this.scale = 1.0
@@ -191,19 +191,19 @@ orb button {
 
 ### Common Events
 
-| Event | Trigger |
-|-------|---------|
-| `on_click` | Clicked/selected |
-| `on_hover_enter` | Cursor enters |
-| `on_hover_exit` | Cursor exits |
-| `on_grab` | Picked up |
-| `on_release` | Let go |
-| `on_throw` | Thrown |
-| `on_collision(other)` | Hit something |
-| `on_trigger_enter(other)` | Entered trigger |
-| `on_trigger_exit(other)` | Exited trigger |
-| `on_spawn` | Object created |
-| `on_destroy` | Object removed |
+| Event                     | Trigger          |
+| ------------------------- | ---------------- |
+| `on_click`                | Clicked/selected |
+| `on_hover_enter`          | Cursor enters    |
+| `on_hover_exit`           | Cursor exits     |
+| `on_grab`                 | Picked up        |
+| `on_release`              | Let go           |
+| `on_throw`                | Thrown           |
+| `on_collision(other)`     | Hit something    |
+| `on_trigger_enter(other)` | Entered trigger  |
+| `on_trigger_exit(other)`  | Exited trigger   |
+| `on_spawn`                | Object created   |
+| `on_destroy`              | Object removed   |
 
 ---
 
@@ -228,7 +228,7 @@ Inside an object, `this` refers to itself:
 ```hsplus
 orb self_destruct_box {
   @clickable
-  
+
   on_click: {
     destroy this
   }
@@ -299,7 +299,7 @@ Objects bounce off each other:
 orb ball {
   @physics
   @collidable
-  
+
   on_collision(other) {
     if (other.name == "goal") {
       score += 1
@@ -316,7 +316,7 @@ Objects pass through but detect entry:
 orb checkpoint {
   @trigger
   visible: false
-  
+
   on_trigger_enter(player) {
     save_progress()
     play_sound("checkpoint.wav")
@@ -333,11 +333,11 @@ For multiplayer (`.hsplus`):
 ```hsplus
 networked_object player {
   sync_rate: 20hz
-  
+
   // Synced properties
   position: synced
   rotation: synced
-  
+
   // Local + synced state
   state {
     displayName: "Player"
@@ -357,10 +357,10 @@ In `.holo`, define templates and create instances:
 template "Coin" {
   @grabbable
   @glowing
-  
+
   model: "coin.glb"
   color: "#ffcc00"
-  
+
   on_grab: {
     Player.score += 10
     destroy this

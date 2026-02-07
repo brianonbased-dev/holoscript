@@ -65,7 +65,12 @@ export interface LinterConfig {
   typeChecking: boolean;
 }
 
-export type RuleConfig = 'off' | 'warn' | 'error' | 'info' | ['warn' | 'error' | 'info', Record<string, unknown>];
+export type RuleConfig =
+  | 'off'
+  | 'warn'
+  | 'error'
+  | 'info'
+  | ['warn' | 'error' | 'info', Record<string, unknown>];
 
 export interface Rule {
   id: string;

@@ -7,11 +7,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
-import {
-  PublishValidator,
-  createPublishValidator,
-  validateForPublish,
-} from './validator';
+import { PublishValidator, createPublishValidator, validateForPublish } from './validator';
 
 describe('PublishValidator', () => {
   const testDir = join(__dirname, '__test_fixtures__');
@@ -78,10 +74,7 @@ describe('PublishValidator', () => {
     };
 
     it('should fail if name is missing', async () => {
-      writeFileSync(
-        join(testDir, 'package.json'),
-        JSON.stringify({ version: '1.0.0' })
-      );
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ version: '1.0.0' }));
       writeFileSync(join(testDir, 'README.md'), '# Test\n\nDescription here.');
       writeFileSync(join(testDir, 'LICENSE'), 'MIT');
 
@@ -139,10 +132,7 @@ describe('PublishValidator', () => {
     };
 
     it('should fail if version is missing', async () => {
-      writeFileSync(
-        join(testDir, 'package.json'),
-        JSON.stringify({ name: '@test/pkg' })
-      );
+      writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: '@test/pkg' }));
       writeFileSync(join(testDir, 'README.md'), '# Test\n\nDescription here.');
       writeFileSync(join(testDir, 'LICENSE'), 'MIT');
 
@@ -222,7 +212,10 @@ describe('PublishValidator', () => {
         join(testDir, 'package.json'),
         JSON.stringify({ name: '@test/pkg', version: '1.0.0', license: 'MIT' })
       );
-      writeFileSync(join(testDir, 'readme.md'), '# Test Package\n\nThis is a comprehensive description of the package.');
+      writeFileSync(
+        join(testDir, 'readme.md'),
+        '# Test Package\n\nThis is a comprehensive description of the package.'
+      );
       writeFileSync(join(testDir, 'LICENSE'), 'MIT');
 
       const validator = createPublishValidator(testDir);
@@ -371,10 +364,7 @@ describe('PublishValidator', () => {
       writeFileSync(join(testDir, 'README.md'), '# Test\n\nDescription here.');
       writeFileSync(join(testDir, 'LICENSE'), 'MIT');
       mkdirSync(join(testDir, 'src'));
-      writeFileSync(
-        join(testDir, 'src', 'index.test.ts'),
-        'console.log("test output")'
-      );
+      writeFileSync(join(testDir, 'src', 'index.test.ts'), 'console.log("test output")');
 
       const validator = createPublishValidator(testDir);
       const result = await validator.validate();

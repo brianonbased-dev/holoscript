@@ -1,22 +1,22 @@
 /**
  * DOM2DRenderer - HoloScript to HTML Element Renderer
- * 
+ *
  * Maps HoloScript AST nodes to native HTML elements.
  * This enables HoloScript to render to 2D web UI instead of VR/3D.
- * 
+ *
  * @example
  * ```typescript
  * import { DOM2DRenderer, createDOM2DRenderer } from '@holoscript/runtime';
  * import { parseHoloScriptPlus } from '@holoscript/core';
- * 
+ *
  * const ast = parseHoloScriptPlus(source);
  * const renderer = createDOM2DRenderer({
  *   onAction: (action, nodeId) => console.log(`Action: ${action}`),
  * });
- * 
+ *
  * renderer.renderTree(ast, document.getElementById('app'));
  * ```
- * 
+ *
  * @version 1.0.0
  */
 
@@ -49,7 +49,7 @@ const DEFAULT_OPTIONS: Required<DOM2DRendererOptions> = {
   classPrefix: 'hs',
   onAction: () => {},
   customCreators: {},
-  document: typeof window !== 'undefined' ? window.document : null as unknown as Document,
+  document: typeof window !== 'undefined' ? window.document : (null as unknown as Document),
 };
 
 /**
@@ -71,7 +71,7 @@ export class DOM2DRenderer {
    */
   createElement(node: HSNode): HTMLElement {
     const type = node.type.toLowerCase();
-    
+
     // Check for custom creator
     if (this.options.customCreators[type]) {
       return this.options.customCreators[type](node, this.options);
@@ -155,9 +155,11 @@ export class DOM2DRenderer {
   }
 
   private createOrb(node: HSNode): HTMLElement {
-    const hasClickable = node.directives?.some(d => d.type === 'clickable' || d.name === 'clickable');
+    const hasClickable = node.directives?.some(
+      (d) => d.type === 'clickable' || d.name === 'clickable'
+    );
     const element = hasClickable ? this.doc.createElement('button') : this.doc.createElement('div');
-    
+
     element.className = `${this.options.classPrefix}-orb`;
     if (node.id) {
       element.id = node.id;
@@ -165,9 +167,9 @@ export class DOM2DRenderer {
     }
 
     // Apply orb-specific styling
-    const color = node.properties.color as string || '#00ffff';
-    const scale = node.properties.scale as number || 1;
-    
+    const color = (node.properties.color as string) || '#00ffff';
+    const scale = (node.properties.scale as number) || 1;
+
     element.style.setProperty('--orb-color', color);
     element.style.setProperty('--orb-scale', String(scale));
     element.style.backgroundColor = color;
@@ -187,7 +189,7 @@ export class DOM2DRenderer {
     if (tooltip) {
       element.setAttribute('title', tooltip);
       element.setAttribute('data-tooltip', tooltip);
-      
+
       // Add tooltip text as inner content
       const tooltipDiv = this.doc.createElement('span');
       tooltipDiv.className = `${this.options.classPrefix}-orb-tooltip`;
@@ -266,7 +268,8 @@ export class DOM2DRenderer {
   private createText(node: HSNode): HTMLElement {
     const text = this.doc.createElement('span');
     text.className = `${this.options.classPrefix}-text`;
-    text.textContent = (node.properties.content as string) || (node.properties.text as string) || '';
+    text.textContent =
+      (node.properties.content as string) || (node.properties.text as string) || '';
     this.applyProperties(text, node.properties);
     return text;
   }
@@ -275,8 +278,9 @@ export class DOM2DRenderer {
     const button = this.doc.createElement('button');
     button.className = `${this.options.classPrefix}-button`;
     if (node.id) button.id = node.id;
-    
-    button.textContent = (node.properties.label as string) || (node.properties.text as string) || '';
+
+    button.textContent =
+      (node.properties.label as string) || (node.properties.text as string) || '';
 
     const action = node.properties.action as string;
     if (action) {
@@ -296,7 +300,7 @@ export class DOM2DRenderer {
     const type = node.type.toLowerCase();
     shape.className = `${this.options.classPrefix}-shape ${this.options.classPrefix}-${type}`;
     if (node.id) shape.id = node.id;
-    
+
     const color = node.properties.color as string;
     if (color) {
       shape.style.backgroundColor = color;
@@ -325,7 +329,7 @@ export class DOM2DRenderer {
 
   private applyProperties(element: HTMLElement, properties: Record<string, unknown>): void {
     if (!properties) return;
-    
+
     for (const [key, value] of Object.entries(properties)) {
       switch (key) {
         case 'color':
@@ -420,7 +424,7 @@ export class DOM2DRenderer {
       }
       // Also check children
       const children = element.querySelectorAll(`[data-action="${action}"]`);
-      children.forEach(child => result.push(child as HTMLElement));
+      children.forEach((child) => result.push(child as HTMLElement));
     }
     return result;
   }
@@ -478,14 +482,17 @@ export function createDOM2DRenderer(options?: DOM2DRendererOptions): DOM2DRender
 export function transformASTToHSNode(parserResult: unknown): HSNode {
   // Handle { ast: {...}, errors: [...] } format from parser
   const ast = (parserResult as { ast?: unknown }).ast || parserResult;
-  
+
   // Find the scene node
   const astWithChildren = ast as { children?: Array<{ type: string }> };
-  const sceneNode = astWithChildren.children?.find((c) => c.type === 'scene') || astWithChildren.children?.[0] || ast;
-  
+  const sceneNode =
+    astWithChildren.children?.find((c) => c.type === 'scene') ||
+    astWithChildren.children?.[0] ||
+    ast;
+
   function transformNode(node: Record<string, unknown>): HSNode {
     const children: HSNode[] = [];
-    
+
     // Handle different child property names
     const childNodes = (node.children || node.elements || []) as Array<Record<string, unknown>>;
     for (const child of childNodes) {
@@ -517,16 +524,28 @@ export function transformASTToHSNode(parserResult: unknown): HSNode {
 
     // Flatten properties
     const properties: Record<string, unknown> = {};
-    
+
     // Copy from properties object
     if (node.properties && typeof node.properties === 'object') {
       for (const [key, value] of Object.entries(node.properties as Record<string, unknown>)) {
         properties[key] = value;
       }
     }
-    
+
     // Also check for direct properties on node
-    const directProps = ['position', 'color', 'scale', 'action', 'tooltip', 'title', 'visible', 'label', 'placeholder', 'text', 'content'];
+    const directProps = [
+      'position',
+      'color',
+      'scale',
+      'action',
+      'tooltip',
+      'title',
+      'visible',
+      'label',
+      'placeholder',
+      'text',
+      'content',
+    ];
     for (const key of directProps) {
       if (node[key] !== undefined && properties[key] === undefined) {
         properties[key] = node[key];

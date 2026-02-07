@@ -121,14 +121,11 @@ export function throttle<T extends (...args: unknown[]) => unknown>(fn: T, ms: n
       lastCall = now();
       fn(...args);
     } else if (!timeoutId) {
-      timeoutId = setTimeout(
-        () => {
-          lastCall = now();
-          timeoutId = null;
-          fn(...args);
-        },
-        ms - elapsed
-      );
+      timeoutId = setTimeout(() => {
+        lastCall = now();
+        timeoutId = null;
+        fn(...args);
+      }, ms - elapsed);
     }
   }) as T;
 }
@@ -136,7 +133,9 @@ export function throttle<T extends (...args: unknown[]) => unknown>(fn: T, ms: n
 /**
  * Measure execution time of a function
  */
-export async function measure<T>(fn: () => T | Promise<T>): Promise<{ result: T; duration: number }> {
+export async function measure<T>(
+  fn: () => T | Promise<T>
+): Promise<{ result: T; duration: number }> {
   const start = hrTime();
   const result = await fn();
   const duration = hrTime() - start;
@@ -585,7 +584,7 @@ export const DateTime = {
    * Add time to a date
    */
   add(date: Date, amount: number, unit: 'ms' | 's' | 'm' | 'h' | 'd'): Date {
-    const ms = DateTime.diff(new Date(amount), new Date(0), 'ms');
+    const _ms = DateTime.diff(new Date(amount), new Date(0), 'ms');
     const multipliers = { ms: 1, s: 1000, m: 60000, h: 3600000, d: 86400000 };
     return new Date(date.getTime() + amount * multipliers[unit]);
   },

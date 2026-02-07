@@ -293,6 +293,7 @@
 ## 🔄 Request/Response Example
 
 ### Login Request
+
 ```
 POST http://localhost:8000/api/auth/login
 Content-Type: application/json
@@ -304,6 +305,7 @@ Content-Type: application/json
 ```
 
 ### Login Response
+
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -316,6 +318,7 @@ Content-Type: application/json
 ```
 
 ### Generate Request
+
 ```
 POST http://localhost:8000/api/generate
 Authorization: Bearer token_1705344600000_abc123xyz
@@ -328,6 +331,7 @@ Content-Type: application/json
 ```
 
 ### Generate Response
+
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -382,29 +386,29 @@ TOTAL: 11 files, ~1,500 lines of code
 
 ## ⚡ Performance Profile
 
-| Operation | Time | Notes |
-|-----------|------|-------|
-| **Server startup** | 1-2s | TypeScript → JavaScript |
-| **Login** | <100ms | In-memory verification |
-| **First generation** | 30-60s | Model loading + inference |
-| **Subsequent generation** | 5-20s | Cached model + inference |
-| **Save build** | <100ms | JSON write to disk |
-| **List builds** | <50ms | Read all JSON files |
-| **Load build** | <10ms | Single JSON read |
+| Operation                 | Time   | Notes                     |
+| ------------------------- | ------ | ------------------------- |
+| **Server startup**        | 1-2s   | TypeScript → JavaScript   |
+| **Login**                 | <100ms | In-memory verification    |
+| **First generation**      | 30-60s | Model loading + inference |
+| **Subsequent generation** | 5-20s  | Cached model + inference  |
+| **Save build**            | <100ms | JSON write to disk        |
+| **List builds**           | <50ms  | Read all JSON files       |
+| **Load build**            | <10ms  | Single JSON read          |
 
 ---
 
 ## 🎯 Key Design Decisions
 
-| Decision | Why | Benefit |
-|----------|-----|---------|
-| **Express.js** | Lightweight HTTP | Fast startup, minimal overhead |
-| **JSON Storage** | No database needed | Zero setup, easy backup |
-| **Session tokens** | Simple auth | Quick implementation |
-| **Ollama** | Free, open-source | User-friendly, extensible |
-| **Vanilla HTML/CSS/JS** | No frameworks | Zero webpack, instant reload |
-| **Local-first** | Privacy & autonomy | Users own their data |
-| **Modular services** | Clean separation | Easy to test, extend, maintain |
+| Decision                | Why                | Benefit                        |
+| ----------------------- | ------------------ | ------------------------------ |
+| **Express.js**          | Lightweight HTTP   | Fast startup, minimal overhead |
+| **JSON Storage**        | No database needed | Zero setup, easy backup        |
+| **Session tokens**      | Simple auth        | Quick implementation           |
+| **Ollama**              | Free, open-source  | User-friendly, extensible      |
+| **Vanilla HTML/CSS/JS** | No frameworks      | Zero webpack, instant reload   |
+| **Local-first**         | Privacy & autonomy | Users own their data           |
+| **Modular services**    | Clean separation   | Easy to test, extend, maintain |
 
 ---
 

@@ -1,6 +1,6 @@
 /**
  * Demo Application 4: Collaborative VR
- * 
+ *
  * Shows multi-user real-time collaboration in VR with synchronized state,
  * gesture recognition, and persistent annotations across sessions.
  */
@@ -132,16 +132,16 @@ function createPersistentAnnotation(text, position, color) {
     creator: getCurrentUser()
   })
 }
-`
+`;
 
 /**
  * Collaborative VR Demo
  * Multi-user real-time collaboration system
  */
 export class CollaborativeVRDemo {
-  private name: string = 'Multi-user Collaboration Engine'
-  private hsCode: number = 100 // Lines of HoloScript+ code
-  private traditionalCode: number = 15000 // Lines of traditional code
+  private name: string = 'Multi-user Collaboration Engine';
+  private hsCode: number = 100; // Lines of HoloScript+ code
+  private traditionalCode: number = 15000; // Lines of traditional code
 
   private collaborationScenarios: string[] = [
     'Architecture Planning Session',
@@ -149,7 +149,7 @@ export class CollaborativeVRDemo {
     'Surgical Planning (Medical)',
     'Manufacturing Line Design',
     'Urban Planning Session',
-  ]
+  ];
 
   private networkSpecs = {
     latency: '< 50ms',
@@ -158,7 +158,7 @@ export class CollaborativeVRDemo {
     updateFrequency: '60 Hz',
     stateSync: 'Differential broadcast',
     failover: 'Automatic reconnection',
-  }
+  };
 
   constructor() {}
 
@@ -166,11 +166,11 @@ export class CollaborativeVRDemo {
    * Multi-user session configuration
    */
   getSessionConfiguration(): {
-    maxUsers: number
-    roles: Record<string, string[]>
-    permissions: Record<string, string[]>
-    bandwidth: string
-    latencyTarget: string
+    maxUsers: number;
+    roles: Record<string, string[]>;
+    permissions: Record<string, string[]>;
+    bandwidth: string;
+    latencyTarget: string;
   } {
     return {
       maxUsers: 16,
@@ -197,12 +197,7 @@ export class CollaborativeVRDemo {
           'Make gestures',
           'View others annotations',
         ],
-        observer: [
-          'Rotate/zoom view',
-          'View annotations',
-          'Search objects',
-          'Filter by type',
-        ],
+        observer: ['Rotate/zoom view', 'View annotations', 'Search objects', 'Filter by type'],
         presenter: [
           'Highlight objects',
           'Guide users to locations',
@@ -212,18 +207,18 @@ export class CollaborativeVRDemo {
       },
       bandwidth: '2 Mbps per user',
       latencyTarget: '< 50ms',
-    }
+    };
   }
 
   /**
    * Real-time state synchronization specification
    */
   getStateSyncSpecification(): {
-    update: string
-    frequency: number
-    bandwidth: string
-    compression: string
-    recovery: string
+    update: string;
+    frequency: number;
+    bandwidth: string;
+    compression: string;
+    recovery: string;
   }[] {
     return [
       {
@@ -268,7 +263,7 @@ export class CollaborativeVRDemo {
         compression: 'Opus codec (80%)',
         recovery: 'Silence on network loss',
       },
-    ]
+    ];
   }
 
   /**
@@ -318,18 +313,18 @@ export class CollaborativeVRDemo {
         confidence: '93%',
         handedness: 'Either hand',
       },
-    }
+    };
   }
 
   /**
    * Annotation system specification
    */
   getAnnotationSystem(): {
-    type: string
-    lifetime: string
-    visibility: string
-    persistence: string
-    features: string[]
+    type: string;
+    lifetime: string;
+    visibility: string;
+    persistence: string;
+    features: string[];
   }[] {
     return [
       {
@@ -367,7 +362,7 @@ export class CollaborativeVRDemo {
         persistence: 'Tag in metadata',
         features: ['Category based', 'Color coded', 'User assignable', 'Priority levels'],
       },
-    ]
+    ];
   }
 
   /**
@@ -424,17 +419,17 @@ export class CollaborativeVRDemo {
         ],
         outcome: 'Manufacturing plan approved',
       },
-    }
+    };
   }
 
   /**
    * Comparison: Traditional vs HoloScript+
    */
   getImplementationComparison(): {
-    aspect: string
-    traditional: string
-    holoscript: string
-    timeSaved: string
+    aspect: string;
+    traditional: string;
+    holoscript: string;
+    timeSaved: string;
   }[] {
     return [
       {
@@ -473,17 +468,17 @@ export class CollaborativeVRDemo {
         holoscript: 'Automatic with state diff capture',
         timeSaved: '2 weeks',
       },
-    ]
+    ];
   }
 
   /**
    * Technical requirements
    */
   getTechnicalRequirements(): {
-    component: string
-    traditional: number | string
-    holoscript: number | string
-    improvement: string
+    component: string;
+    traditional: number | string;
+    holoscript: number | string;
+    improvement: string;
   }[] {
     return [
       {
@@ -528,7 +523,7 @@ export class CollaborativeVRDemo {
         holoscript: 'Test once',
         improvement: '80% fewer tests',
       },
-    ]
+    ];
   }
 
   /**
@@ -546,19 +541,19 @@ export class CollaborativeVRDemo {
       '🔄 Reusability: Components shared across organizations',
       '📈 Scalability: Add users without code changes',
       '💰 Cost: 90% development cost reduction',
-    ]
+    ];
   }
 
   /**
    * Cross-platform device matrix
    */
   getCrossPlatformMatrix(): {
-    device: string
-    participants: number
-    latency: string
-    gestures: string
-    annotations: string
-    recording: string
+    device: string;
+    participants: number;
+    latency: string;
+    gestures: string;
+    annotations: string;
+    recording: string;
   }[] {
     return [
       {
@@ -609,10 +604,10 @@ export class CollaborativeVRDemo {
         annotations: 'Simplified',
         recording: 'Screen capture',
       },
-    ]
+    ];
   }
 }
 
 export function createCollaborativeDemo(): CollaborativeVRDemo {
-  return new CollaborativeVRDemo()
+  return new CollaborativeVRDemo();
 }

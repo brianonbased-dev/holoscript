@@ -24,22 +24,24 @@ export class McpOrchestratorClient {
     }
 
     if (!config.apiKey || !config.url) {
-      this.log('Missing MCP API configuration. Set holoscript.mcpOrchestratorUrl and holoscript.mcpApiKey.');
+      this.log(
+        'Missing MCP API configuration. Set holoscript.mcpOrchestratorUrl and holoscript.mcpApiKey.'
+      );
       return;
     }
 
-    this.register(config).catch(err => this.log(`Register failed: ${err}`));
+    this.register(config).catch((err) => this.log(`Register failed: ${err}`));
 
     this.startHeartbeat(config);
 
     context.subscriptions.push({ dispose: () => this.stopHeartbeat() });
 
-    vscode.workspace.onDidChangeConfiguration(e => {
+    vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('holoscript.mcp')) {
         this.stopHeartbeat();
         const next = this.getConfig();
         if (next.enabled && next.apiKey && next.url) {
-          this.register(next).catch(err => this.log(`Register failed: ${err}`));
+          this.register(next).catch((err) => this.log(`Register failed: ${err}`));
           this.startHeartbeat(next);
         }
       }
@@ -54,16 +56,18 @@ export class McpOrchestratorClient {
     const heartbeatSeconds = cfg.get<number>('heartbeatSeconds', 20);
     const visibility = cfg.get<'public' | 'private'>('visibility', 'public');
     const workspace = cfg.get<string>('workspaceId', 'holoscript');
-    
+
     // Resolve environment variable reference or fallback to process.env
     if (!apiKey || apiKey.includes('${env:')) {
       apiKey = process.env.MCP_API_KEY || '';
     }
-    
+
     return { url, apiKey, enabled, heartbeatSeconds, visibility, workspace };
   }
 
-  private buildRegistrationPayload(config: ReturnType<McpOrchestratorClient['getConfig']>): McpRegistrationPayload {
+  private buildRegistrationPayload(
+    config: ReturnType<McpOrchestratorClient['getConfig']>
+  ): McpRegistrationPayload {
     const machineId = vscode.env.machineId?.slice(0, 8) || 'local';
     const id = `holoscript-vscode-${machineId}`;
 
@@ -87,8 +91,8 @@ export class McpOrchestratorClient {
         'holoscript.agent.status',
         'holoscript.openPreview',
         'holoscript.openPreviewToSide',
-        'holoscript.validate'
-      ]
+        'holoscript.validate',
+      ],
     };
   }
 
@@ -99,9 +103,9 @@ export class McpOrchestratorClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-mcp-api-key': config.apiKey
+        'x-mcp-api-key': config.apiKey,
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     this.log('Registered with MCP orchestrator.');
@@ -117,9 +121,9 @@ export class McpOrchestratorClient {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-mcp-api-key': config.apiKey
+            'x-mcp-api-key': config.apiKey,
           },
-          body: JSON.stringify({ status: 'active', tools: payload.tools })
+          body: JSON.stringify({ status: 'active', tools: payload.tools }),
         });
       } catch (err) {
         this.log(`Heartbeat failed: ${err}`);
@@ -141,7 +145,7 @@ export class McpOrchestratorClient {
     this.output.appendLine(`[MCP] ${message}`);
   }
 
-  async getStatus(): Promise<{ ok: boolean; message: string }>{
+  async getStatus(): Promise<{ ok: boolean; message: string }> {
     const config = this.getConfig();
 
     if (!config.enabled) {
@@ -163,7 +167,7 @@ export class McpOrchestratorClient {
       }
 
       const servers = await fetch(`${config.url}/servers`, {
-        headers: { 'x-mcp-api-key': config.apiKey }
+        headers: { 'x-mcp-api-key': config.apiKey },
       });
 
       if (!servers.ok) {

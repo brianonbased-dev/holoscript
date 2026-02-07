@@ -19,12 +19,15 @@ describe('Trait Constraints Validation', () => {
     `;
     const parseResult = parser.parse(code);
     const checkResult = typeChecker.check(parseResult.ast.body);
-    
+
     expect(checkResult.valid).toBe(false);
-    expect(checkResult.diagnostics.some(d => 
-      d.message.includes('Physics enabled objects must be collidable') ||
-      d.message.includes('requires @collidable')
-    )).toBe(true);
+    expect(
+      checkResult.diagnostics.some(
+        (d) =>
+          d.message.includes('Physics enabled objects must be collidable') ||
+          d.message.includes('requires @collidable')
+      )
+    ).toBe(true);
   });
 
   it('should report error when @grabbable is missing @physics', () => {
@@ -36,12 +39,15 @@ describe('Trait Constraints Validation', () => {
     `;
     const parseResult = parser.parse(code);
     const checkResult = typeChecker.check(parseResult.ast.body);
-    
+
     expect(checkResult.valid).toBe(false);
-    expect(checkResult.diagnostics.some(d => 
-      d.message.includes('Grabbable objects require physics') ||
-      d.message.includes('requires @physics')
-    )).toBe(true);
+    expect(
+      checkResult.diagnostics.some(
+        (d) =>
+          d.message.includes('Grabbable objects require physics') ||
+          d.message.includes('requires @physics')
+      )
+    ).toBe(true);
   });
 
   it('should report error for conflicting traits (@static and @physics)', () => {
@@ -53,11 +59,14 @@ describe('Trait Constraints Validation', () => {
     `;
     const parseResult = parser.parse(code);
     const checkResult = typeChecker.check(parseResult.ast.body);
-    
+
     expect(checkResult.valid).toBe(false);
-    expect(checkResult.diagnostics.some(d => 
-      d.message.includes('Static objects cannot have physics') ||
-      d.message.includes('conflicts with @physics')
-    )).toBe(true);
+    expect(
+      checkResult.diagnostics.some(
+        (d) =>
+          d.message.includes('Static objects cannot have physics') ||
+          d.message.includes('conflicts with @physics')
+      )
+    ).toBe(true);
   });
 });

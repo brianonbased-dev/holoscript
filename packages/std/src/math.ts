@@ -4,7 +4,7 @@
  * Vector math, quaternion operations, interpolation, and noise functions.
  */
 
-import type { Vec2, Vec3, Vec4, Quat, EulerAngles, AABB, Ray, RaycastHit } from './types.js';
+import type { Vec2, Vec3, Quat, EulerAngles, AABB } from './types.js';
 import { vec3, quat } from './types.js';
 
 // =============================================================================
@@ -34,7 +34,13 @@ export function inverseLerp(a: number, b: number, value: number): number {
   return (value - a) / (b - a);
 }
 
-export function remap(value: number, inMin: number, inMax: number, outMin: number, outMax: number): number {
+export function remap(
+  value: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number
+): number {
   return lerp(outMin, outMax, inverseLerp(inMin, inMax, value));
 }
 
@@ -153,10 +159,7 @@ export const vec3Math = {
     const dot = clamp(vec3Math.dot(a, b), -1, 1);
     const theta = Math.acos(dot) * t;
     const relative = vec3Math.normalize(vec3Math.sub(b, vec3Math.mul(a, dot)));
-    return vec3Math.add(
-      vec3Math.mul(a, Math.cos(theta)),
-      vec3Math.mul(relative, Math.sin(theta))
-    );
+    return vec3Math.add(vec3Math.mul(a, Math.cos(theta)), vec3Math.mul(relative, Math.sin(theta)));
   },
 
   negate: (v: Vec3): Vec3 => ({ x: -v.x, y: -v.y, z: -v.z }),
@@ -406,17 +409,23 @@ export const quatMath = {
 export const aabbMath = {
   contains: (aabb: AABB, point: Vec3): boolean => {
     return (
-      point.x >= aabb.min.x && point.x <= aabb.max.x &&
-      point.y >= aabb.min.y && point.y <= aabb.max.y &&
-      point.z >= aabb.min.z && point.z <= aabb.max.z
+      point.x >= aabb.min.x &&
+      point.x <= aabb.max.x &&
+      point.y >= aabb.min.y &&
+      point.y <= aabb.max.y &&
+      point.z >= aabb.min.z &&
+      point.z <= aabb.max.z
     );
   },
 
   intersects: (a: AABB, b: AABB): boolean => {
     return (
-      a.min.x <= b.max.x && a.max.x >= b.min.x &&
-      a.min.y <= b.max.y && a.max.y >= b.min.y &&
-      a.min.z <= b.max.z && a.max.z >= b.min.z
+      a.min.x <= b.max.x &&
+      a.max.x >= b.min.x &&
+      a.min.y <= b.max.y &&
+      a.max.y >= b.min.y &&
+      a.min.z <= b.max.z &&
+      a.max.z >= b.min.z
     );
   },
 
@@ -508,7 +517,14 @@ export const noise = {
   /**
    * Fractal Brownian Motion (fBm)
    */
-  fbm: (x: number, y: number, z: number, octaves: number = 6, lacunarity: number = 2, gain: number = 0.5): number => {
+  fbm: (
+    x: number,
+    y: number,
+    z: number,
+    octaves: number = 6,
+    lacunarity: number = 2,
+    gain: number = 0.5
+  ): number => {
     let value = 0;
     let amplitude = 1;
     let frequency = 1;
@@ -550,7 +566,7 @@ export const noise = {
 
           // Pseudo-random point in cell
           const hash = perm[(perm[(perm[cellX & 255] + cellY) & 255] + cellZ) & 255];
-          const px = cellX + (hash / 255);
+          const px = cellX + hash / 255;
           const py = cellY + ((hash * 7) % 255) / 255;
           const pz = cellZ + ((hash * 13) % 255) / 255;
 

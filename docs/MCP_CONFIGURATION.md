@@ -6,11 +6,11 @@ Quick reference for configuring HoloScript and Hololand MCP servers across diffe
 
 ## Configuration Files
 
-| IDE | Location |
-|-----|----------|
-| VS Code | `.vscode/mcp.json` |
-| Antigravity | `.antigravity/mcp.json` |
-| Cursor | `.cursor/mcp.json` |
+| IDE            | Location                                      |
+| -------------- | --------------------------------------------- |
+| VS Code        | `.vscode/mcp.json`                            |
+| Antigravity    | `.antigravity/mcp.json`                       |
+| Cursor         | `.cursor/mcp.json`                            |
 | Claude Desktop | `claude_desktop_config.json` (user directory) |
 
 ---
@@ -25,11 +25,13 @@ Quick reference for configuring HoloScript and Hololand MCP servers across diffe
 **Usable by:** Brittney, Copilot, Claude, Cursor, any AI agent
 
 **Start Command:**
+
 ```bash
 npx tsx packages/mcp-server/src/index.ts
 ```
 
 **Tools (12):**
+
 - `parse_hs` - Parse .hs/.hsplus
 - `parse_holo` - Parse .holo
 - `validate_holoscript` - Syntax validation
@@ -53,11 +55,13 @@ npx tsx packages/mcp-server/src/index.ts
 **Usable by:** Brittney, Copilot, Claude, Cursor, any AI agent
 
 **Start Command:**
+
 ```bash
 npx tsx packages/brittney/mcp-server/src/index.ts
 ```
 
 **Environment Variables:**
+
 ```
 HOLOLAND_API_URL=http://localhost:3000
 BRITTNEY_SERVICE_URL=http://localhost:11435
@@ -66,14 +70,14 @@ BRITTNEY_ADMIN_KEY=mcp-localhost-trusted
 
 **Tool Categories (40+ tools):**
 
-| Category | Prefix | Examples |
-|----------|--------|----------|
-| IDE Tools | `brittney_` | scan_project, diagnostics, autocomplete |
-| AI Features | `brittney_` | ask_question, explain_scene, auto_fix |
-| Graph Tools | `holo_` | parse_to_graph, visualize_flow |
-| Debugging | `brittney_` | error_monitor, performance_monitor |
-| Versioning | `brittney_` | scene_snapshot, compare_snapshots |
-| World Mgmt | - | create_world, list_worlds |
+| Category    | Prefix      | Examples                                |
+| ----------- | ----------- | --------------------------------------- |
+| IDE Tools   | `brittney_` | scan_project, diagnostics, autocomplete |
+| AI Features | `brittney_` | ask_question, explain_scene, auto_fix   |
+| Graph Tools | `holo_`     | parse_to_graph, visualize_flow          |
+| Debugging   | `brittney_` | error_monitor, performance_monitor      |
+| Versioning  | `brittney_` | scene_snapshot, compare_snapshots       |
+| World Mgmt  | -           | create_world, list_worlds               |
 
 ---
 
@@ -82,13 +86,14 @@ BRITTNEY_ADMIN_KEY=mcp-localhost-trusted
 ### VS Code (Both Servers)
 
 `.vscode/mcp.json`:
+
 ```jsonc
 {
   "servers": {
     "holoscript": {
       "type": "stdio",
       "command": "npx",
-      "args": ["tsx", "packages/mcp-server/src/index.ts"]
+      "args": ["tsx", "packages/mcp-server/src/index.ts"],
     },
     "hololand": {
       "type": "stdio",
@@ -97,16 +102,17 @@ BRITTNEY_ADMIN_KEY=mcp-localhost-trusted
       "env": {
         "HOLOLAND_API_URL": "http://localhost:3000",
         "BRITTNEY_SERVICE_URL": "http://localhost:11435",
-        "BRITTNEY_ADMIN_KEY": "mcp-localhost-trusted"
-      }
-    }
-  }
+        "BRITTNEY_ADMIN_KEY": "mcp-localhost-trusted",
+      },
+    },
+  },
 }
 ```
 
 ### Antigravity IDE
 
 `.antigravity/mcp.json`:
+
 ```json
 {
   "name": "HoloScript Development",
@@ -135,6 +141,7 @@ BRITTNEY_ADMIN_KEY=mcp-localhost-trusted
 ### Claude Desktop
 
 `claude_desktop_config.json`:
+
 ```json
 {
   "mcpServers": {
@@ -163,6 +170,7 @@ BRITTNEY_ADMIN_KEY=mcp-localhost-trusted
 ### Cursor
 
 `.cursor/mcp.json`:
+
 ```json
 {
   "holoscript": {
@@ -185,6 +193,7 @@ BRITTNEY_ADMIN_KEY=mcp-localhost-trusted
 Both repos include `.claude/settings.json` for Claude Desktop/Code:
 
 `.claude/settings.json`:
+
 ```json
 {
   "name": "HoloScript Development",
@@ -231,11 +240,13 @@ To ensure AI assistants always use MCP tools, add to `.github/copilot-instructio
 ## ⚠️ CRITICAL: Use MCP Tools First
 
 Before writing HoloScript code, ALWAYS use MCP tools:
+
 - `suggest_traits` - Get appropriate VR traits
 - `generate_object` - Create objects from descriptions
 - `validate_holoscript` - Verify syntax
 
 Required Workflow:
+
 1. suggest_traits → 2. generate_object → 3. validate_holoscript
 ```
 
@@ -265,10 +276,10 @@ Then reload your IDE and check MCP tool availability.
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| "Server not found" | Check path in config is correct |
-| "Tool not available" | Reload IDE window |
-| "Module not found" | Run `pnpm install` in package dir |
-| "Build errors" | Run `pnpm build` in package dir |
+| Issue                          | Solution                            |
+| ------------------------------ | ----------------------------------- |
+| "Server not found"             | Check path in config is correct     |
+| "Tool not available"           | Reload IDE window                   |
+| "Module not found"             | Run `pnpm install` in package dir   |
+| "Build errors"                 | Run `pnpm build` in package dir     |
 | "Cannot find @holoscript/core" | Check workspace dependencies linked |

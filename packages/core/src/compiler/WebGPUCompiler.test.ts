@@ -559,9 +559,7 @@ describe('WebGPUCompiler', () => {
     it('should handle light direction', () => {
       const composition = createComposition({
         lights: [
-          createLight('downLight', 'directional', [
-            { key: 'direction', value: [0, -1, 0] },
-          ]),
+          createLight('downLight', 'directional', [{ key: 'direction', value: [0, -1, 0] }]),
         ],
       });
 
@@ -1050,7 +1048,16 @@ describe('WebGPUCompiler', () => {
   });
 
   describe('geometry types', () => {
-    const geometryTypes = ['cube', 'sphere', 'orb', 'plane', 'cylinder', 'cone', 'pyramid', 'torus'];
+    const geometryTypes = [
+      'cube',
+      'sphere',
+      'orb',
+      'plane',
+      'cylinder',
+      'cone',
+      'pyramid',
+      'torus',
+    ];
 
     geometryTypes.forEach((geoType) => {
       it(`should handle ${geoType} geometry`, () => {
@@ -1289,9 +1296,7 @@ describe('WebGPUCompiler', () => {
 
     it('should handle fog with missing properties', () => {
       const composition = createComposition({
-        environment: createEnvironment([
-          { key: 'fog', value: {} },
-        ]),
+        environment: createEnvironment([{ key: 'fog', value: {} }]),
       });
 
       const result = compiler.compile(composition);
@@ -1305,7 +1310,9 @@ describe('WebGPUCompiler', () => {
         environment: createEnvironment([{ key: 'background', value: '#1a1a2e' }]),
         objects: [
           createObject('cube', { properties: [{ key: 'mesh', value: 'cube' }] }),
-          createObject('particles', { traits: [{ name: 'gpu_particle', config: { count: 1000 } }] }),
+          createObject('particles', {
+            traits: [{ name: 'gpu_particle', config: { count: 1000 } }],
+          }),
         ],
         lights: [createLight('sun', 'directional', [{ key: 'intensity', value: 1.0 }])],
         camera: createCamera([{ key: 'fov', value: 60 }]),

@@ -12,13 +12,13 @@ import { Vector3 } from '../types/HoloScriptPlus';
 export interface FlowFieldConfig {
   /** ID of the destination to follow */
   destinationId: string;
-  
+
   /** Speed of the agent */
   speed?: number;
-  
+
   /** How much the agent should steer towards the flow direction (0-1) */
   steeringWeight?: number;
-  
+
   /** Stop distance from destination */
   stopDistance?: number;
 }
@@ -35,13 +35,13 @@ export const flowFieldHandler: TraitHandler<FlowFieldConfig> = {
     destinationId: '',
     speed: 3.0,
     steeringWeight: 0.8,
-    stopDistance: 0.5
+    stopDistance: 0.5,
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const state: FlowFieldState = {
       currentDirection: [0, 0, 0],
-      isMoving: false
+      isMoving: false,
     };
     (node as any).__flowFieldState = state;
   },
@@ -58,33 +58,36 @@ export const flowFieldHandler: TraitHandler<FlowFieldConfig> = {
     if (!navEngine) return;
 
     const currentPos = (node.properties?.position as Vector3) || [0, 0, 0];
-    
+
     // Sample direction from flow field
     const flowDir = navEngine.sampleDirection(config.destinationId, currentPos);
-    
+
     // Combine with current movement or apply directly
     const speed = config.speed ?? 3.0;
     const steeringWeight = config.steeringWeight ?? 0.8;
-    
+
     // Basic steering logic
     state.currentDirection = [
-      (state.currentDirection as any)[0] * (1 - steeringWeight) + (flowDir as any)[0] * steeringWeight,
-      (state.currentDirection as any)[1] * (1 - steeringWeight) + (flowDir as any)[1] * steeringWeight,
-      (state.currentDirection as any)[2] * (1 - steeringWeight) + (flowDir as any)[2] * steeringWeight
+      (state.currentDirection as any)[0] * (1 - steeringWeight) +
+        (flowDir as any)[0] * steeringWeight,
+      (state.currentDirection as any)[1] * (1 - steeringWeight) +
+        (flowDir as any)[1] * steeringWeight,
+      (state.currentDirection as any)[2] * (1 - steeringWeight) +
+        (flowDir as any)[2] * steeringWeight,
     ];
 
     // Normalize direction
     const mag = Math.sqrt(
-      (state.currentDirection as any)[0] ** 2 + 
-      (state.currentDirection as any)[1] ** 2 + 
-      (state.currentDirection as any)[2] ** 2
+      (state.currentDirection as any)[0] ** 2 +
+        (state.currentDirection as any)[1] ** 2 +
+        (state.currentDirection as any)[2] ** 2
     );
 
     if (mag > 0.001) {
       const normalizedDir: Vector3 = [
         (state.currentDirection as any)[0] / mag,
         (state.currentDirection as any)[1] / mag,
-        (state.currentDirection as any)[2] / mag
+        (state.currentDirection as any)[2] / mag,
       ];
 
       // Update position
@@ -92,18 +95,22 @@ export const flowFieldHandler: TraitHandler<FlowFieldConfig> = {
         node.properties.position = [
           (currentPos as any)[0] + (normalizedDir as any)[0] * speed * delta,
           (currentPos as any)[1] + (normalizedDir as any)[1] * speed * delta,
-          (currentPos as any)[2] + (normalizedDir as any)[2] * speed * delta
+          (currentPos as any)[2] + (normalizedDir as any)[2] * speed * delta,
         ];
-        
+
         // Face the direction of movement
-        node.properties.rotation = [0, Math.atan2((normalizedDir as any)[0], (normalizedDir as any)[2]) * (180 / Math.PI), 0];
+        node.properties.rotation = [
+          0,
+          Math.atan2((normalizedDir as any)[0], (normalizedDir as any)[2]) * (180 / Math.PI),
+          0,
+        ];
       }
-      
+
       state.isMoving = true;
     } else {
       state.isMoving = false;
     }
-  }
+  },
 };
 
 export default flowFieldHandler;

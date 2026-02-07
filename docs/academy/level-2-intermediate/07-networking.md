@@ -17,20 +17,20 @@ HoloScript provides built-in networking for multiplayer experiences:
 
 ```holo
 composition "Multiplayer Room" {
-  
+
   // Configure networking
   network {
     maxPlayers: 8
     tickRate: 30        // Updates per second
     mode: "peer-to-peer" // or "dedicated"
   }
-  
+
   // Networked objects are synced automatically
   orb sharedBall {
     @networked
     @grabbable
     @physics
-    
+
     geometry: "sphere"
     position: [0, 1, 0]
   }
@@ -45,7 +45,7 @@ Make any object sync across clients:
 orb syncedCube {
   @networked  // Position, rotation, scale sync automatically
   @grabbable
-  
+
   geometry: "cube"
   color: "#ff0000"
 }
@@ -61,10 +61,10 @@ orb player {
     sync: ["position", "rotation", "health", "score"]
     rate: 20  // Updates per second
   }
-  
+
   health: 100
   score: 0
-  
+
   geometry: "capsule"
 }
 ```
@@ -77,7 +77,7 @@ orb player {
 orb grabbableItem {
   @networked
   @grabbable
-  
+
   // Ownership transfers automatically when grabbed
   onGrab: {
     // Now this client controls the object
@@ -91,18 +91,18 @@ orb grabbableItem {
 ```hs
 orb sharedResource {
   @networked { ownership: "request" }
-  
+
   onClick: {
     if (!network.isOwner(this)) {
       network.requestOwnership(this)
     }
   }
-  
+
   onOwnershipGranted: {
     this.color = "#00ff00"
     console.log("Ownership granted!")
   }
-  
+
   onOwnershipDenied: {
     console.log("Ownership denied")
   }
@@ -115,9 +115,9 @@ orb sharedResource {
 orb gameManager {
   @networked
   @host_only  // Only host can modify
-  
+
   gameState: "waiting"
-  
+
   function startGame(): {
     if (network.isHost) {
       this.gameState = "playing"
@@ -136,24 +136,24 @@ template PlayerAvatar {
     playerId: string
     playerName: string
   }
-  
+
   @networked { owner: params.playerId }
-  
+
   geometry: "capsule"
   scale: [0.3, 0.9, 0.3]
-  
+
   orb nameTag {
     @billboard
     text: params.playerName
     position: [0, 1.2, 0]
   }
-  
+
   orb leftHand {
     @networked
     geometry: "sphere"
     scale: 0.1
   }
-  
+
   orb rightHand {
     @networked
     geometry: "sphere"
@@ -181,11 +181,11 @@ network.onPlayerLeft(player => {
 ```hs
 orb playerList {
   @networked
-  
+
   onUpdate: {
     const players = network.getPlayers()
     console.log(`${players.length} players connected`)
-    
+
     players.forEach(p => {
       console.log(`- ${p.name} (${p.id})`)
     })
@@ -205,7 +205,7 @@ async function createRoom(): {
     maxPlayers: 4,
     isPrivate: false
   })
-  
+
   console.log("Room created:", room.code)
 }
 
@@ -253,20 +253,20 @@ network.onRoomFull(() => {
 ```hs
 orb gameController {
   @networked
-  
+
   // RPC that runs on all clients
   @rpc("all")
   function announceScore(playerName, score): {
     ui.showMessage(`${playerName} scored ${score} points!`)
     audio.play("score.mp3")
   }
-  
+
   // RPC that runs only on host
   @rpc("host")
   function requestSpawn(position): {
     spawn(Enemy, { position })
   }
-  
+
   // RPC that runs on specific player
   @rpc("target")
   function sendDamage(targetId, amount): {
@@ -281,14 +281,14 @@ orb gameController {
 ```hs
 orb trigger {
   @clickable
-  
+
   onClick: {
     // Call on all clients
     gameController.rpc.announceScore(player.name, 100)
-    
+
     // Call on host only
     gameController.rpc.requestSpawn([0, 0, 5])
-    
+
     // Call on specific player
     gameController.rpc.sendDamage("player123", 25)
   }
@@ -305,7 +305,7 @@ orb smoothObject {
     interpolation: true
     interpolationDelay: 100  // ms
   }
-  
+
   // Position updates are smoothly interpolated
 }
 ```
@@ -319,7 +319,7 @@ orb playerBall {
     reconciliation: true  // Correct mispredictions
   }
   @physics
-  
+
   // Client predicts movement, server authoritative
 }
 ```
@@ -328,27 +328,27 @@ orb playerBall {
 
 ```holo
 composition "Combat Arena" {
-  
+
   network {
     maxPlayers: 8
     mode: "dedicated"
     tickRate: 60
   }
-  
+
   template Projectile {
     @networked { owner: "shooter" }
     @physics { mass: 0.1 }
-    
+
     geometry: "sphere"
     scale: 0.1
     color: "#ffff00"
     damage: 10
     lifetime: 3
-    
+
     onCreate: {
       setTimeout(() => this.destroy(), this.lifetime * 1000)
     }
-    
+
     onCollision(event): {
       if (event.other.tag === "player") {
         // Only owner processes hits
@@ -359,26 +359,26 @@ composition "Combat Arena" {
       }
     }
   }
-  
+
   template Player {
     @networked { sync: ["position", "rotation", "health"] }
     @collidable
-    
+
     tag: "player"
     health: 100
-    
+
     geometry: "capsule"
-    
+
     @rpc("owner")
     function takeDamage(amount): {
       this.health -= amount
       haptic.feedback("strong")
-      
+
       if (this.health <= 0) {
         this.respawn()
       }
     }
-    
+
     function shoot(): {
       if (network.isOwner(this)) {
         const proj = spawn(Projectile, {
@@ -388,13 +388,13 @@ composition "Combat Arena" {
         })
       }
     }
-    
+
     function respawn(): {
       this.health = 100
       this.position = getSpawnPoint()
     }
   }
-  
+
   // Spawn players
   network.onPlayerJoined(player => {
     spawn(Player, {
@@ -423,9 +423,9 @@ composition "Combat Arena" {
 ```hs
 // Client predicts, server validates
 orb ball {
-  @networked { 
+  @networked {
     authority: "host"
-    prediction: true 
+    prediction: true
   }
 }
 ```

@@ -1,6 +1,6 @@
 /**
  * HoloScript Documentation Database
- * 
+ *
  * Comprehensive documentation for traits, syntax, and examples.
  */
 
@@ -11,11 +11,27 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@grabbable': {
     name: '@grabbable',
     category: 'interaction',
-    description: 'Allows the object to be picked up by the user in VR/AR. When grabbed, the object follows the controller.',
+    description:
+      'Allows the object to be picked up by the user in VR/AR. When grabbed, the object follows the controller.',
     parameters: [
-      { name: 'snap_to_hand', type: 'boolean', default: 'false', description: 'Snap object to hand when grabbed' },
-      { name: 'two_handed', type: 'boolean', default: 'false', description: 'Require two hands to grab' },
-      { name: 'highlight', type: 'boolean', default: 'true', description: 'Highlight when in grab range' },
+      {
+        name: 'snap_to_hand',
+        type: 'boolean',
+        default: 'false',
+        description: 'Snap object to hand when grabbed',
+      },
+      {
+        name: 'two_handed',
+        type: 'boolean',
+        default: 'false',
+        description: 'Require two hands to grab',
+      },
+      {
+        name: 'highlight',
+        type: 'boolean',
+        default: 'true',
+        description: 'Highlight when in grab range',
+      },
     ],
     events: ['onGrab', 'onRelease', 'onGrabStart', 'onGrabEnd'],
     example: `orb Sword @grabbable(snap_to_hand: true) {
@@ -25,13 +41,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@throwable', '@holdable', '@equippable'],
   },
-  
+
   '@throwable': {
     name: '@throwable',
     category: 'interaction',
     description: 'Allows the object to be thrown with physics. Requires @grabbable.',
     parameters: [
-      { name: 'velocity_multiplier', type: 'number', default: '1.0', description: 'Multiplier for throw velocity' },
+      {
+        name: 'velocity_multiplier',
+        type: 'number',
+        default: '1.0',
+        description: 'Multiplier for throw velocity',
+      },
       { name: 'bounce', type: 'boolean', default: 'true', description: 'Bounce on impact' },
     ],
     events: ['onThrow', 'onLand'],
@@ -41,14 +62,24 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@grabbable', '@collidable', '@physics'],
   },
-  
+
   '@holdable': {
     name: '@holdable',
     category: 'interaction',
     description: 'Object can be held without physics simulation (stays in hand exactly).',
     parameters: [
-      { name: 'offset', type: 'array', default: '[0, 0, 0]', description: 'Position offset when held' },
-      { name: 'rotation', type: 'array', default: '[0, 0, 0]', description: 'Rotation offset when held' },
+      {
+        name: 'offset',
+        type: 'array',
+        default: '[0, 0, 0]',
+        description: 'Position offset when held',
+      },
+      {
+        name: 'rotation',
+        type: 'array',
+        default: '[0, 0, 0]',
+        description: 'Rotation offset when held',
+      },
     ],
     events: ['onHold', 'onDrop'],
     example: `orb Flashlight @grabbable @holdable(offset: [0, 0, -0.1]) {
@@ -57,7 +88,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@grabbable', '@equippable'],
   },
-  
+
   '@clickable': {
     name: '@clickable',
     category: 'interaction',
@@ -74,13 +105,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@pointable', '@hoverable'],
   },
-  
+
   '@hoverable': {
     name: '@hoverable',
     category: 'interaction',
     description: 'Object responds to hover/point events.',
     parameters: [
-      { name: 'highlight_color', type: 'string', default: '#ffffff', description: 'Color when hovered' },
+      {
+        name: 'highlight_color',
+        type: 'string',
+        default: '#ffffff',
+        description: 'Color when hovered',
+      },
     ],
     events: ['onHoverEnter', 'onHoverExit', 'onHover'],
     example: `orb InfoPanel @hoverable {
@@ -90,13 +126,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@clickable', '@pointable'],
   },
-  
+
   '@draggable': {
     name: '@draggable',
     category: 'interaction',
     description: 'Object can be dragged (moved while clicking/holding).',
     parameters: [
-      { name: 'axis', type: 'string', default: 'all', description: 'Constrain to axis: x, y, z, xy, xz, yz, all' },
+      {
+        name: 'axis',
+        type: 'string',
+        default: 'all',
+        description: 'Constrain to axis: x, y, z, xy, xz, yz, all',
+      },
       { name: 'bounds', type: 'object', description: 'Movement bounds' },
     ],
     events: ['onDragStart', 'onDrag', 'onDragEnd'],
@@ -107,7 +148,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@grabbable'],
   },
-  
+
   '@pointable': {
     name: '@pointable',
     category: 'interaction',
@@ -123,7 +164,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@clickable', '@hoverable'],
   },
-  
+
   '@scalable': {
     name: '@scalable',
     category: 'interaction',
@@ -139,7 +180,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@grabbable', '@draggable'],
   },
-  
+
   // Physics Traits
   '@collidable': {
     name: '@collidable',
@@ -157,13 +198,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@physics', '@trigger'],
   },
-  
+
   '@physics': {
     name: '@physics',
     category: 'physics',
     description: 'Object has full physics simulation (mass, velocity, forces).',
     parameters: [
-      { name: 'type', type: 'string', default: 'dynamic', description: 'Physics body type: dynamic, kinematic, static' },
+      {
+        name: 'type',
+        type: 'string',
+        default: 'dynamic',
+        description: 'Physics body type: dynamic, kinematic, static',
+      },
       { name: 'mass', type: 'number', default: '1', description: 'Mass in kg' },
       { name: 'friction', type: 'number', default: '0.5', description: 'Surface friction' },
       { name: 'restitution', type: 'number', default: '0.3', description: 'Bounciness (0-1)' },
@@ -175,7 +221,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@collidable', '@gravity'],
   },
-  
+
   '@rigid': {
     name: '@rigid',
     category: 'physics',
@@ -188,7 +234,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@physics', '@kinematic'],
   },
-  
+
   '@kinematic': {
     name: '@kinematic',
     category: 'physics',
@@ -201,13 +247,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@physics', '@rigid'],
   },
-  
+
   '@trigger': {
     name: '@trigger',
     category: 'physics',
-    description: 'Object detects overlaps but doesn\'t physically collide.',
+    description: "Object detects overlaps but doesn't physically collide.",
     parameters: [
-      { name: 'shape', type: 'string', default: 'auto', description: 'Trigger shape: box, sphere, auto' },
+      {
+        name: 'shape',
+        type: 'string',
+        default: 'auto',
+        description: 'Trigger shape: box, sphere, auto',
+      },
     ],
     events: ['onTriggerEnter', 'onTriggerExit', 'onTriggerStay'],
     example: `orb DamagZone @trigger {
@@ -218,7 +269,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@collidable'],
   },
-  
+
   '@gravity': {
     name: '@gravity',
     category: 'physics',
@@ -233,7 +284,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@physics'],
   },
-  
+
   // Visual Traits
   '@glowing': {
     name: '@glowing',
@@ -241,7 +292,12 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
     description: 'Object emits a glow effect.',
     parameters: [
       { name: 'intensity', type: 'number', default: '0.5', description: 'Glow intensity' },
-      { name: 'color', type: 'string', default: 'inherit', description: 'Glow color (defaults to object color)' },
+      {
+        name: 'color',
+        type: 'string',
+        default: 'inherit',
+        description: 'Glow color (defaults to object color)',
+      },
       { name: 'pulse', type: 'boolean', default: 'false', description: 'Pulsing glow effect' },
     ],
     events: [],
@@ -251,7 +307,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@emissive'],
   },
-  
+
   '@emissive': {
     name: '@emissive',
     category: 'visual',
@@ -267,7 +323,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@glowing'],
   },
-  
+
   '@transparent': {
     name: '@transparent',
     category: 'visual',
@@ -282,7 +338,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@reflective'],
   },
-  
+
   '@reflective': {
     name: '@reflective',
     category: 'visual',
@@ -298,7 +354,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@transparent'],
   },
-  
+
   '@animated': {
     name: '@animated',
     category: 'visual',
@@ -314,7 +370,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: [],
   },
-  
+
   '@billboard': {
     name: '@billboard',
     category: 'visual',
@@ -329,7 +385,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: [],
   },
-  
+
   // Networking Traits
   '@networked': {
     name: '@networked',
@@ -337,7 +393,12 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
     description: 'Object state is synchronized across clients.',
     parameters: [
       { name: 'sync_rate', type: 'string', default: '20hz', description: 'Sync rate in Hz' },
-      { name: 'interpolate', type: 'boolean', default: 'true', description: 'Interpolate between updates' },
+      {
+        name: 'interpolate',
+        type: 'boolean',
+        default: 'true',
+        description: 'Interpolate between updates',
+      },
     ],
     events: ['onNetworkSync', 'onOwnershipChange'],
     example: `orb SharedBall @networked(sync_rate: "30hz") @grabbable {
@@ -347,14 +408,12 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@synced', '@persistent', '@owned'],
   },
-  
+
   '@synced': {
     name: '@synced',
     category: 'networking',
     description: 'Specific property is synced across network.',
-    parameters: [
-      { name: 'property', type: 'string', description: 'Property to sync' },
-    ],
+    parameters: [{ name: 'property', type: 'string', description: 'Property to sync' }],
     events: [],
     example: `orb Counter @networked {
   state { count: 0 }
@@ -362,13 +421,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@networked'],
   },
-  
+
   '@persistent': {
     name: '@persistent',
     category: 'networking',
     description: 'Object state persists across sessions.',
     parameters: [
-      { name: 'storage', type: 'string', default: 'cloud', description: 'Storage type: cloud, local' },
+      {
+        name: 'storage',
+        type: 'string',
+        default: 'cloud',
+        description: 'Storage type: cloud, local',
+      },
     ],
     events: ['onSave', 'onLoad'],
     example: `orb SavedProgress @persistent {
@@ -379,7 +443,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@networked'],
   },
-  
+
   '@owned': {
     name: '@owned',
     category: 'networking',
@@ -392,7 +456,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@networked'],
   },
-  
+
   '@host_only': {
     name: '@host_only',
     category: 'networking',
@@ -407,7 +471,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@networked'],
   },
-  
+
   // Behavior Traits
   '@stackable': {
     name: '@stackable',
@@ -422,27 +486,30 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@attachable'],
   },
-  
+
   '@attachable': {
     name: '@attachable',
     category: 'behavior',
     description: 'Object can attach to other objects.',
-    parameters: [
-      { name: 'attach_points', type: 'array', description: 'Named attachment points' },
-    ],
+    parameters: [{ name: 'attach_points', type: 'array', description: 'Named attachment points' }],
     events: ['onAttach', 'onDetach'],
     example: `orb Scope @attachable(attach_points: ["weapon_top"]) {
   geometry: "model/scope.glb"
 }`,
     relatedTraits: ['@equippable'],
   },
-  
+
   '@equippable': {
     name: '@equippable',
     category: 'behavior',
     description: 'Object can be equipped to body slots.',
     parameters: [
-      { name: 'slot', type: 'string', default: 'hand', description: 'Equip slot: hand, head, back, chest' },
+      {
+        name: 'slot',
+        type: 'string',
+        default: 'hand',
+        description: 'Equip slot: hand, head, back, chest',
+      },
     ],
     events: ['onEquip', 'onUnequip'],
     example: `orb Helmet @equippable(slot: "head") {
@@ -450,14 +517,12 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@grabbable', '@attachable'],
   },
-  
+
   '@consumable': {
     name: '@consumable',
     category: 'behavior',
     description: 'Object can be consumed/used once.',
-    parameters: [
-      { name: 'effect', type: 'string', description: 'Effect on consumption' },
-    ],
+    parameters: [{ name: 'effect', type: 'string', description: 'Effect on consumption' }],
     events: ['onConsume'],
     example: `orb HealthPotion @grabbable @consumable {
   geometry: "model/potion.glb"
@@ -466,7 +531,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@grabbable'],
   },
-  
+
   '@destructible': {
     name: '@destructible',
     category: 'behavior',
@@ -482,14 +547,19 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@collidable'],
   },
-  
+
   // Spatial Traits
   '@anchor': {
     name: '@anchor',
     category: 'spatial',
     description: 'Object is anchored to a real-world position (AR).',
     parameters: [
-      { name: 'persist', type: 'boolean', default: 'true', description: 'Persist anchor across sessions' },
+      {
+        name: 'persist',
+        type: 'boolean',
+        default: 'true',
+        description: 'Persist anchor across sessions',
+      },
     ],
     events: ['onAnchorFound', 'onAnchorLost'],
     example: `orb ARLabel @anchor {
@@ -498,7 +568,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@world_locked'],
   },
-  
+
   '@tracked': {
     name: '@tracked',
     category: 'spatial',
@@ -513,7 +583,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@hand_tracked', '@eye_tracked'],
   },
-  
+
   '@world_locked': {
     name: '@world_locked',
     category: 'spatial',
@@ -526,13 +596,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@anchor'],
   },
-  
+
   '@hand_tracked': {
     name: '@hand_tracked',
     category: 'spatial',
     description: 'Object uses hand tracking data.',
     parameters: [
-      { name: 'hand', type: 'string', default: 'auto', description: 'Which hand: left, right, auto' },
+      {
+        name: 'hand',
+        type: 'string',
+        default: 'auto',
+        description: 'Which hand: left, right, auto',
+      },
     ],
     events: ['onGesture', 'onPinch', 'onPoint'],
     example: `orb HandMenu @hand_tracked(hand: "left") {
@@ -541,13 +616,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@tracked'],
   },
-  
+
   '@eye_tracked': {
     name: '@eye_tracked',
     category: 'spatial',
     description: 'Object responds to eye tracking.',
     parameters: [
-      { name: 'dwell_time', type: 'number', default: '500', description: 'Dwell time in ms for activation' },
+      {
+        name: 'dwell_time',
+        type: 'number',
+        default: '500',
+        description: 'Dwell time in ms for activation',
+      },
     ],
     events: ['onGaze', 'onGazeEnter', 'onGazeExit', 'onDwell'],
     example: `orb GazeButton @eye_tracked(dwell_time: 300) {
@@ -556,14 +636,19 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@tracked'],
   },
-  
+
   // Audio Traits
   '@spatial_audio': {
     name: '@spatial_audio',
     category: 'audio',
     description: 'Object has 3D spatial audio.',
     parameters: [
-      { name: 'rolloff', type: 'string', default: 'linear', description: 'Distance rolloff: linear, logarithmic' },
+      {
+        name: 'rolloff',
+        type: 'string',
+        default: 'linear',
+        description: 'Distance rolloff: linear, logarithmic',
+      },
       { name: 'max_distance', type: 'number', default: '10', description: 'Max audible distance' },
     ],
     events: [],
@@ -572,28 +657,24 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@ambient'],
   },
-  
+
   '@ambient': {
     name: '@ambient',
     category: 'audio',
     description: 'Object provides ambient audio (non-directional).',
-    parameters: [
-      { name: 'volume', type: 'number', default: '1', description: 'Volume level' },
-    ],
+    parameters: [{ name: 'volume', type: 'number', default: '1', description: 'Volume level' }],
     events: [],
     example: `orb Ambience @ambient(volume: 0.3) {
   audio: { src: "forest-ambience.mp3", loop: true }
 }`,
     relatedTraits: ['@spatial_audio'],
   },
-  
+
   '@voice_activated': {
     name: '@voice_activated',
     category: 'audio',
     description: 'Object responds to voice commands.',
-    parameters: [
-      { name: 'keywords', type: 'array', description: 'Keywords to listen for' },
-    ],
+    parameters: [{ name: 'keywords', type: 'array', description: 'Keywords to listen for' }],
     events: ['onVoiceCommand', 'onSpeechStart', 'onSpeechEnd'],
     example: `orb VoiceLight @voice_activated(keywords: ["lights on", "lights off"]) {
   onVoiceCommand: |cmd| {
@@ -603,7 +684,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: [],
   },
-  
+
   // State Traits
   '@state': {
     name: '@state',
@@ -620,7 +701,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@reactive', '@observable'],
   },
-  
+
   '@reactive': {
     name: '@reactive',
     category: 'state',
@@ -633,7 +714,7 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@state', '@computed'],
   },
-  
+
   '@observable': {
     name: '@observable',
     category: 'state',
@@ -645,14 +726,12 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
 }`,
     relatedTraits: ['@state'],
   },
-  
+
   '@computed': {
     name: '@computed',
     category: 'state',
     description: 'Property is derived from other state.',
-    parameters: [
-      { name: 'deps', type: 'array', description: 'Dependencies' },
-    ],
+    parameters: [{ name: 'deps', type: 'array', description: 'Dependencies' }],
     events: [],
     example: `orb Stats @state @computed {
   state { health: 100, maxHealth: 100 }
@@ -669,8 +748,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
     parameters: [
       { name: 'speed', type: 'number', default: '1.0', description: 'Rotation speed multiplier' },
       { name: 'axis', type: 'string', default: 'y', description: 'Rotation axis: x, y, z' },
-      { name: 'snap_angle', type: 'number', default: '0', description: 'Snap to angle increments in degrees (0 = free rotation)' },
-      { name: 'auto_rotate', type: 'boolean', default: 'false', description: 'Enable continuous auto-rotation' },
+      {
+        name: 'snap_angle',
+        type: 'number',
+        default: '0',
+        description: 'Snap to angle increments in degrees (0 = free rotation)',
+      },
+      {
+        name: 'auto_rotate',
+        type: 'boolean',
+        default: 'false',
+        description: 'Enable continuous auto-rotation',
+      },
     ],
     events: ['onRotateStart', 'onRotate', 'onRotateEnd'],
     example: `orb Turntable @rotatable(axis: "y", auto_rotate: true, speed: 0.5) {
@@ -685,11 +774,31 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
     category: 'interaction',
     description: 'Object snaps to grid positions or predefined snap points when moved.',
     parameters: [
-      { name: 'grid_size', type: 'number', default: '0.5', description: 'Grid cell size for snapping' },
+      {
+        name: 'grid_size',
+        type: 'number',
+        default: '0.5',
+        description: 'Grid cell size for snapping',
+      },
       { name: 'snap_points', type: 'array', description: 'Custom [x,y,z] snap point positions' },
-      { name: 'snap_distance', type: 'number', default: '0.3', description: 'Distance threshold to trigger snapping' },
-      { name: 'snap_rotation', type: 'boolean', default: 'false', description: 'Also snap rotation to increments' },
-      { name: 'rotation_snap', type: 'number', default: '45', description: 'Rotation snap increment in degrees' },
+      {
+        name: 'snap_distance',
+        type: 'number',
+        default: '0.3',
+        description: 'Distance threshold to trigger snapping',
+      },
+      {
+        name: 'snap_rotation',
+        type: 'boolean',
+        default: 'false',
+        description: 'Also snap rotation to increments',
+      },
+      {
+        name: 'rotation_snap',
+        type: 'number',
+        default: '45',
+        description: 'Rotation snap increment in degrees',
+      },
     ],
     events: ['onSnap', 'onUnsnap'],
     example: `orb BuildingBlock @grabbable @snappable(grid_size: 1, snap_rotation: true) {
@@ -703,11 +812,27 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@breakable': {
     name: '@breakable',
     category: 'behavior',
-    description: 'Object shatters into fragments on impact when velocity exceeds the break force threshold.',
+    description:
+      'Object shatters into fragments on impact when velocity exceeds the break force threshold.',
     parameters: [
-      { name: 'break_force', type: 'number', default: '5', description: 'Minimum velocity to trigger breaking' },
-      { name: 'fragments', type: 'number', default: '6', description: 'Number of debris fragments to spawn' },
-      { name: 'fragment_lifetime', type: 'number', default: '4', description: 'Seconds before fragments fade away' },
+      {
+        name: 'break_force',
+        type: 'number',
+        default: '5',
+        description: 'Minimum velocity to trigger breaking',
+      },
+      {
+        name: 'fragments',
+        type: 'number',
+        default: '6',
+        description: 'Number of debris fragments to spawn',
+      },
+      {
+        name: 'fragment_lifetime',
+        type: 'number',
+        default: '4',
+        description: 'Seconds before fragments fade away',
+      },
     ],
     events: ['onBreak'],
     example: `orb GlassPane @physics @breakable(break_force: 3, fragments: 10) {
@@ -722,12 +847,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@character': {
     name: '@character',
     category: 'behavior',
-    description: 'Adds a basic character controller with keyboard movement (WASD), jumping, and gravity.',
+    description:
+      'Adds a basic character controller with keyboard movement (WASD), jumping, and gravity.',
     parameters: [
       { name: 'speed', type: 'number', default: '3', description: 'Movement speed in m/s' },
       { name: 'jump_force', type: 'number', default: '5', description: 'Jump impulse force' },
       { name: 'gravity', type: 'number', default: '-9.81', description: 'Gravity acceleration' },
-      { name: 'ground_level', type: 'number', default: '0', description: 'Y position of the ground plane' },
+      {
+        name: 'ground_level',
+        type: 'number',
+        default: '0',
+        description: 'Y position of the ground plane',
+      },
     ],
     events: ['onJump', 'onLand', 'onMove'],
     example: `orb Player @character(speed: 5, jump_force: 6) @collidable {
@@ -741,10 +872,21 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@teleport': {
     name: '@teleport',
     category: 'advanced',
-    description: 'Parabolic arc teleportation with visual indicator ring. When activated via userData.teleporting, draws a parabolic arc from the object and shows a ground target ring at the landing point.',
+    description:
+      'Parabolic arc teleportation with visual indicator ring. When activated via userData.teleporting, draws a parabolic arc from the object and shows a ground target ring at the landing point.',
     parameters: [
-      { name: 'arcColor', type: 'string', default: '0x00aaff', description: 'Color of the teleport arc line' },
-      { name: 'ringColor', type: 'string', default: '0x00ff88', description: 'Color of the ground target ring' },
+      {
+        name: 'arcColor',
+        type: 'string',
+        default: '0x00aaff',
+        description: 'Color of the teleport arc line',
+      },
+      {
+        name: 'ringColor',
+        type: 'string',
+        default: '0x00ff88',
+        description: 'Color of the ground target ring',
+      },
     ],
     events: ['onTeleportStart', 'onTeleportConfirm', 'onTeleportCancel'],
     example: `orb VRController @teleport {
@@ -758,12 +900,18 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@ui_panel': {
     name: '@ui_panel',
     category: 'advanced',
-    description: 'Creates a floating 2D UI panel in 3D space using HTML canvas rendering. Supports dynamic text updates via userData.uiText and userData.uiDirty.',
+    description:
+      'Creates a floating 2D UI panel in 3D space using HTML canvas rendering. Supports dynamic text updates via userData.uiText and userData.uiDirty.',
     parameters: [
       { name: 'width', type: 'number', default: '512', description: 'Canvas pixel width' },
       { name: 'height', type: 'number', default: '256', description: 'Canvas pixel height' },
       { name: 'text', type: 'string', default: '""', description: 'Initial text content' },
-      { name: 'backgroundColor', type: 'string', default: '#222', description: 'Panel background color' },
+      {
+        name: 'backgroundColor',
+        type: 'string',
+        default: '#222',
+        description: 'Panel background color',
+      },
       { name: 'textColor', type: 'string', default: '#fff', description: 'Text color' },
       { name: 'fontSize', type: 'number', default: '24', description: 'Font size in pixels' },
     ],
@@ -777,14 +925,25 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@particle_system': {
     name: '@particle_system',
     category: 'advanced',
-    description: 'GPU-friendly particle effects such as smoke, fire, and sparks. Particles emit from the object origin and respawn when their lifetime expires.',
+    description:
+      'GPU-friendly particle effects such as smoke, fire, and sparks. Particles emit from the object origin and respawn when their lifetime expires.',
     parameters: [
       { name: 'count', type: 'number', default: '500', description: 'Number of particles' },
       { name: 'color', type: 'string', default: '0xffaa00', description: 'Particle color' },
       { name: 'size', type: 'number', default: '0.05', description: 'Particle size' },
       { name: 'speed', type: 'number', default: '1', description: 'Upward emission speed' },
-      { name: 'spread', type: 'number', default: '1', description: 'Horizontal emission spread radius' },
-      { name: 'lifetime', type: 'number', default: '3', description: 'Particle lifetime in seconds before respawn' },
+      {
+        name: 'spread',
+        type: 'number',
+        default: '1',
+        description: 'Horizontal emission spread radius',
+      },
+      {
+        name: 'lifetime',
+        type: 'number',
+        default: '3',
+        description: 'Particle lifetime in seconds before respawn',
+      },
     ],
     events: [],
     example: `orb Campfire @particle_system(count: 300, color: "#ff4400", size: 0.04, speed: 2, spread: 0.5) @emissive(intensity: 1.5) {
@@ -797,12 +956,28 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@weather': {
     name: '@weather',
     category: 'advanced',
-    description: 'Dynamic weather effects including rain, snow, and fog. Rain and snow use particle systems while fog modifies the scene fog settings.',
+    description:
+      'Dynamic weather effects including rain, snow, and fog. Rain and snow use particle systems while fog modifies the scene fog settings.',
     parameters: [
-      { name: 'type', type: 'string', default: 'rain', description: "Weather type: 'rain', 'snow', or 'fog'" },
-      { name: 'count', type: 'number', default: '2000', description: 'Number of particles (rain/snow only)' },
+      {
+        name: 'type',
+        type: 'string',
+        default: 'rain',
+        description: "Weather type: 'rain', 'snow', or 'fog'",
+      },
+      {
+        name: 'count',
+        type: 'number',
+        default: '2000',
+        description: 'Number of particles (rain/snow only)',
+      },
       { name: 'area', type: 'number', default: '30', description: 'Area size in meters' },
-      { name: 'intensity', type: 'number', default: '1', description: 'Effect intensity multiplier' },
+      {
+        name: 'intensity',
+        type: 'number',
+        default: '1',
+        description: 'Effect intensity multiplier',
+      },
     ],
     events: ['onWeatherChange'],
     example: `orb SnowEffect @weather(type: "snow", count: 3000, area: 40) {
@@ -814,10 +989,21 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@day_night': {
     name: '@day_night',
     category: 'advanced',
-    description: 'Automated sun cycle with realistic color temperature changes. Creates a directional sun light and ambient light that orbit and change color from warm sunrise to cool moonlight over the configured cycle duration.',
+    description:
+      'Automated sun cycle with realistic color temperature changes. Creates a directional sun light and ambient light that orbit and change color from warm sunrise to cool moonlight over the configured cycle duration.',
     parameters: [
-      { name: 'cycleDuration', type: 'number', default: '120', description: 'Full day/night cycle duration in seconds' },
-      { name: 'startTime', type: 'number', default: '0', description: 'Starting time as fraction of day (0 = midnight, 0.5 = noon)' },
+      {
+        name: 'cycleDuration',
+        type: 'number',
+        default: '120',
+        description: 'Full day/night cycle duration in seconds',
+      },
+      {
+        name: 'startTime',
+        type: 'number',
+        default: '0',
+        description: 'Starting time as fraction of day (0 = midnight, 0.5 = noon)',
+      },
     ],
     events: ['onSunrise', 'onSunset', 'onNoon', 'onMidnight'],
     example: `orb WorldClock @day_night(cycleDuration: 300, startTime: 0.25) {
@@ -831,9 +1017,15 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@lod': {
     name: '@lod',
     category: 'advanced',
-    description: 'Level of Detail optimization that auto-simplifies distant objects. Creates three detail levels: full mesh (near), wireframe (medium), and point cloud (far). Automatically switches based on camera distance.',
+    description:
+      'Level of Detail optimization that auto-simplifies distant objects. Creates three detail levels: full mesh (near), wireframe (medium), and point cloud (far). Automatically switches based on camera distance.',
     parameters: [
-      { name: 'distances', type: 'array', default: '[0, 15, 30]', description: 'Distance thresholds [near, medium, far] in meters' },
+      {
+        name: 'distances',
+        type: 'array',
+        default: '[0, 15, 30]',
+        description: 'Distance thresholds [near, medium, far] in meters',
+      },
     ],
     events: ['onLODChange'],
     example: `orb DetailedTree @lod(distances: [0, 20, 50]) {
@@ -846,11 +1038,27 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@hand_tracking': {
     name: '@hand_tracking',
     category: 'advanced',
-    description: 'WebXR hand joint tracking with pinch detection. Renders fingertip spheres and a wrist indicator. Exposes pinch state via userData.pinching and userData.pinchDistance.',
+    description:
+      'WebXR hand joint tracking with pinch detection. Renders fingertip spheres and a wrist indicator. Exposes pinch state via userData.pinching and userData.pinchDistance.',
     parameters: [
-      { name: 'hand', type: 'string', default: 'right', description: "Which hand to track: 'left' or 'right'" },
-      { name: 'sphereRadius', type: 'number', default: '0.008', description: 'Radius of fingertip indicator spheres' },
-      { name: 'pinchThreshold', type: 'number', default: '0.02', description: 'Distance threshold for pinch detection (meters)' },
+      {
+        name: 'hand',
+        type: 'string',
+        default: 'right',
+        description: "Which hand to track: 'left' or 'right'",
+      },
+      {
+        name: 'sphereRadius',
+        type: 'number',
+        default: '0.008',
+        description: 'Radius of fingertip indicator spheres',
+      },
+      {
+        name: 'pinchThreshold',
+        type: 'number',
+        default: '0.02',
+        description: 'Distance threshold for pinch detection (meters)',
+      },
     ],
     events: ['onPinchStart', 'onPinchEnd', 'onHandFound', 'onHandLost'],
     example: `orb LeftHand @hand_tracking(hand: "left") {
@@ -864,12 +1072,33 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@haptic': {
     name: '@haptic',
     category: 'advanced',
-    description: 'VR controller vibration feedback. Triggers a haptic pulse on the specified controller when userData.triggerHaptic is set to true. Supports both standard Gamepad Haptic API and dual-rumble vibration.',
+    description:
+      'VR controller vibration feedback. Triggers a haptic pulse on the specified controller when userData.triggerHaptic is set to true. Supports both standard Gamepad Haptic API and dual-rumble vibration.',
     parameters: [
-      { name: 'intensity', type: 'number', default: '0.5', description: 'Vibration intensity (0-1)' },
-      { name: 'duration', type: 'number', default: '100', description: 'Vibration duration in milliseconds' },
-      { name: 'hand', type: 'string', default: 'right', description: "Target controller: 'left', 'right', or 'both'" },
-      { name: 'cooldown', type: 'number', default: '50', description: 'Minimum ms between consecutive pulses' },
+      {
+        name: 'intensity',
+        type: 'number',
+        default: '0.5',
+        description: 'Vibration intensity (0-1)',
+      },
+      {
+        name: 'duration',
+        type: 'number',
+        default: '100',
+        description: 'Vibration duration in milliseconds',
+      },
+      {
+        name: 'hand',
+        type: 'string',
+        default: 'right',
+        description: "Target controller: 'left', 'right', or 'both'",
+      },
+      {
+        name: 'cooldown',
+        type: 'number',
+        default: '50',
+        description: 'Minimum ms between consecutive pulses',
+      },
     ],
     events: ['onHapticPulse'],
     example: `orb VRController @haptic(intensity: 0.7, duration: 150, hand: "right") {
@@ -882,11 +1111,22 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@portal': {
     name: '@portal',
     category: 'advanced',
-    description: 'Teleportation gateway with glowing torus ring and semi-transparent surface. Objects tagged as teleportable or isPlayer that enter the activation distance are instantly moved to the destination coordinates.',
+    description:
+      'Teleportation gateway with glowing torus ring and semi-transparent surface. Objects tagged as teleportable or isPlayer that enter the activation distance are instantly moved to the destination coordinates.',
     parameters: [
-      { name: 'destination', type: 'array', default: '[0, 0, 0]', description: 'Target [x, y, z] teleport coordinates' },
+      {
+        name: 'destination',
+        type: 'array',
+        default: '[0, 0, 0]',
+        description: 'Target [x, y, z] teleport coordinates',
+      },
       { name: 'color', type: 'string', default: '#8800ff', description: 'Portal glow color' },
-      { name: 'activationDistance', type: 'number', default: '1', description: 'Distance in meters to trigger teleportation' },
+      {
+        name: 'activationDistance',
+        type: 'number',
+        default: '1',
+        description: 'Distance in meters to trigger teleportation',
+      },
       { name: 'radius', type: 'number', default: '1.2', description: 'Portal ring radius' },
     ],
     events: ['onPortalEnter', 'onPortalExit'],
@@ -900,11 +1140,17 @@ export const TRAIT_DOCS: Record<string, TraitDoc> = {
   '@mirror': {
     name: '@mirror',
     category: 'advanced',
-    description: 'Reflective surface with metallic material and a subtle frame. Creates a highly reflective plane with configurable tint and orientation. Supports vertical, horizontal, or camera-facing modes.',
+    description:
+      'Reflective surface with metallic material and a subtle frame. Creates a highly reflective plane with configurable tint and orientation. Supports vertical, horizontal, or camera-facing modes.',
     parameters: [
       { name: 'size', type: 'number', default: '2', description: 'Mirror plane size in meters' },
       { name: 'tint', type: 'string', default: '#ffffff', description: 'Reflection tint color' },
-      { name: 'orientation', type: 'string', default: 'vertical', description: "Mirror orientation: 'vertical', 'horizontal', or 'face_camera'" },
+      {
+        name: 'orientation',
+        type: 'string',
+        default: 'vertical',
+        description: "Mirror orientation: 'vertical', 'horizontal', or 'face_camera'",
+      },
     ],
     events: [],
     example: `orb WallMirror @mirror(size: 3, tint: "#f0f0ff", orientation: "vertical") {
@@ -929,7 +1175,8 @@ interface TraitDoc {
 export const SYNTAX_DOCS: Record<string, SyntaxDoc> = {
   orb: {
     topic: 'orb',
-    description: 'LEGACY: Define a 3D object. Prefer using composition/template/object pattern for new code.',
+    description:
+      'LEGACY: Define a 3D object. Prefer using composition/template/object pattern for new code.',
     syntax: `// LEGACY SYNTAX (still supported):
 orb <name> [traits] {
   geometry: "<type>"
@@ -973,7 +1220,7 @@ composition "Scene" {
       },
     ],
   },
-  
+
   object: {
     topic: 'object',
     description: 'Define a 3D object in .holo composition syntax.',
@@ -999,7 +1246,7 @@ composition "Scene" {
       },
     ],
   },
-  
+
   template: {
     topic: 'template',
     description: 'Define a reusable object template in .holo compositions.',
@@ -1034,7 +1281,7 @@ composition "Scene" {
       },
     ],
   },
-  
+
   composition: {
     topic: 'composition',
     description: 'Top-level container for a .holo scene definition.',
@@ -1072,7 +1319,7 @@ composition "Scene" {
       },
     ],
   },
-  
+
   environment: {
     topic: 'environment',
     description: 'Configure scene environment (skybox, lighting, fog).',
@@ -1094,10 +1341,11 @@ composition "Scene" {
       },
     ],
   },
-  
+
   spatial_group: {
     topic: 'spatial_group',
-    description: 'DEPRECATED: Group objects. Instead, use multiple templates and objects within a composition.',
+    description:
+      'DEPRECATED: Group objects. Instead, use multiple templates and objects within a composition.',
     syntax: `// DEPRECATED - use composition pattern instead:
 composition "Scene" {
   template "FurnitureTemplate" { ... }
@@ -1126,7 +1374,7 @@ composition "Scene" {
       },
     ],
   },
-  
+
   logic: {
     topic: 'logic',
     description: 'Define scene-level logic and event handlers.',
@@ -1160,7 +1408,7 @@ composition "Scene" {
       },
     ],
   },
-  
+
   animation: {
     topic: 'animation',
     description: 'Define property animations in HoloScript.',
@@ -1189,7 +1437,7 @@ composition "Scene" {
       },
     ],
   },
-  
+
   physics: {
     topic: 'physics',
     description: 'Configure physics properties for objects.',
@@ -1216,7 +1464,7 @@ composition "Scene" {
       },
     ],
   },
-  
+
   events: {
     topic: 'events',
     description: 'Handle interaction and lifecycle events.',
@@ -1248,7 +1496,7 @@ on<EventName>: |param1, param2| { <handler code> }`,
       },
     ],
   },
-  
+
   networking: {
     topic: 'networking',
     description: 'Configure multiplayer networking for objects.',
@@ -1283,7 +1531,7 @@ object "Name" @networked @owned {
       },
     ],
   },
-  
+
   traits: {
     topic: 'traits',
     description: 'Apply VR traits to objects for behavior and interactivity.',
@@ -1352,7 +1600,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['Collectible items', 'Puzzle pieces', 'Tools'],
   },
-  
+
   'multiplayer-sync': {
     pattern: 'multiplayer-sync',
     description: 'Object synchronized across all players in multiplayer.',
@@ -1376,7 +1624,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['Multiplayer games', 'Collaborative spaces', 'Shared toys'],
   },
-  
+
   teleportation: {
     pattern: 'teleportation',
     description: 'Teleportation point that moves the player.',
@@ -1404,7 +1652,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['Navigation', 'Fast travel', 'Accessibility'],
   },
-  
+
   portal: {
     pattern: 'portal',
     description: 'Portal that transitions to another scene.',
@@ -1435,7 +1683,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['Level transitions', 'Room connections', 'Fast travel'],
   },
-  
+
   inventory: {
     pattern: 'inventory',
     description: 'Inventory system with item slots.',
@@ -1474,7 +1722,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['RPG games', 'Crafting systems', 'Tool management'],
   },
-  
+
   animation: {
     pattern: 'animation',
     description: 'Animated object with multiple properties.',
@@ -1508,7 +1756,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['Decorative objects', 'Collectibles', 'Visual feedback'],
   },
-  
+
   'physics-puzzle': {
     pattern: 'physics-puzzle',
     description: 'Physics-based puzzle with stackable blocks.',
@@ -1564,7 +1812,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['Puzzle games', 'Building mechanics', 'Educational apps'],
   },
-  
+
   'ui-panel': {
     pattern: 'ui-panel',
     description: 'Interactive UI panel in VR space.',
@@ -1612,7 +1860,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['Menus', 'Settings', 'Information displays'],
   },
-  
+
   'audio-ambient': {
     pattern: 'audio-ambient',
     description: 'Spatial and ambient audio setup.',
@@ -1650,7 +1898,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['Atmosphere', 'Sound design', 'Immersive environments'],
   },
-  
+
   'day-night-cycle': {
     pattern: 'day-night-cycle',
     description: 'Dynamic day/night cycle with lighting changes.',
@@ -1702,7 +1950,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['Open worlds', 'Simulation', 'Atmosphere'],
   },
-  
+
   'procedural-generation': {
     pattern: 'procedural-generation',
     description: 'Procedurally generated content using templates.',
@@ -1755,7 +2003,7 @@ export const EXAMPLES: Record<string, ExampleDoc> = {
 }`,
     useCases: ['Terrain generation', 'Decoration', 'Game levels'],
   },
-  
+
   'hand-tracking': {
     pattern: 'hand-tracking',
     description: 'Hand tracking with gesture detection.',

@@ -18,9 +18,18 @@
  */
 
 import type {
-  HoloComposition, HoloObjectDecl, HoloSpatialGroup, HoloLight,
-  HoloEnvironment, HoloCamera, HoloTimeline, HoloAudio,
-  HoloZone, HoloUI, HoloTransition, HoloEffects,
+  HoloComposition,
+  HoloObjectDecl,
+  HoloSpatialGroup,
+  HoloLight,
+  HoloEnvironment,
+  HoloCamera,
+  HoloTimeline,
+  HoloAudio,
+  HoloZone,
+  HoloUI,
+  HoloTransition,
+  HoloEffects,
 } from '../parser/HoloCompositionTypes';
 
 export interface BabylonCompilerOptions {
@@ -31,12 +40,19 @@ export interface BabylonCompilerOptions {
 }
 
 const SHAPE_TO_MESH: Record<string, string> = {
-  sphere: 'CreateSphere', orb: 'CreateSphere',
-  cube: 'CreateBox', box: 'CreateBox',
-  cylinder: 'CreateCylinder', cone: 'CreateCylinder', pyramid: 'CreateCylinder',
-  plane: 'CreateGround', ground: 'CreateGround',
-  torus: 'CreateTorus', ring: 'CreateTorus',
-  capsule: 'CreateCapsule', disc: 'CreateDisc',
+  sphere: 'CreateSphere',
+  orb: 'CreateSphere',
+  cube: 'CreateBox',
+  box: 'CreateBox',
+  cylinder: 'CreateCylinder',
+  cone: 'CreateCylinder',
+  pyramid: 'CreateCylinder',
+  plane: 'CreateGround',
+  ground: 'CreateGround',
+  torus: 'CreateTorus',
+  ring: 'CreateTorus',
+  capsule: 'CreateCapsule',
+  disc: 'CreateDisc',
 };
 
 export class BabylonCompiler {
@@ -71,7 +87,9 @@ export class BabylonCompiler {
     this.emit('constructor(canvas: HTMLCanvasElement) {');
     this.indent();
     this.emit('this.canvas = canvas;');
-    this.emit('this.engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });');
+    this.emit(
+      'this.engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });'
+    );
     this.emit('this.scene = new BABYLON.Scene(this.engine);');
     this.dedent();
     this.emit('}');
@@ -83,24 +101,31 @@ export class BabylonCompiler {
     if (composition.lights?.length) {
       for (const light of composition.lights) this.emitLight(light);
     } else {
-      this.emit('const defaultLight = new BABYLON.HemisphericLight("defaultLight", new BABYLON.Vector3(0, 1, 0), this.scene);');
+      this.emit(
+        'const defaultLight = new BABYLON.HemisphericLight("defaultLight", new BABYLON.Vector3(0, 1, 0), this.scene);'
+      );
       this.emit('defaultLight.intensity = 0.7;');
       this.emit('');
     }
     if (composition.camera) this.emitCamera(composition.camera);
     else {
-      this.emit('const camera = new BABYLON.ArcRotateCamera("defaultCamera", -Math.PI / 2, Math.PI / 3, 10, BABYLON.Vector3.Zero(), this.scene);');
+      this.emit(
+        'const camera = new BABYLON.ArcRotateCamera("defaultCamera", -Math.PI / 2, Math.PI / 3, 10, BABYLON.Vector3.Zero(), this.scene);'
+      );
       this.emit('camera.attachControl(this.canvas, true);');
       this.emit('');
     }
     if (composition.objects?.length) for (const obj of composition.objects) this.emitObject(obj);
-    if (composition.spatialGroups?.length) for (const g of composition.spatialGroups) this.emitGroup(g);
-    if (composition.timelines?.length) for (const tl of composition.timelines) this.emitTimeline(tl);
+    if (composition.spatialGroups?.length)
+      for (const g of composition.spatialGroups) this.emitGroup(g);
+    if (composition.timelines?.length)
+      for (const tl of composition.timelines) this.emitTimeline(tl);
     if (composition.audio?.length) for (const a of composition.audio) this.emitAudio(a);
     if (composition.zones?.length) for (const z of composition.zones) this.emitZone(z);
     if (composition.ui) this.emitUI(composition.ui);
     if (composition.effects) this.emitEffects(composition.effects);
-    if (composition.transitions?.length) for (const t of composition.transitions) this.emitTransition(t);
+    if (composition.transitions?.length)
+      for (const t of composition.transitions) this.emitTransition(t);
     if (this.options.enableXR) this.emitXRSetup();
     this.emitRenderLoop();
     this.dedent();
@@ -138,10 +163,14 @@ export class BabylonCompiler {
   private emitEnvironment(env: HoloEnvironment): void {
     for (const prop of env.properties) {
       if (prop.key === 'skybox' || prop.key === 'preset') {
-        this.emit(`const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, this.scene);`);
+        this.emit(
+          `const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, this.scene);`
+        );
         this.emit(`const skyMat = new BABYLON.StandardMaterial("skyMat", this.scene);`);
         this.emit(`skyMat.backFaceCulling = false;`);
-        this.emit(`skyMat.reflectionTexture = new BABYLON.CubeTexture("textures/${prop.value}", this.scene);`);
+        this.emit(
+          `skyMat.reflectionTexture = new BABYLON.CubeTexture("textures/${prop.value}", this.scene);`
+        );
         this.emit(`skyMat.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;`);
         this.emit(`skyMat.disableLighting = true;`);
         this.emit(`skybox.material = skyMat; skybox.infiniteDistance = true;`);
@@ -152,14 +181,20 @@ export class BabylonCompiler {
         if (fog.near !== undefined) this.emit(`this.scene.fogStart = ${fog.near};`);
         if (fog.far !== undefined) this.emit(`this.scene.fogEnd = ${fog.far};`);
       } else if (prop.key === 'ambient_light') {
-        this.emit(`this.scene.ambientColor = new BABYLON.Color3(${prop.value}, ${prop.value}, ${prop.value});`);
+        this.emit(
+          `this.scene.ambientColor = new BABYLON.Color3(${prop.value}, ${prop.value}, ${prop.value});`
+        );
       } else if (prop.key === 'ground') {
-        this.emit(`const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 100, height: 100 }, this.scene);`);
+        this.emit(
+          `const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 100, height: 100 }, this.scene);`
+        );
         if (typeof prop.value === 'object' && prop.value !== null) {
           const g = prop.value as Record<string, any>;
           if (g.color) {
             this.emit(`const groundMat = new BABYLON.PBRMaterial("groundMat", this.scene);`);
-            this.emit(`groundMat.albedoColor = ${this.toBabylonColor3(g.color)}; groundMat.roughness = 0.8;`);
+            this.emit(
+              `groundMat.albedoColor = ${this.toBabylonColor3(g.color)}; groundMat.roughness = 0.8;`
+            );
             this.emit(`ground.material = groundMat;`);
           }
         }
@@ -173,54 +208,100 @@ export class BabylonCompiler {
 
   private emitObject(obj: HoloObjectDecl, parentVar?: string): void {
     const v = this.sanitizeName(obj.name);
-    let geom = 'cube', modelSrc: string | undefined, textContent: string | undefined;
+    let geom = 'cube',
+      modelSrc: string | undefined,
+      textContent: string | undefined;
     let position: any[] | undefined, rotation: any[] | undefined, scale: any, size: any;
     const mat: Record<string, any> = {};
 
     for (const p of obj.properties) {
       switch (p.key) {
-        case 'geometry': case 'mesh': case 'type':
-          if (typeof p.value === 'string') geom = p.value; break;
-        case 'position': if (Array.isArray(p.value)) position = p.value; break;
-        case 'rotation': if (Array.isArray(p.value)) rotation = p.value; break;
-        case 'scale': scale = p.value; break;
-        case 'size': size = p.value; break;
-        case 'color': mat.color = p.value; break;
-        case 'roughness': mat.roughness = p.value; break;
-        case 'metalness': case 'metallic': mat.metalness = p.value; break;
-        case 'opacity': mat.opacity = p.value; break;
-        case 'emissive': mat.emissive = p.value; break;
-        case 'emissive_intensity': case 'emissiveIntensity': mat.emissiveIntensity = p.value; break;
-        case 'material':
-          if (typeof p.value === 'object' && p.value !== null) Object.assign(mat, p.value as Record<string, any>);
+        case 'geometry':
+        case 'mesh':
+        case 'type':
+          if (typeof p.value === 'string') geom = p.value;
           break;
-        case 'model': case 'src':
-          if (typeof p.value === 'string') modelSrc = p.value; break;
+        case 'position':
+          if (Array.isArray(p.value)) position = p.value;
+          break;
+        case 'rotation':
+          if (Array.isArray(p.value)) rotation = p.value;
+          break;
+        case 'scale':
+          scale = p.value;
+          break;
+        case 'size':
+          size = p.value;
+          break;
+        case 'color':
+          mat.color = p.value;
+          break;
+        case 'roughness':
+          mat.roughness = p.value;
+          break;
+        case 'metalness':
+        case 'metallic':
+          mat.metalness = p.value;
+          break;
+        case 'opacity':
+          mat.opacity = p.value;
+          break;
+        case 'emissive':
+          mat.emissive = p.value;
+          break;
+        case 'emissive_intensity':
+        case 'emissiveIntensity':
+          mat.emissiveIntensity = p.value;
+          break;
+        case 'material':
+          if (typeof p.value === 'object' && p.value !== null)
+            Object.assign(mat, p.value as Record<string, any>);
+          break;
+        case 'model':
+        case 'src':
+          if (typeof p.value === 'string') modelSrc = p.value;
+          break;
         case 'text':
-          if (typeof p.value === 'string') textContent = p.value; break;
+          if (typeof p.value === 'string') textContent = p.value;
+          break;
       }
     }
 
     this.emit(`// Object: ${obj.name}`);
     if (modelSrc) {
-      this.emit(`const ${v} = await BABYLON.SceneLoader.ImportMeshAsync("", "${modelSrc}", "", this.scene);`);
+      this.emit(
+        `const ${v} = await BABYLON.SceneLoader.ImportMeshAsync("", "${modelSrc}", "", this.scene);`
+      );
     } else if (geom === 'text' || textContent) {
-      this.emit(`const ${v} = BABYLON.MeshBuilder.CreatePlane("${obj.name}", { width: 2, height: 1 }, this.scene);`);
-      this.emit(`const ${v}Tex = new BABYLON.DynamicTexture("${v}Tex", { width: 512, height: 256 }, this.scene);`);
-      this.emit(`${v}Tex.drawText("${textContent || ''}", null, null, "bold 48px Arial", "#ffffff", "#00000000", true);`);
+      this.emit(
+        `const ${v} = BABYLON.MeshBuilder.CreatePlane("${obj.name}", { width: 2, height: 1 }, this.scene);`
+      );
+      this.emit(
+        `const ${v}Tex = new BABYLON.DynamicTexture("${v}Tex", { width: 512, height: 256 }, this.scene);`
+      );
+      this.emit(
+        `${v}Tex.drawText("${textContent || ''}", null, null, "bold 48px Arial", "#ffffff", "#00000000", true);`
+      );
       this.emit(`const ${v}Mat = new BABYLON.StandardMaterial("${v}Mat", this.scene);`);
-      this.emit(`${v}Mat.diffuseTexture = ${v}Tex; ${v}Mat.emissiveColor = BABYLON.Color3.White();`);
+      this.emit(
+        `${v}Mat.diffuseTexture = ${v}Tex; ${v}Mat.emissiveColor = BABYLON.Color3.White();`
+      );
       this.emit(`${v}.material = ${v}Mat;`);
     } else {
-      this.emit(`const ${v} = BABYLON.MeshBuilder.${this.mapShapeToMesh(geom)}("${obj.name}", ${this.meshBuilderOptions(geom, size)}, this.scene);`);
+      this.emit(
+        `const ${v} = BABYLON.MeshBuilder.${this.mapShapeToMesh(geom)}("${obj.name}", ${this.meshBuilderOptions(geom, size)}, this.scene);`
+      );
       if (Object.keys(mat).length > 0) {
         this.emit(`const ${v}Mat = new BABYLON.PBRMaterial("${v}Mat", this.scene);`);
         if (mat.color) this.emit(`${v}Mat.albedoColor = ${this.toBabylonColor3(mat.color)};`);
         if (mat.roughness !== undefined) this.emit(`${v}Mat.roughness = ${mat.roughness};`);
         if (mat.metalness !== undefined) this.emit(`${v}Mat.metallic = ${mat.metalness};`);
-        if (mat.opacity !== undefined && mat.opacity < 1) this.emit(`${v}Mat.alpha = ${mat.opacity};`);
-        if (mat.emissive) this.emit(`${v}Mat.emissiveColor = ${this.toBabylonColor3(mat.emissive)};`);
-        if (mat.emissiveIntensity !== undefined) this.emit(`${v}Mat.emissiveIntensity = ${mat.emissiveIntensity};`);
+        if (mat.opacity !== undefined && mat.opacity < 1)
+          this.emit(`${v}Mat.alpha = ${mat.opacity};`);
+        if (mat.emissive)
+          this.emit(`${v}Mat.emissiveColor = ${this.toBabylonColor3(mat.emissive)};`);
+        if (mat.emissiveIntensity !== undefined)
+          this.emit(`${v}Mat.emissiveIntensity = ${mat.emissiveIntensity};`);
         this.emit(`${v}.material = ${v}Mat;`);
       }
     }
@@ -228,9 +309,11 @@ export class BabylonCompiler {
     if (position) this.emit(`${v}.position = ${this.toBabylonVector(position)};`);
     if (rotation) this.emit(`${v}.rotation = ${this.toBabylonVector(rotation)};`);
     if (scale) {
-      this.emit(Array.isArray(scale)
-        ? `${v}.scaling = ${this.toBabylonVector(scale)};`
-        : `${v}.scaling = new BABYLON.Vector3(${scale}, ${scale}, ${scale});`);
+      this.emit(
+        Array.isArray(scale)
+          ? `${v}.scaling = ${this.toBabylonVector(scale)};`
+          : `${v}.scaling = new BABYLON.Vector3(${scale}, ${scale}, ${scale});`
+      );
     }
     if (parentVar) this.emit(`${v}.parent = ${parentVar};`);
 
@@ -238,10 +321,14 @@ export class BabylonCompiler {
     for (const trait of obj.traits || []) {
       if (trait.name === 'grabbable') {
         this.emit(`${v}.actionManager = new BABYLON.ActionManager(this.scene);`);
-        this.emit(`${v}.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => { console.log("Picked: ${obj.name}"); }));`);
+        this.emit(
+          `${v}.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => { console.log("Picked: ${obj.name}"); }));`
+        );
       } else if (trait.name === 'physics' || trait.name === 'collidable') {
         const mt = (trait.config?.type || 'dynamic') === 'static' ? 'STATIC' : 'DYNAMIC';
-        this.emit(`const ${v}Body = new BABYLON.PhysicsBody(${v}, BABYLON.PhysicsMotionType.${mt}, false, this.scene);`);
+        this.emit(
+          `const ${v}Body = new BABYLON.PhysicsBody(${v}, BABYLON.PhysicsMotionType.${mt}, false, this.scene);`
+        );
         this.emit(`${v}Body.shape = new BABYLON.PhysicsShapeConvexHull(${v}, this.scene);`);
         this.emit(`${v}Body.setMassProperties({ mass: ${trait.config?.mass ?? 1} });`);
       } else if (trait.name === 'gaussian_splat') {
@@ -250,11 +337,19 @@ export class BabylonCompiler {
       } else if (trait.name === 'shadow') {
         this.emit(`${v}.receiveShadows = true;`);
       } else if (trait.name === 'hoverable') {
-        this.emit(`${v}.actionManager = ${v}.actionManager || new BABYLON.ActionManager(this.scene);`);
-        this.emit(`${v}.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => { ${v}.renderOverlay = true; ${v}.overlayColor = BABYLON.Color3.White(); }));`);
-        this.emit(`${v}.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => { ${v}.renderOverlay = false; }));`);
+        this.emit(
+          `${v}.actionManager = ${v}.actionManager || new BABYLON.ActionManager(this.scene);`
+        );
+        this.emit(
+          `${v}.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => { ${v}.renderOverlay = true; ${v}.overlayColor = BABYLON.Color3.White(); }));`
+        );
+        this.emit(
+          `${v}.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => { ${v}.renderOverlay = false; }));`
+        );
       } else if (trait.name === 'accessible') {
-        this.emit(`${v}.accessibilityTag = { description: "${obj.name}", role: "${trait.config?.role || 'generic'}" };`);
+        this.emit(
+          `${v}.accessibilityTag = { description: "${obj.name}", role: "${trait.config?.role || 'generic'}" };`
+        );
       } else {
         this.emit(`// @${trait.name}: ${JSON.stringify(trait.config || {})}`);
       }
@@ -270,12 +365,16 @@ export class BabylonCompiler {
     const v = this.sanitizeName(group.name);
     this.emit(`const ${v} = new BABYLON.TransformNode("${group.name}", this.scene);`);
     for (const p of group.properties) {
-      if (p.key === 'position' && Array.isArray(p.value)) this.emit(`${v}.position = ${this.toBabylonVector(p.value)};`);
-      else if (p.key === 'rotation' && Array.isArray(p.value)) this.emit(`${v}.rotation = ${this.toBabylonVector(p.value)};`);
+      if (p.key === 'position' && Array.isArray(p.value))
+        this.emit(`${v}.position = ${this.toBabylonVector(p.value)};`);
+      else if (p.key === 'rotation' && Array.isArray(p.value))
+        this.emit(`${v}.rotation = ${this.toBabylonVector(p.value)};`);
       else if (p.key === 'scale') {
-        this.emit(Array.isArray(p.value)
-          ? `${v}.scaling = ${this.toBabylonVector(p.value)};`
-          : `${v}.scaling = new BABYLON.Vector3(${p.value}, ${p.value}, ${p.value});`);
+        this.emit(
+          Array.isArray(p.value)
+            ? `${v}.scaling = ${this.toBabylonVector(p.value)};`
+            : `${v}.scaling = new BABYLON.Vector3(${p.value}, ${p.value}, ${p.value});`
+        );
       }
     }
     if (parentVar) this.emit(`${v}.parent = ${parentVar};`);
@@ -289,7 +388,10 @@ export class BabylonCompiler {
   private emitLight(light: HoloLight): void {
     const v = this.sanitizeName(light.name);
     let pos: any[] | undefined, color: any, intensity: number | undefined;
-    let dir: any[] | undefined, castShadow = false, angle: number | undefined, dist: number | undefined;
+    let dir: any[] | undefined,
+      castShadow = false,
+      angle: number | undefined,
+      dist: number | undefined;
 
     for (const p of light.properties) {
       if (p.key === 'position' && Array.isArray(p.value)) pos = p.value;
@@ -305,20 +407,35 @@ export class BabylonCompiler {
     const dirV = dir ? this.toBabylonVector(dir) : 'new BABYLON.Vector3(0, -1, 0)';
 
     switch (light.lightType) {
-      case 'hemisphere': case 'ambient':
-        this.emit(`const ${v} = new BABYLON.HemisphericLight("${light.name}", ${posV}, this.scene);`); break;
+      case 'hemisphere':
+      case 'ambient':
+        this.emit(
+          `const ${v} = new BABYLON.HemisphericLight("${light.name}", ${posV}, this.scene);`
+        );
+        break;
       case 'directional':
-        this.emit(`const ${v} = new BABYLON.DirectionalLight("${light.name}", ${dirV}, this.scene);`);
-        if (pos) this.emit(`${v}.position = ${posV};`); break;
+        this.emit(
+          `const ${v} = new BABYLON.DirectionalLight("${light.name}", ${dirV}, this.scene);`
+        );
+        if (pos) this.emit(`${v}.position = ${posV};`);
+        break;
       case 'point':
-        this.emit(`const ${v} = new BABYLON.PointLight("${light.name}", ${posV}, this.scene);`); break;
+        this.emit(`const ${v} = new BABYLON.PointLight("${light.name}", ${posV}, this.scene);`);
+        break;
       case 'spot':
-        this.emit(`const ${v} = new BABYLON.SpotLight("${light.name}", ${posV}, ${dirV}, ${angle ?? Math.PI / 4}, 2, this.scene);`); break;
+        this.emit(
+          `const ${v} = new BABYLON.SpotLight("${light.name}", ${posV}, ${dirV}, ${angle ?? Math.PI / 4}, 2, this.scene);`
+        );
+        break;
       case 'area':
         this.emit(`// Area light fallback`);
-        this.emit(`const ${v} = new BABYLON.PointLight("${light.name}", ${posV}, this.scene);`); break;
+        this.emit(`const ${v} = new BABYLON.PointLight("${light.name}", ${posV}, this.scene);`);
+        break;
       default:
-        this.emit(`const ${v} = new BABYLON.HemisphericLight("${light.name}", ${posV}, this.scene);`); break;
+        this.emit(
+          `const ${v} = new BABYLON.HemisphericLight("${light.name}", ${posV}, this.scene);`
+        );
+        break;
     }
 
     if (color) this.emit(`${v}.diffuse = ${this.toBabylonColor3(color)};`);
@@ -339,18 +456,23 @@ export class BabylonCompiler {
     for (const p of cam.properties) {
       if (p.key === 'fov' || p.key === 'field_of_view') fov = p.value as number;
       else if (p.key === 'position' && Array.isArray(p.value)) pos = p.value;
-      else if ((p.key === 'look_at' || p.key === 'lookAt') && Array.isArray(p.value)) lookAt = p.value;
+      else if ((p.key === 'look_at' || p.key === 'lookAt') && Array.isArray(p.value))
+        lookAt = p.value;
       else if (p.key === 'near') near = p.value as number;
       else if (p.key === 'far') far = p.value as number;
     }
     const target = lookAt ? this.toBabylonVector(lookAt) : 'BABYLON.Vector3.Zero()';
 
     if (cam.cameraType === 'orthographic') {
-      this.emit(`const camera = new BABYLON.FreeCamera("camera", ${pos ? this.toBabylonVector(pos) : 'new BABYLON.Vector3(0, 5, -10)'}, this.scene);`);
+      this.emit(
+        `const camera = new BABYLON.FreeCamera("camera", ${pos ? this.toBabylonVector(pos) : 'new BABYLON.Vector3(0, 5, -10)'}, this.scene);`
+      );
       this.emit(`camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;`);
       this.emit(`camera.setTarget(${target});`);
     } else {
-      this.emit(`const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 3, 10, ${target}, this.scene);`);
+      this.emit(
+        `const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 3, 10, ${target}, this.scene);`
+      );
       if (pos) this.emit(`camera.setPosition(${this.toBabylonVector(pos)});`);
     }
     if (fov !== undefined) this.emit(`camera.fov = ${fov * (Math.PI / 180)};`);
@@ -374,8 +496,12 @@ export class BabylonCompiler {
           const n = `${v}_${this.sanitizeName(a.target)}_${key}`;
           const animType = Array.isArray(value) ? 'ANIMATIONTYPE_VECTOR3' : 'ANIMATIONTYPE_FLOAT';
           const valStr = Array.isArray(value) ? this.toBabylonVector(value) : String(value);
-          this.emit(`const ${n} = new BABYLON.Animation("${n}", "${this.mapAnimProperty(key)}", ${fps}, BABYLON.Animation.${animType}, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);`);
-          this.emit(`${n}.setKeys([{ frame: 0, value: ${valStr} }, { frame: ${frame}, value: ${valStr} }]);`);
+          this.emit(
+            `const ${n} = new BABYLON.Animation("${n}", "${this.mapAnimProperty(key)}", ${fps}, BABYLON.Animation.${animType}, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);`
+          );
+          this.emit(
+            `${n}.setKeys([{ frame: 0, value: ${valStr} }, { frame: ${frame}, value: ${valStr} }]);`
+          );
         }
       } else if (a.kind === 'emit') {
         this.emit(`// @${entry.time}s: emit "${a.event}"`);
@@ -391,7 +517,10 @@ export class BabylonCompiler {
 
   private emitAudio(audio: HoloAudio): void {
     const v = this.sanitizeName(audio.name);
-    let src = '', volume = 1, loop = false, spatial = false;
+    let src = '',
+      volume = 1,
+      loop = false,
+      spatial = false;
     let position: any[] | undefined, dist: number | undefined;
     for (const p of audio.properties) {
       if (p.key === 'src' || p.key === 'source') src = String(p.value);
@@ -406,7 +535,9 @@ export class BabylonCompiler {
     if (volume !== 1) opts.push(`volume: ${volume}`);
     if (spatial) opts.push('spatialSound: true');
     if (dist !== undefined) opts.push(`maxDistance: ${dist}`);
-    this.emit(`const ${v} = new BABYLON.Sound("${audio.name}", "${src}", this.scene, null, { ${opts.join(', ')} });`);
+    this.emit(
+      `const ${v} = new BABYLON.Sound("${audio.name}", "${src}", this.scene, null, { ${opts.join(', ')} });`
+    );
     if (spatial && position) this.emit(`${v}.setPosition(${this.toBabylonVector(position)});`);
     this.emit('');
   }
@@ -415,7 +546,10 @@ export class BabylonCompiler {
 
   private emitZone(zone: HoloZone): void {
     const v = this.sanitizeName(zone.name);
-    let shape = 'box', position: any[] | undefined, size: any, radius: number | undefined;
+    let shape = 'box',
+      position: any[] | undefined,
+      size: any,
+      radius: number | undefined;
     for (const p of zone.properties) {
       if (p.key === 'shape') shape = String(p.value);
       else if (p.key === 'position' && Array.isArray(p.value)) position = p.value;
@@ -423,19 +557,29 @@ export class BabylonCompiler {
       else if (p.key === 'radius') radius = p.value as number;
     }
     if (shape === 'sphere') {
-      this.emit(`const ${v} = BABYLON.MeshBuilder.CreateSphere("${zone.name}", { diameter: ${(radius || 5) * 2} }, this.scene);`);
+      this.emit(
+        `const ${v} = BABYLON.MeshBuilder.CreateSphere("${zone.name}", { diameter: ${(radius || 5) * 2} }, this.scene);`
+      );
     } else {
       const s = Array.isArray(size) ? size : [size || 5, size || 5, size || 5];
-      this.emit(`const ${v} = BABYLON.MeshBuilder.CreateBox("${zone.name}", { width: ${s[0]}, height: ${s[1]}, depth: ${s[2]} }, this.scene);`);
+      this.emit(
+        `const ${v} = BABYLON.MeshBuilder.CreateBox("${zone.name}", { width: ${s[0]}, height: ${s[1]}, depth: ${s[2]} }, this.scene);`
+      );
     }
     if (position) this.emit(`${v}.position = ${this.toBabylonVector(position)};`);
     this.emit(`${v}.isVisible = false; ${v}.checkCollisions = true;`);
     if (zone.handlers?.length) {
       this.emit(`${v}.actionManager = new BABYLON.ActionManager(this.scene);`);
       for (const h of zone.handlers) {
-        const trigger = h.event === 'on_enter' ? 'OnIntersectionEnterTrigger'
-          : h.event === 'on_exit' ? 'OnIntersectionExitTrigger' : `NothingTrigger /* ${h.event} */`;
-        this.emit(`${v}.actionManager.registerAction(new BABYLON.ExecuteCodeAction({ trigger: BABYLON.ActionManager.${trigger} }, () => { /* ${h.event} */ }));`);
+        const trigger =
+          h.event === 'on_enter'
+            ? 'OnIntersectionEnterTrigger'
+            : h.event === 'on_exit'
+              ? 'OnIntersectionExitTrigger'
+              : `NothingTrigger /* ${h.event} */`;
+        this.emit(
+          `${v}.actionManager.registerAction(new BABYLON.ExecuteCodeAction({ trigger: BABYLON.ActionManager.${trigger} }, () => { /* ${h.event} */ }));`
+        );
       }
     }
     this.emit('');
@@ -447,7 +591,11 @@ export class BabylonCompiler {
     this.emit('const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");');
     for (const el of ui.elements) {
       const v = this.sanitizeName(el.name);
-      let elType = 'text', text = '', fontSize = 24, color = '#ffffff', bg: string | undefined;
+      let elType = 'text',
+        text = '',
+        fontSize = 24,
+        color = '#ffffff',
+        bg: string | undefined;
       for (const p of el.properties) {
         if (p.key === 'type') elType = String(p.value);
         else if (p.key === 'text') text = String(p.value);
@@ -457,7 +605,9 @@ export class BabylonCompiler {
       }
       if (elType === 'button') {
         this.emit(`const ${v} = GUI.Button.CreateSimpleButton("${el.name}", "${text}");`);
-        this.emit(`${v}.width = "150px"; ${v}.height = "40px"; ${v}.color = "${color}"; ${v}.fontSize = ${fontSize};`);
+        this.emit(
+          `${v}.width = "150px"; ${v}.height = "40px"; ${v}.color = "${color}"; ${v}.fontSize = ${fontSize};`
+        );
         if (bg) this.emit(`${v}.background = "${bg}";`);
         this.emit(`advancedTexture.addControl(${v});`);
       } else if (elType === 'progress') {
@@ -465,7 +615,9 @@ export class BabylonCompiler {
         this.emit(`${v}.width = "200px"; ${v}.height = "20px"; advancedTexture.addControl(${v});`);
       } else {
         this.emit(`const ${v} = new GUI.TextBlock("${el.name}", "${text}");`);
-        this.emit(`${v}.color = "${color}"; ${v}.fontSize = ${fontSize}; advancedTexture.addControl(${v});`);
+        this.emit(
+          `${v}.color = "${color}"; ${v}.fontSize = ${fontSize}; advancedTexture.addControl(${v});`
+        );
       }
     }
     this.emit('');
@@ -474,7 +626,9 @@ export class BabylonCompiler {
   // --- Effects ---
 
   private emitEffects(effects: HoloEffects): void {
-    this.emit('const pipeline = new BABYLON.DefaultRenderingPipeline("defaultPipeline", true, this.scene);');
+    this.emit(
+      'const pipeline = new BABYLON.DefaultRenderingPipeline("defaultPipeline", true, this.scene);'
+    );
     for (const fx of effects.effects) {
       const p = fx.properties;
       switch (fx.effectType) {
@@ -485,20 +639,25 @@ export class BabylonCompiler {
           break;
         case 'dof':
           this.emit('pipeline.depthOfFieldEnabled = true;');
-          if (p.focalLength !== undefined) this.emit(`pipeline.depthOfField.focalLength = ${p.focalLength};`);
+          if (p.focalLength !== undefined)
+            this.emit(`pipeline.depthOfField.focalLength = ${p.focalLength};`);
           if (p.fStop !== undefined) this.emit(`pipeline.depthOfField.fStop = ${p.fStop};`);
           break;
         case 'ssao':
-          this.emit('const ssao = new BABYLON.SSAO2RenderingPipeline("ssao", this.scene, { ssaoRatio: 0.5, blurRatio: 0.5 });');
+          this.emit(
+            'const ssao = new BABYLON.SSAO2RenderingPipeline("ssao", this.scene, { ssaoRatio: 0.5, blurRatio: 0.5 });'
+          );
           if (p.radius !== undefined) this.emit(`ssao.radius = ${p.radius};`);
           break;
         case 'vignette':
           this.emit('pipeline.imageProcessing.vignetteEnabled = true;');
-          if (p.weight !== undefined) this.emit(`pipeline.imageProcessing.vignetteWeight = ${p.weight};`);
+          if (p.weight !== undefined)
+            this.emit(`pipeline.imageProcessing.vignetteWeight = ${p.weight};`);
           break;
         case 'chromatic_aberration':
           this.emit('pipeline.chromaticAberrationEnabled = true;');
-          if (p.amount !== undefined) this.emit(`pipeline.chromaticAberration.aberrationAmount = ${p.amount};`);
+          if (p.amount !== undefined)
+            this.emit(`pipeline.chromaticAberration.aberrationAmount = ${p.amount};`);
           break;
         case 'tone_mapping':
           this.emit('pipeline.imageProcessingEnabled = true;');
@@ -520,7 +679,9 @@ export class BabylonCompiler {
       else if (p.key === 'effect') effect = String(p.value);
       else if (p.key === 'duration') duration = p.value as number;
     }
-    this.emit(`// Transition "${tr.name}": navigate to "${target || '?'}" with ${effect || 'fade'} over ${duration || 1}s`);
+    this.emit(
+      `// Transition "${tr.name}": navigate to "${target || '?'}" with ${effect || 'fade'} over ${duration || 1}s`
+    );
   }
 
   // --- XR ---
@@ -573,31 +734,56 @@ export class BabylonCompiler {
   private meshBuilderOptions(type: string, size: any): string {
     const s = typeof size === 'number' ? size : 1;
     switch (type) {
-      case 'sphere': case 'orb': return `{ diameter: ${s}, segments: 32 }`;
-      case 'cube': case 'box': return `{ size: ${s} }`;
-      case 'cylinder': return `{ diameter: ${s}, height: ${s * 2}, tessellation: 32 }`;
-      case 'cone': case 'pyramid':
+      case 'sphere':
+      case 'orb':
+        return `{ diameter: ${s}, segments: 32 }`;
+      case 'cube':
+      case 'box':
+        return `{ size: ${s} }`;
+      case 'cylinder':
+        return `{ diameter: ${s}, height: ${s * 2}, tessellation: 32 }`;
+      case 'cone':
+      case 'pyramid':
         return `{ diameterTop: 0, diameterBottom: ${s}, height: ${s * 2}, tessellation: ${type === 'pyramid' ? 4 : 32} }`;
-      case 'plane': case 'ground': return `{ width: ${s}, height: ${s} }`;
-      case 'torus': case 'ring': return `{ diameter: ${s}, thickness: ${s * 0.3}, tessellation: 32 }`;
-      case 'capsule': return `{ radius: ${s * 0.3}, height: ${s} }`;
-      case 'disc': return `{ radius: ${s * 0.5}, tessellation: 32 }`;
-      default: return `{ size: ${s} }`;
+      case 'plane':
+      case 'ground':
+        return `{ width: ${s}, height: ${s} }`;
+      case 'torus':
+      case 'ring':
+        return `{ diameter: ${s}, thickness: ${s * 0.3}, tessellation: 32 }`;
+      case 'capsule':
+        return `{ radius: ${s * 0.3}, height: ${s} }`;
+      case 'disc':
+        return `{ radius: ${s * 0.5}, tessellation: 32 }`;
+      default:
+        return `{ size: ${s} }`;
     }
   }
 
   private mapAnimProperty(key: string): string {
     const m: Record<string, string> = {
-      position: 'position', rotation: 'rotation', scale: 'scaling',
-      color: 'material.albedoColor', opacity: 'material.alpha', emissive: 'material.emissiveColor',
+      position: 'position',
+      rotation: 'rotation',
+      scale: 'scaling',
+      color: 'material.albedoColor',
+      opacity: 'material.alpha',
+      emissive: 'material.emissiveColor',
     };
     return m[key] || key;
   }
 
   // --- Emit Helpers ---
 
-  private emit(line: string): void { this.lines.push(this.options.indent.repeat(this.indentLevel) + line); }
-  private indent(): void { this.indentLevel++; }
-  private dedent(): void { this.indentLevel = Math.max(0, this.indentLevel - 1); }
-  private sanitizeName(name: string): string { return name.replace(/[^a-zA-Z0-9_]/g, '_'); }
+  private emit(line: string): void {
+    this.lines.push(this.options.indent.repeat(this.indentLevel) + line);
+  }
+  private indent(): void {
+    this.indentLevel++;
+  }
+  private dedent(): void {
+    this.indentLevel = Math.max(0, this.indentLevel - 1);
+  }
+  private sanitizeName(name: string): string {
+    return name.replace(/[^a-zA-Z0-9_]/g, '_');
+  }
 }

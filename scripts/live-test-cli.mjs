@@ -28,12 +28,12 @@ let failed = 0;
 function runCli(args) {
   const result = spawnSync('node', [CLI_PATH, ...args], {
     encoding: 'utf-8',
-    timeout: 10000
+    timeout: 10000,
   });
   return {
     stdout: result.stdout || '',
     stderr: result.stderr || '',
-    status: result.status
+    status: result.status,
   };
 }
 

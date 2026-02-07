@@ -10,12 +10,12 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
  * Types of completion contexts
  */
 export type CompletionContextType =
-  | 'trait'      // After @ symbol
-  | 'property'   // Inside object, adding property
-  | 'event'      // Event handler (on_*)
-  | 'comment'    // Comment that might be a code gen request
-  | 'value'      // After : in a property
-  | 'general';   // General completion
+  | 'trait' // After @ symbol
+  | 'property' // Inside object, adding property
+  | 'event' // Event handler (on_*)
+  | 'comment' // Comment that might be a code gen request
+  | 'value' // After : in a property
+  | 'general'; // General completion
 
 /**
  * Completion context for AI
@@ -119,7 +119,7 @@ export class ContextGatherer {
       column: position.character,
       surroundingCode,
       surroundingLines,
-      filePath: document.uri
+      filePath: document.uri,
     };
 
     // If inside an object, gather object context
@@ -152,7 +152,7 @@ export class ContextGatherer {
       ...baseContext,
       errorMessage: error.message,
       errorLine: error.line,
-      errorColumn: error.column
+      errorColumn: error.column,
     };
   }
 
@@ -179,7 +179,10 @@ export class ContextGatherer {
 
     // Comment that looks like a code gen request
     if (trimmed.startsWith('//') || trimmed.startsWith('#')) {
-      const comment = trimmed.replace(/^\/\/|^#/, '').trim().toLowerCase();
+      const comment = trimmed
+        .replace(/^\/\/|^#/, '')
+        .trim()
+        .toLowerCase();
       if (this.isCodeGenComment(comment)) {
         return 'comment';
       }
@@ -203,12 +206,23 @@ export class ContextGatherer {
    */
   private isCodeGenComment(comment: string): boolean {
     const codeGenIndicators = [
-      'create', 'make', 'add', 'generate', 'implement',
-      'todo:', 'TODO:', 'FIXME:', 'implement:', 'add:',
-      'should', 'when', 'needs to', 'must'
+      'create',
+      'make',
+      'add',
+      'generate',
+      'implement',
+      'todo:',
+      'TODO:',
+      'FIXME:',
+      'implement:',
+      'add:',
+      'should',
+      'when',
+      'needs to',
+      'must',
     ];
 
-    return codeGenIndicators.some(indicator =>
+    return codeGenIndicators.some((indicator) =>
       comment.toLowerCase().includes(indicator.toLowerCase())
     );
   }
@@ -242,7 +256,10 @@ export class ContextGatherer {
   /**
    * Get context about the current object
    */
-  private getObjectContext(lines: string[], currentLine: number): {
+  private getObjectContext(
+    lines: string[],
+    currentLine: number
+  ): {
     name: string;
     type: string;
     traits: string[];

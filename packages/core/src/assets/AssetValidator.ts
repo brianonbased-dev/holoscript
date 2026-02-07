@@ -327,13 +327,7 @@ const BUILTIN_RULES: ValidationRule[] = [
     validate: (asset) => {
       const pc = asset.platformCompatibility;
       const hasAny =
-        pc.webgl ||
-        pc.webgl2 ||
-        pc.webgpu ||
-        pc.vr ||
-        pc.ar ||
-        pc.mobile ||
-        pc.desktop;
+        pc.webgl || pc.webgl2 || pc.webgpu || pc.vr || pc.ar || pc.mobile || pc.desktop;
 
       if (!hasAny) {
         return {
@@ -357,9 +351,7 @@ const BUILTIN_RULES: ValidationRule[] = [
     severity: 'error',
     appliesTo: 'all',
     validate: (asset) => {
-      const missingDeps = asset.dependencies.filter(
-        (d) => d.required && !d.fallback
-      );
+      const missingDeps = asset.dependencies.filter((d) => d.required && !d.fallback);
 
       if (missingDeps.length > 0) {
         return {

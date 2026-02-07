@@ -23,6 +23,7 @@ ollama pull orca-mini        # Mini model (fast)
 ```
 
 **Start Ollama server**:
+
 ```bash
 ollama serve
 # You should see: Listening on 127.0.0.1:11434
@@ -50,6 +51,7 @@ npm run dev
 ```
 
 You should see:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 HoloScript LLM Service Started
@@ -69,15 +71,18 @@ Quick Start:
 ### Step 3: Start Building!
 
 Open your browser:
+
 ```
 http://localhost:8000
 ```
 
 **Login with**:
+
 - Username: `user`
 - Password: `password`
 
 Then:
+
 1. **Name your build** (e.g., "Spinning Cube")
 2. **Describe what you want** (e.g., "Create a blue sphere that rotates continuously")
 3. **Click "Generate HoloScript"**
@@ -107,6 +112,7 @@ Everything runs locally. Your data never leaves your machine.
 ## 🔌 API Reference
 
 ### Login
+
 ```bash
 curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -116,6 +122,7 @@ curl -X POST http://localhost:8000/api/auth/login \
 ```
 
 ### Generate HoloScript
+
 ```bash
 curl -X POST http://localhost:8000/api/generate \
   -H "Content-Type: application/json" \
@@ -126,6 +133,7 @@ curl -X POST http://localhost:8000/api/generate \
 ```
 
 ### Save Build
+
 ```bash
 curl -X POST http://localhost:8000/api/builds \
   -H "Content-Type: application/json" \
@@ -134,6 +142,7 @@ curl -X POST http://localhost:8000/api/builds \
 ```
 
 ### List Builds
+
 ```bash
 curl -X GET http://localhost:8000/api/builds \
   -H "Authorization: Bearer <token>"
@@ -191,18 +200,22 @@ See `src/server.ts` for TODOs.
 ## 🆘 Troubleshooting
 
 **"Cannot connect to Ollama"**
+
 - Make sure `ollama serve` is running
 - Check `OLLAMA_URL` in `.env.local`
 
 **"Generation is slow"**
+
 - First generation takes longer (model loading)
 - Smaller models are faster (orca-mini)
 - Use GPU: `ollama pull <model>` with GPU flag
 
 **"Port 8000 already in use"**
+
 - Change `PORT=8001` in `.env.local`
 
 **"Out of memory"**
+
 - Use smaller model: `ollama pull orca-mini`
 - Or reduce context window in config
 

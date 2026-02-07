@@ -20,7 +20,7 @@ export class ReactiveState implements IReactiveState {
       get(obj, key) {
         const val = obj[key];
         if (val && typeof val === 'object' && !Array.isArray(val)) {
-            return self.createReactiveProxy(val);
+          return self.createReactiveProxy(val);
         }
         return val;
       },
@@ -31,7 +31,7 @@ export class ReactiveState implements IReactiveState {
           self.notify();
         }
         return true;
-      }
+      },
     });
   }
 
@@ -57,7 +57,7 @@ export class ReactiveState implements IReactiveState {
   }
 
   private notify() {
-    this.subscribers.forEach(cb => cb(this.getSnapshot()));
+    this.subscribers.forEach((cb) => cb(this.getSnapshot()));
   }
 }
 
@@ -95,23 +95,23 @@ export class ExpressionEvaluator {
 
     // If it's a template string with ${}, we need to interpolate
     if (expression.includes('${')) {
-        // Special case: if the whole string is just one interpolation, return raw value
-        // Use trim() to allow spaces like " ${ count } "
-        const trimmed = expression.trim();
-        const match = trimmed.match(/^\$\{([^}]+)\}$/);
-        if (match) {
-             return this.evaluate(match[1]);
-        }
-        return this.interpolate(expression);
+      // Special case: if the whole string is just one interpolation, return raw value
+      // Use trim() to allow spaces like " ${ count } "
+      const trimmed = expression.trim();
+      const match = trimmed.match(/^\$\{([^}]+)\}$/);
+      if (match) {
+        return this.evaluate(match[1]);
+      }
+      return this.interpolate(expression);
     }
 
     const keys = Object.keys(this.context);
     const values = Object.values(this.context);
-    
+
     try {
       const fn = new Function(...keys, `return (${expression})`);
       return fn(...values);
-    } catch (e) {
+    } catch (_e) {
       // If it's just a string not an expression, return as is
       return expression;
     }
@@ -119,8 +119,8 @@ export class ExpressionEvaluator {
 
   private interpolate(str: string): string {
     return str.replace(/\$\{([^}]+)\}/g, (_, expr) => {
-        const val = this.evaluate(expr);
-        return val !== undefined ? String(val) : '';
+      const val = this.evaluate(expr);
+      return val !== undefined ? String(val) : '';
     });
   }
 
@@ -134,5 +134,5 @@ export class ExpressionEvaluator {
 }
 
 export function createState(initial: Record<string, HoloScriptValue> = {}): ReactiveState {
-    return new ReactiveState(initial);
+  return new ReactiveState(initial);
 }

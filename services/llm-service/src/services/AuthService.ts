@@ -1,6 +1,6 @@
 /**
  * Simple auth service
- * 
+ *
  * Default credentials: user / password
  * In production, use proper authentication and password hashing
  */

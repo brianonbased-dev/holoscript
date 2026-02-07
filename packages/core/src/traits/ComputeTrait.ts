@@ -73,7 +73,7 @@ export const computeHandler: TraitHandler<ComputeConfig> = {
       executionCount: 0,
     };
     (node as any).__computeState = state;
-    
+
     if (config.shader_source) {
       context.emit?.('compute_init', {
         node,
@@ -96,10 +96,10 @@ export const computeHandler: TraitHandler<ComputeConfig> = {
     delete (node as any).__computeState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__computeState as ComputeState;
     if (!state || !state.isReady) return;
-    
+
     if (config.dispatch_on_update) {
       state.lastDispatchTime = Date.now();
       context.emit?.('compute_execute', {
@@ -115,12 +115,12 @@ export const computeHandler: TraitHandler<ComputeConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__computeState as ComputeState;
     if (!state) return;
-    
+
     if (event.type === 'compute_initialized') {
       state.isReady = true;
       state.shaderModule = event.shaderModule;
       state.pipeline = event.pipeline;
-      
+
       context.emit?.('on_compute_ready', { node });
     } else if (event.type === 'compute_dispatch') {
       if (!state.isReady) {
@@ -130,10 +130,10 @@ export const computeHandler: TraitHandler<ComputeConfig> = {
         });
         return;
       }
-      
-      const dispatch = event.dispatch as [number, number, number] || config.dispatch;
+
+      const dispatch = (event.dispatch as [number, number, number]) || config.dispatch;
       state.lastDispatchTime = Date.now();
-      
+
       context.emit?.('compute_execute', {
         node,
         pipeline: state.pipeline,
@@ -147,12 +147,12 @@ export const computeHandler: TraitHandler<ComputeConfig> = {
         pipeline: state.pipeline,
         bindGroups: Array.from(state.bindGroups.values()),
         indirectBuffer: event.buffer,
-        offset: event.offset as number || 0,
+        offset: (event.offset as number) || 0,
       });
     } else if (event.type === 'compute_write_buffer') {
       const bufferName = event.buffer as string;
       const bufferHandle = state.buffers.get(bufferName);
-      
+
       if (!bufferHandle) {
         context.emit?.('on_compute_error', {
           node,
@@ -160,17 +160,17 @@ export const computeHandler: TraitHandler<ComputeConfig> = {
         });
         return;
       }
-      
+
       context.emit?.('compute_buffer_write', {
         node,
         buffer: bufferHandle,
         data: event.data,
-        offset: event.offset as number || 0,
+        offset: (event.offset as number) || 0,
       });
     } else if (event.type === 'compute_read_buffer') {
       const bufferName = event.buffer as string;
       const bufferHandle = state.buffers.get(bufferName);
-      
+
       if (!bufferHandle) {
         context.emit?.('compute_buffer_read_error', {
           node,
@@ -179,7 +179,7 @@ export const computeHandler: TraitHandler<ComputeConfig> = {
         });
         return;
       }
-      
+
       context.emit?.('compute_buffer_read', {
         node,
         buffer: bufferHandle,
@@ -196,7 +196,7 @@ export const computeHandler: TraitHandler<ComputeConfig> = {
     } else if (event.type === 'compute_create_buffer') {
       const binding = event.binding as BufferBinding;
       const typeSize = getSizeOfType(binding.dataType);
-      
+
       context.emit?.('compute_allocate_buffer', {
         node,
         name: binding.name,
@@ -207,7 +207,7 @@ export const computeHandler: TraitHandler<ComputeConfig> = {
       });
     } else if (event.type === 'compute_buffer_created') {
       state.buffers.set(event.name as string, event.handle);
-      
+
       context.emit?.('compute_update_bind_group', {
         node,
         group: event.group,
@@ -224,7 +224,7 @@ export const computeHandler: TraitHandler<ComputeConfig> = {
       });
     } else if (event.type === 'compute_complete') {
       state.executionCount++;
-      
+
       context.emit?.('on_compute_complete', {
         node,
         executionTime: event.executionTime,

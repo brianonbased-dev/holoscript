@@ -164,10 +164,10 @@ export class DeltaEncoder {
       } else if (change.op === 'delete') {
         this.deleteNestedValue(newProperties, change.path);
       } else if (change.op === 'increment') {
-        const currentValue = this.getNestedValue(newProperties, change.path) as number ?? 0;
+        const currentValue = (this.getNestedValue(newProperties, change.path) as number) ?? 0;
         this.setNestedValue(newProperties, change.path, currentValue + (change.value as number));
       } else if (change.op === 'append') {
-        const currentArray = this.getNestedValue(newProperties, change.path) as unknown[] ?? [];
+        const currentArray = (this.getNestedValue(newProperties, change.path) as unknown[]) ?? [];
         const appendValues = Array.isArray(change.value) ? change.value : [change.value];
         this.setNestedValue(newProperties, change.path, [...currentArray, ...appendValues]);
       }
@@ -919,8 +919,5 @@ export function createSyncProtocol(
 }
 
 export function createLocalSync(roomId: string): SyncProtocol {
-  return new SyncProtocol(
-    { roomId, transport: 'local' },
-    { interestManagement: false }
-  );
+  return new SyncProtocol({ roomId, transport: 'local' }, { interestManagement: false });
 }

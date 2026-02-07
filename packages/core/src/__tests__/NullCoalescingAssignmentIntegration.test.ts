@@ -17,7 +17,7 @@ describe('Null Coalescing Assignment Integration Test', () => {
         }
       }
     `;
-    
+
     const result = parser.parse(source);
     expect(result.success).toBe(true);
     expect(result.errors).toHaveLength(0);
@@ -29,7 +29,7 @@ describe('Null Coalescing Assignment Integration Test', () => {
         defaultValue: (x ??= 10)
       }
     `;
-    
+
     const result = parser.parse(source);
     expect(result.success).toBe(true);
     expect(result.errors).toHaveLength(0);
@@ -41,7 +41,7 @@ describe('Null Coalescing Assignment Integration Test', () => {
         setting: (value ??= "fallback")
       }
     `;
-    
+
     const result = parser.parse(source);
     expect(result.success).toBe(true);
     expect(result.errors).toHaveLength(0);

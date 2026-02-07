@@ -1,11 +1,11 @@
 /**
  * HoloScriptPlus Parser - Extended DSL with Trait Annotations
- * 
+ *
  * Extends HoloScript with support for:
  * - @material trait annotations for PBR materials
  * - @lighting trait annotations for dynamic lighting
  * - @rendering trait annotations for GPU optimization
- * 
+ *
  * Syntax:
  * orb#sphere {
  *   @material { type: pbr, metallic: 0.5, roughness: 0.4 }
@@ -15,10 +15,7 @@
  */
 
 import { HoloScriptCodeParser } from './HoloScriptCodeParser';
-import type {
-  ASTNode,
-  OrbNode,
-} from './types';
+import type { ASTNode, OrbNode } from './types';
 import { MaterialTrait } from './traits/MaterialTrait';
 import { LightingTrait, LIGHTING_PRESETS } from './traits/LightingTrait';
 import { RenderingTrait } from './traits/RenderingTrait';
@@ -233,7 +230,7 @@ export class HoloScriptPlusParser {
   parse(code: string): ASTNode[] {
     // First, parse with base parser
     const baseResult = this.baseParser.parse(code);
-    const ast = baseResult.ast as ASTNode[];
+    const ast = baseResult.ast;
 
     // Then enhance with trait annotations
     return this.enhanceWithTraits(ast, code);
@@ -280,9 +277,10 @@ export class HoloScriptPlusParser {
    */
   extractTraitAnnotations(code: string, _orbLine?: number): AnyTraitAnnotation[] {
     const traits: AnyTraitAnnotation[] = [];
-    
+
     // Extended regex to match all trait types including inline shader code
-    const traitRegex = /@(material|lighting|rendering|shader|networked|rpc|joint|ik)\s*\{((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\}/g;
+    const traitRegex =
+      /@(material|lighting|rendering|shader|networked|rpc|joint|ik)\s*\{((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\}/g;
 
     let match;
     while ((match = traitRegex.exec(code)) !== null) {
@@ -313,35 +311,35 @@ export class HoloScriptPlusParser {
               config: config as RenderingTraitAnnotation['config'],
             });
             break;
-            
+
           case 'shader':
             traits.push({
               type: 'shader',
               config: config as ShaderTraitAnnotation['config'],
             });
             break;
-            
+
           case 'networked':
             traits.push({
               type: 'networked',
               config: config as NetworkedTraitAnnotation['config'],
             });
             break;
-            
+
           case 'rpc':
             traits.push({
               type: 'rpc',
               config: config as RPCTraitAnnotation['config'],
             });
             break;
-            
+
           case 'joint':
             traits.push({
               type: 'joint',
               config: config as JointTraitAnnotation['config'],
             });
             break;
-            
+
           case 'ik':
             traits.push({
               type: 'ik',
@@ -373,17 +371,17 @@ export class HoloScriptPlusParser {
    */
   parseShaderConfig(str: string): Record<string, unknown> {
     const config: Record<string, unknown> = {};
-    
+
     // First, extract backtick strings and replace with placeholders
     const backtickStrings: string[] = [];
-    let processedStr = str.replace(/`([^`]*)`/g, (_, content) => {
+    const processedStr = str.replace(/`([^`]*)`/g, (_, content) => {
       backtickStrings.push(content);
       return `__BACKTICK_${backtickStrings.length - 1}__`;
     });
-    
+
     // Parse the config
     const parsed = this.parseObjectLiteral(processedStr);
-    
+
     // Restore backtick strings
     for (const [key, value] of Object.entries(parsed)) {
       if (typeof value === 'string' && value.startsWith('__BACKTICK_')) {
@@ -393,7 +391,7 @@ export class HoloScriptPlusParser {
         config[key] = value;
       }
     }
-    
+
     return config;
   }
 
@@ -407,7 +405,7 @@ export class HoloScriptPlusParser {
     // Split by comma, but respect nested braces and brackets
     let depth = 0;
     let current = '';
-    let pairs: string[] = [];
+    const pairs: string[] = [];
 
     for (let i = 0; i < str.length; i++) {
       const char = str[i];
@@ -484,35 +482,35 @@ export class HoloScriptPlusParser {
     for (const trait of traits) {
       switch (trait.type) {
         case 'material':
-          config.material = (trait as MaterialTraitAnnotation).config;
+          config.material = (trait).config;
           break;
 
         case 'lighting':
-          config.lighting = (trait as LightingTraitAnnotation).config;
+          config.lighting = (trait).config;
           break;
 
         case 'rendering':
-          config.rendering = (trait as RenderingTraitAnnotation).config;
+          config.rendering = (trait).config;
           break;
-          
+
         case 'shader':
-          config.shader = (trait as ShaderTraitAnnotation).config;
+          config.shader = (trait).config;
           break;
-          
+
         case 'networked':
-          config.networked = (trait as NetworkedTraitAnnotation).config;
+          config.networked = (trait).config;
           break;
-          
+
         case 'rpc':
-          config.rpc = (trait as RPCTraitAnnotation).config;
+          config.rpc = (trait).config;
           break;
-          
+
         case 'joint':
-          config.joint = (trait as JointTraitAnnotation).config;
+          config.joint = (trait).config;
           break;
-          
+
         case 'ik':
-          config.ik = (trait as IKTraitAnnotation).config;
+          config.ik = (trait).config;
           break;
       }
     }
@@ -528,31 +526,31 @@ export class HoloScriptPlusParser {
 
     switch (trait.type) {
       case 'material':
-        errors.push(...this.validateMaterialTrait(trait as MaterialTraitAnnotation));
+        errors.push(...this.validateMaterialTrait(trait));
         break;
 
       case 'lighting':
-        errors.push(...this.validateLightingTrait(trait as LightingTraitAnnotation));
+        errors.push(...this.validateLightingTrait(trait));
         break;
 
       case 'rendering':
-        errors.push(...this.validateRenderingTrait(trait as RenderingTraitAnnotation));
+        errors.push(...this.validateRenderingTrait(trait));
         break;
-        
+
       case 'shader':
-        errors.push(...this.validateShaderTrait(trait as ShaderTraitAnnotation));
+        errors.push(...this.validateShaderTrait(trait));
         break;
-        
+
       case 'networked':
-        errors.push(...this.validateNetworkedTrait(trait as NetworkedTraitAnnotation));
+        errors.push(...this.validateNetworkedTrait(trait));
         break;
-        
+
       case 'joint':
-        errors.push(...this.validateJointTrait(trait as JointTraitAnnotation));
+        errors.push(...this.validateJointTrait(trait));
         break;
-        
+
       case 'ik':
-        errors.push(...this.validateIKTrait(trait as IKTraitAnnotation));
+        errors.push(...this.validateIKTrait(trait));
         break;
     }
 
@@ -570,11 +568,17 @@ export class HoloScriptPlusParser {
     const { config } = trait;
 
     if (config.pbr) {
-      if (config.pbr.metallic !== undefined && (config.pbr.metallic < 0 || config.pbr.metallic > 1)) {
+      if (
+        config.pbr.metallic !== undefined &&
+        (config.pbr.metallic < 0 || config.pbr.metallic > 1)
+      ) {
         errors.push('material.pbr.metallic must be between 0 and 1');
       }
 
-      if (config.pbr.roughness !== undefined && (config.pbr.roughness < 0 || config.pbr.roughness > 1)) {
+      if (
+        config.pbr.roughness !== undefined &&
+        (config.pbr.roughness < 0 || config.pbr.roughness > 1)
+      ) {
         errors.push('material.pbr.roughness must be between 0 and 1');
       }
     }
@@ -593,7 +597,10 @@ export class HoloScriptPlusParser {
     const errors: string[] = [];
     const { config } = trait;
 
-    if (config.preset && !['studio', 'outdoor', 'interior', 'night', 'sunset'].includes(config.preset)) {
+    if (
+      config.preset &&
+      !['studio', 'outdoor', 'interior', 'night', 'sunset'].includes(config.preset)
+    ) {
       errors.push('lighting.preset must be one of: studio, outdoor, interior, night, sunset');
     }
 
@@ -664,7 +671,6 @@ export class HoloScriptPlusParser {
    * Create MaterialTrait from config
    */
   private createMaterialTrait(config: any): MaterialTrait {
-
     const material = new MaterialTrait({
       type: config.type || 'pbr',
       pbr: config.pbr,
@@ -695,7 +701,6 @@ export class HoloScriptPlusParser {
    * Create LightingTrait from config
    */
   private createLightingTrait(config: any): LightingTrait {
-
     let lighting: any;
 
     if (config.preset) {
@@ -723,7 +728,6 @@ export class HoloScriptPlusParser {
    * Create RenderingTrait from config
    */
   private createRenderingTrait(config: any): RenderingTrait {
-
     const rendering = new RenderingTrait();
 
     if (config.quality) {
@@ -781,7 +785,7 @@ export class HoloScriptPlusParser {
         fragment: config.fragment,
       },
       uniforms: config.uniforms as any,
-      includes: config.includes?.map(path => ({ path })),
+      includes: config.includes?.map((path) => ({ path })),
       blendMode: config.blendMode,
       depthTest: config.depthTest,
       depthWrite: config.depthWrite,
@@ -805,7 +809,9 @@ export class HoloScriptPlusParser {
 
     // Validate preset name if provided
     if (config.preset && !SHADER_PRESETS[config.preset as keyof typeof SHADER_PRESETS]) {
-      errors.push(`shader.preset "${config.preset}" is not a valid preset. Available: hologram, forceField, dissolve`);
+      errors.push(
+        `shader.preset "${config.preset}" is not a valid preset. Available: hologram, forceField, dissolve`
+      );
     }
 
     // Validate language
@@ -814,7 +820,10 @@ export class HoloScriptPlusParser {
     }
 
     // Validate blend mode
-    if (config.blendMode && !['opaque', 'blend', 'additive', 'multiply'].includes(config.blendMode)) {
+    if (
+      config.blendMode &&
+      !['opaque', 'blend', 'additive', 'multiply'].includes(config.blendMode)
+    ) {
       errors.push('shader.blendMode must be one of: opaque, blend, additive, multiply');
     }
 

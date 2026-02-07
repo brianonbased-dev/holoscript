@@ -19,12 +19,16 @@ const fixturesDir = resolve(__dirname, 'fixtures');
 const examplesDir = resolve(__dirname, '../../../../examples');
 
 function loadFixture(name: string): string {
-  const filePath = name.endsWith('.hsplus') ? join(fixturesDir, name) : join(fixturesDir, `${name}.hsplus`);
+  const filePath = name.endsWith('.hsplus')
+    ? join(fixturesDir, name)
+    : join(fixturesDir, `${name}.hsplus`);
   return readFileSync(filePath, 'utf-8');
 }
 
 function loadExample(name: string): string {
-  const filePath = name.endsWith('.hsplus') ? join(examplesDir, name) : join(examplesDir, `${name}.hsplus`);
+  const filePath = name.endsWith('.hsplus')
+    ? join(examplesDir, name)
+    : join(examplesDir, `${name}.hsplus`);
   return readFileSync(filePath, 'utf-8');
 }
 
@@ -59,7 +63,7 @@ describe('HoloScript+ File Parsing', () => {
     });
 
     it('parses all fixtures without throwing', () => {
-      const fixtures = readdirSync(fixturesDir).filter(f => f.endsWith('.hsplus'));
+      const fixtures = readdirSync(fixturesDir).filter((f) => f.endsWith('.hsplus'));
       expect(fixtures.length).toBeGreaterThan(0);
 
       for (const fixture of fixtures) {
@@ -87,7 +91,7 @@ describe('HoloScript+ File Parsing', () => {
 
     it('parses all examples without throwing', () => {
       if (!existsSync(examplesDir)) return;
-      const examples = readdirSync(examplesDir).filter(f => f.endsWith('.hsplus'));
+      const examples = readdirSync(examplesDir).filter((f) => f.endsWith('.hsplus'));
       expect(examples.length).toBeGreaterThan(0);
 
       for (const example of examples) {
@@ -134,7 +138,9 @@ describe('HoloScript+ File Parsing', () => {
     });
 
     it('handles multiple traits on single line', () => {
-      const result = parser.parse('orb#test @grabbable @throwable @hoverable { position: [0,0,0] }');
+      const result = parser.parse(
+        'orb#test @grabbable @throwable @hoverable { position: [0,0,0] }'
+      );
       expect(result).toBeDefined();
       expect(result.ast.root.traits.has('grabbable')).toBe(true);
     });

@@ -34,7 +34,7 @@ describe('ClothTrait', () => {
 
     it('should attach and create state', () => {
       attachTrait(clothHandler, node, {}, ctx);
-      
+
       expect((node as any).__clothState).toBeDefined();
       expect((node as any).__clothState.vertices).toBeDefined();
       expect((node as any).__clothState.constraints).toBeDefined();
@@ -42,7 +42,7 @@ describe('ClothTrait', () => {
 
     it('should initialize vertices based on resolution', () => {
       attachTrait(clothHandler, node, { resolution: 4 }, ctx);
-      
+
       const state = (node as any).__clothState;
       expect(state.vertices.length).toBe(4); // 4 rows
       expect(state.vertices[0].length).toBe(4); // 4 cols
@@ -50,7 +50,7 @@ describe('ClothTrait', () => {
 
     it('should emit cloth_create on attach', () => {
       attachTrait(clothHandler, node, { resolution: 3 }, ctx);
-      
+
       const createEvent = getLastEvent(ctx, 'cloth_create');
       expect(createEvent).toBeDefined();
       expect(createEvent.resolution).toBe(3);
@@ -66,15 +66,15 @@ describe('ClothTrait', () => {
     it('should apply wind force during update', () => {
       const state = (node as any).__clothState;
       state.windForce = { x: 1, y: 0, z: 0 };
-      
+
       updateTrait(clothHandler, node, { resolution: 3, wind_response: 0.5 }, ctx, 16.67);
-      
+
       expect(getEventCount(ctx, 'cloth_apply_force')).toBe(1);
     });
 
     it('should emit cloth_step during update', () => {
       updateTrait(clothHandler, node, { resolution: 3 }, ctx, 16.67);
-      
+
       expect(getEventCount(ctx, 'cloth_step')).toBe(1);
     });
   });
@@ -91,7 +91,7 @@ describe('ClothTrait', () => {
         x: 0,
         y: 0,
       });
-      
+
       const state = (node as any).__clothState;
       expect(state.vertices[0][0].isPinned).toBe(true);
     });
@@ -103,14 +103,14 @@ describe('ClothTrait', () => {
         x: 0,
         y: 0,
       });
-      
+
       // Then unpin
       sendEvent(clothHandler, node, { resolution: 3 }, ctx, {
         type: 'cloth_unpin_vertex',
         x: 0,
         y: 0,
       });
-      
+
       const state = (node as any).__clothState;
       expect(state.vertices[0][0].isPinned).toBe(false);
     });
@@ -127,7 +127,7 @@ describe('ClothTrait', () => {
         type: 'wind_update',
         direction: { x: 5, y: 0, z: 0 },
       });
-      
+
       const state = (node as any).__clothState;
       expect(state.windForce).toEqual({ x: 5, y: 0, z: 0 });
     });
@@ -135,23 +135,34 @@ describe('ClothTrait', () => {
 
   describe('tearing', () => {
     it('should tear cloth when constraint breaks', () => {
-      attachTrait(clothHandler, node, { 
-        resolution: 3,
-        tearable: true,
-        tear_threshold: 100,
-      }, ctx);
+      attachTrait(
+        clothHandler,
+        node,
+        {
+          resolution: 3,
+          tearable: true,
+          tear_threshold: 100,
+        },
+        ctx
+      );
       ctx.clearEvents();
-      
+
       // Send a constraint break event
-      sendEvent(clothHandler, node, { 
-        resolution: 3,
-        tearable: true,
-        tear_threshold: 100,
-      }, ctx, {
-        type: 'cloth_constraint_break',
-        constraintIndex: 0,
-      });
-      
+      sendEvent(
+        clothHandler,
+        node,
+        {
+          resolution: 3,
+          tearable: true,
+          tear_threshold: 100,
+        },
+        ctx,
+        {
+          type: 'cloth_constraint_break',
+          constraintIndex: 0,
+        }
+      );
+
       const state = (node as any).__clothState;
       expect(state.isTorn).toBe(true);
       expect(getEventCount(ctx, 'on_cloth_tear')).toBe(1);
@@ -162,7 +173,7 @@ describe('ClothTrait', () => {
     it('should clean up state on detach', () => {
       attachTrait(clothHandler, node, {}, ctx);
       clothHandler.onDetach?.(node, clothHandler.defaultConfig, ctx);
-      
+
       expect((node as any).__clothState).toBeUndefined();
       expect(getEventCount(ctx, 'cloth_destroy')).toBe(1);
     });

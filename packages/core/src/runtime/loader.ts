@@ -74,9 +74,7 @@ export class ChunkLoader {
 
     try {
       const info = this.manifest.chunks[chunkId];
-      const url = this.options.baseUrl 
-        ? `${this.options.baseUrl}/${info.file}`
-        : info.file;
+      const url = this.options.baseUrl ? `${this.options.baseUrl}/${info.file}` : info.file;
 
       const response = await fetch(url);
       const chunkData = await response.json();
@@ -98,14 +96,14 @@ export class ChunkLoader {
     if (!objects) return;
 
     for (const obj of objects) {
-      // Use the runtime's internal instantiateNode if accessible, 
+      // Use the runtime's internal instantiateNode if accessible,
       // or a public method if we add one.
       // For now, we assume we've added a mountObject method to the runtime interface.
       if ((this.runtime as any).mountObject) {
-         (this.runtime as any).mountObject(obj);
+        (this.runtime as any).mountObject(obj);
       } else {
-         // Fallback or internal access
-         (this.runtime as any).instantiateNode(obj, (this.runtime as any).rootInstance);
+        // Fallback or internal access
+        (this.runtime as any).instantiateNode(obj, (this.runtime as any).rootInstance);
       }
     }
   }
@@ -114,9 +112,12 @@ export class ChunkLoader {
     if (bounds.length < 2) return false;
     const [min, max] = bounds;
     return (
-      point[0] >= min[0] && point[0] <= max[0] &&
-      point[1] >= min[1] && point[1] <= max[1] &&
-      point[2] >= min[2] && point[2] <= max[2]
+      point[0] >= min[0] &&
+      point[0] <= max[0] &&
+      point[1] >= min[1] &&
+      point[1] <= max[1] &&
+      point[2] >= min[2] &&
+      point[2] <= max[2]
     );
   }
 }

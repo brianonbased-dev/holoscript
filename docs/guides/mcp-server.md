@@ -19,11 +19,13 @@ The MCP server provides tools that AI assistants (Claude, GPT, Cursor) can use t
 ### For Claude Desktop
 
 1. Install the server:
+
 ```bash
 npm install -g @holoscript/mcp-server
 ```
 
 2. Add to Claude config (`~/.claude/settings.json` or Claude Desktop settings):
+
 ```json
 {
   "mcpServers": {
@@ -40,6 +42,7 @@ npm install -g @holoscript/mcp-server
 ### For VS Code + Copilot
 
 Add to `.vscode/mcp.json`:
+
 ```json
 {
   "mcpServers": {
@@ -54,11 +57,12 @@ Add to `.vscode/mcp.json`:
 ### For Cursor
 
 Add to Cursor settings or `.cursor/mcp.json`:
+
 ```json
 {
   "mcpServers": {
     "holoscript": {
-      "command": "npx", 
+      "command": "npx",
       "args": ["@holoscript/mcp-server"]
     }
   }
@@ -74,6 +78,7 @@ Add to Cursor settings or `.cursor/mcp.json`:
 Generate a HoloScript object from a natural language description.
 
 **Input:**
+
 ```json
 {
   "description": "a glowing blue orb that can be grabbed and thrown",
@@ -82,20 +87,21 @@ Generate a HoloScript object from a natural language description.
 ```
 
 **Output:**
+
 ```hsplus
 orb glowing_orb {
   @grabbable
   @throwable
   @glowing
-  
+
   position: [0, 1.5, -2]
   color: "#0088ff"
   glow_intensity: 1.5
-  
+
   on_grab: {
     this.glow_intensity = 2.5
   }
-  
+
   on_release: {
     this.glow_intensity = 1.5
   }
@@ -109,6 +115,7 @@ orb glowing_orb {
 Generate a complete `.holo` composition from a description.
 
 **Input:**
+
 ```json
 {
   "description": "A medieval marketplace with NPC vendors selling potions and weapons",
@@ -125,6 +132,7 @@ Generate a complete `.holo` composition from a description.
 Check code for syntax errors and semantic issues.
 
 **Input:**
+
 ```json
 {
   "code": "orb test { @grabbble position: [0, 1, 0] }",
@@ -133,6 +141,7 @@ Check code for syntax errors and semantic issues.
 ```
 
 **Output:**
+
 ```json
 {
   "valid": false,
@@ -154,6 +163,7 @@ Check code for syntax errors and semantic issues.
 Get appropriate VR traits for an object or use case.
 
 **Input:**
+
 ```json
 {
   "description": "a sword the player can pick up and use as a weapon"
@@ -161,6 +171,7 @@ Get appropriate VR traits for an object or use case.
 ```
 
 **Output:**
+
 ```json
 {
   "traits": [
@@ -180,6 +191,7 @@ Get appropriate VR traits for an object or use case.
 Get a plain English explanation of HoloScript code.
 
 **Input:**
+
 ```json
 {
   "code": "orb portal { @trigger @glowing on_trigger_enter(player) { teleport(player, destination) } }"
@@ -187,6 +199,7 @@ Get a plain English explanation of HoloScript code.
 ```
 
 **Output:**
+
 ```
 This code creates a glowing portal object:
 
@@ -204,6 +217,7 @@ This is commonly used for level transitions or fast travel points.
 List all available VR traits with descriptions.
 
 **Output:**
+
 ```json
 {
   "categories": {
@@ -223,6 +237,7 @@ List all available VR traits with descriptions.
 Get detailed documentation for a specific trait.
 
 **Input:**
+
 ```json
 {
   "trait": "grabbable"
@@ -230,6 +245,7 @@ Get detailed documentation for a specific trait.
 ```
 
 **Output:**
+
 ```json
 {
   "name": "@grabbable",
@@ -252,6 +268,7 @@ Get detailed documentation for a specific trait.
 Get syntax reference for HoloScript constructs.
 
 **Input:**
+
 ```json
 {
   "topic": "composition"
@@ -267,6 +284,7 @@ Get syntax reference for HoloScript constructs.
 Parse `.hs` or `.hsplus` code and return the AST.
 
 **Input:**
+
 ```json
 {
   "code": "orb ball { position: [0, 1, 0] }"
@@ -331,6 +349,7 @@ Then connect via HTTP or stdio.
 The MCP server implements the [Model Context Protocol](https://modelcontextprotocol.io) specification.
 
 All tools are exposed via:
+
 - **stdio** (default) - For Claude Desktop, Cursor
 - **HTTP** - With `--port` flag
 

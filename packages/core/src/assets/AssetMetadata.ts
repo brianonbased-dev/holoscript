@@ -434,7 +434,8 @@ export interface AssetMetadata {
  * Create empty asset metadata with defaults
  */
 export function createAssetMetadata(
-  partial: Partial<AssetMetadata> & Pick<AssetMetadata, 'id' | 'name' | 'format' | 'assetType' | 'sourcePath'>
+  partial: Partial<AssetMetadata> &
+    Pick<AssetMetadata, 'id' | 'name' | 'format' | 'assetType' | 'sourcePath'>
 ): AssetMetadata {
   const now = new Date().toISOString();
 

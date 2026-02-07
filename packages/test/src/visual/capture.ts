@@ -1,4 +1,3 @@
-
 import { Page } from 'puppeteer';
 
 export interface CaptureOptions {
@@ -14,6 +13,6 @@ export async function captureScreenshot(page: Page, options: CaptureOptions = {}
     quality: options.type === 'jpeg' ? options.quality || 80 : undefined,
     fullPage: options.fullPage,
     clip: options.clip,
-    encoding: 'binary'
-  })) as Buffer;
+    encoding: 'binary',
+  }));
 }

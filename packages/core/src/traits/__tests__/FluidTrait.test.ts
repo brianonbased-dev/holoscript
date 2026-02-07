@@ -33,26 +33,36 @@ describe('FluidTrait', () => {
 
     it('should attach and initialize state', () => {
       attachTrait(fluidHandler, node, {}, ctx);
-      
+
       const state = (node as any).__fluidState;
       expect(state).toBeDefined();
       expect(state.isSimulating).toBe(true);
     });
 
     it('should emit fluid_create on attach', () => {
-      attachTrait(fluidHandler, node, {
-        particle_count: 500,
-      }, ctx);
-      
+      attachTrait(
+        fluidHandler,
+        node,
+        {
+          particle_count: 500,
+        },
+        ctx
+      );
+
       expect(getEventCount(ctx, 'fluid_create')).toBe(1);
     });
   });
 
   describe('simulation', () => {
     beforeEach(() => {
-      attachTrait(fluidHandler, node, {
-        particle_count: 100,
-      }, ctx);
+      attachTrait(
+        fluidHandler,
+        node,
+        {
+          particle_count: 100,
+        },
+        ctx
+      );
       ctx.clearEvents();
     });
 
@@ -65,7 +75,7 @@ describe('FluidTrait', () => {
       sendEvent(fluidHandler, node, { particle_count: 100 }, ctx, {
         type: 'fluid_pause',
       });
-      
+
       const state = (node as any).__fluidState;
       expect(state.isSimulating).toBe(false);
     });
@@ -77,7 +87,7 @@ describe('FluidTrait', () => {
       sendEvent(fluidHandler, node, { particle_count: 100 }, ctx, {
         type: 'fluid_resume',
       });
-      
+
       const state = (node as any).__fluidState;
       expect(state.isSimulating).toBe(true);
     });
@@ -85,9 +95,14 @@ describe('FluidTrait', () => {
 
   describe('emitters', () => {
     beforeEach(() => {
-      attachTrait(fluidHandler, node, {
-        particle_count: 1000,
-      }, ctx);
+      attachTrait(
+        fluidHandler,
+        node,
+        {
+          particle_count: 1000,
+        },
+        ctx
+      );
       ctx.clearEvents();
     });
 
@@ -99,7 +114,7 @@ describe('FluidTrait', () => {
         velocity: { x: 0, y: -1, z: 0 },
         rate: 10,
       });
-      
+
       const state = (node as any).__fluidState;
       expect(state.emitters.size).toBe(1);
     });
@@ -112,12 +127,12 @@ describe('FluidTrait', () => {
         rate: 10,
       });
       ctx.clearEvents();
-      
+
       sendEvent(fluidHandler, node, { particle_count: 1000 }, ctx, {
         type: 'fluid_remove_emitter',
         emitterId: 'emitter-1',
       });
-      
+
       const state = (node as any).__fluidState;
       expect(state.emitters.size).toBe(0);
     });
@@ -125,9 +140,14 @@ describe('FluidTrait', () => {
 
   describe('splash', () => {
     beforeEach(() => {
-      attachTrait(fluidHandler, node, {
-        particle_count: 100,
-      }, ctx);
+      attachTrait(
+        fluidHandler,
+        node,
+        {
+          particle_count: 100,
+        },
+        ctx
+      );
       ctx.clearEvents();
     });
 
@@ -138,16 +158,21 @@ describe('FluidTrait', () => {
         force: 10,
         radius: 0.5,
       });
-      
+
       expect(getEventCount(ctx, 'on_fluid_splash')).toBe(1);
     });
   });
 
   describe('bounds', () => {
     beforeEach(() => {
-      attachTrait(fluidHandler, node, {
-        particle_count: 100,
-      }, ctx);
+      attachTrait(
+        fluidHandler,
+        node,
+        {
+          particle_count: 100,
+        },
+        ctx
+      );
       ctx.clearEvents();
     });
 
@@ -157,7 +182,7 @@ describe('FluidTrait', () => {
         min: { x: -2, y: -2, z: -2 },
         max: { x: 2, y: 2, z: 2 },
       });
-      
+
       const state = (node as any).__fluidState;
       expect(state.boundingBox.min.x).toBe(-2);
       expect(state.boundingBox.max.x).toBe(2);
@@ -166,9 +191,14 @@ describe('FluidTrait', () => {
 
   describe('reset', () => {
     beforeEach(() => {
-      attachTrait(fluidHandler, node, {
-        particle_count: 100,
-      }, ctx);
+      attachTrait(
+        fluidHandler,
+        node,
+        {
+          particle_count: 100,
+        },
+        ctx
+      );
       sendEvent(fluidHandler, node, { particle_count: 100 }, ctx, {
         type: 'fluid_add_emitter',
         emitterId: 'test',
@@ -182,7 +212,7 @@ describe('FluidTrait', () => {
       sendEvent(fluidHandler, node, { particle_count: 100 }, ctx, {
         type: 'fluid_reset',
       });
-      
+
       const state = (node as any).__fluidState;
       expect(state.particleCount).toBe(0);
       expect(state.emitters.size).toBe(0);
@@ -192,29 +222,39 @@ describe('FluidTrait', () => {
 
   describe('cleanup', () => {
     it('should clean up on detach', () => {
-      attachTrait(fluidHandler, node, {
-        particle_count: 50,
-      }, ctx);
-      
+      attachTrait(
+        fluidHandler,
+        node,
+        {
+          particle_count: 50,
+        },
+        ctx
+      );
+
       fluidHandler.onDetach?.(node, fluidHandler.defaultConfig, ctx);
-      
+
       expect((node as any).__fluidState).toBeUndefined();
     });
   });
 
   describe('query', () => {
     it('should respond to query event', () => {
-      attachTrait(fluidHandler, node, {
-        particle_count: 100,
-        viscosity: 1.5,
-      }, ctx);
+      attachTrait(
+        fluidHandler,
+        node,
+        {
+          particle_count: 100,
+          viscosity: 1.5,
+        },
+        ctx
+      );
       ctx.clearEvents();
-      
+
       sendEvent(fluidHandler, node, { particle_count: 100, viscosity: 1.5 }, ctx, {
         type: 'fluid_query',
         queryId: 'test-query',
       });
-      
+
       const info = getLastEvent(ctx, 'fluid_info');
       expect(info).toBeDefined();
       expect(info.queryId).toBe('test-query');

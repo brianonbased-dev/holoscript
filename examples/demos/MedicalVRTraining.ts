@@ -1,6 +1,6 @@
 /**
  * Demo Application 1: Medical VR Training
- * 
+ *
  * Demonstrates revolutionary code reduction in VR medical training.
  * Same application: Traditional (~5,000 LOC) vs HoloScript+ (~50 LOC)
  */
@@ -71,7 +71,7 @@ function onSurgicalAction() {
     assessPerformance()
   }
 }
-`
+`;
 
 // ============================================================================
 // TRADITIONAL VERSION (Pseudocode - would be 5,000-10,000 actual LOC)
@@ -142,7 +142,7 @@ export const MEDICAL_VR_TRAINING_TRADITIONAL = `
 // - Device-specific testing
 
 // TOTAL: 5,000-10,000 lines of code
-`
+`;
 
 // ============================================================================
 // DEMO APPLICATION CODE
@@ -153,10 +153,10 @@ export const MEDICAL_VR_TRAINING_TRADITIONAL = `
  * Showcases revolutionary complexity reduction
  */
 export class MedicalVRTrainingDemo {
-  private name: string = 'Surgical Training Simulator'
-  private hsVersion: string = `~50 LOC`
-  private traditionalVersion: string = `~5,000-10,000 LOC`
-  private codeReduction: number = 99
+  private name: string = 'Surgical Training Simulator';
+  private hsVersion: string = `~50 LOC`;
+  private traditionalVersion: string = `~5,000-10,000 LOC`;
+  private codeReduction: number = 99;
 
   private features: string[] = [
     'Full 3D anatomy model with hundreds of interactive parts',
@@ -169,7 +169,7 @@ export class MedicalVRTrainingDemo {
     'Automatic quality adaptation',
     'State management for training scenarios',
     'Real-time GPU memory optimization',
-  ]
+  ];
 
   constructor() {}
 
@@ -177,13 +177,13 @@ export class MedicalVRTrainingDemo {
    * Get comparison metrics
    */
   getComparison(): {
-    name: string
-    hsCode: number
-    traditionalCode: number
-    reduction: number
-    developmentTime: string
-    cost: string
-    teamSize: string
+    name: string;
+    hsCode: number;
+    traditionalCode: number;
+    reduction: number;
+    developmentTime: string;
+    cost: string;
+    teamSize: string;
   } {
     return {
       name: this.name,
@@ -193,7 +193,7 @@ export class MedicalVRTrainingDemo {
       developmentTime: 'HoloScript+: 1-2 weeks | Traditional: 6-12 months',
       cost: 'HoloScript+: $50K | Traditional: $500K-$5M',
       teamSize: 'HoloScript+: 1-2 devs | Traditional: 10-20 people',
-    }
+    };
   }
 
   /**
@@ -202,9 +202,9 @@ export class MedicalVRTrainingDemo {
   getFeatureMatrix(): Record<
     string,
     {
-      holoscript: string
-      traditional: string
-      effort: string
+      holoscript: string;
+      traditional: string;
+      effort: string;
     }
   > {
     return {
@@ -218,7 +218,7 @@ export class MedicalVRTrainingDemo {
         traditional: 'Manual texture baking + shader variants',
         effort: '95% less code',
       },
-      'Lighting': {
+      Lighting: {
         holoscript: '@lighting trait + auto-shadows',
         traditional: 'Shadow map setup + cascade optimization',
         effort: '90% less code',
@@ -228,12 +228,12 @@ export class MedicalVRTrainingDemo {
         traditional: 'Device-specific optimization code',
         effort: '98% less code',
       },
-      'Performance': {
+      Performance: {
         holoscript: 'Adaptive quality automatic',
         traditional: 'Manual profiling + optimization',
         effort: '97% less code',
       },
-      'Interaction': {
+      Interaction: {
         holoscript: '@grabbable, @pointable traits',
         traditional: 'Custom interaction system',
         effort: '95% less code',
@@ -243,12 +243,12 @@ export class MedicalVRTrainingDemo {
         traditional: 'Manual state machine',
         effort: '90% less code',
       },
-      'Deployment': {
+      Deployment: {
         holoscript: 'npm publish (works everywhere)',
         traditional: 'Per-platform builds + testing',
         effort: '99% less effort',
       },
-    }
+    };
   }
 
   /**
@@ -317,17 +317,17 @@ orb trainingScenario {
   orb anastomosisMarkers { @hoverable { guidance: true } }
 }
       `,
-    }
+    };
 
-    return scenarios[difficulty]
+    return scenarios[difficulty];
   }
 
   /**
    * Compare learning curve
    */
   getLearningCurve(): {
-    traditional: Record<string, string>
-    holoscript: Record<string, string>
+    traditional: Record<string, string>;
+    holoscript: Record<string, string>;
   } {
     return {
       traditional: {
@@ -344,19 +344,19 @@ orb trainingScenario {
         'Week 2': 'Customize for devices, optimize (~10 hours)',
         'Week 3+': 'Add scenarios, polish, iterate (~as needed)',
       },
-    }
+    };
   }
 
   /**
    * ROI analysis for medical VR deployment
    */
   analyzeROI(): {
-    trainingMethod: string
-    developmentCost: string
-    timeToMarket: string
-    maintenanceCost: string
-    scalability: string
-    deviceSupport: string
+    trainingMethod: string;
+    developmentCost: string;
+    timeToMarket: string;
+    maintenanceCost: string;
+    scalability: string;
+    deviceSupport: string;
   } {
     return {
       trainingMethod: 'Medical VR Training',
@@ -385,7 +385,7 @@ orb trainingScenario {
         HoloScript+: Supports unlimited devices (auto-optimization)
         COVERAGE: 10x+
       `,
-    }
+    };
   }
 
   /**
@@ -399,12 +399,12 @@ orb trainingScenario {
       '✅ Surgeons practice rare procedures safely',
       '✅ Better trained surgeons = better patient outcomes',
       '✅ Reduces medical errors in first procedures',
-      '✅ Works on any device (surgeon\'s phone to hospital workstation)',
+      "✅ Works on any device (surgeon's phone to hospital workstation)",
       '✅ Continuous skill improvement throughout career',
-    ]
+    ];
   }
 }
 
 export function createMedicalTrainingDemo(): MedicalVRTrainingDemo {
-  return new MedicalVRTrainingDemo()
+  return new MedicalVRTrainingDemo();
 }

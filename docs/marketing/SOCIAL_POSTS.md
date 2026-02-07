@@ -14,18 +14,23 @@ Ready-to-post content for X/Twitter. Generated with Grok AI assistance.
 ## Launch & Announcement Posts
 
 ### Post 1
+
 Hey creators! Meet HoloScript — an open-source language for building VR/AR/XR experiences as easily as writing HTML. With 56 traits like @grabbable & @teleport, it compiles to WebXR and runs in any browser. Start building now! #VRdev #WebXR
 
 ### Post 2
+
 VR dev just got easier with HoloScript. It's free, open-source, and turns simple code into immersive WebXR experiences. Ideal for indie devs & hobbyists. 56 traits to explore! Find it on GitHub and start building. #VRdev
 
 ### Post 3
+
 Introducing HoloScript — an open-source, declarative way to craft VR/AR experiences. 56 traits to play with, from @physics to @portal. Perfect for educators & creators. Compiles to WebXR, runs anywhere. Dive in on GitHub! #WebXR
 
 ### Post 4
+
 Big news! HoloScript is here to make VR dev a breeze for hobbyists & indie devs. Think HTML simplicity for immersive worlds. Free, open-source, and GitHub-hosted. Let's create together! #VRdev
 
 ### Post 5
+
 We're thrilled to share HoloScript — an open-source tool to build VR/AR worlds with HTML-like ease. Use traits like @weather or @teleport to create magic. Runs in any browser via WebXR. Join us on GitHub! #WebXR
 
 ---
@@ -33,24 +38,29 @@ We're thrilled to share HoloScript — an open-source tool to build VR/AR worlds
 ## Code Snippet Posts
 
 ### Post 6 (pair with screenshot of VR scene)
+
 Build a physics-based VR game with HoloScript! Drop a ball with @physics in 3 lines. Free & open-source on GitHub. What game will you make? #WebXR
 
 ### Post 7 (pair with portal demo gif)
+
 Wanna teleport in VR? HoloScript's @teleport trait = instant portal magic. Free to use, open-source on GitHub. Try it out! #WebXR
 
 ### Post 8 (pair with weather demo)
+
 Rain in VR? Easy with HoloScript's @weather trait. Open-source, browser-ready via WebXR. Play with it on GitHub! #VRdev
 
 ### Post 9 (pair with gallery screenshot)
+
 Create an interactive VR art gallery with HoloScript! Use @grabbable to move art pieces. Open-source, WebXR-ready. #VRdev
 
 ### Post 10 (pair with code screenshot)
+
 A spinning, glowing cube in VR — 6 lines of HoloScript:
 
 object "MyCube" @spinning @glowing {
-  geometry: "cube"
-  color: "#00ffff"
-  position: [0, 1.5, -3]
+geometry: "cube"
+color: "#00ffff"
+position: [0, 1.5, -3]
 }
 
 Open-source on GitHub. #WebXR
@@ -60,15 +70,19 @@ Open-source on GitHub. #WebXR
 ## Community & Engagement Posts
 
 ### Post 11
+
 Hey VR creators! What's the one feature you'd love in a VR dev tool? We're building HoloScript (free, open-source) and want your ideas. Drop 'em below! #VRdev
 
 ### Post 12
+
 VR educators! How could HoloScript help in classrooms? It's free, open-source, and easy like HTML. Think virtual labs or history tours. Let's brainstorm! #VRdev
 
 ### Post 13
+
 Indie devs, what's your biggest VR dev struggle? HoloScript is open-source and aims to simplify with 56 traits like @teleport. Tell us how we can make it better! #WebXR
 
 ### Post 14
+
 Poll time! What's your main focus for VR/AR projects?
 🎮 Games
 📚 Education
@@ -77,6 +91,7 @@ Poll time! What's your main focus for VR/AR projects?
 Reply with your thoughts! #VRdev
 
 ### Post 15
+
 Just dropped a VR scene with HoloScript. What's the coolest XR project you've made or wanna make? Share inspo! It's free & open-source on GitHub. #VRdev
 
 ---
@@ -84,18 +99,23 @@ Just dropped a VR scene with HoloScript. What's the coolest XR project you've ma
 ## Thread Starters
 
 ### Post 16
+
 1/ New to VR dev? HoloScript is open-source & as simple as HTML. Let's walk through your first VR scene step-by-step. From setup to traits like @teleport, I've got you covered! #VRdev
 
 ### Post 17
+
 1/ Building VR games doesn't have to be hard. HoloScript uses traits like @physics & @grabbable. Let's break down a simple game mechanic in this thread. #WebXR
 
 ### Post 18
+
 1/ VR architecture walkthroughs made easy with HoloScript. Let's dive into a workflow for designing virtual spaces for clients. #VRdev
 
 ### Post 19
+
 1/ Let's explore VR art creation with HoloScript. Free, open-source, with traits like @grabbable. How do we craft immersive galleries? #WebXR
 
 ### Post 20
+
 1/ Let's talk VR for education. HoloScript is open-source & easy like HTML. Imagine virtual science labs or history reenactments. #VRdev #EdTech
 
 ---

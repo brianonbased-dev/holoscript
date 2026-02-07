@@ -17,7 +17,15 @@ import * as THREE from 'three';
 type BTStatus = 'success' | 'failure' | 'running';
 
 interface BTNode {
-  type: 'sequence' | 'selector' | 'parallel' | 'inverter' | 'repeater' | 'condition' | 'action' | 'wait';
+  type:
+    | 'sequence'
+    | 'selector'
+    | 'parallel'
+    | 'inverter'
+    | 'repeater'
+    | 'condition'
+    | 'action'
+    | 'wait';
   name?: string;
   children?: BTNode[];
   count?: number;
@@ -44,12 +52,7 @@ interface BTState {
   isRunning: boolean;
 }
 
-function tickBTNode(
-  node: BTNode,
-  state: BTState,
-  context: TraitContext,
-  delta: number
-): BTStatus {
+function tickBTNode(node: BTNode, state: BTState, context: TraitContext, delta: number): BTStatus {
   let nodeState = state.nodeStates.get(node);
   if (!nodeState) {
     nodeState = {
@@ -84,7 +87,13 @@ function tickBTNode(
   }
 }
 
-function tickSequence(node: BTNode, nodeState: BTNodeState, state: BTState, context: TraitContext, delta: number): BTStatus {
+function tickSequence(
+  node: BTNode,
+  nodeState: BTNodeState,
+  state: BTState,
+  context: TraitContext,
+  delta: number
+): BTStatus {
   const children = node.children || [];
   for (let i = nodeState.childIndex; i < children.length; i++) {
     const result = tickBTNode(children[i], state, context, delta);
@@ -101,7 +110,13 @@ function tickSequence(node: BTNode, nodeState: BTNodeState, state: BTState, cont
   return 'success';
 }
 
-function tickSelector(node: BTNode, nodeState: BTNodeState, state: BTState, context: TraitContext, delta: number): BTStatus {
+function tickSelector(
+  node: BTNode,
+  nodeState: BTNodeState,
+  state: BTState,
+  context: TraitContext,
+  delta: number
+): BTStatus {
   const children = node.children || [];
   for (let i = nodeState.childIndex; i < children.length; i++) {
     const result = tickBTNode(children[i], state, context, delta);
@@ -118,26 +133,50 @@ function tickSelector(node: BTNode, nodeState: BTNodeState, state: BTState, cont
   return 'failure';
 }
 
-function tickParallel(node: BTNode, nodeState: BTNodeState, state: BTState, context: TraitContext, delta: number): BTStatus {
+function tickParallel(
+  node: BTNode,
+  nodeState: BTNodeState,
+  state: BTState,
+  context: TraitContext,
+  delta: number
+): BTStatus {
   const children = node.children || [];
   const threshold = node.successThreshold ?? children.length;
-  let successes = 0, failures = 0;
+  let successes = 0,
+    failures = 0;
 
   for (let i = 0; i < children.length; i++) {
-    if (nodeState.childStatuses[i] === 'success') { successes++; continue; }
-    if (nodeState.childStatuses[i] === 'failure') { failures++; continue; }
+    if (nodeState.childStatuses[i] === 'success') {
+      successes++;
+      continue;
+    }
+    if (nodeState.childStatuses[i] === 'failure') {
+      failures++;
+      continue;
+    }
     const result = tickBTNode(children[i], state, context, delta);
     nodeState.childStatuses[i] = result;
     if (result === 'success') successes++;
     else if (result === 'failure') failures++;
   }
 
-  if (successes >= threshold) { nodeState.childStatuses = []; return 'success'; }
-  if (failures > children.length - threshold) { nodeState.childStatuses = []; return 'failure'; }
+  if (successes >= threshold) {
+    nodeState.childStatuses = [];
+    return 'success';
+  }
+  if (failures > children.length - threshold) {
+    nodeState.childStatuses = [];
+    return 'failure';
+  }
   return 'running';
 }
 
-function tickInverter(node: BTNode, state: BTState, context: TraitContext, delta: number): BTStatus {
+function tickInverter(
+  node: BTNode,
+  state: BTState,
+  context: TraitContext,
+  delta: number
+): BTStatus {
   const child = node.children?.[0];
   if (!child) return 'failure';
   const result = tickBTNode(child, state, context, delta);
@@ -146,7 +185,13 @@ function tickInverter(node: BTNode, state: BTState, context: TraitContext, delta
   return 'running';
 }
 
-function tickRepeater(node: BTNode, nodeState: BTNodeState, state: BTState, context: TraitContext, delta: number): BTStatus {
+function tickRepeater(
+  node: BTNode,
+  nodeState: BTNodeState,
+  state: BTState,
+  context: TraitContext,
+  delta: number
+): BTStatus {
   const child = node.children?.[0];
   if (!child) return 'failure';
   const maxCount = node.count ?? -1;
@@ -184,7 +229,11 @@ function tickAction(node: BTNode, state: BTState, context: TraitContext): BTStat
   }
 
   // Emit event for external handling
-  context.object.dispatchEvent({ type: 'bt_action', action: actionName, params: node.params } as any);
+  context.object.dispatchEvent({
+    type: 'bt_action',
+    action: actionName,
+    params: node.params,
+  } as any);
   return 'success';
 }
 
@@ -227,7 +276,7 @@ export const BehaviorTreeTrait: TraitHandler = {
         context.object.dispatchEvent({
           type: 'bt_complete',
           status: state.status,
-          blackboard: state.blackboard
+          blackboard: state.blackboard,
         } as any);
 
         if (context.data.restartOnComplete) {
@@ -241,14 +290,23 @@ export const BehaviorTreeTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     context.data.state = null;
-  }
+  },
 };
 
 // =============================================================================
 // EMOTION TRAIT (PAD Model)
 // =============================================================================
 
-type EmotionName = 'joy' | 'sadness' | 'anger' | 'fear' | 'surprise' | 'disgust' | 'trust' | 'anticipation' | 'neutral';
+type EmotionName =
+  | 'joy'
+  | 'sadness'
+  | 'anger'
+  | 'fear'
+  | 'surprise'
+  | 'disgust'
+  | 'trust'
+  | 'anticipation'
+  | 'neutral';
 
 interface PAD {
   pleasure: number;
@@ -271,8 +329,8 @@ const EMOTION_PAD: Record<EmotionName, PAD> = {
 function padDistance(a: PAD, b: PAD): number {
   return Math.sqrt(
     Math.pow(a.pleasure - b.pleasure, 2) +
-    Math.pow(a.arousal - b.arousal, 2) +
-    Math.pow(a.dominance - b.dominance, 2)
+      Math.pow(a.arousal - b.arousal, 2) +
+      Math.pow(a.dominance - b.dominance, 2)
   );
 }
 
@@ -297,7 +355,7 @@ function lerpPad(a: PAD, b: PAD, t: number): PAD {
   };
 }
 
-function clampPad(pad: PAD): PAD {
+function _clampPad(pad: PAD): PAD {
   return {
     pleasure: Math.max(-1, Math.min(1, pad.pleasure)),
     arousal: Math.max(-1, Math.min(1, pad.arousal)),
@@ -331,7 +389,11 @@ export const EmotionTrait: TraitHandler = {
 
     // Decay toward neutral
     const neutralPad = EMOTION_PAD.neutral;
-    context.data.targetPad = lerpPad(context.data.targetPad, neutralPad, context.data.decayRate * delta);
+    context.data.targetPad = lerpPad(
+      context.data.targetPad,
+      neutralPad,
+      context.data.decayRate * delta
+    );
 
     // Classify current emotion
     context.data.currentEmotion = classifyEmotion(context.data.pad);
@@ -357,7 +419,7 @@ export const EmotionTrait: TraitHandler = {
     delete context.object.userData.emotion;
     delete context.object.userData.emotionIntensity;
     delete context.object.userData.emotionPad;
-  }
+  },
 };
 
 // =============================================================================
@@ -450,7 +512,10 @@ function planActions(
 
     let depth = 0;
     let temp: PlanNode | null = current;
-    while (temp) { depth++; temp = temp.parent; }
+    while (temp) {
+      depth++;
+      temp = temp.parent;
+    }
     if (depth > maxDepth) continue;
 
     for (const action of actions) {
@@ -539,7 +604,7 @@ export const GoalOrientedTrait: TraitHandler = {
     delete context.object.userData.goapState;
     delete context.object.userData.goapGoal;
     delete context.object.userData.goapAction;
-  }
+  },
 };
 
 function selectGoalAndPlan(context: TraitContext): void {
@@ -549,7 +614,7 @@ function selectGoalAndPlan(context: TraitContext): void {
 
   // Find highest priority valid goal
   const validGoals = goals
-    .filter(g => !stateMatches(worldState, g.desiredState))
+    .filter((g) => !stateMatches(worldState, g.desiredState))
     .sort((a, b) => b.priority - a.priority);
 
   if (validGoals.length === 0) {
@@ -573,7 +638,7 @@ function selectGoalAndPlan(context: TraitContext): void {
     context.object.dispatchEvent({
       type: 'goap_plan_created',
       goal: goal.name,
-      actions: plan.map(a => a.name),
+      actions: plan.map((a) => a.name),
     } as any);
   } else {
     context.object.dispatchEvent({
@@ -609,7 +674,7 @@ export const PerceptionTrait: TraitHandler = {
     const perceived: any[] = [];
     const myPos = context.object.position;
     const range = context.data.range;
-    const fovRad = (context.data.fov / 2) * Math.PI / 180;
+    const fovRad = ((context.data.fov / 2) * Math.PI) / 180;
 
     // Get forward direction
     const forward = context.object.getWorldDirection(new THREE.Vector3());
@@ -639,7 +704,7 @@ export const PerceptionTrait: TraitHandler = {
           object: child,
           name: child.name,
           distance: dist,
-          angle: angle * 180 / Math.PI,
+          angle: (angle * 180) / Math.PI,
           tag: child.userData.tag,
         });
       });
@@ -661,7 +726,7 @@ export const PerceptionTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     delete context.object.userData.perceivedObjects;
-  }
+  },
 };
 
 // =============================================================================
@@ -698,11 +763,16 @@ export const MemoryTrait: TraitHandler = {
   },
   onRemove: (context: TraitContext) => {
     delete context.object.userData.memories;
-  }
+  },
 };
 
 // Helper function to add memories (can be called via event)
-export function addMemory(context: TraitContext, type: string, data: Record<string, unknown>, importance = 1): void {
+export function addMemory(
+  context: TraitContext,
+  type: string,
+  data: Record<string, unknown>,
+  importance = 1
+): void {
   const memories = context.data.memories as MemoryEntry[];
 
   memories.push({

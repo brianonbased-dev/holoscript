@@ -35,12 +35,7 @@ export type RenderingBackend =
   | 'directx11'
   | 'directx12';
 
-export type XRMode =
-  | 'none'
-  | 'vr'
-  | 'ar'
-  | 'mr'
-  | 'passthrough';
+export type XRMode = 'none' | 'vr' | 'ar' | 'mr' | 'passthrough';
 
 // ============================================================================
 // Capability Categories
@@ -64,7 +59,7 @@ export interface GraphicsCapabilities {
 
   /** Supports compressed textures */
   compressedTextures: {
-    s3tc: boolean;    // DXT
+    s3tc: boolean; // DXT
     etc1: boolean;
     etc2: boolean;
     astc: boolean;
@@ -527,8 +522,9 @@ export class CapabilityMatrix {
     };
 
     // Check for anisotropic filtering
-    const aniso = gl.getExtension('EXT_texture_filter_anisotropic') ||
-                  gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
+    const aniso =
+      gl.getExtension('EXT_texture_filter_anisotropic') ||
+      gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
     if (aniso) {
       defaults.anisotropicFiltering = true;
       defaults.maxAnisotropy = gl.getParameter(aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
@@ -648,7 +644,8 @@ export class CapabilityMatrix {
     }
 
     defaults.mediaRecording = 'MediaRecorder' in window;
-    defaults.speechRecognition = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
+    defaults.speechRecognition =
+      'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
     defaults.speechSynthesis = 'speechSynthesis' in window;
 
     return defaults;
@@ -781,9 +778,12 @@ export class CapabilityMatrix {
 
     // SIMD check
     try {
-      defaults.simd = WebAssembly.validate(new Uint8Array([
-        0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11
-      ]));
+      defaults.simd = WebAssembly.validate(
+        new Uint8Array([
+          0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0,
+          253, 15, 253, 98, 11,
+        ])
+      );
     } catch {
       defaults.simd = false;
     }
@@ -983,43 +983,63 @@ export function createFeatureRequirement(
 // ============================================================================
 
 export const CommonFeatures = {
-  webgpu: createFeatureRequirement('webgpu', [
-    { capability: 'renderingBackend', value: 'webgpu', comparison: 'equals' },
-  ], { fallback: 'webgl2', description: 'WebGPU rendering' }),
+  webgpu: createFeatureRequirement(
+    'webgpu',
+    [{ capability: 'renderingBackend', value: 'webgpu', comparison: 'equals' }],
+    { fallback: 'webgl2', description: 'WebGPU rendering' }
+  ),
 
-  computeShaders: createFeatureRequirement('computeShaders', [
-    { capability: 'graphics.computeShaders', value: true, comparison: 'equals' },
-  ], { critical: false, description: 'GPU compute shaders' }),
+  computeShaders: createFeatureRequirement(
+    'computeShaders',
+    [{ capability: 'graphics.computeShaders', value: true, comparison: 'equals' }],
+    { critical: false, description: 'GPU compute shaders' }
+  ),
 
-  rayTracing: createFeatureRequirement('rayTracing', [
-    { capability: 'graphics.rayTracing', value: true, comparison: 'equals' },
-  ], { fallback: 'rasterization', description: 'Hardware ray tracing' }),
+  rayTracing: createFeatureRequirement(
+    'rayTracing',
+    [{ capability: 'graphics.rayTracing', value: true, comparison: 'equals' }],
+    { fallback: 'rasterization', description: 'Hardware ray tracing' }
+  ),
 
-  vrSupport: createFeatureRequirement('vrSupport', [
-    { capability: 'xr.modes', value: 'vr', comparison: 'contains' },
-  ], { critical: false, description: 'VR headset support' }),
+  vrSupport: createFeatureRequirement(
+    'vrSupport',
+    [{ capability: 'xr.modes', value: 'vr', comparison: 'contains' }],
+    { critical: false, description: 'VR headset support' }
+  ),
 
-  arSupport: createFeatureRequirement('arSupport', [
-    { capability: 'xr.modes', value: 'ar', comparison: 'contains' },
-  ], { critical: false, description: 'AR support' }),
+  arSupport: createFeatureRequirement(
+    'arSupport',
+    [{ capability: 'xr.modes', value: 'ar', comparison: 'contains' }],
+    { critical: false, description: 'AR support' }
+  ),
 
-  handTracking: createFeatureRequirement('handTracking', [
-    { capability: 'xr.handTracking', value: true, comparison: 'equals' },
-  ], { fallback: 'controllers', description: 'Hand tracking' }),
+  handTracking: createFeatureRequirement(
+    'handTracking',
+    [{ capability: 'xr.handTracking', value: true, comparison: 'equals' }],
+    { fallback: 'controllers', description: 'Hand tracking' }
+  ),
 
-  spatialAudio: createFeatureRequirement('spatialAudio', [
-    { capability: 'audio.spatialAudio', value: true, comparison: 'equals' },
-  ], { fallback: 'stereoAudio', description: '3D spatial audio' }),
+  spatialAudio: createFeatureRequirement(
+    'spatialAudio',
+    [{ capability: 'audio.spatialAudio', value: true, comparison: 'equals' }],
+    { fallback: 'stereoAudio', description: '3D spatial audio' }
+  ),
 
-  speechRecognition: createFeatureRequirement('speechRecognition', [
-    { capability: 'audio.speechRecognition', value: true, comparison: 'equals' },
-  ], { critical: false, description: 'Voice input' }),
+  speechRecognition: createFeatureRequirement(
+    'speechRecognition',
+    [{ capability: 'audio.speechRecognition', value: true, comparison: 'equals' }],
+    { critical: false, description: 'Voice input' }
+  ),
 
-  multiThreading: createFeatureRequirement('multiThreading', [
-    { capability: 'performance.multiThreading', value: true, comparison: 'equals' },
-  ], { fallback: 'singleThread', description: 'Web Workers with SharedArrayBuffer' }),
+  multiThreading: createFeatureRequirement(
+    'multiThreading',
+    [{ capability: 'performance.multiThreading', value: true, comparison: 'equals' }],
+    { fallback: 'singleThread', description: 'Web Workers with SharedArrayBuffer' }
+  ),
 
-  highEndDevice: createFeatureRequirement('highEndDevice', [
-    { capability: 'performance.deviceTier', value: 4, comparison: 'gte' },
-  ], { fallback: 'standardDevice', description: 'High-end device capabilities' }),
+  highEndDevice: createFeatureRequirement(
+    'highEndDevice',
+    [{ capability: 'performance.deviceTier', value: 4, comparison: 'gte' }],
+    { fallback: 'standardDevice', description: 'High-end device capabilities' }
+  ),
 };

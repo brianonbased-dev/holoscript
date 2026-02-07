@@ -1,9 +1,4 @@
-import {
-  HSPlusAST,
-  ASTNode,
-  HSPlusDirective,
-  VRTraitName
-} from '../types';
+import { HSPlusAST, ASTNode, HSPlusDirective, VRTraitName } from '../types';
 
 export interface R3FNode {
   type: string;
@@ -18,24 +13,51 @@ export interface R3FNode {
  * Material presets mapping surface names to Three.js PBR properties.
  */
 export const MATERIAL_PRESETS: Record<string, Record<string, any>> = {
-  'plastic': { roughness: 0.5, metalness: 0.0, clearcoat: 0.1 },
-  'metal': { roughness: 0.2, metalness: 1.0 },
-  'chrome': { roughness: 0.05, metalness: 1.0, envMapIntensity: 1.5 },
-  'gold': { roughness: 0.3, metalness: 1.0, color: '#ffd700' },
-  'copper': { roughness: 0.4, metalness: 1.0, color: '#b87333' },
-  'glass': { roughness: 0.0, metalness: 0.0, transmission: 0.95, ior: 1.5, thickness: 0.5, transparent: true },
-  'crystal': { roughness: 0.0, metalness: 0.1, transmission: 0.9, ior: 2.0, iridescence: 1.0, iridescenceIOR: 1.3 },
-  'wood': { roughness: 0.8, metalness: 0.0 },
-  'fabric': { roughness: 0.95, metalness: 0.0 },
-  'rubber': { roughness: 0.9, metalness: 0.0 },
-  'leather': { roughness: 0.7, metalness: 0.0 },
-  'water': { roughness: 0.0, metalness: 0.0, transmission: 0.9, ior: 1.33, transparent: true, color: '#006994' },
-  'emissive': { roughness: 0.5, metalness: 0.0, emissiveIntensity: 2.0 },
-  'hologram': { roughness: 0.0, metalness: 0.3, transparent: true, opacity: 0.6, emissiveIntensity: 1.0 },
+  plastic: { roughness: 0.5, metalness: 0.0, clearcoat: 0.1 },
+  metal: { roughness: 0.2, metalness: 1.0 },
+  chrome: { roughness: 0.05, metalness: 1.0, envMapIntensity: 1.5 },
+  gold: { roughness: 0.3, metalness: 1.0, color: '#ffd700' },
+  copper: { roughness: 0.4, metalness: 1.0, color: '#b87333' },
+  glass: {
+    roughness: 0.0,
+    metalness: 0.0,
+    transmission: 0.95,
+    ior: 1.5,
+    thickness: 0.5,
+    transparent: true,
+  },
+  crystal: {
+    roughness: 0.0,
+    metalness: 0.1,
+    transmission: 0.9,
+    ior: 2.0,
+    iridescence: 1.0,
+    iridescenceIOR: 1.3,
+  },
+  wood: { roughness: 0.8, metalness: 0.0 },
+  fabric: { roughness: 0.95, metalness: 0.0 },
+  rubber: { roughness: 0.9, metalness: 0.0 },
+  leather: { roughness: 0.7, metalness: 0.0 },
+  water: {
+    roughness: 0.0,
+    metalness: 0.0,
+    transmission: 0.9,
+    ior: 1.33,
+    transparent: true,
+    color: '#006994',
+  },
+  emissive: { roughness: 0.5, metalness: 0.0, emissiveIntensity: 2.0 },
+  hologram: {
+    roughness: 0.0,
+    metalness: 0.3,
+    transparent: true,
+    opacity: 0.6,
+    emissiveIntensity: 1.0,
+  },
 };
 
 export const ENVIRONMENT_PRESETS: Record<string, any> = {
-  'forest_sunset': {
+  forest_sunset: {
     background: true,
     envPreset: 'sunset',
     fog: { color: '#ff9966', near: 10, far: 100 },
@@ -45,7 +67,7 @@ export const ENVIRONMENT_PRESETS: Record<string, any> = {
       directional: { color: '#ff7700', intensity: 1.5, position: [10, 20, 5], shadows: true },
     },
   },
-  'cyberpunk_city': {
+  cyberpunk_city: {
     background: true,
     envPreset: 'night',
     fog: { color: '#0a0020', near: 5, far: 60 },
@@ -60,7 +82,7 @@ export const ENVIRONMENT_PRESETS: Record<string, any> = {
     },
     postprocessing: { bloom: { intensity: 1.5, luminanceThreshold: 0.1 } },
   },
-  'space_void': {
+  space_void: {
     background: true,
     envPreset: 'night',
     lighting: {
@@ -68,7 +90,7 @@ export const ENVIRONMENT_PRESETS: Record<string, any> = {
       directional: { color: '#ffffff', intensity: 0.5, position: [0, 10, 0], shadows: false },
     },
   },
-  'studio': {
+  studio: {
     background: true,
     envPreset: 'studio',
     ground: { color: '#cccccc' },
@@ -77,7 +99,7 @@ export const ENVIRONMENT_PRESETS: Record<string, any> = {
       directional: { color: '#ffffff', intensity: 1.0, position: [5, 10, 5], shadows: true },
     },
   },
-  'underwater': {
+  underwater: {
     background: true,
     envPreset: 'dawn',
     fog: { color: '#003366', near: 2, far: 40 },
@@ -87,7 +109,7 @@ export const ENVIRONMENT_PRESETS: Record<string, any> = {
       directional: { color: '#66aacc', intensity: 0.8, position: [0, 20, 0], shadows: true },
     },
   },
-  'desert': {
+  desert: {
     background: true,
     envPreset: 'sunset',
     fog: { color: '#d4a574', near: 20, far: 150 },
@@ -101,18 +123,36 @@ export const ENVIRONMENT_PRESETS: Record<string, any> = {
 
 // Geometry types that compile to <mesh> with a specific child geometry
 const MESH_TYPES = new Set([
-  'orb', 'sphere', 'cube', 'box', 'cylinder', 'pyramid', 'cone',
-  'plane', 'torus', 'ring', 'capsule', 'object', 'avatar', 'dna',
-  'gaussian_splat', 'splat', 'nerf', 'volumetric_video',
+  'orb',
+  'sphere',
+  'cube',
+  'box',
+  'cylinder',
+  'pyramid',
+  'cone',
+  'plane',
+  'torus',
+  'ring',
+  'capsule',
+  'object',
+  'avatar',
+  'dna',
+  'gaussian_splat',
+  'splat',
+  'nerf',
+  'volumetric_video',
 ]);
 
 /**
  * UI Component presets for @react-three/uikit mapping.
  * Maps HoloScript UI components to uikit component configurations.
  */
-export const UI_COMPONENT_PRESETS: Record<string, { component: string; defaultProps: Record<string, any> }> = {
-  'UIPanel': {
-    component: 'Container',  // @react-three/uikit Container
+export const UI_COMPONENT_PRESETS: Record<
+  string,
+  { component: string; defaultProps: Record<string, any> }
+> = {
+  UIPanel: {
+    component: 'Container', // @react-three/uikit Container
     defaultProps: {
       flexDirection: 'column',
       padding: 16,
@@ -120,15 +160,15 @@ export const UI_COMPONENT_PRESETS: Record<string, { component: string; defaultPr
       borderRadius: 8,
     },
   },
-  'UIText': {
-    component: 'Text',  // @react-three/uikit Text
+  UIText: {
+    component: 'Text', // @react-three/uikit Text
     defaultProps: {
       fontSize: 16,
       color: 'white',
     },
   },
-  'UIButton': {
-    component: 'Button',  // Custom button using Container with hover
+  UIButton: {
+    component: 'Button', // Custom button using Container with hover
     defaultProps: {
       padding: 12,
       paddingX: 24,
@@ -137,8 +177,8 @@ export const UI_COMPONENT_PRESETS: Record<string, { component: string; defaultPr
       cursor: 'pointer',
     },
   },
-  'UISlider': {
-    component: 'Slider',  // Custom slider implementation
+  UISlider: {
+    component: 'Slider', // Custom slider implementation
     defaultProps: {
       width: 200,
       height: 20,
@@ -147,8 +187,8 @@ export const UI_COMPONENT_PRESETS: Record<string, { component: string; defaultPr
       thumbSize: 16,
     },
   },
-  'UIInput': {
-    component: 'Input',  // @react-three/uikit Input
+  UIInput: {
+    component: 'Input', // @react-three/uikit Input
     defaultProps: {
       width: 200,
       padding: 8,
@@ -159,22 +199,22 @@ export const UI_COMPONENT_PRESETS: Record<string, { component: string; defaultPr
       color: 'white',
     },
   },
-  'UIImage': {
-    component: 'Image',  // @react-three/uikit Image
+  UIImage: {
+    component: 'Image', // @react-three/uikit Image
     defaultProps: {
       objectFit: 'contain',
     },
   },
-  'UIChart': {
-    component: 'Chart',  // Custom chart component
+  UIChart: {
+    component: 'Chart', // Custom chart component
     defaultProps: {
       width: 300,
       height: 200,
       backgroundColor: '#1a1a2e',
     },
   },
-  'UIGauge': {
-    component: 'Gauge',  // Custom gauge component
+  UIGauge: {
+    component: 'Gauge', // Custom gauge component
     defaultProps: {
       size: 100,
       strokeWidth: 8,
@@ -192,7 +232,6 @@ export const UI_COMPONENT_PRESETS: Record<string, { component: string; defaultPr
  * (from HoloCompositionParser/.holo files).
  */
 export class R3FCompiler {
-
   // ─── Spread Expansion Utility ─────────────────────────────────────────
 
   /**
@@ -220,7 +259,13 @@ export class R3FCompiler {
         spreadKeys.push(key);
       } else {
         // Recursively expand spreads in nested objects
-        if (value && typeof value === 'object' && !Array.isArray(value) && !('__ref' in value) && !('__expr' in value)) {
+        if (
+          value &&
+          typeof value === 'object' &&
+          !Array.isArray(value) &&
+          !('__ref' in value) &&
+          !('__expr' in value)
+        ) {
           result[key] = this.expandSpreads(value, context);
         } else if (Array.isArray(value)) {
           // Handle arrays - expand spreads within array items
@@ -245,8 +290,17 @@ export class R3FCompiler {
 
     // Re-apply non-spread properties to ensure they override spread values
     for (const [key, value] of Object.entries(props)) {
-      if (!key.startsWith('__spread_') && !(value && typeof value === 'object' && value.type === 'spread')) {
-        if (value && typeof value === 'object' && !Array.isArray(value) && !('__ref' in value) && !('__expr' in value)) {
+      if (
+        !key.startsWith('__spread_') &&
+        !(value && typeof value === 'object' && value.type === 'spread')
+      ) {
+        if (
+          value &&
+          typeof value === 'object' &&
+          !Array.isArray(value) &&
+          !('__ref' in value) &&
+          !('__expr' in value)
+        ) {
           result[key] = this.expandSpreads(value, context);
         } else if (Array.isArray(value)) {
           result[key] = this.expandArraySpreads(value, context);
@@ -368,7 +422,7 @@ export class R3FCompiler {
       root.children?.unshift({
         type: 'EffectComposer',
         props: {},
-        children: this.extractPostProcessingNodes(root)
+        children: this.extractPostProcessingNodes(root),
       });
     }
 
@@ -386,7 +440,7 @@ export class R3FCompiler {
       props: this.compileProperties(node, rawProps),
       children: [],
       traits: new Map(),
-      directives: node.directives || []
+      directives: node.directives || [],
     };
 
     if (node.directives) {
@@ -510,7 +564,7 @@ export class R3FCompiler {
       root.children!.unshift({
         type: 'EffectComposer',
         props: {},
-        children: this.extractPostProcessingNodes(root)
+        children: this.extractPostProcessingNodes(root),
       });
     }
 
@@ -520,8 +574,12 @@ export class R3FCompiler {
 
   private compileLightBlock(light: any): R3FNode {
     const lightMapping: Record<string, string> = {
-      'directional': 'directionalLight', 'point': 'pointLight', 'spot': 'spotLight',
-      'hemisphere': 'hemisphereLight', 'ambient': 'ambientLight', 'area': 'rectAreaLight',
+      directional: 'directionalLight',
+      point: 'pointLight',
+      spot: 'spotLight',
+      hemisphere: 'hemisphereLight',
+      ambient: 'ambientLight',
+      area: 'rectAreaLight',
     };
     const type = lightMapping[light.lightType] || 'directionalLight';
     const props: Record<string, any> = {};
@@ -530,15 +588,23 @@ export class R3FCompiler {
       for (const prop of light.properties) {
         const key = prop.key;
         const value = prop.value;
-        if (key === 'cast_shadow' || key === 'castShadow') { props.castShadow = value; }
-        else if (key === 'ground_color' || key === 'groundColor') { props.groundColor = value; }
-        else if (key === 'shadow_map_size') { props['shadow-mapSize'] = Array.isArray(value) ? value : [value, value]; }
-        else { props[key] = value; }
+        if (key === 'cast_shadow' || key === 'castShadow') {
+          props.castShadow = value;
+        } else if (key === 'ground_color' || key === 'groundColor') {
+          props.groundColor = value;
+        } else if (key === 'shadow_map_size') {
+          props['shadow-mapSize'] = Array.isArray(value) ? value : [value, value];
+        } else {
+          props[key] = value;
+        }
       }
     }
 
     // Default castShadow for directional/spot
-    if ((light.lightType === 'directional' || light.lightType === 'spot') && props.castShadow === undefined) {
+    if (
+      (light.lightType === 'directional' || light.lightType === 'spot') &&
+      props.castShadow === undefined
+    ) {
       props.castShadow = true;
     }
 
@@ -550,9 +616,13 @@ export class R3FCompiler {
     if (effects.effects) {
       for (const effect of effects.effects) {
         const effectMapping: Record<string, string> = {
-          bloom: 'Bloom', ssao: 'SSAO', vignette: 'Vignette',
-          dof: 'DepthOfField', chromatic_aberration: 'ChromaticAberration',
-          tone_mapping: 'ToneMapping', noise: 'Noise',
+          bloom: 'Bloom',
+          ssao: 'SSAO',
+          vignette: 'Vignette',
+          dof: 'DepthOfField',
+          chromatic_aberration: 'ChromaticAberration',
+          tone_mapping: 'ToneMapping',
+          noise: 'Noise',
         };
         const type = effectMapping[effect.effectType] || effect.effectType;
         children.push({ type, props: { ...effect.properties } });
@@ -565,9 +635,13 @@ export class R3FCompiler {
     const props: Record<string, any> = {};
     if (camera.properties) {
       for (const prop of camera.properties) {
-        if (prop.key === 'field_of_view' || prop.key === 'fov') { props.fov = prop.value; }
-        else if (prop.key === 'look_at' || prop.key === 'lookAt') { props.lookAt = prop.value; }
-        else { props[prop.key] = prop.value; }
+        if (prop.key === 'field_of_view' || prop.key === 'fov') {
+          props.fov = prop.value;
+        } else if (prop.key === 'look_at' || prop.key === 'lookAt') {
+          props.lookAt = prop.value;
+        } else {
+          props[prop.key] = prop.value;
+        }
       }
     }
     props.cameraType = camera.cameraType;
@@ -589,43 +663,104 @@ export class R3FCompiler {
     if (presetName) {
       const preset = ENVIRONMENT_PRESETS[presetName];
       if (preset) {
-        nodes.push({ type: 'Environment', props: { background: true, preset: preset.envPreset || presetName }, children: [] });
+        nodes.push({
+          type: 'Environment',
+          props: { background: true, preset: preset.envPreset || presetName },
+          children: [],
+        });
 
         if (preset.lighting?.ambient) {
-          nodes.push({ type: 'ambientLight', props: { color: preset.lighting.ambient.color, intensity: preset.lighting.ambient.intensity } });
+          nodes.push({
+            type: 'ambientLight',
+            props: {
+              color: preset.lighting.ambient.color,
+              intensity: preset.lighting.ambient.intensity,
+            },
+          });
         }
         if (preset.lighting?.directional) {
           const dl = preset.lighting.directional;
-          nodes.push({ type: 'directionalLight', props: { color: dl.color, intensity: dl.intensity, position: dl.position, castShadow: dl.shadows !== false, 'shadow-mapSize': [2048, 2048] } });
+          nodes.push({
+            type: 'directionalLight',
+            props: {
+              color: dl.color,
+              intensity: dl.intensity,
+              position: dl.position,
+              castShadow: dl.shadows !== false,
+              'shadow-mapSize': [2048, 2048],
+            },
+          });
         }
         if (preset.lighting?.points) {
           for (const pl of preset.lighting.points) {
-            nodes.push({ type: 'pointLight', props: { color: pl.color, intensity: pl.intensity, position: pl.position, distance: pl.distance } });
+            nodes.push({
+              type: 'pointLight',
+              props: {
+                color: pl.color,
+                intensity: pl.intensity,
+                position: pl.position,
+                distance: pl.distance,
+              },
+            });
           }
         }
         if (preset.fog) {
-          nodes.push({ type: 'fog', props: { attach: 'fog', color: preset.fog.color, near: preset.fog.near, far: preset.fog.far } });
+          nodes.push({
+            type: 'fog',
+            props: {
+              attach: 'fog',
+              color: preset.fog.color,
+              near: preset.fog.near,
+              far: preset.fog.far,
+            },
+          });
         }
         if (preset.ground) {
           nodes.push({
-            type: 'mesh', id: '__ground',
-            props: { hsType: 'plane', rotation: [-Math.PI / 2, 0, 0], position: [0, -0.01, 0], receiveShadow: true, args: [200, 200], color: preset.ground.color, materialProps: { roughness: 0.8, metalness: 0.0 } },
+            type: 'mesh',
+            id: '__ground',
+            props: {
+              hsType: 'plane',
+              rotation: [-Math.PI / 2, 0, 0],
+              position: [0, -0.01, 0],
+              receiveShadow: true,
+              args: [200, 200],
+              color: preset.ground.color,
+              materialProps: { roughness: 0.8, metalness: 0.0 },
+            },
             children: [],
           });
         }
       } else {
-        nodes.push({ type: 'Environment', props: { background: true, preset: presetName }, children: [] });
+        nodes.push({
+          type: 'Environment',
+          props: { background: true, preset: presetName },
+          children: [],
+        });
       }
     }
 
     // Explicit ambient_light
     if (envProps.ambient_light !== undefined) {
-      nodes.push({ type: 'ambientLight', props: { intensity: typeof envProps.ambient_light === 'number' ? envProps.ambient_light : 0.5 } });
+      nodes.push({
+        type: 'ambientLight',
+        props: {
+          intensity: typeof envProps.ambient_light === 'number' ? envProps.ambient_light : 0.5,
+        },
+      });
     }
 
     // Explicit fog
     if (envProps.fog && typeof envProps.fog === 'object') {
-      nodes.push({ type: 'fog', props: { attach: 'fog', color: envProps.fog.color || '#cccccc', near: envProps.fog.near || 10, far: envProps.fog.far || 100 } });
+      nodes.push({
+        type: 'fog',
+        props: {
+          attach: 'fog',
+          color: envProps.fog.color || '#cccccc',
+          near: envProps.fog.near || 10,
+          far: envProps.fog.far || 100,
+        },
+      });
     }
 
     return nodes;
@@ -664,10 +799,9 @@ export class R3FCompiler {
       for (const prop of obj.properties) {
         // Handle spread properties: { type: 'spread', target: 'TemplateName' }
         if (prop && prop.type === 'spread') {
-          const resolved = this.resolveSpreadArgument(
-            prop.target || prop.argument,
-            { templates: templateMap }
-          );
+          const resolved = this.resolveSpreadArgument(prop.target || prop.argument, {
+            templates: templateMap,
+          });
           if (resolved && typeof resolved === 'object' && !Array.isArray(resolved)) {
             // Convert resolved object to property array format
             for (const [key, value] of Object.entries(resolved)) {
@@ -689,63 +823,84 @@ export class R3FCompiler {
         const key = prop.key;
         const value = prop.value;
 
-        if (key === 'geometry' || key === 'mesh') { geometryType = value; }
-        else if (key === 'type') {
+        if (key === 'geometry' || key === 'mesh') {
+          geometryType = value;
+        } else if (key === 'type') {
           // Special types override geometry determination
           if (['text', 'sparkles', 'portal', 'audio'].includes(value)) {
             geometryType = value;
-          } else if (['directional', 'point', 'spot', 'hemisphere', 'ambient', 'area'].includes(value)) {
+          } else if (
+            ['directional', 'point', 'spot', 'hemisphere', 'ambient', 'area'].includes(value)
+          ) {
             // Light-type shorthand: type: "directional" implies a light
             geometryType = 'light';
             props.lightType = value;
           } else {
             props[key] = value;
           }
-        }
-        else if (key === 'light_type') { props.lightType = value; }
-        else if (key === 'position' && Array.isArray(value)) { props.position = value; }
-        else if (key === 'rotation' && Array.isArray(value)) { props.rotation = value; }
-        else if (key === 'scale') { props.scale = Array.isArray(value) ? value : [value, value, value]; }
-        else if (key === 'color') { props.color = value; }
-        else if (key === 'src' || key === 'model') { props.src = value; geometryType = 'model'; }
-        else if (key === 'text') { props.children = this.resolveValue(value); props.text = this.resolveValue(value); }
-        else if (key === 'font_size') { props.fontSize = value; }
-        else if (key === 'material') {
+        } else if (key === 'light_type') {
+          props.lightType = value;
+        } else if (key === 'position' && Array.isArray(value)) {
+          props.position = value;
+        } else if (key === 'rotation' && Array.isArray(value)) {
+          props.rotation = value;
+        } else if (key === 'scale') {
+          props.scale = Array.isArray(value) ? value : [value, value, value];
+        } else if (key === 'color') {
+          props.color = value;
+        } else if (key === 'src' || key === 'model') {
+          props.src = value;
+          geometryType = 'model';
+        } else if (key === 'text') {
+          props.children = this.resolveValue(value);
+          props.text = this.resolveValue(value);
+        } else if (key === 'font_size') {
+          props.fontSize = value;
+        } else if (key === 'material') {
           if (typeof value === 'string' && MATERIAL_PRESETS[value]) {
             props.materialProps = { ...MATERIAL_PRESETS[value], ...props.materialProps };
           } else if (typeof value === 'object') {
             // Handle material objects with a preset key: { preset: "glass", color: "#aaddff" }
             if (value.preset && MATERIAL_PRESETS[value.preset]) {
               const { preset: _, ...rest } = value;
-              props.materialProps = { ...MATERIAL_PRESETS[value.preset], ...rest, ...props.materialProps };
+              props.materialProps = {
+                ...MATERIAL_PRESETS[value.preset],
+                ...rest,
+                ...props.materialProps,
+              };
             } else {
               props.materialProps = { ...props.materialProps, ...value };
             }
           }
-        }
-        else if (key === 'roughness' || key === 'metalness' || key === 'metallic') {
+        } else if (key === 'roughness' || key === 'metalness' || key === 'metallic') {
           props.materialProps = props.materialProps || {};
           props.materialProps[key === 'metallic' ? 'metalness' : key] = value;
-        }
-        else if (key === 'opacity') {
+        } else if (key === 'opacity') {
           props.materialProps = props.materialProps || {};
           props.materialProps.opacity = value;
           props.materialProps.transparent = value < 1;
-        }
-        else if (key === 'emissive') { props.materialProps = { ...props.materialProps, emissive: value }; }
-        else if (key === 'emissiveIntensity' || key === 'emissive_intensity') {
+        } else if (key === 'emissive') {
+          props.materialProps = { ...props.materialProps, emissive: value };
+        } else if (key === 'emissiveIntensity' || key === 'emissive_intensity') {
           props.materialProps = { ...props.materialProps, emissiveIntensity: value };
-        }
-        else if (key === 'size') {
-          if (Array.isArray(value)) { props.args = value; }
+        } else if (key === 'size') {
+          if (Array.isArray(value)) {
+            props.args = value;
+          }
           props.size = value;
+        } else if (key === 'radius') {
+          props.size = value * 2;
+        } else if (key === 'intensity') {
+          props.intensity = value;
+        } else if (key === 'cast_shadow' || key === 'castShadow') {
+          props.castShadow = value;
+        } else if (key === 'receiveShadow' || key === 'receive_shadow') {
+          props.receiveShadow = value;
+        } else if (key === 'visible') {
+          props[key] = value;
+        } else {
+          props[key] = this.resolveValue(value);
         }
-        else if (key === 'radius') { props.size = value * 2; }
-        else if (key === 'intensity') { props.intensity = value; }
-        else if (key === 'cast_shadow' || key === 'castShadow') { props.castShadow = value; }
-        else if (key === 'receiveShadow' || key === 'receive_shadow') { props.receiveShadow = value; }
-        else if (key === 'visible') { props[key] = value; }
-        else { props[key] = this.resolveValue(value); }
       }
     }
 
@@ -758,121 +913,106 @@ export class R3FCompiler {
           props.grabbable = trait.config || true;
           if (!props.rigidBody) props.rigidBody = { type: 'dynamic' };
           if (!props.collider) props.collider = { type: 'auto' };
-        }
-        else if (name === 'hoverable') { props.hoverable = trait.config || true; }
-        else if (name === 'collidable') {
+        } else if (name === 'hoverable') {
+          props.hoverable = trait.config || true;
+        } else if (name === 'collidable') {
           const bodyType = trait.config?.type || 'fixed';
           props.rigidBody = { type: bodyType };
           props.collider = { type: 'auto' };
           props.castShadow = true;
           props.receiveShadow = true;
-        }
-        else if (name === 'animated') { props.animated = trait.config || true; }
-        else if (name === 'positional' || name === 'spatial_audio') { props.spatial = true; }
-        else if (name === 'shadow') {
+        } else if (name === 'animated') {
+          props.animated = trait.config || true;
+        } else if (name === 'positional' || name === 'spatial_audio') {
+          props.spatial = true;
+        } else if (name === 'shadow') {
           props.castShadow = true;
-          if (trait.config?.mapSize) props['shadow-mapSize'] = [trait.config.mapSize, trait.config.mapSize];
-        }
-        else if (name === 'material') {
+          if (trait.config?.mapSize)
+            props['shadow-mapSize'] = [trait.config.mapSize, trait.config.mapSize];
+        } else if (name === 'material') {
           const presetName = trait.config?.preset;
           if (presetName && MATERIAL_PRESETS[presetName]) {
             const { preset: _, ...rest } = trait.config;
-            props.materialProps = { ...MATERIAL_PRESETS[presetName], ...rest, ...props.materialProps };
+            props.materialProps = {
+              ...MATERIAL_PRESETS[presetName],
+              ...rest,
+              ...props.materialProps,
+            };
           } else {
             props.materialProps = { ...props.materialProps, ...trait.config };
           }
-        }
-        else if (name === 'networked') { props.networked = trait.config || true; }
-        else if (name === 'moldable') { props.moldable = trait.config || true; }
-        else if (name === 'stretchable') { props.stretchable = trait.config || true; }
-        else if (name === 'bloom') { props.bloom = trait.config || { intensity: 1.0 }; }
-        else if (name === 'physics') {
+        } else if (name === 'networked') {
+          props.networked = trait.config || true;
+        } else if (name === 'moldable') {
+          props.moldable = trait.config || true;
+        } else if (name === 'stretchable') {
+          props.stretchable = trait.config || true;
+        } else if (name === 'bloom') {
+          props.bloom = trait.config || { intensity: 1.0 };
+        } else if (name === 'physics') {
           if (!props.rigidBody) props.rigidBody = { type: 'dynamic' };
           if (!props.collider) props.collider = { type: 'auto' };
           if (trait.config) Object.assign(props.rigidBody, trait.config);
-        }
-        else if (name === 'portal') {
+        } else if (name === 'portal') {
           props.portal = trait.config || true;
-        }
-        else if (name === 'attach') {
+        } else if (name === 'attach') {
           props.attach = trait.config || true;
-        }
-        else if (name === 'orbit') {
+        } else if (name === 'orbit') {
           props.orbit = trait.config || true;
-        }
-        else if (name === 'look_at') {
+        } else if (name === 'look_at') {
           props.lookAtTarget = trait.config || true;
-        }
-        else if (name === 'follow') {
+        } else if (name === 'follow') {
           props.follow = trait.config || true;
         }
         // ── Environment Understanding ─────────────────────────────
         else if (name === 'plane_detection') {
           props.planeDetection = trait.config || { mode: 'all' };
-        }
-        else if (name === 'mesh_detection') {
+        } else if (name === 'mesh_detection') {
           props.meshDetection = trait.config || { classification: true };
-        }
-        else if (name === 'anchor') {
+        } else if (name === 'anchor') {
           props.anchor = trait.config || { type: 'spatial' };
-        }
-        else if (name === 'persistent_anchor') {
+        } else if (name === 'persistent_anchor') {
           props.persistentAnchor = trait.config || { storage: 'local' };
-        }
-        else if (name === 'shared_anchor') {
+        } else if (name === 'shared_anchor') {
           props.sharedAnchor = trait.config || { authority: 'creator' };
-        }
-        else if (name === 'occlusion') {
+        } else if (name === 'occlusion') {
           props.occlusionMode = trait.config?.mode || 'environment';
           props.occlusion = trait.config || true;
-        }
-        else if (name === 'light_estimation') {
+        } else if (name === 'light_estimation') {
           props.lightEstimation = trait.config || { auto_apply: true };
-        }
-        else if (name === 'geospatial') {
+        } else if (name === 'geospatial') {
           props.geospatial = trait.config || true;
         }
         // ── Gaussian Splatting & Volumetric ───────────────────────
         else if (name === 'gaussian_splat') {
           props.gaussianSplat = trait.config || true;
-        }
-        else if (name === 'nerf') {
+        } else if (name === 'nerf') {
           props.nerf = trait.config || true;
-        }
-        else if (name === 'volumetric_video') {
+        } else if (name === 'volumetric_video') {
           props.volumetricVideo = trait.config || true;
-        }
-        else if (name === 'point_cloud') {
+        } else if (name === 'point_cloud') {
           props.pointCloud = trait.config || true;
-        }
-        else if (name === 'photogrammetry') {
+        } else if (name === 'photogrammetry') {
           props.photogrammetry = trait.config || true;
         }
         // ── Physics Expansion ─────────────────────────────────────
         else if (name === 'cloth') {
           props.cloth = trait.config || { stiffness: 0.8 };
           if (!props.rigidBody) props.rigidBody = { type: 'dynamic' };
-        }
-        else if (name === 'fluid') {
+        } else if (name === 'fluid') {
           props.fluid = trait.config || { viscosity: 0.01 };
-        }
-        else if (name === 'soft_body') {
+        } else if (name === 'soft_body') {
           props.softBody = trait.config || { elasticity: 0.5 };
           if (!props.rigidBody) props.rigidBody = { type: 'dynamic' };
-        }
-        else if (name === 'rope') {
+        } else if (name === 'rope') {
           props.rope = trait.config || { segments: 20 };
-        }
-        else if (name === 'chain') {
+        } else if (name === 'chain') {
           props.chain = trait.config || { link_count: 20 };
-        }
-        else if (name === 'wind') {
+        } else if (name === 'wind') {
           props.wind = trait.config || { strength: 5.0 };
-        }
-        else if (name === 'buoyancy') {
+        } else if (name === 'buoyancy') {
           props.buoyancy = trait.config || { water_level: 0 };
-        }
-        else if (name === 'destruction') {
+        } else if (name === 'destruction') {
           props.destruction = trait.config || { health: 100 };
           if (!props.rigidBody) props.rigidBody = { type: 'dynamic' };
           if (!props.collider) props.collider = { type: 'auto' };
@@ -881,90 +1021,73 @@ export class R3FCompiler {
         else if (name === 'ambisonics') {
           props.ambisonics = trait.config || { order: 1 };
           props.spatial = true;
-        }
-        else if (name === 'hrtf') {
+        } else if (name === 'hrtf') {
           props.hrtf = trait.config || true;
           props.spatial = true;
-        }
-        else if (name === 'reverb_zone') {
+        } else if (name === 'reverb_zone') {
           props.reverbZone = trait.config || { preset: 'room' };
-        }
-        else if (name === 'audio_occlusion') {
+        } else if (name === 'audio_occlusion') {
           props.audioOcclusion = trait.config || true;
-        }
-        else if (name === 'audio_portal') {
+        } else if (name === 'audio_portal') {
           props.audioPortal = trait.config || true;
-        }
-        else if (name === 'head_tracked_audio') {
+        } else if (name === 'head_tracked_audio') {
           props.headTrackedAudio = trait.config || true;
           props.spatial = true;
         }
         // ── Accessibility ─────────────────────────────────────────
         else if (name === 'accessible') {
           props.accessible = trait.config || { role: 'generic' };
-        }
-        else if (name === 'alt_text') {
+        } else if (name === 'alt_text') {
           props.altText = trait.config?.text || '';
-        }
-        else if (name === 'magnifiable') {
+        } else if (name === 'magnifiable') {
           props.magnifiable = trait.config || { max_scale: 3.0 };
-        }
-        else if (name === 'high_contrast') {
+        } else if (name === 'high_contrast') {
           props.highContrast = trait.config || { mode: 'outline' };
-        }
-        else if (name === 'motion_reduced') {
+        } else if (name === 'motion_reduced') {
           props.motionReduced = trait.config || true;
           if (props.animated) props.animated = false;
         }
         // ── WebGPU Compute ────────────────────────────────────────
         else if (name === 'compute') {
           props.compute = trait.config || true;
-        }
-        else if (name === 'gpu_particle') {
+        } else if (name === 'gpu_particle') {
           props.gpuParticle = trait.config || { count: 10000 };
-        }
-        else if (name === 'gpu_physics') {
+        } else if (name === 'gpu_physics') {
           props.gpuPhysics = trait.config || true;
         }
         // ── Digital Twin & IoT ────────────────────────────────────
         else if (name === 'digital_twin') {
           props.digitalTwin = trait.config || true;
-        }
-        else if (name === 'sensor') {
+        } else if (name === 'sensor') {
           props.sensor = trait.config || true;
-        }
-        else if (name === 'data_binding') {
+        } else if (name === 'data_binding') {
           props.dataBinding = trait.config || true;
         }
         // ── Autonomous Agents ─────────────────────────────────────
         else if (name === 'behavior_tree') {
           props.behaviorTree = trait.config || true;
-        }
-        else if (name === 'llm_agent') {
+        } else if (name === 'llm_agent') {
           props.llmAgent = trait.config || true;
-        }
-        else if (name === 'neural_link') {
+        } else if (name === 'neural_link') {
           props.neuralLink = trait.config || { model: 'brittney-v4.gguf', temperature: 0.7 };
-        }
-        else if (name === 'perception') {
+        } else if (name === 'perception') {
           props.perception = trait.config || { sight_range: 20 };
-        }
-        else if (name === 'patrol') {
+        } else if (name === 'patrol') {
           props.patrol = trait.config || true;
         }
         // ── Co-Presence ───────────────────────────────────────────
         else if (name === 'co_located') {
           props.coLocated = trait.config || true;
-        }
-        else if (name === 'shared_world') {
+        } else if (name === 'shared_world') {
           props.sharedWorld = trait.config || true;
-        }
-        else if (name === 'voice_proximity') {
+        } else if (name === 'voice_proximity') {
           props.voiceProximity = trait.config || { max_distance: 20 };
           props.spatial = true;
         }
         // ── Catch-all for remaining traits ────────────────────────
-        else { props[name] = trait.config || true; }
+        else {
+          props[name] = trait.config || true;
+        }
       }
     }
 
@@ -975,8 +1098,12 @@ export class R3FCompiler {
     } else if (geometryType === 'light') {
       const lightType = props.lightType || props.type || 'directional';
       const lightMapping: Record<string, string> = {
-        'directional': 'directionalLight', 'point': 'pointLight', 'spot': 'spotLight',
-        'hemisphere': 'hemisphereLight', 'ambient': 'ambientLight', 'area': 'rectAreaLight',
+        directional: 'directionalLight',
+        point: 'pointLight',
+        spot: 'spotLight',
+        hemisphere: 'hemisphereLight',
+        ambient: 'ambientLight',
+        area: 'rectAreaLight',
       };
       type = lightMapping[lightType] || 'directionalLight';
       delete props.lightType;
@@ -1012,17 +1139,22 @@ export class R3FCompiler {
       for (const prop of group.properties) {
         if (prop.key === 'position') props.position = prop.value;
         else if (prop.key === 'rotation') props.rotation = prop.value;
-        else if (prop.key === 'scale') props.scale = Array.isArray(prop.value) ? prop.value : [prop.value, prop.value, prop.value];
+        else if (prop.key === 'scale')
+          props.scale = Array.isArray(prop.value)
+            ? prop.value
+            : [prop.value, prop.value, prop.value];
       }
     }
 
     const node: R3FNode = { type: 'group', id: group.name, props, children: [], traits: new Map() };
 
     if (group.objects) {
-      for (const obj of group.objects) node.children!.push(this.compileObjectDecl(obj, templateMap));
+      for (const obj of group.objects)
+        node.children!.push(this.compileObjectDecl(obj, templateMap));
     }
     if (group.groups) {
-      for (const sub of group.groups) node.children!.push(this.compileSpatialGroup(sub, templateMap));
+      for (const sub of group.groups)
+        node.children!.push(this.compileSpatialGroup(sub, templateMap));
     }
 
     return node;
@@ -1059,9 +1191,13 @@ export class R3FCompiler {
     const props: Record<string, any> = {};
     if (audio.properties) {
       for (const prop of audio.properties) {
-        if (prop.key === 'src' || prop.key === 'source') { props.src = prop.value; }
-        else if (prop.key === 'rolloff') { props.rolloffFactor = prop.value; }
-        else { props[prop.key] = prop.value; }
+        if (prop.key === 'src' || prop.key === 'source') {
+          props.src = prop.value;
+        } else if (prop.key === 'rolloff') {
+          props.rolloffFactor = prop.value;
+        } else {
+          props[prop.key] = prop.value;
+        }
       }
     }
     return { type: 'Audio', id: audio.name, props };
@@ -1092,8 +1228,11 @@ export class R3FCompiler {
         const elProps: Record<string, any> = {};
         if (el.properties) {
           for (const prop of el.properties) {
-            if (prop.key === 'font_size') { elProps.fontSize = prop.value; }
-            else { elProps[prop.key] = this.resolveValue(prop.value); }
+            if (prop.key === 'font_size') {
+              elProps.fontSize = prop.value;
+            } else {
+              elProps[prop.key] = this.resolveValue(prop.value);
+            }
           }
         }
         children.push({ type: 'UIElement', id: el.name, props: elProps });
@@ -1123,15 +1262,20 @@ export class R3FCompiler {
 
     const elseChildren: R3FNode[] = [];
     if (cond.elseObjects) {
-      for (const obj of cond.elseObjects) elseChildren.push(this.compileObjectDecl(obj, templateMap));
+      for (const obj of cond.elseObjects)
+        elseChildren.push(this.compileObjectDecl(obj, templateMap));
     }
     if (cond.elseSpatialGroups) {
-      for (const g of cond.elseSpatialGroups) elseChildren.push(this.compileSpatialGroup(g, templateMap));
+      for (const g of cond.elseSpatialGroups)
+        elseChildren.push(this.compileSpatialGroup(g, templateMap));
     }
 
     return {
       type: 'ConditionalGroup',
-      props: { condition: cond.condition, elseChildren: elseChildren.length > 0 ? elseChildren : undefined },
+      props: {
+        condition: cond.condition,
+        elseChildren: elseChildren.length > 0 ? elseChildren : undefined,
+      },
       children,
     };
   }
@@ -1139,10 +1283,12 @@ export class R3FCompiler {
   private compileForEachBlock(iter: any, templateMap?: Map<string, any>): R3FNode {
     const templateChildren: R3FNode[] = [];
     if (iter.objects) {
-      for (const obj of iter.objects) templateChildren.push(this.compileObjectDecl(obj, templateMap));
+      for (const obj of iter.objects)
+        templateChildren.push(this.compileObjectDecl(obj, templateMap));
     }
     if (iter.spatialGroups) {
-      for (const g of iter.spatialGroups) templateChildren.push(this.compileSpatialGroup(g, templateMap));
+      for (const g of iter.spatialGroups)
+        templateChildren.push(this.compileSpatialGroup(g, templateMap));
     }
 
     return {
@@ -1168,20 +1314,29 @@ export class R3FCompiler {
     if (!this.treeHasLights(root)) {
       root.children?.unshift(
         { type: 'ambientLight', props: { intensity: 0.4, color: '#ffffff' } },
-        { type: 'directionalLight', props: { intensity: 1.0, position: [5, 10, 5], castShadow: true, 'shadow-mapSize': [2048, 2048], color: '#ffffff' } }
+        {
+          type: 'directionalLight',
+          props: {
+            intensity: 1.0,
+            position: [5, 10, 5],
+            castShadow: true,
+            'shadow-mapSize': [2048, 2048],
+            color: '#ffffff',
+          },
+        }
       );
     }
   }
 
   private treeHasLights(node: R3FNode): boolean {
     if (node.type.toLowerCase().includes('light')) return true;
-    return node.children?.some(c => this.treeHasLights(c)) || false;
+    return node.children?.some((c) => this.treeHasLights(c)) || false;
   }
 
   private hasPostProcessing(node: R3FNode): boolean {
     if (node.traits?.has('bloom' as any) || node.traits?.has('postprocessing' as any)) return true;
     if (node.props.bloom) return true;
-    return node.children?.some(c => this.hasPostProcessing(c)) || false;
+    return node.children?.some((c) => this.hasPostProcessing(c)) || false;
   }
 
   private extractPostProcessingNodes(node: R3FNode): R3FNode[] {
@@ -1194,10 +1349,13 @@ export class R3FCompiler {
       if (ppTrait.vignette) effects.push({ type: 'Vignette', props: ppTrait.vignette });
     }
     if (node.props.bloom) {
-      effects.push({ type: 'Bloom', props: typeof node.props.bloom === 'object' ? node.props.bloom : { intensity: 1.0 } });
+      effects.push({
+        type: 'Bloom',
+        props: typeof node.props.bloom === 'object' ? node.props.bloom : { intensity: 1.0 },
+      });
     }
 
-    node.children?.forEach(child => effects.push(...this.extractPostProcessingNodes(child)));
+    node.children?.forEach((child) => effects.push(...this.extractPostProcessingNodes(child)));
     return effects;
   }
 
@@ -1212,8 +1370,12 @@ export class R3FCompiler {
     if (type === 'light') {
       const lightType = props.type || 'directional';
       const lightMapping: Record<string, string> = {
-        'directional': 'directionalLight', 'point': 'pointLight', 'spot': 'spotLight',
-        'hemisphere': 'hemisphereLight', 'ambient': 'ambientLight', 'area': 'rectAreaLight'
+        directional: 'directionalLight',
+        point: 'pointLight',
+        spot: 'spotLight',
+        hemisphere: 'hemisphereLight',
+        ambient: 'ambientLight',
+        area: 'rectAreaLight',
       };
       return lightMapping[lightType] || 'directionalLight';
     }
@@ -1228,28 +1390,32 @@ export class R3FCompiler {
     }
 
     const mapping: Record<string, string> = {
-      'ambient_light': 'ambientLight', 'model': 'gltfModel',
-      'audio': 'positionalAudio', 'composition': 'group', 'scale': 'group', 'focus': 'group',
-      'spatial_agent': 'SpatialAgent',
-      'spatial_container': 'group',
-      'ui_panel': 'UIPanel',
-      'ui_text': 'UIText',
-      'ui_button': 'UIButton',
-      'ui_slider': 'UISlider',
-      'ui_input': 'UIInput',
-      'ui_image': 'UIImage',
-      'ui_chart': 'UIChart',
-      'ui_gauge': 'UIGauge',
-      'ui_value': 'UIValue',
-      'ui_status_indicator': 'UIStatusIndicator',
-      'tool_slot': 'ToolSlot',
-      'behavior': 'group',
-      'avatar': 'Avatar',
-      'dna': 'DNA',
-      'gaussian_splat': 'GaussianSplat',
-      'splat': 'GaussianSplat',
-      'nerf': 'NeRF',
-      'volumetric_video': 'VolumetricVideo',
+      ambient_light: 'ambientLight',
+      model: 'gltfModel',
+      audio: 'positionalAudio',
+      composition: 'group',
+      scale: 'group',
+      focus: 'group',
+      spatial_agent: 'SpatialAgent',
+      spatial_container: 'group',
+      ui_panel: 'UIPanel',
+      ui_text: 'UIText',
+      ui_button: 'UIButton',
+      ui_slider: 'UISlider',
+      ui_input: 'UIInput',
+      ui_image: 'UIImage',
+      ui_chart: 'UIChart',
+      ui_gauge: 'UIGauge',
+      ui_value: 'UIValue',
+      ui_status_indicator: 'UIStatusIndicator',
+      tool_slot: 'ToolSlot',
+      behavior: 'group',
+      avatar: 'Avatar',
+      dna: 'DNA',
+      gaussian_splat: 'GaussianSplat',
+      splat: 'GaussianSplat',
+      nerf: 'NeRF',
+      volumetric_video: 'VolumetricVideo',
     };
     return mapping[type] || type;
   }
@@ -1276,7 +1442,9 @@ export class R3FCompiler {
     }
 
     if (rawProps.scale !== undefined && !props.scale) {
-      props.scale = Array.isArray(rawProps.scale) ? rawProps.scale : [rawProps.scale, rawProps.scale, rawProps.scale];
+      props.scale = Array.isArray(rawProps.scale)
+        ? rawProps.scale
+        : [rawProps.scale, rawProps.scale, rawProps.scale];
     }
 
     if (rawProps.geometry && !props.hsType) {
@@ -1284,7 +1452,11 @@ export class R3FCompiler {
       props.args = this.getGeometryArgs(rawProps.geometry, { size: rawProps.size || 1 });
     }
 
-    if (rawProps.material && typeof rawProps.material === 'string' && MATERIAL_PRESETS[rawProps.material]) {
+    if (
+      rawProps.material &&
+      typeof rawProps.material === 'string' &&
+      MATERIAL_PRESETS[rawProps.material]
+    ) {
       props.materialProps = { ...MATERIAL_PRESETS[rawProps.material], ...props.materialProps };
     }
 
@@ -1296,27 +1468,47 @@ export class R3FCompiler {
             props.grabbable = d.config || true;
             if (!props.rigidBody) props.rigidBody = { type: 'dynamic' };
             if (!props.collider) props.collider = { type: 'auto' };
+          } else if ((d.name as any) === 'animated') {
+            props.animated = d.config || true;
+          } else if ((d.name as any) === 'spatial_audio' || (d.name as any) === 'voice') {
+            props.spatial = true;
+          } else if (d.name === 'networked') {
+            props.networked = d.config || true;
+          } else if (d.name === ('moldable' as any)) {
+            props.moldable = d.config || true;
+          } else if (d.name === ('stretchable' as any)) {
+            props.stretchable = d.config || true;
+          } else if (d.name === ('ai_driven' as any)) {
+            props.ai_driven = d.config || true;
+          } else if (d.name === ('dialogue' as any)) {
+            props.dialogue = d.config || true;
+          } else if (d.name === ('gesture' as any)) {
+            props.gesture = d.config || true;
+          } else if (d.name === ('haptic' as any)) {
+            props.haptic = d.config || true;
+          } else if (d.name === ('avatar_embodiment' as any)) {
+            props.avatarEmbodiment = d.config || true;
+          } else if (d.name === ('lip_sync' as any)) {
+            props.lipSync = d.config || true;
+          } else if (d.name === ('emotion_directive' as any)) {
+            props.emotionDirective = d.config || true;
+          } else if (d.name === ('stt' as any)) {
+            props.stt = d.config || true;
+          } else if (d.name === ('tts' as any)) {
+            props.tts = d.config || true;
+          } else if (d.name === ('generate' as any)) {
+            props.generate = d.config;
+          } else if (d.name === 'skeleton') {
+            props.skeleton = d.config || true;
+          } else if (d.name === 'body') {
+            props.body = d.config || true;
+          } else if (d.name === 'gaussian_splat') {
+            props.gaussianSplat = d.config || true;
+          } else if (d.name === 'nerf') {
+            props.nerf = d.config || true;
+          } else if (d.name === 'volumetric_video') {
+            props.volumetricVideo = d.config || true;
           }
-          else if ((d.name as any) === 'animated') { props.animated = d.config || true; }
-          else if ((d.name as any) === 'spatial_audio' || (d.name as any) === 'voice') { props.spatial = true; }
-          else if (d.name === 'networked') { props.networked = d.config || true; }
-          else if (d.name === 'moldable' as any) { props.moldable = d.config || true; }
-          else if (d.name === 'stretchable' as any) { props.stretchable = d.config || true; }
-          else if (d.name === 'ai_driven' as any) { props.ai_driven = d.config || true; }
-          else if (d.name === 'dialogue' as any) { props.dialogue = d.config || true; }
-          else if (d.name === 'gesture' as any) { props.gesture = d.config || true; }
-          else if (d.name === 'haptic' as any) { props.haptic = d.config || true; }
-          else if (d.name === 'avatar_embodiment' as any) { props.avatarEmbodiment = d.config || true; }
-          else if (d.name === 'lip_sync' as any) { props.lipSync = d.config || true; }
-          else if (d.name === 'emotion_directive' as any) { props.emotionDirective = d.config || true; }
-          else if (d.name === 'stt' as any) { props.stt = d.config || true; }
-          else if (d.name === 'tts' as any) { props.tts = d.config || true; }
-          else if (d.name === 'generate' as any) { props.generate = d.config; }
-          else if (d.name === 'skeleton') { props.skeleton = d.config || true; }
-          else if (d.name === 'body') { props.body = d.config || true; }
-          else if (d.name === 'gaussian_splat') { props.gaussianSplat = d.config || true; }
-          else if (d.name === 'nerf') { props.nerf = d.config || true; }
-          else if (d.name === 'volumetric_video') { props.volumetricVideo = d.config || true; }
         }
       }
     }
@@ -1381,15 +1573,27 @@ export class R3FCompiler {
   private getGeometryArgs(type: string, hologram: any): any[] {
     const size = hologram.size || 1;
     switch (type) {
-      case 'sphere': case 'orb': return [size * 0.5, 32, 32];
-      case 'cube': case 'box': return [size, size, size];
-      case 'cylinder': return [size * 0.5, size * 0.5, size, 32];
-      case 'pyramid': case 'cone': return [size * 0.5, 0, size, 4];
-      case 'plane': return [size, size];
-      case 'torus': return [size * 0.5, size * 0.15, 16, 32];
-      case 'ring': return [size * 0.3, size * 0.5, 32];
-      case 'capsule': return [size * 0.3, size * 0.5, 4, 16];
-      default: return [size, size, size];
+      case 'sphere':
+      case 'orb':
+        return [size * 0.5, 32, 32];
+      case 'cube':
+      case 'box':
+        return [size, size, size];
+      case 'cylinder':
+        return [size * 0.5, size * 0.5, size, 32];
+      case 'pyramid':
+      case 'cone':
+        return [size * 0.5, 0, size, 4];
+      case 'plane':
+        return [size, size];
+      case 'torus':
+        return [size * 0.5, size * 0.15, 16, 32];
+      case 'ring':
+        return [size * 0.3, size * 0.5, 32];
+      case 'capsule':
+        return [size * 0.3, size * 0.5, 4, 16];
+      default:
+        return [size, size, size];
     }
   }
 }

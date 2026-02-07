@@ -2,72 +2,68 @@ import * as vscode from 'vscode';
 import AdmZip = require('adm-zip');
 
 export class SmartAssetEditorProvider implements vscode.CustomReadonlyEditorProvider {
+  public static readonly viewType = 'holoscript.smartAssetViewer';
 
-    public static readonly viewType = 'holoscript.smartAssetViewer';
+  public static register(context: vscode.ExtensionContext): vscode.Disposable {
+    const provider = new SmartAssetEditorProvider(context);
+    return vscode.window.registerCustomEditorProvider(SmartAssetEditorProvider.viewType, provider, {
+      webviewOptions: {
+        retainContextWhenHidden: true,
+      },
+      supportsMultipleEditorsPerDocument: false,
+    });
+  }
 
-    public static register(context: vscode.ExtensionContext): vscode.Disposable {
-        const provider = new SmartAssetEditorProvider(context);
-        return vscode.window.registerCustomEditorProvider(
-            SmartAssetEditorProvider.viewType,
-            provider,
-            {
-                webviewOptions: {
-                    retainContextWhenHidden: true,
-                },
-                supportsMultipleEditorsPerDocument: false,
-            }
+  constructor(private readonly context: vscode.ExtensionContext) {}
+
+  async openCustomDocument(
+    uri: vscode.Uri,
+    openContext: vscode.CustomDocumentOpenContext,
+    token: vscode.CancellationToken
+  ): Promise<vscode.CustomDocument> {
+    return { uri, dispose: () => {} };
+  }
+
+  async resolveCustomEditor(
+    document: vscode.CustomDocument,
+    webviewPanel: vscode.WebviewPanel,
+    token: vscode.CancellationToken
+  ): Promise<void> {
+    webviewPanel.webview.options = {
+      enableScripts: true,
+    };
+
+    try {
+      const fileData = await vscode.workspace.fs.readFile(document.uri);
+      const zip = new AdmZip(Buffer.from(fileData));
+
+      const entry = zip.getEntry('smart-asset.json');
+      if (!entry) {
+        webviewPanel.webview.html = this.getErrorHtml(
+          'Invalid Smart Asset: smart-asset.json not found.'
         );
+        return;
+      }
+
+      const jsonContent = entry.getData().toString('utf8');
+      let smartAsset: any;
+      try {
+        smartAsset = JSON.parse(jsonContent);
+      } catch (e) {
+        webviewPanel.webview.html = this.getErrorHtml(
+          'Invalid Smart Asset: Malformed smart-asset.json.'
+        );
+        return;
+      }
+
+      webviewPanel.webview.html = this.getHtmlForWebview(smartAsset);
+    } catch (error) {
+      webviewPanel.webview.html = this.getErrorHtml(`Error opening asset: ${error}`);
     }
+  }
 
-    constructor(
-        private readonly context: vscode.ExtensionContext
-    ) { }
-
-    async openCustomDocument(
-        uri: vscode.Uri,
-        openContext: vscode.CustomDocumentOpenContext,
-        token: vscode.CancellationToken
-    ): Promise<vscode.CustomDocument> {
-        return { uri, dispose: () => { } };
-    }
-
-    async resolveCustomEditor(
-        document: vscode.CustomDocument,
-        webviewPanel: vscode.WebviewPanel,
-        token: vscode.CancellationToken
-    ): Promise<void> {
-        webviewPanel.webview.options = {
-            enableScripts: true,
-        };
-
-        try {
-            const fileData = await vscode.workspace.fs.readFile(document.uri);
-            const zip = new AdmZip(Buffer.from(fileData));
-            
-            const entry = zip.getEntry('smart-asset.json');
-            if (!entry) {
-                webviewPanel.webview.html = this.getErrorHtml("Invalid Smart Asset: smart-asset.json not found.");
-                return;
-            }
-
-            const jsonContent = entry.getData().toString('utf8');
-            let smartAsset: any;
-            try {
-                smartAsset = JSON.parse(jsonContent);
-            } catch (e) {
-                webviewPanel.webview.html = this.getErrorHtml("Invalid Smart Asset: Malformed smart-asset.json.");
-                return;
-            }
-
-            webviewPanel.webview.html = this.getHtmlForWebview(smartAsset);
-            
-        } catch (error) {
-            webviewPanel.webview.html = this.getErrorHtml(`Error opening asset: ${error}`);
-        }
-    }
-
-    private getErrorHtml(error: string): string {
-        return `
+  private getErrorHtml(error: string): string {
+    return `
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -82,15 +78,15 @@ export class SmartAssetEditorProvider implements vscode.CustomReadonlyEditorProv
             </body>
             </html>
         `;
-    }
+  }
 
-    private getHtmlForWebview(asset: any): string {
-        const scriptPreview = asset.script || '// No script provided';
-        const metadata = asset.metadata || {};
-        const physics = asset.physics || {};
-        const ai = asset.ai || {};
+  private getHtmlForWebview(asset: any): string {
+    const scriptPreview = asset.script || '// No script provided';
+    const metadata = asset.metadata || {};
+    const physics = asset.physics || {};
+    const ai = asset.ai || {};
 
-        return `
+    return `
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -170,14 +166,14 @@ export class SmartAssetEditorProvider implements vscode.CustomReadonlyEditorProv
             </body>
             </html>
         `;
-    }
+  }
 
-    private escapeHtml(unsafe: string): string {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
+  private escapeHtml(unsafe: string): string {
+    return unsafe
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 }

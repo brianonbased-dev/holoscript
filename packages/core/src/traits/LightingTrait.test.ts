@@ -439,11 +439,7 @@ describe('LightingTrait', () => {
       });
 
       // Setup GI
-      lig.setAmbientLight(
-        { r: 0.5, g: 0.7, b: 1 },
-        { r: 0.4, g: 0.4, b: 0.35 },
-        1.0
-      );
+      lig.setAmbientLight({ r: 0.5, g: 0.7, b: 1 }, { r: 0.4, g: 0.4, b: 0.35 }, 1.0);
       lig.setScreenSpaceAO(true, 1.0);
 
       const lights = lig.getLights();

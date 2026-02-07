@@ -91,7 +91,15 @@ export interface UICurvedTrait {
 
 export interface UIDockedTrait {
   /** Dock position */
-  position: 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  position:
+    | 'top'
+    | 'bottom'
+    | 'left'
+    | 'right'
+    | 'top-left'
+    | 'top-right'
+    | 'bottom-left'
+    | 'bottom-right';
   /** Padding from edge */
   padding?: number;
   /** Auto-hide when not interacting */
@@ -277,10 +285,16 @@ export function validateUITrait(
 
   switch (name) {
     case 'ui_floating':
-      if (config.follow_delay !== undefined && (typeof config.follow_delay !== 'number' || config.follow_delay < 0)) {
+      if (
+        config.follow_delay !== undefined &&
+        (typeof config.follow_delay !== 'number' || config.follow_delay < 0)
+      ) {
         errors.push('follow_delay must be a non-negative number');
       }
-      if (config.distance !== undefined && (typeof config.distance !== 'number' || config.distance <= 0)) {
+      if (
+        config.distance !== undefined &&
+        (typeof config.distance !== 'number' || config.distance <= 0)
+      ) {
         errors.push('distance must be a positive number');
       }
       break;
@@ -298,13 +312,25 @@ export function validateUITrait(
       break;
 
     case 'ui_curved':
-      if (config.radius !== undefined && (typeof config.radius !== 'number' || config.radius <= 0)) {
+      if (
+        config.radius !== undefined &&
+        (typeof config.radius !== 'number' || config.radius <= 0)
+      ) {
         errors.push('radius must be a positive number');
       }
       break;
 
     case 'ui_docked':
-      const validPositions = ['top', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right'];
+      const validPositions = [
+        'top',
+        'bottom',
+        'left',
+        'right',
+        'top-left',
+        'top-right',
+        'bottom-left',
+        'bottom-right',
+      ];
       if (config.position && !validPositions.includes(config.position as string)) {
         errors.push(`position must be one of: ${validPositions.join(', ')}`);
       }

@@ -221,7 +221,7 @@ export {
 } from './browser/BrowserRuntime.js';
 
 // Physics and Traits
-export { 
+export {
   PhysicsWorld,
   type CollisionEvent,
   type RigidbodyConfig,
@@ -229,8 +229,8 @@ export {
   type PhysicsOptions,
 } from './physics/PhysicsWorld.js';
 export { TraitSystem, type TraitHandler, type TraitContext } from './traits/TraitSystem.js';
-export { 
-  GrabbableTrait, 
+export {
+  GrabbableTrait,
   ThrowableTrait,
   CollidableTrait,
   PhysicsTrait,

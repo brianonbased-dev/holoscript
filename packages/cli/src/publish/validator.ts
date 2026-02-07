@@ -7,7 +7,7 @@
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
-import { join, extname } from 'path';
+import { join } from 'path';
 
 // ============================================================================
 // Types
@@ -266,7 +266,8 @@ export class PublishValidator {
     const version = this.packageJson.version;
 
     // Check semver format
-    const semverRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+    const semverRegex =
+      /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
     if (!semverRegex.test(version)) {
       errors.push({
         code: 'E_INVALID_VERSION',
@@ -425,9 +426,7 @@ export class PublishValidator {
         const content = readFileSync(file, 'utf-8');
 
         // Dynamic import to avoid circular deps
-        const { HoloCompositionParser, HoloScriptCodeParser } = await import(
-          '@holoscript/core'
-        );
+        const { HoloCompositionParser, HoloScriptCodeParser } = await import('@holoscript/core');
 
         const isHolo = file.endsWith('.holo');
         let parseResult: any;
@@ -599,10 +598,7 @@ export class PublishValidator {
 // Factory Functions
 // ============================================================================
 
-export function createPublishValidator(
-  cwd?: string,
-  options?: ValidatorOptions
-): PublishValidator {
+export function createPublishValidator(cwd?: string, options?: ValidatorOptions): PublishValidator {
   return new PublishValidator(cwd, options);
 }
 

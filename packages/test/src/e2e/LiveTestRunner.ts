@@ -1,6 +1,6 @@
 /**
  * Live Integration Test Runner for HoloScript
- * 
+ *
  * Tests REAL behavior, not mocked:
  * - Actually parses .holo files from disk
  * - Actually compiles to runtime representation
@@ -11,7 +11,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { observability, withTracing, withTracingSync } from '../observability/index.js';
+import { observability, withTracing } from '../observability/index.js';
 
 // ESM-compatible __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -83,7 +83,7 @@ export class LiveTestRunner {
       const dirnameRoot = path.resolve(__dirname, '../../../../..');
       // Fallback to process.cwd() and walk up to find package.json at root
       const cwdRoot = this.findMonorepoRoot(process.cwd());
-      
+
       // Use whichever one has an examples directory
       if (fs.existsSync(path.join(dirnameRoot, 'examples'))) {
         this.rootDir = dirnameRoot;
@@ -191,7 +191,7 @@ export class LiveTestRunner {
 
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
-      
+
       // Parse with real parser
       const parseResult = await withTracing('parse.holo', async () => {
         if (this.core?.parseHolo) {
@@ -204,7 +204,7 @@ export class LiveTestRunner {
 
       // Check result
       const hasErrors = this.hasParseErrors(parseResult);
-      
+
       if (hasErrors) {
         observability.increment('parse.errors');
         this.results.push({
@@ -257,7 +257,7 @@ export class LiveTestRunner {
 
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
-      
+
       // Use parseHoloScriptPlus which handles both .hs and .hsplus syntax
       // HoloScriptCodeParser was hanging, so we use the better-tested parser
       const parseResult = await withTracing('parse.hs', async () => {
@@ -270,7 +270,7 @@ export class LiveTestRunner {
       observability.recordLatency('parse', Date.now() - start);
 
       const hasErrors = this.hasParseErrors(parseResult);
-      
+
       if (hasErrors) {
         observability.increment('parse.errors');
       }
@@ -316,7 +316,7 @@ export class LiveTestRunner {
 
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
-      
+
       // Parse with real parser
       const parseResult = await withTracing('parse.hsplus', async () => {
         if (this.core?.parseHoloScriptPlus) {
@@ -328,7 +328,7 @@ export class LiveTestRunner {
       observability.recordLatency('parse', Date.now() - start);
 
       const hasErrors = this.hasParseErrors(parseResult);
-      
+
       if (hasErrors) {
         observability.increment('parse.errors');
       }
@@ -383,13 +383,13 @@ composition "RoundTrip Test" {
 
       // First parse
       const ast1 = this.core.parseHolo(testCode);
-      
+
       // Serialize (if available) or just verify second parse matches
       const ast2 = this.core.parseHolo(testCode);
-      
+
       // Compare (simplified - just check both succeed)
       const passed = !this.hasParseErrors(ast1) && !this.hasParseErrors(ast2);
-      
+
       this.results.push({
         name: 'Round-trip: Parse -> Serialize -> Parse',
         passed,
@@ -426,7 +426,7 @@ composition "RoundTrip Test" {
       try {
         // Should NOT throw, should return error in result
         const result = this.core?.parseHolo?.(testCase.code);
-        
+
         // Passing = we got a result (even if it has errors) without throwing
         this.results.push({
           name: `Error recovery: ${testCase.name}`,
@@ -500,7 +500,7 @@ orb "test" @grabbable @throwable @collidable { geometry: "sphere" }
         // Bug cases use @world syntax, so parse with hsplus parser
         const result = this.core?.parseHoloScriptPlus?.(testCase.code);
         const hasErrors = this.hasParseErrors(result);
-        
+
         this.results.push({
           name: `Bug case: ${testCase.name}`,
           passed: !hasErrors,
@@ -538,7 +538,7 @@ orb "item" @grabbable { geometry: "sphere" }
     for (let i = 0; i < 100; i++) {
       try {
         this.core?.parseHoloScriptPlus?.(testCode);
-      } catch (e) {
+      } catch (_e) {
         // Ignore parse errors for memory test
       }
     }
@@ -571,16 +571,16 @@ orb "item" @grabbable { geometry: "sphere" }
    */
   private findFiles(dir: string, ext: string): string[] {
     const files: string[] = [];
-    
+
     if (!fs.existsSync(dir)) {
       return files;
     }
 
     const entries = fs.readdirSync(dir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
-      
+
       if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
         files.push(...this.findFiles(fullPath, ext));
       } else if (entry.isFile() && entry.name.endsWith(ext)) {
@@ -594,44 +594,47 @@ orb "item" @grabbable { geometry: "sphere" }
   private hasParseErrors(result: unknown): boolean {
     if (!result) return true;
     const r = result as Record<string, unknown>;
-    
+
     // Check various error formats
     if (r.errors && Array.isArray(r.errors) && r.errors.length > 0) return true;
     if (r.success === false) return true;
     if (r.error) return true;
-    
+
     return false;
   }
 
   private extractErrors(result: unknown): string {
     if (!result) return 'No result';
     const r = result as Record<string, unknown>;
-    
+
     if (r.errors && Array.isArray(r.errors)) {
-      return r.errors.slice(0, 3).map((e: unknown) => {
-        if (typeof e === 'string') return e;
-        if (typeof e === 'object' && e !== null) {
-          const err = e as Record<string, unknown>;
-          return err.message || err.error || JSON.stringify(e);
-        }
-        return String(e);
-      }).join('; ');
+      return r.errors
+        .slice(0, 3)
+        .map((e: unknown) => {
+          if (typeof e === 'string') return e;
+          if (typeof e === 'object' && e !== null) {
+            const err = e as Record<string, unknown>;
+            return err.message || err.error || JSON.stringify(e);
+          }
+          return String(e);
+        })
+        .join('; ');
     }
-    
+
     if (r.error) return String(r.error);
     if (r.message) return String(r.message);
-    
+
     return 'Unknown error';
   }
 
   private countNodes(result: unknown): number {
     if (!result) return 0;
     const r = result as Record<string, unknown>;
-    
+
     if (r.ast && Array.isArray(r.ast)) return r.ast.length;
     if (r.nodes && Array.isArray(r.nodes)) return r.nodes.length;
     if (Array.isArray(result)) return result.length;
-    
+
     return 1;
   }
 
@@ -639,8 +642,8 @@ orb "item" @grabbable { geometry: "sphere" }
     const health = await observability.getHealth();
     const metrics = observability.getMetrics();
 
-    const passed = this.results.filter(r => r.passed).length;
-    const failed = this.results.filter(r => !r.passed).length;
+    const passed = this.results.filter((r) => r.passed).length;
+    const failed = this.results.filter((r) => !r.passed).length;
 
     return {
       totalTests: this.results.length,
@@ -652,9 +655,10 @@ orb "item" @grabbable { geometry: "sphere" }
       health: {
         status: health.status,
         memoryMB: Math.round(metrics.memoryUsageMB),
-        errorRate: metrics.parseRequests > 0
-          ? ((metrics.parseErrors / metrics.parseRequests) * 100).toFixed(1) + '%'
-          : 'N/A',
+        errorRate:
+          metrics.parseRequests > 0
+            ? ((metrics.parseErrors / metrics.parseRequests) * 100).toFixed(1) + '%'
+            : 'N/A',
       },
     };
   }
@@ -683,7 +687,9 @@ export async function runLiveTests(): Promise<LiveTestSummary> {
 
   console.log('\n' + '-'.repeat(60));
   console.log(`Total:   ${summary.totalTests} tests`);
-  console.log(`Passed:  ${summary.passed} (${((summary.passed / summary.totalTests) * 100).toFixed(1)}%)`);
+  console.log(
+    `Passed:  ${summary.passed} (${((summary.passed / summary.totalTests) * 100).toFixed(1)}%)`
+  );
   console.log(`Failed:  ${summary.failed}`);
   console.log(`Time:    ${summary.duration}ms`);
   console.log(`Health:  ${summary.health.status}`);
@@ -696,10 +702,12 @@ export async function runLiveTests(): Promise<LiveTestSummary> {
 
 // Main execution when run directly
 if (import.meta.url === `file://${__filename.replace(/\\/g, '/')}`) {
-  runLiveTests().then((summary) => {
-    process.exit(summary.failed > 0 ? 1 : 0);
-  }).catch((err) => {
-    console.error('Live test run failed:', err);
-    process.exit(1);
-  });
+  runLiveTests()
+    .then((summary) => {
+      process.exit(summary.failed > 0 ? 1 : 0);
+    })
+    .catch((err) => {
+      console.error('Live test run failed:', err);
+      process.exit(1);
+    });
 }

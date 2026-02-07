@@ -18,9 +18,7 @@ import { deprecationWarningRule } from './rules/deprecation-warning';
 export * from './types';
 import type {
   Severity,
-  RuleCategory,
   LintDiagnostic,
-  LintFix,
   LintResult,
   LinterConfig,
   RuleConfig,
@@ -70,7 +68,7 @@ export const DEFAULT_CONFIG: LinterConfig = {
     'sorted-properties': 'info',
     'max-line-length': 'warn',
     'trailing-comma': 'info',
-    'quotes': 'info',
+    quotes: 'info',
 
     // Type safety
     'no-implicit-any': 'warn',
@@ -157,9 +155,9 @@ const BUILT_IN_RULES: Rule[] = [
                 line: node.loc?.start.line || 1,
                 column: node.loc?.start.column || 1,
                 fix: {
-                  range: { 
+                  range: {
                     start: 0, // This needs to be absolute offset, which we don't have easily in current HSPlusNode
-                    end: 0 
+                    end: 0,
                   },
                   replacement: pascal,
                 },
@@ -228,59 +226,147 @@ const BUILT_IN_RULES: Rule[] = [
 
       const validTraits = [
         // Interaction
-        'grabbable', 'throwable', 'pointable', 'hoverable', 'scalable', 'rotatable', 
-        'stackable', 'snappable', 'breakable', 'haptic', 'stretchable', 'moldable',
+        'grabbable',
+        'throwable',
+        'pointable',
+        'hoverable',
+        'scalable',
+        'rotatable',
+        'stackable',
+        'snappable',
+        'breakable',
+        'haptic',
+        'stretchable',
+        'moldable',
         // Humanoid/Avatar
-        'skeleton', 'body', 'face', 'expressive', 'hair', 'clothing', 'hands', 
-        'character_voice', 'locomotion', 'poseable', 'morph', 'networked', 'proactive',
+        'skeleton',
+        'body',
+        'face',
+        'expressive',
+        'hair',
+        'clothing',
+        'hands',
+        'character_voice',
+        'locomotion',
+        'poseable',
+        'morph',
+        'networked',
+        'proactive',
         // Media/Social
-        'recordable', 'streamable', 'camera', 'video', 'trackable', 'survey',
-        'abtest', 'heatmap', 'shareable', 'embeddable', 'qr', 'collaborative',
+        'recordable',
+        'streamable',
+        'camera',
+        'video',
+        'trackable',
+        'survey',
+        'abtest',
+        'heatmap',
+        'shareable',
+        'embeddable',
+        'qr',
+        'collaborative',
         // Environment
-        'plane_detection', 'mesh_detection', 'anchor', 'persistent_anchor', 
-        'shared_anchor', 'geospatial', 'occlusion', 'light_estimation',
+        'plane_detection',
+        'mesh_detection',
+        'anchor',
+        'persistent_anchor',
+        'shared_anchor',
+        'geospatial',
+        'occlusion',
+        'light_estimation',
         // Input
-        'eye_tracking', 'hand_tracking', 'controller', 'spatial_accessory', 
-        'body_tracking', 'face_tracking',
+        'eye_tracking',
+        'hand_tracking',
+        'controller',
+        'spatial_accessory',
+        'body_tracking',
+        'face_tracking',
         // Accessibility
-        'accessible', 'alt_text', 'spatial_audio_cue', 'sonification', 
-        'haptic_cue', 'magnifiable', 'high_contrast', 'motion_reduced', 
-        'subtitle', 'screen_reader',
+        'accessible',
+        'alt_text',
+        'spatial_audio_cue',
+        'sonification',
+        'haptic_cue',
+        'magnifiable',
+        'high_contrast',
+        'motion_reduced',
+        'subtitle',
+        'screen_reader',
         // Volumetric/GPU
-        'gaussian_splat', 'nerf', 'volumetric_video', 'point_cloud', 'photogrammetry',
-        'compute', 'gpu_particle', 'gpu_physics', 'gpu_buffer',
+        'gaussian_splat',
+        'nerf',
+        'volumetric_video',
+        'point_cloud',
+        'photogrammetry',
+        'compute',
+        'gpu_particle',
+        'gpu_physics',
+        'gpu_buffer',
         // Digital Twin/IOT
-        'sensor', 'digital_twin', 'data_binding', 'alert', 'heatmap_3d',
+        'sensor',
+        'digital_twin',
+        'data_binding',
+        'alert',
+        'heatmap_3d',
         // Autonomous Agent
-        'behavior_tree', 'goal_oriented', 'llm_agent', 'memory', 'perception', 
-        'emotion', 'dialogue', 'faction', 'patrol',
+        'behavior_tree',
+        'goal_oriented',
+        'llm_agent',
+        'memory',
+        'perception',
+        'emotion',
+        'dialogue',
+        'faction',
+        'patrol',
         // Audio
-        'ambisonics', 'hrtf', 'reverb_zone', 'audio_occlusion', 'audio_portal', 
-        'audio_material', 'head_tracked_audio', 'spatial_audio', 'voice', 
+        'ambisonics',
+        'hrtf',
+        'reverb_zone',
+        'audio_occlusion',
+        'audio_portal',
+        'audio_material',
+        'head_tracked_audio',
+        'spatial_audio',
+        'voice',
         'reactive_audio',
         // Interop/Web3
-        'usd', 'gltf', 'fbx', 'material_x', 'scene_graph', 'nft', 
-        'token_gated', 'wallet', 'marketplace', 'portable',
+        'usd',
+        'gltf',
+        'fbx',
+        'material_x',
+        'scene_graph',
+        'nft',
+        'token_gated',
+        'wallet',
+        'marketplace',
+        'portable',
         // Physics
-        'cloth', 'fluid', 'soft_body', 'rope', 'chain', 'wind', 'buoyancy', 'destruction'
+        'cloth',
+        'fluid',
+        'soft_body',
+        'rope',
+        'chain',
+        'wind',
+        'buoyancy',
+        'destruction',
       ];
 
       const checkTraits = (nodes: LintASTNode[]) => {
         for (const node of nodes) {
           if (node.directives) {
-             for (const dir of node.directives) {
-               if (dir.type === 'trait') {
-                 if (!validTraits.includes(dir.name)) {
-                   diagnostics.push({
-                     ruleId: 'valid-trait-syntax',
-                     message: `Unknown or unsupported trait "@${dir.name}"`,
-                     severity: 'warning',
-                     line: (dir as any).loc?.start.line || 1,
-                     column: (dir as any).loc?.start.column || 1,
-                   });
-                 }
-               }
-             }
+            for (const dir of node.directives) {
+              if (dir.type === 'trait') {
+                if (!validTraits.includes(dir.name)) {
+                  diagnostics.push({
+                    ruleId: 'valid-trait-syntax',
+                    message: `Unknown or unsupported trait "@${dir.name}"`,
+                    severity: 'warning',
+                    line: (dir as any).loc?.start.line || 1,
+                    column: (dir as any).loc?.start.column || 1,
+                  });
+                }
+              }
+            }
           }
           if (node.children) checkTraits(node.children);
         }
@@ -303,8 +389,8 @@ const BUILT_IN_RULES: Rule[] = [
       if (!context.ast) return diagnostics;
 
       const deprecated = {
-        'talkable': 'Use @voice instead',
-        'collision': 'Use @trigger or @physics instead',
+        talkable: 'Use @voice instead',
+        collision: 'Use @trigger or @physics instead',
       };
 
       const checkNodes = (nodes: LintASTNode[]) => {
@@ -996,7 +1082,12 @@ export function createLinter(config: Partial<LinterConfig> = {}): HoloScriptLint
 
 // Rule exports
 export { noDeadCodeRule, createNoDeadCodeRule, type NoDeadCodeOptions } from './rules/no-dead-code';
-export { deprecationWarningRule, createDeprecationWarningRule, type DeprecationWarningOptions, type DeprecationEntry } from './rules/deprecation-warning';
+export {
+  deprecationWarningRule,
+  createDeprecationWarningRule,
+  type DeprecationWarningOptions,
+  type DeprecationEntry,
+} from './rules/deprecation-warning';
 
 // Default export
 export default HoloScriptLinter;

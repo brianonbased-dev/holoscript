@@ -13,7 +13,7 @@
  */
 
 import { HoloScriptPlusParser } from './HoloScriptPlusParser';
-import type { HSPlusParserOptions, ASTProgram } from '../types/AdvancedTypeSystem';
+import type { HSPlusParserOptions } from '../types/AdvancedTypeSystem';
 import type { ParseTaskData, ParseTaskResult } from './ParseWorker';
 
 // Environment detection
@@ -64,8 +64,8 @@ class SimpleEventEmitter {
 }
 
 // Dynamic imports for Node.js modules (only executed in Node environment)
-let WorkerPool: any = null;
-let createWorkerPool: any = null;
+const _WorkerPool: any = null;
+const _createWorkerPool: any = null;
 
 async function loadNodeModules(): Promise<{
   cpuCount: number;
@@ -260,9 +260,7 @@ export class ParallelParser extends SimpleEventEmitter {
     }
 
     // Sort files by size (largest first for better load balancing)
-    const sortedFiles = [...files].sort((a, b) =>
-      b.content.length - a.content.length
-    );
+    const sortedFiles = [...files].sort((a, b) => b.content.length - a.content.length);
 
     // Use fallback if no worker pool
     if (!this.workerPool && this.fallbackParser) {
@@ -298,7 +296,7 @@ export class ParallelParser extends SimpleEventEmitter {
           }
 
           // Build dependency graph
-          const dependencies = result.imports.map(imp => imp.path);
+          const dependencies = result.imports.map((imp) => imp.path);
           dependencyGraph.set(result.filePath, dependencies);
         } else {
           failCount++;
@@ -374,26 +372,25 @@ export class ParallelParser extends SimpleEventEmitter {
     }));
 
     try {
-      const results: ParseTaskResult[] = await this.workerPool.executeAll(
-        'parse',
-        tasks
-      );
+      const results: ParseTaskResult[] = await this.workerPool.executeAll('parse', tasks);
       return results;
     } catch (error: any) {
       this.log(`Batch parse error: ${error.message}`);
 
       // Return error results for all files in batch
-      return tasks.map(task => ({
+      return tasks.map((task) => ({
         fileId: task.fileId,
         filePath: task.filePath,
         ast: null,
         success: false,
-        errors: [{
-          message: error.message,
-          line: 0,
-          column: 0,
-          code: 'WORKER_ERROR',
-        }],
+        errors: [
+          {
+            message: error.message,
+            line: 0,
+            column: 0,
+            code: 'WORKER_ERROR',
+          },
+        ],
         warnings: [],
         exports: [],
         imports: [],
@@ -405,10 +402,7 @@ export class ParallelParser extends SimpleEventEmitter {
   /**
    * Sequential fallback parsing
    */
-  private parseSequential(
-    files: FileInput[],
-    startTime: number
-  ): ParallelParseResult {
+  private parseSequential(files: FileInput[], startTime: number): ParallelParseResult {
     const results = new Map<string, ParseTaskResult>();
     const symbolTable = new Map<string, SymbolInfo>();
     const dependencyGraph = new Map<string, string[]>();
@@ -449,7 +443,7 @@ export class ParallelParser extends SimpleEventEmitter {
             });
           }
 
-          const dependencies = result.imports.map(imp => imp.path);
+          const dependencies = result.imports.map((imp) => imp.path);
           dependencyGraph.set(file.path, dependencies);
         } else {
           failCount++;
@@ -471,12 +465,14 @@ export class ParallelParser extends SimpleEventEmitter {
           filePath: file.path,
           ast: null,
           success: false,
-          errors: [{
-            message: error.message,
-            line: 0,
-            column: 0,
-            code: 'PARSE_CRASH',
-          }],
+          errors: [
+            {
+              message: error.message,
+              line: 0,
+              column: 0,
+              code: 'PARSE_CRASH',
+            },
+          ],
           warnings: [],
           exports: [],
           imports: [],
@@ -503,7 +499,7 @@ export class ParallelParser extends SimpleEventEmitter {
     results: Map<string, ParseTaskResult>,
     symbolTable: Map<string, SymbolInfo>
   ): void {
-    for (const [filePath, result] of results) {
+    for (const [_filePath, result] of results) {
       if (!result.success || !result.ast) continue;
 
       // Check that imported symbols exist
@@ -592,9 +588,7 @@ export class ParallelParser extends SimpleEventEmitter {
 /**
  * Create a parallel parser with default options
  */
-export function createParallelParser(
-  options?: ParallelParserOptions
-): ParallelParser {
+export function createParallelParser(options?: ParallelParserOptions): ParallelParser {
   return new ParallelParser(options);
 }
 

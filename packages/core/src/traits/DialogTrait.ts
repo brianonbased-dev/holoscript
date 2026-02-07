@@ -51,7 +51,14 @@ export interface DialogCondition {
  */
 export interface DialogAction {
   /** Action type */
-  type: 'set_variable' | 'add_item' | 'remove_item' | 'play_animation' | 'play_sound' | 'emit_event' | 'custom';
+  type:
+    | 'set_variable'
+    | 'add_item'
+    | 'remove_item'
+    | 'play_animation'
+    | 'play_sound'
+    | 'emit_event'
+    | 'custom';
 
   /** Target variable/item/animation */
   target?: string;
@@ -343,9 +350,7 @@ export class DialogTrait {
    */
   public addTree(tree: DialogTree): void {
     // Convert nodes object to Map if needed
-    const nodes = tree.nodes instanceof Map
-      ? tree.nodes
-      : new Map(Object.entries(tree.nodes));
+    const nodes = tree.nodes instanceof Map ? tree.nodes : new Map(Object.entries(tree.nodes));
 
     this.trees.set(tree.id, {
       ...tree,
@@ -414,9 +419,10 @@ export class DialogTrait {
   public goToNode(nodeId: string): boolean {
     if (!this.currentTree) return false;
 
-    const nodes = this.currentTree.nodes instanceof Map
-      ? this.currentTree.nodes
-      : new Map(Object.entries(this.currentTree.nodes));
+    const nodes =
+      this.currentTree.nodes instanceof Map
+        ? this.currentTree.nodes
+        : new Map(Object.entries(this.currentTree.nodes));
 
     const node = nodes.get(nodeId);
     if (!node) {
@@ -501,7 +507,8 @@ export class DialogTrait {
     if (!node.text) return;
 
     this.textProgress = 0;
-    const speed = node.typingSpeed ?? this.currentTree?.defaultTypingSpeed ?? this.config.typingSpeed ?? 50;
+    const speed =
+      node.typingSpeed ?? this.currentTree?.defaultTypingSpeed ?? this.config.typingSpeed ?? 50;
     const interval = 1000 / speed;
 
     const text = this.interpolateText(node.text);
@@ -568,7 +575,11 @@ export class DialogTrait {
     if (!node.branches) return;
 
     for (const branch of node.branches) {
-      if (this.evaluateConditions(Array.isArray(branch.condition) ? branch.condition : [branch.condition])) {
+      if (
+        this.evaluateConditions(
+          Array.isArray(branch.condition) ? branch.condition : [branch.condition]
+        )
+      ) {
         this.goToNode(branch.next);
         return;
       }

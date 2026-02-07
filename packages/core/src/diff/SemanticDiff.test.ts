@@ -254,10 +254,7 @@ describe('SemanticDiffEngine - Comment Ignoring', () => {
     const engine = new SemanticDiffEngine({ ignoreComments: true });
 
     const oldAST = createNode('Program', {
-      children: [
-        createNode('Object', { name: 'A' }),
-        { type: 'Comment', value: 'inline comment' },
-      ],
+      children: [createNode('Object', { name: 'A' }), { type: 'Comment', value: 'inline comment' }],
     });
     const newAST = createNode('Program', {
       children: [createNode('Object', { name: 'A' })],
@@ -318,7 +315,10 @@ describe('SemanticDiffEngine - Rename Detection', () => {
       playerController: createNode('Object', { name: 'PlayerController', traits: ['Movable'] }),
     });
     const newAST = createNode('Program', {
-      characterController: createNode('Object', { name: 'CharacterController', traits: ['Movable'] }),
+      characterController: createNode('Object', {
+        name: 'CharacterController',
+        traits: ['Movable'],
+      }),
     });
 
     const result = engine.diff(oldAST, newAST);

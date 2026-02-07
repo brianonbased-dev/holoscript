@@ -2,24 +2,24 @@
 
 ### By Domain (165+ Traits)
 
-| Domain | Traits |
-|----------|--------|
-| **Core Interaction** | `@grabbable` `@throwable` `@pointable` `@hoverable` `@scalable` `@rotatable` `@stackable` `@snappable` `@breakable` `@haptic` `@stretchable` `@moldable` `@interactive` `@clickable` |
-| **Humanoid/Avatar** | `@skeleton` `@body` `@face` `@expressive` `@hair` `@clothing` `@hands` `@character_voice` `@locomotion` `@poseable` `@morph` `@avatar_embodiment` `@spectator` `@role` |
-| **Environment** | `@plane_detection` `@mesh_detection` `@anchor` `@persistent_anchor` `@shared_anchor` `@geospatial` `@occlusion` `@light_estimation` `@geospatial_anchor` `@terrain_anchor` `@rooftop_anchor` `@vps` `@poi` `@world_locked` |
-| **Input Modality** | `@eye_tracking` `@hand_tracking` `@controller` `@spatial_accessory` `@body_tracking` `@face_tracking` |
-| **Accessibility** | `@accessible` `@alt_text` `@spatial_audio_cue` `@sonification` `@haptic_cue` `@magnifiable` `@high_contrast` `@motion_reduced` `@subtitle` `@screen_reader` |
-| **Volumetric** | `@gaussian_splat` `@nerf` `@volumetric_video` `@point_cloud` `@photogrammetry` |
-| **WebGPU Compute** | `@compute` `@gpu_particle` `@gpu_physics` `@gpu_buffer` |
-| **Digital Twin & IoT** | `@sensor` `@digital_twin` `@data_binding` `@alert` `@heatmap_3d` |
-| **Auto-Agents** | `@behavior_tree` `@goal_oriented` `@llm_agent` `@memory` `@perception` `@emotion` `@dialogue` `@faction` `@patrol` `@npc` `@dialog` |
-| **Spatial Audio** | `@ambisonics` `@hrtf` `@reverb_zone` `@audio_occlusion` `@audio_portal` `@audio_material` `@head_tracked_audio` `@spatial_audio` `@ambient` `@voice_activated` |
-| **Interoperability** | `@usd` `@gltf` `@fbx` `@material_x` `@scene_graph` `@portable` |
-| **Web3 & Ownership** | `@nft` `@token_gated` `@wallet` `@marketplace` |
-| **Physics** | `@cloth` `@fluid` `@soft_body` `@rope` `@chain` `@wind` `@buoyancy` `@destruction` `@physics` `@collidable` `@rigidbody` `@joint` `@trigger` |
-| **State & Logic** | `@state` `@reactive` `@observable` `@computed` `@synced` `@persistent` `@owned` `@host_only` |
-| **Visual Effects** | `@animation` `@timeline` `@choreography` `@particle` `@transition` `@filter` `@trail` `@glowing` `@emissive` `@transparent` `@reflective` `@animated` `@billboard` `@rotating` `@lod` |
-| **Behavioral** | `@equippable` `@consumable` `@proactive` `@narrator` |
+| Domain                 | Traits                                                                                                                                                                                                                     |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Core Interaction**   | `@grabbable` `@throwable` `@pointable` `@hoverable` `@scalable` `@rotatable` `@stackable` `@snappable` `@breakable` `@haptic` `@stretchable` `@moldable` `@interactive` `@clickable`                                       |
+| **Humanoid/Avatar**    | `@skeleton` `@body` `@face` `@expressive` `@hair` `@clothing` `@hands` `@character_voice` `@locomotion` `@poseable` `@morph` `@avatar_embodiment` `@spectator` `@role`                                                     |
+| **Environment**        | `@plane_detection` `@mesh_detection` `@anchor` `@persistent_anchor` `@shared_anchor` `@geospatial` `@occlusion` `@light_estimation` `@geospatial_anchor` `@terrain_anchor` `@rooftop_anchor` `@vps` `@poi` `@world_locked` |
+| **Input Modality**     | `@eye_tracking` `@hand_tracking` `@controller` `@spatial_accessory` `@body_tracking` `@face_tracking`                                                                                                                      |
+| **Accessibility**      | `@accessible` `@alt_text` `@spatial_audio_cue` `@sonification` `@haptic_cue` `@magnifiable` `@high_contrast` `@motion_reduced` `@subtitle` `@screen_reader`                                                                |
+| **Volumetric**         | `@gaussian_splat` `@nerf` `@volumetric_video` `@point_cloud` `@photogrammetry`                                                                                                                                             |
+| **WebGPU Compute**     | `@compute` `@gpu_particle` `@gpu_physics` `@gpu_buffer`                                                                                                                                                                    |
+| **Digital Twin & IoT** | `@sensor` `@digital_twin` `@data_binding` `@alert` `@heatmap_3d`                                                                                                                                                           |
+| **Auto-Agents**        | `@behavior_tree` `@goal_oriented` `@llm_agent` `@memory` `@perception` `@emotion` `@dialogue` `@faction` `@patrol` `@npc` `@dialog`                                                                                        |
+| **Spatial Audio**      | `@ambisonics` `@hrtf` `@reverb_zone` `@audio_occlusion` `@audio_portal` `@audio_material` `@head_tracked_audio` `@spatial_audio` `@ambient` `@voice_activated`                                                             |
+| **Interoperability**   | `@usd` `@gltf` `@fbx` `@material_x` `@scene_graph` `@portable`                                                                                                                                                             |
+| **Web3 & Ownership**   | `@nft` `@token_gated` `@wallet` `@marketplace`                                                                                                                                                                             |
+| **Physics**            | `@cloth` `@fluid` `@soft_body` `@rope` `@chain` `@wind` `@buoyancy` `@destruction` `@physics` `@collidable` `@rigidbody` `@joint` `@trigger`                                                                               |
+| **State & Logic**      | `@state` `@reactive` `@observable` `@computed` `@synced` `@persistent` `@owned` `@host_only`                                                                                                                               |
+| **Visual Effects**     | `@animation` `@timeline` `@choreography` `@particle` `@transition` `@filter` `@trail` `@glowing` `@emissive` `@transparent` `@reflective` `@animated` `@billboard` `@rotating` `@lod`                                      |
+| **Behavioral**         | `@equippable` `@consumable` `@proactive` `@narrator`                                                                                                                                                                       |
 
 ---
 
@@ -699,6 +699,7 @@ template "VibratingObject" {
 | `duration` | number | `100` | Haptic pulse duration (ms) |
 
 **Built-in Patterns:**
+
 - `soft` - Gentle tap
 - `hard` - Strong impact
 - `metal` - Metallic ring
@@ -888,4 +889,4 @@ template "Simulation" {
 
 ---
 
-*Note: This is a living document. For a full list of all 165+ traits, see the [VRTraitSystem.ts](file:///c:/Users/josep/Documents/GitHub/HoloScript/packages/core/src/traits/VRTraitSystem.ts).*
+_Note: This is a living document. For a full list of all 165+ traits, see the [VRTraitSystem.ts](file:///c:/Users/josep/Documents/GitHub/HoloScript/packages/core/src/traits/VRTraitSystem.ts)._

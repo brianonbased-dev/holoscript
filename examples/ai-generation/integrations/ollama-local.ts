@@ -1,6 +1,6 @@
 /**
  * Ollama Local Model Integration for HoloScript
- * 
+ *
  * Run HoloScript generation locally with Ollama for privacy,
  * offline use, and cost savings.
  */
@@ -8,16 +8,16 @@
 import { Ollama } from 'ollama';
 
 const ollama = new Ollama({
-  host: process.env.OLLAMA_HOST || 'http://localhost:11434'
+  host: process.env.OLLAMA_HOST || 'http://localhost:11434',
 });
 
 // Recommended models for HoloScript generation
 const RECOMMENDED_MODELS = {
-  fast: 'llama3.2:3b',      // Quick responses, good for simple scenes
-  balanced: 'llama3.1:8b',  // Good balance of speed and quality
-  quality: 'llama3.1:70b',  // Best quality, slower
-  coding: 'codellama:13b',  // Specialized for code generation
-  mixtral: 'mixtral:8x7b'   // Great for complex reasoning
+  fast: 'llama3.2:3b', // Quick responses, good for simple scenes
+  balanced: 'llama3.1:8b', // Good balance of speed and quality
+  quality: 'llama3.1:70b', // Best quality, slower
+  coding: 'codellama:13b', // Specialized for code generation
+  mixtral: 'mixtral:8x7b', // Great for complex reasoning
 };
 
 // System prompt optimized for local models
@@ -58,17 +58,17 @@ export async function generateLocal(
   options: GenerationOptions = {}
 ): Promise<string> {
   const model = options.model || RECOMMENDED_MODELS.balanced;
-  
+
   const response = await ollama.chat({
     model,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: `Create a VR scene: ${prompt}` }
+      { role: 'user', content: `Create a VR scene: ${prompt}` },
     ],
     options: {
       temperature: options.temperature ?? 0.7,
-      num_predict: options.maxTokens ?? 2048
-    }
+      num_predict: options.maxTokens ?? 2048,
+    },
   });
 
   // Extract code from response
@@ -84,18 +84,18 @@ export async function* streamLocal(
   options: GenerationOptions = {}
 ): AsyncGenerator<string> {
   const model = options.model || RECOMMENDED_MODELS.balanced;
-  
+
   const response = await ollama.chat({
     model,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: `Create a VR scene: ${prompt}` }
+      { role: 'user', content: `Create a VR scene: ${prompt}` },
     ],
     stream: true,
     options: {
       temperature: options.temperature ?? 0.7,
-      num_predict: options.maxTokens ?? 2048
-    }
+      num_predict: options.maxTokens ?? 2048,
+    },
   });
 
   let inCodeBlock = false;
@@ -140,23 +140,23 @@ export async function compareModels(
   models: string[] = [RECOMMENDED_MODELS.fast, RECOMMENDED_MODELS.balanced]
 ): Promise<Map<string, { code: string; duration: number }>> {
   const results = new Map();
-  
+
   for (const model of models) {
     const start = Date.now();
     try {
       const code = await generateLocal(prompt, { model });
       results.set(model, {
         code,
-        duration: Date.now() - start
+        duration: Date.now() - start,
       });
     } catch (error) {
       results.set(model, {
         code: `// Error: ${error}`,
-        duration: Date.now() - start
+        duration: Date.now() - start,
       });
     }
   }
-  
+
   return results;
 }
 
@@ -169,15 +169,15 @@ export async function* interactiveRefinement(
 ): AsyncGenerator<{ code: string; iteration: number }> {
   let currentCode = await generateLocal(initialPrompt, options);
   let iteration = 1;
-  
+
   yield { code: currentCode, iteration };
 
   // This would be called by external input
   while (true) {
     const feedback: string = yield { code: currentCode, iteration };
-    
+
     if (!feedback || feedback === 'done') break;
-    
+
     const refinedPrompt = `Current HoloScript code:
 \`\`\`holo
 ${currentCode}
@@ -189,7 +189,7 @@ Generate an improved version based on the feedback. Output only the new code.`;
 
     currentCode = await generateLocal(refinedPrompt, options);
     iteration++;
-    
+
     yield { code: currentCode, iteration };
   }
 }
@@ -199,7 +199,7 @@ Generate an improved version based on the feedback. Output only the new code.`;
  */
 export async function listModels(): Promise<string[]> {
   const models = await ollama.list();
-  return models.models.map(m => m.name);
+  return models.models.map((m) => m.name);
 }
 
 /**
@@ -207,16 +207,16 @@ export async function listModels(): Promise<string[]> {
  */
 export async function pullModel(model: string = RECOMMENDED_MODELS.balanced): Promise<void> {
   console.log(`Pulling ${model}...`);
-  
+
   const response = await ollama.pull({ model, stream: true });
-  
+
   for await (const progress of response) {
     if (progress.total && progress.completed) {
       const percent = Math.round((progress.completed / progress.total) * 100);
       process.stdout.write(`\rDownloading: ${percent}%`);
     }
   }
-  
+
   console.log('\nModel ready!');
 }
 

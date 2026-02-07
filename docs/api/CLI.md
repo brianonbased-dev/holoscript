@@ -40,37 +40,37 @@ holoscript compile src/*.holo --target vrchat --optimize
 
 #### Options
 
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--target <platform>` | `-t` | Target platform (required) |
-| `--output <dir>` | `-o` | Output directory |
-| `--optimize` | | Enable optimizations |
-| `--minify` | | Minify output |
-| `--sourcemap` | | Generate source maps |
-| `--watch` | `-w` | Watch for changes |
+| Option                | Short | Description                |
+| --------------------- | ----- | -------------------------- |
+| `--target <platform>` | `-t`  | Target platform (required) |
+| `--output <dir>`      | `-o`  | Output directory           |
+| `--optimize`          |       | Enable optimizations       |
+| `--minify`            |       | Minify output              |
+| `--sourcemap`         |       | Generate source maps       |
+| `--watch`             | `-w`  | Watch for changes          |
 
 #### Targets
 
-| Target | Platform | Output |
-|--------|----------|--------|
-| `threejs` | Three.js | JavaScript module |
-| `babylon` | Babylon.js | JavaScript module |
-| `aframe` | A-Frame | HTML + components |
-| `webxr` | WebXR | JavaScript module |
-| `webgpu` | WebGPU | JavaScript + WGSL |
-| `unity` | Unity | C# scripts + prefabs |
-| `unreal` | Unreal 5 | C++ actors |
-| `godot` | Godot 4 | GDScript + scenes |
-| `vrchat` | VRChat | UdonSharp + prefabs |
-| `visionos` | visionOS | Swift + RealityKit |
-| `openxr` | OpenXR | C++ application |
-| `ios` | iOS/ARKit | Swift + ARKit |
-| `android` | Android/ARCore | Kotlin + ARCore |
-| `androidxr` | Android XR | Kotlin + Jetpack XR |
-| `wasm` | WebAssembly | WAT + bindings |
-| `urdf` | ROS URDF | XML robot description |
-| `sdf` | Gazebo SDF | XML simulation |
-| `dtdl` | Azure DTDL | JSON digital twin |
+| Target      | Platform       | Output                |
+| ----------- | -------------- | --------------------- |
+| `threejs`   | Three.js       | JavaScript module     |
+| `babylon`   | Babylon.js     | JavaScript module     |
+| `aframe`    | A-Frame        | HTML + components     |
+| `webxr`     | WebXR          | JavaScript module     |
+| `webgpu`    | WebGPU         | JavaScript + WGSL     |
+| `unity`     | Unity          | C# scripts + prefabs  |
+| `unreal`    | Unreal 5       | C++ actors            |
+| `godot`     | Godot 4        | GDScript + scenes     |
+| `vrchat`    | VRChat         | UdonSharp + prefabs   |
+| `visionos`  | visionOS       | Swift + RealityKit    |
+| `openxr`    | OpenXR         | C++ application       |
+| `ios`       | iOS/ARKit      | Swift + ARKit         |
+| `android`   | Android/ARCore | Kotlin + ARCore       |
+| `androidxr` | Android XR     | Kotlin + Jetpack XR   |
+| `wasm`      | WebAssembly    | WAT + bindings        |
+| `urdf`      | ROS URDF       | XML robot description |
+| `sdf`       | Gazebo SDF     | XML simulation        |
+| `dtdl`      | Azure DTDL     | JSON digital twin     |
 
 ### holoscript validate
 
@@ -177,32 +177,29 @@ export default {
   // Source files
   include: ['src/**/*.holo', 'src/**/*.hsplus'],
   exclude: ['node_modules'],
-  
+
   // Default compile target
   target: 'threejs',
-  
+
   // Output directory
   outDir: 'dist',
-  
+
   // Compiler options
   compiler: {
     optimize: true,
     minify: false,
     sourcemap: true,
   },
-  
+
   // Dev server
   server: {
     port: 3000,
     open: true,
     hot: true,
   },
-  
+
   // Plugins
-  plugins: [
-    '@holoscript/plugin-physics',
-    '@holoscript/plugin-audio',
-  ],
+  plugins: ['@holoscript/plugin-physics', '@holoscript/plugin-audio'],
 };
 ```
 
@@ -210,23 +207,23 @@ export default {
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `HOLOSCRIPT_TARGET` | Default compile target |
-| `HOLOSCRIPT_DEV` | Enable dev mode logging |
-| `HOLOSCRIPT_CACHE` | Cache directory (default: `node_modules/.cache/holoscript`) |
+| Variable            | Description                                                 |
+| ------------------- | ----------------------------------------------------------- |
+| `HOLOSCRIPT_TARGET` | Default compile target                                      |
+| `HOLOSCRIPT_DEV`    | Enable dev mode logging                                     |
+| `HOLOSCRIPT_CACHE`  | Cache directory (default: `node_modules/.cache/holoscript`) |
 
 ---
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | Compile error |
-| 2 | Validation error |
-| 3 | File not found |
-| 4 | Invalid configuration |
+| Code | Meaning               |
+| ---- | --------------------- |
+| 0    | Success               |
+| 1    | Compile error         |
+| 2    | Validation error      |
+| 3    | File not found        |
+| 4    | Invalid configuration |
 
 ---
 

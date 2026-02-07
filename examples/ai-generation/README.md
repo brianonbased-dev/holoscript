@@ -25,13 +25,13 @@ ai-generation/
 
 ## AI Provider Integrations
 
-| Provider | File | Features |
-|----------|------|----------|
-| **xAI Grok** | `xai-grok.ts` | X platform native, tweet sharing |
-| **Anthropic Claude** | `anthropic-claude.ts` | Multi-turn, iterative refinement |
-| **OpenAI GPT-4** | `openai-gpt.ts` | Function calling, streaming, vision |
-| **Google Gemini** | `google-gemini.ts` | Multimodal, video, grounded search |
-| **Ollama** | `ollama-local.ts` | Local/offline, model comparison |
+| Provider             | File                  | Features                            |
+| -------------------- | --------------------- | ----------------------------------- |
+| **xAI Grok**         | `xai-grok.ts`         | X platform native, tweet sharing    |
+| **Anthropic Claude** | `anthropic-claude.ts` | Multi-turn, iterative refinement    |
+| **OpenAI GPT-4**     | `openai-gpt.ts`       | Function calling, streaming, vision |
+| **Google Gemini**    | `google-gemini.ts`    | Multimodal, video, grounded search  |
+| **Ollama**           | `ollama-local.ts`     | Local/offline, model comparison     |
 
 ## Quick Start for AI Agents
 
@@ -40,34 +40,34 @@ ai-generation/
 ```typescript
 // 1. Suggest traits for an object
 const traits = await mcp.call('suggest_traits', {
-  description: 'a sword that can be picked up and thrown'
+  description: 'a sword that can be picked up and thrown',
 });
 // → ["@grabbable", "@throwable", "@collidable"]
 
 // 2. Generate object code
 const object = await mcp.call('generate_object', {
   description: 'a glowing blue crystal that floats',
-  format: 'hsplus'
+  format: 'hsplus',
 });
 // → orb Crystal @glowing @animated { ... }
 
 // 3. Generate complete scene
 const scene = await mcp.call('generate_scene', {
   description: 'an enchanted forest with glowing mushrooms and a fairy',
-  style: 'detailed'
+  style: 'detailed',
 });
 
 // 4. Validate the code
 const validation = await mcp.call('validate_holoscript', {
   code: scene.code,
-  includeSuggestions: true
+  includeSuggestions: true,
 });
 
 // 5. Create share link for X
 const share = await mcp.call('create_share_link', {
   code: scene.code,
   title: 'Enchanted Forest',
-  platform: 'x'
+  platform: 'x',
 });
 ```
 
@@ -92,6 +92,7 @@ if hs.validate(scene.code).valid:
 ## System Prompts
 
 See individual prompt files for detailed system prompts optimized for:
+
 - Scene composition from vague descriptions
 - Object generation with appropriate traits
 - Trait selection based on behavior requirements

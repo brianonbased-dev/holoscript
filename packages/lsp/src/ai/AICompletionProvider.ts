@@ -1,8 +1,8 @@
 /**
  * HoloScript LSP - AI Completion Provider
- * 
+ *
  * Provides AI-powered code completions for HoloScript.
- * 
+ *
  * Features:
  * - Smart trait suggestions based on context
  * - Code generation from comments
@@ -10,7 +10,12 @@
  * - Context-aware recommendations
  */
 
-import { CompletionItem, CompletionItemKind, InsertTextFormat, MarkupKind } from 'vscode-languageserver/node.js';
+import {
+  CompletionItem,
+  CompletionItemKind,
+  InsertTextFormat,
+  MarkupKind,
+} from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import type { AIAdapter } from '@holoscript/core';
 import { ContextGatherer, type CompletionContext } from './ContextGatherer';
@@ -55,7 +60,7 @@ const DEFAULT_CONFIG: AICompletionConfig = {
   preferLocal: true,
   cacheTTL: 30000, // 30 seconds
   maxCompletions: 5,
-  confidenceThreshold: 0.3
+  confidenceThreshold: 0.3,
 };
 
 /**
@@ -67,28 +72,28 @@ export class AICompletionProvider {
   private promptBuilder: PromptBuilder;
   private cache: Map<string, CacheEntry> = new Map();
   private config: AICompletionConfig;
-  
+
   constructor(adapter?: AIAdapter, config: Partial<AICompletionConfig> = {}) {
     this.adapter = adapter ?? null;
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.contextGatherer = new ContextGatherer();
     this.promptBuilder = new PromptBuilder();
   }
-  
+
   /**
    * Set the AI adapter
    */
   public setAdapter(adapter: AIAdapter): void {
     this.adapter = adapter;
   }
-  
+
   /**
    * Update configuration
    */
   public setConfig(config: Partial<AICompletionConfig>): void {
     this.config = { ...this.config, ...config };
   }
-  
+
   /**
    * Get smart completions based on context
    */
@@ -98,29 +103,29 @@ export class AICompletionProvider {
     triggerCharacter?: string
   ): Promise<AICompletionResult> {
     const startTime = Date.now();
-    
+
     if (!this.config.enabled || !this.adapter) {
       return { completions: [], isFromCache: false, latency: 0 };
     }
-    
+
     // Gather context
     const context = this.contextGatherer.gather(document, position, triggerCharacter);
     const contextHash = this.hashContext(context);
-    
+
     // Check cache
     const cached = this.getFromCache(contextHash);
     if (cached) {
-      return { 
-        completions: cached, 
-        isFromCache: true, 
-        latency: Date.now() - startTime 
+      return {
+        completions: cached,
+        isFromCache: true,
+        latency: Date.now() - startTime,
       };
     }
-    
+
     try {
       // Get completions based on context type
       let completions: CompletionItem[];
-      
+
       switch (context.type) {
         case 'trait':
           completions = await this.getTraitCompletions(context);
@@ -137,31 +142,31 @@ export class AICompletionProvider {
         default:
           completions = await this.getGeneralCompletions(context);
       }
-      
+
       // Cache results
       this.setCache(contextHash, completions);
-      
+
       return {
         completions,
         isFromCache: false,
-        latency: Date.now() - startTime
+        latency: Date.now() - startTime,
       };
     } catch (error) {
       console.error('[AICompletion] Error getting completions:', error);
       return { completions: [], isFromCache: false, latency: Date.now() - startTime };
     }
   }
-  
+
   /**
    * Get trait suggestions based on object context
    */
   private async getTraitCompletions(context: CompletionContext): Promise<CompletionItem[]> {
     const prompt = this.promptBuilder.buildTraitPrompt(context);
     const response = await this.queryAI(prompt);
-    
+
     return this.parseTraitSuggestions(response, context);
   }
-  
+
   /**
    * Generate code from comment
    */
@@ -169,43 +174,43 @@ export class AICompletionProvider {
     if (!context.comment) {
       return [];
     }
-    
+
     const prompt = this.promptBuilder.buildCodeGenPrompt(context);
     const response = await this.queryAI(prompt);
-    
+
     return this.parseCodeGenSuggestion(response, context);
   }
-  
+
   /**
    * Get property completions
    */
   private async getPropertyCompletions(context: CompletionContext): Promise<CompletionItem[]> {
     const prompt = this.promptBuilder.buildPropertyPrompt(context);
     const response = await this.queryAI(prompt);
-    
+
     return this.parsePropertySuggestions(response);
   }
-  
+
   /**
    * Get event handler completions
    */
   private async getEventCompletions(context: CompletionContext): Promise<CompletionItem[]> {
     const prompt = this.promptBuilder.buildEventPrompt(context);
     const response = await this.queryAI(prompt);
-    
+
     return this.parseEventSuggestions(response);
   }
-  
+
   /**
    * Get general completions
    */
   private async getGeneralCompletions(context: CompletionContext): Promise<CompletionItem[]> {
     const prompt = this.promptBuilder.buildGeneralPrompt(context);
     const response = await this.queryAI(prompt);
-    
+
     return this.parseGeneralSuggestions(response);
   }
-  
+
   /**
    * Get error fix suggestions
    */
@@ -216,10 +221,10 @@ export class AICompletionProvider {
     if (!this.adapter) {
       return [];
     }
-    
+
     const context = this.contextGatherer.gatherErrorContext(document, error);
     const prompt = this.promptBuilder.buildErrorFixPrompt(context, error);
-    
+
     try {
       const response = await this.queryAI(prompt);
       return this.parseErrorFixSuggestions(response, context);
@@ -228,7 +233,7 @@ export class AICompletionProvider {
       return [];
     }
   }
-  
+
   /**
    * Query the AI model
    */
@@ -236,36 +241,36 @@ export class AICompletionProvider {
     if (!this.adapter) {
       throw new Error('No AI adapter configured');
     }
-    
+
     try {
       const response = await this.adapter.complete(prompt, {
         maxTokens: 500,
-        temperature: 0.3 // Lower temperature for more focused completions
+        temperature: 0.3, // Lower temperature for more focused completions
       });
-      
+
       return response.text ?? '';
     } catch (error) {
       console.error('[AICompletion] AI query failed:', error);
       throw error;
     }
   }
-  
+
   /**
    * Parse trait suggestions from AI response
    */
-  private parseTraitSuggestions(response: string, context: CompletionContext): CompletionItem[] {
+  private parseTraitSuggestions(response: string, _context: CompletionContext): CompletionItem[] {
     const suggestions: CompletionItem[] = [];
-    
+
     // Look for trait patterns in response: @traitname or just traitname
     const traitPattern = /@?(\w+)/g;
     const matches = response.matchAll(traitPattern);
     const seen = new Set<string>();
-    
+
     for (const match of matches) {
       const trait = match[1].toLowerCase();
       if (seen.has(trait)) continue;
       seen.add(trait);
-      
+
       // Only include known HoloScript traits
       if (this.isKnownTrait(trait)) {
         suggestions.push({
@@ -275,16 +280,16 @@ export class AICompletionProvider {
           insertText: trait,
           documentation: {
             kind: MarkupKind.Markdown,
-            value: this.getTraitDescription(trait)
+            value: this.getTraitDescription(trait),
           },
-          sortText: `00_ai_${suggestions.length}`
+          sortText: `00_ai_${suggestions.length}`,
         });
       }
     }
-    
+
     return suggestions.slice(0, this.config.maxCompletions);
   }
-  
+
   /**
    * Parse code generation suggestion
    */
@@ -292,51 +297,55 @@ export class AICompletionProvider {
     // Extract code blocks from response
     const codeBlockPattern = /```(?:hsplus|hs|holo)?\s*([\s\S]*?)```/g;
     const matches = [...response.matchAll(codeBlockPattern)];
-    
+
     if (matches.length === 0) {
       // Try to use the whole response as code
       const code = response.trim();
       if (code.length > 0 && code.length < 2000) {
-        return [{
-          label: '✨ Generated Code',
-          kind: CompletionItemKind.Snippet,
-          detail: 'AI Generated from comment',
-          insertText: code,
-          insertTextFormat: InsertTextFormat.Snippet,
-          documentation: {
-            kind: MarkupKind.Markdown,
-            value: `Generated from: "${context.comment}"\n\n\`\`\`hsplus\n${code}\n\`\`\``
+        return [
+          {
+            label: '✨ Generated Code',
+            kind: CompletionItemKind.Snippet,
+            detail: 'AI Generated from comment',
+            insertText: code,
+            insertTextFormat: InsertTextFormat.Snippet,
+            documentation: {
+              kind: MarkupKind.Markdown,
+              value: `Generated from: "${context.comment}"\n\n\`\`\`hsplus\n${code}\n\`\`\``,
+            },
+            sortText: '00_ai_codegen',
           },
-          sortText: '00_ai_codegen'
-        }];
+        ];
       }
       return [];
     }
-    
-    return matches.map((match, index) => ({
-      label: `✨ Generated Code ${index + 1}`,
-      kind: CompletionItemKind.Snippet,
-      detail: 'AI Generated from comment',
-      insertText: match[1].trim(),
-      insertTextFormat: InsertTextFormat.Snippet,
-      documentation: {
-        kind: MarkupKind.Markdown,
-        value: `Generated from: "${context.comment}"`
-      },
-      sortText: `00_ai_codegen_${index}`
-    })).slice(0, this.config.maxCompletions);
+
+    return matches
+      .map((match, index) => ({
+        label: `✨ Generated Code ${index + 1}`,
+        kind: CompletionItemKind.Snippet,
+        detail: 'AI Generated from comment',
+        insertText: match[1].trim(),
+        insertTextFormat: InsertTextFormat.Snippet,
+        documentation: {
+          kind: MarkupKind.Markdown,
+          value: `Generated from: "${context.comment}"`,
+        },
+        sortText: `00_ai_codegen_${index}`,
+      }))
+      .slice(0, this.config.maxCompletions);
   }
-  
+
   /**
    * Parse property suggestions
    */
   private parsePropertySuggestions(response: string): CompletionItem[] {
     const suggestions: CompletionItem[] = [];
-    
+
     // Look for property: value patterns
     const propPattern = /(\w+):\s*(.+)/g;
     const matches = response.matchAll(propPattern);
-    
+
     for (const match of matches) {
       const [, name, value] = match;
       suggestions.push({
@@ -344,125 +353,161 @@ export class AICompletionProvider {
         kind: CompletionItemKind.Property,
         detail: `AI Suggestion: ${value.trim()}`,
         insertText: `${name}: ${value.trim()}`,
-        sortText: `00_ai_${suggestions.length}`
+        sortText: `00_ai_${suggestions.length}`,
       });
     }
-    
+
     return suggestions.slice(0, this.config.maxCompletions);
   }
-  
+
   /**
    * Parse event suggestions
    */
   private parseEventSuggestions(response: string): CompletionItem[] {
     const suggestions: CompletionItem[] = [];
-    
+
     // Look for event handler patterns
     const eventPattern = /(on\w+|on_\w+)/gi;
     const matches = response.matchAll(eventPattern);
     const seen = new Set<string>();
-    
+
     for (const match of matches) {
       const event = match[1];
       if (seen.has(event.toLowerCase())) continue;
       seen.add(event.toLowerCase());
-      
+
       suggestions.push({
         label: event,
         kind: CompletionItemKind.Event,
         detail: 'AI Suggested Event',
         insertText: `${event}: {\n  $0\n}`,
         insertTextFormat: InsertTextFormat.Snippet,
-        sortText: `00_ai_${suggestions.length}`
+        sortText: `00_ai_${suggestions.length}`,
       });
     }
-    
+
     return suggestions.slice(0, this.config.maxCompletions);
   }
-  
+
   /**
    * Parse general suggestions
    */
   private parseGeneralSuggestions(response: string): CompletionItem[] {
     // For general suggestions, just extract any reasonable code snippets
     const suggestions: CompletionItem[] = [];
-    
-    const lines = response.split('\n').filter(l => l.trim().length > 0);
-    
+
+    const lines = response.split('\n').filter((l) => l.trim().length > 0);
+
     for (const line of lines.slice(0, this.config.maxCompletions)) {
       const trimmed = line.trim();
       if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
         continue; // Skip markdown list items
       }
-      
+
       suggestions.push({
         label: trimmed.slice(0, 40) + (trimmed.length > 40 ? '...' : ''),
         kind: CompletionItemKind.Text,
         detail: 'AI Suggestion',
         insertText: trimmed,
-        sortText: `00_ai_${suggestions.length}`
+        sortText: `00_ai_${suggestions.length}`,
       });
     }
-    
+
     return suggestions;
   }
-  
+
   /**
    * Parse error fix suggestions
    */
-  private parseErrorFixSuggestions(response: string, context: CompletionContext): CompletionItem[] {
+  private parseErrorFixSuggestions(response: string, _context: CompletionContext): CompletionItem[] {
     const codePattern = /```(?:hsplus|hs|holo)?\s*([\s\S]*?)```/g;
     const matches = [...response.matchAll(codePattern)];
-    
+
     if (matches.length > 0) {
-      return matches.map((match, index) => ({
-        label: `🔧 Fix ${index + 1}`,
-        kind: CompletionItemKind.Snippet,
-        detail: 'AI Suggested Fix',
-        insertText: match[1].trim(),
-        insertTextFormat: InsertTextFormat.Snippet,
-        sortText: `00_fix_${index}`
-      })).slice(0, 3);
+      return matches
+        .map((match, index) => ({
+          label: `🔧 Fix ${index + 1}`,
+          kind: CompletionItemKind.Snippet,
+          detail: 'AI Suggested Fix',
+          insertText: match[1].trim(),
+          insertTextFormat: InsertTextFormat.Snippet,
+          sortText: `00_fix_${index}`,
+        }))
+        .slice(0, 3);
     }
-    
+
     return [];
   }
-  
+
   /**
    * Check if a trait name is known
    */
   private isKnownTrait(name: string): boolean {
     const knownTraits = [
-      'grabbable', 'throwable', 'holdable', 'clickable', 'hoverable', 'draggable',
-      'pointable', 'scalable', 'collidable', 'physics', 'rigid', 'kinematic',
-      'trigger', 'gravity', 'glowing', 'emissive', 'transparent', 'reflective',
-      'animated', 'billboard', 'networked', 'synced', 'persistent', 'owned',
-      'host_only', 'stackable', 'attachable', 'equippable', 'consumable',
-      'destructible', 'anchor', 'tracked', 'world_locked', 'hand_tracked',
-      'eye_tracked', 'spatial_audio', 'ambient', 'voice_activated', 'state',
-      'reactive', 'observable', 'computed'
+      'grabbable',
+      'throwable',
+      'holdable',
+      'clickable',
+      'hoverable',
+      'draggable',
+      'pointable',
+      'scalable',
+      'collidable',
+      'physics',
+      'rigid',
+      'kinematic',
+      'trigger',
+      'gravity',
+      'glowing',
+      'emissive',
+      'transparent',
+      'reflective',
+      'animated',
+      'billboard',
+      'networked',
+      'synced',
+      'persistent',
+      'owned',
+      'host_only',
+      'stackable',
+      'attachable',
+      'equippable',
+      'consumable',
+      'destructible',
+      'anchor',
+      'tracked',
+      'world_locked',
+      'hand_tracked',
+      'eye_tracked',
+      'spatial_audio',
+      'ambient',
+      'voice_activated',
+      'state',
+      'reactive',
+      'observable',
+      'computed',
     ];
-    
+
     return knownTraits.includes(name);
   }
-  
+
   /**
    * Get trait description
    */
   private getTraitDescription(trait: string): string {
     const descriptions: Record<string, string> = {
-      'grabbable': 'Allows the object to be grabbed in VR',
-      'throwable': 'Object can be thrown when released',
-      'collidable': 'Enables physics collisions',
-      'physics': 'Adds physics simulation',
-      'networked': 'Syncs object across network',
-      'animated': 'Supports animations',
-      'pointable': 'Can be pointed at with controllers'
+      grabbable: 'Allows the object to be grabbed in VR',
+      throwable: 'Object can be thrown when released',
+      collidable: 'Enables physics collisions',
+      physics: 'Adds physics simulation',
+      networked: 'Syncs object across network',
+      animated: 'Supports animations',
+      pointable: 'Can be pointed at with controllers',
     };
-    
+
     return descriptions[trait] ?? `The @${trait} trait`;
   }
-  
+
   /**
    * Hash context for caching
    */
@@ -470,22 +515,22 @@ export class AICompletionProvider {
     const key = `${context.type}:${context.linePrefix}:${context.objectType ?? ''}:${context.existingTraits?.join(',')}`;
     return key;
   }
-  
+
   /**
    * Get from cache
    */
   private getFromCache(hash: string): CompletionItem[] | null {
     const entry = this.cache.get(hash);
     if (!entry) return null;
-    
+
     if (Date.now() - entry.timestamp > this.config.cacheTTL) {
       this.cache.delete(hash);
       return null;
     }
-    
+
     return entry.completions;
   }
-  
+
   /**
    * Set cache
    */
@@ -493,9 +538,9 @@ export class AICompletionProvider {
     this.cache.set(hash, {
       completions,
       timestamp: Date.now(),
-      contextHash: hash
+      contextHash: hash,
     });
-    
+
     // Limit cache size
     if (this.cache.size > 100) {
       const oldestKey = this.cache.keys().next().value;
@@ -504,7 +549,7 @@ export class AICompletionProvider {
       }
     }
   }
-  
+
   /**
    * Clear cache
    */

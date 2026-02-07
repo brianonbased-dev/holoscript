@@ -1,6 +1,6 @@
 /**
  * OpenAI GPT Integration for HoloScript
- * 
+ *
  * Use GPT-4 to generate HoloScript scenes with function calling
  * for structured output and validation.
  */
@@ -23,15 +23,15 @@ const HOLOSCRIPT_TOOLS: OpenAI.ChatCompletionTool[] = [
         properties: {
           composition_name: {
             type: 'string',
-            description: 'Name of the scene composition'
+            description: 'Name of the scene composition',
           },
           environment: {
             type: 'object',
             properties: {
               skybox: { type: 'string' },
               ambient_light: { type: 'number' },
-              fog: { type: 'boolean' }
-            }
+              fog: { type: 'boolean' },
+            },
           },
           objects: {
             type: 'array',
@@ -40,21 +40,21 @@ const HOLOSCRIPT_TOOLS: OpenAI.ChatCompletionTool[] = [
               properties: {
                 name: { type: 'string' },
                 geometry: { type: 'string' },
-                position: { 
+                position: {
                   type: 'array',
                   items: { type: 'number' },
                   minItems: 3,
-                  maxItems: 3
+                  maxItems: 3,
                 },
                 traits: {
                   type: 'array',
-                  items: { type: 'string' }
+                  items: { type: 'string' },
                 },
                 color: { type: 'string' },
-                scale: { type: 'number' }
+                scale: { type: 'number' },
               },
-              required: ['name', 'geometry', 'position']
-            }
+              required: ['name', 'geometry', 'position'],
+            },
           },
           logic: {
             type: 'array',
@@ -62,14 +62,14 @@ const HOLOSCRIPT_TOOLS: OpenAI.ChatCompletionTool[] = [
               type: 'object',
               properties: {
                 event: { type: 'string' },
-                action: { type: 'string' }
-              }
-            }
-          }
+                action: { type: 'string' },
+              },
+            },
+          },
         },
-        required: ['composition_name', 'objects']
-      }
-    }
+        required: ['composition_name', 'objects'],
+      },
+    },
   },
   {
     type: 'function',
@@ -80,12 +80,12 @@ const HOLOSCRIPT_TOOLS: OpenAI.ChatCompletionTool[] = [
         type: 'object',
         properties: {
           object_type: { type: 'string' },
-          purpose: { type: 'string' }
+          purpose: { type: 'string' },
         },
-        required: ['object_type']
-      }
-    }
-  }
+        required: ['object_type'],
+      },
+    },
+  },
 ];
 
 // System prompt
@@ -144,7 +144,7 @@ function sceneDataToHoloScript(data: SceneData): string {
 
   // Objects
   for (const obj of data.objects) {
-    const traits = obj.traits?.map(t => t.startsWith('@') ? t : `@${t}`).join(' ') || '';
+    const traits = obj.traits?.map((t) => (t.startsWith('@') ? t : `@${t}`)).join(' ') || '';
     code += `  object "${obj.name}" ${traits} {\n`;
     code += `    geometry: "${obj.geometry}"\n`;
     code += `    position: [${obj.position.join(', ')}]\n`;
@@ -183,10 +183,10 @@ export async function generateWithGPT(prompt: string): Promise<{
     model: 'gpt-4-turbo',
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: `Create a VR scene: ${prompt}` }
+      { role: 'user', content: `Create a VR scene: ${prompt}` },
     ],
     tools: HOLOSCRIPT_TOOLS,
-    tool_choice: { type: 'function', function: { name: 'generate_holoscript' } }
+    tool_choice: { type: 'function', function: { name: 'generate_holoscript' } },
   });
 
   const toolCall = response.choices[0].message.tool_calls?.[0];
@@ -208,12 +208,12 @@ export async function* streamGeneration(prompt: string): AsyncGenerator<string> 
     model: 'gpt-4-turbo',
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
-      { 
-        role: 'user', 
-        content: `Create a VR scene and respond with HoloScript code: ${prompt}` 
-      }
+      {
+        role: 'user',
+        content: `Create a VR scene and respond with HoloScript code: ${prompt}`,
+      },
     ],
-    stream: true
+    stream: true,
   });
 
   let inCodeBlock = false;
@@ -257,17 +257,17 @@ export async function generateFromImage(
         content: [
           {
             type: 'image_url',
-            image_url: { url: imageUrl }
+            image_url: { url: imageUrl },
           },
           {
             type: 'text',
-            text: `Recreate this scene in HoloScript. ${additionalContext || ''}`
-          }
-        ]
-      }
+            text: `Recreate this scene in HoloScript. ${additionalContext || ''}`,
+          },
+        ],
+      },
     ],
     tools: HOLOSCRIPT_TOOLS,
-    tool_choice: { type: 'function', function: { name: 'generate_holoscript' } }
+    tool_choice: { type: 'function', function: { name: 'generate_holoscript' } },
   });
 
   const toolCall = response.choices[0].message.tool_calls?.[0];
@@ -284,7 +284,7 @@ async function main() {
   // Structured generation
   console.log('=== Structured Generation ===');
   const result = await generateWithGPT(
-    'A space station control room with holographic displays and a captain\'s chair'
+    "A space station control room with holographic displays and a captain's chair"
   );
   console.log(result.code);
   console.log(`\nObjects: ${result.data.objects.length}`);

@@ -6,7 +6,7 @@ async function run() {
   const mockAST = {
     type: 'Program',
     body: [],
-    root: { type: 'scene', traits: new Map(), directives: [], children: [], properties: {} }
+    root: { type: 'scene', traits: new Map(), directives: [], children: [], properties: {} },
   } as any;
   const runtime = createRuntime(mockAST);
 
@@ -22,13 +22,13 @@ async function run() {
   runtime.registerTemplate('test', astV1.root);
   const nodeV1 = runtime.spawnTemplate('test', { x: 0, y: 0, z: 0 });
   const instance = runtime.findInstanceByNode(nodeV1);
-  
+
   if (!instance) throw new Error('Instance not found');
-  
+
   // Simulate runtime modification
   console.log('--- MODIFYING PROPERTY ---');
-  instance.node.properties!.oldProp = "modified";
-  
+  instance.node.properties!.oldProp = 'modified';
+
   console.log('Properties before hot-reload:', JSON.stringify(instance.node.properties));
 
   console.log('--- HOT-RELOAD TO V2 ---');
@@ -47,10 +47,10 @@ async function run() {
     }
   `;
   const astV2 = parser.parse(codeV2);
-  
+
   // Trigger hot-reload
   runtime.registerTemplate('test', astV2.root);
-  
+
   console.log('Properties after hot-reload:', JSON.stringify(instance.node.properties));
   console.log('Instance properties getter:', JSON.stringify(instance.properties));
 

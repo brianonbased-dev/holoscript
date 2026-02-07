@@ -14,15 +14,16 @@ A declarative language with tooling that compiles to multiple platforms. This ro
 
 All 10 development sprints have been completed ahead of schedule:
 
-| Sprint | Focus | Status |
-|--------|-------|--------|
-| 1-2 | Parser, VS Code, Incremental Compilation | ✅ Complete |
-| 3-4 | WASM, WoT/MQTT, Headless Runtime, URDF/SDF | ✅ Complete |
-| 5-6 | Dead Code Detection, Deprecations, Publishing | ✅ Complete |
-| 7-8 | Visual Scripting, AI Autocomplete, IntelliJ, Academy | ✅ Complete |
-| 9-10 | Certified Packages, Partner SDK, 3.0 Release | ✅ Complete |
+| Sprint | Focus                                                | Status      |
+| ------ | ---------------------------------------------------- | ----------- |
+| 1-2    | Parser, VS Code, Incremental Compilation             | ✅ Complete |
+| 3-4    | WASM, WoT/MQTT, Headless Runtime, URDF/SDF           | ✅ Complete |
+| 5-6    | Dead Code Detection, Deprecations, Publishing        | ✅ Complete |
+| 7-8    | Visual Scripting, AI Autocomplete, IntelliJ, Academy | ✅ Complete |
+| 9-10   | Certified Packages, Partner SDK, 3.0 Release         | ✅ Complete |
 
 **Key Deliverables:**
+
 - HoloScript 3.0 with WASM compilation
 - Full package registry with certified packages
 - Partner SDK for ecosystem integration
@@ -35,13 +36,13 @@ See [RELEASE_NOTES_3.0.md](./docs/RELEASE_NOTES_3.0.md) for full details.
 
 ## AI Agent Structure (5 Agents)
 
-| Agent | Focus Area | Parallelization |
-|-------|------------|-----------------|
+| Agent         | Focus Area                    | Parallelization       |
+| ------------- | ----------------------------- | --------------------- |
 | **Architect** | Parser, type system, compiler | Core language changes |
-| **Tooling** | CLI, formatter, linter | Build tools |
-| **IDE** | LSP, VS Code, debugger | Editor integration |
-| **QA** | Test framework, CI/CD | Quality assurance |
-| **Docs** | Documentation, examples | Content generation |
+| **Tooling**   | CLI, formatter, linter        | Build tools           |
+| **IDE**       | LSP, VS Code, debugger        | Editor integration    |
+| **QA**        | Test framework, CI/CD         | Quality assurance     |
+| **Docs**      | Documentation, examples       | Content generation    |
 
 **AI Acceleration Factor:** Tasks that take humans weeks can be completed in days with AI agents working 24/7 in parallel.
 
@@ -54,18 +55,18 @@ See [RELEASE_NOTES_3.0.md](./docs/RELEASE_NOTES_3.0.md) for full details.
 
 ### Priority Stack (Ordered by Dependencies)
 
-| #  | Priority                         | Agent            | Status         | Blocks   |
-|----|----------------------------------|------------------|----------------|----------|
-| 1  | Advanced Spread Operator Support | Architect        | ✅ Complete | 2, 5, 10 |
-| 2  | Enhanced Error Recovery          | Architect        | ✅ Complete | 7        |
-| 3  | Trait Change Detection           | Architect        | ✅ Complete | 5        |
-| 4  | Stabilize Visual Test Runner     | QA               | ✅ Complete | 9        |
-| 5  | Performance Benchmarking         | Tooling          | ✅ Complete | -        |
-| 6  | Formatter Optimizations          | Tooling          | ✅ Complete | -        |
-| 7  | VS Code Extension Enhancements   | IDE              | ✅ Complete | -        |
-| 8  | Visual Diff Tools                | Tooling + QA     | ✅ Complete | -        |
-| 9  | Snapshot Coverage                | QA               | ✅ Complete | -        |
-| 10 | Ecosystem Expansion              | Architect + Docs | ✅ Complete | 1-9      |
+| #   | Priority                         | Agent            | Status      | Blocks   |
+| --- | -------------------------------- | ---------------- | ----------- | -------- |
+| 1   | Advanced Spread Operator Support | Architect        | ✅ Complete | 2, 5, 10 |
+| 2   | Enhanced Error Recovery          | Architect        | ✅ Complete | 7        |
+| 3   | Trait Change Detection           | Architect        | ✅ Complete | 5        |
+| 4   | Stabilize Visual Test Runner     | QA               | ✅ Complete | 9        |
+| 5   | Performance Benchmarking         | Tooling          | ✅ Complete | -        |
+| 6   | Formatter Optimizations          | Tooling          | ✅ Complete | -        |
+| 7   | VS Code Extension Enhancements   | IDE              | ✅ Complete | -        |
+| 8   | Visual Diff Tools                | Tooling + QA     | ✅ Complete | -        |
+| 9   | Snapshot Coverage                | QA               | ✅ Complete | -        |
+| 10  | Ecosystem Expansion              | Architect + Docs | ✅ Complete | 1-9      |
 
 ### Critical Path
 
@@ -94,14 +95,15 @@ HoloScript uses three file extensions, each serving distinct purposes at differe
 
 **Purpose:** Core logic, protocols, and system-level directives.
 
-| Aspect | Description |
-|--------|-------------|
-| **Layer** | Foundation / Logic |
-| **Primary Use** | Business logic, state machines, protocols, AI behaviors |
-| **Syntax Focus** | Imperative logic, type definitions, function declarations |
-| **Compilation Target** | JavaScript, WASM, native (via adapters) |
+| Aspect                 | Description                                               |
+| ---------------------- | --------------------------------------------------------- |
+| **Layer**              | Foundation / Logic                                        |
+| **Primary Use**        | Business logic, state machines, protocols, AI behaviors   |
+| **Syntax Focus**       | Imperative logic, type definitions, function declarations |
+| **Compilation Target** | JavaScript, WASM, native (via adapters)                   |
 
 **Capabilities:**
+
 - **Protocols & Interfaces** — Define contracts between systems
 - **State Machines** — Complex state management with transitions
 - **Type Definitions** — Custom types, generics, unions, type guards
@@ -110,6 +112,7 @@ HoloScript uses three file extensions, each serving distinct purposes at differe
 - **AI Behaviors** — Decision trees, behavior trees, utility AI
 
 **Example:**
+
 ```hs
 protocol Interactable {
   on_interact(actor: Entity): void
@@ -132,6 +135,7 @@ state_machine GameController {
 ```
 
 **When to use `.hs`:**
+
 - Shared logic between multiple scenes
 - Protocol/interface definitions
 - Complex state management
@@ -145,14 +149,15 @@ state_machine GameController {
 
 **Purpose:** 3D/VR scene definitions with enhanced declarative syntax.
 
-| Aspect | Description |
-|--------|-------------|
-| **Layer** | Presentation / Scene |
-| **Primary Use** | Object definitions, spatial layouts, trait composition |
-| **Syntax Focus** | Declarative orbs, traits, templates, visual properties |
-| **Compilation Target** | Scene graphs (Three.js, Unity, Unreal, WebXR) |
+| Aspect                 | Description                                            |
+| ---------------------- | ------------------------------------------------------ |
+| **Layer**              | Presentation / Scene                                   |
+| **Primary Use**        | Object definitions, spatial layouts, trait composition |
+| **Syntax Focus**       | Declarative orbs, traits, templates, visual properties |
+| **Compilation Target** | Scene graphs (Three.js, Unity, Unreal, WebXR)          |
 
 **Capabilities:**
+
 - **Orb Definitions** — 3D objects with properties and behaviors
 - **Trait System** — 165+ built-in traits (@grabbable, @physics, @audio, etc.)
 - **Templates** — Reusable object patterns with inheritance
@@ -162,6 +167,7 @@ state_machine GameController {
 - **Animation** — Keyframes, tweens, state-based animation
 
 **Example:**
+
 ```hsplus
 @manifest {
   title: "Interactive Gallery"
@@ -196,6 +202,7 @@ orb gallery_room {
 ```
 
 **When to use `.hsplus`:**
+
 - Scene and object definitions
 - Visual/spatial layouts
 - Interactive experiences
@@ -209,14 +216,15 @@ orb gallery_room {
 
 **Purpose:** Complete world compositions with templates, objects, state, and behaviors.
 
-| Aspect | Description |
-|--------|-------------|
-| **Layer** | Composition / World |
-| **Primary Use** | Full scene definitions, game logic, AI-generated content |
-| **Syntax Focus** | Declarative compositions, templates, objects, actions, event handlers |
-| **Compilation Target** | Scene graphs, runtime executables, multi-platform builds |
+| Aspect                 | Description                                                           |
+| ---------------------- | --------------------------------------------------------------------- |
+| **Layer**              | Composition / World                                                   |
+| **Primary Use**        | Full scene definitions, game logic, AI-generated content              |
+| **Syntax Focus**       | Declarative compositions, templates, objects, actions, event handlers |
+| **Compilation Target** | Scene graphs, runtime executables, multi-platform builds              |
 
 **Capabilities:**
+
 - **Compositions** — Named world containers with environment, templates, objects
 - **Templates** — Reusable object blueprints with traits, state, actions, collision handlers
 - **Objects** — Instances with positions, properties, and behavior overrides
@@ -227,6 +235,7 @@ orb gallery_room {
 - **UI Panels** — Declarative HUD/menu definitions with data binding
 
 **Example:**
+
 ```holo
 composition "Pinball Table" {
   environment {
@@ -243,11 +252,11 @@ composition "Pinball Table" {
       balls: 3
       multiplier: 1
     }
-    
+
     action add_score(points) {
       state.score += points * state.multiplier
     }
-    
+
     action lose_ball() {
       state.balls--
       if (state.balls <= 0) {
@@ -261,10 +270,10 @@ composition "Pinball Table" {
     @physics
     @collidable
     @glowing
-    
+
     geometry: "cylinder"
     state { points: 100 }
-    
+
     on_collision(ball) {
       if (ball.has_template("Ball")) {
         GameState.add_score(state.points)
@@ -306,6 +315,7 @@ composition "Pinball Table" {
 ```
 
 **When to use `.holo`:**
+
 - Complete scene/world definitions
 - AI-generated content (natural language → .holo)
 - Games and interactive experiences
@@ -347,6 +357,7 @@ composition "Pinball Table" {
 ```
 
 **Recommended Project Structure:**
+
 ```
 my-vr-project/
 ├── holoscript.config.json     # Build configuration
@@ -373,6 +384,7 @@ my-vr-project/
 ```
 
 **Import & Reference Patterns:**
+
 ```hsplus
 // In main.hsplus - import logic from .hs files
 import { GameController, PlayerState } from "./logic/game-state.hs"
@@ -399,15 +411,16 @@ Beyond traditional VR/AR development, HoloScript's three-layer architecture enab
 
 ### `.hs` — Beyond VR: Universal Spatial Logic
 
-| Domain | Application | Key Capabilities |
-|--------|-------------|------------------|
-| **IoT & Smart Spaces** | Building automation, environmental control | Device protocols (BACnet, MQTT, Zigbee), spatial triggers, occupancy rules |
-| **Robotics** | Warehouse automation, autonomous navigation | Fleet coordination, collision avoidance, task optimization |
-| **Digital Twins** | Manufacturing, infrastructure monitoring | Real-time sync, predictive simulation, what-if analysis |
-| **Cross-Reality** | Retail bridging physical/virtual | Bidirectional state sync, customer journey orchestration |
-| **Spatial Protocols** | Federated spatial web | Location queries, spatial subscriptions, cross-domain linking |
+| Domain                 | Application                                 | Key Capabilities                                                           |
+| ---------------------- | ------------------------------------------- | -------------------------------------------------------------------------- |
+| **IoT & Smart Spaces** | Building automation, environmental control  | Device protocols (BACnet, MQTT, Zigbee), spatial triggers, occupancy rules |
+| **Robotics**           | Warehouse automation, autonomous navigation | Fleet coordination, collision avoidance, task optimization                 |
+| **Digital Twins**      | Manufacturing, infrastructure monitoring    | Real-time sync, predictive simulation, what-if analysis                    |
+| **Cross-Reality**      | Retail bridging physical/virtual            | Bidirectional state sync, customer journey orchestration                   |
+| **Spatial Protocols**  | Federated spatial web                       | Location queries, spatial subscriptions, cross-domain linking              |
 
 **IoT Orchestration Example:**
+
 ```hs
 @device("philips-hue") @protocol("zigbee")
 trait SmartLighting {
@@ -434,6 +447,7 @@ space FloorPlan {
 ```
 
 **Robotics Fleet Coordination:**
+
 ```hs
 @hardware("boston-dynamics-spot")
 trait AutonomousRobot {
@@ -458,6 +472,7 @@ fleet WarehouseFleet {
 ```
 
 **Digital Twin Simulation:**
+
 ```hs
 @twin("factory-floor-1")
 @sync(source: "opcua://plc-main.factory.local")
@@ -484,16 +499,17 @@ trait DigitalTwin<T: PhysicalAsset> {
 
 ### `.hsplus` — Beyond Scenes: Domain-Specific Visualization
 
-| Domain | Application | Key Capabilities |
-|--------|-------------|------------------|
-| **Medical** | Surgical planning, anatomy training | DICOM/volumetric data, haptic simulation, assessment |
-| **Scientific** | Molecular dynamics, data visualization | PDB structures, MD trajectories, pharmacophore analysis |
-| **Architecture** | BIM visualization, design review | IFC import, clash detection, sun studies, collaboration |
-| **Live Events** | Concert production, show control | DMX/lighting rigs, timecode sync, pyro simulation |
-| **Metaverse** | Cross-platform assets | Multi-platform export, LOD management, avatar binding |
-| **Education** | Interactive training, simulations | SCORM/xAPI, adaptive learning, procedural assessment |
+| Domain           | Application                            | Key Capabilities                                        |
+| ---------------- | -------------------------------------- | ------------------------------------------------------- |
+| **Medical**      | Surgical planning, anatomy training    | DICOM/volumetric data, haptic simulation, assessment    |
+| **Scientific**   | Molecular dynamics, data visualization | PDB structures, MD trajectories, pharmacophore analysis |
+| **Architecture** | BIM visualization, design review       | IFC import, clash detection, sun studies, collaboration |
+| **Live Events**  | Concert production, show control       | DMX/lighting rigs, timecode sync, pyro simulation       |
+| **Metaverse**    | Cross-platform assets                  | Multi-platform export, LOD management, avatar binding   |
+| **Education**    | Interactive training, simulations      | SCORM/xAPI, adaptive learning, procedural assessment    |
 
 **Medical Holographic Interface:**
+
 ```hsplus
 @display("looking-glass-8k")
 scene SurgicalPlanning {
@@ -525,6 +541,7 @@ scene SurgicalPlanning {
 ```
 
 **Scientific Molecular Visualization:**
+
 ```hsplus
 @compute("cuda")
 scene MolecularDynamics {
@@ -552,6 +569,7 @@ scene MolecularDynamics {
 ```
 
 **Live Event Production:**
+
 ```hsplus
 @venue("madison-square-garden")
 @timecode(source: "ltc://show-control.local")
@@ -582,6 +600,7 @@ scene ConcertProduction {
 ```
 
 **Cross-Platform Metaverse Asset:**
+
 ```hsplus
 @interop(targets: ["vrchat", "roblox", "spatial", "meta-horizons", "decentraland"])
 asset VirtualFashionItem {
@@ -606,15 +625,16 @@ asset VirtualFashionItem {
 
 ### `.holo` — Beyond Config: World Infrastructure
 
-| Domain | Application | Key Capabilities |
-|--------|-------------|------------------|
-| **Universal Worlds** | City-scale environments | GIS integration, procedural generation, LOD streaming |
-| **Reality Anchoring** | AR placement across platforms | Cloud anchors, VPS, marker tracking, multi-platform |
-| **Deployment** | Cross-platform builds | visionOS, Quest, HoloLens, Web, Unity targets |
-| **Smart Buildings** | Facility management | BACnet/MQTT, digital twin sync, automation rules |
-| **Spatial Web** | Federated spatial services | Location APIs, spatial subscriptions, cross-domain |
+| Domain                | Application                   | Key Capabilities                                      |
+| --------------------- | ----------------------------- | ----------------------------------------------------- |
+| **Universal Worlds**  | City-scale environments       | GIS integration, procedural generation, LOD streaming |
+| **Reality Anchoring** | AR placement across platforms | Cloud anchors, VPS, marker tracking, multi-platform   |
+| **Deployment**        | Cross-platform builds         | visionOS, Quest, HoloLens, Web, Unity targets         |
+| **Smart Buildings**   | Facility management           | BACnet/MQTT, digital twin sync, automation rules      |
+| **Spatial Web**       | Federated spatial services    | Location APIs, spatial subscriptions, cross-domain    |
 
 **Universal World Description:**
+
 ```holo
 @world("city-block-downtown-sf")
 world CityBlock {
@@ -654,6 +674,7 @@ world CityBlock {
 ```
 
 **Reality Anchoring Configuration:**
+
 ```holo
 @ar_experience("nike-store-ar")
 anchoring RetailARExperience {
@@ -689,6 +710,7 @@ anchoring RetailARExperience {
 ```
 
 **Cross-Platform Deployment:**
+
 ```holo
 @app("retail-spatial-experience")
 deployment SpatialAppDeployment {
@@ -724,6 +746,7 @@ deployment SpatialAppDeployment {
 ```
 
 **Smart Building Integration:**
+
 ```holo
 @smart_building("stanford-engineering-quad")
 @protocols(["bacnet", "modbus", "mqtt", "opcua"])
@@ -769,15 +792,15 @@ integration SmartCampusIntegration {
 
 ### Industry Application Matrix
 
-| Industry | `.hs` Logic | `.hsplus` Presentation | `.holo` Configuration |
-|----------|-------------|------------------------|----------------------|
-| **Healthcare** | Clinical workflows, equipment orchestration | Surgical viz, anatomy training | Hospital integration, compliance |
-| **Manufacturing** | Robot coordination, quality rules | Digital twin viz, maintenance AR | Factory mapping, MES integration |
-| **Retail** | Inventory automation, journey logic | Product viz, virtual try-on | Store anchoring, POS integration |
-| **Architecture** | BIM compliance, energy optimization | Design review, client presentations | Site anchoring, GIS integration |
-| **Entertainment** | Show control, safety interlocks | Stage viz, lighting preview | Venue mapping, broadcast integration |
-| **Education** | Adaptive learning, assessment | Interactive 3D, lab simulations | LMS connectivity, accessibility |
-| **Smart Cities** | Traffic optimization, emergency response | Urban viz, planning tools | Multi-building IoT, public services |
+| Industry          | `.hs` Logic                                 | `.hsplus` Presentation              | `.holo` Configuration                |
+| ----------------- | ------------------------------------------- | ----------------------------------- | ------------------------------------ |
+| **Healthcare**    | Clinical workflows, equipment orchestration | Surgical viz, anatomy training      | Hospital integration, compliance     |
+| **Manufacturing** | Robot coordination, quality rules           | Digital twin viz, maintenance AR    | Factory mapping, MES integration     |
+| **Retail**        | Inventory automation, journey logic         | Product viz, virtual try-on         | Store anchoring, POS integration     |
+| **Architecture**  | BIM compliance, energy optimization         | Design review, client presentations | Site anchoring, GIS integration      |
+| **Entertainment** | Show control, safety interlocks             | Stage viz, lighting preview         | Venue mapping, broadcast integration |
+| **Education**     | Adaptive learning, assessment               | Interactive 3D, lab simulations     | LMS connectivity, accessibility      |
+| **Smart Cities**  | Traffic optimization, emergency response    | Urban viz, planning tools           | Multi-building IoT, public services  |
 
 ---
 
@@ -794,6 +817,7 @@ integration SmartCampusIntegration {
 ## Current Status (v2.2.0 - January 2026)
 
 ### ✅ Complete
+
 - `.hsplus` / `.holo` parsers (165+ traits)
 - Type system (generics, unions, type guards)
 - Template system, 16 structural directives
@@ -815,38 +839,38 @@ integration SmartCampusIntegration {
 
 ### Q1: Foundation ✅ (Complete)
 
-| Feature | Agent | Status |
-|---------|-------|--------|
-| Semantic scene syntax | Architect | ✅ Done |
-| Logic block parsing | Architect | ✅ Done |
-| Template system | Architect | ✅ Done |
-| Type guards | Architect | ✅ Done |
-| Debug adapter | IDE | ✅ Done |
-| Unified build | Tooling | ✅ Done |
-| Brittney AI: NPC behavior trees | Architect | ✅ Done |
-| Brittney AI: Quest definition system | Architect | ✅ Done |
+| Feature                                | Agent     | Status  |
+| -------------------------------------- | --------- | ------- |
+| Semantic scene syntax                  | Architect | ✅ Done |
+| Logic block parsing                    | Architect | ✅ Done |
+| Template system                        | Architect | ✅ Done |
+| Type guards                            | Architect | ✅ Done |
+| Debug adapter                          | IDE       | ✅ Done |
+| Unified build                          | Tooling   | ✅ Done |
+| Brittney AI: NPC behavior trees        | Architect | ✅ Done |
+| Brittney AI: Quest definition system   | Architect | ✅ Done |
 | Brittney AI: Ability/spell definitions | Architect | ✅ Done |
-| Brittney AI: Dialogue trees | Architect | ✅ Done |
-| Brittney AI: State machines | Architect | ✅ Done |
-| Brittney AI: Achievements | Architect | ✅ Done |
-| Brittney AI: Talent trees | Architect | ✅ Done |
-| **Phase 5: Asset Pipeline** | Architect | ✅ Done |
-| **Phase 6: Spatial Features** | Architect | ✅ Done |
+| Brittney AI: Dialogue trees            | Architect | ✅ Done |
+| Brittney AI: State machines            | Architect | ✅ Done |
+| Brittney AI: Achievements              | Architect | ✅ Done |
+| Brittney AI: Talent trees              | Architect | ✅ Done |
+| **Phase 5: Asset Pipeline**            | Architect | ✅ Done |
+| **Phase 6: Spatial Features**          | Architect | ✅ Done |
 
 ### Q1-Q2: Sprint 1 (Feb-Mar) - 4 weeks
 
 All agents work in parallel:
 
-| Feature | Agent | Days |
-|---------|-------|------|
-| Config inheritance (`extends`) | Tooling | 3 |
-| Format on save | IDE | 2 |
-| Range formatting | IDE | 2 |
-| Code splitting | Tooling | 4 |
-| Visual regression tests | QA | 3 |
-| Spread operator (`...`) | Architect | 3 |
-| Null coalescing assignment | Architect | 1 |
-| Improved error recovery | Architect | 4 |
+| Feature                        | Agent     | Days |
+| ------------------------------ | --------- | ---- |
+| Config inheritance (`extends`) | Tooling   | 3    |
+| Format on save                 | IDE       | 2    |
+| Range formatting               | IDE       | 2    |
+| Code splitting                 | Tooling   | 4    |
+| Visual regression tests        | QA        | 3    |
+| Spread operator (`...`)        | Architect | 3    |
+| Null coalescing assignment     | Architect | 1    |
+| Improved error recovery        | Architect | 4    |
 
 <details>
 <summary><strong>📋 Sprint 1 Detailed Specifications</strong></summary>
@@ -856,16 +880,20 @@ All agents work in parallel:
 **Location:** `packages/cli/src/config/`
 
 **What to build:**
+
 ```json
 // holoscript.config.json
 {
   "extends": "./base.config.json",
   "extends": "@holoscript/config-recommended",
-  "compilerOptions": { /* overrides */ }
+  "compilerOptions": {
+    /* overrides */
+  }
 }
 ```
 
 **Implementation:**
+
 1. Add `extends` field to config schema in `packages/cli/src/config/schema.ts`
 2. Create `ConfigResolver` class that:
    - Resolves local paths (`./base.config.json`)
@@ -875,11 +903,13 @@ All agents work in parallel:
 3. Support array syntax: `"extends": ["./base.json", "./platform.json"]`
 
 **Files to modify:**
+
 - `packages/cli/src/config/schema.ts` - Add extends to schema
 - `packages/cli/src/config/loader.ts` - Add resolution logic
 - `packages/cli/src/config/merge.ts` - Create deep merge utility
 
 **Acceptance criteria:**
+
 - [ ] Local file extends works
 - [ ] npm package extends works
 - [ ] Multiple extends (array) works
@@ -896,6 +926,7 @@ All agents work in parallel:
 VS Code extension auto-formats `.hsplus`/`.holo` files on save.
 
 **Implementation:**
+
 1. Register `DocumentFormattingEditProvider` in extension
 2. Connect to `@holoscript/formatter` package
 3. Add settings:
@@ -906,11 +937,13 @@ VS Code extension auto-formats `.hsplus`/`.holo` files on save.
 4. Handle large files with progress indicator
 
 **Files to modify:**
+
 - `packages/vscode/src/extension.ts` - Register provider
 - `packages/vscode/src/formatting.ts` - Create formatting provider
 - `packages/vscode/package.json` - Add configuration schema
 
 **Acceptance criteria:**
+
 - [ ] Files format on save when enabled
 - [ ] Respects `.holoscriptrc` formatting options
 - [ ] Shows progress for large files (>1000 lines)
@@ -927,11 +960,13 @@ VS Code extension auto-formats `.hsplus`/`.holo` files on save.
 Format only selected code, not entire file.
 
 **Implementation:**
+
 1. Add `formatRange(source, startLine, endLine, options)` to formatter
 2. Detect block boundaries (don't break mid-expression)
 3. Register `DocumentRangeFormattingEditProvider` in VS Code
 
 **Algorithm:**
+
 ```typescript
 function formatRange(source: string, range: Range): string {
   // 1. Expand range to nearest block boundaries
@@ -942,11 +977,13 @@ function formatRange(source: string, range: Range): string {
 ```
 
 **Files to modify:**
+
 - `packages/formatter/src/index.ts` - Add formatRange export
 - `packages/formatter/src/range.ts` - Create range formatter
 - `packages/vscode/src/formatting.ts` - Add range provider
 
 **Acceptance criteria:**
+
 - [ ] Formats selection without affecting other code
 - [ ] Expands to complete blocks automatically
 - [ ] Preserves surrounding whitespace
@@ -962,11 +999,13 @@ function formatRange(source: string, range: Range): string {
 Split large scenes into chunks for lazy loading.
 
 **Implementation:**
+
 1. Analyze scene graph for split points
 2. Generate chunk manifest
 3. Create loader that fetches chunks on demand
 
 **Output structure:**
+
 ```
 dist/
   main.hsplus.js        # Entry point + manifest
@@ -977,16 +1016,19 @@ dist/
 ```
 
 **Split strategies:**
+
 - By `@zones` directive boundaries
 - By file imports
 - By explicit `@chunk` annotation
 
 **Files to create:**
+
 - `packages/cli/src/build/splitter.ts` - Chunk analyzer
 - `packages/cli/src/build/manifest.ts` - Manifest generator
 - `packages/core/src/runtime/loader.ts` - Runtime chunk loader
 
 **Acceptance criteria:**
+
 - [ ] Automatic splitting by zones
 - [ ] Manual `@chunk("name")` annotation support
 - [ ] Manifest tracks dependencies
@@ -1003,29 +1045,33 @@ dist/
 Screenshot comparison testing for rendered scenes.
 
 **Implementation:**
+
 1. Headless renderer using Puppeteer/Playwright
 2. Screenshot capture at specific viewpoints
 3. Pixel-diff comparison with threshold
 4. HTML report generation
 
 **Test syntax:**
+
 ```typescript
 describe('Gallery Scene', () => {
   visualTest('default-view', {
     scene: 'gallery.hsplus',
     camera: { position: [0, 1.6, 5], target: [0, 1, 0] },
-    threshold: 0.01  // 1% diff allowed
+    threshold: 0.01, // 1% diff allowed
   });
 });
 ```
 
 **Files to create:**
+
 - `packages/test/src/visual/renderer.ts` - Headless renderer
 - `packages/test/src/visual/capture.ts` - Screenshot capture
 - `packages/test/src/visual/diff.ts` - Image comparison
 - `packages/test/src/visual/report.ts` - HTML report generator
 
 **Acceptance criteria:**
+
 - [ ] Captures screenshots at defined viewpoints
 - [ ] Compares against baseline images
 - [ ] Configurable diff threshold
@@ -1039,6 +1085,7 @@ describe('Gallery Scene', () => {
 **Location:** `packages/core/src/parser/`
 
 **What to build:**
+
 ```hsplus
 template "Base" { color: "red", scale: 1 }
 
@@ -1053,12 +1100,14 @@ orb item {
 ```
 
 **Implementation:**
+
 1. Add `SpreadExpression` AST node type
 2. Parse `...identifier` in object and array contexts
 3. Type checker validates spread target is object/array
 4. Evaluate spread at compile time for templates
 
 **Parser changes:**
+
 ```typescript
 // In parseObjectBody()
 if (this.match('...')) {
@@ -1068,11 +1117,13 @@ if (this.match('...')) {
 ```
 
 **Files to modify:**
+
 - `packages/core/src/types.ts` - Add SpreadExpression type
 - `packages/core/src/parser/HoloScriptPlusParser.ts` - Parse spread
 - `packages/core/src/HoloScriptTypeChecker.ts` - Validate spread
 
 **Acceptance criteria:**
+
 - [ ] Object spread in orb definitions
 - [ ] Array spread in children/collections
 - [ ] Template property spreading
@@ -1086,6 +1137,7 @@ if (this.match('...')) {
 **Location:** `packages/core/src/parser/`
 
 **What to build:**
+
 ```hsplus
 orb item {
   // Assign only if null/undefined
@@ -1098,16 +1150,19 @@ orb item {
 ```
 
 **Implementation:**
+
 1. Add `??=` token to lexer
 2. Parse as assignment with null-check semantics
 3. Desugar to: `x = x ?? value`
 
 **Files to modify:**
+
 - `packages/core/src/parser/Lexer.ts` - Add ??= token
 - `packages/core/src/parser/HoloScriptPlusParser.ts` - Parse ??=
 - `packages/core/src/types.ts` - Add NullCoalescingAssignment
 
 **Acceptance criteria:**
+
 - [ ] `??=` parses correctly
 - [ ] Only assigns when left side is null/undefined
 - [ ] Works in property definitions
@@ -1127,11 +1182,13 @@ Parser continues after errors, collecting multiple diagnostics.
 **Target behavior:** Parser recovers and reports all errors
 
 **Recovery strategies:**
+
 1. **Synchronization points:** `}`, `orb`, `template`, `@directive`
 2. **Skip to next statement:** On expression error, skip to `;` or `}`
 3. **Insert missing tokens:** Missing `}` → insert and continue
 
 **Implementation:**
+
 ```typescript
 class ErrorRecoveryParser {
   private errors: Diagnostic[] = [];
@@ -1141,18 +1198,20 @@ class ErrorRecoveryParser {
       return this.parseOrbInner();
     } catch (e) {
       this.errors.push(e);
-      this.synchronize();  // Skip to next safe point
-      return null;  // Return partial AST
+      this.synchronize(); // Skip to next safe point
+      return null; // Return partial AST
     }
   }
 }
 ```
 
 **Files to modify:**
+
 - `packages/core/src/parser/HoloScriptPlusParser.ts` - Add recovery
 - `packages/core/src/parser/ErrorRecovery.ts` - Create recovery strategies
 
 **Acceptance criteria:**
+
 - [ ] Multiple errors reported per parse
 - [ ] Partial AST returned for valid portions
 - [ ] Recovery doesn't cause cascading false errors
@@ -1162,13 +1221,13 @@ class ErrorRecoveryParser {
 
 ### Q2: Sprint 2 (Apr-May) - 4 weeks
 
-| Feature | Agent | Days |
-|---------|-------|------|
-| Incremental parsing | Architect | 5 |
-| Watch mode (`--watch`) | Tooling | 2 |
-| Web playground (basic) | IDE | 5 |
-| Interactive language tour | Docs | 4 |
-| Performance benchmarks | QA | 3 |
+| Feature                   | Agent     | Days |
+| ------------------------- | --------- | ---- |
+| Incremental parsing       | Architect | 5    |
+| Watch mode (`--watch`)    | Tooling   | 2    |
+| Web playground (basic)    | IDE       | 5    |
+| Interactive language tour | Docs      | 4    |
+| Performance benchmarks    | QA        | 3    |
 
 <details>
 <summary><strong>📋 Sprint 2 Detailed Specifications</strong></summary>
@@ -1181,6 +1240,7 @@ class ErrorRecoveryParser {
 Only re-parse changed portions of files, not entire document.
 
 **Architecture:**
+
 ```
 ┌─────────────────────────────────────────┐
 │  Source File                            │
@@ -1200,13 +1260,17 @@ Only re-parse changed portions of files, not entire document.
    - `environment` blocks
 
 2. **Hash-based Cache:**
+
 ```typescript
 interface ParseCache {
-  chunks: Map<string, {
-    hash: string;        // Content hash
-    ast: ASTNode;        // Cached AST
-    dependencies: string[]; // Referenced identifiers
-  }>;
+  chunks: Map<
+    string,
+    {
+      hash: string; // Content hash
+      ast: ASTNode; // Cached AST
+      dependencies: string[]; // Referenced identifiers
+    }
+  >;
 }
 ```
 
@@ -1216,15 +1280,18 @@ interface ParseCache {
    - Structural change (new chunk) → rebuild chunk map
 
 **Files to create:**
+
 - `packages/core/src/parser/IncrementalParser.ts` - Main incremental logic
 - `packages/core/src/parser/ChunkDetector.ts` - Boundary detection
 - `packages/core/src/parser/ParseCache.ts` - Caching layer
 
 **Performance targets:**
+
 - Small edit in 1000-line file: <10ms (vs 100ms+ full parse)
 - Cache hit rate: >90% for typical editing
 
 **Acceptance criteria:**
+
 - [ ] Edits within orb only re-parse that orb
 - [ ] Adding new orb doesn't invalidate others
 - [ ] Reference changes propagate correctly
@@ -1237,6 +1304,7 @@ interface ParseCache {
 **Location:** `packages/cli/src/commands/`
 
 **What to build:**
+
 ```bash
 holoscript build --watch
 holoscript build -w
@@ -1257,17 +1325,20 @@ holoscript build -w
 4. Show colored terminal output with timestamps
 
 **Features:**
+
 - Watch `.hsplus`, `.holo`, `holoscript.config.json`
 - Ignore `node_modules`, `.git`, `dist`
 - Clear terminal on rebuild (optional)
 - Error overlay that persists until fixed
 
 **Files to modify:**
+
 - `packages/cli/src/commands/build.ts` - Add --watch flag
 - `packages/cli/src/watch/Watcher.ts` - Create file watcher
 - `packages/cli/src/watch/Reporter.ts` - Terminal output
 
 **Acceptance criteria:**
+
 - [ ] Detects file changes within 100ms
 - [ ] Debounces rapid saves
 - [ ] Shows build time for each rebuild
@@ -1284,6 +1355,7 @@ holoscript build -w
 Browser-based HoloScript editor with live preview.
 
 **Architecture:**
+
 ```
 ┌──────────────────────────────────────────────┐
 │  Web Playground                              │
@@ -1303,6 +1375,7 @@ Browser-based HoloScript editor with live preview.
 ```
 
 **Tech stack:**
+
 - Monaco Editor with HoloScript language support
 - Three.js for 3D preview
 - Web Workers for parsing (non-blocking)
@@ -1325,6 +1398,7 @@ Browser-based HoloScript editor with live preview.
    - Short URLs via API (optional)
 
 **Files to create:**
+
 ```
 packages/playground/
 ├── src/
@@ -1345,6 +1419,7 @@ packages/playground/
 ```
 
 **Acceptance criteria:**
+
 - [ ] Monaco editor with syntax highlighting
 - [ ] Live 3D preview updates on type
 - [ ] Basic orbit controls in preview
@@ -1362,6 +1437,7 @@ packages/playground/
 Step-by-step tutorial teaching HoloScript basics.
 
 **Structure:**
+
 ```
 Lesson 1: Hello Orb
 ├── Concept: Basic orb syntax
@@ -1384,6 +1460,7 @@ Lesson 3: Traits
 ```
 
 **10 Lessons:**
+
 1. Hello Orb - Basic syntax
 2. Properties - Position, scale, color
 3. Traits - @grabbable, @physics
@@ -1396,6 +1473,7 @@ Lesson 3: Traits
 10. Full Scene - Put it all together
 
 **Format per lesson:**
+
 ```markdown
 # Lesson 3: Traits
 
@@ -1403,15 +1481,18 @@ Traits add **behavior** to objects. The `@grabbable` trait
 lets users pick up objects in VR.
 
 ## Try it:
+
 [Interactive Editor - pre-filled code]
 
 ## Your turn:
+
 Add `@physics` to make the orb fall with gravity.
 
 [Check Answer] [Hint] [Skip]
 ```
 
 **Files to create:**
+
 ```
 docs/tour/
 ├── lessons/
@@ -1427,6 +1508,7 @@ docs/tour/
 ```
 
 **Acceptance criteria:**
+
 - [ ] 10 lessons covering core concepts
 - [ ] Each lesson has interactive editor
 - [ ] Progress saved to localStorage
@@ -1466,6 +1548,7 @@ Automated performance testing suite.
    - Go-to-definition latency
 
 **Output format:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │ HoloScript Performance Benchmarks               │
@@ -1482,12 +1565,14 @@ Automated performance testing suite.
 ```
 
 **Implementation:**
+
 - Use `tinybench` for micro-benchmarks
 - Compare against baseline (stored in repo)
 - CI integration with regression alerts
 - Historical tracking in JSON
 
 **Files to create:**
+
 ```
 packages/benchmark/
 ├── src/
@@ -1508,6 +1593,7 @@ packages/benchmark/
 ```
 
 **Acceptance criteria:**
+
 - [ ] All 4 benchmark suites implemented
 - [ ] Baseline comparison with % change
 - [ ] CI fails on >20% regression
@@ -1518,13 +1604,13 @@ packages/benchmark/
 
 ### Q2-Q3: Sprint 3 (Jun-Jul) - 4 weeks
 
-| Feature | Agent | Days |
-|---------|-------|------|
-| Trait bounds/constraints | Architect | 5 |
-| Better type inference | Architect | 4 |
-| Type aliases | Architect | 2 |
-| Neovim plugin | IDE | 3 |
-| Video tutorials (5 videos) | Docs | 5 |
+| Feature                    | Agent     | Days |
+| -------------------------- | --------- | ---- |
+| Trait bounds/constraints   | Architect | 5    |
+| Better type inference      | Architect | 4    |
+| Type aliases               | Architect | 2    |
+| Neovim plugin              | IDE       | 3    |
+| Video tutorials (5 videos) | Docs      | 5    |
 
 <details>
 <summary><strong>📋 Sprint 3 Detailed Specifications</strong></summary>
@@ -1537,6 +1623,7 @@ packages/benchmark/
 Constrain which traits can be combined.
 
 **Syntax:**
+
 ```hsplus
 // Trait requires another trait
 @physics requires @collidable
@@ -1552,6 +1639,7 @@ Constrain which traits can be combined.
 ```
 
 **Use cases:**
+
 - `@cloth` requires `@mesh` (can't apply cloth physics to point)
 - `@grabbable` conflicts `@static` (can't grab static object)
 - `@vr_only` conflicts `@ar_only` (mutually exclusive)
@@ -1559,12 +1647,13 @@ Constrain which traits can be combined.
 **Implementation:**
 
 1. **Constraint Definition:**
+
 ```typescript
 interface TraitConstraint {
   type: 'requires' | 'conflicts' | 'oneof';
-  source: string;      // Trait being constrained
-  targets: string[];   // Related traits
-  message?: string;    // Custom error message
+  source: string; // Trait being constrained
+  targets: string[]; // Related traits
+  message?: string; // Custom error message
 }
 ```
 
@@ -1574,6 +1663,7 @@ interface TraitConstraint {
    - Report all violations (not just first)
 
 3. **Built-in Constraints:**
+
 ```typescript
 const BUILTIN_CONSTRAINTS: TraitConstraint[] = [
   { type: 'requires', source: 'cloth', targets: ['mesh'] },
@@ -1584,11 +1674,13 @@ const BUILTIN_CONSTRAINTS: TraitConstraint[] = [
 ```
 
 **Files to modify:**
+
 - `packages/core/src/types.ts` - Add TraitConstraint type
 - `packages/core/src/traits/constraints.ts` - Define built-in constraints
 - `packages/core/src/HoloScriptTypeChecker.ts` - Validate constraints
 
 **Acceptance criteria:**
+
 - [ ] `requires` constraints enforced
 - [ ] `conflicts` constraints enforced
 - [ ] `oneof` groups enforced
@@ -1605,6 +1697,7 @@ const BUILTIN_CONSTRAINTS: TraitConstraint[] = [
 Infer types without explicit annotations.
 
 **Current (requires annotation):**
+
 ```hsplus
 orb item {
   count: number = 0
@@ -1613,6 +1706,7 @@ orb item {
 ```
 
 **Target (inferred):**
+
 ```hsplus
 orb item {
   count = 0           // Inferred: number
@@ -1635,6 +1729,7 @@ orb item {
 | `{ a: 1, b: 2 }` | Object type |
 
 **Bidirectional inference:**
+
 ```hsplus
 // Context provides expected type
 orb item {
@@ -1647,10 +1742,12 @@ orb item {
 ```
 
 **Files to modify:**
+
 - `packages/core/src/HoloScriptTypeChecker.ts` - Add inference logic
 - `packages/core/src/types.ts` - Add inference context
 
 **Acceptance criteria:**
+
 - [ ] Primitive literals inferred correctly
 - [ ] Array literals inferred (vec3, vec4, arrays)
 - [ ] Function types inferred
@@ -1664,6 +1761,7 @@ orb item {
 **Location:** `packages/core/src/parser/`, `packages/core/src/types.ts`
 
 **What to build:**
+
 ```hsplus
 // Define type aliases
 type Color = string | [number, number, number]
@@ -1691,11 +1789,13 @@ type Pair<A, B> = [A, B]
 4. **Generics:** Support type parameters
 
 **Files to modify:**
+
 - `packages/core/src/parser/HoloScriptPlusParser.ts` - Parse type aliases
 - `packages/core/src/types.ts` - Add TypeAlias node
 - `packages/core/src/HoloScriptTypeChecker.ts` - Resolve aliases
 
 **Acceptance criteria:**
+
 - [ ] Simple type aliases work
 - [ ] Union type aliases work
 - [ ] Generic type aliases work
@@ -1712,12 +1812,14 @@ type Pair<A, B> = [A, B]
 Neovim plugin with LSP integration.
 
 **Features:**
+
 - Syntax highlighting (Tree-sitter grammar)
 - LSP client configuration
 - Snippets for common patterns
 - Format on save
 
 **Structure:**
+
 ```
 packages/neovim/
 ├── lua/
@@ -1735,6 +1837,7 @@ packages/neovim/
 ```
 
 **LSP Configuration:**
+
 ```lua
 -- lua/holoscript/lsp.lua
 local lspconfig = require('lspconfig')
@@ -1747,12 +1850,14 @@ lspconfig.holoscript.setup({
 ```
 
 **Installation methods:**
+
 - lazy.nvim
 - packer.nvim
 - vim-plug
 - Manual
 
 **Acceptance criteria:**
+
 - [ ] Syntax highlighting works
 - [ ] LSP connects and provides completions
 - [ ] Go-to-definition works
@@ -1767,6 +1872,7 @@ lspconfig.holoscript.setup({
 5 YouTube-ready tutorial videos.
 
 **Video 1: Getting Started (10 min)**
+
 ```
 0:00 - Intro: What is HoloScript?
 1:00 - Installation (npm install -g @holoscript/cli)
@@ -1779,6 +1885,7 @@ lspconfig.holoscript.setup({
 ```
 
 **Video 2: Core Concepts (15 min)**
+
 ```
 0:00 - Orbs: The building blocks
 3:00 - Properties: Position, scale, color
@@ -1789,6 +1896,7 @@ lspconfig.holoscript.setup({
 ```
 
 **Video 3: Building a VR Room (20 min)**
+
 ```
 0:00 - Project setup
 2:00 - Creating the room structure
@@ -1801,6 +1909,7 @@ lspconfig.holoscript.setup({
 ```
 
 **Video 4: Multiplayer Basics (15 min)**
+
 ```
 0:00 - Networking concepts
 2:00 - @networked trait
@@ -1812,6 +1921,7 @@ lspconfig.holoscript.setup({
 ```
 
 **Video 5: Advanced Traits (15 min)**
+
 ```
 0:00 - Physics deep dive
 3:00 - Audio traits
@@ -1822,6 +1932,7 @@ lspconfig.holoscript.setup({
 ```
 
 **Deliverables per video:**
+
 - Script (markdown)
 - Screen recording
 - Voice-over
@@ -1830,6 +1941,7 @@ lspconfig.holoscript.setup({
 - YouTube description with timestamps
 
 **Acceptance criteria:**
+
 - [ ] 5 videos scripted
 - [ ] Clear audio quality
 - [ ] Code visible and readable
@@ -1844,13 +1956,13 @@ lspconfig.holoscript.setup({
 
 ### Q3: Sprint 4 (Aug-Sep) - 4 weeks
 
-| Feature | Agent | Days |
-|---------|-------|------|
-| Exhaustive match checking | Architect | 4 |
-| Parallel parsing | Architect | 5 |
-| Build caching | Tooling | 4 |
-| Source maps v2 | Tooling | 3 |
-| Bundle analyzer | Tooling | 3 |
+| Feature                   | Agent     | Days |
+| ------------------------- | --------- | ---- |
+| Exhaustive match checking | Architect | 4    |
+| Parallel parsing          | Architect | 5    |
+| Build caching             | Tooling   | 4    |
+| Source maps v2            | Tooling   | 3    |
+| Bundle analyzer           | Tooling   | 3    |
 
 <details>
 <summary><strong>📋 Sprint 4 Detailed Specifications</strong></summary>
@@ -1891,32 +2003,34 @@ orb status_display {
    - Report missing cases
 
 3. **Exhaustiveness Algorithm:**
+
 ```typescript
-function checkExhaustive(
-  matchExpr: MatchExpression,
-  unionType: UnionType
-): Diagnostic[] {
-  const coveredCases = new Set(matchExpr.cases.map(c => c.pattern));
+function checkExhaustive(matchExpr: MatchExpression, unionType: UnionType): Diagnostic[] {
+  const coveredCases = new Set(matchExpr.cases.map((c) => c.pattern));
   const allCases = new Set(unionType.members);
 
-  const missing = [...allCases].filter(c => !coveredCases.has(c));
+  const missing = [...allCases].filter((c) => !coveredCases.has(c));
 
   if (missing.length > 0) {
-    return [{
-      message: `Non-exhaustive match. Missing: ${missing.join(', ')}`,
-      severity: 'error',
-      suggestions: missing.map(m => `Add case: "${m}" => ...`)
-    }];
+    return [
+      {
+        message: `Non-exhaustive match. Missing: ${missing.join(', ')}`,
+        severity: 'error',
+        suggestions: missing.map((m) => `Add case: "${m}" => ...`),
+      },
+    ];
   }
   return [];
 }
 ```
 
 **Files to modify:**
+
 - `packages/core/src/HoloScriptTypeChecker.ts` - Add exhaustiveness check
 - `packages/core/src/types.ts` - Add MatchExpression handling
 
 **Acceptance criteria:**
+
 - [ ] String literal unions checked
 - [ ] Number literal unions checked
 - [ ] Nested matches checked
@@ -1933,6 +2047,7 @@ function checkExhaustive(
 Parse multiple files simultaneously using worker threads.
 
 **Architecture:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │  Main Thread                                    │
@@ -1969,15 +2084,18 @@ Parse multiple files simultaneously using worker threads.
    - Resolve cross-file references
 
 **Files to create:**
+
 - `packages/core/src/parser/ParallelParser.ts` - Main coordinator
 - `packages/core/src/parser/ParseWorker.ts` - Worker thread code
 - `packages/core/src/parser/WorkerPool.ts` - Worker management
 
 **Performance targets:**
+
 - 100 files: 4x faster than sequential (on 4-core)
 - 1000 files: 6x faster (better amortization)
 
 **Acceptance criteria:**
+
 - [ ] Parses files in parallel
 - [ ] Handles file dependencies correctly
 - [ ] Graceful fallback if workers unavailable
@@ -1994,6 +2112,7 @@ Parse multiple files simultaneously using worker threads.
 Cache build artifacts to skip unchanged files.
 
 **Cache structure:**
+
 ```
 .holoscript-cache/
 ├── manifest.json       # File hashes and metadata
@@ -2008,6 +2127,7 @@ Cache build artifacts to skip unchanged files.
 ```
 
 **Manifest format:**
+
 ```json
 {
   "version": "1.0",
@@ -2023,23 +2143,27 @@ Cache build artifacts to skip unchanged files.
 ```
 
 **Invalidation rules:**
+
 1. Source file hash changed → rebuild
 2. Any dependency changed → rebuild
 3. Compiler version changed → rebuild all
 4. Config changed → rebuild all
 
 **Implementation:**
+
 - Hash files with xxhash (fast)
 - Track transitive dependencies
 - Parallel cache writes
 - Cache compression (optional)
 
 **Files to create:**
+
 - `packages/cli/src/build/cache/CacheManager.ts`
 - `packages/cli/src/build/cache/HashCalculator.ts`
 - `packages/cli/src/build/cache/DependencyTracker.ts`
 
 **CLI flags:**
+
 ```bash
 holoscript build              # Use cache
 holoscript build --no-cache   # Skip cache
@@ -2047,6 +2171,7 @@ holoscript build --clean      # Clear cache first
 ```
 
 **Acceptance criteria:**
+
 - [ ] Unchanged files skip rebuild
 - [ ] Dependency changes trigger rebuild
 - [ ] Cache survives across sessions
@@ -2068,6 +2193,7 @@ Enhanced source maps with better debugging support.
 **v2 Features:**
 
 1. **Column-level precision:**
+
 ```
 Generated: let x=foo.bar();
                    ^^^
@@ -2076,6 +2202,7 @@ Source:    value = item.property
 ```
 
 2. **Name mappings:**
+
 ```json
 {
   "names": ["value", "item", "property"],
@@ -2084,25 +2211,27 @@ Source:    value = item.property
 ```
 
 3. **Scope information:**
+
 ```json
 {
-  "x_google_ignoreList": [0, 1],  // Ignore generated helper files
-  "x_scopes": [
-    { "name": "orb cube", "start": 10, "end": 50 }
-  ]
+  "x_google_ignoreList": [0, 1], // Ignore generated helper files
+  "x_scopes": [{ "name": "orb cube", "start": 10, "end": 50 }]
 }
 ```
 
 **Implementation:**
+
 - Use `source-map` package for generation
 - Track AST node positions during codegen
 - Emit inline source maps for dev, external for prod
 
 **Files to modify:**
+
 - `packages/cli/src/build/codegen.ts` - Track positions
 - `packages/cli/src/build/sourcemap.ts` - Generate v2 maps
 
 **Acceptance criteria:**
+
 - [ ] Column-level mapping works
 - [ ] Variable names preserved
 - [ ] Chrome DevTools shows correct source
@@ -2119,6 +2248,7 @@ Source:    value = item.property
 Visualize bundle composition and size.
 
 **Output:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │  HoloScript Bundle Analysis                     │
@@ -2137,12 +2267,14 @@ Visualize bundle composition and size.
 ```
 
 **Features:**
+
 1. **Size breakdown** by file
 2. **Treemap visualization** (HTML report)
 3. **Duplicate detection** (same code in multiple chunks)
 4. **Unused export detection**
 
 **CLI:**
+
 ```bash
 holoscript analyze dist/
 holoscript analyze --json > report.json
@@ -2150,11 +2282,13 @@ holoscript analyze --html > report.html
 ```
 
 **Files to create:**
+
 - `packages/cli/src/analyze/BundleAnalyzer.ts`
 - `packages/cli/src/analyze/TreemapGenerator.ts`
 - `packages/cli/src/analyze/DuplicateFinder.ts`
 
 **Acceptance criteria:**
+
 - [ ] Terminal output with sizes
 - [ ] JSON export for CI
 - [ ] Interactive HTML treemap
@@ -2165,13 +2299,13 @@ holoscript analyze --html > report.html
 
 ### Q4: Sprint 5 (Oct-Nov) - 4 weeks
 
-| Feature | Agent | Days |
-|---------|-------|------|
-| Dead code detection | Tooling | 4 |
-| Deprecation warnings | Tooling | 2 |
-| Migration assistant | Tooling | 4 |
-| Complexity metrics | QA | 3 |
-| Package registry (MVP) | Tooling | 6 |
+| Feature                | Agent   | Days |
+| ---------------------- | ------- | ---- |
+| Dead code detection    | Tooling | 4    |
+| Deprecation warnings   | Tooling | 2    |
+| Migration assistant    | Tooling | 4    |
+| Complexity metrics     | QA      | 3    |
+| Package registry (MVP) | Tooling | 6    |
 
 <details>
 <summary><strong>📋 Sprint 5 Detailed Specifications</strong></summary>
@@ -2186,6 +2320,7 @@ Identify unused orbs, templates, functions, and properties.
 **Detection categories:**
 
 1. **Unused orbs:**
+
 ```hsplus
 orb helper { }      // Never referenced → WARNING
 orb main_scene {
@@ -2194,6 +2329,7 @@ orb main_scene {
 ```
 
 2. **Unused templates:**
+
 ```hsplus
 template "OldButton" { }  // Never instantiated → WARNING
 template "Button" { }     // Used below
@@ -2201,6 +2337,7 @@ orb btn using "Button" {}
 ```
 
 3. **Unused properties:**
+
 ```hsplus
 orb item {
   old_color: "red"  // Never read → WARNING
@@ -2210,6 +2347,7 @@ orb item {
 ```
 
 4. **Unused functions:**
+
 ```hsplus
 orb controller {
   function deprecated_helper() {}  // Never called → WARNING
@@ -2219,23 +2357,27 @@ orb controller {
 ```
 
 **Implementation:**
+
 1. Build reference graph from AST
 2. Mark entry points (scene roots, exported items)
 3. Walk graph from entry points
 4. Report unreached nodes
 
 **Files to create:**
+
 - `packages/linter/src/rules/no-dead-code.ts`
 - `packages/core/src/analysis/ReferenceGraph.ts`
 - `packages/core/src/analysis/ReachabilityAnalyzer.ts`
 
 **CLI:**
+
 ```bash
 holoscript lint --dead-code
 holoscript lint --dead-code --fix  # Remove dead code
 ```
 
 **Acceptance criteria:**
+
 - [ ] Detects unused orbs
 - [ ] Detects unused templates
 - [ ] Detects unused properties
@@ -2252,6 +2394,7 @@ holoscript lint --dead-code --fix  # Remove dead code
 Warn when using deprecated features.
 
 **Deprecation syntax:**
+
 ```hsplus
 // In trait definitions
 @deprecated("Use @interactive instead")
@@ -2269,6 +2412,7 @@ orb item {
 ```
 
 **Warning output:**
+
 ```
 src/scene.hsplus:15:3
   warning: '@clickable' is deprecated. Use @interactive instead.
@@ -2283,17 +2427,20 @@ src/scene.hsplus:15:3
 ```
 
 **Implementation:**
+
 1. Parse `@deprecated` annotations
 2. Track deprecation in symbol table
 3. Emit warnings on usage
 4. Provide migration suggestions
 
 **Files to modify:**
+
 - `packages/core/src/parser/HoloScriptPlusParser.ts` - Parse @deprecated
 - `packages/linter/src/rules/no-deprecated.ts` - Lint rule
 - `packages/core/src/traits/index.ts` - Mark deprecated traits
 
 **Acceptance criteria:**
+
 - [ ] `@deprecated` annotation parsed
 - [ ] Warnings emitted on usage
 - [ ] Version info (deprecated in, removed in)
@@ -2310,36 +2457,39 @@ src/scene.hsplus:15:3
 Automated code migration between HoloScript versions.
 
 **Use cases:**
+
 1. v2.1 → v2.5 (trait renames, syntax changes)
 2. v2.x → v3.0 (breaking changes)
 
 **Migration script format:**
+
 ```typescript
 // migrations/2.1-to-2.5.ts
 export const migration: Migration = {
-  from: "2.1.0",
-  to: "2.5.0",
+  from: '2.1.0',
+  to: '2.5.0',
   transforms: [
     {
-      name: "rename-clickable-to-interactive",
-      description: "Rename @clickable trait to @interactive",
+      name: 'rename-clickable-to-interactive',
+      description: 'Rename @clickable trait to @interactive',
       transform: (ast) => {
         // Find all @clickable traits
         // Replace with @interactive
-      }
+      },
     },
     {
-      name: "update-physics-syntax",
-      description: "Update @physics parameters",
+      name: 'update-physics-syntax',
+      description: 'Update @physics parameters',
       transform: (ast) => {
         // @physics(gravity: 9.8) → @physics(gravity: [0, -9.8, 0])
-      }
-    }
-  ]
+      },
+    },
+  ],
 };
 ```
 
 **CLI:**
+
 ```bash
 # Check what would change
 holoscript migrate --from 2.1 --to 2.5 --dry-run
@@ -2352,6 +2502,7 @@ holoscript migrate --from 2.1 --to 2.5 --interactive
 ```
 
 **Output:**
+
 ```
 Migration: 2.1.0 → 2.5.0
 
@@ -2369,11 +2520,13 @@ Apply changes? [y/N/i(interactive)]
 ```
 
 **Files to create:**
+
 - `packages/cli/src/migrate/MigrationRunner.ts`
 - `packages/cli/src/migrate/migrations/` - Migration scripts
 - `packages/cli/src/migrate/transforms/` - Reusable transforms
 
 **Acceptance criteria:**
+
 - [ ] Dry-run mode shows changes
 - [ ] Apply mode modifies files
 - [ ] Interactive mode for confirmation
@@ -2408,6 +2561,7 @@ Measure code complexity for maintainability.
    - Threshold: >10 = warning
 
 **Output:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Complexity Report                                          │
@@ -2427,12 +2581,14 @@ Recommendations:
 ```
 
 **Files to create:**
+
 - `packages/cli/src/analyze/ComplexityAnalyzer.ts`
 - `packages/cli/src/analyze/metrics/CyclomaticComplexity.ts`
 - `packages/cli/src/analyze/metrics/NestingDepth.ts`
 - `packages/cli/src/analyze/ComplexityReporter.ts`
 
 **CLI:**
+
 ```bash
 holoscript complexity src/
 holoscript complexity --threshold cc=10,depth=4
@@ -2440,6 +2596,7 @@ holoscript complexity --json
 ```
 
 **Acceptance criteria:**
+
 - [ ] Cyclomatic complexity calculated
 - [ ] Nesting depth calculated
 - [ ] Configurable thresholds
@@ -2456,6 +2613,7 @@ holoscript complexity --json
 Central registry for sharing HoloScript packages.
 
 **Architecture:**
+
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
 │   CLI        │────▶│  Registry    │────▶│  Storage     │
@@ -2471,6 +2629,7 @@ Central registry for sharing HoloScript packages.
 ```
 
 **Package manifest:**
+
 ```json
 {
   "name": "@studio/vr-buttons",
@@ -2487,6 +2646,7 @@ Central registry for sharing HoloScript packages.
 ```
 
 **API Endpoints:**
+
 ```
 POST   /packages              # Publish package
 GET    /packages/:name        # Get package info
@@ -2496,6 +2656,7 @@ GET    /search?q=...          # Search packages
 ```
 
 **CLI commands:**
+
 ```bash
 holoscript registry login
 holoscript registry publish
@@ -2505,12 +2666,14 @@ holoscript search "vr buttons"
 ```
 
 **MVP scope:**
+
 - Public packages only (private in Sprint 6)
 - Basic search (name, description, keywords)
 - Semantic versioning
 - Dependency resolution
 
 **Files to create:**
+
 ```
 packages/registry/
 ├── src/
@@ -2529,6 +2692,7 @@ packages/registry/
 ```
 
 **Acceptance criteria:**
+
 - [ ] Publish packages
 - [ ] Install packages
 - [ ] Search by name/keywords
@@ -2539,11 +2703,11 @@ packages/registry/
 
 ### Q4: Sprint 6 (Dec) - 2 weeks
 
-| Feature | Agent | Days |
-|---------|-------|------|
-| `holoscript publish` | Tooling | 3 |
-| Private packages | Tooling | 4 |
-| HoloScript 2.5 release | All | 3 |
+| Feature                | Agent   | Days |
+| ---------------------- | ------- | ---- |
+| `holoscript publish`   | Tooling | 3    |
+| Private packages       | Tooling | 4    |
+| HoloScript 2.5 release | All     | 3    |
 
 <details>
 <summary><strong>📋 Sprint 6 Detailed Specifications</strong></summary>
@@ -2556,6 +2720,7 @@ packages/registry/
 Publish packages to registry with validation.
 
 **Workflow:**
+
 ```bash
 $ holoscript publish
 
@@ -2584,6 +2749,7 @@ Publishing to registry.holoscript.dev...
 ```
 
 **Pre-publish validations:**
+
 1. package.json required fields
 2. All source files parse
 3. Tests pass (if configured)
@@ -2592,11 +2758,13 @@ Publishing to registry.holoscript.dev...
 6. README exists
 
 **Files to modify:**
+
 - `packages/cli/src/commands/publish.ts` - Main command
 - `packages/cli/src/publish/validator.ts` - Validations
 - `packages/cli/src/publish/packager.ts` - Create tarball
 
 **Acceptance criteria:**
+
 - [ ] Validates package before publish
 - [ ] Builds and bundles package
 - [ ] Uploads to registry
@@ -2615,12 +2783,14 @@ Organization-scoped private packages.
 **Features:**
 
 1. **Organization scopes:**
+
 ```
 @mycompany/internal-utils  ← Private to @mycompany org
 @holoscript/core           ← Public
 ```
 
 2. **Access control:**
+
 ```bash
 # Grant access
 holoscript access grant @mycompany/utils read @alice
@@ -2631,6 +2801,7 @@ holoscript access list @mycompany/utils
 ```
 
 3. **Token authentication:**
+
 ```bash
 # Generate token for CI
 holoscript token create --readonly --scope @mycompany
@@ -2640,6 +2811,7 @@ HOLOSCRIPT_TOKEN=xxx holoscript install
 ```
 
 **Database additions:**
+
 ```sql
 CREATE TABLE organizations (
   id SERIAL PRIMARY KEY,
@@ -2663,11 +2835,13 @@ CREATE TABLE package_access (
 ```
 
 **Files to modify:**
+
 - `packages/registry/src/api/access.ts` - Access control endpoints
 - `packages/registry/src/auth/tokens.ts` - Token management
 - `packages/cli/src/commands/access.ts` - CLI commands
 
 **Acceptance criteria:**
+
 - [ ] Create organizations
 - [ ] Publish private packages
 - [ ] Grant/revoke access
@@ -2709,6 +2883,7 @@ Major release with all Sprint 1-6 features.
    - [ ] Video announcement recorded
 
 **Release artifacts:**
+
 ```
 - @holoscript/core@2.5.0
 - @holoscript/cli@2.5.0
@@ -2721,6 +2896,7 @@ Major release with all Sprint 1-6 features.
 ```
 
 **Announcement channels:**
+
 - GitHub release
 - npm publish
 - Blog post
@@ -2729,6 +2905,7 @@ Major release with all Sprint 1-6 features.
 - YouTube video
 
 **Acceptance criteria:**
+
 - [ ] All packages published to npm
 - [ ] GitHub release with changelog
 - [ ] Documentation site updated
@@ -2743,11 +2920,11 @@ Major release with all Sprint 1-6 features.
 
 ### Q1: Sprint 7 (Jan-Feb) - 4 weeks
 
-| Feature | Agent | Days |
-|---------|-------|------|
-| Visual scripting (MVP) | IDE | 8 |
-| AI autocomplete integration | IDE | 5 |
-| IntelliJ plugin | IDE | 5 |
+| Feature                     | Agent | Days |
+| --------------------------- | ----- | ---- |
+| Visual scripting (MVP)      | IDE   | 8    |
+| AI autocomplete integration | IDE   | 5    |
+| IntelliJ plugin             | IDE   | 5    |
 
 <details>
 <summary><strong>📋 Sprint 7 Detailed Specifications</strong></summary>
@@ -2760,6 +2937,7 @@ Major release with all Sprint 1-6 features.
 Node-based visual programming interface for HoloScript.
 
 **Architecture:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Visual Editor                                              │
@@ -2802,6 +2980,7 @@ Node-based visual programming interface for HoloScript.
    - Array, Object
 
 **Graph to code conversion:**
+
 ```typescript
 // Visual graph
 OnClick → PlaySound("click.mp3") → SetColor("#ff0000")
@@ -2816,12 +2995,14 @@ orb button {
 ```
 
 **Tech stack:**
+
 - React Flow for node editor
 - Monaco for code preview
 - Custom node types
 - Undo/redo support
 
 **Files to create:**
+
 ```
 packages/visual/
 ├── src/
@@ -2844,6 +3025,7 @@ packages/visual/
 ```
 
 **MVP scope:**
+
 - 20 core node types
 - Drag-and-drop connections
 - Real-time code preview
@@ -2851,6 +3033,7 @@ packages/visual/
 - Import from .hsplus (basic)
 
 **Acceptance criteria:**
+
 - [ ] Node canvas with pan/zoom
 - [ ] 20 node types available
 - [ ] Connect nodes with wires
@@ -2869,6 +3052,7 @@ AI-powered code suggestions beyond basic completion.
 **Features:**
 
 1. **Smart completions:**
+
 ```hsplus
 orb player {
   @physics
@@ -2878,6 +3062,7 @@ orb player {
 ```
 
 2. **Code generation from comments:**
+
 ```hsplus
 orb game {
   // Create a countdown timer that shows 3, 2, 1, Go!
@@ -2899,12 +3084,14 @@ orb game {
 ```
 
 3. **Error fix suggestions:**
+
 ```
 Error: Property 'colr' does not exist. Did you mean 'color'?
   [Quick fix: AI suggests full correction with context]
 ```
 
 4. **Trait recommendations:**
+
 ```hsplus
 orb door {
   // AI: "This looks like a door. Consider adding:"
@@ -2928,6 +3115,7 @@ orb door {
    - Error messages
 
 3. **Prompt engineering:**
+
 ```
 You are a HoloScript expert. Given this context:
 - File: {filename}
@@ -2939,18 +3127,21 @@ Suggest the most likely completion.
 ```
 
 **Files to create:**
+
 - `packages/lsp/src/ai/AICompletionProvider.ts`
 - `packages/lsp/src/ai/ContextGatherer.ts`
 - `packages/lsp/src/ai/PromptBuilder.ts`
 - `packages/vscode/src/ai/AIFeatures.ts`
 
 **Privacy:**
+
 - Local-first (Ollama)
 - Opt-in cloud features
 - No code sent without consent
 - Clear data usage policy
 
 **Acceptance criteria:**
+
 - [ ] Smart trait suggestions
 - [ ] Comment-to-code generation
 - [ ] Error fix suggestions
@@ -2967,6 +3158,7 @@ Suggest the most likely completion.
 Full HoloScript support for IntelliJ IDEA, WebStorm, etc.
 
 **Features:**
+
 - Syntax highlighting
 - LSP integration
 - Code formatting
@@ -2976,6 +3168,7 @@ Full HoloScript support for IntelliJ IDEA, WebStorm, etc.
 - Refactoring support
 
 **Architecture:**
+
 ```
 ┌─────────────────────────────────────────┐
 │  IntelliJ Plugin                        │
@@ -3002,12 +3195,14 @@ Full HoloScript support for IntelliJ IDEA, WebStorm, etc.
 ```
 
 **Tech stack:**
+
 - Kotlin for plugin
 - lsp4intellij for LSP client
 - TextMate bundles for syntax
 - Gradle for build
 
 **Files to create:**
+
 ```
 packages/intellij/
 ├── src/main/
@@ -3028,10 +3223,12 @@ packages/intellij/
 ```
 
 **Distribution:**
+
 - JetBrains Marketplace
 - Manual install from ZIP
 
 **Acceptance criteria:**
+
 - [ ] Syntax highlighting works
 - [ ] LSP features (completion, hover, etc.)
 - [ ] Format on save
@@ -3042,11 +3239,11 @@ packages/intellij/
 
 ### Q2: Sprint 8 (Mar-Apr) - 4 weeks
 
-| Feature | Agent | Days |
-|---------|-------|------|
-| WASM compiler | Architect | 8 |
-| Team workspaces | Tooling | 5 |
-| HoloScript Academy content | Docs | 6 |
+| Feature                    | Agent     | Days |
+| -------------------------- | --------- | ---- |
+| WASM compiler              | Architect | 8    |
+| Team workspaces            | Tooling   | 5    |
+| HoloScript Academy content | Docs      | 6    |
 
 <details>
 <summary><strong>📋 Sprint 8 Detailed Specifications</strong></summary>
@@ -3059,11 +3256,13 @@ packages/intellij/
 Compile HoloScript to WebAssembly for high-performance execution.
 
 **Use cases:**
+
 1. **Web playground** - Parse in browser without server
 2. **Embedded runtime** - Run HoloScript in any WASM host
 3. **Performance** - 10x faster than JS interpreter
 
 **Architecture:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  HoloScript Source                                          │
@@ -3093,6 +3292,7 @@ Compile HoloScript to WebAssembly for high-performance execution.
 **Implementation approach:**
 
 1. **Rust rewrite of core:**
+
 ```rust
 // src/parser.rs
 pub fn parse(source: &str) -> Result<Ast, ParseError> {
@@ -3112,6 +3312,7 @@ pub fn parse_to_json(source: &str) -> String {
 ```
 
 2. **Build pipeline:**
+
 ```bash
 # Compile Rust to WASM
 wasm-pack build --target web
@@ -3124,20 +3325,24 @@ pkg/
 ```
 
 3. **JavaScript API:**
+
 ```typescript
 import init, { parse_to_json } from '@holoscript/wasm';
 
-await init();  // Load WASM
+await init(); // Load WASM
 
-const ast = JSON.parse(parse_to_json(`
+const ast = JSON.parse(
+  parse_to_json(`
   orb cube {
     @grabbable
     color: "red"
   }
-`));
+`)
+);
 ```
 
 **Files to create:**
+
 ```
 packages/compiler-wasm/
 ├── src/
@@ -3152,11 +3357,13 @@ packages/compiler-wasm/
 ```
 
 **Performance targets:**
+
 - Parse 1000 lines: <5ms (vs 50ms in JS)
 - WASM binary size: <500KB gzipped
 - Memory usage: <10MB for typical projects
 
 **Acceptance criteria:**
+
 - [ ] Parser compiles to WASM
 - [ ] Type checker compiles to WASM
 - [ ] npm package published
@@ -3175,6 +3382,7 @@ Collaborative workspaces for teams.
 **Features:**
 
 1. **Shared configurations:**
+
 ```json
 // .holoscript/workspace.json
 {
@@ -3191,6 +3399,7 @@ Collaborative workspaces for teams.
 ```
 
 2. **Role-based access:**
+
 ```
 Owner    - Full control, billing, delete workspace
 Admin    - Manage members, settings, packages
@@ -3199,6 +3408,7 @@ Viewer   - Read-only access
 ```
 
 3. **Shared secrets:**
+
 ```bash
 # Set team secret (encrypted)
 holoscript workspace secret set API_KEY=xxx
@@ -3208,6 +3418,7 @@ holoscript build --env workspace
 ```
 
 4. **Activity feed:**
+
 ```
 Recent activity in @myteam/vr-project:
 
@@ -3217,6 +3428,7 @@ Recent activity in @myteam/vr-project:
 ```
 
 **API endpoints:**
+
 ```
 POST   /workspaces                    # Create workspace
 GET    /workspaces/:id                # Get workspace
@@ -3229,11 +3441,13 @@ POST   /workspaces/:id/secrets        # Set secret
 ```
 
 **Files to create:**
+
 - `packages/registry/src/api/workspaces.ts`
 - `packages/registry/src/db/workspace-schema.sql`
 - `packages/cli/src/commands/workspace.ts`
 
 **Acceptance criteria:**
+
 - [ ] Create/delete workspaces
 - [ ] Invite/remove members
 - [ ] Role-based permissions
@@ -3252,6 +3466,7 @@ Comprehensive learning platform for HoloScript.
 **Course structure:**
 
 **Level 1: Fundamentals (10 lessons)**
+
 ```
 1.1 What is HoloScript?
 1.2 Installation & Setup
@@ -3266,6 +3481,7 @@ Comprehensive learning platform for HoloScript.
 ```
 
 **Level 2: Intermediate (10 lessons)**
+
 ```
 2.1 Advanced Traits
 2.2 Physics Simulation
@@ -3280,6 +3496,7 @@ Comprehensive learning platform for HoloScript.
 ```
 
 **Level 3: Advanced (10 lessons)**
+
 ```
 3.1 Custom Trait Development
 3.2 Plugin Architecture
@@ -3294,6 +3511,7 @@ Comprehensive learning platform for HoloScript.
 ```
 
 **Each lesson includes:**
+
 - Written content (1000-2000 words)
 - Interactive code playground
 - Video explanation (5-10 min)
@@ -3302,6 +3520,7 @@ Comprehensive learning platform for HoloScript.
 - Discussion forum
 
 **Certification:**
+
 ```
 ┌─────────────────────────────────────────┐
 │  HoloScript Developer Certificate       │
@@ -3319,6 +3538,7 @@ Comprehensive learning platform for HoloScript.
 ```
 
 **Platform features:**
+
 - Progress tracking
 - Code playground per lesson
 - Discussion forums
@@ -3327,6 +3547,7 @@ Comprehensive learning platform for HoloScript.
 - Study groups
 
 **Files to create:**
+
 ```
 docs/academy/
 ├── courses/
@@ -3342,6 +3563,7 @@ docs/academy/
 ```
 
 **Acceptance criteria:**
+
 - [ ] 30 lessons created
 - [ ] Code playgrounds work
 - [ ] Quizzes functional
@@ -3354,11 +3576,11 @@ docs/academy/
 
 ### Q3-Q4: Sprint 9-10 (May-Aug) - 8 weeks
 
-| Feature | Agent | Days |
-|---------|-------|------|
-| Certified packages | Docs | 5 |
-| Partner SDK | Tooling | 6 |
-| HoloScript 3.0 release | All | 5 |
+| Feature                | Agent   | Days |
+| ---------------------- | ------- | ---- |
+| Certified packages     | Docs    | 5    |
+| Partner SDK            | Tooling | 6    |
+| HoloScript 3.0 release | All     | 5    |
 
 <details>
 <summary><strong>📋 Sprint 9-10 Detailed Specifications</strong></summary>
@@ -3395,6 +3617,7 @@ Verification program for high-quality packages.
    - Semantic versioning
 
 **Certification badge:**
+
 ```
 ┌─────────────────────────────────────────┐
 │  ✓ HoloScript Certified                 │
@@ -3407,6 +3630,7 @@ Verification program for high-quality packages.
 ```
 
 **Certification process:**
+
 1. Package author applies
 2. Automated checks run
 3. Manual review (if needed)
@@ -3414,11 +3638,13 @@ Verification program for high-quality packages.
 5. Annual renewal
 
 **Files to create:**
+
 - `packages/registry/src/certification/Checker.ts`
 - `packages/registry/src/certification/Badge.ts`
 - `docs/certification/requirements.md`
 
 **Acceptance criteria:**
+
 - [ ] Automated quality checks
 - [ ] Manual review workflow
 - [ ] Badge display in registry
@@ -3435,6 +3661,7 @@ Verification program for high-quality packages.
 SDK for partners to integrate HoloScript into their platforms.
 
 **Use cases:**
+
 1. Game engines embedding HoloScript
 2. Design tools with HoloScript export
 3. LMS platforms with HoloScript courses
@@ -3443,6 +3670,7 @@ SDK for partners to integrate HoloScript into their platforms.
 **SDK components:**
 
 1. **Embedding API:**
+
 ```typescript
 import { HoloScriptRuntime } from '@holoscript/partner-sdk';
 
@@ -3465,6 +3693,7 @@ runtime.on('sceneReady', (scene) => {
 ```
 
 2. **Export adapters:**
+
 ```typescript
 import { exportTo } from '@holoscript/partner-sdk';
 
@@ -3474,6 +3703,7 @@ const godotProject = exportTo('godot', holoScriptScene);
 ```
 
 3. **Branding kit:**
+
 ```
 assets/
 ├── logos/
@@ -3485,25 +3715,30 @@ assets/
 ```
 
 4. **Integration docs:**
+
 ```markdown
 # Integrating HoloScript
 
 ## Quick Start
+
 1. Install SDK
 2. Initialize runtime
 3. Load scenes
 4. Connect to your renderer
 
 ## API Reference
+
 ...
 
 ## Examples
+
 - Unity integration
 - Unreal integration
 - Custom renderer
 ```
 
 **Partner tiers:**
+
 ```
 Community  - Free, self-service, basic support
 Pro        - $99/mo, priority support, analytics
@@ -3511,6 +3746,7 @@ Enterprise - Custom, SLA, dedicated support
 ```
 
 **Files to create:**
+
 ```
 packages/partner-sdk/
 ├── src/
@@ -3532,6 +3768,7 @@ packages/partner-sdk/
 ```
 
 **Acceptance criteria:**
+
 - [ ] Embedding API works
 - [ ] Unity export adapter
 - [ ] Branding kit complete
@@ -3546,6 +3783,7 @@ packages/partner-sdk/
 Major version with visual scripting and WASM.
 
 **Breaking changes (migration guide required):**
+
 1. Deprecated traits removed
 2. Config file format v3
 3. Runtime API changes
@@ -3573,6 +3811,7 @@ Major version with visual scripting and WASM.
    - [ ] Plan 3.0.1
 
 **Release artifacts:**
+
 ```
 @holoscript/core@3.0.0
 @holoscript/cli@3.0.0
@@ -3589,6 +3828,7 @@ Major version with visual scripting and WASM.
 ```
 
 **Marketing:**
+
 - Launch video (5 min)
 - Feature showcase GIFs
 - Press release
@@ -3596,6 +3836,7 @@ Major version with visual scripting and WASM.
 - Community showcase
 
 **Acceptance criteria:**
+
 - [ ] All packages published
 - [ ] No P0 bugs
 - [ ] Migration guide tested
@@ -3619,22 +3860,22 @@ Major version with visual scripting and WASM.
 
 ### Current (v3.x) ✅
 
-| Package | Version | Agent |
-|---------|---------|-------|
-| `@holoscript/core` | 3.0.0 | Architect |
-| `@holoscript/cli` | 3.0.0 | Tooling |
-| `@holoscript/formatter` | 3.0.0 | Tooling |
-| `@holoscript/linter` | 3.0.0 | Tooling |
-| `@holoscript/lsp` | 3.0.0 | IDE |
-| `@holoscript/test` | 3.0.0 | QA |
-| `@holoscript/vscode` | 3.0.0 | IDE |
-| `@holoscript/partner-sdk` | 1.0.0 | Tooling |
+| Package                   | Version | Agent     |
+| ------------------------- | ------- | --------- |
+| `@holoscript/core`        | 3.0.0   | Architect |
+| `@holoscript/cli`         | 3.0.0   | Tooling   |
+| `@holoscript/formatter`   | 3.0.0   | Tooling   |
+| `@holoscript/linter`      | 3.0.0   | Tooling   |
+| `@holoscript/lsp`         | 3.0.0   | IDE       |
+| `@holoscript/test`        | 3.0.0   | QA        |
+| `@holoscript/vscode`      | 3.0.0   | IDE       |
+| `@holoscript/partner-sdk` | 1.0.0   | Tooling   |
 
 ### Planned (v3.x)
 
-| Package | Agent | Target |
-|---------|-------|--------|
-| `@holoscript/visual` | IDE | 2027 Q1 |
+| Package                | Agent   | Target  |
+| ---------------------- | ------- | ------- |
+| `@holoscript/visual`   | IDE     | 2027 Q1 |
 | `@holoscript/registry` | Tooling | 2026 Q4 |
 
 ---
@@ -3642,6 +3883,7 @@ Major version with visual scripting and WASM.
 ## Milestones (AI-Accelerated Timeline)
 
 ### 2026 ✅ COMPLETE
+
 - [x] Feb: Config inheritance + format on save shipped
 - [x] Feb: Web playground live
 - [x] Feb: Incremental parsing + watch mode
@@ -3680,6 +3922,7 @@ pnpm test
 **HoloScript 3.0 Released** - February 2026
 
 All 10 sprints have been completed:
+
 - Sprint 1-2: Parser, VS Code, incremental compilation
 - Sprint 3-4: WASM, WoT/MQTT, headless runtime, URDF/SDF
 - Sprint 5-6: Dead code detection, deprecations, publishing
@@ -3692,13 +3935,13 @@ All 10 sprints have been completed:
 
 ## AI Agent Assignment
 
-| Agent | Current Task | Status |
-|-------|--------------|--------|
+| Agent     | Current Task         | Status      |
+| --------- | -------------------- | ----------- |
 | Architect | All sprints complete | ✅ Complete |
-| Tooling | All sprints complete | ✅ Complete |
-| IDE | All sprints complete | ✅ Complete |
-| QA | All sprints complete | ✅ Complete |
-| Docs | All sprints complete | ✅ Complete |
+| Tooling   | All sprints complete | ✅ Complete |
+| IDE       | All sprints complete | ✅ Complete |
+| QA        | All sprints complete | ✅ Complete |
+| Docs      | All sprints complete | ✅ Complete |
 
 ---
 
@@ -3709,5 +3952,5 @@ All 10 sprints have been completed:
 
 ---
 
-*Last updated: 2026-02-05*
-*Roadmap version: 3.0 - All Sprints Complete*
+_Last updated: 2026-02-05_
+_Roadmap version: 3.0 - All Sprints Complete_

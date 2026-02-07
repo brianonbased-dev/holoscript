@@ -17,7 +17,6 @@ import type {
   HoloComposition,
   HoloObjectDecl,
   HoloState,
-  HoloValue,
 } from '../parser/HoloCompositionTypes';
 import type { HSPlusAST, HSPlusNode } from '../types/HoloScriptPlus';
 
@@ -162,9 +161,7 @@ export class WASMCompiler {
     this.emitModule(composition);
 
     // Generate JS bindings
-    const bindings = this.options.generateBindings
-      ? this.generateBindings(composition)
-      : '';
+    const bindings = this.options.generateBindings ? this.generateBindings(composition) : '';
 
     return {
       wat: this.lines.join('\n'),
@@ -190,9 +187,7 @@ export class WASMCompiler {
     this.emitModuleFromAST(ast);
 
     // Generate JS bindings
-    const bindings = this.options.generateBindings
-      ? this.generateBindingsFromAST(ast)
-      : '';
+    const bindings = this.options.generateBindings ? this.generateBindingsFromAST(ast) : '';
 
     return {
       wat: this.lines.join('\n'),
@@ -267,7 +262,7 @@ export class WASMCompiler {
   }
 
   private analyzeHSPlusState(ast: HSPlusAST): void {
-    const stateDirective = ast.root.directives?.find(d => d.type === 'state');
+    const stateDirective = ast.root.directives?.find((d) => d.type === 'state');
     if (!stateDirective || stateDirective.type !== 'state') return;
 
     let offset = 0;
@@ -366,12 +361,10 @@ export class WASMCompiler {
     this.memoryLayout.objectsOffset = this.memoryLayout.stateSize;
     this.memoryLayout.eventsOffset =
       this.memoryLayout.objectsOffset + this.memoryLayout.objectsSize;
-    this.memoryLayout.stringsOffset =
-      this.memoryLayout.eventsOffset + this.memoryLayout.eventsSize;
+    this.memoryLayout.stringsOffset = this.memoryLayout.eventsOffset + this.memoryLayout.eventsSize;
 
     // Calculate total (will be updated as strings are added)
-    this.memoryLayout.totalSize =
-      this.memoryLayout.stringsOffset + this.memoryLayout.stringsSize;
+    this.memoryLayout.totalSize = this.memoryLayout.stringsOffset + this.memoryLayout.stringsSize;
   }
 
   // ===========================================================================
@@ -620,7 +613,9 @@ export class WASMCompiler {
     this.emit(')');
 
     // Set object active
-    this.emit('(func $set_object_active (export "set_object_active") (param $idx i32) (param $active i32)');
+    this.emit(
+      '(func $set_object_active (export "set_object_active") (param $idx i32) (param $active i32)'
+    );
     this.indent();
     this.emit('(i32.store');
     this.emit('  (i32.add');
@@ -655,7 +650,7 @@ export class WASMCompiler {
     this.emit('');
   }
 
-  private emitUpdateFunction(composition: HoloComposition): void {
+  private emitUpdateFunction(_composition: HoloComposition): void {
     this.emit(';; Main update function');
     this.emit('(func $update (export "update") (param $dt f32)');
     this.indent();
@@ -698,7 +693,7 @@ export class WASMCompiler {
     this.emit('');
   }
 
-  private emitUpdateFunctionFromAST(ast: HSPlusAST): void {
+  private emitUpdateFunctionFromAST(_ast: HSPlusAST): void {
     this.emit(';; Main update function');
     this.emit('(func $update (export "update") (param $dt f32)');
     this.indent();
@@ -758,7 +753,7 @@ export class WASMCompiler {
   // JS BINDINGS GENERATION
   // ===========================================================================
 
-  private generateBindings(composition: HoloComposition): string {
+  private generateBindings(_composition: HoloComposition): string {
     const lines: string[] = [];
 
     lines.push('/**');
@@ -885,7 +880,9 @@ export class WASMCompiler {
     lines.push('  }');
     lines.push('');
     lines.push('  setObjectActive(index: number, active: boolean): void {');
-    lines.push('    (this.instance!.exports.set_object_active as Function)(index, active ? 1 : 0);');
+    lines.push(
+      '    (this.instance!.exports.set_object_active as Function)(index, active ? 1 : 0);'
+    );
     lines.push('  }');
     lines.push('');
 
@@ -967,7 +964,7 @@ export class WASMCompiler {
     }
   }
 
-  private valueToWASM(value: unknown, type: WASMValueType): number | bigint {
+  private valueToWASM(value: unknown, _type: WASMValueType): number | bigint {
     if (typeof value === 'boolean') return value ? 1 : 0;
     if (typeof value === 'number') return value;
     if (typeof value === 'bigint') return value;
@@ -1033,10 +1030,7 @@ export function compileToWASM(
 /**
  * Compile HSPlusAST to WASM
  */
-export function compileASTToWASM(
-  ast: HSPlusAST,
-  options?: WASMCompilerOptions
-): WASMCompileResult {
+export function compileASTToWASM(ast: HSPlusAST, options?: WASMCompilerOptions): WASMCompileResult {
   const compiler = new WASMCompiler(options);
   return compiler.compileAST(ast);
 }

@@ -1,6 +1,6 @@
 /**
  * HoloScript Visual - Node Registry
- * 
+ *
  * Defines all 20+ core node types for visual programming.
  */
 
@@ -18,9 +18,9 @@ export const EVENT_NODES: NodeTypeDefinition[] = [
     inputs: [],
     outputs: [
       { id: 'flow', label: 'Execute', type: 'flow' },
-      { id: 'pointer', label: 'Pointer', type: 'object' }
+      { id: 'pointer', label: 'Pointer', type: 'object' },
     ],
-    icon: '👆'
+    icon: '👆',
   },
   {
     type: 'on_hover',
@@ -30,9 +30,9 @@ export const EVENT_NODES: NodeTypeDefinition[] = [
     inputs: [],
     outputs: [
       { id: 'enter', label: 'On Enter', type: 'flow' },
-      { id: 'exit', label: 'On Exit', type: 'flow' }
+      { id: 'exit', label: 'On Exit', type: 'flow' },
     ],
-    icon: '🎯'
+    icon: '🎯',
   },
   {
     type: 'on_grab',
@@ -43,9 +43,9 @@ export const EVENT_NODES: NodeTypeDefinition[] = [
     outputs: [
       { id: 'grab', label: 'On Grab', type: 'flow' },
       { id: 'release', label: 'On Release', type: 'flow' },
-      { id: 'hand', label: 'Hand', type: 'object' }
+      { id: 'hand', label: 'Hand', type: 'object' },
     ],
-    icon: '✊'
+    icon: '✊',
   },
   {
     type: 'on_tick',
@@ -55,9 +55,9 @@ export const EVENT_NODES: NodeTypeDefinition[] = [
     inputs: [],
     outputs: [
       { id: 'flow', label: 'Execute', type: 'flow' },
-      { id: 'deltaTime', label: 'Delta Time', type: 'number' }
+      { id: 'deltaTime', label: 'Delta Time', type: 'number' },
     ],
-    icon: '⏱️'
+    icon: '⏱️',
   },
   {
     type: 'on_timer',
@@ -65,14 +65,12 @@ export const EVENT_NODES: NodeTypeDefinition[] = [
     category: 'event',
     description: 'Triggered after a delay',
     inputs: [],
-    outputs: [
-      { id: 'flow', label: 'Execute', type: 'flow' }
-    ],
+    outputs: [{ id: 'flow', label: 'Execute', type: 'flow' }],
     properties: [
       { id: 'delay', label: 'Delay (ms)', type: 'number', default: 1000 },
-      { id: 'repeat', label: 'Repeat', type: 'boolean', default: false }
+      { id: 'repeat', label: 'Repeat', type: 'boolean', default: false },
     ],
-    icon: '⏰'
+    icon: '⏰',
   },
   {
     type: 'on_collision',
@@ -83,9 +81,9 @@ export const EVENT_NODES: NodeTypeDefinition[] = [
     outputs: [
       { id: 'enter', label: 'On Enter', type: 'flow' },
       { id: 'exit', label: 'On Exit', type: 'flow' },
-      { id: 'other', label: 'Other Object', type: 'object' }
+      { id: 'other', label: 'Other Object', type: 'object' },
     ],
-    icon: '💥'
+    icon: '💥',
   },
   {
     type: 'on_trigger',
@@ -96,10 +94,10 @@ export const EVENT_NODES: NodeTypeDefinition[] = [
     outputs: [
       { id: 'enter', label: 'On Enter', type: 'flow' },
       { id: 'exit', label: 'On Exit', type: 'flow' },
-      { id: 'other', label: 'Other Object', type: 'object' }
+      { id: 'other', label: 'Other Object', type: 'object' },
     ],
-    icon: '🚪'
-  }
+    icon: '🚪',
+  },
 ];
 
 /**
@@ -113,18 +111,18 @@ export const ACTION_NODES: NodeTypeDefinition[] = [
     description: 'Play an audio file',
     inputs: [
       { id: 'flow', label: 'Execute', type: 'flow' },
-      { id: 'url', label: 'URL', type: 'string' }
+      { id: 'url', label: 'URL', type: 'string' },
     ],
     outputs: [
       { id: 'flow', label: 'Then', type: 'flow' },
-      { id: 'done', label: 'On Complete', type: 'flow' }
+      { id: 'done', label: 'On Complete', type: 'flow' },
     ],
     properties: [
       { id: 'url', label: 'Sound URL', type: 'string', default: '' },
       { id: 'volume', label: 'Volume', type: 'number', default: 1 },
-      { id: 'loop', label: 'Loop', type: 'boolean', default: false }
+      { id: 'loop', label: 'Loop', type: 'boolean', default: false },
     ],
-    icon: '🔊'
+    icon: '🔊',
   },
   {
     type: 'play_animation',
@@ -133,18 +131,18 @@ export const ACTION_NODES: NodeTypeDefinition[] = [
     description: 'Play an animation on the object',
     inputs: [
       { id: 'flow', label: 'Execute', type: 'flow' },
-      { id: 'target', label: 'Target', type: 'object' }
+      { id: 'target', label: 'Target', type: 'object' },
     ],
     outputs: [
       { id: 'flow', label: 'Then', type: 'flow' },
-      { id: 'done', label: 'On Complete', type: 'flow' }
+      { id: 'done', label: 'On Complete', type: 'flow' },
     ],
     properties: [
       { id: 'animation', label: 'Animation', type: 'string', default: 'default' },
       { id: 'duration', label: 'Duration (ms)', type: 'number', default: 1000 },
-      { id: 'loop', label: 'Loop', type: 'boolean', default: false }
+      { id: 'loop', label: 'Loop', type: 'boolean', default: false },
     ],
-    icon: '🎬'
+    icon: '🎬',
   },
   {
     type: 'set_property',
@@ -154,15 +152,11 @@ export const ACTION_NODES: NodeTypeDefinition[] = [
     inputs: [
       { id: 'flow', label: 'Execute', type: 'flow' },
       { id: 'target', label: 'Target', type: 'object' },
-      { id: 'value', label: 'Value', type: 'any' }
+      { id: 'value', label: 'Value', type: 'any' },
     ],
-    outputs: [
-      { id: 'flow', label: 'Then', type: 'flow' }
-    ],
-    properties: [
-      { id: 'property', label: 'Property', type: 'string', default: 'color' }
-    ],
-    icon: '✏️'
+    outputs: [{ id: 'flow', label: 'Then', type: 'flow' }],
+    properties: [{ id: 'property', label: 'Property', type: 'string', default: 'color' }],
+    icon: '✏️',
   },
   {
     type: 'toggle',
@@ -171,16 +165,14 @@ export const ACTION_NODES: NodeTypeDefinition[] = [
     description: 'Toggle a boolean property',
     inputs: [
       { id: 'flow', label: 'Execute', type: 'flow' },
-      { id: 'target', label: 'Target', type: 'object' }
+      { id: 'target', label: 'Target', type: 'object' },
     ],
     outputs: [
       { id: 'flow', label: 'Then', type: 'flow' },
-      { id: 'value', label: 'New Value', type: 'boolean' }
+      { id: 'value', label: 'New Value', type: 'boolean' },
     ],
-    properties: [
-      { id: 'property', label: 'Property', type: 'string', default: 'visible' }
-    ],
-    icon: '🔄'
+    properties: [{ id: 'property', label: 'Property', type: 'string', default: 'visible' }],
+    icon: '🔄',
   },
   {
     type: 'spawn',
@@ -189,16 +181,14 @@ export const ACTION_NODES: NodeTypeDefinition[] = [
     description: 'Create a new object instance',
     inputs: [
       { id: 'flow', label: 'Execute', type: 'flow' },
-      { id: 'position', label: 'Position', type: 'object' }
+      { id: 'position', label: 'Position', type: 'object' },
     ],
     outputs: [
       { id: 'flow', label: 'Then', type: 'flow' },
-      { id: 'spawned', label: 'Spawned', type: 'object' }
+      { id: 'spawned', label: 'Spawned', type: 'object' },
     ],
-    properties: [
-      { id: 'template', label: 'Template', type: 'string', default: '' }
-    ],
-    icon: '✨'
+    properties: [{ id: 'template', label: 'Template', type: 'string', default: '' }],
+    icon: '✨',
   },
   {
     type: 'destroy',
@@ -207,13 +197,11 @@ export const ACTION_NODES: NodeTypeDefinition[] = [
     description: 'Remove an object from the scene',
     inputs: [
       { id: 'flow', label: 'Execute', type: 'flow' },
-      { id: 'target', label: 'Target', type: 'object' }
+      { id: 'target', label: 'Target', type: 'object' },
     ],
-    outputs: [
-      { id: 'flow', label: 'Then', type: 'flow' }
-    ],
-    icon: '💨'
-  }
+    outputs: [{ id: 'flow', label: 'Then', type: 'flow' }],
+    icon: '💨',
+  },
 ];
 
 /**
@@ -227,13 +215,13 @@ export const LOGIC_NODES: NodeTypeDefinition[] = [
     description: 'Branch based on a condition',
     inputs: [
       { id: 'flow', label: 'Execute', type: 'flow' },
-      { id: 'condition', label: 'Condition', type: 'boolean' }
+      { id: 'condition', label: 'Condition', type: 'boolean' },
     ],
     outputs: [
       { id: 'true', label: 'True', type: 'flow' },
-      { id: 'false', label: 'False', type: 'flow' }
+      { id: 'false', label: 'False', type: 'flow' },
     ],
-    icon: '🔀'
+    icon: '🔀',
   },
   {
     type: 'switch',
@@ -242,20 +230,20 @@ export const LOGIC_NODES: NodeTypeDefinition[] = [
     description: 'Branch based on a value',
     inputs: [
       { id: 'flow', label: 'Execute', type: 'flow' },
-      { id: 'value', label: 'Value', type: 'any' }
+      { id: 'value', label: 'Value', type: 'any' },
     ],
     outputs: [
       { id: 'case1', label: 'Case 1', type: 'flow' },
       { id: 'case2', label: 'Case 2', type: 'flow' },
       { id: 'case3', label: 'Case 3', type: 'flow' },
-      { id: 'default', label: 'Default', type: 'flow' }
+      { id: 'default', label: 'Default', type: 'flow' },
     ],
     properties: [
       { id: 'case1', label: 'Case 1 Value', type: 'string', default: '' },
       { id: 'case2', label: 'Case 2 Value', type: 'string', default: '' },
-      { id: 'case3', label: 'Case 3 Value', type: 'string', default: '' }
+      { id: 'case3', label: 'Case 3 Value', type: 'string', default: '' },
     ],
-    icon: '🔢'
+    icon: '🔢',
   },
   {
     type: 'and',
@@ -264,12 +252,10 @@ export const LOGIC_NODES: NodeTypeDefinition[] = [
     description: 'Logical AND operation',
     inputs: [
       { id: 'a', label: 'A', type: 'boolean' },
-      { id: 'b', label: 'B', type: 'boolean' }
+      { id: 'b', label: 'B', type: 'boolean' },
     ],
-    outputs: [
-      { id: 'result', label: 'Result', type: 'boolean' }
-    ],
-    icon: '&'
+    outputs: [{ id: 'result', label: 'Result', type: 'boolean' }],
+    icon: '&',
   },
   {
     type: 'or',
@@ -278,25 +264,19 @@ export const LOGIC_NODES: NodeTypeDefinition[] = [
     description: 'Logical OR operation',
     inputs: [
       { id: 'a', label: 'A', type: 'boolean' },
-      { id: 'b', label: 'B', type: 'boolean' }
+      { id: 'b', label: 'B', type: 'boolean' },
     ],
-    outputs: [
-      { id: 'result', label: 'Result', type: 'boolean' }
-    ],
-    icon: '|'
+    outputs: [{ id: 'result', label: 'Result', type: 'boolean' }],
+    icon: '|',
   },
   {
     type: 'not',
     label: 'Not',
     category: 'logic',
     description: 'Logical NOT operation',
-    inputs: [
-      { id: 'value', label: 'Value', type: 'boolean' }
-    ],
-    outputs: [
-      { id: 'result', label: 'Result', type: 'boolean' }
-    ],
-    icon: '!'
+    inputs: [{ id: 'value', label: 'Value', type: 'boolean' }],
+    outputs: [{ id: 'result', label: 'Result', type: 'boolean' }],
+    icon: '!',
   },
   {
     type: 'compare',
@@ -305,16 +285,14 @@ export const LOGIC_NODES: NodeTypeDefinition[] = [
     description: 'Compare two values',
     inputs: [
       { id: 'a', label: 'A', type: 'any' },
-      { id: 'b', label: 'B', type: 'any' }
+      { id: 'b', label: 'B', type: 'any' },
     ],
-    outputs: [
-      { id: 'result', label: 'Result', type: 'boolean' }
-    ],
+    outputs: [{ id: 'result', label: 'Result', type: 'boolean' }],
     properties: [
-      { 
-        id: 'operator', 
-        label: 'Operator', 
-        type: 'select', 
+      {
+        id: 'operator',
+        label: 'Operator',
+        type: 'select',
         default: '==',
         options: [
           { label: 'Equals', value: '==' },
@@ -322,11 +300,11 @@ export const LOGIC_NODES: NodeTypeDefinition[] = [
           { label: 'Greater Than', value: '>' },
           { label: 'Less Than', value: '<' },
           { label: 'Greater or Equal', value: '>=' },
-          { label: 'Less or Equal', value: '<=' }
-        ]
-      }
+          { label: 'Less or Equal', value: '<=' },
+        ],
+      },
     ],
-    icon: '⚖️'
+    icon: '⚖️',
   },
   {
     type: 'math',
@@ -335,16 +313,14 @@ export const LOGIC_NODES: NodeTypeDefinition[] = [
     description: 'Perform math operation',
     inputs: [
       { id: 'a', label: 'A', type: 'number' },
-      { id: 'b', label: 'B', type: 'number' }
+      { id: 'b', label: 'B', type: 'number' },
     ],
-    outputs: [
-      { id: 'result', label: 'Result', type: 'number' }
-    ],
+    outputs: [{ id: 'result', label: 'Result', type: 'number' }],
     properties: [
-      { 
-        id: 'operator', 
-        label: 'Operation', 
-        type: 'select', 
+      {
+        id: 'operator',
+        label: 'Operation',
+        type: 'select',
         default: '+',
         options: [
           { label: 'Add', value: '+' },
@@ -352,12 +328,12 @@ export const LOGIC_NODES: NodeTypeDefinition[] = [
           { label: 'Multiply', value: '*' },
           { label: 'Divide', value: '/' },
           { label: 'Modulo', value: '%' },
-          { label: 'Power', value: '**' }
-        ]
-      }
+          { label: 'Power', value: '**' },
+        ],
+      },
     ],
-    icon: '🧮'
-  }
+    icon: '🧮',
+  },
 ];
 
 /**
@@ -369,16 +345,10 @@ export const DATA_NODES: NodeTypeDefinition[] = [
     label: 'Get Property',
     category: 'data',
     description: 'Get a property from an object',
-    inputs: [
-      { id: 'target', label: 'Target', type: 'object' }
-    ],
-    outputs: [
-      { id: 'value', label: 'Value', type: 'any' }
-    ],
-    properties: [
-      { id: 'property', label: 'Property', type: 'string', default: 'position' }
-    ],
-    icon: '📖'
+    inputs: [{ id: 'target', label: 'Target', type: 'object' }],
+    outputs: [{ id: 'value', label: 'Value', type: 'any' }],
+    properties: [{ id: 'property', label: 'Property', type: 'string', default: 'position' }],
+    icon: '📖',
   },
   {
     type: 'constant',
@@ -386,21 +356,23 @@ export const DATA_NODES: NodeTypeDefinition[] = [
     category: 'data',
     description: 'A constant value',
     inputs: [],
-    outputs: [
-      { id: 'value', label: 'Value', type: 'any' }
-    ],
+    outputs: [{ id: 'value', label: 'Value', type: 'any' }],
     properties: [
-      { id: 'type', label: 'Type', type: 'select', default: 'string',
+      {
+        id: 'type',
+        label: 'Type',
+        type: 'select',
+        default: 'string',
         options: [
           { label: 'String', value: 'string' },
           { label: 'Number', value: 'number' },
           { label: 'Boolean', value: 'boolean' },
-          { label: 'Color', value: 'color' }
-        ]
+          { label: 'Color', value: 'color' },
+        ],
       },
-      { id: 'value', label: 'Value', type: 'string', default: '' }
+      { id: 'value', label: 'Value', type: 'string', default: '' },
     ],
-    icon: '📌'
+    icon: '📌',
   },
   {
     type: 'random',
@@ -409,17 +381,15 @@ export const DATA_NODES: NodeTypeDefinition[] = [
     description: 'Generate a random number',
     inputs: [
       { id: 'min', label: 'Min', type: 'number' },
-      { id: 'max', label: 'Max', type: 'number' }
+      { id: 'max', label: 'Max', type: 'number' },
     ],
-    outputs: [
-      { id: 'value', label: 'Value', type: 'number' }
-    ],
+    outputs: [{ id: 'value', label: 'Value', type: 'number' }],
     properties: [
       { id: 'min', label: 'Min', type: 'number', default: 0 },
       { id: 'max', label: 'Max', type: 'number', default: 1 },
-      { id: 'integer', label: 'Integer', type: 'boolean', default: false }
+      { id: 'integer', label: 'Integer', type: 'boolean', default: false },
     ],
-    icon: '🎲'
+    icon: '🎲',
   },
   {
     type: 'interpolate',
@@ -429,12 +399,10 @@ export const DATA_NODES: NodeTypeDefinition[] = [
     inputs: [
       { id: 'from', label: 'From', type: 'number' },
       { id: 'to', label: 'To', type: 'number' },
-      { id: 't', label: 'T (0-1)', type: 'number' }
+      { id: 't', label: 'T (0-1)', type: 'number' },
     ],
-    outputs: [
-      { id: 'value', label: 'Value', type: 'number' }
-    ],
-    icon: '📈'
+    outputs: [{ id: 'value', label: 'Value', type: 'number' }],
+    icon: '📈',
   },
   {
     type: 'this',
@@ -442,10 +410,8 @@ export const DATA_NODES: NodeTypeDefinition[] = [
     category: 'data',
     description: 'Reference to the current object',
     inputs: [],
-    outputs: [
-      { id: 'object', label: 'Object', type: 'object' }
-    ],
-    icon: '🎯'
+    outputs: [{ id: 'object', label: 'Object', type: 'object' }],
+    icon: '🎯',
   },
   {
     type: 'vector3',
@@ -455,18 +421,16 @@ export const DATA_NODES: NodeTypeDefinition[] = [
     inputs: [
       { id: 'x', label: 'X', type: 'number' },
       { id: 'y', label: 'Y', type: 'number' },
-      { id: 'z', label: 'Z', type: 'number' }
+      { id: 'z', label: 'Z', type: 'number' },
     ],
-    outputs: [
-      { id: 'vector', label: 'Vector', type: 'object' }
-    ],
+    outputs: [{ id: 'vector', label: 'Vector', type: 'object' }],
     properties: [
       { id: 'x', label: 'X', type: 'number', default: 0 },
       { id: 'y', label: 'Y', type: 'number', default: 0 },
-      { id: 'z', label: 'Z', type: 'number', default: 0 }
+      { id: 'z', label: 'Z', type: 'number', default: 0 },
     ],
-    icon: '📐'
-  }
+    icon: '📐',
+  },
 ];
 
 /**
@@ -476,14 +440,14 @@ export const ALL_NODES: NodeTypeDefinition[] = [
   ...EVENT_NODES,
   ...ACTION_NODES,
   ...LOGIC_NODES,
-  ...DATA_NODES
+  ...DATA_NODES,
 ];
 
 /**
  * Node registry for quick lookup
  */
 export const NODE_REGISTRY = new Map<string, NodeTypeDefinition>(
-  ALL_NODES.map(node => [node.type, node])
+  ALL_NODES.map((node) => [node.type, node])
 );
 
 /**
@@ -497,5 +461,5 @@ export function getNodeDefinition(type: string): NodeTypeDefinition | undefined 
  * Get all nodes in a category
  */
 export function getNodesByCategory(category: string): NodeTypeDefinition[] {
-  return ALL_NODES.filter(node => node.category === category);
+  return ALL_NODES.filter((node) => node.category === category);
 }

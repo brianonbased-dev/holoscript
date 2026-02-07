@@ -232,7 +232,9 @@ describe('LobbyTrait', () => {
   describe('events', () => {
     it('should emit player joined event', () => {
       let eventFired = false;
-      trait.on('player-joined', () => { eventFired = true; });
+      trait.on('player-joined', () => {
+        eventFired = true;
+      });
       trait.addPlayer({ id: 'p1', name: 'P1' });
       expect(eventFired).toBe(true);
     });
@@ -240,7 +242,9 @@ describe('LobbyTrait', () => {
     it('should emit player left event', () => {
       let eventFired = false;
       trait.addPlayer({ id: 'p1', name: 'P1' });
-      trait.on('player-left', () => { eventFired = true; });
+      trait.on('player-left', () => {
+        eventFired = true;
+      });
       trait.removePlayer('p1');
       expect(eventFired).toBe(true);
     });

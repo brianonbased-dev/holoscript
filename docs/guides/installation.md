@@ -92,13 +92,13 @@ Add to Claude Desktop config (`~/.claude/settings.json`):
 
 ### Available MCP Tools
 
-| Tool | Description |
-|------|-------------|
-| `generate_object` | Create objects from descriptions |
-| `generate_scene` | Create complete compositions |
-| `validate_holoscript` | Check code for errors |
-| `suggest_traits` | Get trait recommendations |
-| `explain_code` | Get plain English explanation |
+| Tool                  | Description                      |
+| --------------------- | -------------------------------- |
+| `generate_object`     | Create objects from descriptions |
+| `generate_scene`      | Create complete compositions     |
+| `validate_holoscript` | Check code for errors            |
+| `suggest_traits`      | Get trait recommendations        |
+| `explain_code`        | Get plain English explanation    |
 
 See [MCP Server Guide](/guides/mcp-server) for full documentation.
 
@@ -210,7 +210,7 @@ composition "My Scene" {
   environment {
     skybox: "sunset"
   }
-  
+
   object "Player" {
     @collidable
     position: [0, 1.6, 0]
@@ -244,12 +244,12 @@ Output is in `dist/` ready for deployment.
 
 ## System Requirements
 
-| Requirement | Minimum |
-|-------------|---------|
-| Node.js | v18+ |
-| VS Code | v1.85+ |
-| RAM | 4GB |
-| OS | Windows, macOS, Linux |
+| Requirement | Minimum               |
+| ----------- | --------------------- |
+| Node.js     | v18+                  |
+| VS Code     | v1.85+                |
+| RAM         | 4GB                   |
+| OS          | Windows, macOS, Linux |
 
 ---
 

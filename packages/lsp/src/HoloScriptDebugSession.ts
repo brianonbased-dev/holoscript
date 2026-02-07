@@ -10,8 +10,10 @@ import {
   Variable,
 } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
-import { HoloScriptDebugger, type Breakpoint, type StackFrame as HoloStackFrame } from '@holoscript/core';
-import { join } from 'path';
+import {
+  HoloScriptDebugger,
+  type StackFrame as HoloStackFrame,
+} from '@holoscript/core';
 
 export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
   /** An absolute path to the "program" to debug. */
@@ -31,11 +33,11 @@ export class HoloScriptDebugSession extends LoggingDebugSession {
     this.debugger = new HoloScriptDebugger();
 
     // Listen to debugger events
-    this.debugger.on('breakpoint-hit', (event: any) => {
+    this.debugger.on('breakpoint-hit', (_event: any) => {
       this.sendEvent(new StoppedEvent('breakpoint', HoloScriptDebugSession.THREAD_ID));
     });
 
-    this.debugger.on('step-complete', (event: any) => {
+    this.debugger.on('step-complete', (_event: any) => {
       this.sendEvent(new StoppedEvent('step', HoloScriptDebugSession.THREAD_ID));
     });
 
@@ -45,14 +47,14 @@ export class HoloScriptDebugSession extends LoggingDebugSession {
       }
     });
 
-    this.debugger.on('exception', (event: any) => {
+    this.debugger.on('exception', (_event: any) => {
       this.sendEvent(new StoppedEvent('exception', HoloScriptDebugSession.THREAD_ID));
     });
   }
 
   protected initializeRequest(
     response: DebugProtocol.InitializeResponse,
-    args: DebugProtocol.InitializeRequestArguments
+    _args: DebugProtocol.InitializeRequestArguments
   ): void {
     response.body = response.body || {};
     response.body.supportsConfigurationDoneRequest = true;
@@ -98,14 +100,16 @@ export class HoloScriptDebugSession extends LoggingDebugSession {
     // Clear existing breakpoints for this file
     this.debugger.clearBreakpoints(); // Simple implementation: clear all
 
-    const breakpoints: DebugProtocol.Breakpoint[] = clientLines.map((l: DebugProtocol.SourceBreakpoint) => {
-      const bp = this.debugger.setBreakpoint(l.line, { file: path });
-      return {
-        id: parseInt(bp.id.replace('bp_', '')),
-        verified: true,
-        line: bp.line
-      };
-    });
+    const breakpoints: DebugProtocol.Breakpoint[] = clientLines.map(
+      (l: DebugProtocol.SourceBreakpoint) => {
+        const bp = this.debugger.setBreakpoint(l.line, { file: path });
+        return {
+          id: parseInt(bp.id.replace('bp_', '')),
+          verified: true,
+          line: bp.line,
+        };
+      }
+    );
 
     response.body = { breakpoints };
     this.sendResponse(response);
@@ -113,25 +117,28 @@ export class HoloScriptDebugSession extends LoggingDebugSession {
 
   protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
     response.body = {
-      threads: [new Thread(HoloScriptDebugSession.THREAD_ID, 'Main Thread')]
+      threads: [new Thread(HoloScriptDebugSession.THREAD_ID, 'Main Thread')],
     };
     this.sendResponse(response);
   }
 
   protected stackTraceRequest(
     response: DebugProtocol.StackTraceResponse,
-    args: DebugProtocol.StackTraceArguments
+    _args: DebugProtocol.StackTraceArguments
   ): void {
     const frames = this.debugger.getCallStack();
     response.body = {
-      stackFrames: frames.map((f: HoloStackFrame, i: number) => new StackFrame(
-        f.id,
-        f.name,
-        new Source(f.file || 'unknown', f.file || ''),
-        f.line,
-        f.column
-      )),
-      totalFrames: frames.length
+      stackFrames: frames.map(
+        (f: HoloStackFrame, _i: number) =>
+          new StackFrame(
+            f.id,
+            f.name,
+            new Source(f.file || 'unknown', f.file || ''),
+            f.line,
+            f.column
+          )
+      ),
+      totalFrames: frames.length,
     };
     this.sendResponse(response);
   }
@@ -141,9 +148,7 @@ export class HoloScriptDebugSession extends LoggingDebugSession {
     args: DebugProtocol.ScopesArguments
   ): void {
     response.body = {
-      scopes: [
-        new Scope('Local', args.frameId, false),
-      ]
+      scopes: [new Scope('Local', args.frameId, false)],
     };
     this.sendResponse(response);
   }
@@ -165,7 +170,7 @@ export class HoloScriptDebugSession extends LoggingDebugSession {
 
   protected async continueRequest(
     response: DebugProtocol.ContinueResponse,
-    args: DebugProtocol.ContinueArguments
+    _args: DebugProtocol.ContinueArguments
   ): Promise<void> {
     await this.debugger.continue();
     this.sendResponse(response);
@@ -173,7 +178,7 @@ export class HoloScriptDebugSession extends LoggingDebugSession {
 
   protected async nextRequest(
     response: DebugProtocol.NextResponse,
-    args: DebugProtocol.NextArguments
+    _args: DebugProtocol.NextArguments
   ): Promise<void> {
     await this.debugger.stepOver();
     this.sendResponse(response);
@@ -181,7 +186,7 @@ export class HoloScriptDebugSession extends LoggingDebugSession {
 
   protected async stepInRequest(
     response: DebugProtocol.StepInResponse,
-    args: DebugProtocol.StepInArguments
+    _args: DebugProtocol.StepInArguments
   ): Promise<void> {
     await this.debugger.stepInto();
     this.sendResponse(response);
@@ -189,7 +194,7 @@ export class HoloScriptDebugSession extends LoggingDebugSession {
 
   protected async stepOutRequest(
     response: DebugProtocol.StepOutResponse,
-    args: DebugProtocol.StepOutArguments
+    _args: DebugProtocol.StepOutArguments
   ): Promise<void> {
     await this.debugger.stepOut();
     this.sendResponse(response);

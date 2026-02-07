@@ -641,9 +641,7 @@ export function createWorldMetadata(
 /**
  * Create default world configuration
  */
-export function createWorldConfig(
-  options: Partial<WorldConfig> = {}
-): WorldConfig {
+export function createWorldConfig(options: Partial<WorldConfig> = {}): WorldConfig {
   return {
     maxUsers: options.maxUsers ?? 50,
     bounds: options.bounds ?? {
@@ -720,9 +718,7 @@ export function createWorldConfig(
 /**
  * Create default environment
  */
-export function createWorldEnvironment(
-  options: Partial<WorldEnvironment> = {}
-): WorldEnvironment {
+export function createWorldEnvironment(options: Partial<WorldEnvironment> = {}): WorldEnvironment {
   return {
     skybox: options.skybox ?? {
       type: 'procedural',
@@ -766,7 +762,9 @@ export function createWorldEnvironment(
 export function createWorldDefinition(
   id: string,
   name: string,
-  options: Partial<Omit<WorldDefinition, 'schemaVersion' | 'metadata' | 'config' | 'environment'>> = {}
+  options: Partial<
+    Omit<WorldDefinition, 'schemaVersion' | 'metadata' | 'config' | 'environment'>
+  > = {}
 ): WorldDefinition {
   return {
     schemaVersion: '1.0.0',

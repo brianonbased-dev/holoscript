@@ -39,7 +39,10 @@ export class StorageService {
     }
   }
 
-  async saveBuild(userId: string, build: Omit<StoredBuild, 'id' | 'createdAt' | 'updatedAt'>): Promise<StoredBuild> {
+  async saveBuild(
+    userId: string,
+    build: Omit<StoredBuild, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<StoredBuild> {
     const id = uuid();
     const now = new Date().toISOString();
 
@@ -90,7 +93,9 @@ export class StorageService {
         }
       }
 
-      return builds.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return builds.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     } catch (error) {
       logger.error('Failed to read builds:', error);
       return [];

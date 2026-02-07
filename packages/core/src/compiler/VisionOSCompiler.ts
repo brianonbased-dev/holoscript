@@ -158,13 +158,14 @@ export class VisionOSCompiler {
     this.emit('}');
 
     // Gesture attachments
-    const grabbables = composition.objects?.filter(o =>
-      o.traits?.some(t => t.name === 'grabbable')
-    ) || [];
+    const grabbables =
+      composition.objects?.filter((o) => o.traits?.some((t) => t.name === 'grabbable')) || [];
     if (grabbables.length > 0) {
       this.emit('.gesture(DragGesture().targetedToAnyEntity().onChanged { value in');
       this.indentLevel++;
-      this.emit('value.entity.position = value.convert(value.location3D, from: .local, to: .scene)');
+      this.emit(
+        'value.entity.position = value.convert(value.location3D, from: .local, to: .scene)'
+      );
       this.indentLevel--;
       this.emit('})');
     }
@@ -212,7 +213,9 @@ export class VisionOSCompiler {
         this.indentLevel--;
         this.emit('}');
       } else if (prop.key === 'fog' && typeof prop.value === 'object') {
-        this.emit(`// Fog: ${JSON.stringify(prop.value)} — not natively supported, use post-processing`);
+        this.emit(
+          `// Fog: ${JSON.stringify(prop.value)} — not natively supported, use post-processing`
+        );
       } else if (prop.key === 'ambient_light') {
         this.emit(`// Ambient light: ${prop.value} — handled via IBL intensity`);
       }
@@ -236,22 +239,28 @@ export class VisionOSCompiler {
       this.emit(`let ${varName} = Entity()`);
       this.emit(`${varName}.name = "${light.name}"`);
 
-      const colorProp = light.properties.find(p => p.key === 'color');
-      const intensityProp = light.properties.find(p => p.key === 'intensity');
-      const posProp = light.properties.find(p => p.key === 'position');
+      const colorProp = light.properties.find((p) => p.key === 'color');
+      const intensityProp = light.properties.find((p) => p.key === 'intensity');
+      const posProp = light.properties.find((p) => p.key === 'position');
 
       if (light.lightType === 'point') {
         this.emit(`var ${varName}Light = PointLightComponent()`);
-        if (colorProp) this.emit(`${varName}Light.color = .init(${this.toUIColor(colorProp.value)})`);
-        if (intensityProp) this.emit(`${varName}Light.intensity = ${(intensityProp.value as number) * 1000}`);
+        if (colorProp)
+          this.emit(`${varName}Light.color = .init(${this.toUIColor(colorProp.value)})`);
+        if (intensityProp)
+          this.emit(`${varName}Light.intensity = ${(intensityProp.value as number) * 1000}`);
       } else if (light.lightType === 'directional') {
         this.emit(`var ${varName}Light = DirectionalLightComponent()`);
-        if (colorProp) this.emit(`${varName}Light.color = .init(${this.toUIColor(colorProp.value)})`);
-        if (intensityProp) this.emit(`${varName}Light.intensity = ${(intensityProp.value as number) * 1000}`);
+        if (colorProp)
+          this.emit(`${varName}Light.color = .init(${this.toUIColor(colorProp.value)})`);
+        if (intensityProp)
+          this.emit(`${varName}Light.intensity = ${(intensityProp.value as number) * 1000}`);
       } else if (light.lightType === 'spot') {
         this.emit(`var ${varName}Light = SpotLightComponent()`);
-        if (colorProp) this.emit(`${varName}Light.color = .init(${this.toUIColor(colorProp.value)})`);
-        if (intensityProp) this.emit(`${varName}Light.intensity = ${(intensityProp.value as number) * 1000}`);
+        if (colorProp)
+          this.emit(`${varName}Light.color = .init(${this.toUIColor(colorProp.value)})`);
+        if (intensityProp)
+          this.emit(`${varName}Light.intensity = ${(intensityProp.value as number) * 1000}`);
       }
 
       this.emit(`${varName}.components.set(${varName}Light)`);
@@ -277,7 +286,9 @@ export class VisionOSCompiler {
     const meshType = this.findObjProp(obj, 'mesh') || this.findObjProp(obj, 'type') || 'cube';
     const isText = meshType === 'text';
     const isModel = !!this.findObjProp(obj, 'model') || !!this.findObjProp(obj, 'src');
-    const isLight = ['directional', 'point', 'spot', 'hemisphere', 'ambient', 'area'].includes(meshType as string);
+    const isLight = ['directional', 'point', 'spot', 'hemisphere', 'ambient', 'area'].includes(
+      meshType as string
+    );
     const isSparkles = meshType === 'sparkles';
 
     this.emit('');
@@ -300,7 +311,9 @@ export class VisionOSCompiler {
         this.emit(`    containerFrame: .zero,`);
         this.emit(`    alignment: .center,`);
         this.emit(`    lineBreakMode: .byWordWrapping)`);
-        this.emit(`${varName}.components.set(ModelComponent(mesh: ${varName}Mesh, materials: [SimpleMaterial(color: ${this.toUIColor(this.findObjProp(obj, 'color') || '#ffffff')}, isMetallic: false)]))`);
+        this.emit(
+          `${varName}.components.set(ModelComponent(mesh: ${varName}Mesh, materials: [SimpleMaterial(color: ${this.toUIColor(this.findObjProp(obj, 'color') || '#ffffff')}, isMetallic: false)]))`
+        );
       }
     } else if (isModel) {
       const src = this.findObjProp(obj, 'model') || this.findObjProp(obj, 'src');
@@ -346,14 +359,25 @@ export class VisionOSCompiler {
       if (material && typeof material === 'object') {
         const mat = material as Record<string, any>;
         this.emit(`var ${varName}Material = PhysicallyBasedMaterial()`);
-        if (mat.color) this.emit(`${varName}Material.baseColor = .init(tint: ${this.toUIColor(mat.color)})`);
-        if (mat.roughness !== undefined) this.emit(`${varName}Material.roughness = .init(floatLiteral: ${mat.roughness})`);
-        if (mat.metalness !== undefined) this.emit(`${varName}Material.metallic = .init(floatLiteral: ${mat.metalness})`);
-        if (mat.emissive) this.emit(`${varName}Material.emissiveColor = .init(color: ${this.toUIColor(mat.emissive)})`);
-        if (mat.emissiveIntensity) this.emit(`${varName}Material.emissiveIntensity = ${mat.emissiveIntensity}`);
-        this.emit(`let ${varName} = ModelEntity(mesh: ${varName}Mesh, materials: [${varName}Material])`);
+        if (mat.color)
+          this.emit(`${varName}Material.baseColor = .init(tint: ${this.toUIColor(mat.color)})`);
+        if (mat.roughness !== undefined)
+          this.emit(`${varName}Material.roughness = .init(floatLiteral: ${mat.roughness})`);
+        if (mat.metalness !== undefined)
+          this.emit(`${varName}Material.metallic = .init(floatLiteral: ${mat.metalness})`);
+        if (mat.emissive)
+          this.emit(
+            `${varName}Material.emissiveColor = .init(color: ${this.toUIColor(mat.emissive)})`
+          );
+        if (mat.emissiveIntensity)
+          this.emit(`${varName}Material.emissiveIntensity = ${mat.emissiveIntensity}`);
+        this.emit(
+          `let ${varName} = ModelEntity(mesh: ${varName}Mesh, materials: [${varName}Material])`
+        );
       } else {
-        this.emit(`let ${varName} = ModelEntity(mesh: ${varName}Mesh, materials: [SimpleMaterial()])`);
+        this.emit(
+          `let ${varName} = ModelEntity(mesh: ${varName}Mesh, materials: [SimpleMaterial()])`
+        );
       }
 
       this.emit(`${varName}.name = "${obj.name}"`);
@@ -379,7 +403,9 @@ export class VisionOSCompiler {
       const radX = ((rot[0] as number) * Math.PI) / 180;
       const radY = ((rot[1] as number) * Math.PI) / 180;
       const radZ = ((rot[2] as number) * Math.PI) / 180;
-      this.emit(`${varName}.orientation = simd_quatf(angle: ${radX.toFixed(4)}, axis: SIMD3<Float>(1, 0, 0)) * simd_quatf(angle: ${radY.toFixed(4)}, axis: SIMD3<Float>(0, 1, 0)) * simd_quatf(angle: ${radZ.toFixed(4)}, axis: SIMD3<Float>(0, 0, 1))`);
+      this.emit(
+        `${varName}.orientation = simd_quatf(angle: ${radX.toFixed(4)}, axis: SIMD3<Float>(1, 0, 0)) * simd_quatf(angle: ${radY.toFixed(4)}, axis: SIMD3<Float>(0, 1, 0)) * simd_quatf(angle: ${radZ.toFixed(4)}, axis: SIMD3<Float>(0, 0, 1))`
+      );
     }
     const scale = this.findObjProp(obj, 'scale');
     if (scale) this.emit(`${varName}.scale = ${this.toSIMD3(scale as any)}`);
@@ -427,8 +453,8 @@ export class VisionOSCompiler {
     this.emit(`let ${varName} = Entity()`);
     this.emit(`${varName}.name = "${audio.name}"`);
 
-    const src = audio.properties.find(p => p.key === 'src' || p.key === 'source')?.value;
-    const spatial = audio.properties.find(p => p.key === 'spatial')?.value;
+    const src = audio.properties.find((p) => p.key === 'src' || p.key === 'source')?.value;
+    const spatial = audio.properties.find((p) => p.key === 'spatial')?.value;
 
     if (src) {
       this.emit(`if let audioResource = try? await AudioFileResource(named: "${src}") {`);
@@ -445,7 +471,7 @@ export class VisionOSCompiler {
       this.emit('}');
     }
 
-    const pos = audio.properties.find(p => p.key === 'position')?.value;
+    const pos = audio.properties.find((p) => p.key === 'position')?.value;
     if (pos) this.emit(`${varName}.position = ${this.toSIMD3(pos as any)}`);
 
     this.emit(`root.addChild(${varName})`);
@@ -458,23 +484,27 @@ export class VisionOSCompiler {
     this.emit(`let ${varName} = Entity()`);
     this.emit(`${varName}.name = "${zone.name}"`);
 
-    const shape = zone.properties.find(p => p.key === 'shape')?.value;
+    const shape = zone.properties.find((p) => p.key === 'shape')?.value;
     if (shape === 'box') {
-      const size = zone.properties.find(p => p.key === 'size')?.value;
+      const size = zone.properties.find((p) => p.key === 'size')?.value;
       if (size && Array.isArray(size)) {
-        this.emit(`${varName}.components.set(CollisionComponent(shapes: [.generateBox(size: ${this.toSIMD3(size)})]))`);
+        this.emit(
+          `${varName}.components.set(CollisionComponent(shapes: [.generateBox(size: ${this.toSIMD3(size)})]))`
+        );
       }
     } else if (shape === 'sphere') {
-      const radius = zone.properties.find(p => p.key === 'radius')?.value;
+      const radius = zone.properties.find((p) => p.key === 'radius')?.value;
       if (radius) {
-        this.emit(`${varName}.components.set(CollisionComponent(shapes: [.generateSphere(radius: ${radius})]))`);
+        this.emit(
+          `${varName}.components.set(CollisionComponent(shapes: [.generateSphere(radius: ${radius})]))`
+        );
       }
     }
 
-    const pos = zone.properties.find(p => p.key === 'position')?.value;
+    const pos = zone.properties.find((p) => p.key === 'position')?.value;
     if (pos) this.emit(`${varName}.position = ${this.toSIMD3(pos as any)}`);
 
-    this.emit(`// Zone handlers: ${zone.handlers?.map(h => h.event).join(', ') || 'none'}`);
+    this.emit(`// Zone handlers: ${zone.handlers?.map((h) => h.event).join(', ') || 'none'}`);
     this.emit(`root.addChild(${varName})`);
   }
 
@@ -492,7 +522,9 @@ export class VisionOSCompiler {
       }
 
       if (entry.action.kind === 'animate') {
-        this.emit(`// Animate "${entry.action.target}": ${JSON.stringify(entry.action.properties)}`);
+        this.emit(
+          `// Animate "${entry.action.target}": ${JSON.stringify(entry.action.properties)}`
+        );
       } else if (entry.action.kind === 'emit') {
         this.emit(`// Emit: "${entry.action.event}"`);
       } else if (entry.action.kind === 'call') {
@@ -516,9 +548,9 @@ export class VisionOSCompiler {
     this.emit(`func ${varName}() {`);
     this.indentLevel++;
 
-    const target = tr.properties.find(p => p.key === 'target')?.value;
+    const target = tr.properties.find((p) => p.key === 'target')?.value;
     this.emit(`// Transition to: "${target}"`);
-    this.emit(`// Effect: ${tr.properties.find(p => p.key === 'effect')?.value || 'default'}`);
+    this.emit(`// Effect: ${tr.properties.find((p) => p.key === 'effect')?.value || 'default'}`);
 
     this.indentLevel--;
     this.emit('}');
@@ -537,7 +569,7 @@ export class VisionOSCompiler {
    */
   private compileUIComponent(obj: HoloObjectDecl, parentVar: string): void {
     const varName = this.sanitizeName(obj.name);
-    const uiType = this.findObjProp(obj, 'type') as string || 'panel';
+    const uiType = (this.findObjProp(obj, 'type') as string) || 'panel';
 
     this.emit('');
     this.emit(`// UI Component: ${obj.name}`);
@@ -610,7 +642,9 @@ export class VisionOSCompiler {
     this.emit(`// SwiftUI Button: "${text}"`);
     this.emit(`// Implement via ViewAttachmentComponent with Button { Text("${text}") }`);
     this.emit(`${varName}.components.set(InputTargetComponent())`);
-    this.emit(`${varName}.components.set(CollisionComponent(shapes: [.generateBox(size: SIMD3<Float>(0.2, 0.08, 0.01))]))`);
+    this.emit(
+      `${varName}.components.set(CollisionComponent(shapes: [.generateBox(size: SIMD3<Float>(0.2, 0.08, 0.01))]))`
+    );
     this.emit(`${parentVar}.addChild(${varName})`);
   }
 
@@ -625,7 +659,9 @@ export class VisionOSCompiler {
     this.emit(`    containerFrame: .zero,`);
     this.emit(`    alignment: .center,`);
     this.emit(`    lineBreakMode: .byWordWrapping)`);
-    this.emit(`let ${varName} = ModelEntity(mesh: ${varName}Mesh, materials: [SimpleMaterial(color: ${this.toUIColor(color)}, isMetallic: false)])`);
+    this.emit(
+      `let ${varName} = ModelEntity(mesh: ${varName}Mesh, materials: [SimpleMaterial(color: ${this.toUIColor(color)}, isMetallic: false)])`
+    );
     this.emit(`${varName}.name = "${obj.name}"`);
     this.emit(`${parentVar}.addChild(${varName})`);
   }
@@ -644,7 +680,9 @@ export class VisionOSCompiler {
     }
 
     this.emit(`// SwiftUI Slider: min=${min}, max=${max}, value=${value}`);
-    this.emit(`// Implement via ViewAttachmentComponent with Slider(value: $value, in: ${min}...${max})`);
+    this.emit(
+      `// Implement via ViewAttachmentComponent with Slider(value: $value, in: ${min}...${max})`
+    );
     this.emit(`${varName}.components.set(InputTargetComponent())`);
     this.emit(`${parentVar}.addChild(${varName})`);
   }
@@ -661,7 +699,9 @@ export class VisionOSCompiler {
     }
 
     this.emit(`// SwiftUI TextField with placeholder: "${placeholder}"`);
-    this.emit(`// Implement via ViewAttachmentComponent with TextField("${placeholder}", text: $text)`);
+    this.emit(
+      `// Implement via ViewAttachmentComponent with TextField("${placeholder}", text: $text)`
+    );
     this.emit(`${varName}.components.set(InputTargetComponent())`);
     this.emit(`${parentVar}.addChild(${varName})`);
   }
@@ -680,12 +720,16 @@ export class VisionOSCompiler {
     }
 
     this.emit(`// Image: ${src} (${width}x${height})`);
-    this.emit(`let ${varName}Mesh = MeshResource.generatePlane(width: ${(width as number) / 1000}, depth: ${(height as number) / 1000})`);
+    this.emit(
+      `let ${varName}Mesh = MeshResource.generatePlane(width: ${(width as number) / 1000}, depth: ${(height as number) / 1000})`
+    );
     this.emit(`if let texture = try? await TextureResource(named: "${src}") {`);
     this.indentLevel++;
     this.emit(`var ${varName}Material = UnlitMaterial()`);
     this.emit(`${varName}Material.color = .init(texture: .init(texture))`);
-    this.emit(`${varName}.components.set(ModelComponent(mesh: ${varName}Mesh, materials: [${varName}Material]))`);
+    this.emit(
+      `${varName}.components.set(ModelComponent(mesh: ${varName}Mesh, materials: [${varName}Material]))`
+    );
     this.indentLevel--;
     this.emit(`}`);
     this.emit(`${parentVar}.addChild(${varName})`);
@@ -772,6 +816,6 @@ export class VisionOSCompiler {
   }
 
   private findObjProp(obj: HoloObjectDecl, key: string): HoloValue | undefined {
-    return obj.properties?.find(p => p.key === key)?.value;
+    return obj.properties?.find((p) => p.key === key)?.value;
   }
 }

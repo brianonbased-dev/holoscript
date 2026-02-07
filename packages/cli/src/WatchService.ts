@@ -1,7 +1,6 @@
 import chokidar from 'chokidar';
 import path from 'path';
 import fs from 'fs';
-import { logger } from '@holoscript/core';
 
 export interface WatchOptions {
   input: string;
@@ -27,7 +26,7 @@ export class WatchService {
    */
   public async start(): Promise<void> {
     const inputPath = path.resolve(this.options.input);
-    
+
     if (!fs.existsSync(inputPath)) {
       throw new Error(`Watch input path not found: ${inputPath}`);
     }
@@ -70,15 +69,17 @@ export class WatchService {
     this.debounceTimer = setTimeout(async () => {
       const timestamp = new Date().toLocaleTimeString();
       console.log(`\x1b[2m[${timestamp}]\x1b[0m File changed, rebuilding...`);
-      
+
       try {
         // Try incremental build if available
         if (this.options.useIncremental && this.options.onChangedIncremental) {
           try {
             await this.options.onChangedIncremental(changedFile);
-            console.log(`\x1b[2m[${timestamp}]\x1b[0m \x1b[32mBuild successful (incremental)\x1b[0m`);
+            console.log(
+              `\x1b[2m[${timestamp}]\x1b[0m \x1b[32mBuild successful (incremental)\x1b[0m`
+            );
             return;
-          } catch (error) {
+          } catch (_error) {
             // Fall back to full rebuild on incremental error
             if (this.options.verbose) {
               console.warn(`\x1b[33mIncremental build failed, falling back to full rebuild\x1b[0m`);

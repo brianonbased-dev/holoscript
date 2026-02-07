@@ -20,7 +20,12 @@ export class BindingFlowInspector {
   /**
    * Register a new data binding
    */
-  public registerBinding(sourceId: string, targetId: string, property: string, expression: string): string {
+  public registerBinding(
+    sourceId: string,
+    targetId: string,
+    property: string,
+    expression: string
+  ): string {
     const id = `${sourceId}->${targetId}:${property}`;
     this.bindings.set(id, {
       id,
@@ -29,7 +34,7 @@ export class BindingFlowInspector {
       property,
       expression,
       lastValue: undefined,
-      updateCount: 0
+      updateCount: 0,
     });
     return id;
   }
@@ -59,7 +64,7 @@ export class BindingFlowInspector {
    * Get bindings for a specific target
    */
   public getTargetBindings(targetId: string): BindingInfo[] {
-    return this.getActiveBindings().filter(b => b.targetId === targetId);
+    return this.getActiveBindings().filter((b) => b.targetId === targetId);
   }
 
   public setEnabled(enabled: boolean): void {

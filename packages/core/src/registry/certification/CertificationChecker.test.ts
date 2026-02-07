@@ -148,9 +148,7 @@ describe('add', () => {
 
     it('should fail typed check for JavaScript-only packages', async () => {
       const files = createMinimalPackage();
-      files.sourceFiles = [
-        { path: 'src/index.js', content: 'export const x = 1;' },
-      ];
+      files.sourceFiles = [{ path: 'src/index.js', content: 'export const x = 1;' }];
 
       const result = await checker.certify(files);
 

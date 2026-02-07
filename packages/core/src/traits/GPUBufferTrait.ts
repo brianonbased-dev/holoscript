@@ -13,7 +13,14 @@ import type { TraitHandler } from './TraitTypes';
 // TYPES
 // =============================================================================
 
-type BufferUsage = 'storage' | 'uniform' | 'vertex' | 'index' | 'indirect' | 'copy_src' | 'copy_dst';
+type BufferUsage =
+  | 'storage'
+  | 'uniform'
+  | 'vertex'
+  | 'index'
+  | 'indirect'
+  | 'copy_src'
+  | 'copy_dst';
 
 interface GPUBufferState {
   isAllocated: boolean;
@@ -25,10 +32,10 @@ interface GPUBufferState {
 }
 
 interface GPUBufferConfig {
-  size: number;  // bytes
+  size: number; // bytes
   usage: BufferUsage | BufferUsage[];
   initial_data: string | ArrayBuffer;
-  shared: boolean;  // Shared between shaders
+  shared: boolean; // Shared between shaders
   label: string;
   mapped_at_creation: boolean;
 }
@@ -59,7 +66,7 @@ export const gpuBufferHandler: TraitHandler<GPUBufferConfig> = {
       pendingWrites: [],
     };
     (node as any).__gpuBufferState = state;
-    
+
     // Create GPU buffer
     context.emit?.('gpu_buffer_create', {
       node,
@@ -78,15 +85,15 @@ export const gpuBufferHandler: TraitHandler<GPUBufferConfig> = {
     delete (node as any).__gpuBufferState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__gpuBufferState as GPUBufferState;
     if (!state || !state.isAllocated) return;
-    
+
     // Process pending writes
     if (state.pendingWrites.length > 0 && !state.isMapped) {
       const writes = [...state.pendingWrites];
       state.pendingWrites = [];
-      
+
       for (const write of writes) {
         context.emit?.('gpu_buffer_write', {
           node,
@@ -100,25 +107,26 @@ export const gpuBufferHandler: TraitHandler<GPUBufferConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__gpuBufferState as GPUBufferState;
     if (!state) return;
-    
+
     if (event.type === 'gpu_buffer_created') {
       state.isAllocated = true;
       state.gpuBuffer = event.buffer;
       state.size = event.size as number;
-      
+
       // Write initial data if provided
       if (config.initial_data) {
-        const data = typeof config.initial_data === 'string'
-          ? new TextEncoder().encode(config.initial_data).buffer
-          : config.initial_data;
-        
+        const data =
+          typeof config.initial_data === 'string'
+            ? new TextEncoder().encode(config.initial_data).buffer
+            : config.initial_data;
+
         context.emit?.('gpu_buffer_write', {
           node,
           offset: 0,
           data,
         });
       }
-      
+
       context.emit?.('on_buffer_ready', {
         node,
         size: state.size,
@@ -129,9 +137,9 @@ export const gpuBufferHandler: TraitHandler<GPUBufferConfig> = {
         error: event.error,
       });
     } else if (event.type === 'buffer_write') {
-      const offset = event.offset as number || 0;
+      const offset = (event.offset as number) || 0;
       const data = event.data as ArrayBuffer;
-      
+
       if (state.isMapped) {
         // Queue for later
         state.pendingWrites.push({ offset, data });
@@ -144,10 +152,10 @@ export const gpuBufferHandler: TraitHandler<GPUBufferConfig> = {
         state.lastWriteTime = Date.now();
       }
     } else if (event.type === 'buffer_read') {
-      const offset = event.offset as number || 0;
-      const size = event.size as number || state.size;
+      const offset = (event.offset as number) || 0;
+      const size = (event.size as number) || state.size;
       const callbackId = event.callbackId as string;
-      
+
       context.emit?.('gpu_buffer_read', {
         node,
         offset,
@@ -164,7 +172,7 @@ export const gpuBufferHandler: TraitHandler<GPUBufferConfig> = {
       state.isMapped = true;
       context.emit?.('gpu_buffer_map', {
         node,
-        mode: event.mode as string || 'read',
+        mode: (event.mode as string) || 'read',
       });
     } else if (event.type === 'buffer_unmap') {
       state.isMapped = false;
@@ -174,13 +182,13 @@ export const gpuBufferHandler: TraitHandler<GPUBufferConfig> = {
       context.emit?.('gpu_buffer_resize', {
         node,
         size: newSize,
-        preserveData: event.preserveData as boolean ?? true,
+        preserveData: (event.preserveData as boolean) ?? true,
       });
     } else if (event.type === 'buffer_clear') {
       context.emit?.('gpu_buffer_clear', {
         node,
-        offset: event.offset as number || 0,
-        size: event.size as number || state.size,
+        offset: (event.offset as number) || 0,
+        size: (event.size as number) || state.size,
       });
     } else if (event.type === 'buffer_query') {
       context.emit?.('buffer_info', {

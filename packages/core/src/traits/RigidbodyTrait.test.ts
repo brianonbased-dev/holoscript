@@ -109,10 +109,7 @@ describe('RigidbodyTrait', () => {
     });
 
     it('should add force at position', () => {
-      trait.addForceAtPosition(
-        { x: 10, y: 0, z: 0 },
-        { x: 0, y: 1, z: 0 }
-      );
+      trait.addForceAtPosition({ x: 10, y: 0, z: 0 }, { x: 0, y: 1, z: 0 });
       expect(trait.getState().isSleeping).toBe(false);
     });
   });

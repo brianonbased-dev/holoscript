@@ -283,7 +283,14 @@ export class OptimizationPass {
           }
 
           // VRAM for textures
-          const textureKeys = ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap', 'aoMap'];
+          const textureKeys = [
+            'map',
+            'normalMap',
+            'roughnessMap',
+            'metalnessMap',
+            'emissiveMap',
+            'aoMap',
+          ];
           for (const tk of textureKeys) {
             if (matProps[tk]) stats.estimatedVRAM_MB += VRAM_PER_TEXTURE_MB;
           }
@@ -336,7 +343,8 @@ export class OptimizationPass {
         category: 'general',
         severity: stats.lightCount > this.options.lightBudget * 1.5 ? 'critical' : 'warning',
         message: `Scene has ${stats.lightCount} lights (budget: ${this.options.lightBudget})`,
-        suggestion: 'Bake static lights, merge area lights, or use light probes for indirect lighting',
+        suggestion:
+          'Bake static lights, merge area lights, or use light probes for indirect lighting',
         estimatedSavings: `${stats.lightCount - this.options.lightBudget} fewer real-time lights`,
       });
     }
@@ -395,14 +403,15 @@ export class OptimizationPass {
         category: 'drawcalls',
         severity: 'critical',
         message: `Estimated ${stats.estimatedDrawCalls} draw calls (budget: ${this.options.drawCallBudget})`,
-        suggestion: 'Use instanced meshes for repeated geometry, batch static objects, merge materials',
+        suggestion:
+          'Use instanced meshes for repeated geometry, batch static objects, merge materials',
         estimatedSavings: `~${stats.estimatedDrawCalls - this.options.drawCallBudget} draw calls`,
       });
     } else if (stats.estimatedDrawCalls > this.options.drawCallBudget * 0.75) {
       hints.push({
         category: 'drawcalls',
         severity: 'warning',
-        message: `Draw calls at ${Math.round(stats.estimatedDrawCalls / this.options.drawCallBudget * 100)}% of budget`,
+        message: `Draw calls at ${Math.round((stats.estimatedDrawCalls / this.options.drawCallBudget) * 100)}% of budget`,
         suggestion: 'Consider batching static geometry to stay within budget',
       });
     }
@@ -443,7 +452,10 @@ export class OptimizationPass {
       const transparentNodes: R3FNode[] = [];
       this.walkTree(tree, (node) => {
         const mat = node.props?.materialProps;
-        if (mat && (mat.transparent || mat.transmission || (mat.opacity !== undefined && mat.opacity < 1))) {
+        if (
+          mat &&
+          (mat.transparent || mat.transmission || (mat.opacity !== undefined && mat.opacity < 1))
+        ) {
           transparentNodes.push(node);
         }
       });
@@ -453,7 +465,8 @@ export class OptimizationPass {
           category: 'overdraw',
           severity: 'warning',
           message: `${transparentNodes.length} transparent objects — costly on ${this.options.platform}`,
-          suggestion: 'Minimize transparent objects on VR/mobile; use alpha-cutout instead of alpha-blend',
+          suggestion:
+            'Minimize transparent objects on VR/mobile; use alpha-cutout instead of alpha-blend',
           estimatedSavings: 'Reduced GPU overdraw, better frame timing',
         });
       }
@@ -494,7 +507,7 @@ export class OptimizationPass {
       if (node.type === 'Audio') audioNodes.push(node);
     });
 
-    const spatialAudio = audioNodes.filter(n => n.props?.spatial === true);
+    const spatialAudio = audioNodes.filter((n) => n.props?.spatial === true);
     if (spatialAudio.length > 8) {
       hints.push({
         category: 'audio',
@@ -507,12 +520,16 @@ export class OptimizationPass {
 
   // ─── LOD Analysis ──────────────────────────────────────────────────────
 
-  private analyzeLODOpportunities(tree: R3FNode, recommendations: LODRecommendation[], hints: OptimizationHint[]): void {
+  private analyzeLODOpportunities(
+    tree: R3FNode,
+    recommendations: LODRecommendation[],
+    hints: OptimizationHint[]
+  ): void {
     this.walkTree(tree, (node) => {
       if (node.type !== 'mesh' && node.type !== 'gltfModel') return;
 
       const hsType = node.props?.hsType || 'box';
-      const triEstimate = node.type === 'gltfModel' ? 5000 : (TRI_ESTIMATES[hsType] || 12);
+      const triEstimate = node.type === 'gltfModel' ? 5000 : TRI_ESTIMATES[hsType] || 12;
 
       // Only recommend LOD for high-poly objects
       if (triEstimate >= 500) {
@@ -546,8 +563,12 @@ export class OptimizationPass {
 
   // ─── Batching Analysis ─────────────────────────────────────────────────
 
-  private analyzeBatchingOpportunities(tree: R3FNode, groups: BatchGroup[], hints: OptimizationHint[]): void {
-    const materialGroups = new Map<string, { nodes: R3FNode[], canInstance: boolean }>();
+  private analyzeBatchingOpportunities(
+    tree: R3FNode,
+    groups: BatchGroup[],
+    hints: OptimizationHint[]
+  ): void {
+    const materialGroups = new Map<string, { nodes: R3FNode[]; canInstance: boolean }>();
 
     this.walkTree(tree, (node) => {
       if (node.type !== 'mesh') return;
@@ -573,11 +594,11 @@ export class OptimizationPass {
     for (const [matKey, { nodes, canInstance }] of materialGroups) {
       if (nodes.length < 2) continue;
 
-      const isStatic = nodes.every(n => !n.props?.animated && !n.props?.rigidBody);
+      const isStatic = nodes.every((n) => !n.props?.animated && !n.props?.rigidBody);
 
       groups.push({
         material: matKey === '__default' ? 'default' : `custom_${groups.length}`,
-        nodeIds: nodes.map(n => n.id || 'unnamed'),
+        nodeIds: nodes.map((n) => n.id || 'unnamed'),
         nodeCount: nodes.length,
         canInstance,
         canStaticBatch: isStatic,
@@ -606,8 +627,12 @@ export class OptimizationPass {
 
     // Check for uncompressed textures suggestion
     if (materialNodes.length > 5) {
-      const platformFormat = this.options.platform === 'mobile' ? 'ETC2/ASTC' :
-                             this.options.platform === 'vr' ? 'ASTC' : 'BCn (DXT)';
+      const platformFormat =
+        this.options.platform === 'mobile'
+          ? 'ETC2/ASTC'
+          : this.options.platform === 'vr'
+            ? 'ASTC'
+            : 'BCn (DXT)';
       hints.push({
         category: 'textures',
         severity: 'info',
@@ -617,7 +642,7 @@ export class OptimizationPass {
     }
 
     // High-res material presets that could use mipmaps
-    const highDetailMaterials = materialNodes.filter(n => {
+    const highDetailMaterials = materialNodes.filter((n) => {
       const mat = n.props?.materialProps;
       return mat && (mat.iridescence || mat.clearcoat || mat.transmission);
     });
@@ -627,7 +652,8 @@ export class OptimizationPass {
         category: 'textures',
         severity: 'info',
         message: `${highDetailMaterials.length} complex PBR materials (iridescence/clearcoat/transmission)`,
-        suggestion: 'Complex PBR features are GPU-intensive; consider simpler materials at distance',
+        suggestion:
+          'Complex PBR features are GPU-intensive; consider simpler materials at distance',
       });
     }
   }
@@ -638,8 +664,8 @@ export class OptimizationPass {
     let score = 100;
 
     // Deduct for critical issues
-    const criticalCount = hints.filter(h => h.severity === 'critical').length;
-    const warningCount = hints.filter(h => h.severity === 'warning').length;
+    const criticalCount = hints.filter((h) => h.severity === 'critical').length;
+    const warningCount = hints.filter((h) => h.severity === 'warning').length;
 
     score -= criticalCount * 20;
     score -= warningCount * 5;

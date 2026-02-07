@@ -36,14 +36,14 @@ composition "Hello World" {
 
   object "Greeting" {
     @glowing
-    
+
     position: [0, 1.5, -2]
     color: "#00ffff"
     glow_intensity: 1.5
-    
+
     text: "Hello, HoloScript World!"
   }
-  
+
   logic {
     on_scene_load {
       pulse Greeting over 1s

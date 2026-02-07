@@ -6,7 +6,7 @@ import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind
+  TransportKind,
 } from 'vscode-languageclient/node';
 import { HoloHubTreeDataProvider } from './holohubView';
 import { HoloScriptPreviewPanel } from './previewPanel';
@@ -50,7 +50,7 @@ export function activate(context: ExtensionContext) {
 
   // Auto-update preview when switching documents
   context.subscriptions.push(
-    window.onDidChangeActiveTextEditor(editor => {
+    window.onDidChangeActiveTextEditor((editor) => {
       if (editor && isHoloScriptFile(editor.document) && HoloScriptPreviewPanel.currentPanel) {
         HoloScriptPreviewPanel.currentPanel.updateContent(editor.document);
       }
@@ -63,7 +63,7 @@ export function activate(context: ExtensionContext) {
       window.registerWebviewPanelSerializer(HoloScriptPreviewPanel.viewType, {
         async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, _state: unknown) {
           HoloScriptPreviewPanel.revive(webviewPanel, context.extensionUri);
-        }
+        },
       })
     );
   }
@@ -93,17 +93,25 @@ export function activate(context: ExtensionContext) {
     commands.registerCommand('holoscript.openExamples', async () => {
       const examplesPath = path.join(context.extensionPath, '..', '..', 'examples', 'quickstart');
       const uri = vscode.Uri.file(examplesPath);
-      
+
       // Try to open the quickstart folder
       try {
         if (fs.existsSync(examplesPath)) {
           await commands.executeCommand('vscode.openFolder', uri, { forceNewWindow: false });
         } else {
           // Fallback: open examples on GitHub
-          vscode.env.openExternal(vscode.Uri.parse('https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart'));
+          vscode.env.openExternal(
+            vscode.Uri.parse(
+              'https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart'
+            )
+          );
         }
       } catch {
-        vscode.env.openExternal(vscode.Uri.parse('https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart'));
+        vscode.env.openExternal(
+          vscode.Uri.parse(
+            'https://github.com/brianonbased-dev/holoscript/tree/main/examples/quickstart'
+          )
+        );
       }
     })
   );
@@ -111,7 +119,10 @@ export function activate(context: ExtensionContext) {
   // Register Show Walkthrough command
   context.subscriptions.push(
     commands.registerCommand('holoscript.showWalkthrough', () => {
-      commands.executeCommand('workbench.action.openWalkthrough', 'holoscript.holoscript-vscode#holoscript-getting-started');
+      commands.executeCommand(
+        'workbench.action.openWalkthrough',
+        'holoscript.holoscript-vscode#holoscript-getting-started'
+      );
     })
   );
 
@@ -130,15 +141,15 @@ export function activate(context: ExtensionContext) {
         window.showWarningMessage('Open a HoloScript file (.holo or .hsplus) to validate.');
         return;
       }
-      
+
       const text = editor.document.getText();
       const lines = text.split('\n');
       const errors: { line: number; message: string }[] = [];
-      
+
       // Basic syntax validation
       let braceCount = 0;
       let inString = false;
-      
+
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         for (const char of line) {
@@ -149,15 +160,17 @@ export function activate(context: ExtensionContext) {
           }
         }
       }
-      
+
       if (braceCount !== 0) {
         errors.push({ line: lines.length, message: 'Unbalanced braces' });
       }
-      
+
       if (errors.length === 0) {
         window.showInformationMessage('✅ HoloScript syntax is valid!');
       } else {
-        window.showErrorMessage(`❌ Found ${errors.length} error(s): ${errors.map(e => e.message).join(', ')}`);
+        window.showErrorMessage(
+          `❌ Found ${errors.length} error(s): ${errors.map((e) => e.message).join(', ')}`
+        );
       }
     })
   );
@@ -174,13 +187,13 @@ export function activate(context: ExtensionContext) {
       const filename = await window.showInputBox({
         prompt: 'Enter a name for your first scene',
         value: 'hello-world',
-        placeHolder: 'hello-world'
+        placeHolder: 'hello-world',
       });
 
       if (!filename) return;
 
       const filePath = path.join(workspaceFolder.uri.fsPath, `${filename}.holo`);
-      
+
       const defaultContent = `composition "My First Scene" {
   environment {
     skybox: "default"
@@ -214,17 +227,19 @@ export function activate(context: ExtensionContext) {
   const hasShownWelcome = context.globalState.get('holoscript.hasShownWelcome');
   if (!hasShownWelcome) {
     context.globalState.update('holoscript.hasShownWelcome', true);
-    window.showInformationMessage(
-      'Welcome to HoloScript! 🎉 Ready to build VR/AR experiences?',
-      'Get Started',
-      'Open Examples'
-    ).then(selection => {
-      if (selection === 'Get Started') {
-        commands.executeCommand('holoscript.showWalkthrough');
-      } else if (selection === 'Open Examples') {
-        commands.executeCommand('holoscript.openExamples');
-      }
-    });
+    window
+      .showInformationMessage(
+        'Welcome to HoloScript! 🎉 Ready to build VR/AR experiences?',
+        'Get Started',
+        'Open Examples'
+      )
+      .then((selection) => {
+        if (selection === 'Get Started') {
+          commands.executeCommand('holoscript.showWalkthrough');
+        } else if (selection === 'Open Examples') {
+          commands.executeCommand('holoscript.openExamples');
+        }
+      });
   }
 
   // Try multiple possible server locations
@@ -234,7 +249,15 @@ export function activate(context: ExtensionContext) {
     // In workspace (monorepo development)
     path.join(context.extensionPath, '..', 'cli', 'dist', 'lsp', 'server.js'),
     // Installed globally via npm
-    path.join(context.extensionPath, 'node_modules', '@holoscript', 'cli', 'dist', 'lsp', 'server.js'),
+    path.join(
+      context.extensionPath,
+      'node_modules',
+      '@holoscript',
+      'cli',
+      'dist',
+      'lsp',
+      'server.js'
+    ),
     // From lsp package directly
     path.join(context.extensionPath, '..', 'lsp', 'dist', 'server.js'),
   ];
@@ -258,7 +281,7 @@ export function activate(context: ExtensionContext) {
     debug: {
       module: serverModule,
       transport: TransportKind.ipc,
-    }
+    },
   };
 
   const clientOptions: LanguageClientOptions = {
@@ -267,8 +290,8 @@ export function activate(context: ExtensionContext) {
       { scheme: 'file', language: 'holoscriptplus' },
     ],
     synchronize: {
-      fileEvents: workspace.createFileSystemWatcher('**/.holoscriptrc')
-    }
+      fileEvents: workspace.createFileSystemWatcher('**/.holoscriptrc'),
+    },
   };
 
   client = new LanguageClient(
@@ -296,10 +319,10 @@ export function activate(context: ExtensionContext) {
       // item type is HoloSmartAssetItem (inferred or any)
       const assetName = item?.label || 'Asset';
       window.showInformationMessage(`Downloading ${assetName} from HoloHub...`);
-      
+
       // Mock download delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       window.showInformationMessage(`Successfully imported ${assetName} to project!`);
     })
   );
@@ -308,87 +331,95 @@ export function activate(context: ExtensionContext) {
   try {
     const formatter = require('@holoscript/formatter');
     const { loadConfig } = formatter; // Dynamic import to avoid build issues if dep missing during dev
-    
+
     context.subscriptions.push(
-      vscode.languages.registerDocumentFormattingEditProvider(
-        ['holoscript', 'holoscriptplus'],
-        {
-          provideDocumentFormattingEdits(document: vscode.TextDocument): vscode.ProviderResult<vscode.TextEdit[]> {
-            const config = vscode.workspace.getConfiguration('holoscript');
-            // Note: VS Code handles formatOnSave via editor.formatOnSave. 
-            // We can check our setting here but manual format should always work.
-            const timeout = config.get<number>('formatOnSaveTimeout', 1000);
+      vscode.languages.registerDocumentFormattingEditProvider(['holoscript', 'holoscriptplus'], {
+        provideDocumentFormattingEdits(
+          document: vscode.TextDocument
+        ): vscode.ProviderResult<vscode.TextEdit[]> {
+          const config = vscode.workspace.getConfiguration('holoscript');
+          // Note: VS Code handles formatOnSave via editor.formatOnSave.
+          // We can check our setting here but manual format should always work.
+          const timeout = config.get<number>('formatOnSaveTimeout', 1000);
 
-            return new Promise((resolve) => {
-              const timer = setTimeout(() => {
-                console.warn('HoloScript: Formatting timed out');
-                resolve([]);
-              }, timeout);
+          return new Promise((resolve) => {
+            const timer = setTimeout(() => {
+              console.warn('HoloScript: Formatting timed out');
+              resolve([]);
+            }, timeout);
 
-              const runFormat = () => {
-                try {
-                  const options = loadConfig(document.fileName);
-                  const fmtr = formatter.createFormatter(options);
-                  
-                  const text = document.getText();
-                  const result = fmtr.format(text, document.languageId === 'holoscriptplus' ? 'hsplus' : 'holo');
-                  clearTimeout(timer);
-                  
-                  if (result.errors.length > 0) {
-                    console.warn('HoloScript: Formatter errors:', result.errors);
-                  }
+            const runFormat = () => {
+              try {
+                const options = loadConfig(document.fileName);
+                const fmtr = formatter.createFormatter(options);
 
-                  if (!result.changed) {
-                    resolve([]);
-                    return;
-                  }
+                const text = document.getText();
+                const result = fmtr.format(
+                  text,
+                  document.languageId === 'holoscriptplus' ? 'hsplus' : 'holo'
+                );
+                clearTimeout(timer);
 
-                  const fullRange = new vscode.Range(
-                    document.positionAt(0),
-                    document.positionAt(text.length)
-                  );
-                  
-                  resolve([vscode.TextEdit.replace(fullRange, result.formatted)]);
-                } catch (err) {
-                  console.error('HoloScript: Formatting failed:', err);
-                  clearTimeout(timer);
-                  resolve([]);
+                if (result.errors.length > 0) {
+                  console.warn('HoloScript: Formatter errors:', result.errors);
                 }
-              };
 
-              if (document.lineCount > 1000) {
-                vscode.window.withProgress({
-                  location: vscode.ProgressLocation.Notification,
-                  title: "Formatting HoloScript...",
-                  cancellable: false
-                }, async () => {
-                  runFormat();
-                });
-              } else {
-                runFormat();
+                if (!result.changed) {
+                  resolve([]);
+                  return;
+                }
+
+                const fullRange = new vscode.Range(
+                  document.positionAt(0),
+                  document.positionAt(text.length)
+                );
+
+                resolve([vscode.TextEdit.replace(fullRange, result.formatted)]);
+              } catch (err) {
+                console.error('HoloScript: Formatting failed:', err);
+                clearTimeout(timer);
+                resolve([]);
               }
-            });
-          }
-        }
-      ),
+            };
+
+            if (document.lineCount > 1000) {
+              vscode.window.withProgress(
+                {
+                  location: vscode.ProgressLocation.Notification,
+                  title: 'Formatting HoloScript...',
+                  cancellable: false,
+                },
+                async () => {
+                  runFormat();
+                }
+              );
+            } else {
+              runFormat();
+            }
+          });
+        },
+      }),
       vscode.languages.registerDocumentRangeFormattingEditProvider(
         ['holoscript', 'holoscriptplus'],
         {
-          provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range): vscode.TextEdit[] {
+          provideDocumentRangeFormattingEdits(
+            document: vscode.TextDocument,
+            range: vscode.Range
+          ): vscode.TextEdit[] {
             try {
               const options = loadConfig(document.fileName);
               const fmtr = formatter.createFormatter(options);
-              
+
               const text = document.getText();
               const fileType = document.languageId === 'holoscriptplus' ? 'hsplus' : 'holo';
-              
+
               const rangeParams = {
                 startLine: range.start.line,
-                endLine: range.end.line
+                endLine: range.end.line,
               };
 
               const result = fmtr.formatRange(text, rangeParams, fileType);
-              
+
               if (!result.changed) return [];
 
               return [vscode.TextEdit.replace(range, result.formatted)];
@@ -396,7 +427,7 @@ export function activate(context: ExtensionContext) {
               console.error('HoloScript: Range formatting failed:', err);
               return [];
             }
-          }
+          },
         }
       )
     );
@@ -408,9 +439,9 @@ export function activate(context: ExtensionContext) {
   // Register Completion Provider
   context.subscriptions.push(
     vscode.languages.registerCompletionItemProvider(
-        ['holoscript', 'holoscriptplus'],
-        new HoloScriptCompletionItemProvider(),
-        '@' // Trigger character
+      ['holoscript', 'holoscriptplus'],
+      new HoloScriptCompletionItemProvider(),
+      '@' // Trigger character
     )
   );
 

@@ -8,7 +8,7 @@ import { parseArgs, printHelp } from './args';
 import { startREPL } from './repl';
 import { add, remove, list } from './packageManager';
 import { TRAITS, formatTrait, formatAllTraits, suggestTraits } from './traits';
-import { generateObject, generateScene, listTemplates, getTemplate } from './generator';
+import { generateObject, listTemplates, getTemplate } from './generator';
 import { packAsset, unpackAsset, inspectAsset } from './smartAssets';
 import { WatchService } from './WatchService';
 import { generateTargetCode } from './build/generators';
@@ -45,50 +45,61 @@ async function main(): Promise<void> {
       }
 
       const content = fs.readFileSync(filePath, 'utf-8');
-      const parser = new HoloScriptCodeParser();
-      
+      const _parser = new HoloScriptCodeParser();
+
       console.log(`\n\x1b[36mValidating ${options.input}...\x1b[0m\n`);
-      
+
       try {
         const isHolo = options.input.endsWith('.holo');
         let success = false;
         let errorList: any[] = [];
 
-        if (options.verbose) console.log(`\x1b[2m[TRACE] Starting validation (isHolo: ${isHolo})...\x1b[0m`);
+        if (options.verbose)
+          console.log(`\x1b[2m[TRACE] Starting validation (isHolo: ${isHolo})...\x1b[0m`);
 
         let parseResult: any;
 
         if (isHolo) {
-          if (options.verbose) console.log(`\x1b[2m[TRACE] Importing HoloCompositionParser...\x1b[0m`);
+          if (options.verbose)
+            console.log(`\x1b[2m[TRACE] Importing HoloCompositionParser...\x1b[0m`);
           const { HoloCompositionParser } = await import('@holoscript/core');
-          if (options.verbose) console.log(`\x1b[2m[TRACE] Parser imported. Initializing...\x1b[0m`);
+          if (options.verbose)
+            console.log(`\x1b[2m[TRACE] Parser imported. Initializing...\x1b[0m`);
           const compositionParser = new HoloCompositionParser();
           if (options.verbose) console.log(`\x1b[2m[TRACE] Starting parse...\x1b[0m`);
           const result = compositionParser.parse(content);
           parseResult = result;
-          if (options.verbose) console.log(`\x1b[2m[TRACE] Parse complete. Success: ${result.success}\x1b[0m`);
+          if (options.verbose)
+            console.log(`\x1b[2m[TRACE] Parse complete. Success: ${result.success}\x1b[0m`);
           success = result.success;
-          errorList = result.errors.map((e: any) => ({ line: e.loc?.line, column: e.loc?.column, message: e.message }));
+          errorList = result.errors.map((e: any) => ({
+            line: e.loc?.line,
+            column: e.loc?.column,
+            message: e.message,
+          }));
         } else {
-          if (options.verbose) console.log(`\x1b[2m[TRACE] Importing HoloScriptCodeParser...\x1b[0m`);
+          if (options.verbose)
+            console.log(`\x1b[2m[TRACE] Importing HoloScriptCodeParser...\x1b[0m`);
           const { HoloScriptCodeParser } = await import('@holoscript/core');
-          if (options.verbose) console.log(`\x1b[2m[TRACE] Parser imported. Initializing...\x1b[0m`);
+          if (options.verbose)
+            console.log(`\x1b[2m[TRACE] Parser imported. Initializing...\x1b[0m`);
           const parser = new HoloScriptCodeParser();
           if (options.verbose) console.log(`\x1b[2m[TRACE] Starting parse...\x1b[0m`);
           const result = parser.parse(content);
           parseResult = result;
-          if (options.verbose) console.log(`\x1b[2m[TRACE] Parse complete. Success: ${result.success}\x1b[0m`);
+          if (options.verbose)
+            console.log(`\x1b[2m[TRACE] Parse complete. Success: ${result.success}\x1b[0m`);
           success = result.success;
           errorList = result.errors;
         }
 
         // Custom Validations (Shared with LSP)
         const lines = content.split('\n');
-        
+
         // 1. Common Typos
         const typos: Record<string, string> = {
-          'sper': 'sphere',
-          'box': 'cube',
+          sper: 'sphere',
+          box: 'cube',
           'rotate.y': 'rotation.y',
           'rotate.x': 'rotation.x',
           'rotate.z': 'rotation.z',
@@ -98,13 +109,13 @@ async function main(): Promise<void> {
           for (const [typo, fix] of Object.entries(typos)) {
             // Avoid false positives for skybox
             if (typo === 'box' && line.includes('skybox')) continue;
-            
+
             if (line.includes(typo)) {
               errorList.push({
                 line: i + 1,
                 column: line.indexOf(typo),
                 message: `[Warning] Common typo detected: Did you mean '${fix}'?`,
-                severity: 'warning'
+                severity: 'warning',
               });
             }
           }
@@ -114,7 +125,7 @@ async function main(): Promise<void> {
         // Simple recursive finder
         const findNodes = (nodes: any[]): any[] => {
           if (!nodes) return [];
-          let results: any[] = [];
+          const results: any[] = [];
           for (const node of nodes) {
             results.push(node);
             if (node.children) results.push(...findNodes(node.children));
@@ -123,37 +134,43 @@ async function main(): Promise<void> {
         };
 
         const astRoot = isHolo ? parseResult.ast?.objects : parseResult.ast;
-        const allNodes = Array.isArray(astRoot) ? findNodes(astRoot) : (astRoot ? findNodes([astRoot]) : []);
-        
+        const allNodes = Array.isArray(astRoot)
+          ? findNodes(astRoot)
+          : astRoot
+            ? findNodes([astRoot])
+            : [];
+
         for (const node of allNodes) {
           if (node.directives) {
             const hasGrabHook = node.directives.some((d: any) => d.hook === 'on_grab');
-            const hasGrabbableTrait = node.directives.some((d: any) => d.type === 'trait' && d.name === 'grabbable');
-            
+            const hasGrabbableTrait = node.directives.some(
+              (d: any) => d.type === 'trait' && d.name === 'grabbable'
+            );
+
             if (hasGrabHook && !hasGrabbableTrait) {
               errorList.push({
-                line: node.line || (node.loc?.line) || 0,
-                column: node.column || (node.loc?.column) || 0,
+                line: node.line || node.loc?.line || 0,
+                column: node.column || node.loc?.column || 0,
                 message: `[Warning] Node has 'on_grab' hook but is missing '@grabbable' trait. Interaction will not work.`,
-                severity: 'warning'
+                severity: 'warning',
               });
             }
           }
         }
-        
-        if (success && errorList.filter(e => e.severity !== 'warning').length === 0) {
+
+        if (success && errorList.filter((e) => e.severity !== 'warning').length === 0) {
           if (errorList.length > 0) {
-             console.log(`\x1b[33m✓ Validation passed with ${errorList.length} warnings:\x1b[0m`);
-             errorList.forEach(err => {
-               console.log(`  Line ${err.line}:${err.column}: ${err.message}`);
-             });
+            console.log(`\x1b[33m✓ Validation passed with ${errorList.length} warnings:\x1b[0m`);
+            errorList.forEach((err) => {
+              console.log(`  Line ${err.line}:${err.column}: ${err.message}`);
+            });
           } else {
-             console.log(`\x1b[32m✓ Validation successful!\x1b[0m\n`);
+            console.log(`\x1b[32m✓ Validation successful!\x1b[0m\n`);
           }
           process.exit(0);
         } else {
           console.error(`\x1b[31mValidation failed with ${errorList.length} errors:\x1b[0m`);
-          errorList.forEach(err => {
+          errorList.forEach((err) => {
             console.error(`  Line ${err.line}:${err.column}: ${err.message}`);
           });
           process.exit(1);
@@ -218,8 +235,9 @@ async function main(): Promise<void> {
       }
       try {
         await packAsset(options.input, options.output, options.verbose);
-      } catch (e: any) {
-        console.error(`\x1b[31mError packing asset: ${e.message}\x1b[0m`);
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        console.error(`\x1b[31mError packing asset: ${message}\x1b[0m`);
         process.exit(1);
       }
       process.exit(0);
@@ -234,33 +252,35 @@ async function main(): Promise<void> {
       }
       try {
         await unpackAsset(options.input, options.output, options.verbose);
-      } catch (e: any) {
-         console.error(`\x1b[31mError unpacking asset: ${e.message}\x1b[0m`);
-         process.exit(1);
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        console.error(`\x1b[31mError unpacking asset: ${message}\x1b[0m`);
+        process.exit(1);
       }
-       process.exit(0);
-       break;
+      process.exit(0);
+      break;
     }
 
     case 'inspect': {
-       if (!options.input) {
+      if (!options.input) {
         console.error('\x1b[31mError: No input file specified.\x1b[0m');
         console.log('Usage: holoscript inspect <file.hsa>');
         process.exit(1);
       }
       try {
         await inspectAsset(options.input, options.verbose);
-      } catch (e: any) {
-         console.error(`\x1b[31mError inspecting asset: ${e.message}\x1b[0m`);
-         process.exit(1);
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        console.error(`\x1b[31mError inspecting asset: ${message}\x1b[0m`);
+        process.exit(1);
       }
-       process.exit(0);
-       break;
+      process.exit(0);
+      break;
     }
 
     case 'diff': {
       // Get file arguments from original args array
-      const diffArgs = args.filter(a => !a.startsWith('-') && a !== 'diff');
+      const diffArgs = args.filter((a) => !a.startsWith('-') && a !== 'diff');
       if (diffArgs.length < 2) {
         console.error('\x1b[31mError: Two files required for diff.\x1b[0m');
         console.log('Usage: holoscript diff <file1> <file2> [--json]');
@@ -269,7 +289,8 @@ async function main(): Promise<void> {
 
       const fs = await import('fs');
       const path = await import('path');
-      const { SemanticDiffEngine, formatDiffResult, HoloCompositionParser, HoloScriptCodeParser } = await import('@holoscript/core');
+      const { SemanticDiffEngine, formatDiffResult, HoloCompositionParser, HoloScriptCodeParser } =
+        await import('@holoscript/core');
 
       const file1 = path.resolve(diffArgs[0]);
       const file2 = path.resolve(diffArgs[1]);
@@ -300,7 +321,9 @@ async function main(): Promise<void> {
           const result = parser.parse(content1);
           if (!result.success) {
             console.error(`\x1b[31mError parsing ${diffArgs[0]}:\x1b[0m`);
-            result.errors.forEach((e: any) => console.error(`  ${e.loc?.line}:${e.loc?.column}: ${e.message}`));
+            result.errors.forEach((e: any) =>
+              console.error(`  ${e.loc?.line}:${e.loc?.column}: ${e.message}`)
+            );
             process.exit(1);
           }
           ast1 = result.ast;
@@ -309,7 +332,9 @@ async function main(): Promise<void> {
           const result = parser.parse(content1);
           if (!result.success) {
             console.error(`\x1b[31mError parsing ${diffArgs[0]}:\x1b[0m`);
-            result.errors.forEach((e: any) => console.error(`  ${e.line}:${e.column}: ${e.message}`));
+            result.errors.forEach((e: any) =>
+              console.error(`  ${e.line}:${e.column}: ${e.message}`)
+            );
             process.exit(1);
           }
           ast1 = { type: 'Program', children: result.ast };
@@ -320,7 +345,9 @@ async function main(): Promise<void> {
           const result = parser.parse(content2);
           if (!result.success) {
             console.error(`\x1b[31mError parsing ${diffArgs[1]}:\x1b[0m`);
-            result.errors.forEach((e: any) => console.error(`  ${e.loc?.line}:${e.loc?.column}: ${e.message}`));
+            result.errors.forEach((e: any) =>
+              console.error(`  ${e.loc?.line}:${e.loc?.column}: ${e.message}`)
+            );
             process.exit(1);
           }
           ast2 = result.ast;
@@ -329,7 +356,9 @@ async function main(): Promise<void> {
           const result = parser.parse(content2);
           if (!result.success) {
             console.error(`\x1b[31mError parsing ${diffArgs[1]}:\x1b[0m`);
-            result.errors.forEach((e: any) => console.error(`  ${e.line}:${e.column}: ${e.message}`));
+            result.errors.forEach((e: any) =>
+              console.error(`  ${e.line}:${e.column}: ${e.message}`)
+            );
             process.exit(1);
           }
           ast2 = { type: 'Program', children: result.ast };
@@ -351,9 +380,15 @@ async function main(): Promise<void> {
 
           // Summary
           const added = result.changes.filter((c: { type: string }) => c.type === 'added').length;
-          const removed = result.changes.filter((c: { type: string }) => c.type === 'removed').length;
-          const modified = result.changes.filter((c: { type: string }) => c.type === 'modified').length;
-          const renamed = result.changes.filter((c: { type: string }) => c.type === 'renamed').length;
+          const removed = result.changes.filter(
+            (c: { type: string }) => c.type === 'removed'
+          ).length;
+          const modified = result.changes.filter(
+            (c: { type: string }) => c.type === 'modified'
+          ).length;
+          const renamed = result.changes.filter(
+            (c: { type: string }) => c.type === 'renamed'
+          ).length;
           const moved = result.changes.filter((c: { type: string }) => c.type === 'moved').length;
 
           console.log(`\n\x1b[1mSummary:\x1b[0m`);
@@ -386,11 +421,8 @@ async function main(): Promise<void> {
         const fs = await import('fs');
         const path = await import('path');
         const { HoloCompositionParser } = await import('@holoscript/core');
-        const {
-          ThingDescriptionGenerator,
-          serializeThingDescription,
-          validateThingDescription,
-        } = await import('@holoscript/core/wot');
+        const { ThingDescriptionGenerator, serializeThingDescription, validateThingDescription } =
+          await import('@holoscript/core/wot');
 
         const filePath = path.resolve(options.input);
         if (!fs.existsSync(filePath)) {
@@ -398,7 +430,9 @@ async function main(): Promise<void> {
           process.exit(1);
         }
 
-        console.log(`\n\x1b[36mGenerating W3C Thing Descriptions from ${options.input}...\x1b[0m\n`);
+        console.log(
+          `\n\x1b[36mGenerating W3C Thing Descriptions from ${options.input}...\x1b[0m\n`
+        );
 
         const content = fs.readFileSync(filePath, 'utf-8');
         const parser = new HoloCompositionParser();
@@ -429,7 +463,9 @@ async function main(): Promise<void> {
 
         if (thingDescriptions.length === 0) {
           console.log('\x1b[33mNo objects with @wot_thing trait found.\x1b[0m');
-          console.log('Add @wot_thing(title: "My Thing", security: "nosec") to objects you want to export.');
+          console.log(
+            'Add @wot_thing(title: "My Thing", security: "nosec") to objects you want to export.'
+          );
           process.exit(0);
         }
 
@@ -494,7 +530,9 @@ async function main(): Promise<void> {
             const actionCount = Object.keys(result.td.actions || {}).length;
             const eventCount = Object.keys(result.td.events || {}).length;
 
-            console.log(`  Properties: ${propCount}, Actions: ${actionCount}, Events: ${eventCount}`);
+            console.log(
+              `  Properties: ${propCount}, Actions: ${actionCount}, Events: ${eventCount}`
+            );
             console.log('');
           }
 
@@ -523,11 +561,8 @@ async function main(): Promise<void> {
         const fs = await import('fs');
         const path = await import('path');
         const { HoloCompositionParser, HoloScriptPlusParser } = await import('@holoscript/core');
-        const {
-          createHeadlessRuntime,
-          HEADLESS_PROFILE,
-          getProfile,
-        } = await import('@holoscript/core/runtime/profiles');
+        const { createHeadlessRuntime, HEADLESS_PROFILE, getProfile } =
+          await import('@holoscript/core/runtime/profiles');
 
         const filePath = path.resolve(options.input);
         if (!fs.existsSync(filePath)) {
@@ -563,15 +598,21 @@ async function main(): Promise<void> {
               children: objects.map((obj: any) => ({
                 type: obj.type || 'object',
                 id: obj.name,
-                properties: Object.fromEntries(obj.properties?.map((p: any) => [p.key, p.value]) || []),
+                properties: Object.fromEntries(
+                  obj.properties?.map((p: any) => [p.key, p.value]) || []
+                ),
                 traits: new Map(obj.traits?.map((t: any) => [t.name, t.config || {}]) || []),
                 directives: obj.directives || [],
                 children: obj.children || [],
               })),
-              directives: parseResult.ast?.state ? [{
-                type: 'state',
-                body: parseResult.ast.state.declarations || {},
-              }] : [],
+              directives: parseResult.ast?.state
+                ? [
+                    {
+                      type: 'state',
+                      body: parseResult.ast.state.declarations || {},
+                    },
+                  ]
+                : [],
             },
             imports: parseResult.ast?.imports || [],
             body: [],
@@ -702,13 +743,15 @@ async function main(): Promise<void> {
       }
 
       const suggested = await suggestTraits(description);
-      
+
       if (options.json) {
         console.log(JSON.stringify(suggested, null, 2));
       } else {
         console.log(`\n\x1b[1mSuggested traits for:\x1b[0m "${description}"\n`);
         if (suggested.length === 0) {
-          console.log('\x1b[2mNo specific traits suggested. Try adding more descriptive keywords.\x1b[0m');
+          console.log(
+            '\x1b[2mNo specific traits suggested. Try adding more descriptive keywords.\x1b[0m'
+          );
           console.log('Keywords: grab, throw, glow, click, physics, network, portal, etc.\n');
         } else {
           for (const trait of suggested) {
@@ -734,34 +777,36 @@ async function main(): Promise<void> {
         verbose: options.verbose,
         timeout: options.timeout,
       });
-      
+
       if (options.json) {
         console.log(JSON.stringify(result, null, 2));
       } else {
         console.log(`\n\x1b[1mGenerated HoloScript\x1b[0m \x1b[2m(${result.source})\x1b[0m\n`);
         console.log('\x1b[36m' + result.code + '\x1b[0m\n');
         if (result.traits.length > 0) {
-          console.log(`\x1b[33mTraits used:\x1b[0m ${result.traits.map(t => `@${t}`).join(', ')}\n`);
+          console.log(
+            `\x1b[33mTraits used:\x1b[0m ${result.traits.map((t) => `@${t}`).join(', ')}\n`
+          );
         }
         if (result.source === 'local') {
           console.log('\x1b[2mTip: Set BRITTNEY_SERVICE_URL for AI-enhanced generation.\x1b[0m\n');
         }
       }
-      
+
       // Write to file if output specified
       if (options.output) {
         const fs = await import('fs');
         fs.writeFileSync(options.output, result.code);
         console.log(`\x1b[32m✓ Written to ${options.output}\x1b[0m\n`);
       }
-      
+
       process.exit(0);
       break;
     }
 
     case 'templates': {
       const templates = listTemplates();
-      
+
       if (options.json) {
         const details: Record<string, any> = {};
         for (const t of templates) {
@@ -774,7 +819,7 @@ async function main(): Promise<void> {
           const info = getTemplate(t);
           if (info) {
             console.log(`  \x1b[36m${t}\x1b[0m`);
-            console.log(`    Traits: ${info.traits.map(tr => `@${tr}`).join(', ')}`);
+            console.log(`    Traits: ${info.traits.map((tr) => `@${tr}`).join(', ')}`);
           }
         }
         console.log('\n\x1b[2mUse: holoscript generate "a <template> called myObject"\x1b[0m\n');
@@ -792,10 +837,25 @@ async function main(): Promise<void> {
 
       const target = options.target || 'threejs';
       const validTargets = [
-        'threejs', 'unity', 'vrchat', 'babylon', 'aframe', 'webxr', 
-        'urdf', 'sdf', 'dtdl', 'wasm',
+        'threejs',
+        'unity',
+        'vrchat',
+        'babylon',
+        'aframe',
+        'webxr',
+        'urdf',
+        'sdf',
+        'dtdl',
+        'wasm',
         // New compilers
-        'unreal', 'ios', 'android', 'godot', 'visionos', 'openxr', 'androidxr', 'webgpu'
+        'unreal',
+        'ios',
+        'android',
+        'godot',
+        'visionos',
+        'openxr',
+        'androidxr',
+        'webgpu',
       ];
 
       if (!validTargets.includes(target)) {
@@ -815,37 +875,41 @@ async function main(): Promise<void> {
       }
 
       const content = fs.readFileSync(filePath, 'utf-8');
-      const parser = new HoloScriptCodeParser();
-      
+      const _parser = new HoloScriptCodeParser();
+
       console.log(`\n\x1b[36mCompiling ${options.input} → ${target}\x1b[0m\n`);
-      
+
       try {
         const isHolo = options.input.endsWith('.holo');
         let ast: any;
 
         if (isHolo) {
-          if (options.verbose) console.log(`\x1b[2m[DEBUG] Using HoloCompositionParser for .holo file...\x1b[0m`);
+          if (options.verbose)
+            console.log(`\x1b[2m[DEBUG] Using HoloCompositionParser for .holo file...\x1b[0m`);
           const { HoloCompositionParser } = await import('@holoscript/core');
           const compositionParser = new HoloCompositionParser();
           const result = compositionParser.parse(content);
-          
+
           if (!result.success) {
             console.error(`\x1b[31mError parsing composition:\x1b[0m`);
-            result.errors.forEach(e => console.error(`  ${e.loc?.line}:${e.loc?.column}: ${e.message}`));
+            result.errors.forEach((e) =>
+              console.error(`  ${e.loc?.line}:${e.loc?.column}: ${e.message}`)
+            );
             process.exit(1);
           }
-          
+
           // Map HoloComposition AST to Generator AST
           ast = {
-            orbs: result.ast?.objects?.map(obj => ({
-              name: obj.name,
-              properties: Object.fromEntries(obj.properties.map(p => [p.key, p.value])),
-              traits: obj.traits || [],
-              state: obj.state,
-            })) || [],
+            orbs:
+              result.ast?.objects?.map((obj) => ({
+                name: obj.name,
+                properties: Object.fromEntries(obj.properties.map((p) => [p.key, p.value])),
+                traits: obj.traits || [],
+                state: obj.state,
+              })) || [],
             functions: [
-              ...(result.ast?.logic?.actions?.map(a => ({ name: a.name })) || []),
-              ...(result.ast?.logic?.handlers?.map(h => ({ name: h.event })) || [])
+              ...(result.ast?.logic?.actions?.map((a) => ({ name: a.name })) || []),
+              ...(result.ast?.logic?.handlers?.map((h) => ({ name: h.event })) || []),
             ],
           };
         } else {
@@ -853,21 +917,23 @@ async function main(): Promise<void> {
           const { HoloScriptCodeParser } = await import('@holoscript/core');
           const parser = new HoloScriptCodeParser();
           const result = parser.parse(content);
-          
+
           if (!result.success) {
             console.error(`\x1b[31mError parsing script:\x1b[0m`);
-            result.errors.forEach(e => console.error(`  ${e.line}:${e.column}: ${e.message}`));
+            result.errors.forEach((e) => console.error(`  ${e.line}:${e.column}: ${e.message}`));
             process.exit(1);
           }
-          
+
           ast = {
-             orbs: result.ast.filter((n: any) => n.type === 'orb'),
-             functions: result.ast.filter((n: any) => n.type === 'method'),
+            orbs: result.ast.filter((n: any) => n.type === 'orb'),
+            functions: result.ast.filter((n: any) => n.type === 'method'),
           };
         }
 
         if (options.verbose) {
-          console.log(`\x1b[2mParsed ${ast.orbs?.length || 0} orbs, ${ast.functions?.length || 0} functions\x1b[0m`);
+          console.log(
+            `\x1b[2mParsed ${ast.orbs?.length || 0} orbs, ${ast.functions?.length || 0} functions\x1b[0m`
+          );
         }
 
         // Special handling for WASM target - needs full HoloComposition
@@ -883,7 +949,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for WASM:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -935,7 +1001,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for URDF:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -951,7 +1017,9 @@ async function main(): Promise<void> {
 
           console.log(`\x1b[32m✓ URDF compilation successful!\x1b[0m`);
           console.log(`\x1b[2m  Objects: ${parseResult.ast.objects?.length || 0}\x1b[0m`);
-          console.log(`\x1b[2m  Spatial groups: ${parseResult.ast.spatialGroups?.length || 0}\x1b[0m`);
+          console.log(
+            `\x1b[2m  Spatial groups: ${parseResult.ast.spatialGroups?.length || 0}\x1b[0m`
+          );
 
           if (options.output) {
             const outputPath = path.resolve(options.output);
@@ -979,7 +1047,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for SDF:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -996,7 +1064,9 @@ async function main(): Promise<void> {
           console.log(`\x1b[32m✓ SDF compilation successful!\x1b[0m`);
           console.log(`\x1b[2m  Objects: ${parseResult.ast.objects?.length || 0}\x1b[0m`);
           console.log(`\x1b[2m  Lights: ${parseResult.ast.lights?.length || 0}\x1b[0m`);
-          console.log(`\x1b[2m  Spatial groups: ${parseResult.ast.spatialGroups?.length || 0}\x1b[0m`);
+          console.log(
+            `\x1b[2m  Spatial groups: ${parseResult.ast.spatialGroups?.length || 0}\x1b[0m`
+          );
 
           if (options.output) {
             const outputPath = path.resolve(options.output);
@@ -1024,11 +1094,13 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for DTDL:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
-          console.log(`\x1b[2m[DEBUG] Compiling to DTDL (Azure Digital Twin Definition Language)...\x1b[0m`);
+          console.log(
+            `\x1b[2m[DEBUG] Compiling to DTDL (Azure Digital Twin Definition Language)...\x1b[0m`
+          );
           const compiler = new DTDLCompiler({
             namespace: `dtmi:${parseResult.ast.name?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'holoscript'}`,
             dtdlVersion: 3,
@@ -1070,7 +1142,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for Unreal:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -1099,7 +1171,7 @@ async function main(): Promise<void> {
             }
           } else {
             console.log('\n--- Unreal Output ---\n');
-            console.log(result.files.map(f => `// ${f.filename}\n${f.content}`).join('\n\n'));
+            console.log(result.files.map((f) => `// ${f.filename}\n${f.content}`).join('\n\n'));
           }
 
           process.exit(0);
@@ -1118,7 +1190,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for iOS:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -1147,7 +1219,7 @@ async function main(): Promise<void> {
             }
           } else {
             console.log('\n--- iOS Output ---\n');
-            console.log(result.files.map(f => `// ${f.filename}\n${f.content}`).join('\n\n'));
+            console.log(result.files.map((f) => `// ${f.filename}\n${f.content}`).join('\n\n'));
           }
 
           process.exit(0);
@@ -1166,7 +1238,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for Android:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -1195,7 +1267,7 @@ async function main(): Promise<void> {
             }
           } else {
             console.log('\n--- Android Output ---\n');
-            console.log(result.files.map(f => `// ${f.filename}\n${f.content}`).join('\n\n'));
+            console.log(result.files.map((f) => `// ${f.filename}\n${f.content}`).join('\n\n'));
           }
 
           process.exit(0);
@@ -1214,7 +1286,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for Godot:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -1255,7 +1327,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for VisionOS:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -1297,7 +1369,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for OpenXR:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -1339,7 +1411,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for AndroidXR:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -1381,7 +1453,7 @@ async function main(): Promise<void> {
 
           if (!parseResult.success || !parseResult.ast) {
             console.error(`\x1b[31mError parsing for WebGPU:\x1b[0m`);
-            parseResult.errors.forEach(e => console.error(`  ${e.message}`));
+            parseResult.errors.forEach((e) => console.error(`  ${e.message}`));
             process.exit(1);
           }
 
@@ -1452,12 +1524,12 @@ async function main(): Promise<void> {
           console.log(`\x1b[36mBuilding file: ${options.input}\x1b[0m`);
           const content = fs.readFileSync(inputPath, 'utf-8');
           const target = options.target || 'threejs';
-          
+
           try {
             const isHolo = options.input.endsWith('.holo');
             let ast: any;
             let composition: any = null;
-            
+
             if (isHolo) {
               const { HoloCompositionParser } = await import('@holoscript/core');
               const result = new HoloCompositionParser().parse(content);
@@ -1466,12 +1538,15 @@ async function main(): Promise<void> {
                 return;
               }
               composition = result.ast;
-              ast = { 
-                orbs: result.ast?.objects?.map((obj: any) => ({ 
-                  name: obj.name, 
-                  properties: Object.fromEntries(obj.properties.map((p: any) => [p.key, p.value])), 
-                  traits: obj.traits || [] 
-                })) || [] 
+              ast = {
+                orbs:
+                  result.ast?.objects?.map((obj: any) => ({
+                    name: obj.name,
+                    properties: Object.fromEntries(
+                      obj.properties.map((p: any) => [p.key, p.value])
+                    ),
+                    traits: obj.traits || [],
+                  })) || [],
               };
             } else {
               const { HoloScriptCodeParser } = await import('@holoscript/core');
@@ -1482,39 +1557,57 @@ async function main(): Promise<void> {
               }
               ast = { orbs: result.ast.filter((n: any) => n.type === 'orb') };
             }
-            
+
             // Handle Code Splitting
-            if (options.split || (composition && composition.zones && composition.zones.length > 0)) {
+            if (
+              options.split ||
+              (composition && composition.zones && composition.zones.length > 0)
+            ) {
               console.log('\x1b[33mCode splitting enabled/detected...\x1b[0m');
               const { SceneSplitter } = await import('./build/splitter');
               const { ManifestGenerator } = await import('./build/manifest');
-              
+
               const splitter = new SceneSplitter();
               const chunks = splitter.split(composition);
-              
-              const outputDir = options.output ? path.dirname(path.resolve(options.output)) : path.resolve('./dist');
+
+              const outputDir = options.output
+                ? path.dirname(path.resolve(options.output))
+                : path.resolve('./dist');
               if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
-              
+
               const chunksDir = path.join(outputDir, 'chunks');
               if (!fs.existsSync(chunksDir)) fs.mkdirSync(chunksDir, { recursive: true });
-              
+
               for (const chunk of chunks) {
                 const chunkAst = { orbs: chunk.objects };
                 const chunkCode = generateTargetCode(chunkAst, target, options.verbose);
                 // For chunks, we'll wrap in JSON or a module format
                 const chunkFile = path.join(chunksDir, `${chunk.id}.chunk.js`);
-                fs.writeFileSync(chunkFile, JSON.stringify({ 
-                  id: chunk.id, 
-                  objects: chunk.objects,
-                  code: chunkCode 
-                }, null, 2));
-                
-                if (options.verbose) console.log(`  \x1b[2mChunk ${chunk.id} written (${chunk.objects.length} objects)\x1b[0m`);
+                fs.writeFileSync(
+                  chunkFile,
+                  JSON.stringify(
+                    {
+                      id: chunk.id,
+                      objects: chunk.objects,
+                      code: chunkCode,
+                    },
+                    null,
+                    2
+                  )
+                );
+
+                if (options.verbose)
+                  console.log(
+                    `  \x1b[2mChunk ${chunk.id} written (${chunk.objects.length} objects)\x1b[0m`
+                  );
               }
-              
+
               const generator = new ManifestGenerator();
               const manifest = generator.generate(chunks, outputDir);
-              fs.writeFileSync(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+              fs.writeFileSync(
+                path.join(outputDir, 'manifest.json'),
+                JSON.stringify(manifest, null, 2)
+              );
               console.log(`\x1b[32m✓ Built ${chunks.length} chunks and manifest.json\x1b[0m`);
             } else {
               const outputCode = generateTargetCode(ast, target, options.verbose);
@@ -1525,17 +1618,21 @@ async function main(): Promise<void> {
                 console.log(outputCode);
               }
             }
-          } catch (e: any) {
-            console.error(`\x1b[31mBuild error: ${e.message}\x1b[0m`);
+          } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : String(e);
+            console.error(`\x1b[31mBuild error: ${message}\x1b[0m`);
           }
         } else if (stats.isDirectory()) {
-           console.log(`\x1b[36mBuilding asset from directory: ${options.input}\x1b[0m`);
-           try {
-             await packAsset(options.input, options.output, options.verbose);
-             console.log(`\x1b[32m✓ Packed asset to ${options.output || (options.input + '.hsa')}\x1b[0m`);
-           } catch (e: any) {
-             console.error(`\x1b[31mError packing asset: ${e.message}\x1b[0m`);
-           }
+          console.log(`\x1b[36mBuilding asset from directory: ${options.input}\x1b[0m`);
+          try {
+            await packAsset(options.input, options.output, options.verbose);
+            console.log(
+              `\x1b[32m✓ Packed asset to ${options.output || options.input + '.hsa'}\x1b[0m`
+            );
+          } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : String(e);
+            console.error(`\x1b[31mError packing asset: ${message}\x1b[0m`);
+          }
         }
       };
 
@@ -1543,7 +1640,7 @@ async function main(): Promise<void> {
         const watcher = new WatchService({
           input: options.input,
           onChanged: executeBuild,
-          verbose: options.verbose
+          verbose: options.verbose,
         });
         await watcher.start();
         // Watch mode keeps the process alive
@@ -1561,11 +1658,13 @@ async function main(): Promise<void> {
 
     case 'package': {
       const { packageForEdge } = await import('./edge');
-      
+
       if (!options.input) {
         console.error('\x1b[31mError: No source file or directory specified.\x1b[0m');
         console.log('Usage: holoscript package <source> [options]');
-        console.log('  --platform <platform>  Target platform (linux-arm64, linux-x64, windows-x64, wasm)');
+        console.log(
+          '  --platform <platform>  Target platform (linux-arm64, linux-x64, windows-x64, wasm)'
+        );
         console.log('  -o, --output <dir>     Output directory');
         process.exit(1);
       }
@@ -1574,7 +1673,7 @@ async function main(): Promise<void> {
         await packageForEdge({
           source: options.input,
           output: options.output,
-          platform: options.platform || 'linux-arm64'
+          platform: options.platform || 'linux-arm64',
         });
         process.exit(0);
       } catch (error: any) {
@@ -1586,7 +1685,7 @@ async function main(): Promise<void> {
 
     case 'deploy': {
       const { deployToDevice } = await import('./edge');
-      
+
       if (!options.input) {
         console.error('\x1b[31mError: No package directory specified.\x1b[0m');
         console.log('Usage: holoscript deploy <package-dir> --host <host> [options]');
@@ -1600,7 +1699,9 @@ async function main(): Promise<void> {
       }
 
       if (!options.host) {
-        console.error('\x1b[31mError: No target host specified. Use --host <ip-or-hostname>\x1b[0m');
+        console.error(
+          '\x1b[31mError: No target host specified. Use --host <ip-or-hostname>\x1b[0m'
+        );
         process.exit(1);
       }
 
@@ -1612,7 +1713,7 @@ async function main(): Promise<void> {
           keyPath: options.keyPath,
           port: options.port,
           remotePath: options.remotePath,
-          serviceName: options.serviceName
+          serviceName: options.serviceName,
         });
         process.exit(success ? 0 : 1);
       } catch (error: any) {
@@ -1644,7 +1745,7 @@ async function main(): Promise<void> {
           port: options.port || 9100,
           interval: options.interval || 2000,
           dashboard: options.dashboard ?? true,
-          logFile: options.output
+          logFile: options.output,
         });
       } catch (error: any) {
         console.error(`\x1b[31mError: ${error.message}\x1b[0m`);
@@ -1685,7 +1786,9 @@ async function main(): Promise<void> {
         if (options.dryRun) {
           console.log('\n\x1b[33m📋 Dry run complete - no changes made\x1b[0m');
         } else {
-          console.log(`\n\x1b[32m✓ Successfully published ${result.packageName}@${result.version}\x1b[0m`);
+          console.log(
+            `\n\x1b[32m✓ Successfully published ${result.packageName}@${result.version}\x1b[0m`
+          );
           if (result.registryUrl) {
             console.log(`  \x1b[2m${result.registryUrl}\x1b[0m`);
           }
@@ -1705,7 +1808,8 @@ async function main(): Promise<void> {
       const path = await import('path');
       const readline = await import('readline');
 
-      const registry = options.registry || process.env.HOLOSCRIPT_REGISTRY || 'https://registry.holoscript.dev';
+      const registry =
+        options.registry || process.env.HOLOSCRIPT_REGISTRY || 'https://registry.holoscript.dev';
 
       console.log(`Registry: \x1b[36m${registry}\x1b[0m\n`);
 
@@ -1753,13 +1857,20 @@ async function main(): Promise<void> {
         const homeDir = process.env.HOME || process.env.USERPROFILE || '';
         const tokenPath = path.join(homeDir, '.holoscript-token');
 
-        fs.writeFileSync(tokenPath, JSON.stringify({
-          token: data.token,
-          username: data.username || username,
-          email: data.email || email,
-          registry,
-          createdAt: new Date().toISOString(),
-        }, null, 2));
+        fs.writeFileSync(
+          tokenPath,
+          JSON.stringify(
+            {
+              token: data.token,
+              username: data.username || username,
+              email: data.email || email,
+              registry,
+              createdAt: new Date().toISOString(),
+            },
+            null,
+            2
+          )
+        );
 
         console.log(`\x1b[32m✓ Logged in as ${data.username || username}\x1b[0m`);
 
@@ -1842,13 +1953,17 @@ async function main(): Promise<void> {
         case 'grant': {
           const [packageName, userId] = restArgs;
           if (!packageName || !userId) {
-            console.error('\x1b[31mUsage: holoscript access grant <package> <user> --permission <level>\x1b[0m');
+            console.error(
+              '\x1b[31mUsage: holoscript access grant <package> <user> --permission <level>\x1b[0m'
+            );
             process.exit(1);
           }
 
           const permission = options.permission || 'read';
           console.log(`Granting ${permission} access to ${userId} on ${packageName}...`);
-          console.log(`\x1b[32m✓ Granted ${permission} access to ${userId} on ${packageName}\x1b[0m`);
+          console.log(
+            `\x1b[32m✓ Granted ${permission} access to ${userId} on ${packageName}\x1b[0m`
+          );
           process.exit(0);
         }
 
@@ -1917,7 +2032,9 @@ async function main(): Promise<void> {
         case 'add-member': {
           const [orgName, userId] = restArgs;
           if (!orgName || !userId) {
-            console.error('\x1b[31mUsage: holoscript org add-member <org> <user> --role <role>\x1b[0m');
+            console.error(
+              '\x1b[31mUsage: holoscript org add-member <org> <user> --role <role>\x1b[0m'
+            );
             process.exit(1);
           }
 
@@ -1994,14 +2111,24 @@ async function main(): Promise<void> {
           console.log(`Creating token "${name}"...`);
 
           // Generate a local token (in production, call registry API)
-          const tokenValue = 'hst_' + Array(32).fill(0).map(() =>
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 62)]
-          ).join('');
+          const tokenValue =
+            'hst_' +
+            Array(32)
+              .fill(0)
+              .map(
+                () =>
+                  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[
+                    Math.floor(Math.random() * 62)
+                  ]
+              )
+              .join('');
 
           console.log('\n\x1b[32m✓ Token created successfully\x1b[0m');
           console.log(`\n\x1b[33m${tokenValue}\x1b[0m\n`);
           console.log('\x1b[31mSave this token now! It will not be shown again.\x1b[0m');
-          console.log('\x1b[2mSet HOLOSCRIPT_TOKEN environment variable or use --token flag.\x1b[0m\n');
+          console.log(
+            '\x1b[2mSet HOLOSCRIPT_TOKEN environment variable or use --token flag.\x1b[0m\n'
+          );
           process.exit(0);
         }
 
@@ -2061,7 +2188,7 @@ async function watchFile(options: ReturnType<typeof parseArgs>): Promise<void> {
 
       if (!parseResult.success) {
         console.log('\x1b[31mParse errors:\x1b[0m');
-        parseResult.errors.forEach(err => {
+        parseResult.errors.forEach((err) => {
           console.log(`  Line ${err.line}:${err.column}: ${err.message}`);
         });
         return;
@@ -2071,15 +2198,19 @@ async function watchFile(options: ReturnType<typeof parseArgs>): Promise<void> {
       runtime = new HoloScriptRuntime();
       const results = await runtime.executeProgram(parseResult.ast);
 
-      const success = results.every(r => r.success);
+      const success = results.every((r) => r.success);
       const timestamp = new Date().toLocaleTimeString();
 
-      console.log(`\x1b[2m[${timestamp}]\x1b[0m ${success ? '\x1b[32m✓\x1b[0m' : '\x1b[31m✗\x1b[0m'} Executed ${results.length} node(s)`);
+      console.log(
+        `\x1b[2m[${timestamp}]\x1b[0m ${success ? '\x1b[32m✓\x1b[0m' : '\x1b[31m✗\x1b[0m'} Executed ${results.length} node(s)`
+      );
 
       if (!success) {
-        results.filter(r => !r.success).forEach(r => {
-          console.log(`  \x1b[31m${r.error}\x1b[0m`);
-        });
+        results
+          .filter((r) => !r.success)
+          .forEach((r) => {
+            console.log(`  \x1b[31m${r.error}\x1b[0m`);
+          });
       }
     } catch (error) {
       console.log(`\x1b[31mError: ${(error as Error).message}\x1b[0m`);
@@ -2100,8 +2231,6 @@ async function watchFile(options: ReturnType<typeof parseArgs>): Promise<void> {
   // Keep process alive
   await new Promise(() => {});
 }
-
-
 
 main().catch((error) => {
   console.error('Fatal error:', error.message);

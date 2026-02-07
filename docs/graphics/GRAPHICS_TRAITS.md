@@ -12,9 +12,11 @@ The Graphics Traits system provides advanced capabilities for creating photoreal
 ## MaterialTrait - Physically Based Rendering (PBR)
 
 ### Purpose
+
 MaterialTrait enables photorealistic material rendering using PBR (Physically Based Rendering) workflows. Supports metallic, roughness, normal maps, emission, and GPU optimization.
 
 ### Key Features
+
 - **PBR Material System**: Metallic, roughness, ambient occlusion, emission
 - **Texture Management**: Multi-channel texture mapping with scale/offset/filtering
 - **Custom Shaders**: Support for GLSL, HLSL, and ShaderGraph code
@@ -67,13 +69,13 @@ const skin = MATERIAL_PRESETS.skin();
 
 ### Material Types
 
-| Type | Use Case | Properties |
-|------|----------|-----------|
-| `pbr` | Realistic surfaces | Metallic, roughness, AO |
-| `standard` | Matte surfaces | Diffuse + specular |
-| `unlit` | No lighting | Base color only |
-| `transparent` | Glass, translucency | Transmission, IOR |
-| `custom` | Advanced rendering | Custom shader code |
+| Type          | Use Case            | Properties              |
+| ------------- | ------------------- | ----------------------- |
+| `pbr`         | Realistic surfaces  | Metallic, roughness, AO |
+| `standard`    | Matte surfaces      | Diffuse + specular      |
+| `unlit`       | No lighting         | Base color only         |
+| `transparent` | Glass, translucency | Transmission, IOR       |
+| `custom`      | Advanced rendering  | Custom shader code      |
 
 ### Texture Channels
 
@@ -89,27 +91,27 @@ const skin = MATERIAL_PRESETS.skin();
 
 ```typescript
 // Chrome/Metal
-MATERIAL_PRESETS.chrome()
+MATERIAL_PRESETS.chrome();
 // { type: 'pbr', pbr: { metallic: 1.0, roughness: 0.1, ... } }
 
 // Plastic
-MATERIAL_PRESETS.plastic()
+MATERIAL_PRESETS.plastic();
 // { type: 'pbr', pbr: { metallic: 0, roughness: 0.8, ... } }
 
 // Wood
-MATERIAL_PRESETS.wood()
+MATERIAL_PRESETS.wood();
 // { type: 'pbr', pbr: { roughness: 0.4, baseColor: brown, ... } }
 
 // Glass
-MATERIAL_PRESETS.glass()
+MATERIAL_PRESETS.glass();
 // { type: 'transparent', pbr: { transmission: 0.9, ior: 1.5 } }
 
 // Emissive (Glowing)
-MATERIAL_PRESETS.emissive()
+MATERIAL_PRESETS.emissive();
 // { type: 'pbr', pbr: { emission: { intensity: 2.0 }, ... } }
 
 // Skin
-MATERIAL_PRESETS.skin()
+MATERIAL_PRESETS.skin();
 // { type: 'pbr', pbr: { roughness: 0.5, ambientOcclusion: 0.8 } }
 ```
 
@@ -118,9 +120,11 @@ MATERIAL_PRESETS.skin()
 ## LightingTrait - Dynamic Lighting & Global Illumination
 
 ### Purpose
+
 LightingTrait manages dynamic lighting with support for multiple light types, shadows, and global illumination. Enables realistic illumination without pre-baked lightmaps.
 
 ### Key Features
+
 - **Light Types**: Directional, point, spot, area lights with individual control
 - **Shadow System**: Hard/soft/raytraced shadows with cascading and bias
 - **Global Illumination**: Sky-based ambient with screen-space AO
@@ -147,39 +151,39 @@ const lighting = new LightingTrait({
 
 // Add sun light
 const sunId = lighting.createDirectionalLight(
-  { x: 0.5, y: 1, z: 0.5 },           // direction
-  { r: 1, g: 0.95, b: 0.8 },          // color (warm)
-  1.2,                                   // intensity
-  true                                   // castShadows
+  { x: 0.5, y: 1, z: 0.5 }, // direction
+  { r: 1, g: 0.95, b: 0.8 }, // color (warm)
+  1.2, // intensity
+  true // castShadows
 );
 
 // Add point lights
 const fillId = lighting.createPointLight(
-  { x: -5, y: 3, z: 0 },              // position
-  { r: 1, g: 1, b: 1 },               // color (neutral)
-  0.6,                                 // intensity
-  20,                                  // range
-  false                                // castShadows
+  { x: -5, y: 3, z: 0 }, // position
+  { r: 1, g: 1, b: 1 }, // color (neutral)
+  0.6, // intensity
+  20, // range
+  false // castShadows
 );
 
 // Add spot light (for accent)
 const spotId = lighting.createSpotLight(
-  { x: 0, y: 5, z: -10 },             // position
-  { x: 0, y: -1, z: 0 },              // direction
-  { r: 1, g: 1, b: 1 },               // color
-  0.8,                                 // intensity
-  30,                                  // range
-  45,                                  // spotAngle (degrees)
-  false                                // castShadows
+  { x: 0, y: 5, z: -10 }, // position
+  { x: 0, y: -1, z: 0 }, // direction
+  { r: 1, g: 1, b: 1 }, // color
+  0.8, // intensity
+  30, // range
+  45, // spotAngle (degrees)
+  false // castShadows
 );
 
 // Add area light (soft fill)
 const areaId = lighting.createAreaLight(
-  { x: 0, y: 5, z: 0 },               // position
-  { r: 1, g: 1, b: 1 },               // color
-  0.5,                                 // intensity
-  4,                                   // width
-  4                                    // height
+  { x: 0, y: 5, z: 0 }, // position
+  { r: 1, g: 1, b: 1 }, // color
+  0.5, // intensity
+  4, // width
+  4 // height
 );
 
 // Update light properties
@@ -200,13 +204,13 @@ const info = lighting.getSceneInfo();
 
 ### Light Types
 
-| Type | Position | Direction | Shadows | Use Case |
-|------|----------|-----------|---------|----------|
-| directional | No | Yes | Yes | Sun, moon, distant light |
-| point | Yes | No | Optional | Lamps, fire, explosions |
-| spot | Yes | Yes | Optional | Flashlights, stage lights |
-| area | Yes | No | No | Soft fill, window light |
-| probe | No | No | No | Light probe for GI |
+| Type        | Position | Direction | Shadows  | Use Case                  |
+| ----------- | -------- | --------- | -------- | ------------------------- |
+| directional | No       | Yes       | Yes      | Sun, moon, distant light  |
+| point       | Yes      | No        | Optional | Lamps, fire, explosions   |
+| spot        | Yes      | Yes       | Optional | Flashlights, stage lights |
+| area        | Yes      | No        | No       | Soft fill, window light   |
+| probe       | No       | No        | No       | Light probe for GI        |
 
 ### Shadow Configuration
 
@@ -228,19 +232,19 @@ const info = lighting.getSceneInfo();
 
 ```typescript
 // Studio - Neutral, balanced
-LIGHTING_PRESETS.studio()
+LIGHTING_PRESETS.studio();
 
 // Outdoor - Bright natural light
-LIGHTING_PRESETS.outdoor()
+LIGHTING_PRESETS.outdoor();
 
 // Interior - Dim ambient
-LIGHTING_PRESETS.interior()
+LIGHTING_PRESETS.interior();
 
 // Night - Very dark with minimal ambient
-LIGHTING_PRESETS.night()
+LIGHTING_PRESETS.night();
 
 // Sunset - Golden hour warm tones
-LIGHTING_PRESETS.sunset()
+LIGHTING_PRESETS.sunset();
 ```
 
 ### Global Illumination Configuration
@@ -249,15 +253,15 @@ LIGHTING_PRESETS.sunset()
 const lighting = new LightingTrait({
   enabled: true,
   intensity: 1.0,
-  skyColor: { r: 0.7, g: 0.85, b: 1.0 },     // Sky ambient
+  skyColor: { r: 0.7, g: 0.85, b: 1.0 }, // Sky ambient
   skyIntensity: 1.0,
-  groundColor: { r: 0.4, g: 0.4, b: 0.35 },  // Ground ambient
+  groundColor: { r: 0.4, g: 0.4, b: 0.35 }, // Ground ambient
   groundIntensity: 0.6,
-  probes: true,                               // Use light probes
-  indirectDiffuse: 1.0,                       // Indirect diffuse multiplier
-  indirectSpecular: 0.5,                      // Indirect specular multiplier
-  aoIntensity: 1.0,                           // AO strength
-  screenSpaceAO: true,                        // Enable screen-space AO
+  probes: true, // Use light probes
+  indirectDiffuse: 1.0, // Indirect diffuse multiplier
+  indirectSpecular: 0.5, // Indirect specular multiplier
+  aoIntensity: 1.0, // AO strength
+  screenSpaceAO: true, // Enable screen-space AO
 });
 ```
 
@@ -266,9 +270,11 @@ const lighting = new LightingTrait({
 ## RenderingTrait - GPU Optimization & Performance Tuning
 
 ### Purpose
+
 RenderingTrait provides GPU optimization directives including LOD (level of detail) management, culling strategies, batching hints, and quality presets for different hardware tiers.
 
 ### Key Features
+
 - **LOD System**: Automatic polygon reduction with texture downscaling
 - **Culling**: Frustum, occlusion, and hierarchical Z-buffer culling
 - **Batching**: Static/dynamic batching with GPU instancing
@@ -392,21 +398,21 @@ const levels = rendering.getLODLevels();
 
 ### Texture Compression Options
 
-| Format | Use Case | Quality | Compression |
-|--------|----------|---------|-------------|
-| none | Desktop (highest quality) | Excellent | 0x |
-| dxt | Desktop & mobile | Good | 6x |
-| astc | Mobile (best) | Good | 6-8x |
-| basis | Cross-platform | Fair | 8x+ |
+| Format | Use Case                  | Quality   | Compression |
+| ------ | ------------------------- | --------- | ----------- |
+| none   | Desktop (highest quality) | Excellent | 0x          |
+| dxt    | Desktop & mobile          | Good      | 6x          |
+| astc   | Mobile (best)             | Good      | 6-8x        |
+| basis  | Cross-platform            | Fair      | 8x+         |
 
 ### Culling Strategies
 
-| Mode | Description | Performance | Use |
-|------|-------------|-------------|-----|
-| frustum | View frustum culling | 10-20% faster | Always enabled |
-| occlusion | Objects hidden by other objects | 20-30% faster | Outdoor/dense scenes |
-| hierarchical-z | GPU-based Z culling | 15-25% faster | VR/AR |
-| none | No culling | Baseline | Reference only |
+| Mode           | Description                     | Performance   | Use                  |
+| -------------- | ------------------------------- | ------------- | -------------------- |
+| frustum        | View frustum culling            | 10-20% faster | Always enabled       |
+| occlusion      | Objects hidden by other objects | 20-30% faster | Outdoor/dense scenes |
+| hierarchical-z | GPU-based Z culling             | 15-25% faster | VR/AR                |
+| none           | No culling                      | Baseline      | Reference only       |
 
 ---
 
@@ -476,16 +482,19 @@ class OutdoorScene {
 ## Performance Considerations
 
 ### MaterialTrait
+
 - **Texture Memory**: 2048px = 16MB RGBA, compress with BASIS for 2-3x reduction
 - **Shader Complexity**: Custom shaders add 5-10% GPU overhead per layer
 - **Instancing**: Reduces draw calls by 10-100x for identical materials
 
 ### LightingTrait
+
 - **Per-Light Cost**: ~1ms GPU for shadow-casting light (1024px map)
 - **Maximum Realistic Lights**: 8-16 with shadows, 32-64 without
 - **Screen-Space AO**: ~2-3% GPU overhead but improves visual quality
 
 ### RenderingTrait
+
 - **LOD Reduction**: 3-level LOD typically saves 40-50% GPU at distance
 - **Occlusion Culling**: 20-30% reduction in draw calls for dense scenes
 - **GPU Instancing**: 10-100x more geometry with same batch cost
@@ -503,6 +512,7 @@ class OutdoorScene {
 ## Testing
 
 All traits include comprehensive test suites:
+
 - **MaterialTrait**: 31 tests covering PBR, textures, shaders, optimization
 - **LightingTrait**: 33 tests covering light management, GI, performance analysis
 - **RenderingTrait**: 35 tests covering LOD, culling, presets, memory estimation
@@ -520,5 +530,5 @@ All traits include comprehensive test suites:
 
 ---
 
-*Created: Phase 2 Release (v2.0.0)*
-*Last Updated: 2024*
+_Created: Phase 2 Release (v2.0.0)_
+_Last Updated: 2024_

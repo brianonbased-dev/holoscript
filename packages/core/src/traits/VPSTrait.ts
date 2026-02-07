@@ -14,13 +14,20 @@ import type { TraitHandler } from './TraitTypes';
 // =============================================================================
 
 type VPSProvider = 'arcore' | 'arkit' | 'niantic' | '6dai' | 'custom';
-type LocalizationState = 'idle' | 'checking_coverage' | 'localizing' | 'localized' | 'tracking' | 'limited' | 'unavailable';
+type LocalizationState =
+  | 'idle'
+  | 'checking_coverage'
+  | 'localizing'
+  | 'localized'
+  | 'tracking'
+  | 'limited'
+  | 'unavailable';
 
 interface VPSState {
   state: LocalizationState;
   isLocalized: boolean;
-  confidence: number;  // 0-1
-  accuracy: number;  // meters
+  confidence: number; // 0-1
+  accuracy: number; // meters
   lastLocalizationTime: number;
   continuousTrackingActive: boolean;
   locationId: string | null;
@@ -34,12 +41,12 @@ interface VPSState {
 interface VPSConfig {
   provider: VPSProvider;
   coverage_check: boolean;
-  localization_timeout: number;  // ms
+  localization_timeout: number; // ms
   continuous_tracking: boolean;
-  quality_threshold: number;  // 0-1
+  quality_threshold: number; // 0-1
   auto_localize: boolean;
   max_attempts: number;
-  retry_interval: number;  // ms
+  retry_interval: number; // ms
 }
 
 // =============================================================================
@@ -76,13 +83,13 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
       localizationAttempts: 0,
     };
     (node as any).__vpsState = state;
-    
+
     // Initialize VPS provider
     context.emit?.('vps_init', {
       node,
       provider: config.provider,
     });
-    
+
     if (config.coverage_check) {
       state.state = 'checking_coverage';
       context.emit?.('vps_check_coverage', { node });
@@ -104,10 +111,10 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
     delete (node as any).__vpsState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, _config, _context, _delta) {
     const state = (node as any).__vpsState as VPSState;
     if (!state) return;
-    
+
     // Apply VPS pose to node
     if (state.state === 'tracking' || state.state === 'localized') {
       if ((node as any).position) {
@@ -129,10 +136,10 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__vpsState as VPSState;
     if (!state) return;
-    
+
     if (event.type === 'vps_coverage_result') {
       const hasCoverage = event.hasCoverage as boolean;
-      
+
       if (hasCoverage) {
         if (config.auto_localize) {
           state.state = 'localizing';
@@ -143,7 +150,7 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
         } else {
           state.state = 'idle';
         }
-        
+
         context.emit?.('on_vps_coverage_available', { node });
       } else {
         state.state = 'unavailable';
@@ -157,19 +164,19 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
       state.confidence = event.confidence as number;
       state.accuracy = event.accuracy as number;
       state.lastLocalizationTime = Date.now();
-      state.locationId = event.locationId as string || null;
+      state.locationId = (event.locationId as string) || null;
       state.pose = event.pose as typeof state.pose;
-      
+
       if (state.confidence >= config.quality_threshold) {
         state.state = 'localized';
-        
+
         if (config.continuous_tracking) {
           state.continuousTrackingActive = true;
           state.state = 'tracking';
-          
+
           context.emit?.('vps_start_tracking', { node });
         }
-        
+
         context.emit?.('on_vps_localized', {
           node,
           confidence: state.confidence,
@@ -178,7 +185,7 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
         });
       } else {
         state.state = 'limited';
-        
+
         context.emit?.('on_vps_limited', {
           node,
           confidence: state.confidence,
@@ -187,7 +194,7 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
       }
     } else if (event.type === 'vps_localization_failed') {
       state.localizationAttempts++;
-      
+
       if (state.localizationAttempts < config.max_attempts) {
         // Retry after interval
         setTimeout(() => {
@@ -200,7 +207,7 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
         }, config.retry_interval);
       } else {
         state.state = 'unavailable';
-        
+
         context.emit?.('on_vps_failed', {
           node,
           attempts: state.localizationAttempts,
@@ -209,9 +216,9 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
       }
     } else if (event.type === 'vps_pose_update') {
       state.pose = event.pose as typeof state.pose;
-      state.confidence = event.confidence as number || state.confidence;
-      state.accuracy = event.accuracy as number || state.accuracy;
-      
+      state.confidence = (event.confidence as number) || state.confidence;
+      state.accuracy = (event.accuracy as number) || state.accuracy;
+
       if (state.confidence < config.quality_threshold && state.state === 'tracking') {
         state.state = 'limited';
         context.emit?.('on_vps_tracking_degraded', {
@@ -228,7 +235,7 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
     } else if (event.type === 'vps_localize') {
       state.state = 'localizing';
       state.localizationAttempts = 0;
-      
+
       context.emit?.('vps_localize', {
         node,
         timeout: config.localization_timeout,
@@ -236,7 +243,7 @@ export const vpsHandler: TraitHandler<VPSConfig> = {
     } else if (event.type === 'vps_stop') {
       state.continuousTrackingActive = false;
       state.state = 'idle';
-      
+
       context.emit?.('vps_stop_tracking', { node });
     } else if (event.type === 'vps_query') {
       context.emit?.('vps_info', {

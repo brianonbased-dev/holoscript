@@ -131,7 +131,8 @@ export interface RuntimeProfile {
  */
 export const HEADLESS_PROFILE: RuntimeProfile = {
   name: 'headless',
-  description: 'Server-side execution without rendering. Ideal for IoT, edge computing, and testing.',
+  description:
+    'Server-side execution without rendering. Ideal for IoT, edge computing, and testing.',
   rendering: {
     enabled: false,
     renderer: 'none',

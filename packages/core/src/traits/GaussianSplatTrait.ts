@@ -37,7 +37,7 @@ interface GaussianSplatConfig {
   sort_mode: SortMode;
   streaming: boolean;
   compression: boolean;
-  sh_degree: number;  // 0-3 spherical harmonics degree
+  sh_degree: number; // 0-3 spherical harmonics degree
   cull_invisible: boolean;
   alpha_threshold: number;
   scale_modifier: number;
@@ -77,7 +77,7 @@ export const gaussianSplatHandler: TraitHandler<GaussianSplatConfig> = {
       needsSort: false,
     };
     (node as any).__gaussianSplatState = state;
-    
+
     if (config.source) {
       loadSplatScene(node, state, config, context);
     }
@@ -91,10 +91,10 @@ export const gaussianSplatHandler: TraitHandler<GaussianSplatConfig> = {
     delete (node as any).__gaussianSplatState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__gaussianSplatState as GaussianSplatState;
     if (!state || !state.isLoaded) return;
-    
+
     // Check if camera moved and needs resort
     const cameraPos = context.camera?.position;
     if (cameraPos && state.lastCameraPosition) {
@@ -102,7 +102,7 @@ export const gaussianSplatHandler: TraitHandler<GaussianSplatConfig> = {
       const dy = cameraPos.y - state.lastCameraPosition.y;
       const dz = cameraPos.z - state.lastCameraPosition.z;
       const distMoved = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      
+
       if (distMoved > 0.1) {
         state.needsSort = true;
         state.lastCameraPosition = { ...cameraPos };
@@ -110,7 +110,7 @@ export const gaussianSplatHandler: TraitHandler<GaussianSplatConfig> = {
     } else if (cameraPos) {
       state.lastCameraPosition = { ...cameraPos };
     }
-    
+
     // Request sort if needed
     if (state.needsSort && config.sort_mode !== 'radix') {
       context.emit?.('splat_sort', {
@@ -125,7 +125,7 @@ export const gaussianSplatHandler: TraitHandler<GaussianSplatConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__gaussianSplatState as GaussianSplatState;
     if (!state) return;
-    
+
     if (event.type === 'splat_load_complete') {
       state.isLoading = false;
       state.isLoaded = true;
@@ -134,7 +134,7 @@ export const gaussianSplatHandler: TraitHandler<GaussianSplatConfig> = {
       state.boundingBox = event.boundingBox as typeof state.boundingBox;
       state.renderHandle = event.renderHandle;
       state.needsSort = true;
-      
+
       context.emit?.('on_splat_loaded', {
         node,
         splatCount: state.splatCount,
@@ -163,7 +163,7 @@ export const gaussianSplatHandler: TraitHandler<GaussianSplatConfig> = {
         }
         state.isLoaded = false;
         state.splatCount = 0;
-        
+
         // Load new
         loadSplatScene(node, state, { ...config, source: newSource }, context);
       }
@@ -193,7 +193,7 @@ function loadSplatScene(
   context: { emit?: (event: string, data: unknown) => void }
 ): void {
   state.isLoading = true;
-  
+
   context.emit?.('splat_load', {
     node,
     source: config.source,

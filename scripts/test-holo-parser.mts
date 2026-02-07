@@ -3,7 +3,11 @@
  * Run with: npx tsx scripts/test-holo-parser.mts
  */
 
-import { HoloCompositionParser, parseHolo, parseHoloStrict } from '../packages/core/src/parser/HoloCompositionParser.js';
+import {
+  HoloCompositionParser,
+  parseHolo,
+  parseHoloStrict,
+} from '../packages/core/src/parser/HoloCompositionParser.js';
 
 let passed = 0;
 let failed = 0;

@@ -137,12 +137,12 @@ export class VRChatCompiler {
     this.emit('{');
     this.indentLevel++;
     this.emit('Debug.Log("[HoloWorld] World initialized");');
-    
+
     // Environment setup
     if (composition.environment) {
       this.compileEnvironment(composition.environment);
     }
-    
+
     this.indentLevel--;
     this.emit('}');
     this.emit('');
@@ -210,15 +210,15 @@ export class VRChatCompiler {
 
   private generateUdonScripts(composition: HoloComposition): void {
     const objects = composition.objects || [];
-    
+
     for (const obj of objects) {
       if (!obj.traits) continue;
 
-      const hasGrabbable = obj.traits.some(t => t.name === 'grabbable');
-      const hasPointable = obj.traits.some(t => t.name === 'pointable' || t.name === 'clickable');
-      const hasNetworked = obj.traits.some(t => t.name === 'networked' || t.name === 'synced');
-      const hasPortal = obj.traits.some(t => t.name === 'portal');
-      const hasMirror = obj.traits.some(t => t.name === 'mirror');
+      const hasGrabbable = obj.traits.some((t) => t.name === 'grabbable');
+      const hasPointable = obj.traits.some((t) => t.name === 'pointable' || t.name === 'clickable');
+      const hasNetworked = obj.traits.some((t) => t.name === 'networked' || t.name === 'synced');
+      const hasPortal = obj.traits.some((t) => t.name === 'portal');
+      const hasMirror = obj.traits.some((t) => t.name === 'mirror');
 
       if (hasGrabbable || hasPointable || hasNetworked || hasPortal || hasMirror) {
         const script = this.generateObjectUdonScript(obj, {
@@ -303,13 +303,13 @@ export class VRChatCompiler {
       lines.push('    public override void Interact()');
       lines.push('    {');
       lines.push('        Debug.Log($"[{gameObject.name}] Interacted");');
-      
+
       // Interaction logic will be generated based on traits
       lines.push('        OnInteractHandler();');
-      
+
       lines.push('    }');
       lines.push('');
-      
+
       lines.push('    private void OnInteractHandler()');
       lines.push('    {');
       lines.push('        // Custom interaction logic based on traits');
@@ -319,7 +319,7 @@ export class VRChatCompiler {
 
     // Portal
     if (traits.hasPortal) {
-      const portalTrait = obj.traits?.find(t => t.name === 'portal');
+      const portalTrait = obj.traits?.find((t) => t.name === 'portal');
       const destination = portalTrait?.config?.destination || 'wrld_unknown';
       lines.push('    [Header("Portal Settings")]');
       lines.push(`    public string destinationWorld = "${destination}";`);
@@ -358,7 +358,7 @@ export class VRChatCompiler {
     lines.push('');
     lines.push('World Root');
     lines.push('â”œâ”€â”€ Environment');
-    
+
     if (composition.lights) {
       lines.push('â”œâ”€â”€ Lighting');
       for (const light of composition.lights) {
@@ -369,7 +369,7 @@ export class VRChatCompiler {
     if (composition.objects) {
       lines.push('â”œâ”€â”€ Objects');
       for (const obj of composition.objects) {
-        const traits = obj.traits?.map(t => `@${t.name}`).join(' ') || '';
+        const traits = obj.traits?.map((t) => `@${t.name}`).join(' ') || '';
         lines.push(`â”‚   â””â”€â”€ ${obj.name} ${traits}`);
       }
     }
@@ -425,7 +425,7 @@ export class VRChatCompiler {
     lines.push('  - position: [0, 0, 0]');
     lines.push('    rotation: [0, 0, 0]');
     lines.push('');
-    
+
     // Reference cameras if present
     if (composition.camera) {
       lines.push('ReferenceCamera:');
@@ -454,14 +454,14 @@ export class VRChatCompiler {
   private compileZoneTriggers(zone: any): void {
     const varName = this.sanitizeName(zone.name);
     this.emit(`// Zone: ${zone.name}`);
-    this.emit(`public void On${varName}Enter(VRCPlayerApi player)`)
+    this.emit(`public void On${varName}Enter(VRCPlayerApi player)`);
     this.emit('{');
     this.indentLevel++;
     this.emit(`Debug.Log($"Player {player.displayName} entered ${zone.name}");`);
     this.indentLevel--;
     this.emit('}');
     this.emit('');
-    this.emit(`public void On${varName}Exit(VRCPlayerApi player)`)
+    this.emit(`public void On${varName}Exit(VRCPlayerApi player)`);
     this.emit('{');
     this.indentLevel++;
     this.emit(`Debug.Log($"Player {player.displayName} exited ${zone.name}");`);
@@ -473,7 +473,7 @@ export class VRChatCompiler {
   private compileTimeline(timeline: HoloTimeline): void {
     const name = this.sanitizeName(timeline.name);
     this.emit(`// Timeline: ${timeline.name}`);
-    this.emit(`public void Play${name}()`)
+    this.emit(`public void Play${name}()`);
     this.emit('{');
     this.indentLevel++;
     this.emit(`SendCustomEventDelayedSeconds("${name}Step0", 0f);`);
@@ -483,9 +483,8 @@ export class VRChatCompiler {
 
     for (let i = 0; i < timeline.entries.length; i++) {
       const entry = timeline.entries[i];
-      const nextDelay = i < timeline.entries.length - 1
-        ? timeline.entries[i + 1].time - entry.time
-        : 0;
+      const nextDelay =
+        i < timeline.entries.length - 1 ? timeline.entries[i + 1].time - entry.time : 0;
 
       this.emit(`public void ${name}Step${i}()`);
       this.emit('{');
@@ -514,10 +513,10 @@ export class VRChatCompiler {
   private compileTransition(transition: HoloTransition): void {
     const name = this.sanitizeName(transition.name);
     this.emit(`// Transition: ${transition.name}`);
-    this.emit(`public void ${name}Transition()`)
+    this.emit(`public void ${name}Transition()`);
     this.emit('{');
     this.indentLevel++;
-    const dest = transition.properties.find(p => p.key === 'destination' || p.key === 'to');
+    const dest = transition.properties.find((p) => p.key === 'destination' || p.key === 'to');
     if (dest) {
       this.emit(`// Transition to: ${dest.value}`);
     }
@@ -552,8 +551,8 @@ export class VRChatCompiler {
     if (typeof value === 'number') return Number.isInteger(value) ? 'int' : 'float';
     if (typeof value === 'string') return 'string';
     if (Array.isArray(value)) {
-      if (value.length === 3 && value.every(v => typeof v === 'number')) return 'Vector3';
-      if (value.length === 4 && value.every(v => typeof v === 'number')) return 'Quaternion';
+      if (value.length === 3 && value.every((v) => typeof v === 'number')) return 'Vector3';
+      if (value.length === 4 && value.every((v) => typeof v === 'number')) return 'Quaternion';
       return 'object[]';
     }
     return 'object';
@@ -565,10 +564,10 @@ export class VRChatCompiler {
     if (typeof value === 'number') return Number.isInteger(value) ? `${value}` : `${value}f`;
     if (typeof value === 'string') return `"${value}"`;
     if (Array.isArray(value)) {
-      if (value.length === 3 && value.every(v => typeof v === 'number')) {
+      if (value.length === 3 && value.every((v) => typeof v === 'number')) {
         return `new Vector3(${value[0]}f, ${value[1]}f, ${value[2]}f)`;
       }
-      if (value.length === 4 && value.every(v => typeof v === 'number')) {
+      if (value.length === 4 && value.every((v) => typeof v === 'number')) {
         return `new Quaternion(${value[0]}f, ${value[1]}f, ${value[2]}f, ${value[3]}f)`;
       }
     }
@@ -587,9 +586,14 @@ export class VRChatCompiler {
         }
       }
       const colors: Record<string, string> = {
-        red: 'Color.red', green: 'Color.green', blue: 'Color.blue',
-        white: 'Color.white', black: 'Color.black', yellow: 'Color.yellow',
-        cyan: 'Color.cyan', magenta: 'Color.magenta',
+        red: 'Color.red',
+        green: 'Color.green',
+        blue: 'Color.blue',
+        white: 'Color.white',
+        black: 'Color.black',
+        yellow: 'Color.yellow',
+        cyan: 'Color.cyan',
+        magenta: 'Color.magenta',
       };
       return colors[value.toLowerCase()] || 'Color.white';
     }

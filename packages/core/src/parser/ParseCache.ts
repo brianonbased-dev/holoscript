@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 
 /**
  * CachedNode
- * 
+ *
  * Stores the AST node and the content hash for a specific chunk.
  */
 export interface CachedNode {
@@ -15,7 +15,7 @@ export interface CachedNode {
 
 /**
  * ParseCache
- * 
+ *
  * In-memory storage for AST nodes to enable incremental parsing re-use.
  */
 export class ParseCache {
@@ -49,12 +49,12 @@ export class ParseCache {
     if (this.cache.size >= this.maxEntries) {
       this.evictOldest();
     }
-    
+
     this.cache.set(id, {
       id,
       hash,
       node,
-      lastUsed: Date.now()
+      lastUsed: Date.now(),
     });
   }
 

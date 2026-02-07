@@ -4,7 +4,7 @@
  * Tests AI adapter exports and mock functionality (no real API calls)
  */
 
-import { 
+import {
   OpenAIAdapter,
   AnthropicAdapter,
   registerAIAdapter,
@@ -12,7 +12,7 @@ import {
   getDefaultAIAdapter,
   setDefaultAIAdapter,
   listAIAdapters,
-  unregisterAIAdapter
+  unregisterAIAdapter,
 } from '../packages/core/dist/index.js';
 
 const BOLD = '\x1b[1m';

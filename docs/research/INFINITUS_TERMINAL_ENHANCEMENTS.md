@@ -37,29 +37,29 @@ packages/core/src/lib/
 
 ### P0: Must Have
 
-| Feature | Description | Effort |
-|---------|-------------|--------|
-| **Tab Completion** | Keywords, traits, properties, files | 3 days |
-| **Syntax Highlighting** | Real-time colorization as you type | 2 days |
-| **`.ai` Command** | Generate HoloScript from natural language | 3 days |
-| **Streaming Output** | Real-time LLM token display | 2 days |
+| Feature                 | Description                               | Effort |
+| ----------------------- | ----------------------------------------- | ------ |
+| **Tab Completion**      | Keywords, traits, properties, files       | 3 days |
+| **Syntax Highlighting** | Real-time colorization as you type        | 2 days |
+| **`.ai` Command**       | Generate HoloScript from natural language | 3 days |
+| **Streaming Output**    | Real-time LLM token display               | 2 days |
 
 ### P1: Should Have
 
-| Feature | Description | Effort |
-|---------|-------------|--------|
-| **Rich TUI (Ink)** | React-based terminal interface | 1 week |
-| **Multi-pane Layout** | Code + Preview + Output split | 1 week |
-| **Phase Indicator** | Show current Infinity Protocol phase | 2 days |
-| **`.explain`/`.fix`** | AI-assisted debugging | 3 days |
+| Feature               | Description                          | Effort |
+| --------------------- | ------------------------------------ | ------ |
+| **Rich TUI (Ink)**    | React-based terminal interface       | 1 week |
+| **Multi-pane Layout** | Code + Preview + Output split        | 1 week |
+| **Phase Indicator**   | Show current Infinity Protocol phase | 2 days |
+| **`.explain`/`.fix`** | AI-assisted debugging                | 3 days |
 
 ### P2: Nice to Have
 
-| Feature | Description | Effort |
-|---------|-------------|--------|
-| **Plugin System** | Extensible command hooks | 1 week |
-| **VR Preview** | Launch Three.js preview from terminal | 1 week |
-| **Git Integration** | Auto-commit generated code | 3 days |
+| Feature             | Description                           | Effort |
+| ------------------- | ------------------------------------- | ------ |
+| **Plugin System**   | Extensible command hooks              | 1 week |
+| **VR Preview**      | Launch Three.js preview from terminal | 1 week |
+| **Git Integration** | Auto-commit generated code            | 3 days |
 
 ---
 
@@ -71,24 +71,41 @@ packages/core/src/lib/
 // packages/cli/src/repl.ts - Update createInterface
 const COMPLETIONS = [
   // Keywords
-  'orb', 'composition', 'template', 'state', 'connect', 'function',
+  'orb',
+  'composition',
+  'template',
+  'state',
+  'connect',
+  'function',
   // Traits (top 20)
-  '@grabbable', '@physics', '@collidable', '@networked', '@sensor',
-  '@digital_twin', '@behavior_tree', '@glowing', '@animated', '@spatial_audio',
+  '@grabbable',
+  '@physics',
+  '@collidable',
+  '@networked',
+  '@sensor',
+  '@digital_twin',
+  '@behavior_tree',
+  '@glowing',
+  '@animated',
+  '@spatial_audio',
   // Properties
-  'position:', 'rotation:', 'scale:', 'color:', 'geometry:',
+  'position:',
+  'rotation:',
+  'scale:',
+  'color:',
+  'geometry:',
 ];
 
 const completer = (line: string) => {
   const lastWord = line.split(/\s+/).pop() || '';
-  const hits = COMPLETIONS.filter(c => c.startsWith(lastWord));
+  const hits = COMPLETIONS.filter((c) => c.startsWith(lastWord));
   return [hits.length ? hits : COMPLETIONS, lastWord];
 };
 
 this.rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  completer,  // Add this
+  completer, // Add this
   prompt: this.getPrompt(),
 });
 ```
@@ -110,12 +127,12 @@ const PATTERNS = {
 
 export function highlight(code: string): string {
   return code
-    .replace(PATTERNS.comment, m => chalk.dim(m))
-    .replace(PATTERNS.keyword, m => chalk.magenta(m))
-    .replace(PATTERNS.trait, m => chalk.cyan.bold(m))
-    .replace(PATTERNS.string, m => chalk.green(m))
-    .replace(PATTERNS.number, m => chalk.yellow(m))
-    .replace(PATTERNS.property, m => chalk.blue(m));
+    .replace(PATTERNS.comment, (m) => chalk.dim(m))
+    .replace(PATTERNS.keyword, (m) => chalk.magenta(m))
+    .replace(PATTERNS.trait, (m) => chalk.cyan.bold(m))
+    .replace(PATTERNS.string, (m) => chalk.green(m))
+    .replace(PATTERNS.number, (m) => chalk.yellow(m))
+    .replace(PATTERNS.property, (m) => chalk.blue(m));
 }
 ```
 
@@ -153,6 +170,7 @@ case '.ai': {
 ## Target User Experience
 
 ### Before (Current)
+
 ```
 $ holoscript repl
 hs> orb myObject { color: "#ff0000" }
@@ -161,6 +179,7 @@ hs>
 ```
 
 ### After (Enhanced)
+
 ```
 $ holoscript
 
@@ -215,29 +234,29 @@ hs>
 
 The terminal should reflect the 7-phase workflow:
 
-| Phase | Terminal Feature |
-|-------|-----------------|
-| **INTAKE** | `.ai` - gather requirements from user |
-| **REFLECT** | Parse and analyze code, show AST |
-| **EXECUTE** | Run code, show results |
-| **COMPRESS** | `.∞` - show compression stats |
-| **GROW** | Suggest related traits/patterns |
-| **RE-INTAKE** | Load and review previous code |
-| **EVOLVE** | `.optimize` - improve code quality |
+| Phase         | Terminal Feature                      |
+| ------------- | ------------------------------------- |
+| **INTAKE**    | `.ai` - gather requirements from user |
+| **REFLECT**   | Parse and analyze code, show AST      |
+| **EXECUTE**   | Run code, show results                |
+| **COMPRESS**  | `.∞` - show compression stats         |
+| **GROW**      | Suggest related traits/patterns       |
+| **RE-INTAKE** | Load and review previous code         |
+| **EVOLVE**    | `.optimize` - improve code quality    |
 
 ---
 
 ## Competitive Positioning
 
-| Feature | Claude Code | Aider | Gemini CLI | **Infinitus** |
-|---------|-------------|-------|------------|---------------|
-| Autocomplete | ✅ | ✅ | ✅ | 🔜 |
-| Syntax Highlighting | ✅ | ✅ | ✅ | 🔜 |
-| AI Generation | ✅ | ✅ | ✅ | 🔜 |
-| Streaming | ✅ | ✅ | ✅ | 🔜 |
-| **Domain-Specific (VR/IoT)** | ❌ | ❌ | ❌ | ✅ |
-| **165+ Built-in Traits** | ❌ | ❌ | ❌ | ✅ |
-| **Compression Protocol** | ❌ | ❌ | ❌ | ✅ |
+| Feature                      | Claude Code | Aider | Gemini CLI | **Infinitus** |
+| ---------------------------- | ----------- | ----- | ---------- | ------------- |
+| Autocomplete                 | ✅          | ✅    | ✅         | 🔜            |
+| Syntax Highlighting          | ✅          | ✅    | ✅         | 🔜            |
+| AI Generation                | ✅          | ✅    | ✅         | 🔜            |
+| Streaming                    | ✅          | ✅    | ✅         | 🔜            |
+| **Domain-Specific (VR/IoT)** | ❌          | ❌    | ❌         | ✅            |
+| **165+ Built-in Traits**     | ❌          | ❌    | ❌         | ✅            |
+| **Compression Protocol**     | ❌          | ❌    | ❌         | ✅            |
 
 **Unique advantage**: HoloScript-specific AI that understands VR, IoT, and digital twin domains with 165+ built-in traits.
 
@@ -251,4 +270,4 @@ The terminal should reflect the 7-phase workflow:
 
 ---
 
-*Research conducted via uAA2++ Protocol v3.0*
+_Research conducted via uAA2++ Protocol v3.0_

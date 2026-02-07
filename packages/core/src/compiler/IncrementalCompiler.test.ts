@@ -30,7 +30,11 @@ describe('IncrementalCompiler', () => {
       const ast: HoloComposition = {
         version: 1,
         objects: [
-          { name: 'myOrb', type: 'orb', properties: [{ type: 'ObjectProperty', key: 'radius', value: 1 }] },
+          {
+            name: 'myOrb',
+            type: 'orb',
+            properties: [{ type: 'ObjectProperty', key: 'radius', value: 1 }],
+          },
         ],
       };
 
@@ -50,9 +54,7 @@ describe('IncrementalCompiler', () => {
 
       const newAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'newOrb', type: 'orb', properties: [] },
-        ],
+        objects: [{ name: 'newOrb', type: 'orb', properties: [] }],
       };
 
       const result = compiler.diff(oldAST, newAST);
@@ -64,9 +66,7 @@ describe('IncrementalCompiler', () => {
     it('should detect removed objects', () => {
       const oldAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'oldOrb', type: 'orb', properties: [] },
-        ],
+        objects: [{ name: 'oldOrb', type: 'orb', properties: [] }],
       };
 
       const newAST: HoloComposition = {
@@ -84,14 +84,22 @@ describe('IncrementalCompiler', () => {
       const oldAST: HoloComposition = {
         version: 1,
         objects: [
-          { name: 'myOrb', type: 'orb', properties: [{ type: 'ObjectProperty', key: 'radius', value: 1 }] },
+          {
+            name: 'myOrb',
+            type: 'orb',
+            properties: [{ type: 'ObjectProperty', key: 'radius', value: 1 }],
+          },
         ],
       };
 
       const newAST: HoloComposition = {
         version: 1,
         objects: [
-          { name: 'myOrb', type: 'orb', properties: [{ type: 'ObjectProperty', key: 'radius', value: 2 }] },
+          {
+            name: 'myOrb',
+            type: 'orb',
+            properties: [{ type: 'ObjectProperty', key: 'radius', value: 2 }],
+          },
         ],
       };
 
@@ -104,51 +112,53 @@ describe('IncrementalCompiler', () => {
     it('should detect added properties', () => {
       const oldAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'myOrb', type: 'orb', properties: [] },
-        ],
+        objects: [{ name: 'myOrb', type: 'orb', properties: [] }],
       };
 
       const newAST: HoloComposition = {
         version: 1,
         objects: [
-          { name: 'myOrb', type: 'orb', properties: [{ type: 'ObjectProperty', key: 'color', value: 'red' }] },
+          {
+            name: 'myOrb',
+            type: 'orb',
+            properties: [{ type: 'ObjectProperty', key: 'color', value: 'red' }],
+          },
         ],
       };
 
       const result = compiler.diff(oldAST, newAST);
 
       expect(result.hasChanges).toBe(true);
-      expect(result.changes.some(c => c.type === 'added' && c.nodeName === 'color')).toBe(true);
+      expect(result.changes.some((c) => c.type === 'added' && c.nodeName === 'color')).toBe(true);
     });
 
     it('should detect removed properties', () => {
       const oldAST: HoloComposition = {
         version: 1,
         objects: [
-          { name: 'myOrb', type: 'orb', properties: [{ type: 'ObjectProperty', key: 'color', value: 'red' }] },
+          {
+            name: 'myOrb',
+            type: 'orb',
+            properties: [{ type: 'ObjectProperty', key: 'color', value: 'red' }],
+          },
         ],
       };
 
       const newAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'myOrb', type: 'orb', properties: [] },
-        ],
+        objects: [{ name: 'myOrb', type: 'orb', properties: [] }],
       };
 
       const result = compiler.diff(oldAST, newAST);
 
       expect(result.hasChanges).toBe(true);
-      expect(result.changes.some(c => c.type === 'removed' && c.nodeName === 'color')).toBe(true);
+      expect(result.changes.some((c) => c.type === 'removed' && c.nodeName === 'color')).toBe(true);
     });
 
     it('should handle null old AST (initial compilation)', () => {
       const newAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'firstOrb', type: 'orb', properties: [] },
-        ],
+        objects: [{ name: 'firstOrb', type: 'orb', properties: [] }],
       };
 
       const result = compiler.diff(null, newAST);
@@ -160,59 +170,67 @@ describe('IncrementalCompiler', () => {
     it('should detect trait additions', () => {
       const oldAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'myOrb', type: 'orb', properties: [], traits: [] },
-        ],
+        objects: [{ name: 'myOrb', type: 'orb', properties: [], traits: [] }],
       };
 
       const newAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'myOrb', type: 'orb', properties: [], traits: ['grabbable'] },
-        ],
+        objects: [{ name: 'myOrb', type: 'orb', properties: [], traits: ['grabbable'] }],
       };
 
       const result = compiler.diff(oldAST, newAST);
 
       expect(result.hasChanges).toBe(true);
-      expect(result.changes.some(c => c.nodeType === 'trait' && c.type === 'added')).toBe(true);
+      expect(result.changes.some((c) => c.nodeType === 'trait' && c.type === 'added')).toBe(true);
     });
 
     it('should detect trait removals', () => {
       const oldAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'myOrb', type: 'orb', properties: [], traits: ['grabbable'] },
-        ],
+        objects: [{ name: 'myOrb', type: 'orb', properties: [], traits: ['grabbable'] }],
       };
 
       const newAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'myOrb', type: 'orb', properties: [], traits: [] },
-        ],
+        objects: [{ name: 'myOrb', type: 'orb', properties: [], traits: [] }],
       };
 
       const result = compiler.diff(oldAST, newAST);
 
       expect(result.hasChanges).toBe(true);
-      expect(result.changes.some(c => c.nodeType === 'trait' && c.type === 'removed')).toBe(true);
+      expect(result.changes.some((c) => c.nodeType === 'trait' && c.type === 'removed')).toBe(true);
     });
 
     it('should track unchanged objects', () => {
       const ast: HoloComposition = {
         version: 1,
         objects: [
-          { name: 'unchangedOrb', type: 'orb', properties: [{ type: 'ObjectProperty', key: 'radius', value: 1 }] },
-          { name: 'changedOrb', type: 'orb', properties: [{ type: 'ObjectProperty', key: 'radius', value: 1 }] },
+          {
+            name: 'unchangedOrb',
+            type: 'orb',
+            properties: [{ type: 'ObjectProperty', key: 'radius', value: 1 }],
+          },
+          {
+            name: 'changedOrb',
+            type: 'orb',
+            properties: [{ type: 'ObjectProperty', key: 'radius', value: 1 }],
+          },
         ],
       };
 
       const newAST: HoloComposition = {
         version: 1,
         objects: [
-          { name: 'unchangedOrb', type: 'orb', properties: [{ type: 'ObjectProperty', key: 'radius', value: 1 }] },
-          { name: 'changedOrb', type: 'orb', properties: [{ type: 'ObjectProperty', key: 'radius', value: 2 }] },
+          {
+            name: 'unchangedOrb',
+            type: 'orb',
+            properties: [{ type: 'ObjectProperty', key: 'radius', value: 1 }],
+          },
+          {
+            name: 'changedOrb',
+            type: 'orb',
+            properties: [{ type: 'ObjectProperty', key: 'radius', value: 2 }],
+          },
         ],
       };
 
@@ -292,7 +310,10 @@ describe('IncrementalCompiler', () => {
       const restored = compiler.restoreState();
 
       expect(restored).not.toBeNull();
-      expect(restored?.objectStates.get('orb1')).toEqual({ position: { x: 1, y: 2, z: 3 }, color: 'red' });
+      expect(restored?.objectStates.get('orb1')).toEqual({
+        position: { x: 1, y: 2, z: 3 },
+        color: 'red',
+      });
       expect(restored?.objectStates.get('orb2')).toEqual({ visible: true });
     });
 
@@ -323,9 +344,7 @@ describe('IncrementalCompiler', () => {
     });
 
     it('should not mutate original state map', () => {
-      const originalStates = new Map<string, Record<string, unknown>>([
-        ['orb', { value: 1 }],
-      ]);
+      const originalStates = new Map<string, Record<string, unknown>>([['orb', { value: 1 }]]);
 
       compiler.saveState(originalStates);
 
@@ -401,9 +420,7 @@ describe('IncrementalCompiler', () => {
     it('should detect added child objects', () => {
       const oldAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'parent', type: 'orb', properties: [], children: [] },
-        ],
+        objects: [{ name: 'parent', type: 'orb', properties: [], children: [] }],
       };
 
       const newAST: HoloComposition = {
@@ -413,9 +430,7 @@ describe('IncrementalCompiler', () => {
             name: 'parent',
             type: 'orb',
             properties: [],
-            children: [
-              { name: 'child', type: 'orb', properties: [] },
-            ],
+            children: [{ name: 'child', type: 'orb', properties: [] }],
           },
         ],
       };
@@ -423,7 +438,7 @@ describe('IncrementalCompiler', () => {
       const result = compiler.diff(oldAST, newAST);
 
       expect(result.hasChanges).toBe(true);
-      expect(result.changes.some(c => c.nodeName === 'child' && c.type === 'added')).toBe(true);
+      expect(result.changes.some((c) => c.nodeName === 'child' && c.type === 'added')).toBe(true);
     });
 
     it('should detect removed child objects', () => {
@@ -434,24 +449,20 @@ describe('IncrementalCompiler', () => {
             name: 'parent',
             type: 'orb',
             properties: [],
-            children: [
-              { name: 'child', type: 'orb', properties: [] },
-            ],
+            children: [{ name: 'child', type: 'orb', properties: [] }],
           },
         ],
       };
 
       const newAST: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'parent', type: 'orb', properties: [], children: [] },
-        ],
+        objects: [{ name: 'parent', type: 'orb', properties: [], children: [] }],
       };
 
       const result = compiler.diff(oldAST, newAST);
 
       expect(result.hasChanges).toBe(true);
-      expect(result.changes.some(c => c.nodeName === 'child' && c.type === 'removed')).toBe(true);
+      expect(result.changes.some((c) => c.nodeName === 'child' && c.type === 'removed')).toBe(true);
     });
   });
 
@@ -474,9 +485,7 @@ describe('IncrementalCompiler', () => {
           {
             name: 'group1',
             position: { x: 0, y: 0, z: 0 },
-            objects: [
-              { name: 'groupedOrb', type: 'orb', properties: [] },
-            ],
+            objects: [{ name: 'groupedOrb', type: 'orb', properties: [] }],
           },
         ],
       };
@@ -504,9 +513,7 @@ describe('IncrementalCompiler', () => {
     it('should handle objects with no properties', () => {
       const ast: HoloComposition = {
         version: 1,
-        objects: [
-          { name: 'emptyOrb', type: 'orb' } as HoloObjectDecl,
-        ],
+        objects: [{ name: 'emptyOrb', type: 'orb' } as HoloObjectDecl],
       };
 
       // Should not throw

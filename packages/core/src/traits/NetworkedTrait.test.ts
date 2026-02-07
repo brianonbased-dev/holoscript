@@ -75,7 +75,7 @@ describe('NetworkedTrait', () => {
     it('should get full state', () => {
       trait.setProperty('position', [1, 2, 3]);
       trait.setProperty('health', 100);
-      
+
       const state = trait.getState();
       expect(state).toBeDefined();
       expect(typeof state).toBe('object');
@@ -103,7 +103,7 @@ describe('NetworkedTrait', () => {
           mode: 'hermite',
         },
       });
-      
+
       const interpConfig = custom.getInterpolationConfig();
       expect(interpConfig.enabled).toBe(true);
       expect(interpConfig.delay).toBe(200);
@@ -113,7 +113,7 @@ describe('NetworkedTrait', () => {
   describe('connection status', () => {
     it('should track connection status', () => {
       expect(trait.isConnected()).toBe(false);
-      
+
       trait.setConnected(true, 'peer-123');
       expect(trait.isConnected()).toBe(true);
     });
@@ -160,7 +160,7 @@ describe('NetworkedTrait', () => {
     it('should remove event listeners', () => {
       let count = 0;
       const handler = () => count++;
-      
+
       trait.on('propertyChanged', handler);
       trait.setProperty('a', 1);
       expect(count).toBe(1);

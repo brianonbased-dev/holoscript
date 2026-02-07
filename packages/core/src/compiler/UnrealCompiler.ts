@@ -18,15 +18,11 @@
 import type {
   HoloComposition,
   HoloObjectDecl,
-  HoloSpatialGroup,
   HoloLight,
   HoloEnvironment,
-  HoloCamera,
   HoloTimeline,
   HoloAudio,
-  HoloZone,
   HoloTransition,
-  HoloEffects,
   HoloValue,
 } from '../parser/HoloCompositionTypes';
 
@@ -104,7 +100,7 @@ export class UnrealCompiler {
     this.emitH('#include "Components/AudioComponent.h"');
     this.emitH('#include "Components/BoxComponent.h"');
     this.emitH('#include "Components/SphereComponent.h"');
-    if (composition.objects?.some(o => o.traits?.some(t => t.name === 'physics'))) {
+    if (composition.objects?.some((o) => o.traits?.some((t) => t.name === 'physics'))) {
       this.emitH('#include "PhysicsEngine/PhysicsConstraintComponent.h"');
     }
     if (this.options.useEnhancedInput) {
@@ -122,7 +118,9 @@ export class UnrealCompiler {
 
     // Class declaration
     this.emitH('UCLASS(Blueprintable, BlueprintType)');
-    this.emitH(`class ${this.options.moduleName.toUpperCase()}_API ${this.options.className} : public AActor`);
+    this.emitH(
+      `class ${this.options.moduleName.toUpperCase()}_API ${this.options.className} : public AActor`
+    );
     this.emitH('{');
     this.indentLevel++;
     this.emitH('GENERATED_BODY()');
@@ -180,13 +178,15 @@ export class UnrealCompiler {
     this.emitH('protected:');
     this.emitH('virtual void BeginPlay() override;');
     this.emitH('virtual void Tick(float DeltaTime) override;');
-    this.emitH('virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;');
+    this.emitH(
+      'virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;'
+    );
     this.emitH('');
 
     // Blueprint callable functions
     this.emitH('public:');
     this.emitH('// === Blueprint Callable Functions ===');
-    
+
     // Actions from logic
     if (composition.logic?.actions) {
       for (const action of composition.logic.actions) {
@@ -218,9 +218,13 @@ export class UnrealCompiler {
       for (const zone of composition.zones) {
         const name = this.sanitizeName(zone.name);
         this.emitH(`UFUNCTION()`);
-        this.emitH(`void On${name}BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);`);
+        this.emitH(
+          `void On${name}BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);`
+        );
         this.emitH(`UFUNCTION()`);
-        this.emitH(`void On${name}EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);`);
+        this.emitH(
+          `void On${name}EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);`
+        );
       }
     }
 
@@ -265,7 +269,9 @@ export class UnrealCompiler {
     this.emitS('bReplicates = true;');
     this.emitS('');
     this.emitS('// Root component');
-    this.emitS('RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));');
+    this.emitS(
+      'RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));'
+    );
     this.emitS('RootComponent = RootSceneComponent;');
     this.emitS('');
     this.emitS('SetupComponents();');
@@ -340,14 +346,14 @@ export class UnrealCompiler {
     }
     this.emitS('');
     this.emitS(`UE_LOG(LogTemp, Log, TEXT("HoloScript scene '${composition.name}' initialized"));`);
-    
+
     // Auto-play timelines
     for (const tl of composition.timelines || []) {
       if (tl.autoplay) {
         this.emitS(`Play${this.sanitizeName(tl.name)}();`);
       }
     }
-    
+
     this.indentLevel--;
     this.emitS('}');
     this.emitS('');
@@ -362,7 +368,9 @@ export class UnrealCompiler {
     this.emitS('');
 
     // Replication
-    this.emitS(`void ${this.options.className}::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const`);
+    this.emitS(
+      `void ${this.options.className}::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const`
+    );
     this.emitS('{');
     this.indentLevel++;
     this.emitS('Super::GetLifetimeReplicatedProps(OutLifetimeProps);');
@@ -409,8 +417,12 @@ export class UnrealCompiler {
     if (!isModel) {
       const meshPath = this.getMeshPath(meshType as string);
       if (meshPath) {
-        this.emitS(`static ConstructorHelpers::FObjectFinder<UStaticMesh> ${varName}MeshAsset(TEXT("${meshPath}"));`);
-        this.emitS(`if (${varName}MeshAsset.Succeeded()) { ${varName}->SetStaticMesh(${varName}MeshAsset.Object); }`);
+        this.emitS(
+          `static ConstructorHelpers::FObjectFinder<UStaticMesh> ${varName}MeshAsset(TEXT("${meshPath}"));`
+        );
+        this.emitS(
+          `if (${varName}MeshAsset.Succeeded()) { ${varName}->SetStaticMesh(${varName}MeshAsset.Object); }`
+        );
       }
     }
 
@@ -418,7 +430,9 @@ export class UnrealCompiler {
     const pos = this.findObjProp(obj, 'position');
     if (pos && Array.isArray(pos)) {
       // Convert from HoloScript coordinate system to Unreal (multiply by 100 for cm)
-      this.emitS(`${varName}->SetRelativeLocation(FVector(${(pos[0] as number) * 100}f, ${(pos[2] as number) * 100}f, ${(pos[1] as number) * 100}f));`);
+      this.emitS(
+        `${varName}->SetRelativeLocation(FVector(${(pos[0] as number) * 100}f, ${(pos[2] as number) * 100}f, ${(pos[1] as number) * 100}f));`
+      );
     }
 
     const rot = this.findObjProp(obj, 'rotation');
@@ -429,7 +443,9 @@ export class UnrealCompiler {
     const scale = this.findObjProp(obj, 'scale');
     if (scale) {
       if (Array.isArray(scale)) {
-        this.emitS(`${varName}->SetRelativeScale3D(FVector(${scale[0]}f, ${scale[1]}f, ${scale[2]}f));`);
+        this.emitS(
+          `${varName}->SetRelativeScale3D(FVector(${scale[0]}f, ${scale[1]}f, ${scale[2]}f));`
+        );
       } else {
         this.emitS(`${varName}->SetRelativeScale3D(FVector(${scale}f));`);
       }
@@ -445,7 +461,10 @@ export class UnrealCompiler {
     this.emitS('');
   }
 
-  private compileTraitSetup(varName: string, trait: { name: string; config?: Record<string, HoloValue> }): void {
+  private compileTraitSetup(
+    varName: string,
+    trait: { name: string; config?: Record<string, HoloValue> }
+  ): void {
     switch (trait.name) {
       case 'physics':
         this.emitS(`${varName}->SetSimulatePhysics(true);`);
@@ -495,7 +514,9 @@ export class UnrealCompiler {
         this.emitS(`${varName}->SetIntensity(${intensity}f);`);
       } else if (prop.key === 'position' && Array.isArray(prop.value)) {
         const pos = prop.value as number[];
-        this.emitS(`${varName}->SetRelativeLocation(FVector(${pos[0] * 100}f, ${pos[2] * 100}f, ${pos[1] * 100}f));`);
+        this.emitS(
+          `${varName}->SetRelativeLocation(FVector(${pos[0] * 100}f, ${pos[2] * 100}f, ${pos[1] * 100}f));`
+        );
       } else if (prop.key === 'cast_shadow' || prop.key === 'castShadow') {
         this.emitS(`${varName}->SetCastShadows(${prop.value ? 'true' : 'false'});`);
       }
@@ -515,7 +536,9 @@ export class UnrealCompiler {
   private compileEnvironment(env: HoloEnvironment): void {
     for (const prop of env.properties) {
       if (prop.key === 'skybox' || prop.key === 'preset') {
-        this.emitS(`// Environment preset: "${prop.value}" — configure via BP_Sky_Sphere or SkyAtmosphere`);
+        this.emitS(
+          `// Environment preset: "${prop.value}" — configure via BP_Sky_Sphere or SkyAtmosphere`
+        );
       } else if (prop.key === 'fog' && typeof prop.value === 'object') {
         this.emitS('// Fog settings — configure via ExponentialHeightFog actor');
       } else if (prop.key === 'ambient_light') {
@@ -527,14 +550,20 @@ export class UnrealCompiler {
   private compileZoneSetup(zone: any): void {
     const varName = this.sanitizeName(zone.name);
     this.emitS(`// Zone: ${zone.name} — bind overlap events`);
-    this.emitS(`// ${varName}Trigger->OnComponentBeginOverlap.AddDynamic(this, &${this.options.className}::On${varName}BeginOverlap);`);
-    this.emitS(`// ${varName}Trigger->OnComponentEndOverlap.AddDynamic(this, &${this.options.className}::On${varName}EndOverlap);`);
+    this.emitS(
+      `// ${varName}Trigger->OnComponentBeginOverlap.AddDynamic(this, &${this.options.className}::On${varName}BeginOverlap);`
+    );
+    this.emitS(
+      `// ${varName}Trigger->OnComponentEndOverlap.AddDynamic(this, &${this.options.className}::On${varName}EndOverlap);`
+    );
   }
 
   private compileZoneHandlers(zone: any): void {
     const varName = this.sanitizeName(zone.name);
-    
-    this.emitS(`void ${this.options.className}::On${varName}BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)`);
+
+    this.emitS(
+      `void ${this.options.className}::On${varName}BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)`
+    );
     this.emitS('{');
     this.indentLevel++;
     this.emitS(`UE_LOG(LogTemp, Log, TEXT("Actor entered zone: ${zone.name}"));`);
@@ -542,7 +571,9 @@ export class UnrealCompiler {
     this.emitS('}');
     this.emitS('');
 
-    this.emitS(`void ${this.options.className}::On${varName}EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)`);
+    this.emitS(
+      `void ${this.options.className}::On${varName}EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)`
+    );
     this.emitS('{');
     this.indentLevel++;
     this.emitS(`UE_LOG(LogTemp, Log, TEXT("Actor exited zone: ${zone.name}"));`);
@@ -571,7 +602,7 @@ export class UnrealCompiler {
     this.emitS(`void ${this.options.className}::${name}Transition()`);
     this.emitS('{');
     this.indentLevel++;
-    const dest = transition.properties.find(p => p.key === 'destination' || p.key === 'to');
+    const dest = transition.properties.find((p) => p.key === 'destination' || p.key === 'to');
     if (dest) {
       this.emitS(`UE_LOG(LogTemp, Log, TEXT("Transitioning to: ${dest.value}"));`);
       this.emitS(`UGameplayStatics::OpenLevel(this, TEXT("${dest.value}"));`);
@@ -594,15 +625,20 @@ export class UnrealCompiler {
   }
 
   private generateBlueprintJson(composition: HoloComposition): string {
-    return JSON.stringify({
-      type: 'Blueprint',
-      class: this.options.className,
-      composition: composition.name,
-      objects: composition.objects?.map(o => ({
-        name: o.name,
-        traits: o.traits?.map(t => t.name) || [],
-      })) || [],
-    }, null, 2);
+    return JSON.stringify(
+      {
+        type: 'Blueprint',
+        class: this.options.className,
+        composition: composition.name,
+        objects:
+          composition.objects?.map((o) => ({
+            name: o.name,
+            traits: o.traits?.map((t) => t.name) || [],
+          })) || [],
+      },
+      null,
+      2
+    );
   }
 
   // === Utility Methods ===
@@ -650,7 +686,7 @@ export class UnrealCompiler {
   }
 
   private findObjProp(obj: HoloObjectDecl, key: string): HoloValue | undefined {
-    return obj.properties?.find(p => p.key === key)?.value;
+    return obj.properties?.find((p) => p.key === key)?.value;
   }
 
   private toCppType(value: HoloValue): string {
@@ -659,8 +695,8 @@ export class UnrealCompiler {
     if (typeof value === 'number') return Number.isInteger(value) ? 'int32' : 'float';
     if (typeof value === 'string') return 'FString';
     if (Array.isArray(value)) {
-      if (value.length === 3 && value.every(v => typeof v === 'number')) return 'FVector';
-      if (value.length === 4 && value.every(v => typeof v === 'number')) return 'FQuat';
+      if (value.length === 3 && value.every((v) => typeof v === 'number')) return 'FVector';
+      if (value.length === 4 && value.every((v) => typeof v === 'number')) return 'FQuat';
       return 'TArray<float>';
     }
     return 'UObject*';

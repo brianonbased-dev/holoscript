@@ -209,12 +209,7 @@ export const ROLE_PERMISSIONS: Record<WorkspaceRole, string[]> = {
     'secret.read',
     'settings.read',
   ],
-  viewer: [
-    'workspace.read',
-    'member.read',
-    'package.read',
-    'settings.read',
-  ],
+  viewer: ['workspace.read', 'member.read', 'package.read', 'settings.read'],
 };
 
 export function hasPermission(role: WorkspaceRole, permission: string): boolean {

@@ -5,15 +5,18 @@ HoloScript includes a built-in 3D preview to test your scenes instantly.
 ## Open Preview
 
 **Method 1: Keyboard Shortcut**
+
 - Press `Ctrl+Shift+V` (Windows/Linux)
 - Press `Cmd+Shift+V` (Mac)
 
 **Method 2: Command Palette**
+
 1. Press `Ctrl+Shift+P` / `Cmd+Shift+P`
 2. Type "HoloScript: Open Preview"
 3. Hit Enter
 
 **Method 3: Editor Title Button**
+
 - Click the preview icon 👁️ in the top-right of the editor
 
 ## Preview Features
@@ -35,4 +38,4 @@ Click **Next** to learn about AI integration!
 
 ---
 
-📹 *Video Tutorial: [Coming Soon - Preview & Debugging]*
+📹 _Video Tutorial: [Coming Soon - Preview & Debugging]_

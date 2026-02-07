@@ -9,7 +9,10 @@
  * @version 1.0.0
  */
 
-import { DeprecationRegistry, createDeprecationRegistry, type DeprecationMatch } from '../deprecation';
+import {
+  DeprecationRegistry,
+  createDeprecationRegistry,
+} from '../deprecation';
 
 /**
  * Migration rule defining how to transform deprecated code
@@ -311,9 +314,10 @@ export class MigrationAssistant {
     const suggestions: MigrationSuggestion[] = [];
 
     for (const rule of this.rules.values()) {
-      const regex = typeof rule.pattern === 'string'
-        ? new RegExp(rule.pattern, 'g')
-        : new RegExp(rule.pattern.source, rule.pattern.flags);
+      const regex =
+        typeof rule.pattern === 'string'
+          ? new RegExp(rule.pattern, 'g')
+          : new RegExp(rule.pattern.source, rule.pattern.flags);
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -380,9 +384,10 @@ export class MigrationAssistant {
       let line = lines[i];
 
       for (const rule of applicableRules) {
-        const regex = typeof rule.pattern === 'string'
-          ? new RegExp(rule.pattern, 'g')
-          : new RegExp(rule.pattern.source, rule.pattern.flags);
+        const regex =
+          typeof rule.pattern === 'string'
+            ? new RegExp(rule.pattern, 'g')
+            : new RegExp(rule.pattern.source, rule.pattern.flags);
 
         let match;
         regex.lastIndex = 0;
@@ -432,9 +437,10 @@ export class MigrationAssistant {
         continue;
       }
 
-      const regex = typeof rule.pattern === 'string'
-        ? new RegExp(rule.pattern, 'g')
-        : new RegExp(rule.pattern.source, rule.pattern.flags);
+      const regex =
+        typeof rule.pattern === 'string'
+          ? new RegExp(rule.pattern, 'g')
+          : new RegExp(rule.pattern.source, rule.pattern.flags);
 
       for (let i = 0; i < lines.length; i++) {
         let match;
@@ -566,10 +572,7 @@ export function createMigrationAssistant(
 /**
  * Quick analyze helper
  */
-export function analyzeMigrations(
-  source: string,
-  filePath = 'input.holo'
-): MigrationResult {
+export function analyzeMigrations(source: string, filePath = 'input.holo'): MigrationResult {
   const assistant = createMigrationAssistant();
   return assistant.analyze(source, filePath);
 }

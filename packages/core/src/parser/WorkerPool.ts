@@ -119,7 +119,7 @@ export class WorkerPool extends EventEmitter {
    * Execute multiple tasks in parallel
    */
   async executeAll<T, R>(type: string, dataItems: T[]): Promise<R[]> {
-    const promises = dataItems.map(data => this.execute<T, R>(type, data));
+    const promises = dataItems.map((data) => this.execute<T, R>(type, data));
     return Promise.all(promises);
   }
 
@@ -127,7 +127,7 @@ export class WorkerPool extends EventEmitter {
    * Get pool statistics
    */
   getStats(): WorkerPoolStats {
-    const busyWorkers = this.workers.filter(w => w.busy).length;
+    const busyWorkers = this.workers.filter((w) => w.busy).length;
 
     return {
       poolSize: this.options.poolSize,
@@ -136,9 +136,7 @@ export class WorkerPool extends EventEmitter {
       idleWorkers: this.workers.length - busyWorkers,
       totalTasksProcessed: this.totalTasksProcessed,
       queuedTasks: this.taskQueue.length,
-      avgTaskTime: this.totalTasksProcessed > 0
-        ? this.totalTaskTime / this.totalTasksProcessed
-        : 0,
+      avgTaskTime: this.totalTasksProcessed > 0 ? this.totalTaskTime / this.totalTasksProcessed : 0,
     };
   }
 
@@ -162,7 +160,7 @@ export class WorkerPool extends EventEmitter {
     this.taskQueue = [];
 
     // Terminate all workers
-    const terminationPromises = this.workers.map(pooledWorker =>
+    const terminationPromises = this.workers.map((pooledWorker) =>
       this.terminateWorker(pooledWorker)
     );
 
@@ -206,12 +204,11 @@ export class WorkerPool extends EventEmitter {
 
           // Replace worker if not shutting down
           if (!this.isShuttingDown && this.workers.length < this.options.poolSize) {
-            this.spawnWorker().catch(err => {
+            this.spawnWorker().catch((err) => {
               this.emit('error', err);
             });
           }
         });
-
       } catch (error) {
         reject(error);
       }
@@ -222,7 +219,7 @@ export class WorkerPool extends EventEmitter {
    * Queue a task for execution
    */
   private queueTask(task: WorkerTask): void {
-    const availableWorker = this.workers.find(w => !w.busy);
+    const availableWorker = this.workers.find((w) => !w.busy);
 
     if (availableWorker) {
       this.assignTask(availableWorker, task);
@@ -286,7 +283,7 @@ export class WorkerPool extends EventEmitter {
    */
   private processQueue(): void {
     while (this.taskQueue.length > 0) {
-      const availableWorker = this.workers.find(w => !w.busy);
+      const availableWorker = this.workers.find((w) => !w.busy);
       if (!availableWorker) break;
 
       const task = this.taskQueue.shift()!;
@@ -298,7 +295,9 @@ export class WorkerPool extends EventEmitter {
    * Recycle a worker that has processed too many tasks
    */
   private async recycleWorker(pooledWorker: PooledWorker): Promise<void> {
-    this.log(`Recycling worker ${pooledWorker.worker.threadId} after ${pooledWorker.taskCount} tasks`);
+    this.log(
+      `Recycling worker ${pooledWorker.worker.threadId} after ${pooledWorker.taskCount} tasks`
+    );
 
     await this.terminateWorker(pooledWorker);
     this.removeWorker(pooledWorker);
@@ -311,12 +310,12 @@ export class WorkerPool extends EventEmitter {
   /**
    * Handle worker failure
    */
-  private handleWorkerFailure(pooledWorker: PooledWorker, error: Error): void {
+  private handleWorkerFailure(pooledWorker: PooledWorker, _error: Error): void {
     this.removeWorker(pooledWorker);
 
     // Respawn worker if not shutting down
     if (!this.isShuttingDown) {
-      this.spawnWorker().catch(err => {
+      this.spawnWorker().catch((err) => {
         this.emit('error', err);
       });
     }

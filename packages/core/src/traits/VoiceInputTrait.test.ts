@@ -5,7 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { VoiceInputTrait, type VoiceInputConfig, type VoiceCommand } from '../traits/VoiceInputTrait';
+import {
+  VoiceInputTrait,
+  type VoiceInputConfig,
+  type VoiceCommand,
+} from '../traits/VoiceInputTrait';
 
 describe('VoiceInputTrait', () => {
   let trait: VoiceInputTrait;
@@ -152,9 +156,7 @@ describe('VoiceInputTrait', () => {
 
   describe('Command Configuration', () => {
     it('should support command phrases', () => {
-      const commands: VoiceCommand[] = [
-        { phrase: 'hello', action: 'greet' },
-      ];
+      const commands: VoiceCommand[] = [{ phrase: 'hello', action: 'greet' }];
       const cmdTrait = new VoiceInputTrait({
         mode: 'continuous',
         confidenceThreshold: 0.7,

@@ -18,10 +18,10 @@ composition "My First VR World" {
   object "FloatingOrb" {
     @grabbable
     @glowing
-    
+
     position: [0, 1.5, -2]
     color: "#00ffff"
-    
+
     on_grab: {
       this.glow_intensity = 2.0
     }
@@ -31,7 +31,7 @@ composition "My First VR World" {
 
 ---
 
-📹 *Video Tutorial: [Coming Soon - Your First HoloScript Scene]*
+📹 _Video Tutorial: [Coming Soon - Your First HoloScript Scene]_
 
 ## What This Does
 

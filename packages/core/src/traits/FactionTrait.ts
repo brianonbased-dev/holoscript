@@ -17,9 +17,9 @@ type RelationType = 'hostile' | 'unfriendly' | 'neutral' | 'friendly' | 'allied'
 
 interface FactionRelation {
   factionId: string;
-  standing: number;  // -100 to 100
+  standing: number; // -100 to 100
   type: RelationType;
-  locked: boolean;   // Prevents changes
+  locked: boolean; // Prevents changes
 }
 
 interface ReputationChange {
@@ -38,25 +38,21 @@ interface FactionState {
 
 interface FactionConfig {
   faction_id: string;
-  reputation: Record<string, number>;       // Initial standings
-  hostile_factions: string[];               // Always hostile
-  allied_factions: string[];                // Always allied
-  neutral_threshold: number;                // Standing for neutral (-25 to 25 typical)
-  friendly_threshold: number;               // Standing for friendly (25-75 typical)
-  allied_threshold: number;                 // Standing for allied (75+ typical)
-  reputation_decay: number;                 // Decay per second toward neutral
-  decay_interval: number;                   // Seconds between decay ticks
+  reputation: Record<string, number>; // Initial standings
+  hostile_factions: string[]; // Always hostile
+  allied_factions: string[]; // Always allied
+  neutral_threshold: number; // Standing for neutral (-25 to 25 typical)
+  friendly_threshold: number; // Standing for friendly (25-75 typical)
+  allied_threshold: number; // Standing for allied (75+ typical)
+  reputation_decay: number; // Decay per second toward neutral
+  decay_interval: number; // Seconds between decay ticks
   history_limit: number;
 }
 
-function getRelationType(
-  standing: number,
-  factionId: string,
-  config: FactionConfig
-): RelationType {
+function getRelationType(standing: number, factionId: string, config: FactionConfig): RelationType {
   if (config.hostile_factions.includes(factionId)) return 'hostile';
   if (config.allied_factions.includes(factionId)) return 'allied';
-  
+
   if (standing <= -config.neutral_threshold) return 'hostile';
   if (standing < -config.neutral_threshold * 0.4) return 'unfriendly';
   if (standing > config.allied_threshold) return 'allied';
@@ -86,11 +82,11 @@ export const factionHandler: TraitHandler<FactionConfig> = {
 
   onAttach(node, config, context) {
     const relations = new Map<string, FactionRelation>();
-    
+
     // Initialize from config
     for (const [factionId, standing] of Object.entries(config.reputation)) {
-      const locked = config.hostile_factions.includes(factionId) || 
-                     config.allied_factions.includes(factionId);
+      const locked =
+        config.hostile_factions.includes(factionId) || config.allied_factions.includes(factionId);
       relations.set(factionId, {
         factionId,
         standing,
@@ -98,7 +94,7 @@ export const factionHandler: TraitHandler<FactionConfig> = {
         locked,
       });
     }
-    
+
     // Add locked hostile factions
     for (const factionId of config.hostile_factions) {
       if (!relations.has(factionId)) {
@@ -110,7 +106,7 @@ export const factionHandler: TraitHandler<FactionConfig> = {
         });
       }
     }
-    
+
     // Add locked allied factions
     for (const factionId of config.allied_factions) {
       if (!relations.has(factionId)) {
@@ -122,14 +118,14 @@ export const factionHandler: TraitHandler<FactionConfig> = {
         });
       }
     }
-    
+
     const state: FactionState = {
       relations,
       history: [],
       decayTimer: 0,
     };
     (node as any).__factionState = state;
-    
+
     // Register in global faction registry
     context.emit?.('faction_registered', {
       node,
@@ -152,21 +148,21 @@ export const factionHandler: TraitHandler<FactionConfig> = {
     state.decayTimer += delta;
     if (state.decayTimer >= config.decay_interval) {
       state.decayTimer = 0;
-      
+
       // Decay all non-locked relations toward neutral
       for (const relation of state.relations.values()) {
         if (relation.locked) continue;
-        
+
         const previousType = relation.type;
-        
+
         if (relation.standing > 0) {
           relation.standing = Math.max(0, relation.standing - config.reputation_decay);
         } else if (relation.standing < 0) {
           relation.standing = Math.min(0, relation.standing + config.reputation_decay);
         }
-        
+
         relation.type = getRelationType(relation.standing, relation.factionId, config);
-        
+
         if (relation.type !== previousType) {
           context.emit?.('faction_relation_changed', {
             node,
@@ -183,12 +179,12 @@ export const factionHandler: TraitHandler<FactionConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__factionState as FactionState;
     if (!state) return;
-    
+
     if (event.type === 'reputation_change') {
       const factionId = event.factionId as string;
       const amount = event.amount as number;
-      const reason = event.reason as string || 'unknown';
-      
+      const reason = (event.reason as string) || 'unknown';
+
       let relation = state.relations.get(factionId);
       if (!relation) {
         relation = {
@@ -199,16 +195,16 @@ export const factionHandler: TraitHandler<FactionConfig> = {
         };
         state.relations.set(factionId, relation);
       }
-      
+
       if (relation.locked) return;
-      
+
       const previousType = relation.type;
       relation.standing = Math.max(-100, Math.min(100, relation.standing + amount));
       relation.type = getRelationType(relation.standing, factionId, config);
-      
+
       // Record history
       state.history.push({
-        sourceId: event.sourceId as string || 'unknown',
+        sourceId: (event.sourceId as string) || 'unknown',
         factionId,
         amount,
         reason,
@@ -217,7 +213,7 @@ export const factionHandler: TraitHandler<FactionConfig> = {
       if (state.history.length > config.history_limit) {
         state.history.shift();
       }
-      
+
       context.emit?.('reputation_updated', {
         node,
         factionId,
@@ -225,7 +221,7 @@ export const factionHandler: TraitHandler<FactionConfig> = {
         change: amount,
         reason,
       });
-      
+
       if (relation.type !== previousType) {
         context.emit?.('faction_relation_changed', {
           node,

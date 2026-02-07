@@ -393,7 +393,7 @@ ${nodes.join('\n\n')}
   }
 
   private generateSceneNode(node: SceneNode, idx: number): string {
-    const className = this.toPascalCase(node.name);
+    const _className = this.toPascalCase(node.name);
     const nodeType = this.getGodotNodeType(node);
     const meshType = this.mapGeometryToMesh(node.type);
 

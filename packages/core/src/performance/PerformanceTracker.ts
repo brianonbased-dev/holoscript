@@ -196,7 +196,7 @@ export class PerformanceTracker {
       timing,
       opsPerSec,
       timestamp: new Date().toISOString(),
-      environment: env
+      environment: env,
     });
   }
 
@@ -213,11 +213,12 @@ export class PerformanceTracker {
         name: metric.name,
         current: metric.timing,
         baseline: baselineMetric?.timing,
-        status: 'OK'
+        status: 'OK',
       };
 
       if (baselineMetric) {
-        const changePercent = ((metric.timing - baselineMetric.timing) / baselineMetric.timing) * 100;
+        const changePercent =
+          ((metric.timing - baselineMetric.timing) / baselineMetric.timing) * 100;
         comparison.changePercent = Math.round(changePercent * 100) / 100;
 
         if (changePercent > DEGRADATION_THRESHOLD) {
@@ -261,7 +262,7 @@ export class PerformanceTracker {
       current: this.currentMetrics,
       comparisons,
       status,
-      alerts
+      alerts,
     };
   }
 
@@ -272,7 +273,7 @@ export class PerformanceTracker {
     const baseline: PerformanceBaseline = {
       version,
       timestamp: new Date().toISOString(),
-      metrics: {}
+      metrics: {},
     };
 
     for (const metric of this.currentMetrics) {
@@ -311,7 +312,7 @@ export class PerformanceTracker {
     history.push({
       label: label || new Date().toISOString(),
       timestamp: new Date().toISOString(),
-      metrics: this.currentMetrics
+      metrics: this.currentMetrics,
     });
 
     // Keep only last 50 entries
@@ -345,7 +346,10 @@ export class PerformanceTracker {
 
     console.log('\nMetrics:');
     for (const comp of report.comparisons) {
-      const change = comp.changePercent !== undefined ? ` (${comp.changePercent > 0 ? '+' : ''}${comp.changePercent}%)` : '';
+      const change =
+        comp.changePercent !== undefined
+          ? ` (${comp.changePercent > 0 ? '+' : ''}${comp.changePercent}%)`
+          : '';
       console.log(`  ${comp.status}: ${comp.name}: ${comp.current?.toFixed(3)}ms${change}`);
     }
 
@@ -391,13 +395,15 @@ export class PerformanceTracker {
         minTiming: 0,
         maxTiming: 0,
         hasBaseline: !!this.baseline,
-        percentWithinThreshold: 0
+        percentWithinThreshold: 0,
       };
     }
 
-    const timings = this.currentMetrics.map(m => m.timing);
+    const timings = this.currentMetrics.map((m) => m.timing);
     const comparisons = this.compare();
-    const withinThreshold = comparisons.filter(c => c.status === 'OK' || c.status === 'WARN').length;
+    const withinThreshold = comparisons.filter(
+      (c) => c.status === 'OK' || c.status === 'WARN'
+    ).length;
 
     return {
       totalMetrics: this.currentMetrics.length,
@@ -405,7 +411,7 @@ export class PerformanceTracker {
       minTiming: Math.min(...timings),
       maxTiming: Math.max(...timings),
       hasBaseline: !!this.baseline,
-      percentWithinThreshold: (withinThreshold / comparisons.length) * 100
+      percentWithinThreshold: (withinThreshold / comparisons.length) * 100,
     };
   }
 

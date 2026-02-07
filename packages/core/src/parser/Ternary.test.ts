@@ -1,4 +1,3 @@
-
 import { describe, it, expect } from 'vitest';
 import { HoloScriptPlusParser } from './HoloScriptPlusParser';
 
@@ -11,12 +10,12 @@ describe('HoloScriptPlusParser - Ternary Operators', () => {
       isEnabled: isActive ? true : false
     }`;
     const result = parser.parse(source);
-    
+
     expect(result.success).toBe(true);
     const root = result.ast.root;
     const node = root.type === 'fragment' ? root.children![0] : root;
-    const expr = node.properties.isEnabled as any;
-    
+    const expr = node.properties.isEnabled;
+
     expect(expr.type).toBe('ternary');
     expect(expr.condition.__ref).toBe('isActive');
     expect(expr.trueValue).toBe(true);
@@ -30,16 +29,16 @@ describe('HoloScriptPlusParser - Ternary Operators', () => {
       val: condA ? 1 : condB ? 2 : 3
     }`;
     const result = parser.parse(source);
-    
+
     expect(result.success).toBe(true);
     const root = result.ast.root;
     const node = root.type === 'fragment' ? root.children![0] : root;
-    const expr = node.properties.val as any;
-    
+    const expr = node.properties.val;
+
     expect(expr.type).toBe('ternary');
     expect(expr.condition.__ref).toBe('condA');
     expect(expr.trueValue).toBe(1);
-    
+
     // The false branch should be another ternary
     expect(expr.falseValue.type).toBe('ternary');
     expect(expr.falseValue.condition.__ref).toBe('condB');
@@ -54,17 +53,17 @@ describe('HoloScriptPlusParser - Ternary Operators', () => {
       val: a ?? b ? "yes" : "no"
     }`;
     const result = parser.parse(source);
-    
+
     expect(result.success).toBe(true);
     const root = result.ast.root;
     const node = root.type === 'fragment' ? root.children![0] : root;
-    const expr = node.properties.val as any;
-    
+    const expr = node.properties.val;
+
     expect(expr.type).toBe('ternary');
     // Condition is binary ??
     expect(expr.condition.type).toBe('binary');
     expect(expr.condition.operator).toBe('??');
-    expect(expr.trueValue).toBe("yes");
-    expect(expr.falseValue).toBe("no");
+    expect(expr.trueValue).toBe('yes');
+    expect(expr.falseValue).toBe('no');
   });
 });

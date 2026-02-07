@@ -96,7 +96,11 @@ export class EnhancedHoloScriptParser {
    */
   error(message: string, suggestion?: string): ParseError {
     const token = this.currentToken();
-    const location = token?.location || { line: this.line, column: this.column, offset: this.position };
+    const location = token?.location || {
+      line: this.line,
+      column: this.column,
+      offset: this.position,
+    };
 
     const error: ParseError = {
       message,
@@ -172,10 +176,6 @@ export class EnhancedHoloScriptParser {
   currentToken(): ParsedToken | undefined {
     return this.tokens[this.position];
   }
-
-
-
-
 }
 
 /**

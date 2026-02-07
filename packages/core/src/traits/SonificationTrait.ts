@@ -38,7 +38,7 @@ interface SonificationState {
 }
 
 interface SonificationConfig {
-  data_source: string;  // Property path to watch
+  data_source: string; // Property path to watch
   mapping: MappingType;
   min_freq: number;
   max_freq: number;
@@ -66,7 +66,7 @@ function mapValue(
   curve: 'linear' | 'exponential' | 'logarithmic'
 ): number {
   const normalized = Math.max(0, Math.min(1, (value - inMin) / (inMax - inMin)));
-  
+
   let curved: number;
   switch (curve) {
     case 'exponential':
@@ -78,7 +78,7 @@ function mapValue(
     default:
       curved = normalized;
   }
-  
+
   return outMin + curved * (outMax - outMin);
 }
 
@@ -117,7 +117,7 @@ export const sonificationHandler: TraitHandler<SonificationConfig> = {
       lastDataUpdate: 0,
     };
     (node as any).__sonificationState = state;
-    
+
     // Create audio nodes
     context.emit?.('sonification_create', {
       node,
@@ -137,10 +137,10 @@ export const sonificationHandler: TraitHandler<SonificationConfig> = {
     delete (node as any).__sonificationState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__sonificationState as SonificationState;
     if (!state || !state.isActive) return;
-    
+
     // Continuous mode - keep updating audio parameters
     if (config.continuous) {
       context.emit?.('sonification_update_params', {
@@ -155,46 +155,48 @@ export const sonificationHandler: TraitHandler<SonificationConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__sonificationState as SonificationState;
     if (!state) return;
-    
+
     if (event.type === 'sonification_data_update') {
       const value = event.value as number;
       const property = (event.property as string) || config.data_source;
-      
+
       state.currentValues.set(property, value);
       state.lastDataUpdate = Date.now();
-      
+
       // Apply primary mapping
       if (property === config.data_source || !config.data_source) {
         switch (config.mapping) {
           case 'pitch':
             state.currentFrequency = mapValue(
-              value, config.min_value, config.max_value,
-              config.min_freq, config.max_freq, 'exponential'
+              value,
+              config.min_value,
+              config.max_value,
+              config.min_freq,
+              config.max_freq,
+              'exponential'
             );
             break;
           case 'volume':
-            state.currentGain = mapValue(
-              value, config.min_value, config.max_value,
-              0, 1, 'linear'
-            );
+            state.currentGain = mapValue(value, config.min_value, config.max_value, 0, 1, 'linear');
             break;
           case 'pan':
-            state.currentPan = mapValue(
-              value, config.min_value, config.max_value,
-              -1, 1, 'linear'
-            );
+            state.currentPan = mapValue(value, config.min_value, config.max_value, -1, 1, 'linear');
             break;
         }
       }
-      
+
       // Apply custom mappings
       for (const mapping of config.custom_mappings) {
         if (mapping.property === property) {
           const mappedValue = mapValue(
-            value, mapping.min_input, mapping.max_input,
-            mapping.min_output, mapping.max_output, mapping.curve
+            value,
+            mapping.min_input,
+            mapping.max_input,
+            mapping.min_output,
+            mapping.max_output,
+            mapping.curve
           );
-          
+
           switch (mapping.type) {
             case 'pitch':
               state.currentFrequency = mappedValue;
@@ -208,7 +210,7 @@ export const sonificationHandler: TraitHandler<SonificationConfig> = {
           }
         }
       }
-      
+
       // Trigger sound if not continuous
       if (!config.continuous && !state.isActive) {
         state.isActive = true;
@@ -219,13 +221,13 @@ export const sonificationHandler: TraitHandler<SonificationConfig> = {
           pan: state.currentPan,
           duration: config.release,
         });
-        
+
         // Auto-stop after release
         setTimeout(() => {
           state.isActive = false;
         }, config.release * 1000);
       }
-      
+
       context.emit?.('sonification_value_changed', {
         node,
         property,
@@ -236,7 +238,7 @@ export const sonificationHandler: TraitHandler<SonificationConfig> = {
     } else if (event.type === 'sonification_start') {
       state.isActive = true;
       state.currentGain = config.volume;
-      
+
       context.emit?.('sonification_play', {
         node,
         frequency: state.currentFrequency,

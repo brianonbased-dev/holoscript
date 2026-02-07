@@ -11,30 +11,30 @@
 
 export type BindingDirection = 'one-way' | 'two-way' | 'one-time';
 export type BindingSource =
-  | 'state'       // Local component state
-  | 'props'       // Incoming props
-  | 'context'     // React-like context
-  | 'store'       // Global state store
-  | 'network'     // Network synced state
-  | 'asset'       // Asset data
-  | 'entity'      // Another entity's property
-  | 'input'       // User input
-  | 'sensor'      // Device sensors
-  | 'api'         // External API
-  | 'computed';   // Derived value
+  | 'state' // Local component state
+  | 'props' // Incoming props
+  | 'context' // React-like context
+  | 'store' // Global state store
+  | 'network' // Network synced state
+  | 'asset' // Asset data
+  | 'entity' // Another entity's property
+  | 'input' // User input
+  | 'sensor' // Device sensors
+  | 'api' // External API
+  | 'computed'; // Derived value
 
 export type TransformType =
-  | 'identity'    // No transform
-  | 'map'         // Map function
-  | 'filter'      // Conditional filter
-  | 'reduce'      // Accumulator
-  | 'debounce'    // Debounced updates
-  | 'throttle'    // Throttled updates
-  | 'clamp'       // Value clamping
-  | 'lerp'        // Linear interpolation
-  | 'format'      // String formatting
-  | 'validate'    // Validation with fallback
-  | 'custom';     // Custom transform function
+  | 'identity' // No transform
+  | 'map' // Map function
+  | 'filter' // Conditional filter
+  | 'reduce' // Accumulator
+  | 'debounce' // Debounced updates
+  | 'throttle' // Throttled updates
+  | 'clamp' // Value clamping
+  | 'lerp' // Linear interpolation
+  | 'format' // String formatting
+  | 'validate' // Validation with fallback
+  | 'custom'; // Custom transform function
 
 // ============================================================================
 // Binding Configuration
@@ -224,9 +224,7 @@ export class BindingManager {
    * Get all bindings for a target
    */
   getBindingsForTarget(targetPath: string): BindingConfig[] {
-    return Array.from(this.bindings.values()).filter(
-      (b) => b.target === targetPath && b.enabled
-    );
+    return Array.from(this.bindings.values()).filter((b) => b.target === targetPath && b.enabled);
   }
 
   // ─── Expression Registration ──────────────────────────────────────────────
@@ -309,7 +307,7 @@ export class BindingManager {
       case 'lerp': {
         const target = transform.params?.target as number;
         const factor = (transform.params?.factor as number) ?? 0.1;
-        return (value as number) + ((target - (value as number)) * factor);
+        return (value as number) + (target - (value as number)) * factor;
       }
 
       case 'format': {
@@ -577,10 +575,7 @@ export function createStoreSlice(
 /**
  * Create a data store
  */
-export function createDataStore(
-  name: string,
-  slices: StoreSlice[]
-): DataStore {
+export function createDataStore(name: string, slices: StoreSlice[]): DataStore {
   const store: DataStore = {
     id: `store_${name}`,
     name,
@@ -615,19 +610,14 @@ export function createFollowBinding(
   targetEntity: string,
   offset: { x: number; y: number; z: number } = { x: 0, y: 0, z: 0 }
 ): BindingConfig {
-  return createBinding(
-    `${sourceEntity}.position`,
-    `${targetEntity}.position`,
-    'entity',
-    {
-      transforms: [
-        {
-          type: 'custom',
-          fn: `(pos) => ({ x: pos.x + ${offset.x}, y: pos.y + ${offset.y}, z: pos.z + ${offset.z} })`,
-        },
-      ],
-    }
-  );
+  return createBinding(`${sourceEntity}.position`, `${targetEntity}.position`, 'entity', {
+    transforms: [
+      {
+        type: 'custom',
+        fn: `(pos) => ({ x: pos.x + ${offset.x}, y: pos.y + ${offset.y}, z: pos.z + ${offset.z} })`,
+      },
+    ],
+  });
 }
 
 /**
@@ -667,14 +657,16 @@ export function createNetworkBinding(
   localProperty: string,
   syncPriority: 'critical' | 'high' | 'normal' | 'low' = 'normal'
 ): BindingConfig {
-  return createBinding(
-    localProperty,
-    `$network.${localProperty}`,
-    'state',
-    {
-      direction: 'two-way',
-      priority: syncPriority === 'critical' ? 100 : syncPriority === 'high' ? 50 : syncPriority === 'normal' ? 0 : -50,
-      metadata: { networkSync: true, syncPriority },
-    }
-  );
+  return createBinding(localProperty, `$network.${localProperty}`, 'state', {
+    direction: 'two-way',
+    priority:
+      syncPriority === 'critical'
+        ? 100
+        : syncPriority === 'high'
+          ? 50
+          : syncPriority === 'normal'
+            ? 0
+            : -50,
+    metadata: { networkSync: true, syncPriority },
+  });
 }

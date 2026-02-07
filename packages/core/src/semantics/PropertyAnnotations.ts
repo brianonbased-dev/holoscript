@@ -5,11 +5,7 @@
  * Provides ready-to-use annotations for spatial, visual, physical, and AI properties.
  */
 
-import {
-  SemanticCategory,
-  createAnnotation,
-  createDefaultFlags,
-} from './SemanticAnnotation';
+import { SemanticCategory, createAnnotation, createDefaultFlags } from './SemanticAnnotation';
 import type { SemanticAnnotation } from './SemanticAnnotation';
 
 // ============================================================================
@@ -727,8 +723,19 @@ export function ariaRoleAnnotation(propertyPath: string): SemanticAnnotation {
     },
     constraints: {
       allowedValues: [
-        'button', 'checkbox', 'dialog', 'gridcell', 'link', 'menuitem',
-        'progressbar', 'radio', 'slider', 'switch', 'tab', 'textbox', 'none',
+        'button',
+        'checkbox',
+        'dialog',
+        'gridcell',
+        'link',
+        'menuitem',
+        'progressbar',
+        'radio',
+        'slider',
+        'switch',
+        'tab',
+        'textbox',
+        'none',
       ],
     },
     editorWidget: 'select',

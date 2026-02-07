@@ -3,6 +3,7 @@
 ## Overview
 
 The Enhanced Error Recovery system provides:
+
 - **Multi-error collection**: Report ALL errors in one parse pass, not just the first
 - **Error enrichment**: Automatic suggestions and quick fixes for common mistakes
 - **Recovery strategies**: Synchronization points to continue parsing after errors
@@ -120,9 +121,9 @@ const keywordPos = Sync.skipToKeyword(tokens, currentPos, ['composition', 'objec
 // Find matching bracket
 const closingBracket = Sync.findMatchingBracket(
   tokens,
-  openPos, 
-  'LBRACE',  // open type
-  'RBRACE'   // close type
+  openPos,
+  'LBRACE', // open type
+  'RBRACE' // close type
 );
 ```
 
@@ -152,22 +153,22 @@ console.log(result);
 
 Supported error codes (matching ErrorRecovery module):
 
-| Code | Severity | Description | Auto-Fix |
-|------|----------|-------------|----------|
-| `SYNTAX_ERROR` | error | General syntax issue | ✓ |
-| `UNEXPECTED_TOKEN` | error | Token not expected here | ✓ |
-| `MISSING_BRACE` | error | Missing `{` or `}` | ✓ |
-| `MISSING_COLON` | error | Missing `:` in property | ✓ |
-| `MISSING_QUOTE` | error | Unclosed string | ✓ |
-| `UNKNOWN_KEYWORD` | error | Invalid keyword | ✓ |
-| `UNKNOWN_TRAIT` | warning | Unknown trait name | ✓ |
-| `UNKNOWN_GEOMETRY` | warning | Unknown geometry type | ✓ |
-| `INVALID_PROPERTY` | info | Unknown property name | ✓ |
-| `INVALID_VALUE` | info | Invalid value for property | - |
-| `TRAIT_CONFLICT` | warning | Conflicting traits | - |
-| `TRAIT_REQUIRES` | warning | Missing required trait | - |
-| `DUPLICATE_NAME` | info | Name defined twice | - |
-| `MISSING_REQUIRED` | error | Required field missing | - |
+| Code               | Severity | Description                | Auto-Fix |
+| ------------------ | -------- | -------------------------- | -------- |
+| `SYNTAX_ERROR`     | error    | General syntax issue       | ✓        |
+| `UNEXPECTED_TOKEN` | error    | Token not expected here    | ✓        |
+| `MISSING_BRACE`    | error    | Missing `{` or `}`         | ✓        |
+| `MISSING_COLON`    | error    | Missing `:` in property    | ✓        |
+| `MISSING_QUOTE`    | error    | Unclosed string            | ✓        |
+| `UNKNOWN_KEYWORD`  | error    | Invalid keyword            | ✓        |
+| `UNKNOWN_TRAIT`    | warning  | Unknown trait name         | ✓        |
+| `UNKNOWN_GEOMETRY` | warning  | Unknown geometry type      | ✓        |
+| `INVALID_PROPERTY` | info     | Unknown property name      | ✓        |
+| `INVALID_VALUE`    | info     | Invalid value for property | -        |
+| `TRAIT_CONFLICT`   | warning  | Conflicting traits         | -        |
+| `TRAIT_REQUIRES`   | warning  | Missing required trait     | -        |
+| `DUPLICATE_NAME`   | info     | Name defined twice         | -        |
+| `MISSING_REQUIRED` | error    | Required field missing     | -        |
 
 ## Output Formats
 
@@ -219,49 +220,60 @@ Test file: `ParserErrorCollector.test.ts`
 **31 test cases** covering:
 
 ✅ **Error Collection** (5 tests)
+
 - Single & multiple error collection
 - Max error limit handling
 - Error object types (string, Error, ParseError)
 
 ✅ **Warning Collection** (2 tests)
+
 - Separate warning tracking
 - Severity level distinction
 
 ✅ **Error Report** (3 tests)
+
 - Accurate count reporting
 - Source code inclusion
 - Stop flag determination
 
 ✅ **Formatting** (4 tests)
+
 - Multi-error display
 - Line number formatting
 - Recovery hint inclusion
 
 ✅ **Quick Fixes** (1 test)
+
 - Auto-fix generation
 
 ✅ **Error Severity** (1 test)
+
 - Severity classification
 
 ✅ **JSON Output** (2 tests)
+
 - LSP-compatible export
 - Diagnostic formatting
 
 ✅ **State Management** (2 tests)
+
 - Reset functionality
 - Source updates
 
 ✅ **Helper Functions** (2 tests)
+
 - Error collection wrapper
 - Error throwing handling
 
 ✅ **Synchronization** (4 tests)
+
 - Statement synchronization
 - Block boundary detection
 - Keyword finding
 - Bracket matching
 
 ✅ **Integration** (2 tests)
+
 - Interleaved errors/warnings
 - Context preservation
 
@@ -328,6 +340,7 @@ getErrors(): ErrorReport {
 ## Summary
 
 Error Recovery provides:
+
 - ✅ Multi-error collection (all errors per parse, not just first)
 - ✅ 31 comprehensive tests
 - ✅ LSP-compatible output

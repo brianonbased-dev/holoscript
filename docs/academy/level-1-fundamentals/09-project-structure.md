@@ -53,14 +53,14 @@ The `holoscript.config.json` file controls project settings:
   "description": "An immersive VR experience",
   "entry": "src/main.holo",
   "targets": ["web", "oculus", "steamvr"],
-  
+
   "compiler": {
     "strictMode": true,
     "optimizations": true,
     "sourceMaps": true,
     "target": "es2020"
   },
-  
+
   "linter": {
     "rules": {
       "no-unused": "warn",
@@ -68,19 +68,19 @@ The `holoscript.config.json` file controls project settings:
       "require-geometry": "error"
     }
   },
-  
+
   "formatter": {
     "tabWidth": 2,
     "useTabs": false,
     "printWidth": 100
   },
-  
+
   "assets": {
     "publicPath": "/assets/",
     "compress": true,
     "textureCompression": "etc2"
   },
-  
+
   "server": {
     "port": 3000,
     "hot": true,
@@ -130,20 +130,20 @@ export composition MenuScene {
     skybox: "sunset"
     ambient_light: 0.5
   }
-  
+
   object menuPanel using Panel {
     position: [0, 1.5, -2]
-    
+
     object startButton using Button {
       label: "Start Game"
       onClick: { scene.load("level1") }
     }
-    
+
     object optionsButton using Button {
       label: "Options"
       onClick: { scene.load("options") }
     }
-    
+
     object quitButton using Button {
       label: "Quit"
       onClick: { app.quit() }
@@ -169,15 +169,15 @@ export composition Level1 {
     skybox: "night"
     fog: { color: "#1a1a2e", near: 10, far: 50 }
   }
-  
+
   // Shared state
   ScoreSystem.init()
-  
+
   object player using Player {
     position: [0, 0, 0]
     health: 100
   }
-  
+
   group enemies {
     object enemy1 using Enemy { position: [5, 0, 10] }
     object enemy2 using Enemy { position: [-5, 0, 10] }
@@ -282,24 +282,24 @@ export const GameManager = {
   score: 0,
   lives: 3,
   level: 1,
-  
+
   init(config) {
     this.score = 0
     this.lives = config.startLives || 3
   },
-  
+
   addScore(points) {
     this.score += points
     events.emit("scoreChanged", this.score)
   },
-  
+
   loseLife() {
     this.lives -= 1
     if (this.lives <= 0) {
       this.gameOver()
     }
   },
-  
+
   gameOver() {
     events.emit("gameOver")
     scene.load("gameover")
@@ -317,12 +317,12 @@ Use events for loose coupling:
 export const ScoreSystem = {
   score: 0,
   multiplier: 1,
-  
+
   init() {
     events.on("enemyKilled", (enemy) => {
       this.add(enemy.points * this.multiplier)
     })
-    
+
     events.on("powerupCollected", (powerup) => {
       if (powerup.type === "multiplier") {
         this.multiplier = 2
@@ -330,7 +330,7 @@ export const ScoreSystem = {
       }
     })
   },
-  
+
   add(points) {
     this.score += points
     events.emit("scoreUpdated", this.score)

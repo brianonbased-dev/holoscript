@@ -176,11 +176,7 @@ export class WorkspaceRepository {
     return member;
   }
 
-  async removeMember(
-    workspaceId: string,
-    userId: string,
-    removedBy: string
-  ): Promise<boolean> {
+  async removeMember(workspaceId: string, userId: string, removedBy: string): Promise<boolean> {
     const memberList = members.get(workspaceId);
     if (!memberList) return false;
 
@@ -254,11 +250,7 @@ export class WorkspaceRepository {
     return secret;
   }
 
-  async deleteSecret(
-    workspaceId: string,
-    secretId: string,
-    deletedBy: string
-  ): Promise<boolean> {
+  async deleteSecret(workspaceId: string, secretId: string, deletedBy: string): Promise<boolean> {
     const secretList = secrets.get(workspaceId);
     if (!secretList) return false;
 

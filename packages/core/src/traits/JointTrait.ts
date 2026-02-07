@@ -18,7 +18,14 @@
  * ```
  */
 
-export type JointType = 'fixed' | 'hinge' | 'ball' | 'slider' | 'spring' | 'distance' | 'configurable';
+export type JointType =
+  | 'fixed'
+  | 'hinge'
+  | 'ball'
+  | 'slider'
+  | 'spring'
+  | 'distance'
+  | 'configurable';
 
 /**
  * 3D Vector
@@ -292,7 +299,10 @@ export class JointTrait {
   /**
    * Set joint limits
    */
-  public setLimits(limits: AngularLimits | LinearLimits, type: 'angular' | 'linear' = 'angular'): void {
+  public setLimits(
+    limits: AngularLimits | LinearLimits,
+    type: 'angular' | 'linear' = 'angular'
+  ): void {
     if (type === 'angular') {
       this.config.angularLimits = limits as AngularLimits;
     } else {

@@ -67,7 +67,7 @@ export const occlusionHandler: TraitHandler<OcclusionConfig> = {
       fadeProgress: 0,
     };
     (node as any).__occlusionState = state;
-    
+
     context.emit?.('occlusion_enable', {
       node,
       mode: config.mode,
@@ -87,16 +87,16 @@ export const occlusionHandler: TraitHandler<OcclusionConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__occlusionState as OcclusionState;
     if (!state) return;
-    
+
     const targetFade = state.isOccluded ? 1 : 0;
-    const fadeSpeed = 1 / config.fade_distance * delta;
-    
+    const fadeSpeed = (1 / config.fade_distance) * delta;
+
     if (state.fadeProgress < targetFade) {
       state.fadeProgress = Math.min(state.fadeProgress + fadeSpeed, targetFade);
     } else if (state.fadeProgress > targetFade) {
       state.fadeProgress = Math.max(state.fadeProgress - fadeSpeed, targetFade);
     }
-    
+
     if (config.edge_smoothing && state.fadeProgress > 0 && state.fadeProgress < 1) {
       context.emit?.('set_opacity', {
         node,
@@ -108,14 +108,14 @@ export const occlusionHandler: TraitHandler<OcclusionConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__occlusionState as OcclusionState;
     if (!state) return;
-    
+
     if (event.type === 'occlusion_update') {
       const prevOccluded = state.isOccluded;
       state.isOccluded = event.isOccluded as boolean;
       state.occlusionAmount = (event.amount as number) ?? (state.isOccluded ? 1 : 0);
       state.occludingObjects = (event.occludingObjects as string[]) ?? [];
       state.lastOcclusionUpdate = Date.now();
-      
+
       if (state.isOccluded && !prevOccluded) {
         context.emit?.('occlusion_start', { node, amount: state.occlusionAmount });
       } else if (!state.isOccluded && prevOccluded) {

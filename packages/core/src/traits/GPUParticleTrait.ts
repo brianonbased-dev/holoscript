@@ -22,8 +22,8 @@ interface ParticleForce {
 }
 
 interface ColorStop {
-  time: number;  // 0-1
-  color: [number, number, number, number];  // RGBA
+  time: number; // 0-1
+  color: [number, number, number, number]; // RGBA
 }
 
 interface SizeStop {
@@ -43,13 +43,13 @@ interface GPUParticleState {
 }
 
 interface GPUParticleConfig {
-  count: number;  // Max particles
-  emission_rate: number;  // Particles per second
-  lifetime: number;  // Seconds
+  count: number; // Max particles
+  emission_rate: number; // Particles per second
+  lifetime: number; // Seconds
   lifetime_variance: number;
   initial_velocity: [number, number, number];
   velocity_variance: [number, number, number];
-  spread_angle: number;  // Degrees
+  spread_angle: number; // Degrees
   forces: ParticleForce[];
   color_over_life: ColorStop[];
   size_over_life: SizeStop[];
@@ -104,7 +104,7 @@ export const gpuParticleHandler: TraitHandler<GPUParticleConfig> = {
       burstQueue: [],
     };
     (node as any).__gpuParticleState = state;
-    
+
     // Create GPU particle system
     context.emit?.('gpu_particle_create', {
       node,
@@ -123,7 +123,7 @@ export const gpuParticleHandler: TraitHandler<GPUParticleConfig> = {
       sprite: config.sprite,
       blendMode: config.blend_mode,
     });
-    
+
     state.isRunning = true;
   },
 
@@ -138,12 +138,12 @@ export const gpuParticleHandler: TraitHandler<GPUParticleConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__gpuParticleState as GPUParticleState;
     if (!state || !state.isRunning) return;
-    
+
     // Process burst queue
     if (state.burstQueue.length > 0) {
       const bursts = [...state.burstQueue];
       state.burstQueue = [];
-      
+
       for (const burst of bursts) {
         context.emit?.('gpu_particle_burst', {
           node,
@@ -153,7 +153,7 @@ export const gpuParticleHandler: TraitHandler<GPUParticleConfig> = {
         state.totalEmitted += burst.count;
       }
     }
-    
+
     // Emit continuous particles
     if (state.isEmitting && config.emission_rate > 0) {
       const toEmit = Math.floor(config.emission_rate * delta);
@@ -166,7 +166,7 @@ export const gpuParticleHandler: TraitHandler<GPUParticleConfig> = {
         });
       }
     }
-    
+
     // Update simulation
     context.emit?.('gpu_particle_step', {
       node,
@@ -177,11 +177,11 @@ export const gpuParticleHandler: TraitHandler<GPUParticleConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__gpuParticleState as GPUParticleState;
     if (!state) return;
-    
+
     if (event.type === 'gpu_particle_update') {
       state.activeCount = event.activeCount as number;
     } else if (event.type === 'particle_burst') {
-      const count = event.count as number || 100;
+      const count = (event.count as number) || 100;
       const position = event.position as { x: number; y: number; z: number } | undefined;
       state.burstQueue.push({ count, position });
     } else if (event.type === 'particle_set_emitter') {

@@ -19,7 +19,9 @@ import type { VRTraitName } from '../types/HoloScriptPlus';
  */
 export function loadFixture(name: string): string {
   const fixturesDir = resolve(__dirname, 'fixtures');
-  const filePath = name.endsWith('.hsplus') ? join(fixturesDir, name) : join(fixturesDir, `${name}.hsplus`);
+  const filePath = name.endsWith('.hsplus')
+    ? join(fixturesDir, name)
+    : join(fixturesDir, `${name}.hsplus`);
 
   if (!existsSync(filePath)) {
     throw new Error(`Fixture not found: ${filePath}`);
@@ -33,7 +35,9 @@ export function loadFixture(name: string): string {
  */
 export function loadExample(name: string): string {
   const examplesDir = resolve(__dirname, '../../../../examples');
-  const filePath = name.endsWith('.hsplus') ? join(examplesDir, name) : join(examplesDir, `${name}.hsplus`);
+  const filePath = name.endsWith('.hsplus')
+    ? join(examplesDir, name)
+    : join(examplesDir, `${name}.hsplus`);
 
   if (!existsSync(filePath)) {
     throw new Error(`Example not found: ${filePath}`);
@@ -48,7 +52,7 @@ export function loadExample(name: string): string {
 export function getAllFixtures(): string[] {
   const fixturesDir = resolve(__dirname, 'fixtures');
   if (!existsSync(fixturesDir)) return [];
-  return readdirSync(fixturesDir).filter(f => f.endsWith('.hsplus'));
+  return readdirSync(fixturesDir).filter((f) => f.endsWith('.hsplus'));
 }
 
 /**
@@ -57,7 +61,7 @@ export function getAllFixtures(): string[] {
 export function getAllExamples(): string[] {
   const examplesDir = resolve(__dirname, '../../../../examples');
   if (!existsSync(examplesDir)) return [];
-  return readdirSync(examplesDir).filter(f => f.endsWith('.hsplus'));
+  return readdirSync(examplesDir).filter((f) => f.endsWith('.hsplus'));
 }
 
 // ============================================================================
@@ -125,7 +129,11 @@ export function parseExpectFailure(source: string) {
 /**
  * Assert that a node has a specific trait
  */
-export function assertHasTrait(node: any, traitName: VRTraitName, config?: Record<string, unknown>) {
+export function assertHasTrait(
+  node: any,
+  traitName: VRTraitName,
+  config?: Record<string, unknown>
+) {
   if (!node.traits?.has?.(traitName)) {
     throw new Error(`Expected node to have trait @${traitName}`);
   }
@@ -136,7 +144,7 @@ export function assertHasTrait(node: any, traitName: VRTraitName, config?: Recor
       if (traitConfig[key] !== value) {
         throw new Error(
           `Expected trait @${traitName} to have ${key}=${JSON.stringify(value)}, ` +
-          `got ${JSON.stringify(traitConfig[key])}`
+            `got ${JSON.stringify(traitConfig[key])}`
         );
       }
     }
@@ -150,7 +158,7 @@ export function assertProperty(node: any, key: string, value: unknown) {
   if (node.properties?.[key] !== value) {
     throw new Error(
       `Expected property ${key}=${JSON.stringify(value)}, ` +
-      `got ${JSON.stringify(node.properties?.[key])}`
+        `got ${JSON.stringify(node.properties?.[key])}`
     );
   }
 }
@@ -172,17 +180,21 @@ export function assertNodeType(node: any, type: string) {
  * Serialize AST for snapshot testing (removes non-deterministic data)
  */
 export function serializeAST(ast: any): string {
-  return JSON.stringify(ast, (key, value) => {
-    // Convert Maps to objects for serialization
-    if (value instanceof Map) {
-      return Object.fromEntries(value);
-    }
-    // Remove position info for cleaner snapshots
-    if (key === 'position' || key === 'loc') {
-      return undefined;
-    }
-    return value;
-  }, 2);
+  return JSON.stringify(
+    ast,
+    (key, value) => {
+      // Convert Maps to objects for serialization
+      if (value instanceof Map) {
+        return Object.fromEntries(value);
+      }
+      // Remove position info for cleaner snapshots
+      if (key === 'position' || key === 'loc') {
+        return undefined;
+      }
+      return value;
+    },
+    2
+  );
 }
 
 // ============================================================================
@@ -192,8 +204,12 @@ export function serializeAST(ast: any): string {
 /**
  * Generate a simple orb definition
  */
-export function generateOrb(id: string, traits: string[] = [], props: Record<string, unknown> = {}): string {
-  const traitStr = traits.map(t => `@${t}`).join(' ');
+export function generateOrb(
+  id: string,
+  traits: string[] = [],
+  props: Record<string, unknown> = {}
+): string {
+  const traitStr = traits.map((t) => `@${t}`).join(' ');
   const propsStr = Object.entries(props)
     .map(([k, v]) => `  ${k}: ${JSON.stringify(v)}`)
     .join('\n');
@@ -204,14 +220,18 @@ export function generateOrb(id: string, traits: string[] = [], props: Record<str
 /**
  * Generate a scene with multiple objects
  */
-export function generateScene(objects: Array<{ type: string; id: string; traits?: string[]; props?: Record<string, unknown> }>): string {
-  return objects.map(obj => {
-    const traitStr = obj.traits?.map(t => `@${t}`).join(' ') || '';
-    const propsStr = Object.entries(obj.props || {})
-      .map(([k, v]) => `  ${k}: ${JSON.stringify(v)}`)
-      .join('\n');
-    return `${obj.type}#${obj.id} ${traitStr} {\n${propsStr}\n}`;
-  }).join('\n\n');
+export function generateScene(
+  objects: Array<{ type: string; id: string; traits?: string[]; props?: Record<string, unknown> }>
+): string {
+  return objects
+    .map((obj) => {
+      const traitStr = obj.traits?.map((t) => `@${t}`).join(' ') || '';
+      const propsStr = Object.entries(obj.props || {})
+        .map(([k, v]) => `  ${k}: ${JSON.stringify(v)}`)
+        .join('\n');
+      return `${obj.type}#${obj.id} ${traitStr} {\n${propsStr}\n}`;
+    })
+    .join('\n\n');
 }
 
 // ============================================================================

@@ -18,9 +18,8 @@
 import type {
   VRTraitName,
   VRHand,
-  ThrowVelocity,
-  CollisionEvent,
   Vector3,
+  Vector3Tuple,
   GrabbableTrait,
   ThrowableTrait,
   PointableTrait,
@@ -32,12 +31,15 @@ import type {
   BreakableTrait,
   SkeletonTrait,
   BodyTrait,
-  GaussianSplatTrait,
-  NerfTrait,
-  VolumetricVideoTrait,
   ProactiveTrait,
   HSPlusNode,
 } from '../types/HoloScriptPlus';
+
+/** Helper to convert Vector3 (object or tuple) to a tuple for indexed access */
+function vec3ToTuple(v: Vector3): Vector3Tuple {
+  if (Array.isArray(v)) return v as Vector3Tuple;
+  return [v.x, v.y, v.z];
+}
 
 import {
   TraitHandler,
@@ -162,8 +164,8 @@ import { flowFieldHandler } from './FlowFieldTrait';
 interface GrabState {
   isGrabbed: boolean;
   grabbingHand: VRHand | null;
-  grabOffset: Vector3;
-  grabRotationOffset: Vector3;
+  grabOffset: Vector3Tuple;
+  grabRotationOffset: Vector3Tuple;
   previousHandPositions: Vector3[];
   previousHandTimes: number[];
 }
@@ -188,8 +190,8 @@ interface ScaleState {
 
 interface RotateState {
   isRotating: boolean;
-  initialHandRotation: Vector3;
-  initialObjectRotation: Vector3;
+  initialHandRotation: Vector3Tuple;
+  initialObjectRotation: Vector3Tuple;
 }
 
 interface StackState {
@@ -214,7 +216,7 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
     max_grab_distance: 3,
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     // Initialize grab state
     const state: GrabState = {
       isGrabbed: false,
@@ -231,18 +233,20 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
     delete (node as unknown as { __grabState?: GrabState }).__grabState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, _context, _delta) {
     const state = (node as unknown as { __grabState: GrabState }).__grabState;
     if (!state?.isGrabbed || !state.grabbingHand) return;
 
     // Follow hand position
     const hand = state.grabbingHand;
+    const handPos = vec3ToTuple(hand.position);
+    const offset = state.grabOffset;
     const newPosition: Vector3 = config.snap_to_hand
       ? hand.position
       : [
-          (hand.position as any)[0] + (state.grabOffset as any)[0],
-          (hand.position as any)[1] + (state.grabOffset as any)[1],
-          (hand.position as any)[2] + (state.grabOffset as any)[2],
+          handPos[0] + offset[0],
+          handPos[1] + offset[1],
+          handPos[2] + offset[2],
         ];
 
     // Update position
@@ -251,7 +255,9 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
     }
 
     // Track velocity for throw
-    state.previousHandPositions.push(Array.isArray(hand.position) ? [...hand.position] : { ...hand.position });
+    state.previousHandPositions.push(
+      Array.isArray(hand.position) ? [...hand.position] : { ...hand.position }
+    );
     state.previousHandTimes.push(Date.now());
 
     // Keep last 10 frames
@@ -272,12 +278,12 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
     if (event.type === 'grab_start') {
       // Check distance for distance grab
       if (!config.distance_grab) {
-        const handPos = event.hand.position;
-        const nodePos = node.properties?.position as Vector3 || [0, 0, 0];
+        const handPos = vec3ToTuple(event.hand.position);
+        const nodePos = vec3ToTuple((node.properties?.position as Vector3) || [0, 0, 0]);
         const distance = Math.sqrt(
-          Math.pow((handPos as any)[0] - (nodePos as any)[0], 2) +
-          Math.pow((handPos as any)[1] - (nodePos as any)[1], 2) +
-          Math.pow((handPos as any)[2] - (nodePos as any)[2], 2)
+          Math.pow(handPos[0] - nodePos[0], 2) +
+            Math.pow(handPos[1] - nodePos[1], 2) +
+            Math.pow(handPos[2] - nodePos[2], 2)
         );
         const maxDist = (config.max_grab_distance || 3) * context.getScaleMultiplier();
         if (distance > maxDist) return;
@@ -287,11 +293,12 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
       state.grabbingHand = event.hand;
 
       // Calculate grab offset
-      const nodePos = node.properties?.position as Vector3 || [0, 0, 0];
+      const nodePosArr = vec3ToTuple((node.properties?.position as Vector3) || [0, 0, 0]);
+      const handPosArr = vec3ToTuple(event.hand.position);
       state.grabOffset = [
-        (nodePos as any)[0] - (event.hand.position as any)[0],
-        (nodePos as any)[1] - (event.hand.position as any)[1],
-        (nodePos as any)[2] - (event.hand.position as any)[2],
+        nodePosArr[0] - handPosArr[0],
+        nodePosArr[1] - handPosArr[1],
+        nodePosArr[2] - handPosArr[2],
       ];
 
       // Haptic feedback
@@ -318,20 +325,23 @@ const grabbableHandler: TraitHandler<GrabbableTrait> = {
         const len = state.previousHandPositions.length;
         const dt = (state.previousHandTimes[len - 1] - state.previousHandTimes[0]) / 1000;
         if (dt > 0) {
-          const velocity: Vector3 = [
-            ((state.previousHandPositions[len - 1] as any)[0] - (state.previousHandPositions[0] as any)[0]) / dt,
-            ((state.previousHandPositions[len - 1] as any)[1] - (state.previousHandPositions[0] as any)[1]) / dt,
-            ((state.previousHandPositions[len - 1] as any)[2] - (state.previousHandPositions[0] as any)[2]) / dt,
+          const last = vec3ToTuple(state.previousHandPositions[len - 1]);
+          const first = vec3ToTuple(state.previousHandPositions[0]);
+          const velocity: Vector3Tuple = [
+            (last[0] - first[0]) / dt,
+            (last[1] - first[1]) / dt,
+            (last[2] - first[2]) / dt,
           ];
 
           // Apply velocity if throwable trait exists
           if (node.traits?.has('throwable')) {
             const throwConfig = node.traits.get('throwable') as ThrowableTrait;
-            const multiplier = (throwConfig.velocity_multiplier || 1) * context.getScaleMultiplier();
+            const multiplier =
+              (throwConfig.velocity_multiplier || 1) * context.getScaleMultiplier();
             context.physics.applyVelocity(node, [
-              (velocity as any)[0] * multiplier,
-              (velocity as any)[1] * multiplier,
-              (velocity as any)[2] * multiplier,
+              velocity[0] * multiplier,
+              velocity[1] * multiplier,
+              velocity[2] * multiplier,
             ]);
           }
         }
@@ -363,7 +373,7 @@ const throwableHandler: TraitHandler<ThrowableTrait> = {
     bounce_factor: 0.5,
   },
 
-  onAttach(node, config, context) {
+  onAttach(_node, _config, _context) {
     // Throwable works with grabbable - just configures throw behavior
   },
 
@@ -375,11 +385,14 @@ const throwableHandler: TraitHandler<ThrowableTrait> = {
       // Reflect velocity
       const velocity = collision.relativeVelocity;
       const normal = collision.normal;
-      const dot = (velocity as any)[0] * (normal as any)[0] + (velocity as any)[1] * (normal as any)[1] + (velocity as any)[2] * (normal as any)[2];
+      const dot =
+        (velocity)[0] * (normal)[0] +
+        (velocity)[1] * (normal)[1] +
+        (velocity)[2] * (normal)[2];
       const reflected: Vector3 = [
-        ((velocity as any)[0] - 2 * dot * (normal as any)[0]) * bounceFactor,
-        ((velocity as any)[1] - 2 * dot * (normal as any)[1]) * bounceFactor,
-        ((velocity as any)[2] - 2 * dot * (normal as any)[2]) * bounceFactor,
+        ((velocity)[0] - 2 * dot * (normal)[0]) * bounceFactor,
+        ((velocity)[1] - 2 * dot * (normal)[1]) * bounceFactor,
+        ((velocity)[2] - 2 * dot * (normal)[2]) * bounceFactor,
       ];
 
       context.physics.applyVelocity(node, reflected);
@@ -400,7 +413,7 @@ const pointableHandler: TraitHandler<PointableTrait> = {
     cursor_style: 'pointer',
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const state: PointState = {
       isPointed: false,
       pointingHand: null,
@@ -461,7 +474,7 @@ const hoverableHandler: TraitHandler<HoverableTrait> = {
     glow_intensity: 0.5,
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const state: HoverState = {
       isHovered: false,
       hoveringHand: null,
@@ -497,9 +510,10 @@ const hoverableHandler: TraitHandler<HoverableTrait> = {
 
       // Tooltip
       if (config.show_tooltip) {
-        const tooltipText = typeof config.show_tooltip === 'string'
-          ? config.show_tooltip
-          : node.properties?.tooltip || node.id || node.type;
+        const tooltipText =
+          typeof config.show_tooltip === 'string'
+            ? config.show_tooltip
+            : node.properties?.tooltip || node.id || node.type;
         context.emit('show_tooltip', {
           node,
           text: tooltipText,
@@ -549,7 +563,7 @@ const scalableHandler: TraitHandler<ScalableTrait> = {
     pivot: [0, 0, 0],
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const state: ScaleState = {
       isScaling: false,
       initialDistance: 0,
@@ -562,7 +576,7 @@ const scalableHandler: TraitHandler<ScalableTrait> = {
     delete (node as unknown as { __scaleState?: ScaleState }).__scaleState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as unknown as { __scaleState: ScaleState }).__scaleState;
     if (!state?.isScaling) return;
 
@@ -570,10 +584,12 @@ const scalableHandler: TraitHandler<ScalableTrait> = {
     if (!hands.left || !hands.right) return;
 
     // Calculate current distance between hands
+    const rightPos = vec3ToTuple(hands.right.position);
+    const leftPos = vec3ToTuple(hands.left.position);
     const currentDistance = Math.sqrt(
-      Math.pow((hands.right.position as any)[0] - (hands.left.position as any)[0], 2) +
-      Math.pow((hands.right.position as any)[1] - (hands.left.position as any)[1], 2) +
-      Math.pow((hands.right.position as any)[2] - (hands.left.position as any)[2], 2)
+      Math.pow(rightPos[0] - leftPos[0], 2) +
+        Math.pow(rightPos[1] - leftPos[1], 2) +
+        Math.pow(rightPos[2] - leftPos[2], 2)
     );
 
     // Calculate scale factor
@@ -618,9 +634,9 @@ const scalableHandler: TraitHandler<ScalableTrait> = {
       // Calculate initial distance between hands
       const { left, right } = event.hands;
       state.initialDistance = Math.sqrt(
-        Math.pow((right.position as any)[0] - (left.position as any)[0], 2) +
-        Math.pow((right.position as any)[1] - (left.position as any)[1], 2) +
-        Math.pow((right.position as any)[2] - (left.position as any)[2], 2)
+        Math.pow((right.position)[0] - (left.position)[0], 2) +
+          Math.pow((right.position)[1] - (left.position)[1], 2) +
+          Math.pow((right.position)[2] - (left.position)[2], 2)
       );
 
       context.emit('scale_start', { node });
@@ -667,10 +683,13 @@ const rotatableHandler: TraitHandler<RotatableTrait> = {
     if (!hand) return;
 
     // Calculate rotation delta
-    const deltaRotation: Vector3 = [
-      ((hand.rotation as any)[0] - (state.initialHandRotation as any)[0]) * (config.speed || 1),
-      ((hand.rotation as any)[1] - (state.initialHandRotation as any)[1]) * (config.speed || 1),
-      ((hand.rotation as any)[2] - (state.initialHandRotation as any)[2]) * (config.speed || 1),
+    const handRot = vec3ToTuple(hand.rotation);
+    const initHandRot = state.initialHandRotation;
+    const initObjRot = state.initialObjectRotation;
+    const deltaRotation: Vector3Tuple = [
+      (handRot[0] - initHandRot[0]) * (config.speed || 1),
+      (handRot[1] - initHandRot[1]) * (config.speed || 1),
+      (handRot[2] - initHandRot[2]) * (config.speed || 1),
     ];
 
     // Apply axis constraint
@@ -678,30 +697,30 @@ const rotatableHandler: TraitHandler<RotatableTrait> = {
     switch (config.axis) {
       case 'x':
         newRotation = [
-          ((state.initialObjectRotation as any)[0] + (deltaRotation as any)[0]) as any,
-          (state.initialObjectRotation as any)[1],
-          (state.initialObjectRotation as any)[2],
+          initObjRot[0] + deltaRotation[0],
+          initObjRot[1],
+          initObjRot[2],
         ];
         break;
       case 'y':
         newRotation = [
-          (state.initialObjectRotation as any)[0],
-          ((state.initialObjectRotation as any)[1] + (deltaRotation as any)[1]) as any,
-          (state.initialObjectRotation as any)[2],
+          initObjRot[0],
+          initObjRot[1] + deltaRotation[1],
+          initObjRot[2],
         ];
         break;
       case 'z':
         newRotation = [
-          (state.initialObjectRotation as any)[0],
-          (state.initialObjectRotation as any)[1],
-          (state.initialObjectRotation as any)[2] + (deltaRotation as any)[2],
+          initObjRot[0],
+          initObjRot[1],
+          initObjRot[2] + deltaRotation[2],
         ];
         break;
       default:
         newRotation = [
-          (state.initialObjectRotation as any)[0] + (deltaRotation as any)[0],
-          (state.initialObjectRotation as any)[1] + (deltaRotation as any)[1],
-          (state.initialObjectRotation as any)[2] + (deltaRotation as any)[2],
+          initObjRot[0] + deltaRotation[0],
+          initObjRot[1] + deltaRotation[1],
+          initObjRot[2] + deltaRotation[2],
         ];
     }
 
@@ -733,8 +752,8 @@ const rotatableHandler: TraitHandler<RotatableTrait> = {
 
     if (event.type === 'rotate_start') {
       state.isRotating = true;
-      state.initialHandRotation = Array.isArray(event.hand.rotation) ? [...event.hand.rotation] : { ...event.hand.rotation };
-      state.initialObjectRotation = (node.properties?.rotation as Vector3) || [0, 0, 0];
+      state.initialHandRotation = vec3ToTuple(event.hand.rotation);
+      state.initialObjectRotation = vec3ToTuple((node.properties?.rotation as Vector3) || [0, 0, 0]);
 
       context.emit('rotate_start', { node });
     }
@@ -773,7 +792,8 @@ const stackableHandler: TraitHandler<StackableTrait> = {
     const state = (node as unknown as { __stackState: StackState }).__stackState;
     // Remove from parent stack
     if (state.stackParent) {
-      const parentState = (state.stackParent as unknown as { __stackState: StackState }).__stackState;
+      const parentState = (state.stackParent as unknown as { __stackState: StackState })
+        .__stackState;
       const index = parentState.stackedItems.indexOf(node);
       if (index > -1) {
         parentState.stackedItems.splice(index, 1);
@@ -788,7 +808,8 @@ const stackableHandler: TraitHandler<StackableTrait> = {
     const state = (node as unknown as { __stackState: StackState }).__stackState;
 
     if (event.type === 'collision' || event.type === 'trigger_enter') {
-      const other = event.type === 'collision' ? event.data.target : (event as { other: HSPlusNode }).other;
+      const other =
+        event.type === 'collision' ? event.data.target : (event as { other: HSPlusNode }).other;
 
       // Check if other is stackable
       if (!other.traits?.has('stackable')) return;
@@ -800,8 +821,8 @@ const stackableHandler: TraitHandler<StackableTrait> = {
       if (state.stackedItems.length >= (config.max_stack || 10)) return;
 
       // Check if close enough
-      const nodePos = node.properties?.position as Vector3 || [0, 0, 0];
-      const otherPos = other.properties?.position as Vector3 || [0, 0, 0];
+      const nodePosArr = vec3ToTuple((node.properties?.position as Vector3) || [0, 0, 0]);
+      const otherPosArr = vec3ToTuple((other.properties?.position as Vector3) || [0, 0, 0]);
 
       const axisIndex = config.stack_axis === 'x' ? 0 : config.stack_axis === 'z' ? 2 : 1;
       const otherAxes = [0, 1, 2].filter((i) => i !== axisIndex);
@@ -809,21 +830,23 @@ const stackableHandler: TraitHandler<StackableTrait> = {
       // Check alignment on other axes
       let aligned = true;
       for (const axis of otherAxes) {
-        if (Math.abs((nodePos as any)[axis] - (otherPos as any)[axis]) > (config.snap_distance || 0.5)) {
+        if (
+          Math.abs(nodePosArr[axis] - otherPosArr[axis]) > (config.snap_distance || 0.5)
+        ) {
           aligned = false;
           break;
         }
       }
 
-      if (aligned && (otherPos as any)[axisIndex] > (nodePos as any)[axisIndex]) {
+      if (aligned && otherPosArr[axisIndex] > nodePosArr[axisIndex]) {
         // Other is above - add to stack
         state.stackedItems.push(other);
         otherState.stackParent = node;
 
         // Snap position
         const stackOffset = config.stack_offset || 0;
-        const newPos: Vector3 = [...(nodePos as any)] as any as Vector3;
-        (newPos as any)[axisIndex] = (nodePos as any)[axisIndex] + stackOffset;
+        const newPos: Vector3Tuple = [...nodePosArr];
+        newPos[axisIndex] = nodePosArr[axisIndex] + stackOffset;
 
         if (other.properties) {
           other.properties.position = newPos;
@@ -853,17 +876,18 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
     if (!config.snap_points || config.snap_points.length === 0) return;
     if (!config.magnetic) return;
 
-    const nodePos = node.properties?.position as Vector3 || [0, 0, 0];
+    const nodePosArr = vec3ToTuple((node.properties?.position as Vector3) || [0, 0, 0]);
 
     // Find closest snap point
     let closestPoint: Vector3 | null = null;
     let closestDistance = (config.snap_distance || 0.3) * context.getScaleMultiplier();
 
     for (const snapPoint of config.snap_points) {
+      const snapArr = vec3ToTuple(snapPoint);
       const distance = Math.sqrt(
-        Math.pow((nodePos as any)[0] - (snapPoint as any)[0], 2) +
-        Math.pow((nodePos as any)[1] - (snapPoint as any)[1], 2) +
-        Math.pow((nodePos as any)[2] - (snapPoint as any)[2], 2)
+        Math.pow(nodePosArr[0] - snapArr[0], 2) +
+          Math.pow(nodePosArr[1] - snapArr[1], 2) +
+          Math.pow(nodePosArr[2] - snapArr[2], 2)
       );
 
       if (distance < closestDistance) {
@@ -875,10 +899,11 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
     // Apply magnetic pull
     if (closestPoint && node.properties) {
       const pullStrength = 0.1;
-      (node.properties as any).position = [
-        (nodePos as any)[0] + ((closestPoint as any)[0] - (nodePos as any)[0]) * pullStrength,
-        (nodePos as any)[1] + ((closestPoint as any)[1] - (nodePos as any)[1]) * pullStrength,
-        (nodePos as any)[2] + ((closestPoint as any)[2] - (nodePos as any)[2]) * pullStrength,
+      const closestArr = vec3ToTuple(closestPoint);
+      node.properties.position = [
+        nodePosArr[0] + (closestArr[0] - nodePosArr[0]) * pullStrength,
+        nodePosArr[1] + (closestArr[1] - nodePosArr[1]) * pullStrength,
+        nodePosArr[2] + (closestArr[2] - nodePosArr[2]) * pullStrength,
       ];
     }
   },
@@ -887,17 +912,18 @@ const snappableHandler: TraitHandler<SnappableTrait> = {
     if (event.type !== 'grab_end') return;
     if (!config.snap_points || config.snap_points.length === 0) return;
 
-    const nodePos = node.properties?.position as Vector3 || [0, 0, 0];
+    const nodePosArr = vec3ToTuple((node.properties?.position as Vector3) || [0, 0, 0]);
 
     // Find closest snap point
     let closestPoint: Vector3 | null = null;
     let closestDistance = (config.snap_distance || 0.3) * context.getScaleMultiplier();
 
     for (const snapPoint of config.snap_points) {
+      const snapArr = vec3ToTuple(snapPoint);
       const distance = Math.sqrt(
-        Math.pow((nodePos as any)[0] - (snapPoint as any)[0], 2) +
-        Math.pow((nodePos as any)[1] - (snapPoint as any)[1], 2) +
-        Math.pow((nodePos as any)[2] - (snapPoint as any)[2], 2)
+        Math.pow(nodePosArr[0] - snapArr[0], 2) +
+          Math.pow(nodePosArr[1] - snapArr[1], 2) +
+          Math.pow(nodePosArr[2] - snapArr[2], 2)
       );
 
       if (distance < closestDistance) {
@@ -939,8 +965,8 @@ const breakableHandler: TraitHandler<BreakableTrait> = {
     const collision = event.data;
     const impactVelocity = Math.sqrt(
       Math.pow(collision.relativeVelocity[0], 2) +
-      Math.pow(collision.relativeVelocity[1], 2) +
-      Math.pow(collision.relativeVelocity[2], 2)
+        Math.pow(collision.relativeVelocity[1], 2) +
+        Math.pow(collision.relativeVelocity[2], 2)
     );
 
     if (impactVelocity < (config.break_velocity || 5)) return;
@@ -957,11 +983,7 @@ const breakableHandler: TraitHandler<BreakableTrait> = {
     const fragmentCount = config.fragments || 8;
     for (let i = 0; i < fragmentCount; i++) {
       const angle = (i / fragmentCount) * Math.PI * 2;
-      const velocity: Vector3 = [
-        Math.cos(angle) * 2,
-        Math.random() * 3,
-        Math.sin(angle) * 2,
-      ];
+      const velocity: Vector3 = [Math.cos(angle) * 2, Math.random() * 3, Math.sin(angle) * 2];
 
       context.emit('spawn_fragment', {
         position: collision.point,
@@ -1019,8 +1041,8 @@ const bodyHandler: TraitHandler<BodyTrait> = {
 
 /**
  * @proactive trait handler
- * 
- * Implements Phase 2 'Active Autonomy'. This trait allows the object to 
+ *
+ * Implements Phase 2 'Active Autonomy'. This trait allows the object to
  * observe its environment and proactively suggest actions or state changes.
  */
 const proactiveHandler: TraitHandler<ProactiveTrait> = {
@@ -1047,9 +1069,11 @@ const proactiveHandler: TraitHandler<ProactiveTrait> = {
     const pos = node.properties?.position as Vector3;
     if (!pos || !vr.headset.position) return;
 
-    const dx = (pos as any)[0] - (vr.headset.position as any)[0];
-    const dy = (pos as any)[1] - (vr.headset.position as any)[1];
-    const dz = (pos as any)[2] - (vr.headset.position as any)[2];
+    const posArr = vec3ToTuple(pos);
+    const headArr = vec3ToTuple(vr.headset.position);
+    const dx = posArr[0] - headArr[0];
+    const dy = posArr[1] - headArr[1];
+    const dz = posArr[2] - headArr[2];
     const distanceToHead = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
     if (distanceToHead < (config.observation_range || 5)) {
@@ -1113,7 +1137,7 @@ export class VRTraitRegistry {
     this.register(skeletonHandler);
     this.register(bodyHandler);
     this.register(proactiveHandler);
-    
+
     // Register VR accessibility traits
     this.register(seatedHandler as TraitHandler);
     this.register(hapticHandler as TraitHandler);
@@ -1241,13 +1265,18 @@ export class VRTraitRegistry {
     return this.handlers.get(name);
   }
 
-  attachTrait(node: HSPlusNode, traitName: VRTraitName, config: unknown, context: TraitContext): void {
+  attachTrait(
+    node: HSPlusNode,
+    traitName: VRTraitName,
+    config: unknown,
+    context: TraitContext
+  ): void {
     const handler = this.handlers.get(traitName);
     if (!handler) return;
 
     const mergedConfig = { ...(handler.defaultConfig as object), ...(config as object) };
     if (!node.traits) {
-      (node as any).traits = new Map();
+      (node as HSPlusNode & { traits: Map<string, unknown> }).traits = new Map();
     }
     node.traits!.set(traitName, mergedConfig);
 
@@ -1268,7 +1297,12 @@ export class VRTraitRegistry {
     node.traits?.delete(traitName);
   }
 
-  updateTrait(node: HSPlusNode, traitName: VRTraitName, context: TraitContext, delta: number): void {
+  updateTrait(
+    node: HSPlusNode,
+    traitName: VRTraitName,
+    context: TraitContext,
+    delta: number
+  ): void {
     const handler = this.handlers.get(traitName);
     if (!handler || !handler.onUpdate) return;
 
@@ -1278,7 +1312,12 @@ export class VRTraitRegistry {
     }
   }
 
-  handleEvent(node: HSPlusNode, traitName: VRTraitName, context: TraitContext, event: TraitEvent): void {
+  handleEvent(
+    node: HSPlusNode,
+    traitName: VRTraitName,
+    context: TraitContext,
+    event: TraitEvent
+  ): void {
     const handler = this.handlers.get(traitName);
     if (!handler || !handler.onEvent) return;
 
@@ -1297,7 +1336,7 @@ export class VRTraitRegistry {
 
   handleEventForAllTraits(node: HSPlusNode, context: TraitContext, event: TraitEvent): void {
     const eventType = typeof event === 'string' ? event : event.type;
-    
+
     // Physics ↔ Haptics Bridge (P0 Pattern)
     // Automatically trigger light haptic feedback on physical interactions if no haptic trait override exists
     if (eventType === 'collision' || eventType === 'trigger_enter') {

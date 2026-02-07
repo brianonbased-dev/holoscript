@@ -307,21 +307,21 @@ export class TreeShaker {
 
     if (typeof n.expression === 'string') {
       // Extract identifiers from expression string
-      const matches = (n.expression as string).match(/[a-zA-Z_][a-zA-Z0-9_]*/g);
+      const matches = (n.expression).match(/[a-zA-Z_][a-zA-Z0-9_]*/g);
       if (matches) {
         identifiers.push(...matches);
       }
     }
 
     if (typeof n.condition === 'string') {
-      const matches = (n.condition as string).match(/[a-zA-Z_][a-zA-Z0-9_]*/g);
+      const matches = (n.condition).match(/[a-zA-Z_][a-zA-Z0-9_]*/g);
       if (matches) {
         identifiers.push(...matches);
       }
     }
 
     if (typeof n.value === 'string') {
-      const matches = (n.value as string).match(/[a-zA-Z_][a-zA-Z0-9_]*/g);
+      const matches = (n.value).match(/[a-zA-Z_][a-zA-Z0-9_]*/g);
       if (matches) {
         identifiers.push(...matches);
       }
@@ -357,13 +357,7 @@ export class TreeShaker {
    * Check if node is a special type that should always be kept
    */
   private isSpecialNode(node: ASTNode): boolean {
-    const specialTypes = [
-      'composition',
-      'environment',
-      'settings',
-      'import',
-      'export',
-    ];
+    const specialTypes = ['composition', 'environment', 'settings', 'import', 'export'];
     return specialTypes.includes(node.type);
   }
 
@@ -387,7 +381,7 @@ export class TreeShaker {
     const n = node as unknown as Record<string, unknown>;
     if (typeof n.expression === 'string') {
       // Contains function call
-      if (/\w+\s*\(/.test(n.expression as string)) {
+      if (/\w+\s*\(/.test(n.expression)) {
         return true;
       }
     }
@@ -437,7 +431,7 @@ export function treeShake(ast: ASTNode[], options?: TreeShakeOptions): TreeShake
  * Dead code elimination - removes unreachable code within functions
  */
 export function eliminateDeadCode(ast: ASTNode[]): ASTNode[] {
-  return ast.map(node => eliminateDeadCodeInNode(node));
+  return ast.map((node) => eliminateDeadCodeInNode(node));
 }
 
 function eliminateDeadCodeInNode(node: ASTNode): ASTNode {
@@ -446,7 +440,7 @@ function eliminateDeadCodeInNode(node: ASTNode): ASTNode {
   // Check for unreachable code after return
   if (Array.isArray(n.body)) {
     const body = n.body as ASTNode[];
-    const returnIndex = body.findIndex(stmt => stmt.type === 'return-statement');
+    const returnIndex = body.findIndex((stmt) => stmt.type === 'return-statement');
     if (returnIndex !== -1 && returnIndex < body.length - 1) {
       // Remove code after return
       return {

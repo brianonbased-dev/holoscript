@@ -305,10 +305,7 @@ export class TraitDependencyGraph {
   /**
    * Detect trait changes for an object
    */
-  detectTraitChanges(
-    objectName: string,
-    newTraits: TraitUsage[]
-  ): TraitChangeInfo[] {
+  detectTraitChanges(objectName: string, newTraits: TraitUsage[]): TraitChangeInfo[] {
     const changes: TraitChangeInfo[] = [];
     const oldInfo = this.previousObjectTraits.get(objectName);
 
@@ -426,10 +423,7 @@ export class TraitDependencyGraph {
         for (const obj of depUsers) {
           if (!objects.has(obj)) {
             objects.add(obj);
-            reasons.set(
-              obj,
-              `Uses trait @${depTrait} which depends on @${traitName}`
-            );
+            reasons.set(obj, `Uses trait @${depTrait} which depends on @${traitName}`);
 
             const info = this.objectTraits.get(obj);
             if (info) {
@@ -482,13 +476,11 @@ export class TraitDependencyGraph {
   serialize(): string {
     const data = {
       version: 1,
-      traitDependencies: Array.from(this.traitDependencies.entries()).map(
-        ([k, v]) => [k, Array.from(v)]
-      ),
-      traitConflicts: Array.from(this.traitConflicts.entries()).map(([k, v]) => [
+      traitDependencies: Array.from(this.traitDependencies.entries()).map(([k, v]) => [
         k,
         Array.from(v),
       ]),
+      traitConflicts: Array.from(this.traitConflicts.entries()).map(([k, v]) => [k, Array.from(v)]),
       objectTraits: Array.from(this.objectTraits.entries()),
       timestamp: Date.now(),
     };
@@ -518,7 +510,7 @@ export class TraitDependencyGraph {
     }
 
     // Restore object traits
-    for (const [name, info] of data.objectTraits) {
+    for (const [_name, info] of data.objectTraits) {
       graph.registerObject(info);
     }
 

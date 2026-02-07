@@ -84,7 +84,7 @@ export class HoloScriptDebugger {
     if (!parseResult.success) {
       return {
         success: false,
-        errors: parseResult.errors.map(e => `Line ${e.line}: ${e.message}`),
+        errors: parseResult.errors.map((e) => `Line ${e.line}: ${e.message}`),
       };
     }
 
@@ -273,7 +273,7 @@ export class HoloScriptDebugger {
    */
   getVariables(frameId?: number): Map<string, unknown> {
     if (frameId !== undefined) {
-      const frame = this.callStack.find(f => f.id === frameId);
+      const frame = this.callStack.find((f) => f.id === frameId);
       return frame?.variables || new Map();
     }
 

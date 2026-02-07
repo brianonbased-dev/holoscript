@@ -7,17 +7,20 @@ The Performance Tracking System is a comprehensive suite of tools designed to mo
 ## Components
 
 ### 1. PerformanceTracker (Core)
+
 The foundational class that collects and stores performance metrics.
 
 **Location:** `src/performance/PerformanceTracker.ts`
 
 **Key Methods:**
+
 - `recordMetric(name: string, value: number, secondaryValue?: number)` - Record a single metric
 - `getAllMetrics()` - Retrieve all collected metrics
 - `getMetricHistory(name: string)` - Get historical data for a specific metric
 - `reset()` - Clear all collected metrics
 
 **Usage Example:**
+
 ```typescript
 import { performanceTracker } from './performance/PerformanceTracker';
 
@@ -34,17 +37,20 @@ for (let i = 0; i < 100; i++) {
 ```
 
 ### 2. PerformanceReportGenerator (Analysis)
+
 Generates comprehensive reports from collected metrics with recommendations.
 
 **Location:** `src/performance/PerformanceReportGenerator.ts`
 
 **Key Methods:**
+
 - `generateReport()` - Create a full performance report
 - `saveReport(report, outputPath?)` - Save report to JSON file
 - `formatReport(report)` - Generate human-readable text report
 - `printReport(report)` - Output formatted report to console
 
 **Usage Example:**
+
 ```typescript
 import { PerformanceReportGenerator } from './performance/PerformanceReportGenerator';
 
@@ -66,21 +72,23 @@ console.log(formatted);
 
 Metrics are automatically organized into categories based on their names:
 
-| Category | Triggers | Threshold |
-|----------|-----------|-----------|
-| **Parser** | Names containing "Parse" | Avg < 15ms |
-| **Compiler** | Names containing "Compile" or "Generate" | Avg < 10ms |
-| **Code Metrics** | Names containing "Reduction" or "LOC" | Reduction > 50% |
-| **Memory** | Names containing "Memory" | Increase < 50MB |
-| **Pipeline** | Names containing "Pipeline" | Avg < 50ms |
-| **Scalability** | Names containing "Scalability" | Avg < 25ms |
+| Category         | Triggers                                 | Threshold       |
+| ---------------- | ---------------------------------------- | --------------- |
+| **Parser**       | Names containing "Parse"                 | Avg < 15ms      |
+| **Compiler**     | Names containing "Compile" or "Generate" | Avg < 10ms      |
+| **Code Metrics** | Names containing "Reduction" or "LOC"    | Reduction > 50% |
+| **Memory**       | Names containing "Memory"                | Increase < 50MB |
+| **Pipeline**     | Names containing "Pipeline"              | Avg < 50ms      |
+| **Scalability**  | Names containing "Scalability"           | Avg < 25ms      |
 
 ## Test Files
 
 ### Benchmark Tests
+
 **Location:** `src/__tests__/benchmark/CodeReduction.test.ts`
 
 Comprehensive benchmarks for:
+
 - Parser performance (Simple, Complex, UI scenes)
 - Compiler performance (visionOS, USDA generation)
 - End-to-end pipeline performance
@@ -88,15 +96,18 @@ Comprehensive benchmarks for:
 - Scalability analysis
 
 **Running Tests:**
+
 ```bash
 npm test -- CodeReduction.test.ts
 npm test -- --coverage  # With coverage reporting
 ```
 
 ### Unit Tests
+
 **Location:** `src/__tests__/performance/PerformanceReportGenerator.test.ts`
 
 Tests for the report generation system:
+
 - Metric collection and organization
 - Report generation
 - Category classification
@@ -105,20 +116,24 @@ Tests for the report generation system:
 - Statistics calculation
 
 **Running Tests:**
+
 ```bash
 npm test -- PerformanceReportGenerator.test.ts
 ```
 
 ### Integration Tests
+
 **Location:** `src/__tests__/integration/PerformanceTrackingIntegration.test.ts`
 
 End-to-end tests demonstrating:
+
 - Real-world metric tracking scenarios
 - Report generation with recommendations
 - Performance degradation detection
 - Optimization tracking
 
 **Running Tests:**
+
 ```bash
 npm test -- PerformanceTrackingIntegration.test.ts
 ```
@@ -132,13 +147,13 @@ import { performanceTracker } from '../performance/PerformanceTracker';
 
 function myExpensiveOperation(input: string): Result {
   const start = performance.now();
-  
+
   // ... perform operation ...
   const result = processInput(input);
-  
+
   const elapsed = performance.now() - start;
   performanceTracker.recordMetric('My Operation', elapsed);
-  
+
   return result;
 }
 ```
@@ -227,24 +242,28 @@ console.log(`Parse Performance:
 ### Understanding Metrics
 
 **Parser Metrics:**
+
 - Measured in milliseconds (ms)
 - Lower is better
 - Target: < 15ms average
 - Includes: tokenization, AST generation, semantic analysis
 
 **Compiler Metrics:**
+
 - Measured in milliseconds (ms)
 - Lower is better
 - Target: < 10ms average
 - Includes: code generation, optimization, output formatting
 
 **Memory Metrics:**
+
 - Measured in megabytes (MB)
 - Lower is better
 - Indicates: heap growth, GC pressure
 - Should stay < 50MB for 1000+ operations
 
 **Code Reduction Metrics:**
+
 - Measured in percentage (%)
 - Higher is better
 - Compares HoloScript LOC vs equivalent compiled code
@@ -296,13 +315,13 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '18'
-      
+
       - run: npm install
       - run: npm test -- benchmark
-      
+
       - name: Generate report
         run: npm run perf:report
-      
+
       - uses: actions/upload-artifact@v2
         with:
           name: performance-reports
@@ -329,7 +348,7 @@ Add new recommendation logic:
 ```typescript
 private generateRecommendations(...) {
   // ... existing recommendations ...
-  
+
   // Add custom check
   if (categories['Custom Category']) {
     const metrics = categories['Custom Category'];
@@ -351,10 +370,11 @@ fs.writeFileSync('metrics.csv', csv);
 
 // Export as Prometheus metrics
 const prometheus = Array.from(metrics.entries())
-  .map(([name, values]) => 
-    `# HELP ${name} HoloScript+ ${name}\n` +
-    `# TYPE ${name} gauge\n` +
-    `${name} ${values[values.length - 1]}`
+  .map(
+    ([name, values]) =>
+      `# HELP ${name} HoloScript+ ${name}\n` +
+      `# TYPE ${name} gauge\n` +
+      `${name} ${values[values.length - 1]}`
   )
   .join('\n');
 ```
@@ -362,17 +382,20 @@ const prometheus = Array.from(metrics.entries())
 ## Troubleshooting
 
 ### No metrics collected
+
 - Ensure `performanceTracker.recordMetric()` is being called
 - Check that performance hooks are properly imported
 - Verify tests are actually running the instrumented code
 
 ### Inaccurate measurements
+
 - Warmup before measuring (first iterations are slower)
 - Run multiple iterations for statistical significance
 - Be aware of system load affecting timings
 - Use `performance.now()` for millisecond precision
 
 ### Reports not generating
+
 - Check PerformanceTracker is initialized
 - Verify reportGenerator has access to tracker instance
 - Ensure output directory is writable

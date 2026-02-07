@@ -54,21 +54,21 @@ cd intellij-plugin
 
 ## Live Templates
 
-| Abbreviation | Description |
-|--------------|-------------|
-| `comp` | Create a composition |
-| `orb` | Create an orb object |
-| `entity` | Create an entity |
-| `@grab` | Add grabbable trait |
-| `@phys` | Add physics trait |
-| `@net` | Add networking traits |
-| `onGrab` | Add onGrab handler |
-| `onClick` | Add onClick handler |
-| `npc` | Create an NPC |
-| `quest` | Create a quest |
-| `dialogue` | Create a dialogue |
-| `template` | Create a template |
-| `using` | Instantiate a template |
+| Abbreviation | Description            |
+| ------------ | ---------------------- |
+| `comp`       | Create a composition   |
+| `orb`        | Create an orb object   |
+| `entity`     | Create an entity       |
+| `@grab`      | Add grabbable trait    |
+| `@phys`      | Add physics trait      |
+| `@net`       | Add networking traits  |
+| `onGrab`     | Add onGrab handler     |
+| `onClick`    | Add onClick handler    |
+| `npc`        | Create an NPC          |
+| `quest`      | Create a quest         |
+| `dialogue`   | Create a dialogue      |
+| `template`   | Create a template      |
+| `using`      | Instantiate a template |
 
 ## Color Settings
 
@@ -78,10 +78,12 @@ Settings → Editor → Color Scheme → HoloScript
 ## LSP Configuration
 
 The plugin automatically looks for `holoscript-lsp` in:
+
 1. `node_modules/.bin/holoscript-lsp` (project local)
 2. Global PATH (`npx holoscript-lsp`)
 
 Install the LSP server:
+
 ```bash
 # Global installation
 npm install -g @holoscript/lsp

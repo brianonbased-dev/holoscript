@@ -1,821 +1,900 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HoloScript - Create VR Worlds Without the Complexity</title>
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="HoloScript is an open-source language that makes building VR/AR experiences as simple as writing HTML. 56 traits. Any browser. Zero setup.">
-    <meta name="keywords" content="VR, AR, WebXR, HoloScript, virtual reality, augmented reality, 3D development, VR language">
-    <meta name="author" content="HoloScript Team">
+    <meta
+      name="description"
+      content="HoloScript is an open-source language that makes building VR/AR experiences as simple as writing HTML. 56 traits. Any browser. Zero setup."
+    />
+    <meta
+      name="keywords"
+      content="VR, AR, WebXR, HoloScript, virtual reality, augmented reality, 3D development, VR language"
+    />
+    <meta name="author" content="HoloScript Team" />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://holoscript.net/">
-    <meta property="og:title" content="HoloScript - Create VR Worlds Without the Complexity">
-    <meta property="og:description" content="Build VR/AR experiences as simple as writing HTML. 56 traits. Any browser. Zero setup.">
-    <meta property="og:image" content="https://holoscript.net/og-image.png">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://holoscript.net/" />
+    <meta property="og:title" content="HoloScript - Create VR Worlds Without the Complexity" />
+    <meta
+      property="og:description"
+      content="Build VR/AR experiences as simple as writing HTML. 56 traits. Any browser. Zero setup."
+    />
+    <meta property="og:image" content="https://holoscript.net/og-image.png" />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://holoscript.net/">
-    <meta property="twitter:title" content="HoloScript - Create VR Worlds Without the Complexity">
-    <meta property="twitter:description" content="Build VR/AR experiences as simple as writing HTML. 56 traits. Any browser. Zero setup.">
-    <meta property="twitter:image" content="https://holoscript.net/og-image.png">
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://holoscript.net/" />
+    <meta property="twitter:title" content="HoloScript - Create VR Worlds Without the Complexity" />
+    <meta
+      property="twitter:description"
+      content="Build VR/AR experiences as simple as writing HTML. 56 traits. Any browser. Zero setup."
+    />
+    <meta property="twitter:image" content="https://holoscript.net/og-image.png" />
 
     <style>
-        /* CSS Custom Properties */
-        :root {
-            --bg-primary: #0a0a1a;
-            --bg-card: #12122a;
-            --accent-cyan: #00ffff;
-            --accent-purple: #8b5cf6;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0b8;
-            --border-glass: rgba(255, 255, 255, 0.1);
-            --shadow-glow: 0 0 30px rgba(0, 255, 255, 0.2);
-            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --gradient-hero: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            --gradient-card: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(139, 92, 246, 0.05));
-        }
+      /* CSS Custom Properties */
+      :root {
+        --bg-primary: #0a0a1a;
+        --bg-card: #12122a;
+        --accent-cyan: #00ffff;
+        --accent-purple: #8b5cf6;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a0b8;
+        --border-glass: rgba(255, 255, 255, 0.1);
+        --shadow-glow: 0 0 30px rgba(0, 255, 255, 0.2);
+        --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+        --gradient-hero: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+        --gradient-card: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(139, 92, 246, 0.05));
+      }
 
-        /* Reset & Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      /* Reset & Base Styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        html {
-            scroll-behavior: smooth;
-        }
+      html {
+        scroll-behavior: smooth;
+      }
 
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Oxygen,
+          Ubuntu,
+          Cantarell,
+          sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
 
-        /* Typography */
-        h1, h2, h3, h4, h5, h6 {
-            line-height: 1.2;
-            font-weight: 700;
-        }
+      /* Typography */
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        line-height: 1.2;
+        font-weight: 700;
+      }
 
-        h1 {
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
-            background: var(--gradient-hero);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1.5rem;
-        }
+      h1 {
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        background: var(--gradient-hero);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1.5rem;
+      }
 
-        h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            margin-bottom: 1rem;
-        }
+      h2 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        margin-bottom: 1rem;
+      }
 
-        h3 {
-            font-size: clamp(1.5rem, 3vw, 2rem);
-            margin-bottom: 0.75rem;
-        }
+      h3 {
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        margin-bottom: 0.75rem;
+      }
 
-        p {
-            color: var(--text-secondary);
-            font-size: clamp(1rem, 2vw, 1.125rem);
-        }
+      p {
+        color: var(--text-secondary);
+        font-size: clamp(1rem, 2vw, 1.125rem);
+      }
 
-        /* Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
+      /* Container */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
 
-        /* Section Spacing */
+      /* Section Spacing */
+      section {
+        padding: 6rem 0;
+        opacity: 0;
+        transform: translateY(30px);
+        transition:
+          opacity 0.8s ease,
+          transform 0.8s ease;
+      }
+
+      section.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-block;
+        padding: 1rem 2.5rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+      }
+
+      .btn-primary {
+        background: var(--accent-cyan);
+        color: var(--bg-primary);
+        box-shadow: var(--shadow-glow);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
+      }
+
+      .btn-outline {
+        background: transparent;
+        color: var(--text-primary);
+        border-color: var(--accent-cyan);
+      }
+
+      .btn-outline:hover {
+        background: rgba(0, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+
+      /* Glass Card */
+      .card {
+        background: var(--bg-card);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-card);
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        border-color: rgba(0, 255, 255, 0.3);
+      }
+
+      /* Grid Layouts */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+      }
+
+      /* Hero Section */
+      #hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        opacity: 1;
+        transform: none;
+      }
+
+      #hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: gridMove 20s linear infinite;
+        pointer-events: none;
+      }
+
+      @keyframes gridMove {
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(50px, 50px);
+        }
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-subtitle {
+        font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+        color: var(--text-secondary);
+        margin-bottom: 3rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 4rem;
+      }
+
+      .code-preview {
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: left;
+        font-family: 'Courier New', monospace;
+        font-size: 0.95rem;
+        line-height: 1.8;
+        box-shadow: var(--shadow-card);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .code-preview::before {
+        content: 'example.holo';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 0.5rem 1rem;
+        background: rgba(0, 255, 255, 0.1);
+        border-bottom: 1px solid var(--border-glass);
+        font-size: 0.75rem;
+        color: var(--accent-cyan);
+      }
+
+      .code-preview pre {
+        margin-top: 2rem;
+        overflow-x: auto;
+      }
+
+      .code-line {
+        opacity: 0;
+        animation: typewriter 0.1s forwards;
+      }
+
+      @keyframes typewriter {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .keyword {
+        color: var(--accent-purple);
+      }
+      .string {
+        color: #7dd3fc;
+      }
+      .property {
+        color: #fbbf24;
+      }
+      .value {
+        color: #34d399;
+      }
+      .decorator {
+        color: var(--accent-cyan);
+      }
+
+      /* Problem Section */
+      #problem {
+        background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(18, 18, 42, 0.3) 100%);
+      }
+
+      .problem-card {
+        text-align: center;
+      }
+
+      .problem-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+      }
+
+      .problem-card h3 {
+        color: #ef4444;
+      }
+
+      /* Solution Section */
+      .solution-card {
+        text-align: center;
+      }
+
+      .solution-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        display: block;
+      }
+
+      .solution-card h3 {
+        color: var(--accent-cyan);
+      }
+
+      /* Code Comparison */
+      #comparison {
+        background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(18, 18, 42, 0.5) 100%);
+      }
+
+      .comparison-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+      }
+
+      .code-block {
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .code-header {
+        background: rgba(0, 255, 255, 0.1);
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-glass);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .code-header h4 {
+        font-size: 1rem;
+        color: var(--accent-cyan);
+      }
+
+      .line-count {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+
+      .line-count.good {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+      }
+
+      .code-content {
+        padding: 1.5rem;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        line-height: 1.8;
+        overflow-x: auto;
+      }
+
+      /* Traits Showcase */
+      .traits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 3rem;
+      }
+
+      .trait-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .trait-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        padding: 1px;
+        background: var(--gradient-hero);
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .trait-card:hover::before {
+        opacity: 1;
+      }
+
+      .trait-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .trait-name {
+        font-family: 'Courier New', monospace;
+        color: var(--accent-cyan);
+        font-weight: 700;
+        font-size: 1.125rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .trait-desc {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+
+      .trait-category {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+
+      .cat-interaction {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+      }
+
+      .cat-visual {
+        background: rgba(168, 85, 247, 0.2);
+        color: #a855f7;
+      }
+
+      .cat-physics {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+      }
+
+      .cat-smart {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+      }
+
+      /* Use Cases */
+      #use-cases {
+        background: linear-gradient(180deg, rgba(18, 18, 42, 0.3) 0%, var(--bg-primary) 100%);
+      }
+
+      .use-case-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .use-case-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-hero);
+      }
+
+      .use-case-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+
+      /* Sample Code Tabs */
+      .tabs {
+        margin-top: 3rem;
+      }
+
+      .tab-labels {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0;
+        flex-wrap: wrap;
+      }
+
+      .tab-labels label {
+        padding: 1rem 2rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 8px 8px 0 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+      }
+
+      .tab-labels label:hover {
+        background: rgba(0, 255, 255, 0.1);
+      }
+
+      input[type='radio'].tab-input {
+        display: none;
+      }
+
+      .tab-content {
+        display: none;
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 0 12px 12px 12px;
+        padding: 2rem;
+        font-family: 'Courier New', monospace;
+        font-size: 0.95rem;
+        line-height: 1.8;
+        overflow-x: auto;
+      }
+
+      #tab1:checked ~ .tab-contents #content1,
+      #tab2:checked ~ .tab-contents #content2,
+      #tab3:checked ~ .tab-contents #content3 {
+        display: block;
+      }
+
+      #tab1:checked ~ .tab-labels label[for='tab1'],
+      #tab2:checked ~ .tab-labels label[for='tab2'],
+      #tab3:checked ~ .tab-labels label[for='tab3'] {
+        background: rgba(0, 255, 255, 0.1);
+        border-bottom-color: transparent;
+        color: var(--accent-cyan);
+      }
+
+      /* Testimonials */
+      .testimonial-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 2rem;
+        position: relative;
+      }
+
+      .quote-icon {
+        font-size: 3rem;
+        color: var(--accent-cyan);
+        opacity: 0.2;
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+      }
+
+      .testimonial-text {
+        font-size: 1.125rem;
+        font-style: italic;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .testimonial-author {
+        color: var(--accent-cyan);
+        font-weight: 600;
+      }
+
+      /* Features Grid */
+      .feature-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+
+      .feature-number {
+        display: inline-block;
+        background: var(--gradient-hero);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+      }
+
+      /* CTA Section */
+      #cta {
+        text-align: center;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(139, 92, 246, 0.05));
+        border-radius: 24px;
+        padding: 4rem 2rem;
+        margin: 4rem auto;
+        max-width: 900px;
+      }
+
+      #cta h2 {
+        background: var(--gradient-hero);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1.5rem;
+      }
+
+      #cta p {
+        font-size: 1.25rem;
+        margin-bottom: 2.5rem;
+      }
+
+      /* Footer */
+      footer {
+        background: var(--bg-card);
+        border-top: 1px solid var(--border-glass);
+        padding: 3rem 0 2rem;
+        margin-top: 4rem;
+      }
+
+      .footer-content {
+        text-align: center;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+      }
+
+      .footer-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        font-size: 1.125rem;
+      }
+
+      .footer-links a:hover {
+        color: var(--accent-cyan);
+      }
+
+      .footer-tagline {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+      }
+
+      .license-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: rgba(0, 255, 255, 0.1);
+        border: 1px solid var(--accent-cyan);
+        border-radius: 20px;
+        color: var(--accent-cyan);
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-top: 1rem;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
         section {
-            padding: 6rem 0;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
+          padding: 4rem 0;
         }
 
-        section.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Buttons */
-        .btn {
-            display: inline-block;
-            padding: 1rem 2.5rem;
-            font-size: 1.125rem;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .btn-primary {
-            background: var(--accent-cyan);
-            color: var(--bg-primary);
-            box-shadow: var(--shadow-glow);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--text-primary);
-            border-color: var(--accent-cyan);
-        }
-
-        .btn-outline:hover {
-            background: rgba(0, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        /* Glass Card */
-        .card {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow-card);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-            border-color: rgba(0, 255, 255, 0.3);
-        }
-
-        /* Grid Layouts */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        /* Hero Section */
-        #hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            opacity: 1;
-            transform: none;
-        }
-
-        #hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-            pointer-events: none;
-        }
-
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-subtitle {
-            font-size: clamp(1.125rem, 2.5vw, 1.5rem);
-            color: var(--text-secondary);
-            margin-bottom: 3rem;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
+        .container {
+          padding: 0 1.5rem;
         }
 
         .hero-buttons {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 4rem;
+          flex-direction: column;
+          align-items: center;
         }
 
-        .code-preview {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 12px;
-            padding: 2rem;
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: left;
-            font-family: 'Courier New', monospace;
-            font-size: 0.95rem;
-            line-height: 1.8;
-            box-shadow: var(--shadow-card);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .code-preview::before {
-            content: 'example.holo';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            padding: 0.5rem 1rem;
-            background: rgba(0, 255, 255, 0.1);
-            border-bottom: 1px solid var(--border-glass);
-            font-size: 0.75rem;
-            color: var(--accent-cyan);
-        }
-
-        .code-preview pre {
-            margin-top: 2rem;
-            overflow-x: auto;
-        }
-
-        .code-line {
-            opacity: 0;
-            animation: typewriter 0.1s forwards;
-        }
-
-        @keyframes typewriter {
-            to { opacity: 1; }
-        }
-
-        .keyword { color: var(--accent-purple); }
-        .string { color: #7dd3fc; }
-        .property { color: #fbbf24; }
-        .value { color: #34d399; }
-        .decorator { color: var(--accent-cyan); }
-
-        /* Problem Section */
-        #problem {
-            background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(18, 18, 42, 0.3) 100%);
-        }
-
-        .problem-card {
-            text-align: center;
-        }
-
-        .problem-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .problem-card h3 {
-            color: #ef4444;
-        }
-
-        /* Solution Section */
-        .solution-card {
-            text-align: center;
-        }
-
-        .solution-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .solution-card h3 {
-            color: var(--accent-cyan);
-        }
-
-        /* Code Comparison */
-        #comparison {
-            background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(18, 18, 42, 0.5) 100%);
+        .btn {
+          width: 100%;
+          max-width: 300px;
+          text-align: center;
         }
 
         .comparison-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
+          grid-template-columns: 1fr;
         }
 
-        .code-block {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .code-header {
-            background: rgba(0, 255, 255, 0.1);
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-glass);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .code-header h4 {
-            font-size: 1rem;
-            color: var(--accent-cyan);
-        }
-
-        .line-count {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        .line-count.good {
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-        }
-
-        .code-content {
-            padding: 1.5rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.875rem;
-            line-height: 1.8;
-            overflow-x: auto;
-        }
-
-        /* Traits Showcase */
         .traits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 3rem;
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         }
+      }
 
-        .trait-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
+      /* Scroll Indicator */
+      .scroll-indicator {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: bounce 2s infinite;
+      }
+
+      @keyframes bounce {
+        0%,
+        20%,
+        50%,
+        80%,
+        100% {
+          transform: translateX(-50%) translateY(0);
         }
-
-        .trait-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 12px;
-            padding: 1px;
-            background: var(--gradient-hero);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        40% {
+          transform: translateX(-50%) translateY(-10px);
         }
-
-        .trait-card:hover::before {
-            opacity: 1;
+        60% {
+          transform: translateX(-50%) translateY(-5px);
         }
+      }
 
-        .trait-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .trait-name {
-            font-family: 'Courier New', monospace;
-            color: var(--accent-cyan);
-            font-weight: 700;
-            font-size: 1.125rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .trait-desc {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .trait-category {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-        }
-
-        .cat-interaction {
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-        }
-
-        .cat-visual {
-            background: rgba(168, 85, 247, 0.2);
-            color: #a855f7;
-        }
-
-        .cat-physics {
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-        }
-
-        .cat-smart {
-            background: rgba(251, 191, 36, 0.2);
-            color: #fbbf24;
-        }
-
-        /* Use Cases */
-        #use-cases {
-            background: linear-gradient(180deg, rgba(18, 18, 42, 0.3) 0%, var(--bg-primary) 100%);
-        }
-
-        .use-case-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 2.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .use-case-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-hero);
-        }
-
-        .use-case-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        /* Sample Code Tabs */
-        .tabs {
-            margin-top: 3rem;
-        }
-
-        .tab-labels {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0;
-            flex-wrap: wrap;
-        }
-
-        .tab-labels label {
-            padding: 1rem 2rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 8px 8px 0 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .tab-labels label:hover {
-            background: rgba(0, 255, 255, 0.1);
-        }
-
-        input[type="radio"].tab-input {
-            display: none;
-        }
-
-        .tab-content {
-            display: none;
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 0 12px 12px 12px;
-            padding: 2rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.95rem;
-            line-height: 1.8;
-            overflow-x: auto;
-        }
-
-        #tab1:checked ~ .tab-contents #content1,
-        #tab2:checked ~ .tab-contents #content2,
-        #tab3:checked ~ .tab-contents #content3 {
-            display: block;
-        }
-
-        #tab1:checked ~ .tab-labels label[for="tab1"],
-        #tab2:checked ~ .tab-labels label[for="tab2"],
-        #tab3:checked ~ .tab-labels label[for="tab3"] {
-            background: rgba(0, 255, 255, 0.1);
-            border-bottom-color: transparent;
-            color: var(--accent-cyan);
-        }
-
-        /* Testimonials */
-        .testimonial-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 2rem;
-            position: relative;
-        }
-
-        .quote-icon {
-            font-size: 3rem;
-            color: var(--accent-cyan);
-            opacity: 0.2;
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-        }
-
-        .testimonial-text {
-            font-size: 1.125rem;
-            font-style: italic;
-            margin-bottom: 1.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .testimonial-author {
-            color: var(--accent-cyan);
-            font-weight: 600;
-        }
-
-        /* Features Grid */
-        .feature-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature-number {
-            display: inline-block;
-            background: var(--gradient-hero);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-        }
-
-        /* CTA Section */
-        #cta {
-            text-align: center;
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(139, 92, 246, 0.05));
-            border-radius: 24px;
-            padding: 4rem 2rem;
-            margin: 4rem auto;
-            max-width: 900px;
-        }
-
-        #cta h2 {
-            background: var(--gradient-hero);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1.5rem;
-        }
-
-        #cta p {
-            font-size: 1.25rem;
-            margin-bottom: 2.5rem;
-        }
-
-        /* Footer */
-        footer {
-            background: var(--bg-card);
-            border-top: 1px solid var(--border-glass);
-            padding: 3rem 0 2rem;
-            margin-top: 4rem;
-        }
-
-        .footer-content {
-            text-align: center;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-        }
-
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.3s ease;
-            font-size: 1.125rem;
-        }
-
-        .footer-links a:hover {
-            color: var(--accent-cyan);
-        }
-
-        .footer-tagline {
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-        }
-
-        .license-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid var(--accent-cyan);
-            border-radius: 20px;
-            color: var(--accent-cyan);
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-top: 1rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            section {
-                padding: 4rem 0;
-            }
-
-            .container {
-                padding: 0 1.5rem;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .btn {
-                width: 100%;
-                max-width: 300px;
-                text-align: center;
-            }
-
-            .comparison-container {
-                grid-template-columns: 1fr;
-            }
-
-            .traits-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-        }
-
-        /* Scroll Indicator */
-        .scroll-indicator {
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-            40% { transform: translateX(-50%) translateY(-10px); }
-            60% { transform: translateX(-50%) translateY(-5px); }
-        }
-
-        .scroll-arrow {
-            font-size: 2rem;
-            color: var(--accent-cyan);
-            opacity: 0.6;
-        }
+      .scroll-arrow {
+        font-size: 2rem;
+        color: var(--accent-cyan);
+        opacity: 0.6;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- HERO SECTION -->
     <section id="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1>Create VR Worlds Without the Complexity</h1>
-                <p class="hero-subtitle">
-                    HoloScript is an open-source language that makes building VR/AR experiences as simple as writing HTML. 56 traits. Any browser. Zero setup.
-                </p>
+      <div class="container">
+        <div class="hero-content">
+          <h1>Create VR Worlds Without the Complexity</h1>
+          <p class="hero-subtitle">
+            HoloScript is an open-source language that makes building VR/AR experiences as simple as
+            writing HTML. 56 traits. Any browser. Zero setup.
+          </p>
 
-                <div class="hero-buttons">
-                    <a href="#cta" class="btn btn-primary">Get Started Free</a>
-                    <a href="https://github.com/brianonbased-dev/Holoscript" class="btn btn-outline">View on GitHub</a>
-                </div>
+          <div class="hero-buttons">
+            <a href="#cta" class="btn btn-primary">Get Started Free</a>
+            <a href="https://github.com/brianonbased-dev/Holoscript" class="btn btn-outline"
+              >View on GitHub</a
+            >
+          </div>
 
-                <div class="code-preview">
-                    <pre><code><span class="code-line" style="animation-delay: 0.1s"><span class="keyword">composition</span> <span class="string">"My World"</span> {</span>
+          <div class="code-preview">
+            <pre><code><span class="code-line" style="animation-delay: 0.1s"><span class="keyword">composition</span> <span class="string">"My World"</span> {</span>
 <span class="code-line" style="animation-delay: 0.3s">  <span class="keyword">object</span> <span class="string">"Crystal"</span> <span class="decorator">@spinning</span> <span class="decorator">@glowing</span> {</span>
 <span class="code-line" style="animation-delay: 0.5s">    <span class="property">geometry:</span> <span class="string">"sphere"</span></span>
 <span class="code-line" style="animation-delay: 0.7s">    <span class="property">color:</span> <span class="string">"#00ffff"</span></span>
 <span class="code-line" style="animation-delay: 0.9s">    <span class="property">position:</span> [<span class="value">0</span>, <span class="value">2</span>, <span class="value">-3</span>]</span>
 <span class="code-line" style="animation-delay: 1.1s">  }</span>
 <span class="code-line" style="animation-delay: 1.3s">}</span></code></pre>
-                </div>
-            </div>
-            <div class="scroll-indicator">
-                <div class="scroll-arrow">↓</div>
-            </div>
+          </div>
         </div>
+        <div class="scroll-indicator">
+          <div class="scroll-arrow">↓</div>
+        </div>
+      </div>
     </section>
 
     <!-- PROBLEM SECTION -->
     <section id="problem">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem;">The Problem with VR Development</h2>
-            <div class="grid-3">
-                <div class="card problem-card">
-                    <span class="problem-icon">📚</span>
-                    <h3>Steep Learning Curve</h3>
-                    <p>Traditional VR tools like Unity or Unreal require months of study before you can build even simple experiences. Complex SDKs, engine-specific APIs, and verbose code block creativity.</p>
-                </div>
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 3rem">The Problem with VR Development</h2>
+        <div class="grid-3">
+          <div class="card problem-card">
+            <span class="problem-icon">📚</span>
+            <h3>Steep Learning Curve</h3>
+            <p>
+              Traditional VR tools like Unity or Unreal require months of study before you can build
+              even simple experiences. Complex SDKs, engine-specific APIs, and verbose code block
+              creativity.
+            </p>
+          </div>
 
-                <div class="card problem-card">
-                    <span class="problem-icon">🧩</span>
-                    <h3>Too Much Boilerplate</h3>
-                    <p>Creating a simple 3D scene requires 200+ lines of setup code. Scene graphs, materials, renderers, cameras - endless configuration before you see results.</p>
-                </div>
+          <div class="card problem-card">
+            <span class="problem-icon">🧩</span>
+            <h3>Too Much Boilerplate</h3>
+            <p>
+              Creating a simple 3D scene requires 200+ lines of setup code. Scene graphs, materials,
+              renderers, cameras - endless configuration before you see results.
+            </p>
+          </div>
 
-                <div class="card problem-card">
-                    <span class="problem-icon">🔒</span>
-                    <h3>Platform Lock-in</h3>
-                    <p>Build for Unity, can't use in Unreal. Build for one platform, rewrite for another. No universal format means wasted time and duplicated effort.</p>
-                </div>
-            </div>
+          <div class="card problem-card">
+            <span class="problem-icon">🔒</span>
+            <h3>Platform Lock-in</h3>
+            <p>
+              Build for Unity, can't use in Unreal. Build for one platform, rewrite for another. No
+              universal format means wasted time and duplicated effort.
+            </p>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- SOLUTION SECTION -->
     <section id="solution">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem;">The HoloScript Solution</h2>
-            <div class="grid-3">
-                <div class="card solution-card">
-                    <span class="solution-icon">✍️</span>
-                    <h3>Write It</h3>
-                    <p>Describe your VR world in plain .holo files using intuitive syntax. No complex APIs or framework knowledge required. Just write what you want to see.</p>
-                </div>
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 3rem">The HoloScript Solution</h2>
+        <div class="grid-3">
+          <div class="card solution-card">
+            <span class="solution-icon">✍️</span>
+            <h3>Write It</h3>
+            <p>
+              Describe your VR world in plain .holo files using intuitive syntax. No complex APIs or
+              framework knowledge required. Just write what you want to see.
+            </p>
+          </div>
 
-                <div class="card solution-card">
-                    <span class="solution-icon">👁️</span>
-                    <h3>See It</h3>
-                    <p>Instant browser preview with WebXR support. See changes in real-time. Test on desktop, mobile, or VR headset without exports or compilation steps.</p>
-                </div>
+          <div class="card solution-card">
+            <span class="solution-icon">👁️</span>
+            <h3>See It</h3>
+            <p>
+              Instant browser preview with WebXR support. See changes in real-time. Test on desktop,
+              mobile, or VR headset without exports or compilation steps.
+            </p>
+          </div>
 
-                <div class="card solution-card">
-                    <span class="solution-icon">🚀</span>
-                    <h3>Share It</h3>
-                    <p>One-click share links that run everywhere. Your VR world works in any modern browser on any device. True write-once, deploy-anywhere.</p>
-                </div>
-            </div>
+          <div class="card solution-card">
+            <span class="solution-icon">🚀</span>
+            <h3>Share It</h3>
+            <p>
+              One-click share links that run everywhere. Your VR world works in any modern browser
+              on any device. True write-once, deploy-anywhere.
+            </p>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- CODE COMPARISON -->
     <section id="comparison">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 1rem;">See the Difference</h2>
-            <p style="text-align: center; max-width: 700px; margin: 0 auto 3rem; font-size: 1.125rem;">
-                Creating a simple 3D scene with a glowing, spinning sphere. Compare traditional Three.js with HoloScript.
-            </p>
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 1rem">See the Difference</h2>
+        <p style="text-align: center; max-width: 700px; margin: 0 auto 3rem; font-size: 1.125rem">
+          Creating a simple 3D scene with a glowing, spinning sphere. Compare traditional Three.js
+          with HoloScript.
+        </p>
 
-            <div class="comparison-container">
-                <div class="code-block">
-                    <div class="code-header">
-                        <h4>Three.js</h4>
-                        <span class="line-count">32 lines</span>
-                    </div>
-                    <div class="code-content">
-<pre><code><span class="keyword">import</span> * <span class="keyword">as</span> THREE <span class="keyword">from</span> <span class="string">'three'</span>;
+        <div class="comparison-container">
+          <div class="code-block">
+            <div class="code-header">
+              <h4>Three.js</h4>
+              <span class="line-count">32 lines</span>
+            </div>
+            <div class="code-content">
+              <pre><code><span class="keyword">import</span> * <span class="keyword">as</span> THREE <span class="keyword">from</span> <span class="string">'three'</span>;
 
 <span class="keyword">const</span> scene = <span class="keyword">new</span> THREE.Scene();
 <span class="keyword">const</span> camera = <span class="keyword">new</span> THREE.PerspectiveCamera(
@@ -850,166 +929,178 @@ camera.position.z = <span class="value">5</span>;
   renderer.render(scene, camera);
 }
 animate();</code></pre>
-                    </div>
-                </div>
+            </div>
+          </div>
 
-                <div class="code-block">
-                    <div class="code-header">
-                        <h4>HoloScript</h4>
-                        <span class="line-count good">6 lines</span>
-                    </div>
-                    <div class="code-content">
-<pre><code><span class="keyword">composition</span> <span class="string">"My World"</span> {
+          <div class="code-block">
+            <div class="code-header">
+              <h4>HoloScript</h4>
+              <span class="line-count good">6 lines</span>
+            </div>
+            <div class="code-content">
+              <pre><code><span class="keyword">composition</span> <span class="string">"My World"</span> {
   <span class="keyword">object</span> <span class="string">"Crystal"</span> <span class="decorator">@spinning</span> <span class="decorator">@glowing</span> {
     <span class="property">geometry:</span> <span class="string">"sphere"</span>
     <span class="property">color:</span> <span class="string">"#00ffff"</span>
     <span class="property">position:</span> [<span class="value">0</span>, <span class="value">2</span>, <span class="value">-3</span>]
   }
 }</code></pre>
-                    </div>
-                </div>
             </div>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- TRAITS SHOWCASE -->
     <section id="traits">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 1rem;">56 Built-in Traits</h2>
-            <p style="text-align: center; max-width: 700px; margin: 0 auto; font-size: 1.125rem;">
-                Add powerful behaviors with simple decorators. No code required.
-            </p>
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 1rem">56 Built-in Traits</h2>
+        <p style="text-align: center; max-width: 700px; margin: 0 auto; font-size: 1.125rem">
+          Add powerful behaviors with simple decorators. No code required.
+        </p>
 
-            <div class="traits-grid">
-                <div class="trait-card">
-                    <div class="trait-category cat-interaction">Interaction</div>
-                    <div class="trait-name">@grabbable</div>
-                    <p class="trait-desc">Pick up and move objects with VR controllers</p>
-                </div>
+        <div class="traits-grid">
+          <div class="trait-card">
+            <div class="trait-category cat-interaction">Interaction</div>
+            <div class="trait-name">@grabbable</div>
+            <p class="trait-desc">Pick up and move objects with VR controllers</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-interaction">Interaction</div>
-                    <div class="trait-name">@teleport</div>
-                    <p class="trait-desc">Enable teleport movement targets</p>
-                </div>
+          <div class="trait-card">
+            <div class="trait-category cat-interaction">Interaction</div>
+            <div class="trait-name">@teleport</div>
+            <p class="trait-desc">Enable teleport movement targets</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-interaction">Interaction</div>
-                    <div class="trait-name">@clickable</div>
-                    <p class="trait-desc">Respond to user clicks and taps</p>
-                </div>
+          <div class="trait-card">
+            <div class="trait-category cat-interaction">Interaction</div>
+            <div class="trait-name">@clickable</div>
+            <p class="trait-desc">Respond to user clicks and taps</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-visual">Visual</div>
-                    <div class="trait-name">@glowing</div>
-                    <p class="trait-desc">Add emissive glow effects</p>
-                </div>
+          <div class="trait-card">
+            <div class="trait-category cat-visual">Visual</div>
+            <div class="trait-name">@glowing</div>
+            <p class="trait-desc">Add emissive glow effects</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-visual">Visual</div>
-                    <div class="trait-name">@particle_system</div>
-                    <p class="trait-desc">Generate particle effects and animations</p>
-                </div>
+          <div class="trait-card">
+            <div class="trait-category cat-visual">Visual</div>
+            <div class="trait-name">@particle_system</div>
+            <p class="trait-desc">Generate particle effects and animations</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-visual">Visual</div>
-                    <div class="trait-name">@weather</div>
-                    <p class="trait-desc">Add rain, snow, or fog atmospherics</p>
-                </div>
+          <div class="trait-card">
+            <div class="trait-category cat-visual">Visual</div>
+            <div class="trait-name">@weather</div>
+            <p class="trait-desc">Add rain, snow, or fog atmospherics</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-physics">Physics</div>
-                    <div class="trait-name">@physics</div>
-                    <p class="trait-desc">Enable realistic physics simulation</p>
-                </div>
+          <div class="trait-card">
+            <div class="trait-category cat-physics">Physics</div>
+            <div class="trait-name">@physics</div>
+            <p class="trait-desc">Enable realistic physics simulation</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-physics">Physics</div>
-                    <div class="trait-name">@cloth</div>
-                    <p class="trait-desc">Simulate fabric and soft body dynamics</p>
-                </div>
+          <div class="trait-card">
+            <div class="trait-category cat-physics">Physics</div>
+            <div class="trait-name">@cloth</div>
+            <p class="trait-desc">Simulate fabric and soft body dynamics</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-physics">Physics</div>
-                    <div class="trait-name">@portal</div>
-                    <p class="trait-desc">Create portals between spaces</p>
-                </div>
+          <div class="trait-card">
+            <div class="trait-category cat-physics">Physics</div>
+            <div class="trait-name">@portal</div>
+            <p class="trait-desc">Create portals between spaces</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-smart">Smart</div>
-                    <div class="trait-name">@behavior_tree</div>
-                    <p class="trait-desc">AI-driven object behaviors</p>
-                </div>
+          <div class="trait-card">
+            <div class="trait-category cat-smart">Smart</div>
+            <div class="trait-name">@behavior_tree</div>
+            <p class="trait-desc">AI-driven object behaviors</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-smart">Smart</div>
-                    <div class="trait-name">@networked</div>
-                    <p class="trait-desc">Sync objects across multiplayer sessions</p>
-                </div>
+          <div class="trait-card">
+            <div class="trait-category cat-smart">Smart</div>
+            <div class="trait-name">@networked</div>
+            <p class="trait-desc">Sync objects across multiplayer sessions</p>
+          </div>
 
-                <div class="trait-card">
-                    <div class="trait-category cat-smart">Smart</div>
-                    <div class="trait-name">@hand_tracking</div>
-                    <p class="trait-desc">Interact with natural hand gestures</p>
-                </div>
-            </div>
+          <div class="trait-card">
+            <div class="trait-category cat-smart">Smart</div>
+            <div class="trait-name">@hand_tracking</div>
+            <p class="trait-desc">Interact with natural hand gestures</p>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- USE CASES -->
     <section id="use-cases">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem;">Built for Every Creator</h2>
-            <div class="grid-4">
-                <div class="use-case-card">
-                    <div class="use-case-icon">🎓</div>
-                    <h3>Education</h3>
-                    <p>Virtual classrooms, interactive science labs, and historical recreations. Make learning immersive without technical barriers.</p>
-                </div>
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 3rem">Built for Every Creator</h2>
+        <div class="grid-4">
+          <div class="use-case-card">
+            <div class="use-case-icon">🎓</div>
+            <h3>Education</h3>
+            <p>
+              Virtual classrooms, interactive science labs, and historical recreations. Make
+              learning immersive without technical barriers.
+            </p>
+          </div>
 
-                <div class="use-case-card">
-                    <div class="use-case-icon">🎨</div>
-                    <h3>Art & Design</h3>
-                    <p>3D galleries, interactive exhibits, and digital installations. Express your creativity in virtual space without code complexity.</p>
-                </div>
+          <div class="use-case-card">
+            <div class="use-case-icon">🎨</div>
+            <h3>Art & Design</h3>
+            <p>
+              3D galleries, interactive exhibits, and digital installations. Express your creativity
+              in virtual space without code complexity.
+            </p>
+          </div>
 
-                <div class="use-case-card">
-                    <div class="use-case-icon">🎮</div>
-                    <h3>Gaming</h3>
-                    <p>Indie VR games, physics sandboxes, and interactive experiences. Rapid prototyping for game developers and hobbyists.</p>
-                </div>
+          <div class="use-case-card">
+            <div class="use-case-icon">🎮</div>
+            <h3>Gaming</h3>
+            <p>
+              Indie VR games, physics sandboxes, and interactive experiences. Rapid prototyping for
+              game developers and hobbyists.
+            </p>
+          </div>
 
-                <div class="use-case-card">
-                    <div class="use-case-icon">🏗️</div>
-                    <h3>Architecture</h3>
-                    <p>Walkthrough models, client presentations, and design reviews. Showcase architectural visions in immersive VR environments.</p>
-                </div>
-            </div>
+          <div class="use-case-card">
+            <div class="use-case-icon">🏗️</div>
+            <h3>Architecture</h3>
+            <p>
+              Walkthrough models, client presentations, and design reviews. Showcase architectural
+              visions in immersive VR environments.
+            </p>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- SAMPLE CODE -->
     <section id="examples">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 1rem;">See What You Can Build</h2>
-            <p style="text-align: center; max-width: 700px; margin: 0 auto; font-size: 1.125rem;">
-                Explore real-world examples. From art galleries to multiplayer rooms.
-            </p>
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 1rem">See What You Can Build</h2>
+        <p style="text-align: center; max-width: 700px; margin: 0 auto; font-size: 1.125rem">
+          Explore real-world examples. From art galleries to multiplayer rooms.
+        </p>
 
-            <div class="tabs">
-                <input type="radio" name="tabs" id="tab1" class="tab-input" checked>
-                <input type="radio" name="tabs" id="tab2" class="tab-input">
-                <input type="radio" name="tabs" id="tab3" class="tab-input">
+        <div class="tabs">
+          <input type="radio" name="tabs" id="tab1" class="tab-input" checked />
+          <input type="radio" name="tabs" id="tab2" class="tab-input" />
+          <input type="radio" name="tabs" id="tab3" class="tab-input" />
 
-                <div class="tab-labels">
-                    <label for="tab1">Art Gallery</label>
-                    <label for="tab2">Physics Playground</label>
-                    <label for="tab3">Multiplayer Room</label>
-                </div>
+          <div class="tab-labels">
+            <label for="tab1">Art Gallery</label>
+            <label for="tab2">Physics Playground</label>
+            <label for="tab3">Multiplayer Room</label>
+          </div>
 
-                <div class="tab-contents">
-                    <div id="content1" class="tab-content">
-<pre><code><span class="keyword">composition</span> <span class="string">"Virtual Gallery"</span> {
+          <div class="tab-contents">
+            <div id="content1" class="tab-content">
+              <pre><code><span class="keyword">composition</span> <span class="string">"Virtual Gallery"</span> {
   <span class="keyword">environment</span> {
     <span class="property">skybox:</span> <span class="string">"museum"</span>
     <span class="property">lighting:</span> <span class="string">"gallery"</span>
@@ -1033,10 +1124,10 @@ animate();</code></pre>
     <span class="property">position:</span> [<span class="value">3</span>, <span class="value">1</span>, <span class="value">-3</span>]
   }
 }</code></pre>
-                    </div>
+            </div>
 
-                    <div id="content2" class="tab-content">
-<pre><code><span class="keyword">composition</span> <span class="string">"Physics Sandbox"</span> {
+            <div id="content2" class="tab-content">
+              <pre><code><span class="keyword">composition</span> <span class="string">"Physics Sandbox"</span> {
   <span class="keyword">environment</span> {
     <span class="property">gravity:</span> [<span class="value">0</span>, <span class="value">-9.8</span>, <span class="value">0</span>]
   }
@@ -1065,10 +1156,10 @@ animate();</code></pre>
     <span class="property">color:</span> <span class="string">"#ff00ff"</span>
   }
 }</code></pre>
-                    </div>
+            </div>
 
-                    <div id="content3" class="tab-content">
-<pre><code><span class="keyword">composition</span> <span class="string">"Multiplayer Lounge"</span> <span class="decorator">@networked</span> {
+            <div id="content3" class="tab-content">
+              <pre><code><span class="keyword">composition</span> <span class="string">"Multiplayer Lounge"</span> <span class="decorator">@networked</span> {
   <span class="keyword">environment</span> {
     <span class="property">skybox:</span> <span class="string">"space"</span>
     <span class="property">ambient_sound:</span> <span class="string">"chill-music.mp3"</span>
@@ -1097,148 +1188,156 @@ animate();</code></pre>
     <span class="property">avatar_model:</span> <span class="string">"default"</span>
   }
 }</code></pre>
-                    </div>
-                </div>
             </div>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- TESTIMONIALS -->
     <section id="testimonials">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem;">Loved by Creators</h2>
-            <div class="grid-3">
-                <div class="testimonial-card">
-                    <div class="quote-icon">"</div>
-                    <p class="testimonial-text">
-                        I'm a teacher with zero coding skills. HoloScript let me build a VR history lesson in a weekend. My students were blown away!
-                    </p>
-                    <p class="testimonial-author">— Sarah T., Educator</p>
-                </div>
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 3rem">Loved by Creators</h2>
+        <div class="grid-3">
+          <div class="testimonial-card">
+            <div class="quote-icon">"</div>
+            <p class="testimonial-text">
+              I'm a teacher with zero coding skills. HoloScript let me build a VR history lesson in
+              a weekend. My students were blown away!
+            </p>
+            <p class="testimonial-author">— Sarah T., Educator</p>
+          </div>
 
-                <div class="testimonial-card">
-                    <div class="quote-icon">"</div>
-                    <p class="testimonial-text">
-                        As an artist, I never thought I could create in VR. HoloScript made it so simple - I focus on the vision, not the code.
-                    </p>
-                    <p class="testimonial-author">— Miguel R., Visual Artist</p>
-                </div>
+          <div class="testimonial-card">
+            <div class="quote-icon">"</div>
+            <p class="testimonial-text">
+              As an artist, I never thought I could create in VR. HoloScript made it so simple - I
+              focus on the vision, not the code.
+            </p>
+            <p class="testimonial-author">— Miguel R., Visual Artist</p>
+          </div>
 
-                <div class="testimonial-card">
-                    <div class="quote-icon">"</div>
-                    <p class="testimonial-text">
-                        I built a VR game for my kids in a single day. No Unity tutorials, no frustration. Just pure creativity. Incredible tool.
-                    </p>
-                    <p class="testimonial-author">— Priya K., Hobbyist</p>
-                </div>
-            </div>
+          <div class="testimonial-card">
+            <div class="quote-icon">"</div>
+            <p class="testimonial-text">
+              I built a VR game for my kids in a single day. No Unity tutorials, no frustration.
+              Just pure creativity. Incredible tool.
+            </p>
+            <p class="testimonial-author">— Priya K., Hobbyist</p>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- FEATURES -->
     <section id="features">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem;">Everything You Need</h2>
-            <div class="grid-3">
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <div class="feature-number">56</div>
-                    <h3>Built-in Traits</h3>
-                    <p>From physics to AI, every behavior you need is one decorator away</p>
-                </div>
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 3rem">Everything You Need</h2>
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-number">56</div>
+            <h3>Built-in Traits</h3>
+            <p>From physics to AI, every behavior you need is one decorator away</p>
+          </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Instant Preview</h3>
-                    <p>See your changes live in the browser. No build step, no compilation</p>
-                </div>
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Instant Preview</h3>
+            <p>See your changes live in the browser. No build step, no compilation</p>
+          </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">💎</div>
-                    <h3>Open Source</h3>
-                    <p>MIT licensed. Free forever. Built by the community, for the community</p>
-                </div>
+          <div class="feature-card">
+            <div class="feature-icon">💎</div>
+            <h3>Open Source</h3>
+            <p>MIT licensed. Free forever. Built by the community, for the community</p>
+          </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">🥽</div>
-                    <h3>WebXR Native</h3>
-                    <p>Works on any VR headset through the browser. No app store required</p>
-                </div>
+          <div class="feature-card">
+            <div class="feature-icon">🥽</div>
+            <h3>WebXR Native</h3>
+            <p>Works on any VR headset through the browser. No app store required</p>
+          </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">🤖</div>
-                    <h3>AI-Powered</h3>
-                    <p>Grok and Claude can generate HoloScript scenes from natural language</p>
-                </div>
+          <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3>AI-Powered</h3>
+            <p>Grok and Claude can generate HoloScript scenes from natural language</p>
+          </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">🔄</div>
-                    <h3>Cross-Platform Export</h3>
-                    <p>Export to Unity, Blender, VRChat, and more. No vendor lock-in</p>
-                </div>
-            </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔄</div>
+            <h3>Cross-Platform Export</h3>
+            <p>Export to Unity, Blender, VRChat, and more. No vendor lock-in</p>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- CTA -->
     <section id="cta">
-        <div class="container">
-            <h2>Ready to Build Your First VR World?</h2>
-            <p>Join creators worldwide using HoloScript. Free and open-source.</p>
-            <a href="https://github.com/brianonbased-dev/Holoscript" class="btn btn-primary" style="font-size: 1.25rem; padding: 1.25rem 3rem;">Start Building Now</a>
-        </div>
+      <div class="container">
+        <h2>Ready to Build Your First VR World?</h2>
+        <p>Join creators worldwide using HoloScript. Free and open-source.</p>
+        <a
+          href="https://github.com/brianonbased-dev/Holoscript"
+          class="btn btn-primary"
+          style="font-size: 1.25rem; padding: 1.25rem 3rem"
+          >Start Building Now</a
+        >
+      </div>
     </section>
 
     <!-- FOOTER -->
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-links">
-                    <a href="https://github.com/brianonbased-dev/Holoscript">GitHub</a>
-                    <a href="https://holoscript.net/guides/">Docs</a>
-                    <a href="https://holoscript.net/guides/quick-start">Quick Start</a>
-                    <a href="https://holoscript.net/examples/">Examples</a>
-                    <a href="https://x.com/holoscript">X / Twitter</a>
-                </div>
-                <p class="footer-tagline">Made with love for the VR community</p>
-                <span class="license-badge">MIT License</span>
-            </div>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-links">
+            <a href="https://github.com/brianonbased-dev/Holoscript">GitHub</a>
+            <a href="https://holoscript.net/guides/">Docs</a>
+            <a href="https://holoscript.net/guides/quick-start">Quick Start</a>
+            <a href="https://holoscript.net/examples/">Examples</a>
+            <a href="https://x.com/holoscript">X / Twitter</a>
+          </div>
+          <p class="footer-tagline">Made with love for the VR community</p>
+          <span class="license-badge">MIT License</span>
         </div>
+      </div>
     </footer>
 
     <script>
-        // Intersection Observer for scroll animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        };
+      // Intersection Observer for scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px',
+      };
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
-
-        // Observe all sections except hero
-        document.querySelectorAll('section:not(#hero)').forEach(section => {
-            observer.observe(section);
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
         });
+      }, observerOptions);
 
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+      // Observe all sections except hero
+      document.querySelectorAll('section:not(#hero)').forEach((section) => {
+        observer.observe(section);
+      });
+
+      // Smooth scroll for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
             });
+          }
         });
+      });
     </script>
-</body>
+  </body>
 </html>

@@ -1,6 +1,6 @@
 /**
  * HoloScript Visual - Sidebar Component
- * 
+ *
  * Node library sidebar for dragging nodes onto the canvas.
  */
 
@@ -22,7 +22,7 @@ interface NodeItemProps {
  */
 const NodeItem: React.FC<NodeItemProps> = memo(({ definition, onDragStart }) => {
   const categoryColor = CATEGORY_COLORS[definition.category];
-  
+
   return (
     <div
       className="node-item"
@@ -39,7 +39,7 @@ const NodeItem: React.FC<NodeItemProps> = memo(({ definition, onDragStart }) => 
         alignItems: 'center',
         gap: 8,
         fontSize: 13,
-        transition: 'transform 0.1s, box-shadow 0.1s'
+        transition: 'transform 0.1s, box-shadow 0.1s',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateX(4px)';
@@ -76,56 +76,52 @@ interface CategorySectionProps {
 /**
  * Collapsible category section
  */
-const CategorySection: React.FC<CategorySectionProps> = memo(({
-  title,
-  category,
-  nodes,
-  isExpanded,
-  onToggle,
-  onDragStart
-}) => {
-  const categoryColor = CATEGORY_COLORS[category];
-  
-  return (
-    <div className="category-section" style={{ marginBottom: 12 }}>
-      <button
-        onClick={onToggle}
-        style={{
-          width: '100%',
-          padding: '10px 12px',
-          backgroundColor: categoryColor,
-          border: 'none',
-          borderRadius: 6,
-          color: '#1e1e2e',
-          fontWeight: 600,
-          fontSize: 13,
-          cursor: 'pointer',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: isExpanded ? 8 : 0
-        }}
-      >
-        <span>{title}</span>
-        <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-          ▶
-        </span>
-      </button>
-      
-      {isExpanded && (
-        <div className="category-nodes" style={{ paddingLeft: 8 }}>
-          {nodes.map((node) => (
-            <NodeItem
-              key={node.type}
-              definition={node}
-              onDragStart={onDragStart}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-});
+const CategorySection: React.FC<CategorySectionProps> = memo(
+  ({ title, category, nodes, isExpanded, onToggle, onDragStart }) => {
+    const categoryColor = CATEGORY_COLORS[category];
+
+    return (
+      <div className="category-section" style={{ marginBottom: 12 }}>
+        <button
+          onClick={onToggle}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            backgroundColor: categoryColor,
+            border: 'none',
+            borderRadius: 6,
+            color: '#1e1e2e',
+            fontWeight: 600,
+            fontSize: 13,
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: isExpanded ? 8 : 0,
+          }}
+        >
+          <span>{title}</span>
+          <span
+            style={{
+              transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s',
+            }}
+          >
+            ▶
+          </span>
+        </button>
+
+        {isExpanded && (
+          <div className="category-nodes" style={{ paddingLeft: 8 }}>
+            {nodes.map((node) => (
+              <NodeItem key={node.type} definition={node} onDragStart={onDragStart} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
 
 CategorySection.displayName = 'CategorySection';
 
@@ -145,35 +141,36 @@ const Sidebar: React.FC<SidebarProps> = ({ width = 260, onDragStart }) => {
     event: true,
     action: true,
     logic: false,
-    data: false
+    data: false,
   });
-  
+
   const [searchQuery, setSearchQuery] = useState('');
-  
-  const handleDragStart = useCallback((event: React.DragEvent, nodeType: string) => {
-    event.dataTransfer.setData('application/holoscript-node', nodeType);
-    event.dataTransfer.effectAllowed = 'move';
-    onDragStart?.(event, nodeType);
-  }, [onDragStart]);
-  
+
+  const handleDragStart = useCallback(
+    (event: React.DragEvent, nodeType: string) => {
+      event.dataTransfer.setData('application/holoscript-node', nodeType);
+      event.dataTransfer.effectAllowed = 'move';
+      onDragStart?.(event, nodeType);
+    },
+    [onDragStart]
+  );
+
   const toggleCategory = useCallback((category: string) => {
     setExpandedCategories((prev) => ({
       ...prev,
-      [category]: !prev[category]
+      [category]: !prev[category],
     }));
   }, []);
-  
+
   // Filter nodes by search
   const filterNodes = (nodes: NodeTypeDefinition[]): NodeTypeDefinition[] => {
     if (!searchQuery) return nodes;
     const query = searchQuery.toLowerCase();
     return nodes.filter(
-      (n) => 
-        n.label.toLowerCase().includes(query) || 
-        n.description.toLowerCase().includes(query)
+      (n) => n.label.toLowerCase().includes(query) || n.description.toLowerCase().includes(query)
     );
   };
-  
+
   return (
     <div
       className="sidebar"
@@ -185,14 +182,12 @@ const Sidebar: React.FC<SidebarProps> = ({ width = 260, onDragStart }) => {
         padding: 12,
         overflowY: 'auto',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
       }}
     >
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
-        <h2 style={{ margin: 0, fontSize: 16, color: '#e4e4e7', marginBottom: 8 }}>
-          Node Library
-        </h2>
+        <h2 style={{ margin: 0, fontSize: 16, color: '#e4e4e7', marginBottom: 8 }}>Node Library</h2>
         <input
           type="text"
           placeholder="Search nodes..."
@@ -206,11 +201,11 @@ const Sidebar: React.FC<SidebarProps> = ({ width = 260, onDragStart }) => {
             borderRadius: 6,
             color: '#e4e4e7',
             fontSize: 13,
-            outline: 'none'
+            outline: 'none',
           }}
         />
       </div>
-      
+
       {/* Categories */}
       <div style={{ flex: 1 }}>
         <CategorySection
@@ -221,7 +216,7 @@ const Sidebar: React.FC<SidebarProps> = ({ width = 260, onDragStart }) => {
           onToggle={() => toggleCategory('event')}
           onDragStart={handleDragStart}
         />
-        
+
         <CategorySection
           title="Actions"
           category="action"
@@ -230,7 +225,7 @@ const Sidebar: React.FC<SidebarProps> = ({ width = 260, onDragStart }) => {
           onToggle={() => toggleCategory('action')}
           onDragStart={handleDragStart}
         />
-        
+
         <CategorySection
           title="Logic"
           category="logic"
@@ -239,7 +234,7 @@ const Sidebar: React.FC<SidebarProps> = ({ width = 260, onDragStart }) => {
           onToggle={() => toggleCategory('logic')}
           onDragStart={handleDragStart}
         />
-        
+
         <CategorySection
           title="Data"
           category="data"
@@ -249,15 +244,17 @@ const Sidebar: React.FC<SidebarProps> = ({ width = 260, onDragStart }) => {
           onDragStart={handleDragStart}
         />
       </div>
-      
+
       {/* Footer */}
-      <div style={{ 
-        paddingTop: 12, 
-        borderTop: '1px solid #3d3d4d', 
-        fontSize: 11, 
-        color: '#71717a',
-        textAlign: 'center'
-      }}>
+      <div
+        style={{
+          paddingTop: 12,
+          borderTop: '1px solid #3d3d4d',
+          fontSize: 11,
+          color: '#71717a',
+          textAlign: 'center',
+        }}
+      >
         Drag nodes to canvas
       </div>
     </div>

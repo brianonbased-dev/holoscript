@@ -6,8 +6,19 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { DTDLCompiler, DTDL_TRAIT_COMPONENTS, type DTDLCompilerOptions, type DTDLInterface } from './DTDLCompiler';
-import type { HoloComposition, HoloObjectDecl, HoloTemplate, HoloState, HoloLogic } from '../parser/HoloCompositionTypes';
+import {
+  DTDLCompiler,
+  DTDL_TRAIT_COMPONENTS,
+  type DTDLCompilerOptions,
+  type DTDLInterface,
+} from './DTDLCompiler';
+import type {
+  HoloComposition,
+  HoloObjectDecl,
+  HoloTemplate,
+  HoloState,
+  HoloLogic,
+} from '../parser/HoloCompositionTypes';
 
 describe('DTDLCompiler', () => {
   let compiler: DTDLCompiler;
@@ -83,7 +94,7 @@ describe('DTDLCompiler', () => {
       const composition = createComposition({ name: 'MyDigitalTwin' });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const mainInterface = interfaces.find(i => i.displayName === 'MyDigitalTwin');
+      const mainInterface = interfaces.find((i) => i.displayName === 'MyDigitalTwin');
       expect(mainInterface).toBeDefined();
       expect(mainInterface?.['@type']).toBe('Interface');
     });
@@ -147,16 +158,18 @@ describe('DTDLCompiler', () => {
     it('should exclude trait components when disabled', () => {
       const customCompiler = new DTDLCompiler({ includeTraitComponents: false });
       const composition = createComposition({
-        objects: [createObject({
-          name: 'PhysicsObject',
-          traits: ['physics', 'grabbable'],
-          properties: [{ key: 'state', value: {} }], // Make it need interface
-        })],
+        objects: [
+          createObject({
+            name: 'PhysicsObject',
+            traits: ['physics', 'grabbable'],
+            properties: [{ key: 'state', value: {} }], // Make it need interface
+          }),
+        ],
       });
       const interfaces = parseDTDL(customCompiler.compile(composition));
 
-      const objInterface = interfaces.find(i => i.displayName === 'PhysicsObject');
-      const components = objInterface?.contents?.filter(c => c['@type'] === 'Component');
+      const objInterface = interfaces.find((i) => i.displayName === 'PhysicsObject');
+      const components = objInterface?.contents?.filter((c) => c['@type'] === 'Component');
       expect(components?.length || 0).toBe(0);
     });
   });
@@ -171,8 +184,8 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const baseTemplate = interfaces.find(i => i.displayName === 'BaseTemplate');
-      const derivedTemplate = interfaces.find(i => i.displayName === 'DerivedTemplate');
+      const baseTemplate = interfaces.find((i) => i.displayName === 'BaseTemplate');
+      const derivedTemplate = interfaces.find((i) => i.displayName === 'DerivedTemplate');
 
       expect(baseTemplate).toBeDefined();
       expect(derivedTemplate).toBeDefined();
@@ -187,28 +200,30 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const derivedTemplate = interfaces.find(i => i.displayName === 'DerivedTemplate');
+      const derivedTemplate = interfaces.find((i) => i.displayName === 'DerivedTemplate');
       // DTDL extends uses full model IDs (dtmi:holoscript:BaseTemplate;1)
       expect(derivedTemplate?.extends?.some((e: string) => e.includes('BaseTemplate'))).toBe(true);
     });
 
     it('should add template state as properties', () => {
       const composition = createComposition({
-        templates: [createTemplate({
-          name: 'StatefulTemplate',
-          state: {
-            properties: [
-              { key: 'counter', value: 0 },
-              { key: 'active', value: true },
-            ],
-          } as HoloState,
-        })],
+        templates: [
+          createTemplate({
+            name: 'StatefulTemplate',
+            state: {
+              properties: [
+                { key: 'counter', value: 0 },
+                { key: 'active', value: true },
+              ],
+            } as HoloState,
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const template = interfaces.find(i => i.displayName === 'StatefulTemplate');
-      const counterProp = template?.contents?.find(c => c.name === 'counter');
-      const activeProp = template?.contents?.find(c => c.name === 'active');
+      const template = interfaces.find((i) => i.displayName === 'StatefulTemplate');
+      const counterProp = template?.contents?.find((c) => c.name === 'counter');
+      const activeProp = template?.contents?.find((c) => c.name === 'active');
 
       expect(counterProp).toBeDefined();
       expect(activeProp).toBeDefined();
@@ -216,92 +231,96 @@ describe('DTDLCompiler', () => {
 
     it('should add template actions as commands', () => {
       const composition = createComposition({
-        templates: [createTemplate({
-          name: 'ActionTemplate',
-          actions: [
-            { name: 'activate' },
-            { name: 'deactivate' },
-          ] as any[],
-        })],
+        templates: [
+          createTemplate({
+            name: 'ActionTemplate',
+            actions: [{ name: 'activate' }, { name: 'deactivate' }] as any[],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const template = interfaces.find(i => i.displayName === 'ActionTemplate');
-      const commands = template?.contents?.filter(c => c['@type'] === 'Command');
+      const template = interfaces.find((i) => i.displayName === 'ActionTemplate');
+      const commands = template?.contents?.filter((c) => c['@type'] === 'Command');
 
       expect(commands?.length).toBe(2);
     });
 
     it('should add template traits as components', () => {
       const composition = createComposition({
-        templates: [createTemplate({
-          name: 'TraitTemplate',
-          traits: ['physics', 'grabbable'],
-        })],
+        templates: [
+          createTemplate({
+            name: 'TraitTemplate',
+            traits: ['physics', 'grabbable'],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const template = interfaces.find(i => i.displayName === 'TraitTemplate');
-      const components = template?.contents?.filter(c => c['@type'] === 'Component');
+      const template = interfaces.find((i) => i.displayName === 'TraitTemplate');
+      const components = template?.contents?.filter((c) => c['@type'] === 'Component');
 
-      expect(components?.some(c => c.name === 'physics')).toBe(true);
-      expect(components?.some(c => c.name === 'grabbable')).toBe(true);
+      expect(components?.some((c) => c.name === 'physics')).toBe(true);
+      expect(components?.some((c) => c.name === 'grabbable')).toBe(true);
     });
   });
 
   describe('Object Processing', () => {
     it('should create relationship for each object', () => {
       const composition = createComposition({
-        objects: [
-          createObject({ name: 'Object1' }),
-          createObject({ name: 'Object2' }),
-        ],
+        objects: [createObject({ name: 'Object1' }), createObject({ name: 'Object2' })],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const mainInterface = interfaces.find(i => i.displayName === 'TestComposition');
-      const relationships = mainInterface?.contents?.filter(c => c['@type'] === 'Relationship');
+      const mainInterface = interfaces.find((i) => i.displayName === 'TestComposition');
+      const relationships = mainInterface?.contents?.filter((c) => c['@type'] === 'Relationship');
 
       expect(relationships?.length).toBe(2);
     });
 
     it('should generate interface for objects with state', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'StatefulObject',
-          properties: [{ key: 'state', value: { count: 0 } }],
-        })],
+        objects: [
+          createObject({
+            name: 'StatefulObject',
+            properties: [{ key: 'state', value: { count: 0 } }],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const objInterface = interfaces.find(i => i.displayName === 'StatefulObject');
+      const objInterface = interfaces.find((i) => i.displayName === 'StatefulObject');
       expect(objInterface).toBeDefined();
     });
 
     it('should generate interface for objects with sensor trait', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'SensorObject',
-          traits: ['sensor'],
-        })],
+        objects: [
+          createObject({
+            name: 'SensorObject',
+            traits: ['sensor'],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const objInterface = interfaces.find(i => i.displayName === 'SensorObject');
+      const objInterface = interfaces.find((i) => i.displayName === 'SensorObject');
       expect(objInterface).toBeDefined();
     });
 
     it('should add telemetry for sensor objects', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'SensorObject',
-          traits: ['sensor'],
-        })],
+        objects: [
+          createObject({
+            name: 'SensorObject',
+            traits: ['sensor'],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const objInterface = interfaces.find(i => i.displayName === 'SensorObject');
-      const telemetry = objInterface?.contents?.find(c => c['@type'] === 'Telemetry');
+      const objInterface = interfaces.find((i) => i.displayName === 'SensorObject');
+      const telemetry = objInterface?.contents?.find((c) => c['@type'] === 'Telemetry');
 
       expect(telemetry).toBeDefined();
       expect(telemetry?.name).toBe('sensorReading');
@@ -309,18 +328,20 @@ describe('DTDLCompiler', () => {
 
     it('should add position as Location property', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'PositionedObject',
-          properties: [
-            { key: 'position', value: [1, 2, 3] },
-            { key: 'state', value: {} }, // Make it need interface
-          ],
-        })],
+        objects: [
+          createObject({
+            name: 'PositionedObject',
+            properties: [
+              { key: 'position', value: [1, 2, 3] },
+              { key: 'state', value: {} }, // Make it need interface
+            ],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const objInterface = interfaces.find(i => i.displayName === 'PositionedObject');
-      const posProp = objInterface?.contents?.find(c => c.name === 'position');
+      const objInterface = interfaces.find((i) => i.displayName === 'PositionedObject');
+      const posProp = objInterface?.contents?.find((c) => c.name === 'position');
 
       expect(posProp).toBeDefined();
       expect(posProp?.['@type']).toContain('Location');
@@ -329,15 +350,17 @@ describe('DTDLCompiler', () => {
     it('should handle object template extension', () => {
       const composition = createComposition({
         templates: [createTemplate({ name: 'BaseObject' })],
-        objects: [createObject({
-          name: 'ExtendedObject',
-          template: 'BaseObject',
-          properties: [{ key: 'state', value: {} }],
-        })],
+        objects: [
+          createObject({
+            name: 'ExtendedObject',
+            template: 'BaseObject',
+            properties: [{ key: 'state', value: {} }],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const objInterface = interfaces.find(i => i.displayName === 'ExtendedObject');
+      const objInterface = interfaces.find((i) => i.displayName === 'ExtendedObject');
       expect(objInterface?.extends).toContain('BaseObject');
     });
   });
@@ -350,7 +373,7 @@ describe('DTDLCompiler', () => {
       const interfaces = parseDTDL(compiler.compile(composition));
 
       const mainInterface = interfaces[0];
-      const skyboxProp = mainInterface.contents?.find(c => c.name === 'skybox');
+      const skyboxProp = mainInterface.contents?.find((c) => c.name === 'skybox');
 
       expect(skyboxProp).toBeDefined();
       expect(skyboxProp?.['@type']).toBe('Property');
@@ -364,7 +387,7 @@ describe('DTDLCompiler', () => {
       const interfaces = parseDTDL(compiler.compile(composition));
 
       const mainInterface = interfaces[0];
-      const ambientProp = mainInterface.contents?.find(c => c.name === 'ambientLight');
+      const ambientProp = mainInterface.contents?.find((c) => c.name === 'ambientLight');
 
       expect(ambientProp).toBeDefined();
       expect(ambientProp?.schema).toBe('double');
@@ -377,7 +400,7 @@ describe('DTDLCompiler', () => {
       const interfaces = parseDTDL(compiler.compile(composition));
 
       const mainInterface = interfaces[0];
-      const fogProp = mainInterface.contents?.find(c => c.name === 'fogEnabled');
+      const fogProp = mainInterface.contents?.find((c) => c.name === 'fogEnabled');
 
       expect(fogProp).toBeDefined();
       expect(fogProp?.schema).toBe('boolean');
@@ -398,9 +421,9 @@ describe('DTDLCompiler', () => {
       const interfaces = parseDTDL(compiler.compile(composition));
 
       const mainInterface = interfaces[0];
-      expect(mainInterface.contents?.some(c => c.name === 'count')).toBe(true);
-      expect(mainInterface.contents?.some(c => c.name === 'name')).toBe(true);
-      expect(mainInterface.contents?.some(c => c.name === 'active')).toBe(true);
+      expect(mainInterface.contents?.some((c) => c.name === 'count')).toBe(true);
+      expect(mainInterface.contents?.some((c) => c.name === 'name')).toBe(true);
+      expect(mainInterface.contents?.some((c) => c.name === 'active')).toBe(true);
     });
 
     it('should mark properties as writable', () => {
@@ -411,7 +434,7 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const prop = interfaces[0].contents?.find(c => c.name === 'counter');
+      const prop = interfaces[0].contents?.find((c) => c.name === 'counter');
       expect(prop?.writable).toBe(true);
     });
   });
@@ -429,10 +452,10 @@ describe('DTDLCompiler', () => {
       const interfaces = parseDTDL(compiler.compile(composition));
 
       const mainInterface = interfaces[0];
-      const commands = mainInterface.contents?.filter(c => c['@type'] === 'Command');
+      const commands = mainInterface.contents?.filter((c) => c['@type'] === 'Command');
 
-      expect(commands?.some(c => c.name === 'click')).toBe(true);
-      expect(commands?.some(c => c.name === 'grab')).toBe(true);
+      expect(commands?.some((c) => c.name === 'click')).toBe(true);
+      expect(commands?.some((c) => c.name === 'grab')).toBe(true);
     });
 
     it('should format command display names', () => {
@@ -443,7 +466,7 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const command = interfaces[0].contents?.find(c => c.name === 'user_enter');
+      const command = interfaces[0].contents?.find((c) => c.name === 'user_enter');
       expect(command?.displayName).toBe('User enter');
     });
   });
@@ -459,8 +482,8 @@ describe('DTDLCompiler', () => {
       const interfaces = parseDTDL(compiler.compile(composition));
 
       const mainInterface = interfaces[0];
-      const relationships = mainInterface.contents?.filter(c =>
-        c['@type'] === 'Relationship' && (c.name === 'GroupA' || c.name === 'GroupB')
+      const relationships = mainInterface.contents?.filter(
+        (c) => c['@type'] === 'Relationship' && (c.name === 'GroupA' || c.name === 'GroupB')
       );
 
       expect(relationships?.length).toBe(2);
@@ -468,15 +491,17 @@ describe('DTDLCompiler', () => {
 
     it('should include object count in description', () => {
       const composition = createComposition({
-        spatialGroups: [{
-          name: 'MyGroup',
-          objects: [createObject({ name: 'O1' }), createObject({ name: 'O2' })],
-        }],
+        spatialGroups: [
+          {
+            name: 'MyGroup',
+            objects: [createObject({ name: 'O1' }), createObject({ name: 'O2' })],
+          },
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
       const mainInterface = interfaces[0];
-      const relationship = mainInterface.contents?.find(c => c.name === 'MyGroup');
+      const relationship = mainInterface.contents?.find((c) => c.name === 'MyGroup');
 
       expect(relationship?.description).toContain('2 objects');
     });
@@ -489,7 +514,7 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const prop = interfaces[0].contents?.find(c => c.name === 'enabled');
+      const prop = interfaces[0].contents?.find((c) => c.name === 'enabled');
       expect(prop?.schema).toBe('boolean');
     });
 
@@ -499,7 +524,7 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const prop = interfaces[0].contents?.find(c => c.name === 'count');
+      const prop = interfaces[0].contents?.find((c) => c.name === 'count');
       expect(prop?.schema).toBe('integer');
     });
 
@@ -509,7 +534,7 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const prop = interfaces[0].contents?.find(c => c.name === 'temperature');
+      const prop = interfaces[0].contents?.find((c) => c.name === 'temperature');
       expect(prop?.schema).toBe('double');
     });
 
@@ -519,7 +544,7 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const prop = interfaces[0].contents?.find(c => c.name === 'label');
+      const prop = interfaces[0].contents?.find((c) => c.name === 'label');
       expect(prop?.schema).toBe('string');
     });
 
@@ -529,7 +554,7 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const prop = interfaces[0].contents?.find(c => c.name === 'values');
+      const prop = interfaces[0].contents?.find((c) => c.name === 'values');
       expect(prop?.schema).toEqual({
         '@type': 'Array',
         elementSchema: 'integer',
@@ -542,7 +567,7 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const prop = interfaces[0].contents?.find(c => c.name === 'config');
+      const prop = interfaces[0].contents?.find((c) => c.name === 'config');
       expect(prop?.schema).toMatchObject({
         '@type': 'Object',
         fields: expect.arrayContaining([
@@ -558,7 +583,7 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const prop = interfaces[0].contents?.find(c => c.name === 'items');
+      const prop = interfaces[0].contents?.find((c) => c.name === 'items');
       expect(prop?.schema).toEqual({
         '@type': 'Array',
         elementSchema: 'double',
@@ -569,16 +594,18 @@ describe('DTDLCompiler', () => {
   describe('Trait Components', () => {
     it('should map grabbable trait to component', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'GrabbableObject',
-          traits: ['grabbable'],
-          properties: [{ key: 'state', value: {} }],
-        })],
+        objects: [
+          createObject({
+            name: 'GrabbableObject',
+            traits: ['grabbable'],
+            properties: [{ key: 'state', value: {} }],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const objInterface = interfaces.find(i => i.displayName === 'GrabbableObject');
-      const component = objInterface?.contents?.find(c => c.name === 'grabbable');
+      const objInterface = interfaces.find((i) => i.displayName === 'GrabbableObject');
+      const component = objInterface?.contents?.find((c) => c.name === 'grabbable');
 
       expect(component).toBeDefined();
       expect(component?.['@type']).toBe('Component');
@@ -586,45 +613,51 @@ describe('DTDLCompiler', () => {
 
     it('should map networked trait to component', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'NetworkedObject',
-          traits: ['networked'],
-        })],
+        objects: [
+          createObject({
+            name: 'NetworkedObject',
+            traits: ['networked'],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const objInterface = interfaces.find(i => i.displayName === 'NetworkedObject');
-      const component = objInterface?.contents?.find(c => c.name === 'networked');
+      const objInterface = interfaces.find((i) => i.displayName === 'NetworkedObject');
+      const component = objInterface?.contents?.find((c) => c.name === 'networked');
 
       expect(component).toBeDefined();
     });
 
     it('should map physics trait to component', () => {
       const composition = createComposition({
-        templates: [createTemplate({
-          name: 'PhysicsTemplate',
-          traits: ['physics'],
-        })],
+        templates: [
+          createTemplate({
+            name: 'PhysicsTemplate',
+            traits: ['physics'],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const template = interfaces.find(i => i.displayName === 'PhysicsTemplate');
-      const component = template?.contents?.find(c => c.name === 'physics');
+      const template = interfaces.find((i) => i.displayName === 'PhysicsTemplate');
+      const component = template?.contents?.find((c) => c.name === 'physics');
 
       expect(component).toBeDefined();
     });
 
     it('should ignore unknown traits', () => {
       const composition = createComposition({
-        templates: [createTemplate({
-          name: 'UnknownTraitTemplate',
-          traits: ['unknown_trait', 'another_unknown'],
-        })],
+        templates: [
+          createTemplate({
+            name: 'UnknownTraitTemplate',
+            traits: ['unknown_trait', 'another_unknown'],
+          }),
+        ],
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const template = interfaces.find(i => i.displayName === 'UnknownTraitTemplate');
-      const components = template?.contents?.filter(c => c['@type'] === 'Component');
+      const template = interfaces.find((i) => i.displayName === 'UnknownTraitTemplate');
+      const components = template?.contents?.filter((c) => c['@type'] === 'Component');
 
       expect(components?.length || 0).toBe(0);
     });
@@ -646,7 +679,7 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const prop = interfaces[0].contents?.find(c => c.name === 'my_property_name');
+      const prop = interfaces[0].contents?.find((c) => c.name === 'my_property_name');
       expect(prop?.displayName).toBe('My property name');
     });
 
@@ -656,41 +689,41 @@ describe('DTDLCompiler', () => {
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const relationship = interfaces[0].contents?.find(c => c['@type'] === 'Relationship');
+      const relationship = interfaces[0].contents?.find((c) => c['@type'] === 'Relationship');
       expect(relationship?.name).toBe('hasMyobject');
     });
   });
 
   describe('Pre-defined Trait Component Interfaces', () => {
     it('should export grabbable component interface', () => {
-      const grabbable = DTDL_TRAIT_COMPONENTS.find(i => i.displayName === 'Grabbable');
+      const grabbable = DTDL_TRAIT_COMPONENTS.find((i) => i.displayName === 'Grabbable');
 
       expect(grabbable).toBeDefined();
-      expect(grabbable?.contents?.some(c => c.name === 'isGrabbed')).toBe(true);
-      expect(grabbable?.contents?.some(c => c.name === 'grabDistance')).toBe(true);
+      expect(grabbable?.contents?.some((c) => c.name === 'isGrabbed')).toBe(true);
+      expect(grabbable?.contents?.some((c) => c.name === 'grabDistance')).toBe(true);
     });
 
     it('should export networked component interface', () => {
-      const networked = DTDL_TRAIT_COMPONENTS.find(i => i.displayName === 'Networked');
+      const networked = DTDL_TRAIT_COMPONENTS.find((i) => i.displayName === 'Networked');
 
       expect(networked).toBeDefined();
-      expect(networked?.contents?.some(c => c.name === 'networkId')).toBe(true);
-      expect(networked?.contents?.some(c => c.name === 'syncRate')).toBe(true);
+      expect(networked?.contents?.some((c) => c.name === 'networkId')).toBe(true);
+      expect(networked?.contents?.some((c) => c.name === 'syncRate')).toBe(true);
     });
 
     it('should export physics component interface', () => {
-      const physics = DTDL_TRAIT_COMPONENTS.find(i => i.displayName === 'Physics');
+      const physics = DTDL_TRAIT_COMPONENTS.find((i) => i.displayName === 'Physics');
 
       expect(physics).toBeDefined();
-      expect(physics?.contents?.some(c => c.name === 'mass')).toBe(true);
-      expect(physics?.contents?.some(c => c.name === 'friction')).toBe(true);
+      expect(physics?.contents?.some((c) => c.name === 'mass')).toBe(true);
+      expect(physics?.contents?.some((c) => c.name === 'friction')).toBe(true);
     });
 
     it('should export sensor component interface', () => {
-      const sensor = DTDL_TRAIT_COMPONENTS.find(i => i.displayName === 'Sensor');
+      const sensor = DTDL_TRAIT_COMPONENTS.find((i) => i.displayName === 'Sensor');
 
       expect(sensor).toBeDefined();
-      expect(sensor?.contents?.some(c => c['@type'] === 'Telemetry')).toBe(true);
+      expect(sensor?.contents?.some((c) => c['@type'] === 'Telemetry')).toBe(true);
     });
   });
 
@@ -715,25 +748,29 @@ describe('DTDLCompiler', () => {
     it('should handle deeply nested objects', () => {
       const composition = createComposition({
         state: {
-          properties: [{
-            key: 'nested',
-            value: { level1: { level2: { level3: { value: 42 } } } },
-          }],
+          properties: [
+            {
+              key: 'nested',
+              value: { level1: { level2: { level3: { value: 42 } } } },
+            },
+          ],
         } as HoloState,
       });
       const interfaces = parseDTDL(compiler.compile(composition));
 
-      const prop = interfaces[0].contents?.find(c => c.name === 'nested');
+      const prop = interfaces[0].contents?.find((c) => c.name === 'nested');
       expect(prop?.schema).toMatchObject({ '@type': 'Object' });
     });
 
     it('should handle objects without traits', () => {
       const composition = createComposition({
-        objects: [createObject({
-          name: 'NoTraits',
-          properties: [],
-          traits: undefined as any,
-        })],
+        objects: [
+          createObject({
+            name: 'NoTraits',
+            properties: [],
+            traits: undefined as any,
+          }),
+        ],
       });
 
       expect(() => compiler.compile(composition)).not.toThrow();
@@ -775,13 +812,12 @@ describe('DTDLCompiler', () => {
             traits: ['networked'],
           }),
         ],
-        spatialGroups: [{
-          name: 'ZoneA',
-          objects: [
-            createObject({ name: 'Light1' }),
-            createObject({ name: 'Light2' }),
-          ],
-        }],
+        spatialGroups: [
+          {
+            name: 'ZoneA',
+            objects: [createObject({ name: 'Light1' }), createObject({ name: 'Light2' })],
+          },
+        ],
         state: {
           properties: [
             { key: 'occupancy', value: 0 },
@@ -804,40 +840,44 @@ describe('DTDLCompiler', () => {
       const interfaces = parseDTDL(output);
 
       // Verify main interface
-      const mainInterface = interfaces.find(i => i.displayName === 'SmartBuildingFloor');
+      const mainInterface = interfaces.find((i) => i.displayName === 'SmartBuildingFloor');
       expect(mainInterface).toBeDefined();
       expect(mainInterface?.['@id']).toBe('dtmi:smartbuilding:SmartBuildingFloor;2');
 
       // Verify environment properties
-      expect(mainInterface?.contents?.some(c => c.name === 'skybox')).toBe(true);
-      expect(mainInterface?.contents?.some(c => c.name === 'ambientLight')).toBe(true);
+      expect(mainInterface?.contents?.some((c) => c.name === 'skybox')).toBe(true);
+      expect(mainInterface?.contents?.some((c) => c.name === 'ambientLight')).toBe(true);
 
       // Verify state properties
-      expect(mainInterface?.contents?.some(c => c.name === 'occupancy')).toBe(true);
-      expect(mainInterface?.contents?.some(c => c.name === 'energyUsage')).toBe(true);
+      expect(mainInterface?.contents?.some((c) => c.name === 'occupancy')).toBe(true);
+      expect(mainInterface?.contents?.some((c) => c.name === 'energyUsage')).toBe(true);
 
       // Verify commands
-      expect(mainInterface?.contents?.some(c => c.name === 'occupancy_change')).toBe(true);
-      expect(mainInterface?.contents?.some(c => c.name === 'temperature_alert')).toBe(true);
+      expect(mainInterface?.contents?.some((c) => c.name === 'occupancy_change')).toBe(true);
+      expect(mainInterface?.contents?.some((c) => c.name === 'temperature_alert')).toBe(true);
 
       // Verify template
-      const sensorTemplate = interfaces.find(i => i.displayName === 'SensorDevice');
+      const sensorTemplate = interfaces.find((i) => i.displayName === 'SensorDevice');
       expect(sensorTemplate).toBeDefined();
-      expect(sensorTemplate?.contents?.some(c => c['@type'] === 'Component')).toBe(true);
+      expect(sensorTemplate?.contents?.some((c) => c['@type'] === 'Component')).toBe(true);
 
       // Verify sensor object with telemetry
-      const tempSensor = interfaces.find(i => i.displayName === 'TemperatureSensor1');
+      const tempSensor = interfaces.find((i) => i.displayName === 'TemperatureSensor1');
       expect(tempSensor).toBeDefined();
       expect(tempSensor?.extends).toContain('SensorDevice');
-      expect(tempSensor?.contents?.some(c => c['@type'] === 'Telemetry')).toBe(true);
+      expect(tempSensor?.contents?.some((c) => c['@type'] === 'Telemetry')).toBe(true);
 
       // Verify relationships (name is hasTemperaturesensor1 due to PascalCase conversion)
-      expect(mainInterface?.contents?.some(c =>
-        c['@type'] === 'Relationship' && c.displayName === 'TemperatureSensor1'
-      )).toBe(true);
-      expect(mainInterface?.contents?.some(c =>
-        c['@type'] === 'Relationship' && c.displayName === 'ZoneA'
-      )).toBe(true);
+      expect(
+        mainInterface?.contents?.some(
+          (c) => c['@type'] === 'Relationship' && c.displayName === 'TemperatureSensor1'
+        )
+      ).toBe(true);
+      expect(
+        mainInterface?.contents?.some(
+          (c) => c['@type'] === 'Relationship' && c.displayName === 'ZoneA'
+        )
+      ).toBe(true);
     });
   });
 });

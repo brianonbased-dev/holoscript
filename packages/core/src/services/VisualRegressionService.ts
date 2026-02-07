@@ -18,41 +18,38 @@ export class VisualRegressionService {
     options: { threshold?: number; includeDiffImage?: boolean } = {}
   ): Promise<VisualComparisonResult> {
     const threshold = options.threshold ?? 0.1;
-    
+
     const basePng = this.decodeBase64Png(base);
     const currentPng = this.decodeBase64Png(current);
-    
+
     const { width, height } = basePng;
-    
+
     if (width !== currentPng.width || height !== currentPng.height) {
-      throw new Error(`Dimension mismatch: base is ${width}x${height}, current is ${currentPng.width}x${currentPng.height}`);
+      throw new Error(
+        `Dimension mismatch: base is ${width}x${height}, current is ${currentPng.width}x${currentPng.height}`
+      );
     }
-    
+
     const diffPng = new PNG({ width, height });
-    
-    const numDiffPixels = pixelmatch(
-      basePng.data,
-      currentPng.data,
-      diffPng.data,
-      width,
-      height,
-      { threshold }
-    );
-    
+
+    const numDiffPixels = pixelmatch(basePng.data, currentPng.data, diffPng.data, width, height, {
+      threshold,
+    });
+
     const totalPixels = width * height;
-    const similarity = 1 - (numDiffPixels / totalPixels);
+    const similarity = 1 - numDiffPixels / totalPixels;
     const isMatch = numDiffPixels === 0;
-    
+
     let diffImage: string | undefined;
     if (options.includeDiffImage) {
       diffImage = this.encodePngToBase64(diffPng);
     }
-    
+
     return {
       similarity,
       isMatch,
       diffImage,
-      numDiffPixels
+      numDiffPixels,
     };
   }
 

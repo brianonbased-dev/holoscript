@@ -460,10 +460,7 @@ export class AssetRegistry {
    * Ensure cache has space for new entry
    */
   private ensureCacheSpace(requiredSize: number): void {
-    while (
-      this.currentCacheSize + requiredSize > this.config.maxCacheSize &&
-      this.cache.size > 0
-    ) {
+    while (this.currentCacheSize + requiredSize > this.config.maxCacheSize && this.cache.size > 0) {
       const victimId = this.selectEvictionVictim();
       if (victimId) {
         this.evictFromCache(victimId);

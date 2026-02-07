@@ -505,9 +505,8 @@ export class VoiceOutputTrait {
    * Synthesize speech
    */
   private synthesize(request: SpeechRequest): void {
-    const text = typeof request.content === 'string'
-      ? request.content
-      : this.segmentsToText(request.content);
+    const text =
+      typeof request.content === 'string' ? request.content : this.segmentsToText(request.content);
 
     if (this.config.engine === 'browser') {
       this.synthesizeBrowser(request, text);

@@ -14,22 +14,22 @@ export type ConfidenceThreshold = number; // 0.0 to 1.0
 export interface VoiceInputConfig {
   /** Speech recognition mode */
   mode: VoiceInputMode;
-  
+
   /** Minimum confidence level (0-1) to trigger command */
   confidenceThreshold: ConfidenceThreshold;
-  
+
   /** Languages supported (BCP 47 codes) */
   languages?: string[];
-  
+
   /** Commands this object responds to */
   commands?: VoiceCommand[];
-  
+
   /** Enable speech-to-text display */
   showTranscript?: boolean;
-  
+
   /** Audio feedback (beep on recognition) */
   audioFeedback?: boolean;
-  
+
   /** Max command processing time (ms) */
   timeout?: number;
 }
@@ -40,16 +40,16 @@ export interface VoiceInputConfig {
 export interface VoiceCommand {
   /** Primary trigger phrase */
   phrase: string;
-  
+
   /** Alternative phrases (fuzzy matching) */
   aliases?: string[];
-  
+
   /** Confidence threshold for this specific command */
   confidence?: number;
-  
+
   /** Action to execute */
   action: string;
-  
+
   /** Parameters extracted from command */
   params?: Record<string, string>;
 }
@@ -60,19 +60,19 @@ export interface VoiceCommand {
 export interface VoiceRecognitionResult {
   /** Transcribed text */
   transcript: string;
-  
+
   /** Confidence (0-1) */
   confidence: number;
-  
+
   /** Is final result or interim? */
   isFinal: boolean;
-  
+
   /** Language detected */
   language: string;
-  
+
   /** Matched command if any */
   matchedCommand?: VoiceCommand;
-  
+
   /** Timestamp */
   timestamp: number;
 }
@@ -114,8 +114,8 @@ export class VoiceInputTrait {
    */
   private initializeRecognition(): void {
     // Use native Web Speech API or polyfill
-    const SpeechRecognition = (globalThis as any).SpeechRecognition ||
-      (globalThis as any).webkitSpeechRecognition;
+    const SpeechRecognition =
+      (globalThis as any).SpeechRecognition || (globalThis as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       console.error('Web Speech API not supported');
@@ -199,10 +199,7 @@ export class VoiceInputTrait {
   /**
    * Process voice command with fuzzy matching
    */
-  private processVoiceCommand(
-    transcript: string,
-    confidence: number
-  ): void {
+  private processVoiceCommand(transcript: string, confidence: number): void {
     if (confidence < this.config.confidenceThreshold) {
       return;
     }
@@ -369,7 +366,7 @@ export class VoiceInputTrait {
 
       oscillator.start(now);
       oscillator.stop(now + duration);
-    } catch (error) {
+    } catch (_error) {
       // Silently fail if audio not available
     }
   }

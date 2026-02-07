@@ -1,132 +1,156 @@
-"use strict";
+'use strict';
 /**
  * HoloScript Live Preview Panel
  *
  * Provides a real-time 3D preview of HoloScript scenes in VS Code.
  * Uses a WebView with Three.js for rendering.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.HoloScriptPreviewPanel = void 0;
-const vscode = require("vscode");
-const path = require("path");
-const RelayService_1 = require("./services/RelayService");
+const vscode = require('vscode');
+const path = require('path');
+const RelayService_1 = require('./services/RelayService');
 class HoloScriptPreviewPanel {
-    static createOrShow(extensionUri, document) {
-        const column = vscode.ViewColumn.Beside;
-        // If we already have a panel, show it
-        if (HoloScriptPreviewPanel.currentPanel) {
-            HoloScriptPreviewPanel.currentPanel._panel.reveal(column);
-            if (document) {
-                HoloScriptPreviewPanel.currentPanel.updateContent(document);
+  static createOrShow(extensionUri, document) {
+    const column = vscode.ViewColumn.Beside;
+    // If we already have a panel, show it
+    if (HoloScriptPreviewPanel.currentPanel) {
+      HoloScriptPreviewPanel.currentPanel._panel.reveal(column);
+      if (document) {
+        HoloScriptPreviewPanel.currentPanel.updateContent(document);
+      }
+      return;
+    }
+    // Otherwise, create a new panel
+    const panel = vscode.window.createWebviewPanel(
+      HoloScriptPreviewPanel.viewType,
+      'HoloScript Preview',
+      column,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+        localResourceRoots: [
+          vscode.Uri.joinPath(extensionUri, 'media'),
+          vscode.Uri.joinPath(extensionUri, 'node_modules'),
+        ],
+      }
+    );
+    HoloScriptPreviewPanel.currentPanel = new HoloScriptPreviewPanel(panel, extensionUri);
+    if (document) {
+      HoloScriptPreviewPanel.currentPanel.updateContent(document);
+    }
+  }
+  static revive(panel, extensionUri) {
+    HoloScriptPreviewPanel.currentPanel = new HoloScriptPreviewPanel(panel, extensionUri);
+  }
+  constructor(panel, extensionUri) {
+    this._disposables = [];
+    this._panel = panel;
+    this._extensionUri = extensionUri;
+    // Set the webview's initial html content
+    this._update();
+    // Listen for when the panel is disposed
+    this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+    // Update the content based on view state changes
+    this._panel.onDidChangeViewState(
+      (_e) => {
+        if (this._panel.visible) {
+          this._update();
+        }
+      },
+      null,
+      this._disposables
+    );
+    // Handle messages from the webview
+    this._panel.webview.onDidReceiveMessage(
+      (message) => {
+        switch (message.command) {
+          case 'error':
+            vscode.window.showErrorMessage(message.text);
+            return;
+          case 'info':
+            vscode.window.showInformationMessage(message.text);
+            return;
+          case 'ready':
+            // Webview is ready, send current content
+            if (this._currentDocument) {
+              this._sendUpdate();
             }
             return;
-        }
-        // Otherwise, create a new panel
-        const panel = vscode.window.createWebviewPanel(HoloScriptPreviewPanel.viewType, 'HoloScript Preview', column, {
-            enableScripts: true,
-            retainContextWhenHidden: true,
-            localResourceRoots: [
-                vscode.Uri.joinPath(extensionUri, 'media'),
-                vscode.Uri.joinPath(extensionUri, 'node_modules'),
-            ],
-        });
-        HoloScriptPreviewPanel.currentPanel = new HoloScriptPreviewPanel(panel, extensionUri);
-        if (document) {
-            HoloScriptPreviewPanel.currentPanel.updateContent(document);
-        }
-    }
-    static revive(panel, extensionUri) {
-        HoloScriptPreviewPanel.currentPanel = new HoloScriptPreviewPanel(panel, extensionUri);
-    }
-    constructor(panel, extensionUri) {
-        this._disposables = [];
-        this._panel = panel;
-        this._extensionUri = extensionUri;
-        // Set the webview's initial html content
-        this._update();
-        // Listen for when the panel is disposed
-        this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-        // Update the content based on view state changes
-        this._panel.onDidChangeViewState(_e => {
-            if (this._panel.visible) {
-                this._update();
+          case 'transform':
+          case 'voice_command':
+          case 'inject_asset':
+            if (this._currentDocument) {
+              RelayService_1.RelayService.getInstance().handleMessage(
+                message,
+                this._currentDocument
+              );
             }
-        }, null, this._disposables);
-        // Handle messages from the webview
-        this._panel.webview.onDidReceiveMessage(message => {
-            switch (message.command) {
-                case 'error':
-                    vscode.window.showErrorMessage(message.text);
-                    return;
-                case 'info':
-                    vscode.window.showInformationMessage(message.text);
-                    return;
-                case 'ready':
-                    // Webview is ready, send current content
-                    if (this._currentDocument) {
-                        this._sendUpdate();
-                    }
-                    return;
-                case 'transform':
-                case 'voice_command':
-                case 'inject_asset':
-                    if (this._currentDocument) {
-                        RelayService_1.RelayService.getInstance().handleMessage(message, this._currentDocument);
-                    }
-                    return;
-                case 'voice_start':
-                    vscode.window.showInputBox({
-                        prompt: "Say a command...",
-                        placeHolder: "e.g., 'Add a red cube at 0,1,0'"
-                    }).then(text => {
-                        if (text && this._currentDocument) {
-                            RelayService_1.RelayService.getInstance().handleMessage({ type: 'voice_command', text }, this._currentDocument);
-                        }
-                    });
-                    return;
-            }
-        }, null, this._disposables);
-        // Watch for document changes
-        vscode.workspace.onDidChangeTextDocument(e => {
-            if (this._currentDocument && e.document === this._currentDocument) {
-                this._sendUpdate();
-            }
-        }, null, this._disposables);
-    }
-    updateContent(document) {
-        this._currentDocument = document;
-        this._panel.title = `Preview: ${path.basename(document.fileName)}`;
-        this._sendUpdate();
-    }
-    _sendUpdate() {
-        if (!this._currentDocument)
             return;
-        const content = this._currentDocument.getText();
-        const fileName = this._currentDocument.fileName;
-        this._panel.webview.postMessage({
-            command: 'update',
-            content,
-            fileName,
-            isHoloPlus: fileName.endsWith('.hsplus'),
-        });
-    }
-    dispose() {
-        HoloScriptPreviewPanel.currentPanel = undefined;
-        this._panel.dispose();
-        while (this._disposables.length) {
-            const disposable = this._disposables.pop();
-            if (disposable) {
-                disposable.dispose();
-            }
+          case 'voice_start':
+            vscode.window
+              .showInputBox({
+                prompt: 'Say a command...',
+                placeHolder: "e.g., 'Add a red cube at 0,1,0'",
+              })
+              .then((text) => {
+                if (text && this._currentDocument) {
+                  RelayService_1.RelayService.getInstance().handleMessage(
+                    { type: 'voice_command', text },
+                    this._currentDocument
+                  );
+                }
+              });
+            return;
         }
+      },
+      null,
+      this._disposables
+    );
+    // Watch for document changes
+    vscode.workspace.onDidChangeTextDocument(
+      (e) => {
+        if (this._currentDocument && e.document === this._currentDocument) {
+          this._sendUpdate();
+        }
+      },
+      null,
+      this._disposables
+    );
+  }
+  updateContent(document) {
+    this._currentDocument = document;
+    this._panel.title = `Preview: ${path.basename(document.fileName)}`;
+    this._sendUpdate();
+  }
+  _sendUpdate() {
+    if (!this._currentDocument) return;
+    const content = this._currentDocument.getText();
+    const fileName = this._currentDocument.fileName;
+    this._panel.webview.postMessage({
+      command: 'update',
+      content,
+      fileName,
+      isHoloPlus: fileName.endsWith('.hsplus'),
+    });
+  }
+  dispose() {
+    HoloScriptPreviewPanel.currentPanel = undefined;
+    this._panel.dispose();
+    while (this._disposables.length) {
+      const disposable = this._disposables.pop();
+      if (disposable) {
+        disposable.dispose();
+      }
     }
-    _update() {
-        this._panel.webview.html = this._getHtmlForWebview(this._panel.webview);
-    }
-    _getHtmlForWebview(webview) {
-        // Use a nonce to only allow specific scripts to be run
-        const nonce = getNonce();
-        return `<!DOCTYPE html>
+  }
+  _update() {
+    this._panel.webview.html = this._getHtmlForWebview(this._panel.webview);
+  }
+  _getHtmlForWebview(webview) {
+    // Use a nonce to only allow specific scripts to be run
+    const nonce = getNonce();
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -2135,16 +2159,16 @@ class HoloScriptPreviewPanel {
   </script>
 </body>
 </html>`;
-    }
+  }
 }
 exports.HoloScriptPreviewPanel = HoloScriptPreviewPanel;
 HoloScriptPreviewPanel.viewType = 'holoscriptPreview';
 function getNonce() {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < 32; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
+  let text = '';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
 }
 //# sourceMappingURL=previewPanel.js.map

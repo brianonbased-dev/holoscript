@@ -5,6 +5,7 @@ Welcome to Lesson 1.4! In this lesson, you'll master the fundamental building bl
 ## What is an Orb?
 
 An **orb** is HoloScript's term for a 3D object in your scene. Think of it as a container that holds:
+
 - **Geometry** - The shape (cube, sphere, model, etc.)
 - **Properties** - Position, color, scale, material
 - **Traits** - Behaviors like @grabbable or @physics
@@ -181,6 +182,7 @@ orb textured {
 ## Naming Conventions
 
 Good orb names are:
+
 - **Descriptive** - Tell what the object represents
 - **Unique** - No duplicate names in the same scope
 - **CamelCase** - For multi-word names
@@ -207,25 +209,25 @@ orb table {
   geometry: "cube"
   scale: [1, 0.1, 0.6]
   position: [0, 0.75, 0]
-  
+
   orb leg1 {
     geometry: "cylinder"
     scale: [0.05, 0.75, 0.05]
     position: [-0.4, -0.4, -0.25]
   }
-  
+
   orb leg2 {
     geometry: "cylinder"
     scale: [0.05, 0.75, 0.05]
     position: [0.4, -0.4, -0.25]
   }
-  
+
   orb leg3 {
     geometry: "cylinder"
     scale: [0.05, 0.75, 0.05]
     position: [-0.4, -0.4, 0.25]
   }
-  
+
   orb leg4 {
     geometry: "cylinder"
     scale: [0.05, 0.75, 0.05]
@@ -254,7 +256,7 @@ Here's a complete example combining all concepts:
 
 ```hs
 orb scene {
-  
+
   // Floor
   orb ground {
     geometry: "plane"
@@ -266,31 +268,31 @@ orb scene {
       roughness: 0.9
     }
   }
-  
+
   // Interactive cube
   orb interactiveCube {
     @grabbable
     @physics { mass: 1.0 }
-    
+
     geometry: "cube"
     position: [0, 1.5, -2]
     scale: 0.3
-    
+
     material: {
       color: "#ff6600"
       metalness: 0.3
       roughness: 0.5
     }
-    
+
     onGrab: {
       this.material.emissive = "#ff6600"
     }
-    
+
     onRelease: {
       this.material.emissive = "#000000"
     }
   }
-  
+
   // Light source
   orb sun {
     geometry: "sphere"
@@ -334,7 +336,7 @@ Create a simple table with a vase on top:
 // Create your solution here
 orb table {
   // Table top and legs
-  
+
   orb vase {
     // Vase on the table
   }

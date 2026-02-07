@@ -2,67 +2,66 @@
  * CLI argument parsing
  */
 const DEFAULT_OPTIONS = {
-    command: 'help',
-    verbose: false,
-    json: false,
-    maxDepth: 10,
-    timeout: 5000,
-    showAST: false,
+  command: 'help',
+  verbose: false,
+  json: false,
+  maxDepth: 10,
+  timeout: 5000,
+  showAST: false,
 };
 export function parseArgs(args) {
-    const options = { ...DEFAULT_OPTIONS };
-    let i = 0;
-    while (i < args.length) {
-        const arg = args[i];
-        // Commands
-        if (!arg.startsWith('-')) {
-            if (['parse', 'run', 'ast', 'repl', 'watch', 'help', 'version'].includes(arg)) {
-                options.command = arg;
-            }
-            else if (!options.input) {
-                options.input = arg;
-            }
-            i++;
-            continue;
-        }
-        // Flags
-        switch (arg) {
-            case '-v':
-            case '--verbose':
-                options.verbose = true;
-                break;
-            case '-j':
-            case '--json':
-                options.json = true;
-                break;
-            case '-o':
-            case '--output':
-                options.output = args[++i];
-                break;
-            case '--max-depth':
-                options.maxDepth = parseInt(args[++i], 10) || 10;
-                break;
-            case '--timeout':
-                options.timeout = parseInt(args[++i], 10) || 5000;
-                break;
-            case '--show-ast':
-                options.showAST = true;
-                break;
-            case '-h':
-            case '--help':
-                options.command = 'help';
-                break;
-            case '-V':
-            case '--version':
-                options.command = 'version';
-                break;
-        }
-        i++;
+  const options = { ...DEFAULT_OPTIONS };
+  let i = 0;
+  while (i < args.length) {
+    const arg = args[i];
+    // Commands
+    if (!arg.startsWith('-')) {
+      if (['parse', 'run', 'ast', 'repl', 'watch', 'help', 'version'].includes(arg)) {
+        options.command = arg;
+      } else if (!options.input) {
+        options.input = arg;
+      }
+      i++;
+      continue;
     }
-    return options;
+    // Flags
+    switch (arg) {
+      case '-v':
+      case '--verbose':
+        options.verbose = true;
+        break;
+      case '-j':
+      case '--json':
+        options.json = true;
+        break;
+      case '-o':
+      case '--output':
+        options.output = args[++i];
+        break;
+      case '--max-depth':
+        options.maxDepth = parseInt(args[++i], 10) || 10;
+        break;
+      case '--timeout':
+        options.timeout = parseInt(args[++i], 10) || 5000;
+        break;
+      case '--show-ast':
+        options.showAST = true;
+        break;
+      case '-h':
+      case '--help':
+        options.command = 'help';
+        break;
+      case '-V':
+      case '--version':
+        options.command = 'version';
+        break;
+    }
+    i++;
+  }
+  return options;
 }
 export function printHelp() {
-    console.log(`
+  console.log(`
 HoloScript CLI v1.0.0-alpha.1
 
 Usage: holoscript <command> [options] [input]

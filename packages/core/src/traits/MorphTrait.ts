@@ -478,12 +478,15 @@ export class MorphTrait {
   /**
    * Play a morph animation
    */
-  public play(clipName: string, options?: {
-    weight?: number;
-    speed?: number;
-    loop?: boolean;
-    onComplete?: () => void;
-  }): boolean {
+  public play(
+    clipName: string,
+    options?: {
+      weight?: number;
+      speed?: number;
+      loop?: boolean;
+      onComplete?: () => void;
+    }
+  ): boolean {
     const clip = this.clips.get(clipName);
     if (!clip) return false;
 
@@ -649,7 +652,10 @@ export class MorphTrait {
   /**
    * Apply easing function
    */
-  private applyEasing(t: number, easing: 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out'): number {
+  private applyEasing(
+    t: number,
+    easing: 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out'
+  ): number {
     switch (easing) {
       case 'ease-in':
         return t * t;

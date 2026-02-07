@@ -1,4 +1,4 @@
-import type { ASTProgram, HSPlusNode, HSPlusDirective } from '../types/AdvancedTypeSystem';
+import type { ASTProgram, HSPlusNode } from '../types/AdvancedTypeSystem';
 import { AdvancedTypeChecker, HoloScriptType } from '../types/AdvancedTypeSystem';
 
 export interface SemanticDefinition {
@@ -50,25 +50,25 @@ export class SemanticValidator {
         if (directive.name === 'semantic' && directive.args?.[0]) {
           const semanticName = directive.args[0];
           const config = directive.config || {};
-          
+
           const definition: SemanticDefinition = {
             name: semanticName,
             category: config.category,
             type: config.type,
             requiredProperties: new Map(),
             requiredTraits: [],
-            requiredMethods: new Map()
+            requiredMethods: new Map(),
           };
 
           if (config.properties) {
-             for (const [prop, typeSpec] of Object.entries(config.properties)) {
-               // If it's an empty object or not a string, we still want to require the property
-               const typeStr = typeof typeSpec === 'string' ? typeSpec : 'any';
-               const type = this.resolveType(typeStr);
-               definition.requiredProperties.set(prop, type || { kind: 'primitive', name: 'void' });
-             }
+            for (const [prop, typeSpec] of Object.entries(config.properties)) {
+              // If it's an empty object or not a string, we still want to require the property
+              const typeStr = typeof typeSpec === 'string' ? typeSpec : 'any';
+              const type = this.resolveType(typeStr);
+              definition.requiredProperties.set(prop, type || { kind: 'primitive', name: 'void' });
+            }
           }
-          
+
           if (config.traits) {
             definition.requiredTraits = config.traits;
           }
@@ -78,7 +78,7 @@ export class SemanticValidator {
               const cfg = methodConfig as any;
               definition.requiredMethods.set(methodName, {
                 params: (cfg.params || []).map((p: string) => this.resolveType(p)),
-                returnType: this.resolveType(cfg.returnType || 'void') as HoloScriptType
+                returnType: this.resolveType(cfg.returnType || 'void') as HoloScriptType,
               });
             }
           }
@@ -123,18 +123,26 @@ export class SemanticValidator {
   private checkRequirements(node: HSPlusNode, definition: SemanticDefinition): void {
     // Check Category/Type if specified
     if (definition.category && node.properties?.category !== definition.category) {
-       // this.addError(node, `Node does not match category "${definition.category}" required by semantic "${definition.name}".`, 'warning');
+      // this.addError(node, `Node does not match category "${definition.category}" required by semantic "${definition.name}".`, 'warning');
     }
 
     // Check required properties
     for (const [prop, expectedType] of definition.requiredProperties.entries()) {
       if (!node.properties || !(prop in node.properties)) {
-        this.addError(node, `Object "${node.id}" is missing required property "${prop}" defined in semantic "${definition.name}".`, 'error');
+        this.addError(
+          node,
+          `Object "${node.id}" is missing required property "${prop}" defined in semantic "${definition.name}".`,
+          'error'
+        );
       } else if (expectedType.kind !== 'primitive' || (expectedType.name as string) !== 'any') {
         const actualType = this.typeChecker.inferType(node.properties[prop]);
         const result = this.typeChecker.checkAssignment(actualType, expectedType);
         if (!result.valid) {
-          this.addError(node, `Property "${prop}" in object "${node.id}" has invalid type. Expected ${this.formatType(expectedType)}, got ${this.formatType(actualType)}.`, 'error');
+          this.addError(
+            node,
+            `Property "${prop}" in object "${node.id}" has invalid type. Expected ${this.formatType(expectedType)}, got ${this.formatType(actualType)}.`,
+            'error'
+          );
         }
       }
     }
@@ -142,7 +150,11 @@ export class SemanticValidator {
     // Check required traits
     for (const trait of definition.requiredTraits) {
       if (!node.traits || !node.traits.has(trait as any)) {
-        this.addError(node, `Object "${node.id}" is missing required trait "@${trait}" defined in semantic "${definition.name}".`, 'error');
+        this.addError(
+          node,
+          `Object "${node.id}" is missing required trait "@${trait}" defined in semantic "${definition.name}".`,
+          'error'
+        );
       }
     }
 
@@ -151,27 +163,41 @@ export class SemanticValidator {
     for (const [methodName, signature] of definition.requiredMethods.entries()) {
       const methodNode = this.findMethod(node, methodName);
       if (!methodNode) {
-        this.addError(node, `Object "${node.id}" is missing required method "${methodName}" defined in semantic "${definition.name}".`, 'error');
+        this.addError(
+          node,
+          `Object "${node.id}" is missing required method "${methodName}" defined in semantic "${definition.name}".`,
+          'error'
+        );
       } else {
         // Convert signature to expected format
         const convertedSignature = {
-          params: signature.params.map((p: any, i: number) => ({ 
-            name: `param${i}`, 
-            type: typeof p === 'string' ? p : ((p as any).kind === 'primitive' ? (p as any).name : 'any') 
+          params: signature.params.map((p: any, i: number) => ({
+            name: `param${i}`,
+            type:
+              typeof p === 'string' ? p : (p).kind === 'primitive' ? (p).name : 'any',
           })),
-          returnType: typeof signature.returnType === 'string' 
-            ? signature.returnType 
-            : ((signature.returnType as any)?.kind === 'primitive' ? (signature.returnType as any).name : 'any')
+          returnType:
+            typeof signature.returnType === 'string'
+              ? signature.returnType
+              : (signature.returnType as any)?.kind === 'primitive'
+                ? (signature.returnType as any).name
+                : 'any',
         };
         // Deep method signature validation
-        this.validateMethodSignature(node, methodNode, methodName, convertedSignature, definition.name);
+        this.validateMethodSignature(
+          node,
+          methodNode,
+          methodName,
+          convertedSignature,
+          definition.name
+        );
       }
     }
   }
 
   private resolveType(typeStr: string): HoloScriptType | undefined {
     if (typeStr === 'any') return { kind: 'primitive', name: 'any' as any };
-    
+
     // Simple lookup in built-ins
     const builtIn = this.typeChecker.getType(typeStr);
     if (builtIn) return builtIn;
@@ -197,7 +223,7 @@ export class SemanticValidator {
     // Validate parameter count (only if method explicitly declares params)
     const methodParams = methodNode.params || [];
     const hasExplicitParams = Array.isArray(methodNode.params);
-    
+
     if (hasExplicitParams && methodParams.length !== expectedSignature.params.length) {
       this.addError(
         node,
@@ -213,16 +239,18 @@ export class SemanticValidator {
         const expected = expectedSignature.params[i];
         const actual = methodParams[i];
         const actualType = actual?.type || actual?.typeAnnotation;
-        
+
         // Skip validation if actual type is not specified
         if (!actualType) continue;
-        
+
         const expectedType = this.resolveType(expected.type);
         const actualResolvedType = this.resolveType(actualType);
 
         if (expectedType && actualResolvedType && expected.type !== 'any' && actualType !== 'any') {
-          const expectedKind = expectedType.kind === 'primitive' ? expectedType.name : expected.type;
-          const actualKind = actualResolvedType.kind === 'primitive' ? actualResolvedType.name : actualType;
+          const expectedKind =
+            expectedType.kind === 'primitive' ? expectedType.name : expected.type;
+          const actualKind =
+            actualResolvedType.kind === 'primitive' ? actualResolvedType.name : actualType;
           if (expectedKind !== actualKind) {
             this.addError(
               node,
@@ -249,7 +277,7 @@ export class SemanticValidator {
 
   private findMethod(node: HSPlusNode, name: string): any {
     // Check children for method nodes
-    return node.children?.find(c => (c as any).type === 'method' && (c as any).name === name);
+    return node.children?.find((c) => (c as any).type === 'method' && (c as any).name === name);
   }
 
   private addError(node: HSPlusNode, message: string, severity: 'error' | 'warning'): void {
@@ -258,7 +286,7 @@ export class SemanticValidator {
       message,
       severity,
       line: node.loc?.start.line || 0,
-      column: node.loc?.start.column || 0
+      column: node.loc?.start.column || 0,
     });
   }
 }

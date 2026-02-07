@@ -5,11 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  ReferenceGraph,
-  createReferenceGraph,
-  SymbolType,
-} from './ReferenceGraph';
+import { ReferenceGraph, createReferenceGraph, SymbolType } from './ReferenceGraph';
 import {
   ReachabilityAnalyzer,
   createReachabilityAnalyzer,
@@ -97,11 +93,11 @@ describe('ReferenceGraph', () => {
       graph.buildFromAST(ast, 'test.holo');
 
       const defs = graph.getDefinitions();
-      const orbDefs = Array.from(defs.values()).filter(d => d.type === 'orb');
+      const orbDefs = Array.from(defs.values()).filter((d) => d.type === 'orb');
 
       expect(orbDefs.length).toBe(2);
-      expect(orbDefs.map(d => d.name)).toContain('OrbA');
-      expect(orbDefs.map(d => d.name)).toContain('OrbB');
+      expect(orbDefs.map((d) => d.name)).toContain('OrbA');
+      expect(orbDefs.map((d) => d.name)).toContain('OrbB');
     });
 
     it('should collect template definitions', () => {
@@ -112,11 +108,11 @@ describe('ReferenceGraph', () => {
       graph.buildFromAST(ast, 'test.holo');
 
       const defs = graph.getDefinitions();
-      const templateDefs = Array.from(defs.values()).filter(d => d.type === 'template');
+      const templateDefs = Array.from(defs.values()).filter((d) => d.type === 'template');
 
       expect(templateDefs.length).toBe(2);
-      expect(templateDefs.map(d => d.name)).toContain('Button');
-      expect(templateDefs.map(d => d.name)).toContain('Panel');
+      expect(templateDefs.map((d) => d.name)).toContain('Button');
+      expect(templateDefs.map((d) => d.name)).toContain('Panel');
     });
 
     it('should collect composition as entry point', () => {
@@ -125,7 +121,7 @@ describe('ReferenceGraph', () => {
       graph.buildFromAST(ast, 'test.holo');
 
       const defs = graph.getDefinitions();
-      const compDef = Array.from(defs.values()).find(d => d.type === 'composition');
+      const compDef = Array.from(defs.values()).find((d) => d.type === 'composition');
 
       expect(compDef).toBeDefined();
       expect(compDef!.isEntryPoint).toBe(true);
@@ -139,7 +135,7 @@ describe('ReferenceGraph', () => {
       graph.buildFromAST(ast, 'src/scene.holo');
 
       const defs = graph.getDefinitions();
-      const orbDef = Array.from(defs.values()).find(d => d.name === 'OrbA');
+      const orbDef = Array.from(defs.values()).find((d) => d.name === 'OrbA');
 
       expect(orbDef!.filePath).toBe('src/scene.holo');
     });
@@ -155,7 +151,7 @@ describe('ReferenceGraph', () => {
       graph.buildFromAST(ast, 'test.holo');
 
       const refs = graph.getReferences();
-      const templateRef = refs.find(r => r.name === 'Button' && r.context === 'template-usage');
+      const templateRef = refs.find((r) => r.name === 'Button' && r.context === 'template-usage');
 
       expect(templateRef).toBeDefined();
     });
@@ -168,7 +164,7 @@ describe('ReferenceGraph', () => {
       graph.buildFromAST(ast, 'test.holo');
 
       const refs = graph.getReferences();
-      const childRefs = refs.filter(r => r.context === 'child-reference');
+      const childRefs = refs.filter((r) => r.context === 'child-reference');
 
       expect(childRefs.length).toBe(2);
     });
@@ -192,7 +188,9 @@ describe('ReferenceGraph', () => {
       graph.buildFromAST(ast, 'test.holo');
 
       const nodes = graph.getNodes();
-      const helperNode = Array.from(nodes.entries()).find(([, n]) => n.definition.name === 'Helper');
+      const helperNode = Array.from(nodes.entries()).find(
+        ([, n]) => n.definition.name === 'Helper'
+      );
 
       if (helperNode) {
         graph.addEntryPoint(helperNode[0]);
@@ -257,7 +255,7 @@ describe('ReachabilityAnalyzer', () => {
       const result = analyzer.analyze();
 
       // Composition should be reachable
-      const compReachable = result.reachable.some(s => s.type === 'composition');
+      const compReachable = result.reachable.some((s) => s.type === 'composition');
       expect(compReachable).toBe(true);
     });
 
@@ -310,7 +308,7 @@ describe('ReachabilityAnalyzer', () => {
 
       // UnusedTemplate should be detected
       const hasUnusedTemplate = unusedTemplates.some(
-        item => item.symbol.name === 'UnusedTemplate'
+        (item) => item.symbol.name === 'UnusedTemplate'
       );
 
       // The analysis depends on how references are resolved
@@ -334,9 +332,7 @@ describe('ReachabilityAnalyzer', () => {
       const result = analyzer.analyze();
 
       // Private orb should not be in dead code
-      const hasPrivate = result.deadCode.some(
-        item => item.symbol.name === '_privateOrb'
-      );
+      const hasPrivate = result.deadCode.some((item) => item.symbol.name === '_privateOrb');
 
       expect(hasPrivate).toBe(false);
     });
@@ -384,9 +380,7 @@ describe('ReachabilityAnalyzer', () => {
 
       const result = analyzer.analyze();
 
-      const exportedReachable = result.reachable.some(
-        s => s.name === 'ExportedOrb'
-      );
+      const exportedReachable = result.reachable.some((s) => s.name === 'ExportedOrb');
 
       expect(exportedReachable).toBe(true);
     });
@@ -486,9 +480,7 @@ describe('analyzeDeadCode convenience function', () => {
       includePrivate: false,
     });
 
-    const hasPrivate = result.deadCode.some(
-      item => item.symbol.name === '_private'
-    );
+    const hasPrivate = result.deadCode.some((item) => item.symbol.name === '_private');
 
     expect(hasPrivate).toBe(false);
   });

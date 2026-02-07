@@ -825,10 +825,16 @@ export class PriorityQueue<T> {
       const rightChild = 2 * index + 2;
       let smallest = index;
 
-      if (leftChild < this.heap.length && this.compareFn(this.heap[leftChild].priority, this.heap[smallest].priority) < 0) {
+      if (
+        leftChild < this.heap.length &&
+        this.compareFn(this.heap[leftChild].priority, this.heap[smallest].priority) < 0
+      ) {
         smallest = leftChild;
       }
-      if (rightChild < this.heap.length && this.compareFn(this.heap[rightChild].priority, this.heap[smallest].priority) < 0) {
+      if (
+        rightChild < this.heap.length &&
+        this.compareFn(this.heap[rightChild].priority, this.heap[smallest].priority) < 0
+      ) {
         smallest = rightChild;
       }
 

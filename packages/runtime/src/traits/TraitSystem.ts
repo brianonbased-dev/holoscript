@@ -37,7 +37,7 @@ export class TraitSystem {
       object,
       physicsWorld: this.physicsWorld,
       config,
-      data: {}
+      data: {},
     };
 
     if (handler.onApply) {
@@ -46,7 +46,7 @@ export class TraitSystem {
 
     const contexts = this.activeTraits.get(traitName)!;
     contexts.push(context);
-    
+
     // Store context on object for easy access/removal
     if (!(object as any)._traits) {
       (object as any)._traits = [];
@@ -65,7 +65,7 @@ export class TraitSystem {
     });
   }
 
-  remove(object: THREE.Object3D, traitName: string): void {
+  remove(_object: THREE.Object3D, _traitName: string): void {
     // Determine which context to remove
     // (Implementation omitted for brevity, would need to find specific context)
   }

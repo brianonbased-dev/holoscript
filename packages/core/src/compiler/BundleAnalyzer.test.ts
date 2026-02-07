@@ -142,8 +142,8 @@ describe('BundleAnalyzer', () => {
       const input = createTestBundle({ moduleCount: 4, chunkCount: 2 });
       const report = analyzer.analyze(input);
 
-      const entryChunks = report.chunks.filter(c => c.isEntry);
-      const asyncChunks = report.chunks.filter(c => c.isAsync);
+      const entryChunks = report.chunks.filter((c) => c.isEntry);
+      const asyncChunks = report.chunks.filter((c) => c.isAsync);
 
       expect(entryChunks.length).toBe(1);
       expect(asyncChunks.length).toBe(1);
@@ -155,37 +155,41 @@ describe('BundleAnalyzer', () => {
   describe('Module Analysis', () => {
     it('should detect module types', () => {
       const input: BundleInput = {
-        chunks: [{
-          id: 'main',
-          name: 'main',
-          isEntry: true,
-          isAsync: false,
-          files: [
-            { path: 'src/main.holo', content: 'orb "Main" {}', type: 'holo' },
-            { path: 'src/MyTemplate.ts', content: 'template', type: 'template' },
-            { path: 'node_modules/pkg/index.js', content: 'export {}', type: 'external' },
-            { path: 'assets/model.json', content: '{}', type: 'json' },
-          ],
-        }],
+        chunks: [
+          {
+            id: 'main',
+            name: 'main',
+            isEntry: true,
+            isAsync: false,
+            files: [
+              { path: 'src/main.holo', content: 'orb "Main" {}', type: 'holo' },
+              { path: 'src/MyTemplate.ts', content: 'template', type: 'template' },
+              { path: 'node_modules/pkg/index.js', content: 'export {}', type: 'external' },
+              { path: 'assets/model.json', content: '{}', type: 'json' },
+            ],
+          },
+        ],
       };
 
       const report = analyzer.analyze(input);
 
-      expect(report.modules.find(m => m.path === 'src/main.holo')?.type).toBe('holo');
-      expect(report.modules.find(m => m.path.includes('node_modules'))?.type).toBe('external');
-      expect(report.modules.find(m => m.path.endsWith('.json'))?.type).toBe('json');
+      expect(report.modules.find((m) => m.path === 'src/main.holo')?.type).toBe('holo');
+      expect(report.modules.find((m) => m.path.includes('node_modules'))?.type).toBe('external');
+      expect(report.modules.find((m) => m.path.endsWith('.json'))?.type).toBe('json');
     });
 
     it('should calculate module sizes', () => {
       const content = 'orb "Test" { color: "red", size: 1.0 }';
       const input: BundleInput = {
-        chunks: [{
-          id: 'main',
-          name: 'main',
-          isEntry: true,
-          isAsync: false,
-          files: [{ path: 'test.holo', content }],
-        }],
+        chunks: [
+          {
+            id: 'main',
+            name: 'main',
+            isEntry: true,
+            isAsync: false,
+            files: [{ path: 'test.holo', content }],
+          },
+        ],
       };
 
       const report = analyzer.analyze(input);
@@ -198,16 +202,18 @@ describe('BundleAnalyzer', () => {
 
     it('should generate unique module hashes', () => {
       const input: BundleInput = {
-        chunks: [{
-          id: 'main',
-          name: 'main',
-          isEntry: true,
-          isAsync: false,
-          files: [
-            { path: 'a.holo', content: 'content A' },
-            { path: 'b.holo', content: 'content B' },
-          ],
-        }],
+        chunks: [
+          {
+            id: 'main',
+            name: 'main',
+            isEntry: true,
+            isAsync: false,
+            files: [
+              { path: 'a.holo', content: 'content A' },
+              { path: 'b.holo', content: 'content B' },
+            ],
+          },
+        ],
       };
 
       const report = analyzer.analyze(input);
@@ -222,7 +228,7 @@ describe('BundleAnalyzer', () => {
       const report = analyzer.analyze(input);
 
       // Module 1 should depend on module 0
-      const module1 = report.modules.find(m => m.path.includes('module1'));
+      const module1 = report.modules.find((m) => m.path.includes('module1'));
       expect(module1?.dependencies).toContain('src/module0.holo');
     });
 
@@ -231,7 +237,7 @@ describe('BundleAnalyzer', () => {
       const report = analyzer.analyze(input);
 
       // Module 0 should be a dependent of module 1
-      const module0 = report.modules.find(m => m.path.includes('module0'));
+      const module0 = report.modules.find((m) => m.path.includes('module0'));
       expect(module0?.dependents).toContain('src/module1.holo');
     });
   });
@@ -285,7 +291,7 @@ describe('BundleAnalyzer', () => {
       const input = createTestBundle({ moduleCount: 2, includeLargeModules: true });
       const report = analyzer.analyze(input);
 
-      const sizeWarnings = report.warnings.filter(w => w.type === 'size');
+      const sizeWarnings = report.warnings.filter((w) => w.type === 'size');
       expect(sizeWarnings.length).toBeGreaterThan(0);
     });
 
@@ -298,7 +304,7 @@ describe('BundleAnalyzer', () => {
       const report = analyzer.analyze(input);
 
       // Very large module should have error severity
-      const errorWarnings = report.warnings.filter(w => w.severity === 'error');
+      const errorWarnings = report.warnings.filter((w) => w.severity === 'error');
       expect(errorWarnings.length).toBeGreaterThan(0);
     });
   });
@@ -312,29 +318,31 @@ describe('BundleAnalyzer', () => {
       const input = createTestBundle({ moduleCount: 2, includeLargeModules: true });
       const report = analyzer.analyze(input);
 
-      const asyncRecs = report.splittingRecommendations.filter(r => r.type === 'async');
+      const asyncRecs = report.splittingRecommendations.filter((r) => r.type === 'async');
       expect(asyncRecs.length).toBeGreaterThan(0);
     });
 
     it('should recommend vendor chunks for external modules', () => {
       const input: BundleInput = {
-        chunks: [{
-          id: 'main',
-          name: 'main',
-          isEntry: true,
-          isAsync: false,
-          files: [
-            { path: 'node_modules/a/index.js', content: 'a', type: 'external' },
-            { path: 'node_modules/b/index.js', content: 'b', type: 'external' },
-            { path: 'node_modules/c/index.js', content: 'c', type: 'external' },
-            { path: 'node_modules/d/index.js', content: 'd', type: 'external' },
-          ],
-        }],
+        chunks: [
+          {
+            id: 'main',
+            name: 'main',
+            isEntry: true,
+            isAsync: false,
+            files: [
+              { path: 'node_modules/a/index.js', content: 'a', type: 'external' },
+              { path: 'node_modules/b/index.js', content: 'b', type: 'external' },
+              { path: 'node_modules/c/index.js', content: 'c', type: 'external' },
+              { path: 'node_modules/d/index.js', content: 'd', type: 'external' },
+            ],
+          },
+        ],
       };
 
       const report = analyzer.analyze(input);
 
-      const vendorRecs = report.splittingRecommendations.filter(r => r.type === 'vendor');
+      const vendorRecs = report.splittingRecommendations.filter((r) => r.type === 'vendor');
       expect(vendorRecs.length).toBe(1);
     });
   });
@@ -379,22 +387,24 @@ describe('BundleAnalyzer', () => {
   describe('Side Effects Detection', () => {
     it('should detect modules with side effects', () => {
       const input: BundleInput = {
-        chunks: [{
-          id: 'main',
-          name: 'main',
-          isEntry: true,
-          isAsync: false,
-          files: [
-            { path: 'pure.holo', content: 'orb "Pure" { color: "red" }' },
-            { path: 'sideeffect.js', content: 'console.log("hello"); window.foo = 1;' },
-          ],
-        }],
+        chunks: [
+          {
+            id: 'main',
+            name: 'main',
+            isEntry: true,
+            isAsync: false,
+            files: [
+              { path: 'pure.holo', content: 'orb "Pure" { color: "red" }' },
+              { path: 'sideeffect.js', content: 'console.log("hello"); window.foo = 1;' },
+            ],
+          },
+        ],
       };
 
       const report = analyzer.analyze(input);
 
-      const pureModule = report.modules.find(m => m.path === 'pure.holo');
-      const sideEffectModule = report.modules.find(m => m.path === 'sideeffect.js');
+      const pureModule = report.modules.find((m) => m.path === 'pure.holo');
+      const sideEffectModule = report.modules.find((m) => m.path === 'sideeffect.js');
 
       expect(pureModule?.sideEffects).toBe(false);
       expect(sideEffectModule?.sideEffects).toBe(true);
@@ -404,17 +414,19 @@ describe('BundleAnalyzer', () => {
   describe('Metrics', () => {
     it('should identify largest and smallest modules', () => {
       const input: BundleInput = {
-        chunks: [{
-          id: 'main',
-          name: 'main',
-          isEntry: true,
-          isAsync: false,
-          files: [
-            { path: 'small.holo', content: 'x' },
-            { path: 'large.holo', content: 'x'.repeat(1000) },
-            { path: 'medium.holo', content: 'x'.repeat(100) },
-          ],
-        }],
+        chunks: [
+          {
+            id: 'main',
+            name: 'main',
+            isEntry: true,
+            isAsync: false,
+            files: [
+              { path: 'small.holo', content: 'x' },
+              { path: 'large.holo', content: 'x'.repeat(1000) },
+              { path: 'medium.holo', content: 'x'.repeat(100) },
+            ],
+          },
+        ],
       };
 
       const report = analyzer.analyze(input);
@@ -440,13 +452,15 @@ describe('Factory Function', () => {
     });
 
     const input: BundleInput = {
-      chunks: [{
-        id: 'main',
-        name: 'main',
-        isEntry: true,
-        isAsync: false,
-        files: [{ path: 'test.holo', content: 'test' }],
-      }],
+      chunks: [
+        {
+          id: 'main',
+          name: 'main',
+          isEntry: true,
+          isAsync: false,
+          files: [{ path: 'test.holo', content: 'test' }],
+        },
+      ],
     };
 
     const report = analyzer.analyze(input);

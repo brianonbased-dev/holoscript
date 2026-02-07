@@ -329,7 +329,10 @@ export function unescapeHtml(s: string): string {
     '&#x27;': "'",
     '&#x2F;': '/',
   };
-  return s.replace(/&(?:amp|lt|gt|quot|#39|#x27|#x2F);/g, (entity) => htmlEntities[entity] || entity);
+  return s.replace(
+    /&(?:amp|lt|gt|quot|#39|#x27|#x2F);/g,
+    (entity) => htmlEntities[entity] || entity
+  );
 }
 
 /**
@@ -382,7 +385,10 @@ export function isAlpha(s: string): boolean {
 /**
  * Generate a random string
  */
-export function randomString(length: number, charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'): string {
+export function randomString(
+  length: number,
+  charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+): string {
   let result = '';
   for (let i = 0; i < length; i++) {
     result += charset[Math.floor(Math.random() * charset.length)];

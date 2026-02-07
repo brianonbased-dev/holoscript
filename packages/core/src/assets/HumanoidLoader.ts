@@ -9,7 +9,7 @@
  * @see https://docs.readyplayer.me/
  */
 
-import type { SmartAssetLoader, LoadProgress, LoadResult } from './SmartAssetLoader';
+import type { SmartAssetLoader, LoadResult } from './SmartAssetLoader';
 import type { AssetMetadata } from './AssetMetadata';
 
 // ============================================================================
@@ -25,31 +25,83 @@ export type AvatarFormat = 'vrm' | 'vrm0' | 'vrm1' | 'rpm' | 'gltf' | 'glb';
  * Standard VRM bone names (VRM 1.0 specification)
  */
 export type VRMBoneName =
-  | 'hips' | 'spine' | 'chest' | 'upperChest' | 'neck' | 'head'
-  | 'leftShoulder' | 'leftUpperArm' | 'leftLowerArm' | 'leftHand'
-  | 'rightShoulder' | 'rightUpperArm' | 'rightLowerArm' | 'rightHand'
-  | 'leftUpperLeg' | 'leftLowerLeg' | 'leftFoot' | 'leftToes'
-  | 'rightUpperLeg' | 'rightLowerLeg' | 'rightFoot' | 'rightToes'
-  | 'leftThumbMetacarpal' | 'leftThumbProximal' | 'leftThumbDistal'
-  | 'leftIndexProximal' | 'leftIndexIntermediate' | 'leftIndexDistal'
-  | 'leftMiddleProximal' | 'leftMiddleIntermediate' | 'leftMiddleDistal'
-  | 'leftRingProximal' | 'leftRingIntermediate' | 'leftRingDistal'
-  | 'leftLittleProximal' | 'leftLittleIntermediate' | 'leftLittleDistal'
-  | 'rightThumbMetacarpal' | 'rightThumbProximal' | 'rightThumbDistal'
-  | 'rightIndexProximal' | 'rightIndexIntermediate' | 'rightIndexDistal'
-  | 'rightMiddleProximal' | 'rightMiddleIntermediate' | 'rightMiddleDistal'
-  | 'rightRingProximal' | 'rightRingIntermediate' | 'rightRingDistal'
-  | 'rightLittleProximal' | 'rightLittleIntermediate' | 'rightLittleDistal'
-  | 'leftEye' | 'rightEye' | 'jaw';
+  | 'hips'
+  | 'spine'
+  | 'chest'
+  | 'upperChest'
+  | 'neck'
+  | 'head'
+  | 'leftShoulder'
+  | 'leftUpperArm'
+  | 'leftLowerArm'
+  | 'leftHand'
+  | 'rightShoulder'
+  | 'rightUpperArm'
+  | 'rightLowerArm'
+  | 'rightHand'
+  | 'leftUpperLeg'
+  | 'leftLowerLeg'
+  | 'leftFoot'
+  | 'leftToes'
+  | 'rightUpperLeg'
+  | 'rightLowerLeg'
+  | 'rightFoot'
+  | 'rightToes'
+  | 'leftThumbMetacarpal'
+  | 'leftThumbProximal'
+  | 'leftThumbDistal'
+  | 'leftIndexProximal'
+  | 'leftIndexIntermediate'
+  | 'leftIndexDistal'
+  | 'leftMiddleProximal'
+  | 'leftMiddleIntermediate'
+  | 'leftMiddleDistal'
+  | 'leftRingProximal'
+  | 'leftRingIntermediate'
+  | 'leftRingDistal'
+  | 'leftLittleProximal'
+  | 'leftLittleIntermediate'
+  | 'leftLittleDistal'
+  | 'rightThumbMetacarpal'
+  | 'rightThumbProximal'
+  | 'rightThumbDistal'
+  | 'rightIndexProximal'
+  | 'rightIndexIntermediate'
+  | 'rightIndexDistal'
+  | 'rightMiddleProximal'
+  | 'rightMiddleIntermediate'
+  | 'rightMiddleDistal'
+  | 'rightRingProximal'
+  | 'rightRingIntermediate'
+  | 'rightRingDistal'
+  | 'rightLittleProximal'
+  | 'rightLittleIntermediate'
+  | 'rightLittleDistal'
+  | 'leftEye'
+  | 'rightEye'
+  | 'jaw';
 
 /**
  * Standard VRM expression names (VRM 1.0)
  */
 export type VRMExpressionName =
-  | 'happy' | 'angry' | 'sad' | 'relaxed' | 'surprised'
-  | 'aa' | 'ih' | 'ou' | 'ee' | 'oh'
-  | 'blink' | 'blinkLeft' | 'blinkRight'
-  | 'lookUp' | 'lookDown' | 'lookLeft' | 'lookRight'
+  | 'happy'
+  | 'angry'
+  | 'sad'
+  | 'relaxed'
+  | 'surprised'
+  | 'aa'
+  | 'ih'
+  | 'ou'
+  | 'ee'
+  | 'oh'
+  | 'blink'
+  | 'blinkLeft'
+  | 'blinkRight'
+  | 'lookUp'
+  | 'lookDown'
+  | 'lookLeft'
+  | 'lookRight'
   | 'neutral';
 
 /**
@@ -305,12 +357,11 @@ export class HumanoidLoader {
    * Initialize the loader with Three.js dependencies
    * Call this after Three.js and loaders are available
    */
-  async initialize(three?: unknown): Promise<void> {
+  async initialize(_three?: unknown): Promise<void> {
     // Dynamic import pattern for Three.js loaders
     // This allows the loader to work without Three.js being bundled
     try {
-      // Try to dynamically import GLTFLoader
-      // @ts-expect-error - Three.js is optional
+      // Dynamic import pattern for Three.js GLTFLoader
       const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
       this.gltfLoader = new GLTFLoader();
 
@@ -555,11 +606,7 @@ export class HumanoidLoader {
   /**
    * Set expression
    */
-  setExpression(
-    id: string,
-    expression: VRMExpressionName | string,
-    weight: number = 1
-  ): void {
+  setExpression(id: string, expression: VRMExpressionName | string, weight: number = 1): void {
     const state = this.avatars.get(id);
     if (!state) return;
 
@@ -640,11 +687,7 @@ export class HumanoidLoader {
   /**
    * Build avatar URL with appropriate parameters
    */
-  private buildAvatarUrl(
-    url: string,
-    format: AvatarFormat,
-    config: HumanoidConfig
-  ): string {
+  private buildAvatarUrl(url: string, format: AvatarFormat, config: HumanoidConfig): string {
     // If it's a Ready Player Me avatar ID
     if (format === 'rpm' && !url.startsWith('http')) {
       return this.buildRPMUrl(url, config);
@@ -662,7 +705,7 @@ export class HumanoidLoader {
    * Build Ready Player Me URL from avatar ID
    */
   private buildRPMUrl(avatarId: string, config: HumanoidConfig): string {
-    let url = `${HumanoidLoader.RPM_BASE_URL}${avatarId}.glb`;
+    const url = `${HumanoidLoader.RPM_BASE_URL}${avatarId}.glb`;
     return this.appendRPMParameters(url, config);
   }
 
@@ -804,7 +847,11 @@ export class HumanoidLoader {
     return {
       avatarId: match?.[1],
       bodyType: config.url.includes('halfbody') ? 'halfbody' : 'fullbody',
-      gender: config.url.includes('male') ? 'male' : config.url.includes('female') ? 'female' : 'neutral',
+      gender: config.url.includes('male')
+        ? 'male'
+        : config.url.includes('female')
+          ? 'female'
+          : 'neutral',
     };
   }
 
@@ -817,26 +864,26 @@ export class HumanoidLoader {
    */
   static readonly BONE_NAME_MAP: Record<string, VRMBoneName> = {
     // Common naming variations
-    'pelvis': 'hips',
-    'spine_01': 'spine',
-    'spine_02': 'chest',
-    'spine_03': 'upperChest',
-    'clavicle_l': 'leftShoulder',
-    'upperarm_l': 'leftUpperArm',
-    'lowerarm_l': 'leftLowerArm',
-    'hand_l': 'leftHand',
-    'clavicle_r': 'rightShoulder',
-    'upperarm_r': 'rightUpperArm',
-    'lowerarm_r': 'rightLowerArm',
-    'hand_r': 'rightHand',
-    'thigh_l': 'leftUpperLeg',
-    'calf_l': 'leftLowerLeg',
-    'foot_l': 'leftFoot',
-    'ball_l': 'leftToes',
-    'thigh_r': 'rightUpperLeg',
-    'calf_r': 'rightLowerLeg',
-    'foot_r': 'rightFoot',
-    'ball_r': 'rightToes',
+    pelvis: 'hips',
+    spine_01: 'spine',
+    spine_02: 'chest',
+    spine_03: 'upperChest',
+    clavicle_l: 'leftShoulder',
+    upperarm_l: 'leftUpperArm',
+    lowerarm_l: 'leftLowerArm',
+    hand_l: 'leftHand',
+    clavicle_r: 'rightShoulder',
+    upperarm_r: 'rightUpperArm',
+    lowerarm_r: 'rightLowerArm',
+    hand_r: 'rightHand',
+    thigh_l: 'leftUpperLeg',
+    calf_l: 'leftLowerLeg',
+    foot_l: 'leftFoot',
+    ball_l: 'leftToes',
+    thigh_r: 'rightUpperLeg',
+    calf_r: 'rightLowerLeg',
+    foot_r: 'rightFoot',
+    ball_r: 'rightToes',
     // Mixamo naming
     'mixamorig:Hips': 'hips',
     'mixamorig:Spine': 'spine',
@@ -882,11 +929,28 @@ export class HumanoidLoader {
 
     // Check if it's already a VRM bone name
     const vrmBones: VRMBoneName[] = [
-      'hips', 'spine', 'chest', 'upperChest', 'neck', 'head',
-      'leftShoulder', 'leftUpperArm', 'leftLowerArm', 'leftHand',
-      'rightShoulder', 'rightUpperArm', 'rightLowerArm', 'rightHand',
-      'leftUpperLeg', 'leftLowerLeg', 'leftFoot', 'leftToes',
-      'rightUpperLeg', 'rightLowerLeg', 'rightFoot', 'rightToes',
+      'hips',
+      'spine',
+      'chest',
+      'upperChest',
+      'neck',
+      'head',
+      'leftShoulder',
+      'leftUpperArm',
+      'leftLowerArm',
+      'leftHand',
+      'rightShoulder',
+      'rightUpperArm',
+      'rightLowerArm',
+      'rightHand',
+      'leftUpperLeg',
+      'leftLowerLeg',
+      'leftFoot',
+      'leftToes',
+      'rightUpperLeg',
+      'rightLowerLeg',
+      'rightFoot',
+      'rightToes',
     ];
 
     if (vrmBones.includes(lower as VRMBoneName)) {

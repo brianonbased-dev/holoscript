@@ -17,13 +17,7 @@ describe('ErrorRecovery', () => {
 
   describe('createError', () => {
     it('should create error with basic info', () => {
-      const error = recovery.createError(
-        'SYNTAX_ERROR',
-        'Unexpected token',
-        10,
-        5,
-        'some source'
-      );
+      const error = recovery.createError('SYNTAX_ERROR', 'Unexpected token', 10, 5, 'some source');
 
       expect(error.code).toBe('SYNTAX_ERROR');
       expect(error.message).toBe('Unexpected token');
@@ -39,63 +33,38 @@ describe('ErrorRecovery', () => {
     });
 
     it('should generate suggestions for UNKNOWN_TRAIT', () => {
-      const error = recovery.createError(
-        'UNKNOWN_TRAIT',
-        'Unknown trait "graable"',
-        1,
-        1
-      );
+      const error = recovery.createError('UNKNOWN_TRAIT', 'Unknown trait "graable"', 1, 1);
 
       expect(error.suggestions).toBeDefined();
       expect(error.suggestions!.length).toBeGreaterThan(0);
-      expect(error.suggestions!.some(s => s.description.includes('grabbable'))).toBe(true);
+      expect(error.suggestions!.some((s) => s.description.includes('grabbable'))).toBe(true);
     });
 
     it('should generate suggestions for UNKNOWN_GEOMETRY', () => {
-      const error = recovery.createError(
-        'UNKNOWN_GEOMETRY',
-        'Unknown geometry "sphre"',
-        1,
-        1
-      );
+      const error = recovery.createError('UNKNOWN_GEOMETRY', 'Unknown geometry "sphre"', 1, 1);
 
       expect(error.suggestions).toBeDefined();
-      expect(error.suggestions!.some(s => s.description.includes('sphere'))).toBe(true);
+      expect(error.suggestions!.some((s) => s.description.includes('sphere'))).toBe(true);
     });
 
     it('should generate suggestions for TRAIT_CONFLICT', () => {
-      const error = recovery.createError(
-        'TRAIT_CONFLICT',
-        '@static conflicts with @physics',
-        1,
-        1
-      );
+      const error = recovery.createError('TRAIT_CONFLICT', '@static conflicts with @physics', 1, 1);
 
       expect(error.suggestions).toBeDefined();
-      expect(error.suggestions!.some(s => s.description.includes('Remove'))).toBe(true);
+      expect(error.suggestions!.some((s) => s.description.includes('Remove'))).toBe(true);
     });
 
     it('should generate suggestions for MISSING_BRACE', () => {
-      const error = recovery.createError(
-        'MISSING_BRACE',
-        'Missing closing brace',
-        10,
-        1
-      );
+      const error = recovery.createError('MISSING_BRACE', 'Missing closing brace', 10, 1);
 
       expect(error.suggestions).toBeDefined();
-      expect(error.suggestions!.some(s => s.description.includes('brace'))).toBe(true);
+      expect(error.suggestions!.some((s) => s.description.includes('brace'))).toBe(true);
     });
   });
 
   describe('analyzeError', () => {
     it('should analyze missing brace error', () => {
-      const error = recovery.analyzeError(
-        'unexpected end of input',
-        'composition "Test" {',
-        1,
-        20
-      );
+      const error = recovery.analyzeError('unexpected end of input', 'composition "Test" {', 1, 20);
 
       expect(error.code).toBe('MISSING_BRACE');
       expect(error.suggestions!.length).toBeGreaterThan(0);
@@ -113,23 +82,13 @@ describe('ErrorRecovery', () => {
     });
 
     it('should analyze unterminated string error', () => {
-      const error = recovery.analyzeError(
-        'Unterminated string literal',
-        'text: "Hello',
-        1,
-        6
-      );
+      const error = recovery.analyzeError('Unterminated string literal', 'text: "Hello', 1, 6);
 
       expect(error.code).toBe('MISSING_QUOTE');
     });
 
     it('should fall back to SYNTAX_ERROR for unknown patterns', () => {
-      const error = recovery.analyzeError(
-        'Some unknown error pattern xyz123',
-        'weird code',
-        1,
-        1
-      );
+      const error = recovery.analyzeError('Some unknown error pattern xyz123', 'weird code', 1, 1);
 
       expect(error.code).toBe('SYNTAX_ERROR');
     });
@@ -273,7 +232,7 @@ describe('Parser Error Recovery Integration', () => {
     it('should use HSP004 for unclosed braces', () => {
       const result = parser.parse(`orb button { color: "blue"`);
       expect(result.success).toBe(false);
-      expect(result.errors.some(e => e.code === 'HSP004')).toBe(true);
+      expect(result.errors.some((e) => e.code === 'HSP004')).toBe(true);
     });
 
     it('should handle unclosed brackets gracefully', () => {
@@ -294,7 +253,7 @@ describe('Parser Error Recovery Integration', () => {
     it('should use HSP201 for invalid directive name', () => {
       const result = parser.parse(`orb obj { @123 }`);
       expect(result.success).toBe(false);
-      expect(result.errors.some(e => e.code === 'HSP201')).toBe(true);
+      expect(result.errors.some((e) => e.code === 'HSP201')).toBe(true);
     });
 
     it('should report error for invalid spread in expression position', () => {

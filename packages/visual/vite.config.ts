@@ -9,7 +9,7 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.tsx'),
       name: 'HoloScriptVisual',
       formats: ['es'],
-      fileName: 'index'
+      fileName: 'index',
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'reactflow', '@holoscript/core'],
@@ -17,13 +17,13 @@ export default defineConfig({
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          reactflow: 'ReactFlow'
-        }
-      }
-    }
+          reactflow: 'ReactFlow',
+        },
+      },
+    },
   },
   test: {
     environment: 'jsdom',
-    globals: true
-  }
+    globals: true,
+  },
 });

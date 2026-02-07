@@ -8,13 +8,13 @@ HoloScript's reactive state system and trait composition model map naturally to 
 
 ## Why HoloScript for IoT?
 
-| HoloScript Feature | IoT Application |
-|-------------------|-----------------|
-| `@state { }` blocks | Device state management |
-| `@reactive` | Real-time sensor updates |
-| `@observable` | Publish/subscribe patterns |
-| Trait composition | Device capability modeling |
-| Scene graph | Spatial relationship mapping |
+| HoloScript Feature  | IoT Application              |
+| ------------------- | ---------------------------- |
+| `@state { }` blocks | Device state management      |
+| `@reactive`         | Real-time sensor updates     |
+| `@observable`       | Publish/subscribe patterns   |
+| Trait composition   | Device capability modeling   |
+| Scene graph         | Spatial relationship mapping |
 
 ## Core Concepts
 
@@ -133,6 +133,7 @@ sensor#temperature {
 ```
 
 Generated Thing Description:
+
 ```json
 {
   "@context": "https://www.w3.org/2022/wot/td/v1.1",

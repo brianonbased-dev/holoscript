@@ -18,7 +18,7 @@ type AnchorState = 'unresolved' | 'resolving' | 'resolved' | 'tracking' | 'unava
 interface RooftopAnchorState {
   state: AnchorState;
   isResolved: boolean;
-  buildingHeight: number;  // meters
+  buildingHeight: number; // meters
   rooftopPosition: { x: number; y: number; z: number };
   groundPosition: { lat: number; lon: number };
   estimatedFloors: number;
@@ -29,10 +29,10 @@ interface RooftopAnchorState {
 interface RooftopAnchorConfig {
   latitude: number;
   longitude: number;
-  elevation_offset: number;  // meters above rooftop
-  building_id: string;  // Optional specific building ID
+  elevation_offset: number; // meters above rooftop
+  building_id: string; // Optional specific building ID
   auto_resolve: boolean;
-  fallback_height: number;  // Default if building not found
+  fallback_height: number; // Default if building not found
   align_to_edge: boolean;
 }
 
@@ -65,10 +65,10 @@ export const rooftopAnchorHandler: TraitHandler<RooftopAnchorConfig> = {
       anchorHandle: null,
     };
     (node as any).__rooftopAnchorState = state;
-    
+
     if (config.auto_resolve) {
       state.state = 'resolving';
-      
+
       context.emit?.('rooftop_anchor_request', {
         node,
         latitude: config.latitude,
@@ -88,10 +88,10 @@ export const rooftopAnchorHandler: TraitHandler<RooftopAnchorConfig> = {
     delete (node as any).__rooftopAnchorState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, _context, _delta) {
     const state = (node as any).__rooftopAnchorState as RooftopAnchorState;
     if (!state) return;
-    
+
     // Apply position from resolved anchor
     if (state.state === 'tracking' || state.state === 'resolved') {
       if ((node as any).position) {
@@ -105,16 +105,16 @@ export const rooftopAnchorHandler: TraitHandler<RooftopAnchorConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__rooftopAnchorState as RooftopAnchorState;
     if (!state) return;
-    
+
     if (event.type === 'rooftop_anchor_resolved') {
       state.state = 'resolved';
       state.isResolved = true;
       state.anchorHandle = event.handle;
       state.buildingHeight = event.buildingHeight as number;
-      state.estimatedFloors = event.floors as number || Math.floor(state.buildingHeight / 3);
-      state.confidence = event.confidence as number || 1.0;
+      state.estimatedFloors = (event.floors as number) || Math.floor(state.buildingHeight / 3);
+      state.confidence = (event.confidence as number) || 1.0;
       state.rooftopPosition = event.position as typeof state.rooftopPosition;
-      
+
       context.emit?.('on_rooftop_resolved', {
         node,
         buildingHeight: state.buildingHeight,
@@ -127,7 +127,7 @@ export const rooftopAnchorHandler: TraitHandler<RooftopAnchorConfig> = {
       state.state = 'resolved';
       state.isResolved = true;
       state.confidence = 0.5;
-      
+
       // Request geospatial position with fallback height
       context.emit?.('rooftop_anchor_fallback', {
         node,
@@ -135,7 +135,7 @@ export const rooftopAnchorHandler: TraitHandler<RooftopAnchorConfig> = {
         longitude: config.longitude,
         height: config.fallback_height + config.elevation_offset,
       });
-      
+
       context.emit?.('on_rooftop_fallback', {
         node,
         fallbackHeight: config.fallback_height,
@@ -145,7 +145,7 @@ export const rooftopAnchorHandler: TraitHandler<RooftopAnchorConfig> = {
       state.state = 'tracking';
     } else if (event.type === 'rooftop_anchor_unavailable') {
       state.state = 'unavailable';
-      
+
       context.emit?.('on_rooftop_unavailable', {
         node,
         reason: event.reason,
@@ -163,7 +163,7 @@ export const rooftopAnchorHandler: TraitHandler<RooftopAnchorConfig> = {
       });
     } else if (event.type === 'rooftop_anchor_resolve') {
       state.state = 'resolving';
-      
+
       context.emit?.('rooftop_anchor_request', {
         node,
         latitude: config.latitude,

@@ -1,6 +1,6 @@
 # @holoscript/mcp-server
 
-Model Context Protocol (MCP) server for HoloScript AI assistance.
+Model Context Protocol (MCP) server for HoloScript AI assistance. **34 tools** across 4 categories, free and open-source.
 
 ## Installation
 
@@ -10,7 +10,7 @@ npm install @holoscript/mcp-server
 
 ## Configuration
 
-Add to your MCP configuration:
+Add to your MCP configuration (Claude Code, Cursor, Copilot, etc.):
 
 ```json
 {
@@ -23,43 +23,112 @@ Add to your MCP configuration:
 }
 ```
 
-## Available Tools
+## Tool Categories (34 total)
 
-### Parsing & Validation
+### Core Tools (15) - Parsing, Validation, Generation
 
-| Tool | Description |
-|------|-------------|
-| `parse_hs` | Parse .hs or .hsplus code |
-| `parse_holo` | Parse .holo compositions |
-| `validate_holoscript` | Check for syntax errors |
+| Tool                  | Description                                    |
+| --------------------- | ---------------------------------------------- |
+| `parse_hs`            | Parse .hs or .hsplus code into AST             |
+| `parse_holo`          | Parse .holo composition files                  |
+| `validate_holoscript` | Validate syntax with AI-friendly error messages |
+| `list_traits`         | List all 56 VR traits by category              |
+| `explain_trait`       | Get detailed trait documentation                |
+| `suggest_traits`      | Suggest traits from natural language            |
+| `generate_object`     | Generate objects from descriptions              |
+| `generate_scene`      | Generate complete compositions                  |
+| `get_syntax_reference`| Syntax documentation lookup                     |
+| `get_examples`        | Code examples for common patterns               |
+| `explain_code`        | Plain English code explanation                  |
+| `analyze_code`        | Complexity and best-practice analysis           |
+| `render_preview`      | Generate preview images/GIFs                    |
+| `create_share_link`   | Create shareable playground links               |
+| `convert_format`      | Convert between .hs, .hsplus, .holo             |
 
-### Code Generation
+### Graph Understanding Tools (6) - Visual Architecture
 
-| Tool | Description |
-|------|-------------|
-| `generate_object` | Create objects from natural language |
-| `generate_scene` | Create complete compositions |
-| `suggest_traits` | Get appropriate VR traits |
+| Tool                      | Description                                    |
+| ------------------------- | ---------------------------------------------- |
+| `holo_parse_to_graph`     | Parse .holo into graph (nodes, edges, flows)   |
+| `holo_visualize_flow`     | ASCII flow diagram of event/action chains      |
+| `holo_get_node_connections`| All connections for a specific node            |
+| `holo_design_graph`       | Design graph architecture from description     |
+| `holo_diff_graphs`        | Compare two .holo files as graph diffs         |
+| `holo_suggest_connections`| Suggest missing connections and flows           |
 
-### Documentation
+### IDE Tools (9) - Editor Integration
 
-| Tool | Description |
-|------|-------------|
-| `list_traits` | Show available VR traits |
-| `explain_trait` | Get trait documentation |
-| `get_syntax_reference` | Syntax help |
-| `get_examples` | Code examples |
+| Tool                 | Description                                     |
+| -------------------- | ----------------------------------------------- |
+| `hs_scan_project`    | Scan workspace for all HoloScript files/assets  |
+| `hs_diagnostics`     | LSP-style diagnostics with quick fixes          |
+| `hs_autocomplete`    | Context-aware completions (traits, properties)  |
+| `hs_refactor`        | Rename, extract template, organize imports      |
+| `hs_docs`            | Inline documentation for traits/keywords        |
+| `hs_code_action`     | Position-aware code actions (lightbulb)         |
+| `hs_hover`           | Hover information (tooltips)                    |
+| `hs_go_to_definition`| Find symbol definitions across files            |
+| `hs_find_references` | Find all references to a symbol                 |
 
-## Usage with Claude
+### Brittney-Lite AI Tools (4) - Free AI Assistant
 
-```typescript
-// Claude will automatically use the MCP tools
+| Tool                  | Description                                    |
+| --------------------- | ---------------------------------------------- |
+| `hs_ai_explain_error` | Human-friendly error explanations with fixes   |
+| `hs_ai_fix_code`      | Automatically fix broken HoloScript code       |
+| `hs_ai_review`        | Code review for performance, traits, structure |
+| `hs_ai_scaffold`      | Generate production-ready project scaffolding  |
+
+## Usage Examples
+
+### With Claude Code
+
+```
 "Create a VR scene with a grabbable ball and physics"
+# Claude uses generate_scene + suggest_traits automatically
+
+"Fix this HoloScript code: orb ball { @graable }"
+# Claude uses hs_ai_fix_code -> corrects @graable to @grabbable
+
+"Show me the architecture of this .holo file"
+# Claude uses holo_parse_to_graph + holo_visualize_flow
 ```
 
-## Usage with Copilot
+### Programmatic Usage
 
-The MCP server integrates with GitHub Copilot in VS Code.
+```typescript
+import { tools, handleTool } from '@holoscript/mcp-server';
+
+// Parse code
+const result = await handleTool('parse_hs', {
+  code: 'orb Ball @grabbable { position: [0, 1, 0] }',
+});
+
+// Get graph structure
+const graph = await handleTool('holo_parse_to_graph', {
+  code: 'composition "Scene" { ... }',
+});
+
+// AI code review
+const review = await handleTool('hs_ai_review', {
+  code: myHoloCode,
+  focus: 'performance',
+});
+```
+
+## Premium: Hololand MCP
+
+For advanced features, use the Hololand MCP server (premium):
+
+- Live browser context visibility via Brittney
+- AI-powered debugging with full runtime context
+- One-shot generate & inject into running app
+- Real-time error monitoring with auto-fix
+- Performance guard with AI optimization
+- Session recording & replay
+- Batch agent operations
+
+See [@hololand/mcp-server](https://github.com/brianonbased-dev/Hololand) for details.
 
 ## License
 

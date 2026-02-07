@@ -409,8 +409,8 @@ describe('RenderingTrait', () => {
       const levels = rendering.getLODLevels();
 
       expect(levels[0].disabledFeatures?.length || 0).toBe(0);
-      expect((levels[1].disabledFeatures?.length || 0)).toBeGreaterThan(0);
-      expect((levels[2].disabledFeatures?.length || 0)).toBeGreaterThan(
+      expect(levels[1].disabledFeatures?.length || 0).toBeGreaterThan(0);
+      expect(levels[2].disabledFeatures?.length || 0).toBeGreaterThan(
         levels[1].disabledFeatures?.length || 0
       );
     });

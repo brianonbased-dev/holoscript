@@ -33,37 +33,39 @@ The HoloScript Plugin System v2 provides a unified API for extending HoloScript 
 ## Plugin Types
 
 ### 1. Parser Plugins
+
 Extend HoloScript syntax with custom constructs.
 
 ```typescript
 interface ParserPlugin {
   name: string;
   version: string;
-  
+
   // Custom syntax rules
   customTokens?: TokenDefinition[];
   customGrammar?: GrammarRule[];
-  
+
   // AST transformation
   transformAST?(ast: HoloScriptAST): HoloScriptAST;
-  
+
   // Validation hooks
   validate?(node: ASTNode, context: ValidationContext): Diagnostic[];
 }
 ```
 
 **Example: Custom Trait Plugin**
+
 ```typescript
 export const PhysicsTraitPlugin: ParserPlugin = {
   name: '@holoscript/physics-traits',
   version: '1.0.0',
-  
+
   customTokens: [
     { name: 'soft_body', pattern: /@soft_body/ },
     { name: 'fluid', pattern: /@fluid/ },
     { name: 'cloth', pattern: /@cloth/ },
   ],
-  
+
   validate(node, context) {
     if (node.type === 'trait' && node.name === 'soft_body') {
       if (!node.parent?.properties?.mass) {
@@ -71,11 +73,12 @@ export const PhysicsTraitPlugin: ParserPlugin = {
       }
     }
     return [];
-  }
+  },
 };
 ```
 
 ### 2. Compiler Plugins
+
 Generate custom output for new platforms.
 
 ```typescript
@@ -83,78 +86,81 @@ interface CompilerPlugin {
   name: string;
   version: string;
   targetPlatform: string;
-  
+
   // Compilation entry point
   compile(ast: HoloScriptAST, options: CompilerOptions): CompileResult;
-  
+
   // Pre/post processing hooks
   preCompile?(ast: HoloScriptAST): HoloScriptAST;
   postCompile?(result: CompileResult): CompileResult;
-  
+
   // Asset processing
   processAsset?(asset: Asset, type: string): ProcessedAsset;
 }
 ```
 
 **Example: WebGPU Compiler Plugin**
+
 ```typescript
 export const WebGPUCompilerPlugin: CompilerPlugin = {
   name: '@holoscript/webgpu-compiler',
   version: '1.0.0',
   targetPlatform: 'webgpu',
-  
+
   compile(ast, options) {
     // Generate WebGPU shaders and scene graph
     const wgsl = generateWGSL(ast);
     const sceneGraph = generateSceneGraph(ast);
-    
+
     return {
       success: true,
       output: { wgsl, sceneGraph },
       artifacts: ['shaders.wgsl', 'scene.json'],
     };
-  }
+  },
 };
 ```
 
 ### 3. Runtime Plugins
+
 Add runtime behaviors and integrations.
 
 ```typescript
 interface RuntimePlugin {
   name: string;
   version: string;
-  
+
   // Lifecycle hooks
   onInitialize?(runtime: HoloScriptRuntime): void | Promise<void>;
   onShutdown?(runtime: HoloScriptRuntime): void | Promise<void>;
-  
+
   // Object lifecycle
   onObjectCreated?(object: HoloObject, context: RuntimeContext): void;
   onObjectDestroyed?(object: HoloObject, context: RuntimeContext): void;
-  
+
   // Event handling
   onEvent?(event: RuntimeEvent, context: RuntimeContext): void;
-  
+
   // Custom trait implementations
   traitImplementations?: Record<string, TraitImplementation>;
-  
+
   // Custom functions available in HoloScript
   globalFunctions?: Record<string, GlobalFunction>;
 }
 ```
 
 **Example: Analytics Plugin**
+
 ```typescript
 export const AnalyticsPlugin: RuntimePlugin = {
   name: '@holoscript/analytics',
   version: '1.0.0',
-  
+
   onInitialize(runtime) {
     console.log('[Analytics] Initialized');
     this.startTime = Date.now();
   },
-  
+
   onEvent(event, context) {
     if (event.type === 'grab' || event.type === 'click') {
       trackInteraction({
@@ -164,7 +170,7 @@ export const AnalyticsPlugin: RuntimePlugin = {
       });
     }
   },
-  
+
   globalFunctions: {
     'analytics.track': (eventName, data) => {
       trackCustomEvent(eventName, data);
@@ -172,18 +178,19 @@ export const AnalyticsPlugin: RuntimePlugin = {
     'analytics.identify': (userId) => {
       identifyUser(userId);
     },
-  }
+  },
 };
 ```
 
 ### 4. Tooling Plugins
+
 Extend LSP, CLI, and MCP functionality.
 
 ```typescript
 interface ToolingPlugin {
   name: string;
   version: string;
-  
+
   // LSP extensions
   lsp?: {
     completionProviders?: CompletionProvider[];
@@ -191,13 +198,13 @@ interface ToolingPlugin {
     codeActionProviders?: CodeActionProvider[];
     customCommands?: LSPCommand[];
   };
-  
+
   // CLI extensions
   cli?: {
     commands?: CLICommand[];
     flags?: CLIFlag[];
   };
-  
+
   // MCP tool extensions
   mcp?: {
     tools?: MCPTool[];
@@ -207,11 +214,12 @@ interface ToolingPlugin {
 ```
 
 **Example: Linting Plugin**
+
 ```typescript
 export const LintingPlugin: ToolingPlugin = {
   name: '@holoscript/extra-lints',
   version: '1.0.0',
-  
+
   lsp: {
     diagnosticProviders: [
       {
@@ -226,11 +234,11 @@ export const LintingPlugin: ToolingPlugin = {
             });
           }
           return diagnostics;
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
-  
+
   cli: {
     commands: [
       {
@@ -239,16 +247,17 @@ export const LintingPlugin: ToolingPlugin = {
         action: async (args) => {
           const files = await glob(args.pattern || '**/*.holo');
           return lintFiles(files);
-        }
-      }
-    ]
-  }
+        },
+      },
+    ],
+  },
 };
 ```
 
 ## Plugin Discovery
 
 ### NPM Package Convention
+
 Plugins are discoverable via npm package naming:
 
 ```
@@ -258,6 +267,7 @@ holoscript-plugin-*         # Community plugins
 ```
 
 ### Configuration
+
 Plugins are configured in `holoscript.config.json`:
 
 ```json
@@ -277,6 +287,7 @@ Plugins are configured in `holoscript.config.json`:
 ```
 
 ### Programmatic Registration
+
 ```typescript
 import { PluginRegistry } from '@holoscript/core';
 import { AnalyticsPlugin } from '@holoscript/plugin-analytics';
@@ -309,19 +320,19 @@ registry.register(AnalyticsPlugin, { trackingId: 'UA-XXXXX-Y' });
 interface PluginLifecycle {
   // Called when plugin is discovered
   onDiscover?(): Promise<PluginMetadata>;
-  
+
   // Called to validate plugin compatibility
   onValidate?(context: ValidationContext): Promise<boolean>;
-  
+
   // Called when plugin is registered
   onRegister?(registry: PluginRegistry): void;
-  
+
   // Called when plugin is activated
   onActivate?(context: PluginContext): Promise<void>;
-  
+
   // Called when plugin is deactivated
   onDeactivate?(context: PluginContext): Promise<void>;
-  
+
   // Called when plugin is unregistered
   onCleanup?(): Promise<void>;
 }
@@ -330,22 +341,23 @@ interface PluginLifecycle {
 ## Security Model
 
 ### Sandboxed Execution
+
 Plugins run in isolated contexts:
 
 ```typescript
 interface PluginSandbox {
   // Allowed APIs
   allowedAPIs: string[];
-  
+
   // Resource limits
-  maxMemory: number;       // MB
-  maxCPU: number;          // percentage
+  maxMemory: number; // MB
+  maxCPU: number; // percentage
   maxExecutionTime: number; // ms
-  
+
   // Network access
   allowedHosts: string[];
   denyNetworkAccess: boolean;
-  
+
   // File system access
   allowedPaths: string[];
   denyFileAccess: boolean;
@@ -353,6 +365,7 @@ interface PluginSandbox {
 ```
 
 ### Permission System
+
 ```typescript
 // Plugin manifest declares required permissions
 {
@@ -366,6 +379,7 @@ interface PluginSandbox {
 ```
 
 ### Trust Levels
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Trust Level │ Permissions                                   │
@@ -388,14 +402,14 @@ import { Plugin, PluginContext, PluginMetadata } from '@holoscript/plugin-api';
 export interface Plugin<TOptions = unknown> {
   // Metadata
   readonly metadata: PluginMetadata;
-  
+
   // Configuration
   configure?(options: TOptions): void;
-  
+
   // Lifecycle
   activate?(context: PluginContext): Promise<void>;
   deactivate?(): Promise<void>;
-  
+
   // Extension points (pick relevant ones)
   parser?: ParserPlugin;
   compiler?: CompilerPlugin;
@@ -420,12 +434,12 @@ export interface PluginContext {
   // Plugin info
   plugin: PluginMetadata;
   options: unknown;
-  
+
   // Core services
   logger: Logger;
   config: ConfigService;
   storage: StorageService;
-  
+
   // Extension APIs
   parser: ParserExtensionAPI;
   compiler: CompilerExtensionAPI;
@@ -483,10 +497,10 @@ export default {
     version: '1.0.0',
     description: 'My first HoloScript plugin',
   },
-  
+
   async activate(context) {
     context.logger.info('My plugin activated!');
-    
+
     // Register a custom trait
     context.runtime.registerTrait('my_trait', {
       onAttach(object) {
@@ -494,13 +508,13 @@ export default {
       },
       onUpdate(object, dt) {
         // Custom update logic
-      }
+      },
     });
   },
-  
+
   async deactivate() {
     console.log('My plugin deactivated');
-  }
+  },
 } satisfies Plugin;
 ```
 
@@ -523,7 +537,7 @@ export default {
     description: 'Advanced physics simulation for HoloScript',
     engines: { holoscript: '^2.0.0' },
   },
-  
+
   // Parser extensions
   parser: {
     customTokens: [
@@ -533,28 +547,28 @@ export default {
     validate(node, context) {
       // Validate physics properties
       return [];
-    }
+    },
   },
-  
+
   // Runtime extensions
   runtime: {
     traitImplementations: {
-      'soft_body': {
+      soft_body: {
         onAttach(object) {
           initSoftBody(object);
         },
         onUpdate(object, dt) {
           updateSoftBody(object, dt);
-        }
-      }
+        },
+      },
     },
     globalFunctions: {
       'physics.raycast': (origin, direction, maxDistance) => {
         return performRaycast(origin, direction, maxDistance);
-      }
-    }
+      },
+    },
   },
-  
+
   // Tooling extensions
   tooling: {
     mcp: {
@@ -562,28 +576,30 @@ export default {
         {
           name: 'physics_simulate',
           description: 'Run physics simulation on a scene',
-          inputSchema: { /* JSON Schema */ },
+          inputSchema: {
+            /* JSON Schema */
+          },
           handler: async (input) => {
             return simulatePhysics(input);
-          }
-        }
-      ]
-    }
+          },
+        },
+      ],
+    },
   },
-  
+
   configure(options: PhysicsPluginOptions) {
     this.options = options;
   },
-  
+
   async activate(context: PluginContext) {
     const options = context.options as PhysicsPluginOptions;
     await initPhysicsEngine(options.solver);
     setGravity(options.gravity);
   },
-  
+
   async deactivate() {
     await shutdownPhysicsEngine();
-  }
+  },
 } satisfies Plugin<PhysicsPluginOptions>;
 ```
 
@@ -620,9 +636,9 @@ await registry.unregister('@holoscript/plugin-analytics');
 await registry.reload('@holoscript/plugin-analytics');
 
 // Events
-registry.on('plugin:registered', (plugin) => { });
-registry.on('plugin:activated', (plugin) => { });
-registry.on('plugin:error', (plugin, error) => { });
+registry.on('plugin:registered', (plugin) => {});
+registry.on('plugin:activated', (plugin) => {});
+registry.on('plugin:error', (plugin, error) => {});
 ```
 
 ## AI Integration
@@ -633,7 +649,7 @@ Plugins can expose functionality to AI agents via MCP:
 // Plugin with MCP tools
 export default {
   metadata: { name: 'ai-helper-plugin', version: '1.0.0' },
-  
+
   tooling: {
     mcp: {
       tools: [
@@ -644,15 +660,15 @@ export default {
             type: 'object',
             properties: {
               description: { type: 'string' },
-              physicsType: { type: 'string', enum: ['dynamic', 'static', 'kinematic'] }
+              physicsType: { type: 'string', enum: ['dynamic', 'static', 'kinematic'] },
             },
-            required: ['description']
+            required: ['description'],
           },
           handler: async ({ description, physicsType }) => {
             // AI can call this tool to generate HoloScript code
             return generatePhysicsObject(description, physicsType);
-          }
-        }
+          },
+        },
       ],
       resources: [
         {
@@ -662,34 +678,38 @@ export default {
           mimeType: 'application/json',
           handler: async () => {
             return JSON.stringify(physicsExamples);
-          }
-        }
-      ]
-    }
-  }
+          },
+        },
+      ],
+    },
+  },
 } satisfies Plugin;
 ```
 
 ## Implementation Roadmap
 
 ### Phase 1: Core Infrastructure (Sprint 3-4)
+
 - [ ] Plugin interface definitions
 - [ ] PluginRegistry implementation
 - [ ] Basic lifecycle management
 - [ ] Configuration loading
 
 ### Phase 2: Extension Points (Sprint 4-5)
+
 - [ ] Parser plugin hooks
 - [ ] Compiler plugin hooks
 - [ ] Runtime plugin hooks
 - [ ] Basic sandboxing
 
 ### Phase 3: Tooling Integration (Sprint 5-6)
+
 - [ ] LSP plugin support
 - [ ] CLI plugin support
 - [ ] MCP tool registration
 
 ### Phase 4: Ecosystem (Sprint 6+)
+
 - [ ] Plugin marketplace
 - [ ] Signature verification
 - [ ] Hot reload support
@@ -704,14 +724,14 @@ packages/
       index.ts          # Main exports
       types/            # Interface definitions
       decorators/       # @Plugin, @Hook decorators
-  
+
   plugin-registry/      # Plugin management
     src/
       registry.ts       # PluginRegistry class
       loader.ts         # Plugin loading
       sandbox.ts        # Sandboxed execution
       validator.ts      # Plugin validation
-  
+
   plugin-cli/           # CLI for plugin management
     src/
       commands/

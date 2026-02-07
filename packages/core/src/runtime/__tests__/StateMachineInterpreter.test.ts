@@ -11,12 +11,12 @@ describe('StateMachineInterpreter', () => {
     initialState: 'closed',
     states: [
       { type: 'state', name: 'closed', onExit: 'log("Opening door")' },
-      { type: 'state', name: 'open', onEntry: 'log("Door is open")' }
+      { type: 'state', name: 'open', onEntry: 'log("Door is open")' },
     ],
     transitions: [
       { type: 'transition', from: 'closed', to: 'open', event: 'click' },
-      { type: 'transition', from: 'open', to: 'closed', event: 'click' }
-    ]
+      { type: 'transition', from: 'open', to: 'closed', event: 'click' },
+    ],
   };
 
   beforeEach(() => {
@@ -31,7 +31,7 @@ describe('StateMachineInterpreter', () => {
   it('should transition on valid event', () => {
     interpreter.createInstance('door1', doorSM, {});
     const transitioned = interpreter.sendEvent('door1', 'click');
-    
+
     expect(transitioned).toBe(true);
     const instance = interpreter.getInstance('door1');
     expect(instance?.currentState).toBe('open');
@@ -40,7 +40,7 @@ describe('StateMachineInterpreter', () => {
   it('should not transition on invalid event', () => {
     interpreter.createInstance('door1', doorSM, {});
     const transitioned = interpreter.sendEvent('door1', 'hover');
-    
+
     expect(transitioned).toBe(false);
     const instance = interpreter.getInstance('door1');
     expect(instance?.currentState).toBe('closed');
@@ -50,7 +50,7 @@ describe('StateMachineInterpreter', () => {
     interpreter.createInstance('door1', doorSM, {});
     interpreter.sendEvent('door1', 'click'); // open
     interpreter.sendEvent('door1', 'click'); // closed
-    
+
     expect(interpreter.getInstance('door1')?.currentState).toBe('closed');
   });
 });

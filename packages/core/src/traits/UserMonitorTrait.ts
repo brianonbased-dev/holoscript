@@ -12,10 +12,10 @@ import { HSPlusNode, Vector3 } from '../types/HoloScriptPlus';
 export interface UserMonitorConfig {
   /** Frequency of emotion inference (in seconds, default 0.2s = 5Hz) */
   updateRate?: number;
-  
+
   /** Sensitivity to jitter (0-1) */
   jitterSensitivity?: number;
-  
+
   /** Auto-adjust interactions based on frustration */
   adaptiveAssistance?: boolean;
 }
@@ -37,10 +37,10 @@ export const userMonitorHandler: TraitHandler<UserMonitorConfig> = {
   defaultConfig: {
     updateRate: 0.2,
     jitterSensitivity: 0.5,
-    adaptiveAssistance: true
+    adaptiveAssistance: true,
   },
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const state: UserMonitorState = {
       lastInferenceTime: 0,
       headPositions: [],
@@ -67,8 +67,8 @@ export const userMonitorHandler: TraitHandler<UserMonitorConfig> = {
     const hand = context.vr.getDominantHand();
     const handPos = hand ? hand.position : null;
 
-    state.headPositions.push([...headPos as any] as any as Vector3);
-    if (handPos) state.handPositions.push([...handPos as any] as any as Vector3);
+    state.headPositions.push([...(headPos as any)] as any as Vector3);
+    if (handPos) state.handPositions.push([...(handPos as any)] as any as Vector3);
 
     // Keep buffers small (last 30 frames ~0.5s)
     if (state.headPositions.length > 30) state.headPositions.shift();
@@ -102,7 +102,7 @@ export const userMonitorHandler: TraitHandler<UserMonitorConfig> = {
 /**
  * Perform emotion inference using the @builtin detector
  */
-(userMonitorHandler as any).performInference = function(
+(userMonitorHandler as any).performInference = function (
   node: HSPlusNode,
   config: UserMonitorConfig,
   context: TraitContext,
@@ -122,7 +122,7 @@ export const userMonitorHandler: TraitHandler<UserMonitorConfig> = {
     headStability,
     handStability,
     interactionIntensity,
-    behavioralStressing: interactionIntensity > 0.5 ? 0.7 : 0.2
+    behavioralStressing: interactionIntensity > 0.5 ? 0.7 : 0.2,
   });
 
   // Update state
@@ -135,25 +135,25 @@ export const userMonitorHandler: TraitHandler<UserMonitorConfig> = {
     node.properties.userFrustration = state.frustration;
     node.properties.userConfusion = state.confusion;
   }
-}
+};
 
 function calculateStability(positions: Vector3[]): number {
   if (positions.length < 2) return 1.0;
-  
+
   let totalDelta = 0;
   for (let i = 1; i < positions.length; i++) {
-    const p1 = positions[i-1];
+    const p1 = positions[i - 1];
     const p2 = positions[i];
     totalDelta += Math.sqrt(
-      ((p2 as any)[0] - (p1 as any)[0])**2 + 
-      ((p2 as any)[1] - (p1 as any)[1])**2 + 
-      ((p2 as any)[2] - (p1 as any)[2])**2
+      ((p2 as any)[0] - (p1 as any)[0]) ** 2 +
+        ((p2 as any)[1] - (p1 as any)[1]) ** 2 +
+        ((p2 as any)[2] - (p1 as any)[2]) ** 2
     );
   }
-  
+
   const avgDelta = totalDelta / (positions.length - 1);
   // Normalize: 0.05m delta per frame is high jitter for VR
-  return Math.max(0, 1.0 - (avgDelta / 0.05));
+  return Math.max(0, 1.0 - avgDelta / 0.05);
 }
 
 export default userMonitorHandler;

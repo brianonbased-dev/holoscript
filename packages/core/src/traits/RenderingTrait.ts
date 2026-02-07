@@ -15,16 +15,16 @@ export type GPUResourceTier = 'low' | 'medium' | 'high' | 'ultra';
 export interface LODLevel {
   /** LOD level (0 = highest detail) */
   level: number;
-  
+
   /** Screen-relative size threshold for this LOD */
   screenRelativeSize: number;
-  
+
   /** Polygon reduction ratio (0-1) */
   polygonReduction?: number;
-  
+
   /** Disable features at this LOD */
   disabledFeatures?: ('shadows' | 'normals' | 'specular' | 'animation')[];
-  
+
   /** Texture resolution multiplier (0.25 = 1/4 resolution) */
   textureScale?: number;
 }
@@ -35,16 +35,16 @@ export interface LODLevel {
 export interface CullingConfig {
   /** Face culling mode */
   mode: CullingMode;
-  
+
   /** Frustum culling */
   frustum?: boolean;
-  
+
   /** Occlusion culling */
   occlusion?: boolean;
-  
+
   /** Occlusion query distance in units */
   occlusionDistance?: number;
-  
+
   /** Hierarchical Z-buffer culling */
   hierarchicalZ?: boolean;
 }
@@ -55,16 +55,16 @@ export interface CullingConfig {
 export interface BatchingConfig {
   /** Static batching (for non-moving objects) */
   static?: boolean;
-  
+
   /** Dynamic batching */
   dynamic?: boolean;
-  
+
   /** Max batch size in vertices */
   maxBatchSize?: number;
-  
+
   /** GPU instancing */
   instancing?: boolean;
-  
+
   /** Instancing buffer size */
   maxInstanceCount?: number;
 }
@@ -75,19 +75,19 @@ export interface BatchingConfig {
 export interface TextureOptimization {
   /** Enable texture streaming */
   streaming?: boolean;
-  
+
   /** Streaming budget in MB */
   streamingBudget?: number;
-  
+
   /** Virtual texture paging */
   virtualTexturing?: boolean;
-  
+
   /** Texture compression */
   compression?: 'none' | 'dxt' | 'astc' | 'basis' | 'auto';
-  
+
   /** Mipmap generation */
   mipmaps?: boolean;
-  
+
   /** Max texture resolution */
   maxResolution?: 256 | 512 | 1024 | 2048 | 4096;
 }
@@ -98,10 +98,10 @@ export interface TextureOptimization {
 export interface ShaderOptimization {
   /** Shader LOD bias */
   lodBias?: number;
-  
+
   /** Use simplified shaders for distant objects */
   simplifiedShaders?: boolean;
-  
+
   /** Compile shader variants for performance */
   variants?: {
     [key: string]: {
@@ -117,31 +117,31 @@ export interface ShaderOptimization {
 export interface RenderingOptimization {
   /** LOD strategy */
   lodStrategy?: LodStrategy;
-  
+
   /** LOD levels */
   lodLevels?: LODLevel[];
-  
+
   /** Culling configuration */
   culling?: CullingConfig;
-  
+
   /** Batching configuration */
   batching?: BatchingConfig;
-  
+
   /** Texture optimization */
   textures?: TextureOptimization;
-  
+
   /** Shader optimization */
   shaders?: ShaderOptimization;
-  
+
   /** Target GPU tier */
   targetGPUTier?: GPUResourceTier;
-  
+
   /** Fixed time-step rendering (for VR/AR) */
   fixedTimestep?: number;
-  
+
   /** Enable adaptive quality */
   adaptiveQuality?: boolean;
-  
+
   /** Target frame rate */
   targetFrameRate?: number;
 }
@@ -260,10 +260,7 @@ export class RenderingTrait {
   /**
    * Enable occlusion culling
    */
-  public setOcclusionCulling(
-    enabled: boolean,
-    distance?: number
-  ): void {
+  public setOcclusionCulling(enabled: boolean, distance?: number): void {
     if (!this.optimization.culling) {
       this.optimization.culling = { mode: 'back' };
     }
@@ -309,10 +306,7 @@ export class RenderingTrait {
   /**
    * Enable texture streaming
    */
-  public setTextureStreaming(
-    enabled: boolean,
-    budgetMB?: number
-  ): void {
+  public setTextureStreaming(enabled: boolean, budgetMB?: number): void {
     if (!this.optimization.textures) {
       this.optimization.textures = {};
     }
@@ -325,9 +319,7 @@ export class RenderingTrait {
   /**
    * Set texture compression
    */
-  public setTextureCompression(
-    compression: 'none' | 'dxt' | 'astc' | 'basis' | 'auto'
-  ): void {
+  public setTextureCompression(compression: 'none' | 'dxt' | 'astc' | 'basis' | 'auto'): void {
     if (!this.optimization.textures) {
       this.optimization.textures = {};
     }
@@ -337,9 +329,7 @@ export class RenderingTrait {
   /**
    * Set max texture resolution
    */
-  public setMaxTextureResolution(
-    resolution: 256 | 512 | 1024 | 2048 | 4096
-  ): void {
+  public setMaxTextureResolution(resolution: 256 | 512 | 1024 | 2048 | 4096): void {
     if (!this.optimization.textures) {
       this.optimization.textures = {};
     }
@@ -366,10 +356,7 @@ export class RenderingTrait {
   /**
    * Enable adaptive quality (adjust based on frame rate)
    */
-  public setAdaptiveQuality(
-    enabled: boolean,
-    targetFrameRate?: number
-  ): void {
+  public setAdaptiveQuality(enabled: boolean, targetFrameRate?: number): void {
     this.optimization.adaptiveQuality = enabled;
     if (targetFrameRate) {
       this.optimization.targetFrameRate = targetFrameRate;
@@ -386,9 +373,7 @@ export class RenderingTrait {
   /**
    * Get rendering preset for quality level
    */
-  public getPresetForQuality(
-    quality: 'low' | 'medium' | 'high' | 'ultra'
-  ): RenderingOptimization {
+  public getPresetForQuality(quality: 'low' | 'medium' | 'high' | 'ultra'): RenderingOptimization {
     const presets: Record<string, Partial<RenderingOptimization>> = {
       low: {
         targetGPUTier: 'low',
@@ -462,7 +447,7 @@ export class RenderingTrait {
    */
   public applyQualityPreset(quality: 'low' | 'medium' | 'high' | 'ultra'): void {
     const preset = this.getPresetForQuality(quality);
-    this.optimization = preset as RenderingOptimization;
+    this.optimization = preset;
   }
 
   /**
@@ -504,8 +489,10 @@ export class RenderingTrait {
     const instancing = this.optimization.batching?.instancing ? 'yes' : 'no';
     const memory = this.estimateGPUMemory();
 
-    return `Rendering: tier=${tier} | LOD=${lod} | culling=${culling} | instancing=${instancing} | ` +
-           `memory=${memory.estimatedTotal}MB`;
+    return (
+      `Rendering: tier=${tier} | LOD=${lod} | culling=${culling} | instancing=${instancing} | ` +
+      `memory=${memory.estimatedTotal}MB`
+    );
   }
 
   /**
@@ -548,8 +535,6 @@ export class RenderingTrait {
 /**
  * HoloScript+ @rendering trait factory
  */
-export function createRenderingTrait(
-  config?: RenderingOptimization
-): RenderingTrait {
+export function createRenderingTrait(config?: RenderingOptimization): RenderingTrait {
   return new RenderingTrait(config);
 }

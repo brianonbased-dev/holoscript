@@ -49,7 +49,11 @@ export { HoloScriptValidator, type ValidationError } from './HoloScriptValidator
 export * from './HoloScriptCodeParser';
 
 // HoloScript+ Parser (NEW)
-export { HoloScriptPlusParser, createParser, parse as parseHoloScriptPlus } from './parser/HoloScriptPlusParser';
+export {
+  HoloScriptPlusParser,
+  createParser,
+  parse as parseHoloScriptPlus,
+} from './parser/HoloScriptPlusParser';
 
 // Rich Error System (NEW - Enhanced error messages with codes, context, suggestions)
 export {
@@ -136,9 +140,9 @@ export { HoloScriptPlusRuntimeImpl, createRuntime } from './runtime/HoloScriptPl
 export type { RuntimeOptions, Renderer, NodeInstance } from './runtime/HoloScriptPlusRuntime';
 
 // HoloScript+ Speech Recognition (NEW - Phase 16)
-export { 
-  speechRecognizerRegistry, 
-  registerSpeechRecognizer, 
+export {
+  speechRecognizerRegistry,
+  registerSpeechRecognizer,
   getSpeechRecognizer,
   type SpeechRecognizer,
   type SpeechRecognizerConfig,
@@ -210,7 +214,14 @@ export {
 export { userMonitorHandler, type UserMonitorConfig } from './traits/UserMonitorTrait';
 
 // HoloScript+ State Management (NEW)
-export { ReactiveState, createState, reactive, effect, computed, bind } from './state/ReactiveState';
+export {
+  ReactiveState,
+  createState,
+  reactive,
+  effect,
+  computed,
+  bind,
+} from './state/ReactiveState';
 
 // Core types
 export type { HSPlusAST, VRTraitName } from './types';
@@ -246,13 +257,37 @@ export { OpenXRCompiler, type OpenXRCompilerOptions } from './compiler/OpenXRCom
 // HoloScript Robotics & IoT Compilers (Sprint 3)
 export { URDFCompiler, type URDFCompilerOptions } from './compiler/URDFCompiler';
 export { SDFCompiler, type SDFCompilerOptions } from './compiler/SDFCompiler';
-export { DTDLCompiler, type DTDLCompilerOptions, DTDL_TRAIT_COMPONENTS } from './compiler/DTDLCompiler';
+export {
+  DTDLCompiler,
+  type DTDLCompilerOptions,
+  DTDL_TRAIT_COMPONENTS,
+} from './compiler/DTDLCompiler';
 
 // Native Platform Compilers (Full Platform Coverage)
-export { VRChatCompiler, compileToVRChat, type VRChatCompilerOptions, type VRChatCompileResult } from './compiler/VRChatCompiler';
-export { UnrealCompiler, compileToUnreal, type UnrealCompilerOptions, type UnrealCompileResult } from './compiler/UnrealCompiler';
-export { IOSCompiler, compileToIOS, type IOSCompilerOptions, type IOSCompileResult } from './compiler/IOSCompiler';
-export { AndroidCompiler, compileToAndroid, type AndroidCompilerOptions, type AndroidCompileResult } from './compiler/AndroidCompiler';
+export {
+  VRChatCompiler,
+  compileToVRChat,
+  type VRChatCompilerOptions,
+  type VRChatCompileResult,
+} from './compiler/VRChatCompiler';
+export {
+  UnrealCompiler,
+  compileToUnreal,
+  type UnrealCompilerOptions,
+  type UnrealCompileResult,
+} from './compiler/UnrealCompiler';
+export {
+  IOSCompiler,
+  compileToIOS,
+  type IOSCompilerOptions,
+  type IOSCompileResult,
+} from './compiler/IOSCompiler';
+export {
+  AndroidCompiler,
+  compileToAndroid,
+  type AndroidCompilerOptions,
+  type AndroidCompileResult,
+} from './compiler/AndroidCompiler';
 
 // WASM Compiler (Sprint 3 - High-performance edge execution)
 export {
@@ -1308,7 +1343,12 @@ export function createHoloScriptEnvironment() {
  */
 export function isHoloScriptSupported(): boolean {
   if (typeof globalThis === 'undefined') return false;
-  const win = globalThis as { window?: { navigator?: { xr?: unknown; getVRDisplays?: unknown }; webkitGetUserMedia?: unknown } };
+  const win = globalThis as {
+    window?: {
+      navigator?: { xr?: unknown; getVRDisplays?: unknown };
+      webkitGetUserMedia?: unknown;
+    };
+  };
   if (!win.window) return false;
 
   return !!(
@@ -1329,10 +1369,7 @@ export {
 } from './SourceMapGenerator';
 
 // Incremental Parsing
-export {
-  IncrementalParser,
-  createIncrementalParser,
-} from './IncrementalParser';
+export { IncrementalParser, createIncrementalParser } from './IncrementalParser';
 
 // HoloScript+ Incremental Parsing
 export {

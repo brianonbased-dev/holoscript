@@ -39,7 +39,7 @@ describe('Phase 13: Spatial State Machines Integration', () => {
 
     const parser = new HoloScriptPlusParser();
     const result = parser.parse(source);
-    
+
     // Execute the program
     const execResults = await runtime.execute(result.ast.body);
     expect(execResults.success).toBe(true);
@@ -47,7 +47,7 @@ describe('Phase 13: Spatial State Machines Integration', () => {
     // Verify initial state
     const gateObj = runtime.getVariable('gate') as any;
     expect(gateObj).toBeDefined();
-    
+
     // Simulate click event
     await runtime.triggerUIEvent('gate', 'click', { id: 'gate' });
 

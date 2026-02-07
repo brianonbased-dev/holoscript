@@ -1,15 +1,11 @@
 /**
  * xAI Grok Integration for HoloScript
- * 
+ *
  * Example showing how Grok can generate and share HoloScript scenes on X.
  * This can run in Grok's Python environment or as a TypeScript module.
  */
 
-import {
-  HoloScriptPlusParser,
-  HoloCompositionParser,
-  parseHolo,
-} from '@holoscript/core';
+import { HoloScriptPlusParser, HoloCompositionParser, parseHolo } from '@holoscript/core';
 
 // Types
 interface GrokContext {
@@ -37,17 +33,20 @@ const tools = {
   /**
    * Generate a complete HoloScript scene from natural language
    */
-  async generateScene(description: string, style: 'minimal' | 'detailed' | 'production' = 'detailed'): Promise<GeneratedScene> {
+  async generateScene(
+    description: string,
+    style: 'minimal' | 'detailed' | 'production' = 'detailed'
+  ): Promise<GeneratedScene> {
     // Parse the description for key elements
     const elements = parseDescription(description);
-    
+
     // Generate the scene code
     const code = generateSceneCode(elements, style);
-    
+
     // Extract metadata
     const traits = extractTraits(code);
     const objectCount = (code.match(/object\s+"/g) || []).length;
-    
+
     return {
       code,
       title: elements.sceneName,
@@ -56,33 +55,35 @@ const tools = {
       objectCount,
     };
   },
-  
+
   /**
    * Validate HoloScript code
    */
-  async validate(code: string): Promise<{ valid: boolean; errors: string[]; suggestions: string[] }> {
+  async validate(
+    code: string
+  ): Promise<{ valid: boolean; errors: string[]; suggestions: string[] }> {
     const errors: string[] = [];
     const suggestions: string[] = [];
-    
+
     try {
       // Try parsing
       const result = parseHolo(code);
-      
+
       if (result.errors && result.errors.length > 0) {
         for (const err of result.errors) {
           errors.push(`Line ${err.line}: ${err.message}`);
         }
       }
-      
+
       // Check for common issues
       if (!code.includes('environment')) {
         suggestions.push('Consider adding an environment block for skybox and lighting');
       }
-      
+
       if (!code.includes('@')) {
         suggestions.push('Add VR traits like @grabbable, @glowing for interactivity');
       }
-      
+
       return {
         valid: errors.length === 0,
         errors,
@@ -93,7 +94,7 @@ const tools = {
       return { valid: false, errors, suggestions };
     }
   },
-  
+
   /**
    * Create shareable links for X
    */
@@ -101,7 +102,7 @@ const tools = {
     // Encode code for URL
     const encoded = Buffer.from(code).toString('base64');
     const playgroundUrl = `https://play.holoscript.dev?code=${encodeURIComponent(encoded)}`;
-    
+
     // Generate tweet text
     const hashtags = '#HoloScript #VR #XR #Metaverse #3D';
     const tweetText = `🎮 ${title}
@@ -110,21 +111,21 @@ Built with HoloScript! Experience it in VR/AR:
 ${playgroundUrl}
 
 ${hashtags}`;
-    
+
     return {
       playgroundUrl,
       tweetText,
       previewUrl: `${playgroundUrl}/preview`,
     };
   },
-  
+
   /**
    * Suggest appropriate traits for an object
    */
   suggestTraits(objectDescription: string): string[] {
     const desc = objectDescription.toLowerCase();
     const traits: string[] = [];
-    
+
     // Interaction traits
     if (desc.includes('grab') || desc.includes('pick up') || desc.includes('hold')) {
       traits.push('@grabbable');
@@ -138,7 +139,7 @@ ${hashtags}`;
     if (desc.includes('point') || desc.includes('teleport')) {
       traits.push('@pointable');
     }
-    
+
     // Visual traits
     if (desc.includes('glow') || desc.includes('light') || desc.includes('luminous')) {
       traits.push('@glowing');
@@ -149,23 +150,23 @@ ${hashtags}`;
     if (desc.includes('animate') || desc.includes('move') || desc.includes('float')) {
       traits.push('@animated');
     }
-    
+
     // Physics
     if (desc.includes('physics') || desc.includes('fall') || desc.includes('bounce')) {
       traits.push('@physics');
       traits.push('@collidable');
     }
-    
+
     // Networking
     if (desc.includes('multiplayer') || desc.includes('shared') || desc.includes('sync')) {
       traits.push('@networked');
     }
-    
+
     // Default if none found
     if (traits.length === 0) {
       traits.push('@pointable');
     }
-    
+
     return traits;
   },
 };
@@ -178,13 +179,15 @@ function parseDescription(description: string): {
   summary: string;
 } {
   // Extract scene name
-  const nameMatch = description.match(/(?:a|an|the)?\s*([a-z]+(?:\s+[a-z]+)?)\s*(?:scene|world|room)/i);
+  const nameMatch = description.match(
+    /(?:a|an|the)?\s*([a-z]+(?:\s+[a-z]+)?)\s*(?:scene|world|room)/i
+  );
   const sceneName = nameMatch ? capitalize(nameMatch[1]) : 'Generated Scene';
-  
+
   // Extract objects
   const objectMatch = description.match(/(?:with|containing|featuring|has)\s+([^.]+)/i);
   const objects: { name: string; description: string }[] = [];
-  
+
   if (objectMatch) {
     const items = objectMatch[1].split(/,\s*and\s*|,\s*|\s+and\s+/);
     for (const item of items) {
@@ -196,7 +199,7 @@ function parseDescription(description: string): {
       }
     }
   }
-  
+
   // Determine environment
   let environment = 'gradient';
   const lower = description.toLowerCase();
@@ -204,7 +207,7 @@ function parseDescription(description: string): {
   if (lower.includes('space') || lower.includes('galaxy')) environment = 'nebula';
   if (lower.includes('night')) environment = 'night';
   if (lower.includes('cave') || lower.includes('dark')) environment = 'dark';
-  
+
   return {
     sceneName,
     objects: objects.length > 0 ? objects : [{ name: 'MainObject', description }],
@@ -213,24 +216,23 @@ function parseDescription(description: string): {
   };
 }
 
-function generateSceneCode(
-  elements: ReturnType<typeof parseDescription>,
-  style: string
-): string {
-  const objects = elements.objects.map(obj => {
-    const traits = tools.suggestTraits(obj.description);
-    const geometry = extractGeometry(obj.description);
-    const color = extractColor(obj.description);
-    
-    return `    object "${obj.name}" ${traits.join(' ')} {
+function generateSceneCode(elements: ReturnType<typeof parseDescription>, style: string): string {
+  const objects = elements.objects
+    .map((obj) => {
+      const traits = tools.suggestTraits(obj.description);
+      const geometry = extractGeometry(obj.description);
+      const color = extractColor(obj.description);
+
+      return `    object "${obj.name}" ${traits.join(' ')} {
       geometry: "${geometry}"
       color: "${color}"
       position: [${randomPosition()}]
     }`;
-  }).join('\n\n');
-  
+    })
+    .join('\n\n');
+
   const ambientLight = elements.environment === 'dark' ? 0.1 : 0.3;
-  
+
   return `composition "${elements.sceneName}" {
   environment {
     skybox: "${elements.environment}"
@@ -272,7 +274,7 @@ function extractGeometry(description: string): string {
     tree: 'model/tree.glb',
     mushroom: 'model/mushroom.glb',
   };
-  
+
   for (const [key, value] of Object.entries(geometryMap)) {
     if (lower.includes(key)) return value;
   }
@@ -292,7 +294,7 @@ function extractColor(description: string): string {
     black: '#333333',
     glow: '#00ffff',
   };
-  
+
   for (const [key, value] of Object.entries(colorMap)) {
     if (lower.includes(key)) return value;
   }
@@ -319,23 +321,23 @@ function randomPosition(): string {
 // Main workflow for Grok
 export async function grokBuildScene(context: GrokContext): Promise<string> {
   const { userPrompt, platform } = context;
-  
+
   // 1. Generate the scene
   console.log('🎨 Generating HoloScript scene...');
   const scene = await tools.generateScene(userPrompt, 'detailed');
-  
+
   // 2. Validate
   console.log('✅ Validating code...');
   const validation = await tools.validate(scene.code);
-  
+
   if (!validation.valid) {
     return `❌ Generated code has errors:\n${validation.errors.join('\n')}\n\nLet me fix that...`;
   }
-  
+
   // 3. Create share link
   console.log('🔗 Creating share link...');
   const share = await tools.share(scene.code, scene.title);
-  
+
   // 4. Format response
   if (platform === 'x') {
     return `🎮 **${scene.title}**
@@ -356,7 +358,7 @@ ${validation.suggestions.length > 0 ? `💡 **Tips:** ${validation.suggestions[0
 
 ${share.tweetText}`;
   }
-  
+
   return scene.code;
 }
 

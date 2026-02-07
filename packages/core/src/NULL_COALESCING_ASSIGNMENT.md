@@ -15,10 +15,12 @@ target ??= value
 ### Semantics
 
 The operator works as follows:
+
 - If `target` is `null` or `undefined`, assign `value` to `target`
 - If `target` is any other value, leave it unchanged
 
 This is semantically equivalent to:
+
 ```
 target = target ?? value
 ```
@@ -26,6 +28,7 @@ target = target ?? value
 ### Type Safety
 
 The `??=` operator requires:
+
 - **Left-hand side (target)**: Must be assignable (identifier or member expression)
 - **Right-hand side (value)**: Any valid expression
 
@@ -92,6 +95,7 @@ cache ??= expensive()
 ## Features
 
 ✅ **Implemented**
+
 - Lexer token recognition for `??=`
 - Parser expression handling with correct precedence
 - Type system support with `NullCoalescingAssignment` AST node
@@ -112,6 +116,7 @@ cache ??= expensive()
 **File**: `HoloScriptPlusParser.ts`
 
 Added `parseAssignment()` function that:
+
 1. Parses the expression normally via `parseExpression()`
 2. Checks for `NULL_COALESCE_ASSIGN` token
 3. Validates that the left side is assignable
@@ -120,12 +125,12 @@ Added `parseAssignment()` function that:
 ```typescript
 private parseAssignment(): unknown {
     const expr = this.parseExpression();
-    
+
     if (this.check('NULL_COALESCE_ASSIGN')) {
         if (typeof expr === 'string' || (typeof expr === 'object' && expr?.type === 'member')) {
             this.advance();
             const value = this.parseExpression();
-            
+
             return {
                 type: 'nullCoalescingAssignment',
                 target: expr,
@@ -135,7 +140,7 @@ private parseAssignment(): unknown {
             throw new Error(`Cannot use ??= on non-assignable expression`);
         }
     }
-    
+
     return expr;
 }
 ```
@@ -149,9 +154,9 @@ Added `NullCoalescingAssignment` interface:
 ```typescript
 export interface NullCoalescingAssignment extends ASTNode {
   type: 'nullCoalescingAssignment';
-  target: string | unknown;  // Identifier or member expression
-  value: unknown;             // Right-hand side expression
-  isValid?: boolean;          // Validation result
+  target: string | unknown; // Identifier or member expression
+  value: unknown; // Right-hand side expression
+  isValid?: boolean; // Validation result
   targetType?: 'variable' | 'member' | 'unknown';
 }
 ```
@@ -161,6 +166,7 @@ Updated `HoloScriptValue` union type to include the new expression type.
 ### Operator Precedence
 
 Precedence (highest to lowest):
+
 1. Primary expressions (identifiers, literals, parentheses)
 2. Unary operators (spread `...`)
 3. Multiplicative, additive operators
@@ -175,6 +181,7 @@ This ensures that `condition ? x : y ??= 10` parses as `condition ? x : (y ??= 1
 **File**: `NullCoalescingAssignment.test.ts`
 
 Test suites:
+
 - **Basic Assignment** (4 tests): Numbers, strings, booleans, null
 - **Complex Expressions** (4 tests): Binary ops, nested null coalesce, ternary, function calls
 - **Object/Array Contexts** (3 tests): Property values, array elements, shorthand
@@ -192,6 +199,7 @@ Test suites:
 ## Performance
 
 The null coalescing assignment operator has **minimal performance impact**:
+
 - No additional lexing overhead (token already exists)
 - **~2% parser overhead** for the additional precedence level
 - No runtime evaluation change (desugars to existing `??` operator)
@@ -201,12 +209,14 @@ The null coalescing assignment operator has **minimal performance impact**:
 For existing code using the manual pattern:
 
 **Before:**
+
 ```holoscript
 count = count ?? 0
 name = name ?? "default"
 ```
 
 **After (equivalent):**
+
 ```holoscript
 count ??= 0
 name ??= "default"
@@ -232,15 +242,15 @@ validateNullCoalescingAssignment(node: NullCoalescingAssignment): ValidationResu
     if (!this.isAssignable(node.target)) {
         return { isValid: false, error: "Target must be assignable" };
     }
-    
+
     // 2. Verify value type is compatible
     const valueType = this.resolveType(node.value);
-    
+
     // 3. Check for obvious null/undefined values on RHS
     if (isAlwaysNullUndefined(node.value)) {
         return { isValid: false, warning: "Target will always be null/undefined" };
     }
-    
+
     return { isValid: true };
 }
 ```
@@ -254,6 +264,7 @@ validateNullCoalescingAssignment(node: NullCoalescingAssignment): ValidationResu
 ## Summary
 
 The null coalescing assignment operator (`??=`) is now fully implemented in HoloScript with:
+
 - ✅ Lexer support (token recognition)
 - ✅ Parser support (expression handling)
 - ✅ Type system support (AST nodes)

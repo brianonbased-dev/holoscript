@@ -18,8 +18,8 @@ type AnchorState = 'unresolved' | 'resolving' | 'resolved' | 'tracking' | 'limit
 
 interface GeospatialAnchorState {
   state: AnchorState;
-  accuracy: number;  // meters
-  headingAccuracy: number;  // degrees
+  accuracy: number; // meters
+  headingAccuracy: number; // degrees
   resolvedPosition: { lat: number; lon: number; alt: number } | null;
   localPosition: { x: number; y: number; z: number };
   retryCount: number;
@@ -32,8 +32,8 @@ interface GeospatialAnchorConfig {
   longitude: number;
   altitude: number;
   altitude_type: AltitudeType;
-  heading: number;  // degrees from north
-  accuracy_threshold: number;  // meters
+  heading: number; // degrees from north
+  accuracy_threshold: number; // meters
   visual_indicator: boolean;
   auto_resolve: boolean;
   retry_on_lost: boolean;
@@ -44,16 +44,13 @@ interface GeospatialAnchorConfig {
 // HELPERS
 // =============================================================================
 
-function haversineDistance(
-  lat1: number, lon1: number,
-  lat2: number, lon2: number
-): number {
-  const R = 6371000;  // Earth radius in meters
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) ** 2;
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000; // Earth radius in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -89,7 +86,7 @@ export const geospatialAnchorHandler: TraitHandler<GeospatialAnchorConfig> = {
       anchorHandle: null,
     };
     (node as any).__geospatialAnchorState = state;
-    
+
     if (config.auto_resolve) {
       state.state = 'resolving';
       context.emit?.('geospatial_anchor_request', {
@@ -101,7 +98,7 @@ export const geospatialAnchorHandler: TraitHandler<GeospatialAnchorConfig> = {
         heading: config.heading,
       });
     }
-    
+
     if (config.visual_indicator) {
       context.emit?.('geospatial_indicator_show', {
         node,
@@ -124,9 +121,9 @@ export const geospatialAnchorHandler: TraitHandler<GeospatialAnchorConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__geospatialAnchorState as GeospatialAnchorState;
     if (!state) return;
-    
+
     state.lastUpdateTime += delta;
-    
+
     // Update visual indicator
     if (config.visual_indicator) {
       context.emit?.('geospatial_indicator_update', {
@@ -135,7 +132,7 @@ export const geospatialAnchorHandler: TraitHandler<GeospatialAnchorConfig> = {
         accuracy: state.accuracy,
       });
     }
-    
+
     // Apply local position from resolved anchor
     if (state.state === 'tracking' || state.state === 'resolved') {
       if ((node as any).position) {
@@ -149,7 +146,7 @@ export const geospatialAnchorHandler: TraitHandler<GeospatialAnchorConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__geospatialAnchorState as GeospatialAnchorState;
     if (!state) return;
-    
+
     if (event.type === 'geospatial_anchor_resolved') {
       state.state = 'resolved';
       state.anchorHandle = event.handle;
@@ -159,7 +156,7 @@ export const geospatialAnchorHandler: TraitHandler<GeospatialAnchorConfig> = {
         alt: event.altitude as number,
       };
       state.accuracy = event.accuracy as number;
-      
+
       context.emit?.('on_geospatial_anchor_resolved', {
         node,
         latitude: event.latitude,
@@ -171,7 +168,7 @@ export const geospatialAnchorHandler: TraitHandler<GeospatialAnchorConfig> = {
       state.localPosition = event.localPosition as typeof state.localPosition;
       state.accuracy = event.accuracy as number;
       state.headingAccuracy = event.headingAccuracy as number;
-      
+
       if (state.accuracy <= config.accuracy_threshold) {
         state.state = 'tracking';
       } else {
@@ -179,11 +176,11 @@ export const geospatialAnchorHandler: TraitHandler<GeospatialAnchorConfig> = {
       }
     } else if (event.type === 'geospatial_tracking_lost') {
       state.state = 'lost';
-      
+
       if (config.retry_on_lost && state.retryCount < config.max_retries) {
         state.retryCount++;
         state.state = 'resolving';
-        
+
         context.emit?.('geospatial_anchor_request', {
           node,
           latitude: config.latitude,
@@ -198,7 +195,7 @@ export const geospatialAnchorHandler: TraitHandler<GeospatialAnchorConfig> = {
     } else if (event.type === 'geospatial_anchor_resolve') {
       state.state = 'resolving';
       state.retryCount = 0;
-      
+
       context.emit?.('geospatial_anchor_request', {
         node,
         latitude: config.latitude,
@@ -210,13 +207,15 @@ export const geospatialAnchorHandler: TraitHandler<GeospatialAnchorConfig> = {
     } else if (event.type === 'geospatial_query_distance') {
       const targetLat = event.latitude as number;
       const targetLon = event.longitude as number;
-      
+
       if (state.resolvedPosition) {
         const distance = haversineDistance(
-          state.resolvedPosition.lat, state.resolvedPosition.lon,
-          targetLat, targetLon
+          state.resolvedPosition.lat,
+          state.resolvedPosition.lon,
+          targetLat,
+          targetLon
         );
-        
+
         context.emit?.('geospatial_distance_result', {
           queryId: event.queryId,
           node,

@@ -5,16 +5,19 @@ HoloScript is the **spatial programming language** for VR, AR, and 3D applicatio
 ## Why HoloScript?
 
 ### For Humans
+
 - **No syntax errors** - Visual/declarative approach eliminates brackets and semicolons
 - **Universal input** - Voice, gesture, gaze, or traditional keyboard
 - **See the data flow** - Watch computation happen in 3D space
 
 ### For AI
+
 - **Visual understanding** - AI "sees" program structure
 - **Native manipulation** - AI can place and connect objects naturally
 - **Any output target** - Generate code for any platform
 
 ### For Computing
+
 - **One source → 9 platforms** - Web, VR, AR, mobile, desktop, Unity, Unreal, VRChat
 - **50,000 → 500 lines** - Declarative syntax eliminates boilerplate
 - **Built for collaboration** - Human and AI work in the same space
@@ -23,11 +26,11 @@ HoloScript is the **spatial programming language** for VR, AR, and 3D applicatio
 
 HoloScript uses three file formats:
 
-| Extension | Purpose | Best For |
-|-----------|---------|----------|
-| `.hs` | Classic HoloScript | Simple prototypes, learning |
-| `.hsplus` | HoloScript Plus | VR traits, networking, physics |
-| `.holo` | Composition | AI-generated scenes, full worlds |
+| Extension | Purpose            | Best For                         |
+| --------- | ------------------ | -------------------------------- |
+| `.hs`     | Classic HoloScript | Simple prototypes, learning      |
+| `.hsplus` | HoloScript Plus    | VR traits, networking, physics   |
+| `.holo`   | Composition        | AI-generated scenes, full worlds |
 
 ## Quick Start
 

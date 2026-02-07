@@ -1,9 +1,9 @@
 /**
  * Chunk-Based Incremental Parser for HoloScript+
- * 
+ *
  * Only re-parses changed portions of files rather than the entire document.
  * Uses chunk-based caching with hash detection and dependency tracking.
- * 
+ *
  * Performance targets:
  * - Small edit in 1000-line file: <10ms (vs 100-150ms full parse)
  * - Cache hit rate: >90% for typical editing
@@ -12,13 +12,13 @@
 import { ChunkDetector, SourceChunk } from './ChunkDetector';
 import { ParseCache, globalParseCache } from './ParseCache';
 import { HoloScriptPlusParser } from './HoloScriptPlusParser';
-import type { HSPlusNode, HSPlusCompileResult } from '../types/AdvancedTypeSystem';
+import type { HSPlusNode } from '../types/AdvancedTypeSystem';
 
 export interface IncrementalParseResult {
   ast: HSPlusNode;
-  cached: number;        // Number of chunks loaded from cache
-  parsed: number;        // Number of chunks parsed fresh
-  duration: number;      // Parse time in ms
+  cached: number; // Number of chunks loaded from cache
+  parsed: number; // Number of chunks parsed fresh
+  duration: number; // Parse time in ms
   changedChunks: string[];
 }
 
@@ -48,7 +48,7 @@ export class ChunkBasedIncrementalParser {
 
     // Step 1: Detect chunks in current source
     const currentChunks = this.detectChunks(source);
-    const chunkMap = new Map(currentChunks.map(c => [c.id, c]));
+    const chunkMap = new Map(currentChunks.map((c) => [c.id, c]));
 
     // Step 2: Identify changed chunks by hash comparison
     const changedIds = this.identifyChangedChunks(currentChunks);
@@ -138,8 +138,8 @@ export class ChunkBasedIncrementalParser {
     }
 
     // Also mark chunks that were removed (their dependents may need re-parse)
-    for (const [id, lastChunk] of this.lastChunks.entries()) {
-      const currentChunk = this.detectChunks(this.lastSource).find(c => c.id === id);
+    for (const [id, _lastChunk] of this.lastChunks.entries()) {
+      const currentChunk = this.detectChunks(this.lastSource).find((c) => c.id === id);
       if (!currentChunk) {
         // Chunk removed - its dependents are now orphaned
         changed.push(id);
@@ -190,7 +190,7 @@ export class ChunkBasedIncrementalParser {
     // Match template references: using "TemplateName"
     const templateRefs = content.match(/using\s+"([^"]+)"/g);
     if (templateRefs) {
-      templateRefs.forEach(ref => {
+      templateRefs.forEach((ref) => {
         const name = ref.match(/"([^"]+)"/)![1];
         refs.add(`template:${name}`);
       });
@@ -199,7 +199,7 @@ export class ChunkBasedIncrementalParser {
     // Match identifier references in spread: ...name
     const spreadRefs = content.match(/\.\.\.\s*([a-zA-Z0-9_]+)/g);
     if (spreadRefs) {
-      spreadRefs.forEach(ref => {
+      spreadRefs.forEach((ref) => {
         const name = ref.replace(/\.\.\./, '').trim();
         refs.add(`identifier:${name}`);
       });
@@ -208,7 +208,7 @@ export class ChunkBasedIncrementalParser {
     // Match composition references
     const compRefs = content.match(/@composition\s+"([^"]+)"/g);
     if (compRefs) {
-      compRefs.forEach(ref => {
+      compRefs.forEach((ref) => {
         const name = ref.match(/"([^"]+)"/)![1];
         refs.add(`composition:${name}`);
       });
@@ -251,10 +251,7 @@ export class ChunkBasedIncrementalParser {
   /**
    * Assembles final AST from parsed chunks
    */
-  private assembleAST(
-    chunkNodes: Map<string, HSPlusNode>,
-    chunks: SourceChunk[]
-  ): HSPlusNode {
+  private assembleAST(chunkNodes: Map<string, HSPlusNode>, chunks: SourceChunk[]): HSPlusNode {
     // Create fragment node containing all chunks
     const children: HSPlusNode[] = [];
 

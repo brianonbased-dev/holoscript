@@ -1,6 +1,6 @@
 /**
  * HoloScript Visual - Node Type Definitions
- * 
+ *
  * Types for the node-based visual programming interface.
  */
 
@@ -15,10 +15,10 @@ export type NodeCategory = 'event' | 'action' | 'logic' | 'data';
  * Category colors
  */
 export const CATEGORY_COLORS: Record<NodeCategory, string> = {
-  event: '#22c55e',   // Green
-  action: '#3b82f6',  // Blue
-  logic: '#eab308',   // Yellow
-  data: '#a855f7'     // Purple
+  event: '#22c55e', // Green
+  action: '#3b82f6', // Blue
+  logic: '#eab308', // Yellow
+  data: '#a855f7', // Purple
 };
 
 /**
@@ -33,7 +33,7 @@ export interface PortDefinition {
   id: string;
   label: string;
   type: PortType;
-  multiple?: boolean;  // Allow multiple connections
+  multiple?: boolean; // Allow multiple connections
 }
 
 /**
@@ -105,7 +105,7 @@ export interface GraphMetadata {
   version: string;
   createdAt: string;
   updatedAt: string;
-  targetObject?: string;  // The object this graph controls
+  targetObject?: string; // The object this graph controls
 }
 
 /**

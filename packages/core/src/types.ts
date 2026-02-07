@@ -8,22 +8,16 @@
 // HS+ Consolidated Types (Imported from AdvancedTypeSystem and HoloScriptPlus)
 // ============================================================================
 
-import type { 
-  HSPlusDirective,
-  HSPlusAST,
-  ASTProgram,
-  HSPlusCompileResult
-} from './types/AdvancedTypeSystem';
-
-import type { HSPlusNode } from './types/HoloScriptPlus';
-
-export type { 
+import type {
   HSPlusDirective,
   HSPlusAST,
   ASTProgram,
   HSPlusCompileResult,
-  HSPlusNode
-};
+} from './types/AdvancedTypeSystem';
+
+import type { HSPlusNode } from './types/HoloScriptPlus';
+
+export type { HSPlusDirective, HSPlusAST, ASTProgram, HSPlusCompileResult, HSPlusNode };
 
 // ============================================================================
 // Spatial Types
@@ -49,7 +43,18 @@ export interface Size2D {
 // Hologram Types
 // ============================================================================
 
-export type HologramShape = 'orb' | 'cube' | 'cylinder' | 'pyramid' | 'sphere' | 'function' | 'gate' | 'stream' | 'server' | 'database' | 'fetch';
+export type HologramShape =
+  | 'orb'
+  | 'cube'
+  | 'cylinder'
+  | 'pyramid'
+  | 'sphere'
+  | 'function'
+  | 'gate'
+  | 'stream'
+  | 'server'
+  | 'database'
+  | 'fetch';
 
 export interface HologramProperties {
   shape: HologramShape;
@@ -97,7 +102,6 @@ export interface Animation {
 // AST Node Types
 // ============================================================================
 
-
 export type HoloScriptValue =
   | string
   | number
@@ -132,11 +136,7 @@ export interface MatchCase extends ASTNode {
   guard?: string;
 }
 
-export type MatchPattern =
-  | LiteralPattern
-  | WildcardPattern
-  | BindingPattern
-  | DestructuringPattern;
+export type MatchPattern = LiteralPattern | WildcardPattern | BindingPattern | DestructuringPattern;
 
 export interface LiteralPattern {
   type: 'literal-pattern';
@@ -223,9 +223,9 @@ export type VRTraitName =
   | 'subtitle'
   | 'screen_reader'
   // Gaussian Splatting & Volumetric
-  | 'gaussian_splat'
-  | 'nerf'
-  | 'volumetric_video'
+   
+   
+   
   | 'point_cloud'
   | 'photogrammetry'
   // WebGPU Compute
@@ -298,16 +298,12 @@ export { VRHand } from './types/HoloScriptPlus';
 
 export interface TraitConstraint {
   type: 'requires' | 'conflicts' | 'oneof';
-  source: string;      // Trait being constrained
-  targets: string[];   // Related traits
-  message?: string;    // Custom error message
+  source: string; // Trait being constrained
+  targets: string[]; // Related traits
+  message?: string; // Custom error message
 }
 
-export type LifecycleHook =
-  | 'on_mount'
-  | 'on_unmount'
-  | 'on_update'
-  | 'on_data_update';
+export type LifecycleHook = 'on_mount' | 'on_unmount' | 'on_update' | 'on_data_update';
 
 export type VRLifecycleHook =
   | 'on_grab'
@@ -370,10 +366,7 @@ export type VolumetricHook =
   | 'on_point_cloud_loaded'
   | 'on_capture_complete';
 
-export type ComputeHook =
-  | 'on_compute_complete'
-  | 'on_buffer_ready'
-  | 'on_gpu_error';
+export type ComputeHook = 'on_compute_complete' | 'on_buffer_ready' | 'on_gpu_error';
 
 export type DigitalTwinHook =
   | 'on_sensor_update'
@@ -400,10 +393,7 @@ export type SpatialAudioHook =
   | 'on_audio_occluded'
   | 'on_audio_portal_enter';
 
-export type InteropHook =
-  | 'on_asset_loaded'
-  | 'on_format_converted'
-  | 'on_scene_composed';
+export type InteropHook = 'on_asset_loaded' | 'on_format_converted' | 'on_scene_composed';
 
 export type CoPresenceHook =
   | 'on_co_presence_joined'
@@ -454,7 +444,6 @@ export type AllExpandedHooks =
   | PhysicsExpansionHook;
 
 // HS+ Directive and AST types are now imported from AdvancedTypeSystem
-
 
 export interface OrbNode extends ASTNode {
   type: 'orb';
@@ -552,7 +541,6 @@ export interface ZoneNode extends ASTNode {
   events: Record<string, string>; // on_enter, on_exit -> code
   properties: Record<string, HoloScriptValue>;
 }
-
 
 // ============================================================================
 // Phase 2: Loop Types
@@ -790,7 +778,7 @@ export interface StateNode extends ASTNode {
   type: 'state';
   name: string;
   onEntry?: string; // Code block
-  onExit?: string;  // Code block
+  onExit?: string; // Code block
 }
 
 export interface TransitionNode extends ASTNode {
@@ -821,7 +809,11 @@ export type UIElementType =
   | 'grid-container'
   | 'scroll-view'
   | 'tab-view'
-  | 'dashboard' | 'card' | 'metric' | 'row' | 'col';
+  | 'dashboard'
+  | 'card'
+  | 'metric'
+  | 'row'
+  | 'col';
 
 export interface UI2DNode {
   type: '2d-element';
@@ -883,7 +875,7 @@ export interface RuntimeContext {
 
 export interface QuestState {
   id: string;
-  objectives: Record<string, { current: number, target: number, complete: boolean }>;
+  objectives: Record<string, { current: number; target: number; complete: boolean }>;
   status: 'active' | 'completed' | 'failed';
 }
 
@@ -894,7 +886,6 @@ export interface ReactiveState {
   getSnapshot(): Record<string, HoloScriptValue>;
   update(updates: Record<string, HoloScriptValue>): void;
 }
-
 
 export interface ExecutionResult {
   success: boolean;
@@ -1045,7 +1036,6 @@ export type {
   LocomotionTrait,
   PoseableTrait,
   MorphTrait,
-
   NetworkedTrait,
   ProactiveTrait,
 

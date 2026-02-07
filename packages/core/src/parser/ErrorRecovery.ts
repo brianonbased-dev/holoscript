@@ -284,7 +284,7 @@ export class ErrorRecovery {
   /**
    * Get suggestions based on error type
    */
-  private getSuggestions(code: ErrorCode, message: string, source?: string): ErrorSuggestion[] {
+  private getSuggestions(code: ErrorCode, message: string, _source?: string): ErrorSuggestion[] {
     const suggestions: ErrorSuggestion[] = [];
 
     switch (code) {

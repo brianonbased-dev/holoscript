@@ -1,4 +1,4 @@
-import type { ASTProgram, HSPlusNode, ImportNode } from '../types';
+import type { ASTProgram, HSPlusNode } from '../types';
 
 export interface BundleChunk {
   id: string;
@@ -41,41 +41,41 @@ export class BundleSplitter {
     // 1. Check for dynamic imports in `logic` blocks
     if (node.type === 'logic' && (node as any).body) {
       const body = (node as any).body;
-      
+
       // Functions
       if (body.functions) {
-         for (const func of body.functions) {
-           if (func.body) this.scanStringForImports(func.body, `func_${func.name}`);
-         }
+        for (const func of body.functions) {
+          if (func.body) this.scanStringForImports(func.body, `func_${func.name}`);
+        }
       }
 
       // Event Handlers
       if (body.eventHandlers) {
-         for (const handler of body.eventHandlers) {
-           if (handler.body) this.scanStringForImports(handler.body, `event_${handler.event}`);
-         }
+        for (const handler of body.eventHandlers) {
+          if (handler.body) this.scanStringForImports(handler.body, `event_${handler.event}`);
+        }
       }
-      
+
       // Tick Handlers
       if (body.tickHandlers) {
         for (const handler of body.tickHandlers) {
-           if (handler.body) this.scanStringForImports(handler.body, `tick_${handler.interval}`);
+          if (handler.body) this.scanStringForImports(handler.body, `tick_${handler.interval}`);
         }
       }
     }
 
     // 3. Fallback: Check for CallExpression nodes if parser supports them
     if (this.isDynamicImport(node)) {
-        const target = this.extractImportPath(node);
-        if (target) {
-            this.splitPoints.push({
-                nodeId: node.id || 'unknown',
-                line: node.loc?.start.line || 0,
-                sourceFile: 'unknown',
-                targetModule: target,
-                type: 'dynamic_import'
-            });
-        }
+      const target = this.extractImportPath(node);
+      if (target) {
+        this.splitPoints.push({
+          nodeId: node.id || 'unknown',
+          line: node.loc?.start.line || 0,
+          sourceFile: 'unknown',
+          targetModule: target,
+          type: 'dynamic_import',
+        });
+      }
     }
 
     if (node.children) {
@@ -91,13 +91,13 @@ export class BundleSplitter {
     const importRegex = /import\s*\(\s*(?:['"]?)([^)'"]+)(?:['"]?)\s*\)/g;
     let match;
     while ((match = importRegex.exec(code)) !== null) {
-      let target = match[1].trim();
+      const target = match[1].trim();
       this.splitPoints.push({
         nodeId: contextId,
         line: 0,
         sourceFile: 'unknown',
         targetModule: target,
-        type: 'dynamic_import'
+        type: 'dynamic_import',
       });
     }
   }
@@ -107,20 +107,20 @@ export class BundleSplitter {
     // Often it's a CallExpression with callee.name === 'import'
     // Or a specific node type.
     if (node.type === 'call_expression' && (node as any).callee === 'import') {
-        return true;
+      return true;
     }
     // As per HoloScript AST, checking if we have a specific node for this
-    return false; 
+    return false;
   }
 
   private extractImportPath(node: HSPlusNode): string | null {
-      // placeholder extraction
-      if ((node as any).arguments?.[0]) {
-          return (node as any).arguments[0];
-      }
-      return null;
+    // placeholder extraction
+    if ((node as any).arguments?.[0]) {
+      return (node as any).arguments[0];
+    }
+    return null;
   }
-  
+
   /**
    * Generates a manifest of chunks based on identified split points.
    */
@@ -133,10 +133,10 @@ export class BundleSplitter {
       isDynamic: false,
     };
     this.chunks.set('main', mainChunk);
-    
+
     // Group split points by target module to create dynamic chunks
     const moduleToSplitPoints = new Map<string, SplitPoint[]>();
-    
+
     for (const sp of this.splitPoints) {
       const existing = moduleToSplitPoints.get(sp.targetModule);
       if (existing) {
@@ -145,7 +145,7 @@ export class BundleSplitter {
         moduleToSplitPoints.set(sp.targetModule, [sp]);
       }
     }
-    
+
     // Create a chunk for each unique dynamically imported module
     let chunkIndex = 0;
     for (const [modulePath, points] of moduleToSplitPoints) {
@@ -158,7 +158,7 @@ export class BundleSplitter {
         size: 0, // Would be calculated during actual bundling
       };
       this.chunks.set(chunkId, chunk);
-      
+
       // Track which files reference this chunk
       for (const sp of points) {
         if (sp.sourceFile && sp.sourceFile !== 'unknown') {
@@ -169,21 +169,22 @@ export class BundleSplitter {
         }
       }
     }
-    
+
     return Array.from(this.chunks.values());
   }
-  
+
   /**
    * Get split points (for debugging/analysis)
    */
   public getSplitPoints(): SplitPoint[] {
     return this.splitPoints;
   }
-  
+
   /**
    * Clear all chunks and split points (for reanalysis)
    */
   public clear(): void {
     this.chunks.clear();
     this.splitPoints = [];
-  }}
+  }
+}

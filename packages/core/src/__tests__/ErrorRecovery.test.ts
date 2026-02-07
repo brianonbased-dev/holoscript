@@ -22,13 +22,13 @@ describe('Parser Error Recovery', () => {
     `;
 
     const result = parser.parse(code);
-    
+
     // Expect failure because there were errors
     expect(result.success).toBe(false);
     expect(result.ast.children.length).toBeGreaterThan(0);
 
     // Should have parsed Valid1
-    const valid1 = result.ast.children.find(n => (n as any).id === 'Valid1');
+    const valid1 = result.ast.children.find((n) => (n).id === 'Valid1');
     expect(valid1).toBeDefined();
 
     // Should have attempted to parse Invalid (might be partial)
@@ -36,12 +36,12 @@ describe('Parser Error Recovery', () => {
     // expect(invalid).toBeDefined();
 
     // CRITICAL: Should have parsed Valid2 after recovery
-    const valid2 = result.ast.children.find(n => (n as any).id === 'Valid2');
+    const valid2 = result.ast.children.find((n) => (n).id === 'Valid2');
     expect(valid2).toBeDefined();
   });
 
   it('should report multiple errors', () => {
-     const code = `
+    const code = `
       orb "Err1" {
         prop1 "value1"
       }
@@ -52,12 +52,12 @@ describe('Parser Error Recovery', () => {
     const parser = new HoloScriptPlusParser();
     // This code is actually valid HoloScript syntax (value without colon is allowed)
     // so we expect it to parse successfully
-    
+
     const result = parser.parse(code);
     expect(result.success).toBe(true);
-    
+
     // Both orbs should be parsed as valid children
-    const root = result.ast.root as any;
+    const root = result.ast.root;
     expect(root.children).toBeDefined();
     expect(root.children.length).toBeGreaterThan(0);
   });

@@ -27,8 +27,4 @@ export {
   type FileEntry,
 } from './packager';
 
-export {
-  publishPackage,
-  type PublishOptions,
-  type PublishResult,
-} from './publisher';
+export { publishPackage, type PublishOptions, type PublishResult } from './publisher';

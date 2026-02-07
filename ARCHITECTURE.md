@@ -31,27 +31,35 @@ HoloScript/                     # This repo - complete language system
 HoloScript can run in multiple ways:
 
 ### 1. Native Runtime (this repo)
+
 ```bash
 holoscript run scene.holo
 ```
+
 Direct execution via `@holoscript/runtime`.
 
 ### 2. Compile to JavaScript/TypeScript
+
 ```bash
 holoscript compile scene.holo --target js
 ```
+
 Generates standalone JS that runs in any browser.
 
 ### 3. Compile to Platform SDKs
+
 ```bash
 holoscript compile scene.holo --target unity
 holoscript compile scene.holo --target unreal
 holoscript compile scene.holo --target godot
 ```
+
 Generates platform-native code.
 
 ### 4. Hololand Integration
+
 Hololand is a **consumer** of HoloScript, providing:
+
 - Additional platform adapters
 - Brittney AI assistant
 - Hosting and deployment
@@ -60,14 +68,14 @@ But HoloScript works without Hololand.
 
 ## Package Relationships
 
-| Package | Purpose | npm |
-|---------|---------|-----|
-| `@holoscript/core` | Parser, AST, validator, compiler | ✅ v2.1.0 |
-| `@holoscript/runtime` | Native execution engine | ✅ |
-| `@holoscript/cli` | Command-line tools | ✅ |
-| `@holoscript/lsp` | Language Server Protocol | ✅ |
-| `@holoscript/mcp-server` | AI agent integration | ✅ v1.0.2 |
-| `@holoscript/vscode` | VS Code extension | Marketplace |
+| Package                  | Purpose                          | npm         |
+| ------------------------ | -------------------------------- | ----------- |
+| `@holoscript/core`       | Parser, AST, validator, compiler | ✅ v2.1.0   |
+| `@holoscript/runtime`    | Native execution engine          | ✅          |
+| `@holoscript/cli`        | Command-line tools               | ✅          |
+| `@holoscript/lsp`        | Language Server Protocol         | ✅          |
+| `@holoscript/mcp-server` | AI agent integration             | ✅ v1.0.2   |
+| `@holoscript/vscode`     | VS Code extension                | Marketplace |
 
 ## Data Flow
 
@@ -122,13 +130,13 @@ AI Agent (Grok/Claude/Copilot)
 
 **Hololand** is one platform that uses HoloScript, but HoloScript is independent:
 
-| HoloScript (this repo) | Hololand |
-|------------------------|----------|
-| Full programming language | One deployment platform |
-| Native runtime | Extended platform adapters |
-| Compiler (9 targets) | Brittney AI assistant |
-| Developer tools | Hosting services |
-| AI integration (MCP) | Sample applications |
+| HoloScript (this repo)    | Hololand                   |
+| ------------------------- | -------------------------- |
+| Full programming language | One deployment platform    |
+| Native runtime            | Extended platform adapters |
+| Compiler (9 targets)      | Brittney AI assistant      |
+| Developer tools           | Hosting services           |
+| AI integration (MCP)      | Sample applications        |
 
 You can use HoloScript without Hololand. Hololand just provides additional convenience.
 
@@ -147,11 +155,11 @@ pip install holoscript
 
 ## File Formats
 
-| Extension | Purpose | Example |
-|-----------|---------|---------|
-| `.hs` | Classic HoloScript | `orb player { ... }` |
+| Extension | Purpose                     | Example                            |
+| --------- | --------------------------- | ---------------------------------- |
+| `.hs`     | Classic HoloScript          | `orb player { ... }`               |
 | `.hsplus` | HoloScript Plus with traits | `object Player @grabbable { ... }` |
-| `.holo` | Declarative compositions | `composition "Scene" { ... }` |
+| `.holo`   | Declarative compositions    | `composition "Scene" { ... }`      |
 
 ## License
 

@@ -1,6 +1,6 @@
 /**
  * HoloScript Unified Event Bus
- * 
+ *
  * Provides a centralized event system for cross-orb and cross-trait communication.
  * Implements a singleton pattern to ensure a single source of truth for global events.
  */
@@ -70,7 +70,7 @@ export class GlobalEventBus {
     logger.debug(`[EventBus] Emitting: ${event}`, { data });
 
     const promises: Array<void | Promise<void>> = [];
-    handlers.forEach(handler => {
+    handlers.forEach((handler) => {
       try {
         promises.push(handler(data));
       } catch (error) {

@@ -42,7 +42,7 @@ export class ConfigLoader {
 
     const combinedConfig: FormatterConfig = {
       ...DEFAULT_CONFIG,
-      ...options
+      ...options,
     };
 
     this.cache.set(configPath, combinedConfig);
@@ -59,7 +59,7 @@ export class ConfigLoader {
         '.holofmtrc',
         '.holofmtrc.json',
         '.holofmtrc.js',
-        'holofmt.config.js'
+        'holofmt.config.js',
       ];
 
       for (const candidate of candidates) {

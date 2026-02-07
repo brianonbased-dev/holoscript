@@ -2,13 +2,16 @@ import { describe, bench, beforeAll } from 'vitest';
 import { HoloScriptPlusParser } from '../parser/HoloScriptPlusParser';
 import { ParseCache } from '../parser/ParseCache';
 
-const LARGE_PROGRAM = Array.from({ length: 500 }, (_, i) => `
+const LARGE_PROGRAM = Array.from(
+  { length: 500 },
+  (_, i) => `
 orb orb${i} {
   name: "Orb${i}"
   position: [${i}, 0, 0]
   @grabbable
 }
-`).join('\n');
+`
+).join('\n');
 
 const MODIFIED_PROGRAM = LARGE_PROGRAM.replace('orb orb250', 'orb orb250_modified');
 

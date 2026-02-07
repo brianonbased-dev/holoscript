@@ -12,11 +12,11 @@ This guide documents the complete Phase 6 UI component system for the HoloScript
 
 ### Components Created
 
-| Component | Location | Size | Purpose |
-|-----------|----------|------|---------|
-| **TraitEditor** | `TraitEditor.tsx` | 600+ LOC | Visual editor for trait annotations |
-| **PreviewDashboard** | `PreviewDashboard.tsx` | 800+ LOC | Real-time multi-device preview |
-| **Phase6CompleteDemo** | `Phase6CompleteDemo.tsx` | 300+ LOC | Complete integrated application |
+| Component              | Location                 | Size     | Purpose                             |
+| ---------------------- | ------------------------ | -------- | ----------------------------------- |
+| **TraitEditor**        | `TraitEditor.tsx`        | 600+ LOC | Visual editor for trait annotations |
+| **PreviewDashboard**   | `PreviewDashboard.tsx`   | 800+ LOC | Real-time multi-device preview      |
+| **Phase6CompleteDemo** | `Phase6CompleteDemo.tsx` | 300+ LOC | Complete integrated application     |
 
 **Total Code:** 1,700+ LOC of production-ready React UI
 
@@ -115,11 +115,13 @@ const config: EditableTraitConfig = {
 ### Features
 
 **Tabs:**
+
 - **Properties** - Visual controls for all trait properties
 - **Generated Code** - Live HoloScript+ code output
 - **Live Preview** - Device-specific preview cards
 
 **Property Controls:**
+
 - 🎚️ Sliders for numeric values (0-1 ranges)
 - 🎨 Color pickers for RGBA values
 - 📋 Dropdowns for enum types
@@ -127,6 +129,7 @@ const config: EditableTraitConfig = {
 - 📝 Text inputs for strings
 
 **Features:**
+
 - 4 Professional presets (gold, steel, studio, high-performance)
 - Live validation with error display
 - Undo/Redo history (50 items)
@@ -138,22 +141,22 @@ const config: EditableTraitConfig = {
 
 ```typescript
 // Update single property
-editor.updateProperty('metallic', 0.9)
+editor.updateProperty('metallic', 0.9);
 
 // Apply preset
-editor.applyPreset('gold')
+editor.applyPreset('gold');
 
 // Code generation
-const code = editor.generateCode()
+const code = editor.generateCode();
 // Output: @material { type: pbr, metallic: 0.8 }
 
 // History operations
-editor.undo()
-editor.redo()
+editor.undo();
+editor.redo();
 
 // Configuration I/O
-const config = editor.exportConfig()
-editor.importConfig(config)
+const config = editor.exportConfig();
+editor.importConfig(config);
 ```
 
 ---
@@ -177,6 +180,7 @@ import { PreviewDashboard } from '@creator-tools/components/PreviewDashboard'
 ### Features
 
 **Multi-Device Preview (6 Devices):**
+
 - iPhone 15 Pro (256 MB GPU, 60 FPS target)
 - iPad Pro 12.9 (512 MB GPU, 60 FPS target)
 - Meta Quest 3 (384 MB GPU, 90 FPS target)
@@ -185,6 +189,7 @@ import { PreviewDashboard } from '@creator-tools/components/PreviewDashboard'
 - RTX 4090 (8 GB GPU, 120 FPS target)
 
 **Metrics Tracked (Per Device):**
+
 - 📈 FPS (frames per second)
 - 🧠 GPU Memory (absolute MB)
 - 🔋 GPU Memory (percent of budget)
@@ -193,6 +198,7 @@ import { PreviewDashboard } from '@creator-tools/components/PreviewDashboard'
 - ⚡ Shader Compile Time (compilation overhead)
 
 **Dashboard Views:**
+
 1. **Device Overview** - 6 cards with quick stats
 2. **Detailed Metrics** - 6 metric panels with status
 3. **Recommendations** - AI-generated optimization suggestions
@@ -204,24 +210,24 @@ import { PreviewDashboard } from '@creator-tools/components/PreviewDashboard'
 
 ```typescript
 // Start monitoring (live updates every 1 second)
-dashboard.startMonitoring(1000)
+dashboard.startMonitoring(1000);
 
 // Stop monitoring
-dashboard.stopMonitoring()
+dashboard.stopMonitoring();
 
 // Get recommendations
-const recs = engine.getRecommendations()
+const recs = engine.getRecommendations();
 // Examples:
 // "Reduce draw calls for Quest 3 (currently 450, target 300)"
 // "GPU memory on iPhone 15: 78% - consider optimizing"
 // "Shader compile time too high: 125ms, optimize for 50ms"
 
 // Compare devices
-const comparison = engine.compareMetrics()
+const comparison = engine.compareMetrics();
 // Returns: { device: string, metrics: PreviewMetrics }[]
 
 // Export results
-const data = engine.exportResults()
+const data = engine.exportResults();
 // JSON with all metrics, comparisons, and history
 ```
 
@@ -232,6 +238,7 @@ const data = engine.exportResults()
 ### Setup & Running
 
 **Prerequisites:**
+
 ```bash
 # Node.js 18+ with React 18+
 # TypeScript 5+
@@ -239,6 +246,7 @@ const data = engine.exportResults()
 ```
 
 **Installation:**
+
 ```bash
 cd packages/creator-tools
 npm install
@@ -246,16 +254,19 @@ npm run dev
 ```
 
 **Features:**
+
 - 📱 **Editor View** - Full-screen trait editor
 - 👁️ **Preview View** - Full-screen preview dashboard
 - ⚔️ **Split View** - Editor on left, preview on right
 
 **View Switching:**
+
 - Click "✏️ Editor" button for editor-only mode
 - Click "👁️ Preview" button for preview-only mode
 - Click "⚔️ Split" button for side-by-side view (recommended)
 
 **Live Workflow:**
+
 1. Edit properties in left panel (sliders, color pickers)
 2. See generated code in real-time
 3. Watch metrics update on 6 devices in right panel
@@ -282,6 +293,7 @@ export default function App() {
 ## 🔧 Property Control Types
 
 ### Number (Slider)
+
 ```typescript
 {
   name: 'metallic',
@@ -297,6 +309,7 @@ export default function App() {
 ```
 
 ### Color (Color Picker)
+
 ```typescript
 {
   name: 'baseColor',
@@ -309,6 +322,7 @@ export default function App() {
 ```
 
 ### Enum (Dropdown)
+
 ```typescript
 {
   name: 'type',
@@ -322,6 +336,7 @@ export default function App() {
 ```
 
 ### Boolean (Checkbox)
+
 ```typescript
 {
   name: 'useNormalMap',
@@ -334,6 +349,7 @@ export default function App() {
 ```
 
 ### String (Text Input)
+
 ```typescript
 {
   name: 'name',
@@ -350,12 +366,14 @@ export default function App() {
 ## 📈 Performance Metrics Explained
 
 ### FPS (Frames Per Second)
+
 - **Optimal:** ≥60 FPS
 - **Acceptable:** 30-60 FPS
 - **Poor:** <30 FPS
 - **Color:** 🟢 Green (optimal), 🟡 Yellow (acceptable), 🔴 Red (poor)
 
 ### GPU Memory %
+
 - **Optimal:** ≤60% of device budget
 - **Acceptable:** 60-80%
 - **Poor:** >80%
@@ -365,16 +383,19 @@ export default function App() {
   - RTX 4090: 8,192 MB budget
 
 ### Draw Calls
+
 - **Target:** <200 per frame on mobile, <500 on desktop
 - **Why:** Each draw call is CPU overhead
 - **Optimization:** Batch geometry, use instancing
 
 ### Vertices Rendered
+
 - **Target:** <2M on mobile, <50M on desktop
 - **Why:** Geometric complexity affects GPU
 - **Optimization:** Reduce mesh complexity, use LOD
 
 ### Shader Compile Time
+
 - **Target:** <50ms compilation
 - **Why:** Long compile times block rendering
 - **Optimization:** Simplify shaders, reduce variants
@@ -388,6 +409,7 @@ export default function App() {
 The engine analyzes metrics against targets and generates recommendations:
 
 **Example Recommendations:**
+
 ```
 "Reduce draw calls for Quest 3 (currently 450, target 300)"
   → Reduce geometry or batch rendering
@@ -421,33 +443,35 @@ The engine analyzes metrics against targets and generates recommendations:
 ### With Backend (TypeScript Classes)
 
 **TraitAnnotationEditor Integration:**
+
 ```typescript
 // Instantiate backend editor
-const editor = new TraitAnnotationEditor(config)
+const editor = new TraitAnnotationEditor(config);
 
 // React component uses it internally
-const [generatedCode, setGeneratedCode] = useState('')
+const [generatedCode, setGeneratedCode] = useState('');
 
 useEffect(() => {
   editor.on('change', (config) => {
-    setGeneratedCode(editor.generateCode())
-  })
-}, [])
+    setGeneratedCode(editor.generateCode());
+  });
+}, []);
 ```
 
 **RealtimePreviewEngine Integration:**
+
 ```typescript
 // Instantiate backend preview engine
-const engine = new RealtimePreviewEngine()
+const engine = new RealtimePreviewEngine();
 
 // Register 6 devices
-devices.forEach(device => engine.registerDevice(device))
+devices.forEach((device) => engine.registerDevice(device));
 
 // Update preview on code changes
-await engine.updatePreview(traitCode)
+await engine.updatePreview(traitCode);
 
 // Get recommendations
-const recs = engine.getRecommendations()
+const recs = engine.getRecommendations();
 ```
 
 ### Event System
@@ -455,21 +479,21 @@ const recs = engine.getRecommendations()
 ```typescript
 // Editor events
 editor.on('change', (config: EditableTraitConfig) => {
-  console.log('Config changed:', config)
-})
+  console.log('Config changed:', config);
+});
 
 editor.on('preset-applied', (presetName: string) => {
-  console.log('Preset applied:', presetName)
-})
+  console.log('Preset applied:', presetName);
+});
 
 // Preview engine events
-engine.on('update', (data: { traitCode, previews }) => {
-  console.log('Preview updated:', data)
-})
+engine.on('update', (data: { traitCode; previews }) => {
+  console.log('Preview updated:', data);
+});
 
 engine.on('metric', (metric: PreviewMetrics) => {
-  console.log('New metric:', metric)
-})
+  console.log('New metric:', metric);
+});
 ```
 
 ---
@@ -477,12 +501,14 @@ engine.on('metric', (metric: PreviewMetrics) => {
 ## 📦 Bundle Size
 
 **Component Sizes (minified + gzipped):**
+
 - TraitEditor.tsx: ~45 KB
 - PreviewDashboard.tsx: ~52 KB
 - Phase6CompleteDemo.tsx: ~8 KB
 - **Total UI Layer:** ~105 KB
 
 **Combined with Backends:**
+
 - TraitAnnotationEditor.ts: ~32 KB
 - RealtimePreviewEngine.ts: ~38 KB
 - **Total System:** ~175 KB gzipped
@@ -492,17 +518,20 @@ engine.on('metric', (metric: PreviewMetrics) => {
 ## 🚀 Performance Characteristics
 
 ### Render Performance
+
 - **Initial Render:** <500ms
 - **Property Update:** <100ms (real-time feedback)
 - **Preview Update:** ~200-500ms (device-dependent)
 - **Metrics Update:** 60 FPS (60Hz monitor)
 
 ### Memory Usage
+
 - **Idle State:** ~12 MB
 - **With Preview Engine:** ~35 MB (6 devices)
 - **Full History (300 samples):** ~50 MB
 
 ### Network
+
 - **Export JSON:** ~50 KB typical config
 - **Metrics History:** ~2 MB per 300 samples
 
@@ -511,6 +540,7 @@ engine.on('metric', (metric: PreviewMetrics) => {
 ## ✅ Testing Checklist
 
 **Component Tests:**
+
 - ✅ TraitEditor renders with initial config
 - ✅ Property changes update code in real-time
 - ✅ Presets apply correctly
@@ -523,6 +553,7 @@ engine.on('metric', (metric: PreviewMetrics) => {
 - ✅ All device cards render
 
 **Integration Tests:**
+
 - ✅ Trait code changes trigger preview update
 - ✅ Preview metrics update on device select
 - ✅ Callbacks fire correctly
@@ -530,6 +561,7 @@ engine.on('metric', (metric: PreviewMetrics) => {
 - ✅ Theme changes apply
 
 **Performance Tests:**
+
 - ✅ Editor responds to 60+ property changes/sec
 - ✅ Preview updates <500ms
 - ✅ No memory leaks on property updates
@@ -540,6 +572,7 @@ engine.on('metric', (metric: PreviewMetrics) => {
 ## 🎓 Usage Patterns
 
 ### Basic Usage (3 lines)
+
 ```typescript
 import TraitEditor from '@creator-tools/components/TraitEditor'
 
@@ -547,18 +580,20 @@ import TraitEditor from '@creator-tools/components/TraitEditor'
 ```
 
 ### With Callbacks (5 lines)
+
 ```typescript
 const [code, setCode] = useState('')
 const [metrics, setMetrics] = useState(new Map())
 
-<TraitEditor 
-  initialConfig={config} 
+<TraitEditor
+  initialConfig={config}
   onCodeChange={setCode}
   onMetricsUpdate={setMetrics}
 />
 ```
 
 ### Full Integration (20 lines)
+
 ```typescript
 import Phase6CompleteDemo from '@creator-tools/Phase6CompleteDemo'
 
@@ -590,24 +625,26 @@ packages/creator-tools/src/
 ## 🔄 State Management
 
 ### TraitEditor State
+
 ```typescript
-config                   // Current trait configuration
-generatedCode           // Live HoloScript+ code
-propertyUIState         // Individual property values
-selectedPreset          // Currently applied preset
-undoDisabled            // Undo button state
-redoDisabled            // Redo button state
-activeTab               // 'properties' | 'code' | 'preview'
-metrics                 // Map<deviceName, PreviewMetrics>
+config; // Current trait configuration
+generatedCode; // Live HoloScript+ code
+propertyUIState; // Individual property values
+selectedPreset; // Currently applied preset
+undoDisabled; // Undo button state
+redoDisabled; // Redo button state
+activeTab; // 'properties' | 'code' | 'preview'
+metrics; // Map<deviceName, PreviewMetrics>
 ```
 
 ### PreviewDashboard State
+
 ```typescript
-previews                // Map<deviceName, PreviewState>
-metricsHistory          // Map<deviceName, PreviewMetrics[]>
-recommendations         // string[] (AI suggestions)
-selectedDevice          // Currently selected device name
-isMonitoring            // Live monitoring active
+previews; // Map<deviceName, PreviewState>
+metricsHistory; // Map<deviceName, PreviewMetrics[]>
+recommendations; // string[] (AI suggestions)
+selectedDevice; // Currently selected device name
+isMonitoring; // Live monitoring active
 ```
 
 ---
@@ -615,6 +652,7 @@ isMonitoring            // Live monitoring active
 ## 🔐 Error Handling
 
 **Validation Errors:**
+
 ```typescript
 // Property type mismatch
 // → Error: "Cannot set metallic to 'invalid' (number expected)"
@@ -627,6 +665,7 @@ isMonitoring            // Live monitoring active
 ```
 
 **Recovery:**
+
 - Invalid changes are rejected with clear error messages
 - Previous valid state is preserved
 - User can fix and retry
@@ -637,24 +676,28 @@ isMonitoring            // Live monitoring active
 ## 🎯 Next Steps
 
 **Immediate (This Session):**
+
 - ✅ TraitEditor component created
 - ✅ PreviewDashboard component created
 - ✅ Phase6CompleteDemo app created
 - ✅ Integration complete
 
 **Week 1 - Testing:**
+
 - Integration tests for all components
 - Performance benchmarks on target browsers
 - Cross-browser compatibility verification
 - Accessibility audit (a11y)
 
 **Week 2 - Enhancements:**
+
 - Add animation preview
 - Add shader visualization
 - Add performance graph history
 - Add batch property editing
 
 **Week 3 - Production:**
+
 - Package for npm distribution
 - Add TypeScript definitions (.d.ts)
 - Create Storybook stories

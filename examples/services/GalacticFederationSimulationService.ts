@@ -1,5 +1,8 @@
 import { getGalacticProtocolService } from './GalacticProtocolService';
-import { getGovernanceOrchestrator, GovernanceProposal } from '../singularity/GovernanceOrchestrator';
+import {
+  getGovernanceOrchestrator,
+  GovernanceProposal,
+} from '../singularity/GovernanceOrchestrator';
 import { logger } from '@/utils/logger';
 
 export interface SimulationEntity {
@@ -61,32 +64,34 @@ export class GalacticFederationSimulationService {
     });
 
     // 2. Map Proposals to Strategic Points
-    proposals.filter(p => p.status === 'pending').forEach((prop) => {
-      const hash = this.stringToHash(prop.id);
-      const angle = ((hash + 180) % 360) * (Math.PI / 180); // Opposite side of signals
-      const radius = 5 + (hash % 10) / 10;
+    proposals
+      .filter((p) => p.status === 'pending')
+      .forEach((prop) => {
+        const hash = this.stringToHash(prop.id);
+        const angle = ((hash + 180) % 360) * (Math.PI / 180); // Opposite side of signals
+        const radius = 5 + (hash % 10) / 10;
 
-      entities.push({
-        id: prop.id,
-        type: 'proposal',
-        position: [Math.cos(angle) * radius, 1.0, Math.sin(angle) * radius],
-        color: '#FFD700', // Gold for proposals
-        label: `PROP-${prop.id.split('-')[1] || prop.id.substring(0, 4)}`,
-        status: prop.status.toUpperCase(),
-        metadata: {
-          description: prop.description,
-          proposedBy: prop.proposedBy,
-          votes: prop.voteCount,
-          sentimentRequired: prop.sentimentRequired
-        },
+        entities.push({
+          id: prop.id,
+          type: 'proposal',
+          position: [Math.cos(angle) * radius, 1.0, Math.sin(angle) * radius],
+          color: '#FFD700', // Gold for proposals
+          label: `PROP-${prop.id.split('-')[1] || prop.id.substring(0, 4)}`,
+          status: prop.status.toUpperCase(),
+          metadata: {
+            description: prop.description,
+            proposedBy: prop.proposedBy,
+            votes: prop.voteCount,
+            sentimentRequired: prop.sentimentRequired,
+          },
+        });
       });
-    });
 
     return {
       timestamp: Date.now(),
       entities,
       activeMissions: signals.length,
-      unresolvedProposals: proposals.filter(p => p.status === 'pending').length,
+      unresolvedProposals: proposals.filter((p) => p.status === 'pending').length,
       signalStrength: Math.min(100, signals.length * 10),
     };
   }
@@ -101,12 +106,17 @@ export class GalacticFederationSimulationService {
 
   private getSignalColor(type: string): string {
     switch (type) {
-      case 'WORK_POST': return '#00ff00';
-      case 'HELLO_UNIVERSE': return '#00ffff';
-      case 'SINGULARITY_EVENT': return '#ff00ff';
-      default: return '#ffffff';
+      case 'WORK_POST':
+        return '#00ff00';
+      case 'HELLO_UNIVERSE':
+        return '#00ffff';
+      case 'SINGULARITY_EVENT':
+        return '#ff00ff';
+      default:
+        return '#ffffff';
     }
   }
 }
 
-export const getGalacticFederationSimulationService = () => GalacticFederationSimulationService.getInstance();
+export const getGalacticFederationSimulationService = () =>
+  GalacticFederationSimulationService.getInstance();

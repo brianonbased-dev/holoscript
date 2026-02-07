@@ -6,8 +6,8 @@
 
 import * as readline from 'readline';
 import { HoloScriptCodeParser, HoloScriptRuntime, enableConsoleLogging } from '@holoscript/core';
-import type { ExecutionResult, ASTNode } from '@holoscript/core';
-import { KnowledgeClient, getKnowledgeClient } from './knowledge-client.js';
+import type { ExecutionResult } from '@holoscript/core';
+import { getKnowledgeClient } from './knowledge-client.js';
 
 const VERSION = '2.5.0';
 
@@ -177,7 +177,9 @@ ${COLORS.cyan}╔═════════════════════
 
       case '.ast':
         this.options.showAST = !this.options.showAST;
-        console.log(`${COLORS.yellow}AST display: ${this.options.showAST ? 'ON' : 'OFF'}${COLORS.reset}`);
+        console.log(
+          `${COLORS.yellow}AST display: ${this.options.showAST ? 'ON' : 'OFF'}${COLORS.reset}`
+        );
         break;
 
       case '.exit':
@@ -253,7 +255,9 @@ ${COLORS.bright}HoloScript Syntax Examples:${COLORS.reset}
     vars.forEach((value, name) => {
       const type = typeof value;
       const display = JSON.stringify(value);
-      console.log(`  ${COLORS.cyan}${name}${COLORS.reset}: ${COLORS.dim}${type}${COLORS.reset} = ${display}`);
+      console.log(
+        `  ${COLORS.cyan}${name}${COLORS.reset}: ${COLORS.dim}${type}${COLORS.reset} = ${display}`
+      );
     });
     console.log();
   }
@@ -269,9 +273,11 @@ ${COLORS.bright}HoloScript Syntax Examples:${COLORS.reset}
 
     console.log(`\n${COLORS.bright}Functions:${COLORS.reset}`);
     funcs.forEach((func, name) => {
-      const params = func.parameters.map(p => `${p.name}: ${p.dataType}`).join(', ');
+      const params = func.parameters.map((p) => `${p.name}: ${p.dataType}`).join(', ');
       const returnType = func.returnType || 'void';
-      console.log(`  ${COLORS.magenta}${name}${COLORS.reset}(${params}): ${COLORS.dim}${returnType}${COLORS.reset}`);
+      console.log(
+        `  ${COLORS.magenta}${name}${COLORS.reset}(${params}): ${COLORS.dim}${returnType}${COLORS.reset}`
+      );
     });
     console.log();
   }
@@ -314,7 +320,9 @@ ${COLORS.dim}Example: .k search spread operator${COLORS.reset}
     const available = await client.isAvailable();
     if (!available) {
       console.log(`${COLORS.red}Knowledge Hub not available.${COLORS.reset}`);
-      console.log(`${COLORS.dim}Start it with: docker-compose -f docker-compose.knowledge.yml up -d${COLORS.reset}`);
+      console.log(
+        `${COLORS.dim}Start it with: docker-compose -f docker-compose.knowledge.yml up -d${COLORS.reset}`
+      );
       return;
     }
 
@@ -422,15 +430,18 @@ ${COLORS.dim}Example: .k search spread operator${COLORS.reset}
     console.log(`\n${COLORS.bright}Found ${results.length} results:${COLORS.reset}\n`);
 
     results.forEach((r, i) => {
-      const categoryColor = {
-        pattern: COLORS.cyan,
-        gotcha: COLORS.yellow,
-        wisdom: COLORS.magenta,
-        research: COLORS.blue,
-        session: COLORS.dim
-      }[r.metadata.category] || COLORS.reset;
+      const categoryColor =
+        {
+          pattern: COLORS.cyan,
+          gotcha: COLORS.yellow,
+          wisdom: COLORS.magenta,
+          research: COLORS.blue,
+          session: COLORS.dim,
+        }[r.metadata.category] || COLORS.reset;
 
-      console.log(`${categoryColor}${i + 1}. [${r.score.toFixed(2)}] ${r.metadata.category}:${r.metadata.domain}${COLORS.reset}`);
+      console.log(
+        `${categoryColor}${i + 1}. [${r.score.toFixed(2)}] ${r.metadata.category}:${r.metadata.domain}${COLORS.reset}`
+      );
       console.log(`   ${COLORS.dim}${r.metadata.source}${COLORS.reset}`);
       console.log(`   ${r.content.slice(0, 150).replace(/\n/g, ' ')}...`);
       console.log();
@@ -465,8 +476,10 @@ ${COLORS.dim}Example: .k search spread operator${COLORS.reset}
       const parseResult = this.parser.parse(code);
 
       if (!parseResult.success) {
-        parseResult.errors.forEach(err => {
-          console.log(`${COLORS.red}Parse error at line ${err.line}:${err.column}: ${err.message}${COLORS.reset}`);
+        parseResult.errors.forEach((err) => {
+          console.log(
+            `${COLORS.red}Parse error at line ${err.line}:${err.column}: ${err.message}${COLORS.reset}`
+          );
         });
         return;
       }
@@ -488,7 +501,6 @@ ${COLORS.dim}Example: .k search spread operator${COLORS.reset}
       for (const result of results) {
         this.displayResult(result);
       }
-
     } catch (error) {
       console.log(`${COLORS.red}Error: ${(error as Error).message}${COLORS.reset}`);
     }
@@ -501,9 +513,10 @@ ${COLORS.dim}Example: .k search spread operator${COLORS.reset}
     }
 
     if (result.output !== undefined) {
-      const output = typeof result.output === 'object'
-        ? JSON.stringify(result.output, null, 2)
-        : String(result.output);
+      const output =
+        typeof result.output === 'object'
+          ? JSON.stringify(result.output, null, 2)
+          : String(result.output);
       console.log(`${COLORS.green}=> ${output}${COLORS.reset}`);
     }
 

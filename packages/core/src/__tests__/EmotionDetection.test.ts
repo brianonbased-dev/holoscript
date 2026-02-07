@@ -15,9 +15,9 @@ describe('UserMonitorTrait - Phase 21 (Frustration Detection)', () => {
         frustration: 0.1,
         confusion: 0.0,
         engagement: 0.9,
-        primaryState: 'neutral'
+        primaryState: 'neutral',
       }),
-      dispose: vi.fn()
+      dispose: vi.fn(),
     };
     registerEmotionDetector('default', mockDetector);
 
@@ -27,14 +27,14 @@ describe('UserMonitorTrait - Phase 21 (Frustration Detection)', () => {
       type: 'object',
       traits: new Map([['user_monitor', {}]]),
       properties: {},
-      children: []
+      children: [],
     } as any as HSPlusNode;
 
     mockContext = {
       vr: {
         headset: { position: [0, 0, 0], rotation: [0, 0, 0] },
-        getDominantHand: () => ({ position: [0, 0, 0], rotation: [0, 0, 0] })
-      }
+        getDominantHand: () => ({ position: [0, 0, 0], rotation: [0, 0, 0] }),
+      },
     };
   });
 
@@ -46,11 +46,16 @@ describe('UserMonitorTrait - Phase 21 (Frustration Detection)', () => {
 
   it('should accumulate tracking positions over update calls', () => {
     userMonitorHandler.onAttach!(node, userMonitorHandler.defaultConfig as any, mockContext);
-    
+
     // Call update 5 times with moving head
     for (let i = 0; i < 5; i++) {
       mockContext.vr.headset.position = [0, i * 0.01, 0];
-      userMonitorHandler.onUpdate!(node, userMonitorHandler.defaultConfig as any, mockContext, 0.016);
+      userMonitorHandler.onUpdate!(
+        node,
+        userMonitorHandler.defaultConfig as any,
+        mockContext,
+        0.016
+      );
     }
 
     const state = (node as any).__userMonitorState;
@@ -60,7 +65,7 @@ describe('UserMonitorTrait - Phase 21 (Frustration Detection)', () => {
 
   it('should trigger inference at specified updateRate', () => {
     userMonitorHandler.onAttach!(node, { updateRate: 0.1 } as any, mockContext);
-    
+
     // 0.05s update - should not trigger
     userMonitorHandler.onUpdate!(node, { updateRate: 0.1 } as any, mockContext, 0.05);
     expect(mockDetector.infer).not.toHaveBeenCalled();
@@ -72,21 +77,23 @@ describe('UserMonitorTrait - Phase 21 (Frustration Detection)', () => {
 
   it('should detect instability (jitter) during inference', () => {
     userMonitorHandler.onAttach!(node, { updateRate: 0.1 } as any, mockContext);
-    
+
     // High jitter movement: 10cm jump every frame
     for (let i = 0; i < 10; i++) {
-        mockContext.vr.headset.position = [0, i % 2 === 0 ? 0 : 0.1, 0];
-        userMonitorHandler.onUpdate!(node, { updateRate: 0.1 } as any, mockContext, 0.1);
+      mockContext.vr.headset.position = [0, i % 2 === 0 ? 0 : 0.1, 0];
+      userMonitorHandler.onUpdate!(node, { updateRate: 0.1 } as any, mockContext, 0.1);
     }
 
-    expect(mockDetector.infer).toHaveBeenCalledWith(expect.objectContaining({
-        headStability: 0 // Should be low/zero for 10cm jumps
-    }));
+    expect(mockDetector.infer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headStability: 0, // Should be low/zero for 10cm jumps
+      })
+    );
   });
 
   it('should track rapid clicking as interaction intensity', () => {
     userMonitorHandler.onAttach!(node, { updateRate: 0.1 } as any, mockContext);
-    
+
     // Simulate 5 rapid clicks
     for (let i = 0; i < 5; i++) {
       userMonitorHandler.onEvent!(node, {} as any, mockContext, { type: 'click' } as any);
@@ -95,8 +102,10 @@ describe('UserMonitorTrait - Phase 21 (Frustration Detection)', () => {
     // Trigger inference
     userMonitorHandler.onUpdate!(node, { updateRate: 0.1 } as any, mockContext, 0.2);
 
-    expect(mockDetector.infer).toHaveBeenCalledWith(expect.objectContaining({
-        interactionIntensity: 0.4 // 5 clicks -> 4 rapid intervals / 10 limit
-    }));
+    expect(mockDetector.infer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interactionIntensity: 0.4, // 5 clicks -> 4 rapid intervals / 10 limit
+      })
+    );
   });
 });

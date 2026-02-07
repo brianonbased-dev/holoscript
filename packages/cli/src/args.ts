@@ -7,7 +7,40 @@ export type RuntimeProfileName = 'headless' | 'minimal' | 'standard' | 'vr';
 export type EdgePlatform = 'linux-arm64' | 'linux-x64' | 'windows-x64' | 'wasm';
 
 export interface CLIOptions {
-  command: 'parse' | 'validate' | 'run' | 'ast' | 'repl' | 'watch' | 'compile' | 'build' | 'add' | 'remove' | 'list' | 'traits' | 'suggest' | 'generate' | 'templates' | 'pack' | 'unpack' | 'inspect' | 'diff' | 'wot-export' | 'headless' | 'package' | 'deploy' | 'monitor' | 'publish' | 'login' | 'logout' | 'whoami' | 'access' | 'org' | 'token' | 'help' | 'version';
+  command:
+    | 'parse'
+    | 'validate'
+    | 'run'
+    | 'ast'
+    | 'repl'
+    | 'watch'
+    | 'compile'
+    | 'build'
+    | 'add'
+    | 'remove'
+    | 'list'
+    | 'traits'
+    | 'suggest'
+    | 'generate'
+    | 'templates'
+    | 'pack'
+    | 'unpack'
+    | 'inspect'
+    | 'diff'
+    | 'wot-export'
+    | 'headless'
+    | 'package'
+    | 'deploy'
+    | 'monitor'
+    | 'publish'
+    | 'login'
+    | 'logout'
+    | 'whoami'
+    | 'access'
+    | 'org'
+    | 'token'
+    | 'help'
+    | 'version';
   input?: string;
   output?: string;
   verbose: boolean;
@@ -101,7 +134,43 @@ export function parseArgs(args: string[]): CLIOptions {
 
     // Commands
     if (!arg.startsWith('-')) {
-      if (['parse', 'validate', 'run', 'ast', 'repl', 'watch', 'compile', 'build', 'add', 'remove', 'list', 'traits', 'suggest', 'generate', 'templates', 'pack', 'unpack', 'inspect', 'diff', 'wot-export', 'headless', 'package', 'deploy', 'monitor', 'publish', 'login', 'logout', 'whoami', 'access', 'org', 'token', 'help', 'version'].includes(arg)) {
+      if (
+        [
+          'parse',
+          'validate',
+          'run',
+          'ast',
+          'repl',
+          'watch',
+          'compile',
+          'build',
+          'add',
+          'remove',
+          'list',
+          'traits',
+          'suggest',
+          'generate',
+          'templates',
+          'pack',
+          'unpack',
+          'inspect',
+          'diff',
+          'wot-export',
+          'headless',
+          'package',
+          'deploy',
+          'monitor',
+          'publish',
+          'login',
+          'logout',
+          'whoami',
+          'access',
+          'org',
+          'token',
+          'help',
+          'version',
+        ].includes(arg)
+      ) {
         options.command = arg as CLIOptions['command'];
       } else if (['access', 'org', 'token'].includes(options.command) && !options.subcommand) {
         // Subcommands for access/org/token

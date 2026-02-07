@@ -78,7 +78,7 @@ export const anchorHandler: TraitHandler<AnchorConfig> = {
       updateCount: 0,
     };
     (node as any).__anchorState = state;
-    
+
     // Request anchor creation
     context.emit?.('anchor_request', {
       node,
@@ -102,11 +102,11 @@ export const anchorHandler: TraitHandler<AnchorConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__anchorState as AnchorState;
     if (!state) return;
-    
+
     // Handle tracking state
     if (state.trackingState === 'lost') {
       state.lostTime += delta * 1000;
-      
+
       // Handle fallback behavior
       switch (config.fallback_behavior) {
         case 'freeze':
@@ -134,7 +134,7 @@ export const anchorHandler: TraitHandler<AnchorConfig> = {
           break;
       }
     }
-    
+
     // Apply offset to current pose
     if (state.pose && state.trackingState === 'tracking') {
       const [ox, oy, oz] = config.offset;
@@ -146,7 +146,7 @@ export const anchorHandler: TraitHandler<AnchorConfig> = {
           z: state.pose.position.z + oz,
         },
       });
-      
+
       context.emit?.('set_rotation', {
         node,
         rotation: state.pose.rotation,
@@ -157,7 +157,7 @@ export const anchorHandler: TraitHandler<AnchorConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__anchorState as AnchorState;
     if (!state) return;
-    
+
     if (event.type === 'anchor_created') {
       state.anchorId = event.anchorId as string;
       state.isAnchored = true;
@@ -168,12 +168,12 @@ export const anchorHandler: TraitHandler<AnchorConfig> = {
       context.emit?.('anchor_ready', { node, anchorId: state.anchorId });
     } else if (event.type === 'anchor_pose_update') {
       if (event.anchorId !== state.anchorId) return;
-      
+
       const pose = event.pose as AnchorPose;
       state.pose = pose;
       state.lastValidPose = pose;
       state.updateCount++;
-      
+
       if (state.trackingState === 'lost') {
         state.trackingState = 'tracking';
         state.lostTime = 0;
@@ -182,11 +182,11 @@ export const anchorHandler: TraitHandler<AnchorConfig> = {
       }
     } else if (event.type === 'anchor_tracking_lost') {
       if (event.anchorId !== state.anchorId) return;
-      
+
       const prevState = state.trackingState;
       state.trackingState = 'lost';
       state.lostTime = 0;
-      
+
       if (prevState === 'tracking') {
         context.emit?.('anchor_lost', { node, anchorId: state.anchorId });
       }

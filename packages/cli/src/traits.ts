@@ -1,13 +1,21 @@
 /**
  * HoloScript VR Traits Documentation
- * 
+ *
  * Complete reference for all 49 VR traits available in HoloScript.
  * Used by CLI for `holoscript traits` command.
  */
 
 export interface TraitInfo {
   name: string;
-  category: 'interaction' | 'physics' | 'visual' | 'networking' | 'behavior' | 'spatial' | 'audio' | 'state';
+  category:
+    | 'interaction'
+    | 'physics'
+    | 'visual'
+    | 'networking'
+    | 'behavior'
+    | 'spatial'
+    | 'audio'
+    | 'state';
   description: string;
   params?: Record<string, string>;
   example: string;
@@ -24,7 +32,8 @@ export const TRAITS: Record<string, TraitInfo> = {
   grabbable: {
     name: 'grabbable',
     category: 'interaction',
-    description: 'Makes object grabbable by VR controllers or hand tracking. Essential for interactive objects.',
+    description:
+      'Makes object grabbable by VR controllers or hand tracking. Essential for interactive objects.',
     params: {
       snap_to_hand: 'If true, object snaps to hand position when grabbed (default: false)',
       two_handed: 'Requires both hands to grab (default: false)',
@@ -659,7 +668,7 @@ export const TRAITS: Record<string, TraitInfo> = {
  * Get traits by category
  */
 export function getTraitsByCategory(category: TraitInfo['category']): TraitInfo[] {
-  return Object.values(TRAITS).filter(t => t.category === category);
+  return Object.values(TRAITS).filter((t) => t.category === category);
 }
 
 /**
@@ -678,26 +687,31 @@ export function getCategories(): Array<{ name: string; count: number }> {
  */
 export function formatTrait(trait: TraitInfo, verbose: boolean = false): string {
   const lines: string[] = [];
-  
+
   lines.push(`\x1b[36m@${trait.name}\x1b[0m \x1b[2m(${trait.category})\x1b[0m`);
   lines.push(`  ${trait.description}`);
-  
+
   if (verbose && trait.params) {
     lines.push('  \x1b[33mParameters:\x1b[0m');
     for (const [param, desc] of Object.entries(trait.params)) {
       lines.push(`    ${param}: ${desc}`);
     }
   }
-  
+
   if (verbose && trait.requiresTraits) {
-    lines.push(`  \x1b[33mRequires:\x1b[0m ${trait.requiresTraits.map(t => `@${t}`).join(', ')}`);
+    lines.push(`  \x1b[33mRequires:\x1b[0m ${trait.requiresTraits.map((t) => `@${t}`).join(', ')}`);
   }
-  
+
   if (verbose) {
     lines.push('  \x1b[33mExample:\x1b[0m');
-    lines.push(trait.example.split('\n').map(l => `    ${l}`).join('\n'));
+    lines.push(
+      trait.example
+        .split('\n')
+        .map((l) => `    ${l}`)
+        .join('\n')
+    );
   }
-  
+
   return lines.join('\n');
 }
 
@@ -708,12 +722,12 @@ export function formatAllTraits(verbose: boolean = false, json: boolean = false)
   if (json) {
     return JSON.stringify(TRAITS, null, 2);
   }
-  
+
   const categories = getCategories();
   const lines: string[] = [];
-  
+
   lines.push(`\n\x1b[1mHoloScript VR Traits\x1b[0m (${Object.keys(TRAITS).length} total)\n`);
-  
+
   for (const { name, count } of categories) {
     lines.push(`\x1b[1m${name.toUpperCase()}\x1b[0m (${count})`);
     const traits = getTraitsByCategory(name as TraitInfo['category']);
@@ -722,7 +736,7 @@ export function formatAllTraits(verbose: boolean = false, json: boolean = false)
     }
     lines.push('');
   }
-  
+
   return lines.join('\n');
 }
 
@@ -736,22 +750,24 @@ export async function suggestTraits(description: string): Promise<TraitInfo[]> {
   // Try AI-assisted search if adapter available
   const { getDefaultAIAdapter } = await import('@holoscript/core');
   const adapter = getDefaultAIAdapter();
-  
+
   if (adapter && adapter.getEmbeddings) {
     try {
       const { SemanticSearchService } = await import('@holoscript/core');
       const traitList = Object.values(TRAITS);
       const searchService = new SemanticSearchService(adapter, traitList);
-      
+
       await searchService.initialize();
       const aiResults = await searchService.search(description, 5);
-      
-      return aiResults.map(r => r.item);
+
+      return aiResults.map((r) => r.item);
     } catch (e) {
-      console.warn(`\x1b[2m[AI Search Failed: ${(e as Error).message}. Falling back to keywords...]\x1b[0m`);
+      console.warn(
+        `\x1b[2m[AI Search Failed: ${(e as Error).message}. Falling back to keywords...]\x1b[0m`
+      );
     }
   }
-  
+
   // Keyword matching (Fallback)
   const keywords: Record<string, string[]> = {
     grabbable: ['grab', 'pick up', 'hold', 'carry', 'interactive', 'hand'],
@@ -769,27 +785,27 @@ export async function suggestTraits(description: string): Promise<TraitInfo[]> {
     consumable: ['consume', 'eat', 'drink', 'potion', 'health'],
     portal: ['portal', 'teleport', 'door', 'gate', 'travel'],
   };
-  
+
   for (const [traitName, words] of Object.entries(keywords)) {
-    if (words.some(word => desc.includes(word))) {
+    if (words.some((word) => desc.includes(word))) {
       if (TRAITS[traitName]) {
         suggested.push(TRAITS[traitName]);
       }
     }
   }
-  
+
   // Common combinations
-  if (suggested.some(t => t.name === 'grabbable')) {
-    if (!suggested.some(t => t.name === 'collidable')) {
+  if (suggested.some((t) => t.name === 'grabbable')) {
+    if (!suggested.some((t) => t.name === 'collidable')) {
       suggested.push(TRAITS.collidable);
     }
   }
-  
-  if (suggested.some(t => t.name === 'physics')) {
-    if (!suggested.some(t => t.name === 'collidable')) {
+
+  if (suggested.some((t) => t.name === 'physics')) {
+    if (!suggested.some((t) => t.name === 'collidable')) {
       suggested.push(TRAITS.collidable);
     }
   }
-  
+
   return suggested;
 }

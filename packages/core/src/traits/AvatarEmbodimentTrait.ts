@@ -26,7 +26,7 @@
 
 import type { TraitHandler } from './TraitTypes';
 import type { LipSyncConfig } from './LipSyncTrait';
-import type { EmotionDirectiveConfig, EmotionTaggedResponse } from './EmotionDirectiveTrait';
+import type { EmotionDirectiveConfig } from './EmotionDirectiveTrait';
 import type { VoiceOutputConfig } from './VoiceOutputTrait';
 
 // =============================================================================
@@ -48,20 +48,20 @@ export type AvatarIKMode = 'head_only' | 'upper_body' | 'full_body' | 'none';
  */
 export type PipelineStage =
   | 'idle'
-  | 'listening'       // STT active, processing user speech
-  | 'processing'      // LLM generating response
-  | 'speaking'        // TTS playing, lip sync active
-  | 'transitioning';  // Between states
+  | 'listening' // STT active, processing user speech
+  | 'processing' // LLM generating response
+  | 'speaking' // TTS playing, lip sync active
+  | 'transitioning'; // Between states
 
 /**
  * AI avatar personality traits (affect gesture/expression selection)
  */
 export interface AvatarPersonality {
-  sociability?: number;    // 0-1: affects gesture frequency
-  warmth?: number;         // 0-1: affects smile frequency
+  sociability?: number; // 0-1: affects gesture frequency
+  warmth?: number; // 0-1: affects smile frequency
   expressiveness?: number; // 0-1: affects expression intensity
-  formality?: number;      // 0-1: affects gesture style
-  energy?: number;         // 0-1: affects animation speed
+  formality?: number; // 0-1: affects gesture style
+  energy?: number; // 0-1: affects animation speed
 }
 
 /**
@@ -184,7 +184,7 @@ export const avatarEmbodimentHandler: TraitHandler<any> = {
     auto_pipeline: true,
   } as AvatarEmbodimentConfig,
 
-  onAttach(node, config, context) {
+  onAttach(node, _config, _context) {
     const state: AvatarEmbodimentState = {
       isEmbodied: false,
       calibrated: false,
@@ -203,7 +203,7 @@ export const avatarEmbodimentHandler: TraitHandler<any> = {
     delete (node as any).__avatarEmbodimentState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, _config, _context, _delta) {
     const state = (node as any).__avatarEmbodimentState as AvatarEmbodimentState | undefined;
     if (!state) return;
 

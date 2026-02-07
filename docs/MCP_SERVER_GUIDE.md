@@ -23,7 +23,10 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "holoscript": {
       "command": "npx",
-      "args": ["tsx", "C:/Users/yourname/Documents/GitHub/HoloScript/packages/mcp-server/src/index.ts"]
+      "args": [
+        "tsx",
+        "C:/Users/yourname/Documents/GitHub/HoloScript/packages/mcp-server/src/index.ts"
+      ]
     }
   }
 }
@@ -35,23 +38,25 @@ Add to `claude_desktop_config.json`:
 
 ### Parsing
 
-| Tool | Input | Output |
-|------|-------|--------|
-| `parse_hs` | `.hs`/`.hsplus` code | AST (Abstract Syntax Tree) |
-| `parse_holo` | `.holo` composition | AST with composition structure |
+| Tool         | Input                | Output                         |
+| ------------ | -------------------- | ------------------------------ |
+| `parse_hs`   | `.hs`/`.hsplus` code | AST (Abstract Syntax Tree)     |
+| `parse_holo` | `.holo` composition  | AST with composition structure |
 
 **Example:**
+
 ```
 parse_hs({ code: "orb player { @grabbable position: [0, 1, 0] }" })
 ```
 
 ### Validation
 
-| Tool | Input | Output |
-|------|-------|--------|
+| Tool                  | Input               | Output                            |
+| --------------------- | ------------------- | --------------------------------- |
 | `validate_holoscript` | Any HoloScript code | Errors/warnings with line numbers |
 
 **Example:**
+
 ```
 validate_holoscript({ code: "orb test { @unknownTrait }" })
 → { valid: false, errors: [{ line: 1, message: "Unknown trait: @unknownTrait" }] }
@@ -59,13 +64,14 @@ validate_holoscript({ code: "orb test { @unknownTrait }" })
 
 ### Traits
 
-| Tool | Input | Output |
-|------|-------|--------|
-| `list_traits` | Category (optional) | All 49 VR traits |
-| `explain_trait` | Trait name | Full documentation with example |
-| `suggest_traits` | Object description | Recommended traits |
+| Tool             | Input               | Output                          |
+| ---------------- | ------------------- | ------------------------------- |
+| `list_traits`    | Category (optional) | All 49 VR traits                |
+| `explain_trait`  | Trait name          | Full documentation with example |
+| `suggest_traits` | Object description  | Recommended traits              |
 
 **Example:**
+
 ```
 suggest_traits({ description: "a sword that can be picked up" })
 → ["@grabbable", "@equippable", "@collidable"]
@@ -73,12 +79,13 @@ suggest_traits({ description: "a sword that can be picked up" })
 
 ### Code Generation
 
-| Tool | Input | Output |
-|------|-------|--------|
-| `generate_object` | Description | HoloScript object definition |
-| `generate_scene` | Scene description | Complete `.holo` composition |
+| Tool              | Input             | Output                       |
+| ----------------- | ----------------- | ---------------------------- |
+| `generate_object` | Description       | HoloScript object definition |
+| `generate_scene`  | Scene description | Complete `.holo` composition |
 
 **Example:**
+
 ```
 generate_object({ description: "a glowing blue crystal", format: "hsplus" })
 → "orb crystal { @glowing(intensity: 0.8) color: \"#0066ff\" position: [0, 1, -2] }"
@@ -86,12 +93,12 @@ generate_object({ description: "a glowing blue crystal", format: "hsplus" })
 
 ### Documentation
 
-| Tool | Input | Output |
-|------|-------|--------|
-| `get_syntax_reference` | Topic (orb, template, etc.) | Syntax documentation |
-| `get_examples` | Pattern name | Example code |
-| `explain_code` | HoloScript code | Plain English explanation |
-| `analyze_code` | HoloScript code | Stats, complexity, suggestions |
+| Tool                   | Input                       | Output                         |
+| ---------------------- | --------------------------- | ------------------------------ |
+| `get_syntax_reference` | Topic (orb, template, etc.) | Syntax documentation           |
+| `get_examples`         | Pattern name                | Example code                   |
+| `explain_code`         | HoloScript code             | Plain English explanation      |
+| `analyze_code`         | HoloScript code             | Stats, complexity, suggestions |
 
 ---
 
@@ -99,15 +106,16 @@ generate_object({ description: "a glowing blue crystal", format: "hsplus" })
 
 ### 1. Use the Right Parser
 
-| File Type | Parser Tool |
-|-----------|-------------|
-| `.hs` (classic) | `parse_hs` |
-| `.hsplus` (with traits) | `parse_hs` |
-| `.holo` (composition) | `parse_holo` |
+| File Type               | Parser Tool  |
+| ----------------------- | ------------ |
+| `.hs` (classic)         | `parse_hs`   |
+| `.hsplus` (with traits) | `parse_hs`   |
+| `.holo` (composition)   | `parse_holo` |
 
 ### 2. Validate Before Executing
 
 Always validate code before sending to runtime:
+
 ```
 1. validate_holoscript(code)
 2. If errors → show to user
@@ -117,6 +125,7 @@ Always validate code before sending to runtime:
 ### 3. Use Trait Suggestions
 
 When creating interactive objects:
+
 ```
 1. User describes object
 2. suggest_traits({ description }) → get relevant traits
@@ -126,6 +135,7 @@ When creating interactive objects:
 ### 4. Provide Context for Better Generation
 
 More specific descriptions yield better code:
+
 ```
 ❌ "create an orb"
 ✅ "create a glowing blue orb at player height that can be grabbed with one hand"
@@ -138,6 +148,7 @@ More specific descriptions yield better code:
 ### Adding a New Tool
 
 1. Add tool definition to `tools` array in `src/index.ts`:
+
 ```typescript
 {
   name: 'my_new_tool',
@@ -153,6 +164,7 @@ More specific descriptions yield better code:
 ```
 
 2. Add handler in `handleTool` switch:
+
 ```typescript
 case 'my_new_tool': {
   const result = doSomething(args.myParam as string);
@@ -165,8 +177,28 @@ case 'my_new_tool': {
 ### Adding Training Examples
 
 Add to `holoscript-mcp-training.jsonl`:
+
 ```jsonl
-{"messages":[{"role":"user","content":"What does my_new_tool do?"},{"role":"assistant","content":"","tool_calls":[{"name":"my_new_tool","arguments":{"myParam":"example"}}]}]}
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "What does my_new_tool do?"
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "my_new_tool",
+          "arguments": {
+            "myParam": "example"
+          }
+        }
+      ]
+    }
+  ]
+}
 ```
 
 ---
@@ -192,6 +224,7 @@ npx tsx packages/mcp-server/src/index.ts
 ### Tool returns errors
 
 Check input matches schema:
+
 - Required fields provided?
 - Types correct (string vs number)?
 - Enums valid?
@@ -203,6 +236,7 @@ Check input matches schema:
 ### Brittney MCP (`Hololand/packages/brittney/mcp-server`)
 
 For VR platform features, use the Brittney MCP server in the Hololand repo:
+
 - `brittney_*` tools for AI assistance
 - `holo_*` tools for graph visualization
 - Browser debugging tools

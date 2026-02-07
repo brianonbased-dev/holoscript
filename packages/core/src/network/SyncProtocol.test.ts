@@ -106,7 +106,7 @@ describe('DeltaEncoder', () => {
       encoder.encode('entity1', { x: 1, y: 2 });
       const delta = encoder.encode('entity1', { x: 1 });
 
-      expect(delta?.changes.some(c => c.op === 'delete' && c.path === 'y')).toBe(true);
+      expect(delta?.changes.some((c) => c.op === 'delete' && c.path === 'y')).toBe(true);
     });
 
     it('should return null when no changes', () => {
@@ -437,7 +437,7 @@ describe('LocalBroadcastTransport', () => {
     transport1.send(message);
 
     // Wait for message propagation
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     expect(receivedMessages).toHaveLength(1);
     expect(receivedMessages[0].payload.test).toBe(true);
@@ -555,9 +555,7 @@ describe('SyncProtocol', () => {
       sync.on('connected', callback);
       await sync.connect();
 
-      expect(callback).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'connected' })
-      );
+      expect(callback).toHaveBeenCalledWith(expect.objectContaining({ type: 'connected' }));
     });
 
     it('should emit disconnected event', async () => {
@@ -566,9 +564,7 @@ describe('SyncProtocol', () => {
       await sync.connect();
       sync.disconnect();
 
-      expect(callback).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'disconnected' })
-      );
+      expect(callback).toHaveBeenCalledWith(expect.objectContaining({ type: 'disconnected' }));
     });
 
     it('should return unsubscribe function', async () => {
@@ -638,13 +634,13 @@ describe('Integration', () => {
     client1.syncState('shared-entity', { x: 10, y: 20 });
 
     // Wait for propagation
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     // Client1 sends delta
     client1.syncState('shared-entity', { x: 15, y: 20 });
 
     // Wait for propagation
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     // Check if client2 received the update
     expect(stateUpdates.length).toBeGreaterThan(0);
@@ -672,7 +668,7 @@ describe('Integration', () => {
     });
 
     // Wait for propagation
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     expect(presenceUpdates.length).toBeGreaterThan(0);
     expect(presenceUpdates[0].position).toEqual([1, 2, 3]);

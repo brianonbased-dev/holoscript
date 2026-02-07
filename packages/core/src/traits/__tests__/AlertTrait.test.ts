@@ -33,7 +33,7 @@ describe('AlertTrait', () => {
 
     it('should attach and initialize state', () => {
       attachTrait(alertHandler, node, {}, ctx);
-      
+
       const state = (node as any).__alertState;
       expect(state).toBeDefined();
       expect(state.activeAlerts.size).toBe(0);
@@ -43,10 +43,15 @@ describe('AlertTrait', () => {
 
   describe('alert triggering', () => {
     beforeEach(() => {
-      attachTrait(alertHandler, node, {
-        severity: 'warning',
-        cooldown: 0,
-      }, ctx);
+      attachTrait(
+        alertHandler,
+        node,
+        {
+          severity: 'warning',
+          cooldown: 0,
+        },
+        ctx
+      );
       ctx.clearEvents();
     });
 
@@ -55,7 +60,7 @@ describe('AlertTrait', () => {
         type: 'alert_trigger',
         message: 'Test alert',
       });
-      
+
       expect(getEventCount(ctx, 'on_alert_triggered')).toBe(1);
       const alert = getLastEvent(ctx, 'on_alert_triggered');
       expect(alert.severity).toBe('warning');
@@ -67,7 +72,7 @@ describe('AlertTrait', () => {
         id: 'test-alert',
         message: 'Test message',
       });
-      
+
       const state = (node as any).__alertState;
       expect(state.activeAlerts.size).toBe(1);
       expect(state.activeAlerts.has('test-alert')).toBe(true);
@@ -77,21 +82,26 @@ describe('AlertTrait', () => {
   describe('severity levels', () => {
     it('should support all severity levels', () => {
       const severities = ['info', 'warning', 'error', 'critical'];
-      
+
       for (const severity of severities) {
         const testNode = createMockNode('test');
         const testCtx = createMockContext();
-        
-        attachTrait(alertHandler, testNode, {
-          severity,
-          cooldown: 0,
-        }, testCtx);
+
+        attachTrait(
+          alertHandler,
+          testNode,
+          {
+            severity,
+            cooldown: 0,
+          },
+          testCtx
+        );
         testCtx.clearEvents();
-        
+
         sendEvent(alertHandler, testNode, { severity, cooldown: 0 }, testCtx, {
           type: 'alert_trigger',
         });
-        
+
         const alert = getLastEvent(testCtx, 'on_alert_triggered');
         expect(alert.severity).toBe(severity);
       }
@@ -100,9 +110,14 @@ describe('AlertTrait', () => {
 
   describe('cooldown', () => {
     beforeEach(() => {
-      attachTrait(alertHandler, node, {
-        cooldown: 5000,
-      }, ctx);
+      attachTrait(
+        alertHandler,
+        node,
+        {
+          cooldown: 5000,
+        },
+        ctx
+      );
       ctx.clearEvents();
     });
 
@@ -110,7 +125,7 @@ describe('AlertTrait', () => {
       sendEvent(alertHandler, node, { cooldown: 5000 }, ctx, {
         type: 'alert_trigger',
       });
-      
+
       const state = (node as any).__alertState;
       expect(state.isOnCooldown).toBe(true);
     });
@@ -120,22 +135,27 @@ describe('AlertTrait', () => {
         type: 'alert_trigger',
       });
       ctx.clearEvents();
-      
+
       // Second trigger should be blocked
       sendEvent(alertHandler, node, { cooldown: 5000 }, ctx, {
         type: 'alert_trigger',
       });
-      
+
       expect(getEventCount(ctx, 'on_alert_triggered')).toBe(0);
     });
   });
 
   describe('max active alerts', () => {
     beforeEach(() => {
-      attachTrait(alertHandler, node, {
-        max_active: 2,
-        cooldown: 0,
-      }, ctx);
+      attachTrait(
+        alertHandler,
+        node,
+        {
+          max_active: 2,
+          cooldown: 0,
+        },
+        ctx
+      );
       ctx.clearEvents();
     });
 
@@ -147,7 +167,7 @@ describe('AlertTrait', () => {
           id: `alert-${i}`,
         });
       }
-      
+
       const state = (node as any).__alertState;
       expect(state.activeAlerts.size).toBeLessThanOrEqual(2);
     });
@@ -155,10 +175,15 @@ describe('AlertTrait', () => {
 
   describe('alert acknowledgement', () => {
     beforeEach(() => {
-      attachTrait(alertHandler, node, {
-        cooldown: 0,
-      }, ctx);
-      
+      attachTrait(
+        alertHandler,
+        node,
+        {
+          cooldown: 0,
+        },
+        ctx
+      );
+
       sendEvent(alertHandler, node, { cooldown: 0 }, ctx, {
         type: 'alert_trigger',
         id: 'test-alert',
@@ -171,7 +196,7 @@ describe('AlertTrait', () => {
         type: 'alert_acknowledge',
         alertId: 'test-alert',
       });
-      
+
       const state = (node as any).__alertState;
       const alert = state.activeAlerts.get('test-alert');
       expect(alert.acknowledged).toBe(true);
@@ -180,32 +205,42 @@ describe('AlertTrait', () => {
 
   describe('visual effects', () => {
     it('should emit visual effect on trigger', () => {
-      attachTrait(alertHandler, node, {
-        visual_effect: 'pulse',
-        cooldown: 0,
-      }, ctx);
+      attachTrait(
+        alertHandler,
+        node,
+        {
+          visual_effect: 'pulse',
+          cooldown: 0,
+        },
+        ctx
+      );
       ctx.clearEvents();
-      
+
       sendEvent(alertHandler, node, { visual_effect: 'pulse', cooldown: 0 }, ctx, {
         type: 'alert_trigger',
       });
-      
+
       expect(getEventCount(ctx, 'alert_visual_effect')).toBe(1);
     });
   });
 
   describe('haptic feedback', () => {
     it('should emit haptic event on trigger', () => {
-      attachTrait(alertHandler, node, {
-        haptic: true,
-        cooldown: 0,
-      }, ctx);
+      attachTrait(
+        alertHandler,
+        node,
+        {
+          haptic: true,
+          cooldown: 0,
+        },
+        ctx
+      );
       ctx.clearEvents();
-      
+
       sendEvent(alertHandler, node, { haptic: true, cooldown: 0 }, ctx, {
         type: 'alert_trigger',
       });
-      
+
       expect(getEventCount(ctx, 'alert_haptic')).toBe(1);
     });
   });
@@ -213,13 +248,13 @@ describe('AlertTrait', () => {
   describe('cleanup', () => {
     it('should clean up state on detach', () => {
       attachTrait(alertHandler, node, {}, ctx);
-      
+
       sendEvent(alertHandler, node, { cooldown: 0 }, ctx, {
         type: 'alert_trigger',
       });
-      
+
       alertHandler.onDetach?.(node, alertHandler.defaultConfig, ctx);
-      
+
       expect((node as any).__alertState).toBeUndefined();
     });
   });

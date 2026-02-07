@@ -32,14 +32,15 @@ Good prompts are specific:
 
 ```
 ❌ "Make a game"
-✅ "Create a VR escape room with 3 puzzle stations, a locked door 
+✅ "Create a VR escape room with 3 puzzle stations, a locked door
     that opens when all puzzles are solved, and ambient torch lighting"
 ```
 
 ### Example Workflow
 
 **Prompt:**
-> Create a VR meditation space with floating islands, glowing orbs that play 
+
+> Create a VR meditation space with floating islands, glowing orbs that play
 > calming sounds when touched, and a day/night cycle
 
 **AI generates:**
@@ -60,7 +61,7 @@ composition "Meditation Space" {
   template "FloatingIsland" {
     @physics(gravity: false)
     model: "island.glb"
-    
+
     action float() {
       animate this with {
         property: "position.y"
@@ -70,7 +71,7 @@ composition "Meditation Space" {
         loop: "pingpong"
       }
     }
-    
+
     on_spawn: {
       this.float()
     }
@@ -80,22 +81,22 @@ composition "Meditation Space" {
     @grabbable
     @glowing(intensity: 1.5)
     @spatial_audio
-    
+
     sounds: ["bowl_C.wav", "bowl_E.wav", "bowl_G.wav"]
-    
+
     on_click: {
       let sound = random_choice(this.sounds)
       play_spatial_sound(sound, this.position)
-      pulse this with { 
-        scale: 1.3, 
-        duration: 500ms 
+      pulse this with {
+        scale: 1.3,
+        duration: 500ms
       }
     }
-    
+
     on_grab: {
       this.glow_intensity = 2.5
     }
-    
+
     on_release: {
       this.glow_intensity = 1.5
     }
@@ -103,22 +104,22 @@ composition "Meditation Space" {
 
   spatial_group "MainIsland" {
     position: [0, 0, 0]
-    
+
     object "Island_Main" using "FloatingIsland" {
       position: [0, 0, 0]
       scale: 3
     }
-    
+
     object "Orb_1" using "CalmingOrb" {
       position: [-2, 2, 0]
       color: "#ff9999"
     }
-    
+
     object "Orb_2" using "CalmingOrb" {
       position: [2, 2, 0]
       color: "#99ff99"
     }
-    
+
     object "Orb_3" using "CalmingOrb" {
       position: [0, 2, 2]
       color: "#9999ff"
@@ -144,20 +145,20 @@ composition "Meditation Space" {
       if (@state.time_of_day >= 1) {
         @state.time_of_day = 0
       }
-      
+
       // Update lighting
       environment.ambient_light = 0.2 + (sin(@state.time_of_day * PI) * 0.4)
-      
+
       @state.is_night = @state.time_of_day < 0.25 || @state.time_of_day > 0.75
     }
-    
+
     when @state.is_night {
       // Increase orb glow at night
       find_all("CalmingOrb").forEach(orb => {
         orb.glow_intensity = 2.5
       })
     }
-    
+
     when !@state.is_night {
       find_all("CalmingOrb").forEach(orb => {
         orb.glow_intensity = 1.5
@@ -175,30 +176,30 @@ AI agents access HoloScript through MCP tools:
 
 ### Generation Tools
 
-| Tool | Purpose |
-|------|---------|
+| Tool              | Purpose                        |
+| ----------------- | ------------------------------ |
 | `generate_object` | Single object from description |
-| `generate_scene` | Complete composition |
-| `suggest_traits` | Recommend traits for use case |
+| `generate_scene`  | Complete composition           |
+| `suggest_traits`  | Recommend traits for use case  |
 
 ### Validation Tools
 
-| Tool | Purpose |
-|------|---------|
-| `validate_holoscript` | Check for errors |
-| `parse_hs` | Parse to AST |
-| `parse_holo` | Parse composition to AST |
+| Tool                  | Purpose                  |
+| --------------------- | ------------------------ |
+| `validate_holoscript` | Check for errors         |
+| `parse_hs`            | Parse to AST             |
+| `parse_holo`          | Parse composition to AST |
 
 ### Documentation Tools
 
-| Tool | Purpose |
-|------|---------|
-| `explain_code` | Plain English explanation |
-| `explain_trait` | Trait documentation |
-| `list_traits` | All available traits |
-| `get_syntax_reference` | Syntax help |
-| `get_examples` | Code examples |
-| `analyze_code` | Complexity metrics |
+| Tool                   | Purpose                   |
+| ---------------------- | ------------------------- |
+| `explain_code`         | Plain English explanation |
+| `explain_trait`        | Trait documentation       |
+| `list_traits`          | All available traits      |
+| `get_syntax_reference` | Syntax help               |
+| `get_examples`         | Code examples             |
+| `analyze_code`         | Complexity metrics        |
 
 ---
 
@@ -215,6 +216,7 @@ Create a [genre] environment with:
 ```
 
 **Example:**
+
 ```
 Create a cyberpunk rooftop environment with:
 - Neon signs that can be shot
@@ -234,6 +236,7 @@ Create a [object type] that:
 ```
 
 **Example:**
+
 ```
 Create a magic sword that:
 - Glows blue when held

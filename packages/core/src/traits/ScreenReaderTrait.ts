@@ -65,12 +65,12 @@ export const screenReaderHandler: TraitHandler<ScreenReaderConfig> = {
       childNodes: [],
     };
     (node as any).__screenReaderState = state;
-    
+
     // Store initial position
     if ((node as any).position) {
       state.lastPosition = { ...(node as any).position };
     }
-    
+
     // Register with screen reader navigation system
     context.emit?.('screen_reader_register', {
       node,
@@ -85,10 +85,10 @@ export const screenReaderHandler: TraitHandler<ScreenReaderConfig> = {
     delete (node as any).__screenReaderState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__screenReaderState as ScreenReaderState;
     if (!state) return;
-    
+
     // Process announcement queue
     if (state.announcementQueue.length > 0 && !state.isAnnouncing) {
       const message = state.announcementQueue.shift();
@@ -101,7 +101,7 @@ export const screenReaderHandler: TraitHandler<ScreenReaderConfig> = {
         });
       }
     }
-    
+
     // Check for position changes and announce
     if (config.announce_changes && state.isFocused && (node as any).position) {
       const pos = (node as any).position;
@@ -109,10 +109,10 @@ export const screenReaderHandler: TraitHandler<ScreenReaderConfig> = {
       const dy = pos.y - state.lastPosition.y;
       const dz = pos.z - state.lastPosition.z;
       const distMoved = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      
+
       if (distMoved > 0.5) {
         state.lastPosition = { x: pos.x, y: pos.y, z: pos.z };
-        
+
         // Sonify position change
         if (config.sonify_position) {
           context.emit?.('screen_reader_sonify', {
@@ -129,26 +129,26 @@ export const screenReaderHandler: TraitHandler<ScreenReaderConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__screenReaderState as ScreenReaderState;
     if (!state) return;
-    
+
     if (event.type === 'screen_reader_focus') {
       state.isFocused = true;
       state.navigationStack.push(node.id || 'node');
-      
+
       // Build announcement based on verbosity
       let announcement = getNodeAnnouncement(node, config.verbosity);
-      
+
       // Add spatial information
       if (config.reading_mode === 'spatial' && (node as any).position) {
         const pos = (node as any).position;
         announcement += `. Position: ${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}, ${pos.z.toFixed(1)}`;
       }
-      
+
       context.emit?.('screen_reader_announce', {
         node,
         message: announcement,
         interrupt: true,
       });
-      
+
       // Sonify position
       if (config.sonify_position && (node as any).position) {
         context.emit?.('screen_reader_sonify', {
@@ -158,7 +158,7 @@ export const screenReaderHandler: TraitHandler<ScreenReaderConfig> = {
           panForPosition: config.pan_for_position,
         });
       }
-      
+
       context.emit?.('on_screen_reader_focus', { node });
     } else if (event.type === 'screen_reader_blur') {
       state.isFocused = false;
@@ -196,12 +196,12 @@ export const screenReaderHandler: TraitHandler<ScreenReaderConfig> = {
     } else if (event.type === 'screen_reader_describe') {
       // Provide detailed description
       let description = getNodeDescription(node, config.verbosity);
-      
+
       if ((node as any).position) {
         const pos = (node as any).position;
         description += ` Located at ${pos.x.toFixed(1)} meters right, ${pos.y.toFixed(1)} meters up, ${pos.z.toFixed(1)} meters forward.`;
       }
-      
+
       state.announcementQueue.push(description);
     } else if (event.type === 'screen_reader_query') {
       context.emit?.('screen_reader_info', {
@@ -219,7 +219,7 @@ export const screenReaderHandler: TraitHandler<ScreenReaderConfig> = {
 function getNodeAnnouncement(node: any, verbosity: string): string {
   const name = node.name || node.id || 'Object';
   const type = node.type || 'item';
-  
+
   switch (verbosity) {
     case 'minimal':
       return name;
@@ -230,21 +230,21 @@ function getNodeAnnouncement(node: any, verbosity: string): string {
   }
 }
 
-function getNodeDescription(node: any, verbosity: string): string {
+function getNodeDescription(node: any, _verbosity: string): string {
   const name = node.name || node.id || 'Object';
   const type = node.type || 'item';
-  
+
   let desc = `${name} is a ${type}`;
-  
+
   if (node.material?.color) {
     desc += `, colored ${node.material.color}`;
   }
-  
+
   if (node.scale) {
     const s = node.scale;
     desc += `, size ${s.x?.toFixed(1) || 1} by ${s.y?.toFixed(1) || 1} by ${s.z?.toFixed(1) || 1} meters`;
   }
-  
+
   return desc;
 }
 

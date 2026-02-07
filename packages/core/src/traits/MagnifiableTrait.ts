@@ -31,7 +31,7 @@ interface MagnifiableConfig {
   smooth_zoom: boolean;
   zoom_speed: number;
   lens_mode: boolean;
-  lens_size: number;  // Percentage of view
+  lens_size: number; // Percentage of view
   lens_border: boolean;
   preserve_aspect: boolean;
 }
@@ -65,13 +65,13 @@ export const magnifiableHandler: TraitHandler<MagnifiableConfig> = {
       zoomCenter: { x: 0, y: 0, z: 0 },
     };
     (node as any).__magnifiableState = state;
-    
+
     // Store original scale
     if ((node as any).scale) {
       const s = (node as any).scale;
       state.originalScale = { x: s.x || 1, y: s.y || 1, z: s.z || 1 };
     }
-    
+
     context.emit?.('magnifiable_register', {
       node,
       trigger: config.trigger,
@@ -81,14 +81,14 @@ export const magnifiableHandler: TraitHandler<MagnifiableConfig> = {
 
   onDetach(node, config, context) {
     const state = (node as any).__magnifiableState as MagnifiableState;
-    
+
     // Restore original scale
     if (state && (node as any).scale) {
       (node as any).scale.x = state.originalScale.x;
       (node as any).scale.y = state.originalScale.y;
       (node as any).scale.z = state.originalScale.z;
     }
-    
+
     context.emit?.('magnifiable_unregister', { node });
     delete (node as any).__magnifiableState;
   },
@@ -96,21 +96,21 @@ export const magnifiableHandler: TraitHandler<MagnifiableConfig> = {
   onUpdate(node, config, context, delta) {
     const state = (node as any).__magnifiableState as MagnifiableState;
     if (!state) return;
-    
+
     // Smooth zoom interpolation
     if (config.smooth_zoom && state.currentMagnification !== state.targetMagnification) {
       const diff = state.targetMagnification - state.currentMagnification;
       const step = diff * config.zoom_speed * delta;
-      
+
       if (Math.abs(diff) < 0.01) {
         state.currentMagnification = state.targetMagnification;
       } else {
         state.currentMagnification += step;
       }
-      
+
       applyMagnification(node, config, state);
     }
-    
+
     // Update lens position if in lens mode
     if (config.lens_mode && state.lensPosition) {
       context.emit?.('magnifiable_lens_update', {
@@ -126,19 +126,22 @@ export const magnifiableHandler: TraitHandler<MagnifiableConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__magnifiableState as MagnifiableState;
     if (!state) return;
-    
+
     if (event.type === 'magnify_start' || event.type === 'pinch_start') {
       state.isZooming = true;
-      
+
       if (event.center) {
         state.zoomCenter = event.center as typeof state.zoomCenter;
       }
-      
+
       context.emit?.('on_magnify_start', { node });
     } else if (event.type === 'magnify_update' || event.type === 'pinch_update') {
-      const scale = event.scale as number || 1;
-      const newMag = Math.max(config.min_scale, Math.min(config.max_scale, state.currentMagnification * scale));
-      
+      const scale = (event.scale as number) || 1;
+      const newMag = Math.max(
+        config.min_scale,
+        Math.min(config.max_scale, state.currentMagnification * scale)
+      );
+
       if (config.smooth_zoom) {
         state.targetMagnification = newMag;
       } else {
@@ -146,7 +149,7 @@ export const magnifiableHandler: TraitHandler<MagnifiableConfig> = {
         state.targetMagnification = newMag;
         applyMagnification(node, config, state);
       }
-      
+
       // Update lens position
       if (config.lens_mode && event.position) {
         state.lensPosition = event.position as typeof state.lensPosition;
@@ -158,8 +161,11 @@ export const magnifiableHandler: TraitHandler<MagnifiableConfig> = {
         magnification: state.currentMagnification,
       });
     } else if (event.type === 'magnify_set') {
-      const mag = Math.max(config.min_scale, Math.min(config.max_scale, event.magnification as number));
-      
+      const mag = Math.max(
+        config.min_scale,
+        Math.min(config.max_scale, event.magnification as number)
+      );
+
       if (config.smooth_zoom) {
         state.targetMagnification = mag;
       } else {
@@ -188,15 +194,11 @@ export const magnifiableHandler: TraitHandler<MagnifiableConfig> = {
   },
 };
 
-function applyMagnification(
-  node: any,
-  config: MagnifiableConfig,
-  state: MagnifiableState
-): void {
+function applyMagnification(node: any, config: MagnifiableConfig, state: MagnifiableState): void {
   if (!node.scale) return;
-  
+
   const mag = state.currentMagnification;
-  
+
   if (config.preserve_aspect) {
     node.scale.x = state.originalScale.x * mag;
     node.scale.y = state.originalScale.y * mag;

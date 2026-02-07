@@ -64,16 +64,16 @@ export interface NPCGoal {
 export interface AIDriverConfig {
   /** NPC identifier */
   npcId: string;
-  
+
   /** Decision making mode */
   decisionMode: DecisionMode;
-  
+
   /** Base behavior tree */
   behaviorTree?: BehaviorNode;
-  
+
   /** Available goals */
   goals?: NPCGoal[];
-  
+
   /** Personality traits */
   personality?: {
     sociability: number; // 0-1
@@ -81,18 +81,18 @@ export interface AIDriverConfig {
     curiosity: number; // 0-1
     loyalty: number; // 0-1
   };
-  
+
   /** Response to stimuli */
   stimuliThresholds?: {
     hearing: number; // perception distance
     sight: number; // vision distance
     touch: number; // collision distance
   };
-  
+
   /** Learning config */
   enableLearning?: boolean;
   learningRate?: number;
-  
+
   /** Infinity Assistant integration */
   agentId?: string;
 }
@@ -111,10 +111,7 @@ export class BehaviorTreeRunner {
     return this.executeNode(this.rootNode, context);
   }
 
-  private async executeNode(
-    node: BehaviorNode,
-    context: NPCContext
-  ): Promise<boolean> {
+  private async executeNode(node: BehaviorNode, context: NPCContext): Promise<boolean> {
     if (node.type === 'action') {
       if (node.action) {
         try {
@@ -181,10 +178,7 @@ export class GOAPPlanner {
     return [];
   }
 
-  private canAchieve(
-    currentState: Map<string, unknown>,
-    goal: NPCGoal
-  ): boolean {
+  private canAchieve(currentState: Map<string, unknown>, goal: NPCGoal): boolean {
     for (const [key, value] of goal.preconditions) {
       if (currentState.get(key) !== value) {
         return false;
@@ -316,7 +310,14 @@ export class AIDriverTrait {
     // Select highest priority goal
     const plan = this.goapPlanner.planGoal(
       worldState,
-      this.config.goals?.[0] || { id: 'idle', name: 'Idle', priority: 0, preconditions: new Map(), effects: new Map(), cost: 0 }
+      this.config.goals?.[0] || {
+        id: 'idle',
+        name: 'Idle',
+        priority: 0,
+        preconditions: new Map(),
+        effects: new Map(),
+        cost: 0,
+      }
     );
 
     if (plan.length > 0) {
@@ -391,8 +392,8 @@ export class AIDriverTrait {
 
     // Reward based on social interaction (if sociable)
     if (
-      this.config.personality?.sociability || 0 > 0.5 &&
-      this.context.perception.nearbyEntities.length > 0
+      this.config.personality?.sociability ||
+      (0 > 0.5 && this.context.perception.nearbyEntities.length > 0)
     ) {
       reward += 1;
     }
@@ -413,10 +414,7 @@ export class AIDriverTrait {
   /**
    * Update perception (nearby entities, visible targets)
    */
-  public updatePerception(
-    nearbyEntities: string[],
-    visibleEntities: string[]
-  ): void {
+  public updatePerception(nearbyEntities: string[], visibleEntities: string[]): void {
     this.context.perception.nearbyEntities = nearbyEntities;
     this.context.perception.visibleEntities = visibleEntities;
   }

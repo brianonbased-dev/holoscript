@@ -1,31 +1,20 @@
 /**
  * @holoscript/mcp-server
- * 
+ *
  * Model Context Protocol server for HoloScript language tooling.
  * Enables AI agents (Grok, Claude, Copilot, etc.) to parse, validate,
  * and generate HoloScript code in real-time.
+ *
+ * 34 tools across 4 categories:
+ * - Core (15): Parse, validate, generate, render, share
+ * - Graph (6): Parse-to-graph, visualize, design, diff, connections
+ * - IDE (9): Scan, diagnostics, autocomplete, refactor, docs, hover
+ * - Brittney-Lite AI (4): Explain errors, fix code, review, scaffold
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-
-// Import from @holoscript/core
-import {
-  HoloScriptParser,
-  HoloScriptPlusParser,
-  HoloCompositionParser,
-  HoloScriptValidator,
-  parseHoloScriptPlus,
-  parseHolo,
-  parseHoloStrict,
-  formatRichError,
-  formatRichErrors,
-  VR_TRAITS,
-} from '@holoscript/core';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 
 import { tools } from './tools';
 import { handleTool } from './handlers';
@@ -34,7 +23,7 @@ import { handleTool } from './handlers';
 const server = new Server(
   {
     name: 'holoscript-mcp',
-    version: '1.0.0',
+    version: '3.0.0',
   },
   {
     capabilities: {
@@ -51,7 +40,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 // Handle tool calls
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
-  
+
   try {
     const result = await handleTool(name, args || {});
     return {
@@ -91,3 +80,6 @@ export * from './tools';
 export * from './handlers';
 export * from './generators';
 export * from './renderer';
+export * from './graph-tools';
+export * from './ide-tools';
+export * from './brittney-lite';

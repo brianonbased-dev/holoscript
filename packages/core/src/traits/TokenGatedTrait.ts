@@ -29,15 +29,15 @@ interface TokenGatedState {
 interface TokenGatedConfig {
   chain: Chain;
   contract_address: string;
-  token_id: string;  // For ERC1155
+  token_id: string; // For ERC1155
   min_balance: number;
   token_type: TokenType;
   fallback_behavior: FallbackBehavior;
   gate_message: string;
   redirect_url: string;
-  verify_interval: number;  // Re-verify every N ms (0 = once)
-  allow_list: string[];  // Addresses always allowed
-  block_list: string[];  // Addresses always blocked
+  verify_interval: number; // Re-verify every N ms (0 = once)
+  allow_list: string[]; // Addresses always allowed
+  block_list: string[]; // Addresses always blocked
 }
 
 // =============================================================================
@@ -71,7 +71,7 @@ export const tokenGatedHandler: TraitHandler<TokenGatedConfig> = {
       verifyAttempts: 0,
     };
     (node as any).__tokenGatedState = state;
-    
+
     // Apply initial fallback state
     applyFallbackBehavior(node, config, context, false);
   },
@@ -80,10 +80,10 @@ export const tokenGatedHandler: TraitHandler<TokenGatedConfig> = {
     delete (node as any).__tokenGatedState;
   },
 
-  onUpdate(node, config, context, delta) {
+  onUpdate(node, config, context, _delta) {
     const state = (node as any).__tokenGatedState as TokenGatedState;
     if (!state) return;
-    
+
     // Re-verify periodically if configured
     if (config.verify_interval > 0 && state.isVerified) {
       const now = Date.now();
@@ -99,17 +99,17 @@ export const tokenGatedHandler: TraitHandler<TokenGatedConfig> = {
   onEvent(node, config, context, event) {
     const state = (node as any).__tokenGatedState as TokenGatedState;
     if (!state) return;
-    
+
     if (event.type === 'token_gate_verify') {
       const address = event.address as string;
       state.verifyAttempts++;
-      
+
       // Check block list
       if (config.block_list.includes(address.toLowerCase())) {
         state.hasAccess = false;
         state.isVerified = true;
         state.verifiedAddress = address;
-        
+
         context.emit?.('on_token_denied', {
           node,
           address,
@@ -117,13 +117,13 @@ export const tokenGatedHandler: TraitHandler<TokenGatedConfig> = {
         });
         return;
       }
-      
+
       // Check allow list
       if (config.allow_list.includes(address.toLowerCase())) {
         grantAccess(node, state, config, context, address, 999);
         return;
       }
-      
+
       // Request blockchain verification
       context.emit?.('token_gate_check_balance', {
         node,
@@ -136,18 +136,18 @@ export const tokenGatedHandler: TraitHandler<TokenGatedConfig> = {
     } else if (event.type === 'token_gate_balance_result') {
       const address = event.address as string;
       const balance = event.balance as number;
-      
+
       state.tokenBalance = balance;
       state.lastVerifyTime = Date.now();
       state.isVerified = true;
       state.verifiedAddress = address;
-      
+
       if (balance >= config.min_balance) {
         grantAccess(node, state, config, context, address, balance);
       } else {
         state.hasAccess = false;
         applyFallbackBehavior(node, config, context, false);
-        
+
         context.emit?.('on_token_denied', {
           node,
           address,
@@ -161,9 +161,9 @@ export const tokenGatedHandler: TraitHandler<TokenGatedConfig> = {
       state.hasAccess = false;
       state.verifiedAddress = null;
       state.tokenBalance = 0;
-      
+
       applyFallbackBehavior(node, config, context, false);
-      
+
       context.emit?.('on_token_access_revoked', { node });
     } else if (event.type === 'token_gate_refresh') {
       if (state.verifiedAddress) {
@@ -200,10 +200,10 @@ function grantAccess(
   state.hasAccess = true;
   state.verifiedAddress = address;
   state.tokenBalance = balance;
-  
+
   // Remove fallback behavior
   context.emit?.('token_gate_reveal', { node });
-  
+
   context.emit?.('on_token_verified', {
     node,
     address,
@@ -220,7 +220,7 @@ function applyFallbackBehavior(
   hasAccess: boolean
 ): void {
   if (hasAccess) return;
-  
+
   switch (config.fallback_behavior) {
     case 'hide':
       context.emit?.('token_gate_hide', { node });

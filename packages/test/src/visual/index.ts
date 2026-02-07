@@ -1,4 +1,3 @@
-
 import { HeadlessRenderer } from './renderer';
 import { captureScreenshot, CaptureOptions } from './capture';
 import { compareImages, saveDiff } from './diff';
@@ -23,11 +22,11 @@ let globalContext: VisualTestContext | null = null;
 export async function setupVisualTesting(outputDir: string) {
   const renderer = new HeadlessRenderer();
   await renderer.launch();
-  
+
   const reportGenerator = new VisualReportGenerator();
-  
+
   globalContext = { renderer, reportGenerator };
-  
+
   // Ensure output directory exists
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
@@ -87,7 +86,7 @@ export async function visualTest(options: VisualTestOptions) {
     try {
       const result = compareImages(actualBuffer, baselineBuffer, threshold);
       diffPixels = result.diffPixels;
-      
+
       if (diffPixels > 0) {
         saveDiff(result, diffPath);
       } else {
@@ -111,7 +110,7 @@ export async function visualTest(options: VisualTestOptions) {
     diffPixels,
     baselinePath,
     actualPath,
-    diffPath: passed ? undefined : diffPath
+    diffPath: passed ? undefined : diffPath,
   });
 
   if (!passed) {

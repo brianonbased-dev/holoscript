@@ -5,6 +5,7 @@ Welcome to Lesson 1.2! In this lesson, you'll set up your HoloScript development
 ## Prerequisites
 
 Before starting, ensure you have:
+
 - **Node.js** 18.0 or higher
 - A code editor (VS Code recommended)
 - A VR headset (optional for testing, but recommended)
@@ -160,6 +161,7 @@ export PATH="$PATH:$(npm bin -g)"
 ### WebXR Not Available
 
 Ensure you're using a compatible browser:
+
 - **Chrome 79+** on Windows/Android
 - **Firefox** with WebXR enabled
 - **Oculus Browser** on Quest

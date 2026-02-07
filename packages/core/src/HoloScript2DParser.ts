@@ -84,7 +84,10 @@ export class HoloScript2DParser {
       type: '2d-element',
       elementType: elementType as UIElementType,
       name,
-      properties: { ...this.getDefaultProperties(elementType as UIElementType), ...properties } as Record<string, HoloScriptValue>,
+      properties: {
+        ...this.getDefaultProperties(elementType as UIElementType),
+        ...properties,
+      } as Record<string, HoloScriptValue>,
       events: Object.keys(events).length > 0 ? events : undefined,
       children: children.length > 0 ? children : undefined,
     };
@@ -146,7 +149,10 @@ export class HoloScript2DParser {
       type: '2d-element',
       elementType: elementType as UIElementType,
       name,
-      properties: this.getDefaultProperties(elementType as UIElementType) as Record<string, HoloScriptValue>,
+      properties: this.getDefaultProperties(elementType as UIElementType) as Record<
+        string,
+        HoloScriptValue
+      >,
     };
 
     this.uiElements.set(name, node);
@@ -169,7 +175,11 @@ export class HoloScript2DParser {
     }
   }
 
-  private createQuick2DElement(elementType: UIElementType, name: string, position: Position2D): UI2DNode {
+  private createQuick2DElement(
+    elementType: UIElementType,
+    name: string,
+    position: Position2D
+  ): UI2DNode {
     const node: UI2DNode = {
       type: '2d-element',
       elementType,
@@ -187,9 +197,21 @@ export class HoloScript2DParser {
 
   private isValidUIElementType(type: string): boolean {
     const validTypes: UIElementType[] = [
-      'canvas', 'button', 'textinput', 'panel', 'text', 'image',
-      'list', 'modal', 'slider', 'toggle', 'dropdown',
-      'flex-container', 'grid-container', 'scroll-view', 'tab-view'
+      'canvas',
+      'button',
+      'textinput',
+      'panel',
+      'text',
+      'image',
+      'list',
+      'modal',
+      'slider',
+      'toggle',
+      'dropdown',
+      'flex-container',
+      'grid-container',
+      'scroll-view',
+      'tab-view',
     ];
     return validTypes.includes(type as UIElementType);
   }
@@ -197,8 +219,10 @@ export class HoloScript2DParser {
   private parsePropertyValue(value: string): unknown {
     const trimmed = value.trim();
 
-    if ((trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-        (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+    if (
+      (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+      (trimmed.startsWith("'") && trimmed.endsWith("'"))
+    ) {
       return trimmed.slice(1, -1);
     }
 
@@ -210,9 +234,10 @@ export class HoloScript2DParser {
     if (trimmed === 'false') return false;
 
     if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-      const items = trimmed.slice(1, -1).split(',').map(item =>
-        this.parsePropertyValue(item.trim())
-      );
+      const items = trimmed
+        .slice(1, -1)
+        .split(',')
+        .map((item) => this.parsePropertyValue(item.trim()));
       return items;
     }
 
@@ -221,26 +246,47 @@ export class HoloScript2DParser {
 
   private getDefaultProperties(elementType: UIElementType): Record<string, unknown> {
     const defaults: Record<UIElementType, Record<string, unknown>> = {
-      'canvas': { width: 800, height: 600, backgroundColor: '#ffffff' },
-      'button': { text: 'Button', width: 120, height: 40, backgroundColor: '#007bff', color: '#ffffff', borderRadius: 4 },
-      'textinput': { placeholder: '', width: 200, height: 36, fontSize: 14, borderColor: '#cccccc', borderWidth: 1, borderRadius: 4 },
-      'panel': { width: 200, height: 200, backgroundColor: '#f0f0f0', borderRadius: 0 },
-      'text': { content: 'Text', fontSize: 16, color: '#000000', fontFamily: 'sans-serif' },
-      'image': { src: '', width: 100, height: 100, fit: 'cover' },
-      'list': { items: [], itemHeight: 40, width: 200, height: 300 },
-      'modal': { title: 'Modal', width: 400, height: 300, visible: false, backgroundColor: '#ffffff' },
-      'slider': { min: 0, max: 100, value: 50, width: 200 },
-      'toggle': { checked: false, width: 50, height: 24 },
-      'dropdown': { options: [], selected: null, width: 200 },
+      canvas: { width: 800, height: 600, backgroundColor: '#ffffff' },
+      button: {
+        text: 'Button',
+        width: 120,
+        height: 40,
+        backgroundColor: '#007bff',
+        color: '#ffffff',
+        borderRadius: 4,
+      },
+      textinput: {
+        placeholder: '',
+        width: 200,
+        height: 36,
+        fontSize: 14,
+        borderColor: '#cccccc',
+        borderWidth: 1,
+        borderRadius: 4,
+      },
+      panel: { width: 200, height: 200, backgroundColor: '#f0f0f0', borderRadius: 0 },
+      text: { content: 'Text', fontSize: 16, color: '#000000', fontFamily: 'sans-serif' },
+      image: { src: '', width: 100, height: 100, fit: 'cover' },
+      list: { items: [], itemHeight: 40, width: 200, height: 300 },
+      modal: {
+        title: 'Modal',
+        width: 400,
+        height: 300,
+        visible: false,
+        backgroundColor: '#ffffff',
+      },
+      slider: { min: 0, max: 100, value: 50, width: 200 },
+      toggle: { checked: false, width: 50, height: 24 },
+      dropdown: { options: [], selected: null, width: 200 },
       'flex-container': { direction: 'row', gap: 10, padding: 10 },
       'grid-container': { columns: 3, gap: 10, padding: 10 },
       'scroll-view': { width: 300, height: 400, scrollDirection: 'vertical' },
       'tab-view': { tabs: [], activeTabId: null, tabPosition: 'top', width: 400, height: 300 },
-      'dashboard': { title: 'Dashboard', width: 1200, height: 800, layout: 'grid', columns: 4 },
-      'card': { title: '', width: 300, height: 200, backgroundColor: '#ffffff', elevation: 2 },
-      'metric': { label: '', value: 0, unit: '', fontSize: 24, color: '#000000' },
-      'row': { height: 'auto', gap: 10, alignItems: 'center' },
-      'col': { width: 'auto', gap: 10, alignItems: 'stretch' },
+      dashboard: { title: 'Dashboard', width: 1200, height: 800, layout: 'grid', columns: 4 },
+      card: { title: '', width: 300, height: 200, backgroundColor: '#ffffff', elevation: 2 },
+      metric: { label: '', value: 0, unit: '', fontSize: 24, color: '#000000' },
+      row: { height: 'auto', gap: 10, alignItems: 'center' },
+      col: { width: 'auto', gap: 10, alignItems: 'stretch' },
     };
     return { ...defaults[elementType] };
   }

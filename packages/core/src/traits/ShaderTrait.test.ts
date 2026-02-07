@@ -5,12 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  ShaderTrait,
-  createShaderTrait,
-  SHADER_PRESETS,
-  SHADER_CHUNKS,
-} from './ShaderTrait';
+import { ShaderTrait, createShaderTrait, SHADER_PRESETS, SHADER_CHUNKS } from './ShaderTrait';
 
 describe('ShaderTrait', () => {
   let trait: ShaderTrait;

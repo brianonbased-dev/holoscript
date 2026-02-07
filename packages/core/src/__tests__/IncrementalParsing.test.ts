@@ -32,7 +32,7 @@ template "ArtFrame" {
     const result = parser.parseIncremental(source, cache);
     expect(result.success).toBe(true);
     expect(result.ast.children.length).toBe(3);
-    
+
     // Check that nodes are in cache
     const cube1Hash = ParseCache.hash(source.split('\n').slice(1, 5).join('\n'));
     // console.log('Cube 1 Source:', source.split('\n').slice(1, 5).join('\n'));
@@ -43,7 +43,7 @@ template "ArtFrame" {
   it('should reuse cached nodes when nothing changes', () => {
     const result1 = parser.parseIncremental(source, cache);
     const result2 = parser.parseIncremental(source, cache);
-    
+
     expect(result1.ast.children[0]).toBe(result2.ast.children[0]);
     expect(result1.ast.children[1]).toBe(result2.ast.children[1]);
     expect(result1.ast.children[2]).toBe(result2.ast.children[2]);
@@ -51,14 +51,14 @@ template "ArtFrame" {
 
   it('should re-parse only changed chunks', () => {
     const result1 = parser.parseIncremental(source, cache);
-    
+
     // Modify cube_1
     const modifiedSource = source.replace('position: [0, 1, 0]', 'position: [0, 2, 0]');
     const result2 = parser.parseIncremental(modifiedSource, cache);
-    
+
     // cube_1 should be different (re-parsed)
     expect(result1.ast.children[0]).not.toBe(result2.ast.children[0]);
-    
+
     // sphere_1 and ArtFrame should be identical (reused)
     expect(result1.ast.children[1]).toBe(result2.ast.children[1]);
     expect(result1.ast.children[2]).toBe(result2.ast.children[2]);
@@ -68,7 +68,7 @@ template "ArtFrame" {
     // Add two newlines at the top to shift everything
     const shiftedSource = '\n\n' + source.trim();
     const result = parser.parseIncremental(shiftedSource, cache);
-    
+
     const secondOrb = result.ast.children[1]; // sphere_1
     // Original sphere_1 started on line 7 (with trim it would be 6)
     // Shifted by 2 lines -> 8
@@ -77,10 +77,10 @@ template "ArtFrame" {
 
   it('should handle adding new chunks without invalidating others', () => {
     const result1 = parser.parseIncremental(source, cache);
-    
+
     const expandedSource = source + '\norb cube_2 {\n  scale: 2\n}\n';
     const result2 = parser.parseIncremental(expandedSource, cache);
-    
+
     expect(result2.ast.children.length).toBe(4);
     expect(result1.ast.children[0]).toBe(result2.ast.children[0]);
     expect(result1.ast.children[1]).toBe(result2.ast.children[1]);

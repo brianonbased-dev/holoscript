@@ -1,6 +1,6 @@
 /**
  * HoloScript Visual - Visual Editor Component
- * 
+ *
  * Main visual programming editor that combines all components.
  */
 
@@ -21,32 +21,29 @@ interface ToolbarButtonProps {
   title?: string;
 }
 
-const ToolbarButton: React.FC<ToolbarButtonProps> = memo(({ 
-  onClick, 
-  disabled, 
-  children, 
-  title 
-}) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    title={title}
-    style={{
-      padding: '6px 12px',
-      backgroundColor: disabled ? '#1e1e2e' : '#2d2d3d',
-      border: '1px solid #3d3d4d',
-      borderRadius: 4,
-      color: disabled ? '#71717a' : '#e4e4e7',
-      fontSize: 12,
-      cursor: disabled ? 'not-allowed' : 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 4
-    }}
-  >
-    {children}
-  </button>
-));
+const ToolbarButton: React.FC<ToolbarButtonProps> = memo(
+  ({ onClick, disabled, children, title }) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      style={{
+        padding: '6px 12px',
+        backgroundColor: disabled ? '#1e1e2e' : '#2d2d3d',
+        border: '1px solid #3d3d4d',
+        borderRadius: 4,
+        color: disabled ? '#71717a' : '#e4e4e7',
+        fontSize: 12,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 4,
+      }}
+    >
+      {children}
+    </button>
+  )
+);
 
 ToolbarButton.displayName = 'ToolbarButton';
 
@@ -86,7 +83,7 @@ const VisualEditor: React.FC<VisualEditorProps> = ({
   codePreviewWidth = 300,
   showToolbar = true,
   showCodePreview = true,
-  height = '100vh'
+  height = '100vh',
 }) => {
   // Store state and actions
   const nodes = useGraphStore((s) => s.nodes);
@@ -102,20 +99,20 @@ const VisualEditor: React.FC<VisualEditorProps> = ({
   const canRedo = useGraphStore((s) => s.canRedo);
   const removeNode = useGraphStore((s) => s.removeNode);
   const duplicateNodes = useGraphStore((s) => s.duplicateNodes);
-  
+
   // Load initial graph
   useEffect(() => {
     if (initialGraph) {
       loadGraph(initialGraph);
     }
   }, [initialGraph, loadGraph]);
-  
+
   // Notify parent of changes
   useEffect(() => {
     const graph = exportGraph();
     onChange?.(graph);
   }, [nodes, edges, onChange, exportGraph]);
-  
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -140,11 +137,11 @@ const VisualEditor: React.FC<VisualEditorProps> = ({
         duplicateNodes(selectedNodes);
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo, redo, selectedNodes, removeNode, duplicateNodes]);
-  
+
   // Handle new graph
   const handleNew = useCallback(() => {
     if (nodes.length > 0) {
@@ -154,7 +151,7 @@ const VisualEditor: React.FC<VisualEditorProps> = ({
     }
     clear();
   }, [nodes.length, clear]);
-  
+
   // Handle export
   const handleExport = useCallback(() => {
     const graph = exportGraph();
@@ -167,7 +164,7 @@ const VisualEditor: React.FC<VisualEditorProps> = ({
     a.click();
     URL.revokeObjectURL(url);
   }, [exportGraph, metadata.name]);
-  
+
   // Handle import
   const handleImport = useCallback(() => {
     const input = document.createElement('input');
@@ -176,7 +173,7 @@ const VisualEditor: React.FC<VisualEditorProps> = ({
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      
+
       try {
         const text = await file.text();
         const graph = JSON.parse(text) as VisualGraph;
@@ -187,14 +184,14 @@ const VisualEditor: React.FC<VisualEditorProps> = ({
     };
     input.click();
   }, [loadGraph]);
-  
+
   // Current graph for code preview
   const currentGraph: VisualGraph = {
     nodes,
     edges,
-    metadata
+    metadata,
   };
-  
+
   return (
     <div
       className="visual-editor"
@@ -204,7 +201,7 @@ const VisualEditor: React.FC<VisualEditorProps> = ({
         flexDirection: 'column',
         backgroundColor: '#0d0d14',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        color: '#e4e4e7'
+        color: '#e4e4e7',
       }}
     >
       {/* Toolbar */}
@@ -218,7 +215,7 @@ const VisualEditor: React.FC<VisualEditorProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            backgroundColor: '#1e1e2e'
+            backgroundColor: '#1e1e2e',
           }}
         >
           <ToolbarButton onClick={handleNew} title="New graph">
@@ -230,39 +227,33 @@ const VisualEditor: React.FC<VisualEditorProps> = ({
           <ToolbarButton onClick={handleExport} title="Export graph">
             💾 Export
           </ToolbarButton>
-          
+
           <div style={{ width: 1, height: 24, backgroundColor: '#3d3d4d', margin: '0 8px' }} />
-          
+
           <ToolbarButton onClick={undo} disabled={!canUndo()} title="Undo (Ctrl+Z)">
             ↩️ Undo
           </ToolbarButton>
           <ToolbarButton onClick={redo} disabled={!canRedo()} title="Redo (Ctrl+Y)">
             ↪️ Redo
           </ToolbarButton>
-          
+
           <div style={{ flex: 1 }} />
-          
-          <span style={{ fontSize: 14, color: '#71717a' }}>
-            {metadata.name}
-          </span>
+
+          <span style={{ fontSize: 14, color: '#71717a' }}>{metadata.name}</span>
         </div>
       )}
-      
+
       {/* Main editor area */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Sidebar */}
         <Sidebar width={sidebarWidth} />
-        
+
         {/* Canvas */}
         <Canvas />
-        
+
         {/* Code preview */}
         {showCodePreview && (
-          <CodePreview 
-            graph={currentGraph} 
-            width={codePreviewWidth}
-            objectName={objectName}
-          />
+          <CodePreview graph={currentGraph} width={codePreviewWidth} objectName={objectName} />
         )}
       </div>
     </div>

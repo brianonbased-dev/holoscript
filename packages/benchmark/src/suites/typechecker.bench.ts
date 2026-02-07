@@ -1,6 +1,6 @@
 /**
  * Type Checker Benchmarks
- * 
+ *
  * Measures type checking performance
  */
 

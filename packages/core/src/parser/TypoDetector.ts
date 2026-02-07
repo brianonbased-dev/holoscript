@@ -1,6 +1,6 @@
 /**
  * TypoDetector - Utility for detecting typos and suggesting corrections
- * 
+ *
  * Uses Levenshtein distance to find the closest match from a set of valid options.
  */
 
@@ -87,8 +87,8 @@ export class TypoDetector {
         } else {
           matrix[i][j] = Math.min(
             matrix[i - 1][j - 1] + 1, // substitution
-            matrix[i][j - 1] + 1,     // insertion
-            matrix[i - 1][j] + 1      // deletion
+            matrix[i][j - 1] + 1, // insertion
+            matrix[i - 1][j] + 1 // deletion
           );
         }
       }

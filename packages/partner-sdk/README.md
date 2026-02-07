@@ -103,7 +103,11 @@ runtime.start();
 Export to game engines:
 
 ```typescript
-import { createUnityAdapter, createUnrealAdapter, createGodotAdapter } from '@holoscript/partner-sdk';
+import {
+  createUnityAdapter,
+  createUnrealAdapter,
+  createGodotAdapter,
+} from '@holoscript/partner-sdk';
 
 // Unity
 const unity = createUnityAdapter({
