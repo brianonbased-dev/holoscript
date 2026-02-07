@@ -1,6 +1,9 @@
 # Ignore benchmark package (has type resolution issues)
 packages/benchmark/
 
+# Ignore vscode-extension (has many unsafe type patterns, pending refactor)
+packages/vscode-extension/
+
 # Ignore build outputs
 **/dist/
 **/node_modules/

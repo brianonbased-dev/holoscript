@@ -76,7 +76,6 @@ interface Scope {
   parent?: Scope;
 }
 
-
 /**
  * UI Element state
  */
@@ -104,7 +103,10 @@ export class HoloScriptRuntime {
   private uiElements: Map<string, UIElementState> = new Map();
   private builtinFunctions: Map<string, (args: HoloScriptValue[]) => HoloScriptValue>;
 
-  constructor(_importLoader?: ImportLoader, customFunctions?: Record<string, (args: HoloScriptValue[]) => HoloScriptValue>) {
+  constructor(
+    _importLoader?: ImportLoader,
+    customFunctions?: Record<string, (args: HoloScriptValue[]) => HoloScriptValue>
+  ) {
     this.context = this.createEmptyContext();
     this.currentScope = { variables: this.context.variables };
     this.builtinFunctions = this.initBuiltins(customFunctions);
@@ -123,9 +125,11 @@ export class HoloScriptRuntime {
   /**
    * Initialize built-in functions
    */
-  private initBuiltins(customFunctions?: Record<string, (args: HoloScriptValue[]) => HoloScriptValue>): Map<string, (args: HoloScriptValue[]) => HoloScriptValue> {
+  private initBuiltins(
+    customFunctions?: Record<string, (args: HoloScriptValue[]) => HoloScriptValue>
+  ): Map<string, (args: HoloScriptValue[]) => HoloScriptValue> {
     const builtins = new Map<string, (args: HoloScriptValue[]) => HoloScriptValue>();
-    
+
     // Inject Custom Functions
     if (customFunctions) {
       for (const [name, func] of Object.entries(customFunctions)) {
@@ -228,7 +232,9 @@ export class HoloScriptRuntime {
     builtins.set('add', (args): any => Number(args[0]) + Number(args[1]));
     builtins.set('subtract', (args): any => Number(args[0]) - Number(args[1]));
     builtins.set('multiply', (args): any => Number(args[0]) * Number(args[1]));
-    builtins.set('divide', (args): any => Number(args[1]) !== 0 ? Number(args[0]) / Number(args[1]) : 0);
+    builtins.set('divide', (args): any =>
+      Number(args[1]) !== 0 ? Number(args[0]) / Number(args[1]) : 0
+    );
     builtins.set('mod', (args): any => Number(args[0]) % Number(args[1]));
     builtins.set('abs', (args): any => Math.abs(Number(args[0])));
     builtins.set('floor', (args): any => Math.floor(Number(args[0])));
@@ -246,7 +252,9 @@ export class HoloScriptRuntime {
       if (Array.isArray(val)) return val.length;
       return 0;
     });
-    builtins.set('substring', (args): any => String(args[0]).substring(Number(args[1]), Number(args[2])));
+    builtins.set('substring', (args): any =>
+      String(args[0]).substring(Number(args[1]), Number(args[2]))
+    );
     builtins.set('uppercase', (args): any => String(args[0]).toUpperCase());
     builtins.set('lowercase', (args): any => String(args[0]).toLowerCase());
 
@@ -296,7 +304,7 @@ export class HoloScriptRuntime {
     // Type checking
     builtins.set('typeof', (args): any => typeof args[0]);
     builtins.set('isArray', (args): any => Array.isArray(args[0]));
-    builtins.set('isNumber', (args): any => typeof args[0] === 'number' && !isNaN(args[0] as number));
+    builtins.set('isNumber', (args): any => typeof args[0] === 'number' && !isNaN(args[0]));
     builtins.set('isString', (args): any => typeof args[0] === 'string');
 
     // New Primitives
@@ -475,21 +483,21 @@ export class HoloScriptRuntime {
 
     if (Array.isArray(nodes)) {
       const results = await this.executeProgram(nodes);
-      const success = results.every(r => r.success);
-      
+      const success = results.every((r) => r.success);
+
       // Bubble up return result if present
       const lastResult = results[results.length - 1];
       let output: any = success ? `Program executed (${results.length} nodes)` : 'Program failed';
-      
+
       if (lastResult && lastResult.success && lastResult.output !== undefined) {
-         // If evaluateExpression was used, it likely came from a return node or expression statement
-         output = lastResult.output;
+        // If evaluateExpression was used, it likely came from a return node or expression statement
+        output = lastResult.output;
       }
 
       return {
         success,
         output,
-        error: results.find(r => !r.success)?.error
+        error: results.find((r) => !r.success)?.error,
       };
     } else {
       return this.executeNode(nodes);
@@ -507,11 +515,13 @@ export class HoloScriptRuntime {
 
     if (depth > RUNTIME_SECURITY_LIMITS.maxExecutionDepth) {
       logger.error('Max execution depth exceeded', { depth });
-      return [{
-        success: false,
-        error: `Max execution depth exceeded (${RUNTIME_SECURITY_LIMITS.maxExecutionDepth})`,
-        executionTime: 0,
-      }];
+      return [
+        {
+          success: false,
+          error: `Max execution depth exceeded (${RUNTIME_SECURITY_LIMITS.maxExecutionDepth})`,
+          executionTime: 0,
+        },
+      ];
     }
 
     const results: ExecutionResult[] = [];
@@ -621,7 +631,7 @@ export class HoloScriptRuntime {
       this.createExecutionEffect(name, func.position || { x: 0, y: 0, z: 0 });
 
       return {
-        success: results.every(r => r.success),
+        success: results.every((r) => r.success),
         output: returnValue as HoloScriptValue,
         hologram: func.hologram,
         spatialPosition: func.position,
@@ -712,13 +722,11 @@ export class HoloScriptRuntime {
     const evaluator = new ExpressionEvaluator(this.context.state.getSnapshot());
     // Also include currently set variables in context
     const varContext: Record<string, any> = {};
-    this.context.variables.forEach((v, k) => varContext[k] = v);
+    this.context.variables.forEach((v, k) => (varContext[k] = v));
     evaluator.updateContext(varContext);
 
     return evaluator.evaluate(expr);
   }
-
-
 
   // ============================================================================
   // Node Executors
@@ -726,36 +734,40 @@ export class HoloScriptRuntime {
 
   private async executeOrb(node: OrbNode): Promise<ExecutionResult> {
     const scale = this.context.currentScale || 1;
-    const adjustedPos = node.position ? {
-      x: node.position.x * scale,
-      y: node.position.y * scale,
-      z: node.position.z * scale
-    } : { x: 0, y: 0, z: 0 };
+    const adjustedPos = node.position
+      ? {
+          x: node.position.x * scale,
+          y: node.position.y * scale,
+          z: node.position.z * scale,
+        }
+      : { x: 0, y: 0, z: 0 };
 
     if (node.position) {
       this.context.spatialMemory.set(node.name, adjustedPos);
     }
 
-    const hologram = node.hologram ? {
-      ...node.hologram,
-      size: (node.hologram.size || 1) * scale
-    } : undefined;
+    const hologram = node.hologram
+      ? {
+          ...node.hologram,
+          size: (node.hologram.size || 1) * scale,
+        }
+      : undefined;
 
     // Create orb object with reactive properties
     const evaluatedProperties: Record<string, HoloScriptValue> = {};
     for (const [key, val] of Object.entries(node.properties)) {
-        if (typeof val === 'string') {
-            evaluatedProperties[key] = this.evaluateExpression(val);
-        } else {
-            evaluatedProperties[key] = val;
-        }
+      if (typeof val === 'string') {
+        evaluatedProperties[key] = this.evaluateExpression(val);
+      } else {
+        evaluatedProperties[key] = val;
+      }
     }
 
     const orbData = {
       __type: 'orb',
       name: node.name,
       properties: evaluatedProperties,
-      traits: node.directives?.filter(d => d.type === 'trait').map(d => (d as any).name) || [],
+      traits: node.directives?.filter((d) => d.type === 'trait').map((d) => (d as any).name) || [],
       directives: node.directives || [],
       position: adjustedPos,
       hologram: hologram,
@@ -763,7 +775,8 @@ export class HoloScriptRuntime {
       // Methods bound to this orb
       show: () => this.builtinFunctions.get('show')!([node.name]),
       hide: () => this.builtinFunctions.get('hide')!([node.name]),
-      pulse: (opts?: Record<string, unknown>) => this.builtinFunctions.get('pulse')!([node.name, opts]),
+      pulse: (opts?: Record<string, unknown>) =>
+        this.builtinFunctions.get('pulse')!([node.name, opts]),
     };
 
     this.context.variables.set(node.name, orbData as any);
@@ -774,24 +787,36 @@ export class HoloScriptRuntime {
 
     // Apply directives if any
     if (node.directives) {
-        this.applyDirectives(node);
-        
-        // Phase 13: Check for @logic with machine config
-        const logicDirective = node.directives.find(d => d.type === 'trait' && (d as any).name === 'logic');
-        if (logicDirective && (logicDirective as any).config && (logicDirective as any).config.machine) {
-           const machineName = (logicDirective as any).config.machine;
-           const machineDef = this.context.stateMachines.get(machineName);
-           if (machineDef) {
-              stateMachineInterpreter.createInstance(node.name, machineDef, orbData.properties);
-           } else {
-              logger.warn(`[StateMachine] Machine definition ${machineName} not found for orb ${node.name}`);
-           }
+      this.applyDirectives(node);
+
+      // Phase 13: Check for @logic with machine config
+      const logicDirective = node.directives.find(
+        (d) => d.type === 'trait' && (d as any).name === 'logic'
+      );
+      if (
+        logicDirective &&
+        (logicDirective as any).config &&
+        (logicDirective as any).config.machine
+      ) {
+        const machineName = (logicDirective as any).config.machine;
+        const machineDef = this.context.stateMachines.get(machineName);
+        if (machineDef) {
+          stateMachineInterpreter.createInstance(node.name, machineDef, orbData.properties);
+        } else {
+          logger.warn(
+            `[StateMachine] Machine definition ${machineName} not found for orb ${node.name}`
+          );
         }
+      }
     }
 
     this.createParticleEffect(`${node.name}_creation`, adjustedPos, '#00ffff', 20);
 
-    logger.info('Orb created', { name: node.name, properties: Object.keys(node.properties), scale });
+    logger.info('Orb created', {
+      name: node.name,
+      properties: Object.keys(node.properties),
+      scale,
+    });
 
     return {
       success: true,
@@ -815,7 +840,10 @@ export class HoloScriptRuntime {
 
     this.context.hologramState.set(node.name, hologram);
 
-    logger.info('Function defined', { name: node.name, params: node.parameters.map(p => p.name) });
+    logger.info('Function defined', {
+      name: node.name,
+      params: node.parameters.map((p) => p.name),
+    });
 
     return {
       success: true,
@@ -873,7 +901,7 @@ export class HoloScriptRuntime {
 
       if (path.length > 0) {
         const subResults = await this.executeProgram(path, this.callStack.length + 1);
-        
+
         // If the sub-program hit a return, bubble that up
         const lastResult = subResults[subResults.length - 1];
         if (lastResult && lastResult.success && lastResult.output !== undefined) {
@@ -905,10 +933,14 @@ export class HoloScriptRuntime {
   private async executeStream(node: StreamNode): Promise<ExecutionResult> {
     let data = this.getVariable(node.source);
 
-    logger.info('Stream processing', { name: node.name, source: node.source, transforms: node.transformations.length });
+    logger.info('Stream processing', {
+      name: node.name,
+      source: node.source,
+      transforms: node.transformations.length,
+    });
 
     for (const transform of node.transformations) {
-      data = await this.applyTransformation(data, transform) as HoloScriptValue;
+      data = await this.applyTransformation(data, transform);
     }
 
     this.setVariable(`${node.name}_result`, data);
@@ -942,7 +974,9 @@ export class HoloScriptRuntime {
     };
   }
 
-  private async executeCall(node: ASTNode & { target?: string; args?: unknown[] }): Promise<ExecutionResult> {
+  private async executeCall(
+    node: ASTNode & { target?: string; args?: unknown[] }
+  ): Promise<ExecutionResult> {
     const funcName = node.target || '';
     const args = node.args || [];
 
@@ -1051,7 +1085,9 @@ export class HoloScriptRuntime {
    */
   private async executeGeneric(_node: ASTNode): Promise<ExecutionResult> {
     const genericNode = _node as any;
-    const command = String(genericNode.command || '').trim().toLowerCase();
+    const command = String(genericNode.command || '')
+      .trim()
+      .toLowerCase();
     const tokens = command.split(/\s+/);
     const action = tokens[0];
     const target = tokens[1];
@@ -1138,7 +1174,7 @@ export class HoloScriptRuntime {
   private async executeHideCommand(target: string, _node: any): Promise<any> {
     const position = this.context.spatialMemory.get(target) || { x: 0, y: 0, z: 0 };
     this.createParticleEffect(`${target}_hide`, position, '#ff0000', 10);
-    
+
     logger.info('Hide command executed', { target });
 
     return {
@@ -1185,7 +1221,7 @@ export class HoloScriptRuntime {
   private async executeAnimateCommand(target: string, tokens: string[], _node: any): Promise<any> {
     const property = tokens[0] || 'position.y';
     const duration = parseInt(tokens[1] || '1000', 10);
-    
+
     const animation: any = {
       target,
       property,
@@ -1299,7 +1335,9 @@ export class HoloScriptRuntime {
     };
   }
 
-  private async executeAssignment(node: ASTNode & { name: string; value: unknown }): Promise<ExecutionResult> {
+  private async executeAssignment(
+    node: ASTNode & { name: string; value: unknown }
+  ): Promise<ExecutionResult> {
     const value = this.evaluateExpression(String(node.value));
     this.setVariable(node.name, value);
 
@@ -1309,7 +1347,9 @@ export class HoloScriptRuntime {
     };
   }
 
-  private async executeReturn(node: ASTNode & { value?: unknown; expression?: string }): Promise<ExecutionResult> {
+  private async executeReturn(
+    node: ASTNode & { value?: unknown; expression?: string }
+  ): Promise<ExecutionResult> {
     const expr = String(node.value || node.expression || '');
     const value = this.evaluateExpression(expr);
 
@@ -1327,7 +1367,7 @@ export class HoloScriptRuntime {
     if (!condition) return false;
 
     const suspiciousKeywords = ['eval', 'process', 'require', '__proto__', 'constructor'];
-    if (suspiciousKeywords.some(kw => condition.toLowerCase().includes(kw))) {
+    if (suspiciousKeywords.some((kw) => condition.toLowerCase().includes(kw))) {
       logger.warn('Suspicious condition blocked', { condition });
       return false;
     }
@@ -1356,14 +1396,22 @@ export class HoloScriptRuntime {
           if (logical === 'or') return Boolean(left) || Boolean(right);
 
           switch (operator) {
-            case '===': return left === right;
-            case '!==': return left !== right;
-            case '==': return left == right;
-            case '!=': return left != right;
-            case '>=': return Number(left) >= Number(right);
-            case '<=': return Number(left) <= Number(right);
-            case '>': return Number(left) > Number(right);
-            case '<': return Number(left) < Number(right);
+            case '===':
+              return left === right;
+            case '!==':
+              return left !== right;
+            case '==':
+              return left == right;
+            case '!=':
+              return left != right;
+            case '>=':
+              return Number(left) >= Number(right);
+            case '<=':
+              return Number(left) <= Number(right);
+            case '>':
+              return Number(left) > Number(right);
+            case '<':
+              return Number(left) < Number(right);
           }
         }
       }
@@ -1386,7 +1434,10 @@ export class HoloScriptRuntime {
   // Transformation
   // ============================================================================
 
-  private async applyTransformation(data: unknown, transform: TransformationNode): Promise<HoloScriptValue> {
+  private async applyTransformation(
+    data: unknown,
+    transform: TransformationNode
+  ): Promise<HoloScriptValue> {
     const params = transform.parameters || {};
 
     switch (transform.operation) {
@@ -1394,24 +1445,24 @@ export class HoloScriptRuntime {
         if (!Array.isArray(data)) return data as any;
         const predicate = params.predicate as string;
         if (predicate) {
-          return data.filter(item => {
+          return data.filter((item) => {
             this.setVariable('_item', item);
             return this.evaluateCondition(predicate);
           });
         }
-        return data.filter(item => item !== null && item !== undefined);
+        return data.filter((item) => item !== null && item !== undefined);
       }
 
       case 'map': {
         if (!Array.isArray(data)) return data as any;
         const mapper = params.mapper as string;
         if (mapper) {
-          return data.map(item => {
+          return data.map((item) => {
             this.setVariable('_item', item);
             return this.evaluateExpression(mapper);
           });
         }
-        return data.map(item => ({ value: item, processed: true }));
+        return data.map((item) => ({ value: item, processed: true }));
       }
 
       case 'reduce': {
@@ -1443,19 +1494,23 @@ export class HoloScriptRuntime {
       }
 
       case 'sum':
-        return (Array.isArray(data) ? (data as any[]).reduce((sum, item) => sum + (typeof item === 'number' ? item : 0), 0) : data) as any;
+        return (
+          Array.isArray(data)
+            ? data.reduce((sum, item) => sum + (typeof item === 'number' ? item : 0), 0)
+            : data
+        ) as HoloScriptValue;
 
       case 'count':
-        return (Array.isArray(data) ? (data as any[]).length : 1) as any;
+        return (Array.isArray(data) ? data.length : 1) as any;
 
       case 'unique':
-        return (Array.isArray(data) ? Array.from(new Set(data as any[])) : data) as any;
+        return (Array.isArray(data) ? Array.from(new Set(data)) : data) as any;
 
       case 'flatten':
-        return (Array.isArray(data) ? (data as any[]).flat() : data) as any;
+        return (Array.isArray(data) ? data.flat() : data) as any;
 
       case 'reverse':
-        return (Array.isArray(data) ? [...(data as any[])].reverse() : data) as any;
+        return (Array.isArray(data) ? [...data].reverse() : data) as any;
 
       case 'take': {
         if (!Array.isArray(data)) return data as any;
@@ -1504,7 +1559,10 @@ export class HoloScriptRuntime {
       this.eventHandlers.delete(event);
     } else {
       const handlers = this.eventHandlers.get(event) || [];
-      this.eventHandlers.set(event, handlers.filter(h => h !== handler));
+      this.eventHandlers.set(
+        event,
+        handlers.filter((h) => h !== handler)
+      );
     }
   }
 
@@ -1527,7 +1585,7 @@ export class HoloScriptRuntime {
 
     // Phase 13: State Machine transitions
     if (data && typeof data === 'object' && (data as any).id) {
-       stateMachineInterpreter.sendEvent((data as any).id, event);
+      stateMachineInterpreter.sendEvent((data as any).id, event);
     }
   }
 
@@ -1567,7 +1625,7 @@ export class HoloScriptRuntime {
       progress = this.applyEasing(progress, anim.easing);
 
       // Calculate current value
-      let currentValue = anim.from + (anim.to - anim.from) * progress;
+      const currentValue = anim.from + (anim.to - anim.from) * progress;
 
       // Handle yoyo
       if (anim.yoyo && progress >= 1) {
@@ -1595,7 +1653,7 @@ export class HoloScriptRuntime {
    */
   private updateSystemVariables(): void {
     const now = new Date();
-    
+
     // Time variables
     this.setVariable('$time', now.toLocaleTimeString());
     this.setVariable('$date', now.toLocaleDateString());
@@ -1612,7 +1670,7 @@ export class HoloScriptRuntime {
         level: 42,
         rank: 'Legendary',
         achievements: ['First World', 'Spirit Guide'],
-        preferences: { theme: 'holographic', language: 'en' }
+        preferences: { theme: 'holographic', language: 'en' },
       });
     }
 
@@ -1621,7 +1679,7 @@ export class HoloScriptRuntime {
         city: 'Neo Tokyo',
         region: 'Holo-Sector 7',
         coordinates: { lat: 35.6895, lng: 139.6917 },
-        altitude: 450
+        altitude: 450,
       });
     }
 
@@ -1631,33 +1689,34 @@ export class HoloScriptRuntime {
         temperature: 24,
         humidity: 65,
         windSpeed: 12,
-        unit: 'C'
+        unit: 'C',
       });
     }
 
     if (this.getVariable('$wallet') === undefined) {
       this.setVariable('$wallet', {
         address: '0xHolo...42ff',
-        balance: 1337.50,
+        balance: 1337.5,
         currency: 'HOLO',
-        network: 'MainNet'
+        network: 'MainNet',
       });
     }
 
     if (this.getVariable('$ai_config') === undefined) {
-      const savedKeys = typeof localStorage !== 'undefined' ? localStorage.getItem('brittney_api_keys') : null;
+      const savedKeys =
+        typeof localStorage !== 'undefined' ? localStorage.getItem('brittney_api_keys') : null;
       let configuredCount = 0;
       if (savedKeys) {
         try {
           const keys = JSON.parse(savedKeys);
-          configuredCount = Object.values(keys).filter(k => !!k).length;
+          configuredCount = Object.values(keys).filter((k) => !!k).length;
         } catch (e) {}
       }
 
       this.setVariable('$ai_config', {
         status: configuredCount > 0 ? 'configured' : 'pending',
         providerCount: configuredCount,
-        lastUpdated: Date.now()
+        lastUpdated: Date.now(),
       });
     }
 
@@ -1665,7 +1724,7 @@ export class HoloScriptRuntime {
       this.setVariable('$chat_status', {
         active: true,
         typing: false,
-        version: '1.0.0-brittney'
+        version: '1.0.0-brittney',
       });
     }
   }
@@ -1744,7 +1803,7 @@ export class HoloScriptRuntime {
    */
   private handleCalculateArc(args: any[]): any {
     if (args.length < 3) return { x: 0, y: 0, z: 0 };
-    
+
     const start = args[0] as SpatialPosition;
     const end = args[1] as SpatialPosition;
     const speed = args[2] as number;
@@ -1753,7 +1812,7 @@ export class HoloScriptRuntime {
     const dz = end.z - start.z;
     const dy = end.y - start.y;
     const dist = Math.sqrt(dx * dx + dz * dz);
-    
+
     if (dist < 0.1) return { x: 0, y: speed, z: 0 };
 
     // Basic projectile velocity with upward arc
@@ -1762,7 +1821,7 @@ export class HoloScriptRuntime {
     const t = dist / speed;
     const vx = dx / t;
     const vz = dz / t;
-    const vy = (dy / t) + (0.5 * 9.81 * t); // Compensate for gravity
+    const vy = dy / t + 0.5 * 9.81 * t; // Compensate for gravity
 
     return { x: vx, y: vy, z: vz };
   }
@@ -1797,7 +1856,12 @@ export class HoloScriptRuntime {
   // Particle Effects
   // ============================================================================
 
-  private createParticleEffect(name: string, position: SpatialPosition, color: string, count: number): void {
+  private createParticleEffect(
+    name: string,
+    position: SpatialPosition,
+    color: string,
+    count: number
+  ): void {
     const limitedCount = Math.min(count, RUNTIME_SECURITY_LIMITS.maxParticlesPerSystem);
     const particles: SpatialPosition[] = [];
 
@@ -1817,7 +1881,13 @@ export class HoloScriptRuntime {
     });
   }
 
-  private createConnectionStream(from: string, to: string, fromPos: SpatialPosition, toPos: SpatialPosition, dataType: string): void {
+  private createConnectionStream(
+    from: string,
+    to: string,
+    fromPos: SpatialPosition,
+    toPos: SpatialPosition,
+    dataType: string
+  ): void {
     const streamName = `connection_${from}_${to}`;
     const particles: SpatialPosition[] = [];
     const steps = 20;
@@ -1860,13 +1930,13 @@ export class HoloScriptRuntime {
 
   private getDataTypeColor(dataType: string): string {
     const colors: Record<string, string> = {
-      'string': '#ff6b35',
-      'number': '#4ecdc4',
-      'boolean': '#45b7d1',
-      'object': '#96ceb4',
-      'array': '#ffeaa7',
-      'any': '#dda0dd',
-      'move': '#ff69b4',
+      string: '#ff6b35',
+      number: '#4ecdc4',
+      boolean: '#45b7d1',
+      object: '#96ceb4',
+      array: '#ffeaa7',
+      any: '#dda0dd',
+      move: '#ff69b4',
     };
     return colors[dataType] || '#ffffff';
   }
@@ -1882,7 +1952,7 @@ export class HoloScriptRuntime {
   updateParticles(deltaTime: number): void {
     for (const [name, system] of this.particleSystems) {
       system.lifetime -= deltaTime;
-      system.particles.forEach(particle => {
+      system.particles.forEach((particle) => {
         particle.x += (Math.random() - 0.5) * system.speed;
         particle.y += (Math.random() - 0.5) * system.speed;
         particle.z += (Math.random() - 0.5) * system.speed;
@@ -1951,8 +2021,11 @@ export class HoloScriptRuntime {
     this.context.currentScale *= node.multiplier;
     this.context.scaleMagnitude = node.magnitude;
 
-    logger.info('Scale context entering', { magnitude: node.magnitude, multiplier: this.context.currentScale });
-    
+    logger.info('Scale context entering', {
+      magnitude: node.magnitude,
+      multiplier: this.context.currentScale,
+    });
+
     // Emit event for renderer sync
     this.emit('scale:change', { multiplier: this.context.currentScale, magnitude: node.magnitude });
 
@@ -1960,13 +2033,13 @@ export class HoloScriptRuntime {
 
     // Restore parent scale after block
     this.context.currentScale = parentScale;
-    
+
     // Restore renderer scale
     this.emit('scale:change', { multiplier: this.context.currentScale });
 
     return {
-      success: results.every(r => r.success),
-      output: `Executed scale block: ${node.magnitude}`
+      success: results.every((r) => r.success),
+      output: `Executed scale block: ${node.magnitude}`,
     };
   }
 
@@ -1975,8 +2048,8 @@ export class HoloScriptRuntime {
     const results = await this.executeProgram(node.body, this.context.executionStack.length);
 
     return {
-      success: results.every(r => r.success),
-      output: `Focused on ${node.target}`
+      success: results.every((r) => r.success),
+      output: `Focused on ${node.target}`,
     };
   }
 
@@ -1988,22 +2061,33 @@ export class HoloScriptRuntime {
   private async executeComposition(node: CompositionNode): Promise<ExecutionResult> {
     if (node.body) {
       // Execute systems first
-      const systemResults = await this.executeProgram(node.body.systems, this.context.executionStack.length);
+      const systemResults = await this.executeProgram(
+        node.body.systems,
+        this.context.executionStack.length
+      );
       // Execute configs
-      const configResults = await this.executeProgram(node.body.configs, this.context.executionStack.length);
+      const configResults = await this.executeProgram(
+        node.body.configs,
+        this.context.executionStack.length
+      );
       // Execute children
-      const childrenResults = await this.executeProgram(node.body.children, this.context.executionStack.length);
-      
+      const childrenResults = await this.executeProgram(
+        node.body.children,
+        this.context.executionStack.length
+      );
+
       const allResults = [...systemResults, ...configResults, ...childrenResults];
       return {
-        success: allResults.every(r => r.success),
-        output: `Composition ${node.name} executed with specialized blocks`
+        success: allResults.every((r) => r.success),
+        output: `Composition ${node.name} executed with specialized blocks`,
       };
     }
 
-    return { 
-      success: (await this.executeProgram(node.children, this.context.executionStack.length)).every(r => r.success), 
-      output: `Composition ${node.name} executed` 
+    return {
+      success: (await this.executeProgram(node.children, this.context.executionStack.length)).every(
+        (r) => r.success
+      ),
+      output: `Composition ${node.name} executed`,
     };
   }
 
@@ -2021,10 +2105,10 @@ export class HoloScriptRuntime {
         return this.setupPhysics(node);
       default:
         logger.warn(`[Zero-Config] Unknown system: ${systemId}`);
-        return { 
-          success: true, 
-          output: `System ${systemId} not recognized, skipping provisioning`, 
-          executionTime: Date.now() - startTime 
+        return {
+          success: true,
+          output: `System ${systemId} not recognized, skipping provisioning`,
+          executionTime: Date.now() - startTime,
         };
     }
   }
@@ -2041,7 +2125,7 @@ export class HoloScriptRuntime {
     return {
       success: true,
       output: 'Core configuration applied',
-      executionTime: Date.now() - startTime
+      executionTime: Date.now() - startTime,
     };
   }
 
@@ -2052,7 +2136,11 @@ export class HoloScriptRuntime {
   /**
    * Execute a for loop: @for item in collection { ... }
    */
-  private async executeForLoop(node: { variable: string; iterable: any; body: ASTNode[] }): Promise<ExecutionResult> {
+  private async executeForLoop(node: {
+    variable: string;
+    iterable: any;
+    body: ASTNode[];
+  }): Promise<ExecutionResult> {
     const startTime = Date.now();
     const { variable, iterable, body } = node;
 
@@ -2070,12 +2158,14 @@ export class HoloScriptRuntime {
 
       const items = Array.isArray(collection)
         ? collection
-        : (collection && typeof collection === 'object' ? Object.entries(collection) : []);
+        : collection && typeof collection === 'object'
+          ? Object.entries(collection)
+          : [];
       let lastResult: ExecutionResult = { success: true, output: null };
 
       for (const item of items) {
         // Set loop variable in context
-        this.context.variables.set(variable, item as any);
+        this.context.variables.set(variable, item);
 
         // Execute body
         for (const bodyNode of body) {
@@ -2106,7 +2196,11 @@ export class HoloScriptRuntime {
   /**
    * Execute a forEach loop: @forEach item in collection { ... }
    */
-  private async executeForEachLoop(node: { variable: string; collection: any; body: ASTNode[] }): Promise<ExecutionResult> {
+  private async executeForEachLoop(node: {
+    variable: string;
+    collection: any;
+    body: ASTNode[];
+  }): Promise<ExecutionResult> {
     // forEach is functionally identical to for in this context
     return this.executeForLoop({
       variable: node.variable,
@@ -2118,7 +2212,10 @@ export class HoloScriptRuntime {
   /**
    * Execute a while loop: @while condition { ... }
    */
-  private async executeWhileLoop(node: { condition: any; body: ASTNode[] }): Promise<ExecutionResult> {
+  private async executeWhileLoop(node: {
+    condition: any;
+    body: ASTNode[];
+  }): Promise<ExecutionResult> {
     const startTime = Date.now();
     const { condition, body } = node;
     const MAX_ITERATIONS = 10000; // Safety limit
@@ -2162,13 +2259,17 @@ export class HoloScriptRuntime {
   /**
    * Execute an if statement: @if condition { ... } @else { ... }
    */
-  private async executeIfStatement(node: { condition: any; body: ASTNode[]; elseBody?: ASTNode[] }): Promise<ExecutionResult> {
+  private async executeIfStatement(node: {
+    condition: any;
+    body: ASTNode[];
+    elseBody?: ASTNode[];
+  }): Promise<ExecutionResult> {
     const startTime = Date.now();
     const { condition, body, elseBody } = node;
 
     try {
       const conditionResult = this.evaluateCondition(String(condition));
-      const branchToExecute = conditionResult ? body : (elseBody || []);
+      const branchToExecute = conditionResult ? body : elseBody || [];
 
       let lastResult: ExecutionResult = { success: true, output: null };
 
@@ -2194,7 +2295,10 @@ export class HoloScriptRuntime {
   /**
    * Execute a match expression: @match subject { pattern => result, ... }
    */
-  private async executeMatch(node: { subject: any; cases: Array<{ pattern: any; guard?: any; body: any }> }): Promise<ExecutionResult> {
+  private async executeMatch(node: {
+    subject: any;
+    cases: Array<{ pattern: any; guard?: any; body: any }>;
+  }): Promise<ExecutionResult> {
     const startTime = Date.now();
     const { subject, cases } = node;
 
@@ -2275,52 +2379,52 @@ export class HoloScriptRuntime {
   private async executeNarrative(node: NarrativeNode): Promise<ExecutionResult> {
     const startTime = Date.now();
     logger.info(`[Narrative] Initializing narrative: ${node.id}`);
-    
+
     // Register all quests in the narrative
     for (const quest of node.quests) {
       this.context.quests.set(quest.id, quest);
     }
-    
+
     // Auto-start the narrative if startNode is provided
     if (node.startNode) {
       logger.info(`[Narrative] Auto-starting at node: ${node.startNode}`);
     }
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       output: `Narrative ${node.id} initialized with ${node.quests.length} quests`,
-      executionTime: Date.now() - startTime
+      executionTime: Date.now() - startTime,
     };
   }
 
   private async executeQuest(node: QuestNode): Promise<ExecutionResult> {
     const startTime = Date.now();
     logger.info(`[Narrative] Starting quest: ${node.title}`, { questId: node.id });
-    
+
     this.context.activeQuestId = node.id;
     this.context.quests.set(node.id, node);
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       output: `Quest ${node.id} started`,
-      executionTime: Date.now() - startTime
+      executionTime: Date.now() - startTime,
     };
   }
 
   private async executeDialogue(node: DialogueNode): Promise<ExecutionResult> {
     const startTime = Date.now();
     logger.info(`[Narrative] Dialogue: ${node.speaker} says "${node.text}"`);
-    
+
     // Update dialogue state
     this.context.dialogueState = {
       currentNodeId: node.id,
-      speaker: node.speaker
+      speaker: node.speaker,
     };
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       output: `Dialogue node ${node.id} executed`,
-      executionTime: Date.now() - startTime
+      executionTime: Date.now() - startTime,
     };
   }
 
@@ -2333,14 +2437,22 @@ export class HoloScriptRuntime {
     const startTime = Date.now();
     // Logic for initializing NetworkingService would go here
     logger.info('[Networking] Initializing multiplayer fabric...', node.properties);
-    return { success: true, output: 'Networking system provisioned', executionTime: Date.now() - startTime };
+    return {
+      success: true,
+      output: 'Networking system provisioned',
+      executionTime: Date.now() - startTime,
+    };
   }
 
   private async setupPhysics(node: SystemNode): Promise<ExecutionResult> {
     const startTime = Date.now();
     // Logic for initializing PhysicsEngine would go here
     logger.info('[Physics] Initializing spatial simulation engine...', node.properties);
-    return { success: true, output: 'Physics system provisioned', executionTime: Date.now() - startTime };
+    return {
+      success: true,
+      output: 'Physics system provisioned',
+      executionTime: Date.now() - startTime,
+    };
   }
 
   private async executeTemplate(node: TemplateNode): Promise<ExecutionResult> {
@@ -2350,46 +2462,58 @@ export class HoloScriptRuntime {
 
   private async executeServerNode(node: ServerNode): Promise<ExecutionResult> {
     if (this.context.mode === 'public') {
-      return { success: false, error: 'SecurityViolation: Server creation blocked in public mode.', executionTime: 0 };
+      return {
+        success: false,
+        error: 'SecurityViolation: Server creation blocked in public mode.',
+        executionTime: 0,
+      };
     }
-    
+
     logger.info(`Starting server on port ${node.port}`);
-    
+
     return {
       success: true,
       output: `Server listening on port ${node.port}`,
       hologram: node.hologram,
-      executionTime: 0
+      executionTime: 0,
     };
   }
 
   private async executeDatabaseNode(node: DatabaseNode): Promise<ExecutionResult> {
     if (this.context.mode === 'public') {
-      return { success: false, error: 'SecurityViolation: DB access blocked in public mode.', executionTime: 0 };
+      return {
+        success: false,
+        error: 'SecurityViolation: DB access blocked in public mode.',
+        executionTime: 0,
+      };
     }
 
     logger.info(`Executing Query: ${node.query}`);
-    
+
     return {
       success: true,
       output: `Query executed: ${node.query}`,
       hologram: node.hologram,
-      executionTime: 0
+      executionTime: 0,
     };
   }
 
   private async executeFetchNode(node: FetchNode): Promise<ExecutionResult> {
     if (this.context.mode === 'public') {
-      return { success: false, error: 'SecurityViolation: External fetch blocked in public mode.', executionTime: 0 };
+      return {
+        success: false,
+        error: 'SecurityViolation: External fetch blocked in public mode.',
+        executionTime: 0,
+      };
     }
 
     logger.info(`Fetching: ${node.url}`);
-    
+
     return {
       success: true,
       output: `Fetched data from ${node.url}`,
       hologram: node.hologram,
-      executionTime: 0
+      executionTime: 0,
     };
   }
 
@@ -2400,12 +2524,12 @@ export class HoloScriptRuntime {
       return {
         success: false,
         error: `Function ${node.target} not found`,
-        executionTime: 0
+        executionTime: 0,
       };
     }
 
     const result = await this.executeFunction(target);
-    this.createExecutionEffect(node.target, target.position || {x:0,y:0,z:0});
+    this.createExecutionEffect(node.target, target.position || { x: 0, y: 0, z: 0 });
 
     return {
       success: true,
@@ -2417,7 +2541,7 @@ export class HoloScriptRuntime {
         glow: true,
         interactive: false,
       },
-      executionTime: result.executionTime
+      executionTime: result.executionTime,
     };
   }
 
@@ -2436,8 +2560,8 @@ export class HoloScriptRuntime {
       if (d.type === 'trait') {
         logger.info(`Applying trait ${d.name} to ${node.type}`);
         // Optional: Trigger custom initialization for specific traits
-        if (d.name as string === 'chat') {
-           this.emit('show-chat', d.config);
+        if (d.name === 'chat') {
+          this.emit('show-chat', d.config);
         }
       } else if (d.type === 'state') {
         this.context.state.update(d.body as any);
