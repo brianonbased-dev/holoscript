@@ -137,7 +137,7 @@ Add recovery mechanisms for common syntax errors with helpful suggestions.
 error[E0042]: Missing colon in object property
   --> scene.hsplus:15:8
    |
-14 |   orb#player {
+14 |   object "Player" using "PlayerTemplate" {
 15 |     color "#ff0000"
    |           ^ expected ':' before value
    |

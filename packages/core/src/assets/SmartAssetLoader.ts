@@ -499,7 +499,20 @@ export class SmartAssetLoader {
     }
 
     // Combine URL
-    const url = new URL(assetPath, baseUrl);
+    let url: URL;
+    try {
+      url = new URL(assetPath, baseUrl);
+    } catch {
+      // Fallback: If baseUrl is not absolute (e.g. '/'), try making it absolute with a placeholder
+      // or just join paths if it's meant for local use (though fetch expects URL)
+      const absoluteBase = baseUrl.startsWith('http') ? baseUrl : `http://localhost${baseUrl.startsWith('/') ? '' : '/'}${baseUrl}`;
+      try {
+        url = new URL(assetPath, absoluteBase);
+      } catch {
+        // Ultimate fallback: just use a dummy URL to avoid crash, logging warning
+        url = new URL(assetPath, 'http://localhost/');
+      }
+    }
 
     // Add quality parameter for texture formats that support it
     if (metadata.assetType === 'texture' && quality !== 'high') {

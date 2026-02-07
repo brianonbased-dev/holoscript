@@ -61,20 +61,33 @@ import { exportToVRChat } from '@holoscript/vrchat-export';
 
 const parser = new HoloScriptPlusParser();
 const { ast } = parser.parse(`
-  @world {
-    name: "My VRChat World"
-    spawn_point: [0, 0, 0]
-    max_players: 32
-  }
+  composition "MyVRChatWorld" {
+    environment {
+      name: "My VRChat World"
+      spawn_point: [0, 0, 0]
+      max_players: 32
+    }
 
-  orb#ball @grabbable @throwable {
-    color: "#ff0000"
-    position: [0, 1, 0]
-  }
+    template "Ball" {
+      @grabbable
+      @throwable
+      geometry: "sphere"
+      color: "#ff0000"
+    }
 
-  cube#platform @climbable {
-    position: [0, -0.5, 0]
-    scale: [10, 1, 10]
+    template "Platform" {
+      @climbable
+      geometry: "box"
+    }
+
+    object "Ball" using "Ball" {
+      position: [0, 1, 0]
+    }
+
+    object "Platform" using "Platform" {
+      position: [0, -0.5, 0]
+      scale: [10, 1, 10]
+    }
   }
 `);
 
@@ -104,33 +117,50 @@ console.log(`Generated ${result.stats.scriptCount} UdonSharp scripts`);
 ### VRChat-Specific Syntax
 
 ```hsplus
-@world {
-  name: "My Cool World"
-  spawn_point: [0, 0, 0]
-  respawn_height: -10
-  max_players: 32
-}
+composition "MyCoolWorld" {
+  environment {
+    name: "My Cool World"
+    spawn_point: [0, 0, 0]
+    respawn_height: -10
+    max_players: 32
+  }
 
-// VRChat pickup
-cube#pickup @grabbable {
-  position: [0, 1, 0]
-  pickupable: true
-  auto_hold: "auto_detect"
-  proximity: 0.1
-}
+  // VRChat pickup template
+  template "Pickup" {
+    @grabbable
+    geometry: "box"
+    pickupable: true
+    auto_hold: "auto_detect"
+    proximity: 0.1
+  }
 
-// Synced variable (network replicated)
-orb#networked_ball @grabbable @synced {
-  position: [0, 2, 0]
-  sync_mode: "manual"
-  owner_only: true
-}
+  // Synced template (network replicated)
+  template "NetworkedBall" {
+    @grabbable
+    @synced
+    geometry: "sphere"
+    sync_mode: "manual"
+    owner_only: true
+  }
 
-// Portal to another world
-portal#world_portal {
-  position: [5, 0, 0]
-  world_id: "wrld_xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  instance_type: "public"
+  // Portal template
+  template "WorldPortal" {
+    geometry: "portal"
+    world_id: "wrld_xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    instance_type: "public"
+  }
+
+  object "Pickup" using "Pickup" {
+    position: [0, 1, 0]
+  }
+
+  object "NetworkedBall" using "NetworkedBall" {
+    position: [0, 2, 0]
+  }
+
+  object "WorldPortal" using "WorldPortal" {
+    position: [5, 0, 0]
+  }
 }
 ```
 
@@ -202,9 +232,16 @@ const result = await exportToUnity(ast, {
 
 **Source (.hsplus):**
 ```hsplus
-orb#ball @grabbable {
-  color: "#ff0000"
-  position: [0, 1, 0]
+composition "BallDemo" {
+  template "Ball" {
+    @grabbable
+    geometry: "sphere"
+    color: "#ff0000"
+  }
+
+  object "Ball" using "Ball" {
+    position: [0, 1, 0]
+  }
 }
 ```
 
@@ -256,9 +293,17 @@ public class Ball : MonoBehaviour
 ### 1. Design for Multiple Targets
 
 ```hsplus
-// Use standard traits that map to both VRChat and Unity
-orb#item @grabbable @physics {
-  position: [0, 1, 0]
+composition "CrossPlatformItem" {
+  // Use standard traits that map to both VRChat and Unity
+  template "Item" {
+    @grabbable
+    @physics
+    geometry: "sphere"
+  }
+
+  object "Item" using "Item" {
+    position: [0, 1, 0]
+  }
 }
 ```
 

@@ -1,58 +1,91 @@
 // Humanoid Avatars
 // VR avatar configuration
 
-@world {
-  backgroundColor: "#0d1117"
-  ambient: 0.6
-  shadows: true
-}
+composition "HumanoidAvatars" {
+  environment {
+    backgroundColor: "#0d1117"
+    ambient: 0.6
+    shadows: true
+  }
 
-// Avatar spawn point
-cylinder#spawnPoint @glowing {
-  position: [0, 0.05, 0]
-  color: "#00ff00"
-  scale: [1, 0.1, 1]
-}
+  // === TEMPLATES ===
 
-// Avatar placeholder body
-capsule#avatarBody @animated {
-  position: [0, 1, 0]
-  color: "#4a4a6a"
-  scale: [0.4, 1, 0.4]
-}
+  template "SpawnPoint" {
+    @glowing
+    geometry: "cylinder"
+    color: "#00ff00"
+  }
 
-// Avatar head
-sphere#avatarHead {
-  position: [0, 1.8, 0]
-  color: "#f5deb3"
-  size: 0.25
-}
+  template "AvatarBody" {
+    @animated
+    geometry: "capsule"
+    color: "#4a4a6a"
+  }
 
-// Left hand controller
-box#leftHand @grabbable {
-  position: [-0.5, 1.2, 0.3]
-  color: "#0088ff"
-  scale: [0.08, 0.08, 0.15]
-}
+  template "AvatarHead" {
+    geometry: "sphere"
+    color: "#f5deb3"
+  }
 
-// Right hand controller
-box#rightHand @grabbable {
-  position: [0.5, 1.2, 0.3]
-  color: "#0088ff"
-  scale: [0.08, 0.08, 0.15]
-}
+  template "HandController" {
+    @grabbable
+    geometry: "box"
+    color: "#0088ff"
+  }
 
-// Mirror for avatar preview
-box#mirror @glowing {
-  position: [0, 1.5, -2]
-  color: "#aaddff"
-  scale: [1.5, 2, 0.05]
-}
+  template "Mirror" {
+    @glowing
+    geometry: "box"
+    color: "#aaddff"
+  }
 
-// Floor
-plane#floor {
-  position: [0, 0, 0]
-  rotation: [-90, 0, 0]
-  scale: [8, 8, 1]
-  color: "#2a2a3a"
+  template "Floor" {
+    geometry: "plane"
+    color: "#2a2a3a"
+  }
+
+  // === OBJECTS ===
+
+  // Avatar spawn point
+  object "SpawnPoint" using "SpawnPoint" {
+    position: [0, 0.05, 0]
+    scale: [1, 0.1, 1]
+  }
+
+  // Avatar placeholder body
+  object "AvatarBody" using "AvatarBody" {
+    position: [0, 1, 0]
+    scale: [0.4, 1, 0.4]
+  }
+
+  // Avatar head
+  object "AvatarHead" using "AvatarHead" {
+    position: [0, 1.8, 0]
+    scale: [0.25, 0.25, 0.25]
+  }
+
+  // Left hand controller
+  object "LeftHand" using "HandController" {
+    position: [-0.5, 1.2, 0.3]
+    scale: [0.08, 0.08, 0.15]
+  }
+
+  // Right hand controller
+  object "RightHand" using "HandController" {
+    position: [0.5, 1.2, 0.3]
+    scale: [0.08, 0.08, 0.15]
+  }
+
+  // Mirror for avatar preview
+  object "Mirror" using "Mirror" {
+    position: [0, 1.5, -2]
+    scale: [1.5, 2, 0.05]
+  }
+
+  // Floor
+  object "Floor" using "Floor" {
+    position: [0, 0, 0]
+    rotation: [-90, 0, 0]
+    scale: [8, 8, 1]
+  }
 }

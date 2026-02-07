@@ -205,105 +205,113 @@ orb gallery_room {
 
 ---
 
-### `.holo` — Holo Files (Configuration Layer)
+### `.holo` — Holo Files (Composition Layer)
 
-**Purpose:** World configurations, environment settings, and runtime manifests.
+**Purpose:** Complete world compositions with templates, objects, state, and behaviors.
 
 | Aspect | Description |
 |--------|-------------|
-| **Layer** | Configuration / Meta |
-| **Primary Use** | World setup, global settings, asset manifests, deployment configs |
-| **Syntax Focus** | Declarative configuration, environment definitions, asset references |
-| **Compilation Target** | Runtime configuration, asset pipelines, deployment manifests |
+| **Layer** | Composition / World |
+| **Primary Use** | Full scene definitions, game logic, AI-generated content |
+| **Syntax Focus** | Declarative compositions, templates, objects, actions, event handlers |
+| **Compilation Target** | Scene graphs, runtime executables, multi-platform builds |
 
 **Capabilities:**
-- **World Configuration** — Global physics, networking, rendering settings
-- **Environment Definitions** — Lighting, skybox, fog, post-processing
-- **Asset Manifests** — Preloading, lazy loading, CDN configuration
-- **Zone Definitions** — Spatial partitioning, LOD settings, streaming
-- **Deployment Configs** — Platform targets, optimization flags, feature toggles
-- **Multiplayer Settings** — Server configuration, sync settings, authority rules
+- **Compositions** — Named world containers with environment, templates, objects
+- **Templates** — Reusable object blueprints with traits, state, actions, collision handlers
+- **Objects** — Instances with positions, properties, and behavior overrides
+- **State Management** — Reactive state blocks with automatic UI binding
+- **Actions** — Callable functions that mutate state or trigger effects
+- **Event Handlers** — `on_collision`, `on_trigger_enter`, `on_key_down/up`
+- **Animations** — `animate property from X to Y over Nms`
+- **UI Panels** — Declarative HUD/menu definitions with data binding
 
 **Example:**
 ```holo
-@world {
-  id: "gallery-world-001"
-  name: "Virtual Art Gallery"
-  version: "2.0.0"
-
-  physics: {
+composition "Pinball Table" {
+  environment {
+    skybox: "cyberpunk"
+    ambient_light: 0.4
     gravity: [0, -9.81, 0]
-    simulation_rate: 60
-    collision_layers: ["default", "players", "props", "triggers"]
+    table_tilt_degrees: 6.5
   }
 
-  networking: {
-    mode: "client-server"
-    max_players: 32
-    tick_rate: 20
-    interpolation: true
+  // Game state with actions
+  object "GameState" {
+    state {
+      score: 0
+      balls: 3
+      multiplier: 1
+    }
+    
+    action add_score(points) {
+      state.score += points * state.multiplier
+    }
+    
+    action lose_ball() {
+      state.balls--
+      if (state.balls <= 0) {
+        trigger "game_over"
+      }
+    }
   }
 
-  rendering: {
-    quality_presets: ["low", "medium", "high", "ultra"]
-    default_quality: "high"
-    vr_mode: "both_eyes"
-    foveated_rendering: true
+  // Reusable template with collision handler
+  template "Bumper" {
+    @physics
+    @collidable
+    @glowing
+    
+    geometry: "cylinder"
+    state { points: 100 }
+    
+    on_collision(ball) {
+      if (ball.has_template("Ball")) {
+        GameState.add_score(state.points)
+        flash_color("#ffffff", 100ms)
+        pulse_scale(1.3, 50ms)
+      }
+    }
   }
-}
 
-@environment "daytime" {
-  skybox: "assets/sky/cloudy.hdr"
-  sun: {
-    direction: [0.5, -0.8, 0.2]
-    color: "#fff5e6"
-    intensity: 1.2
+  // Object instances
+  object "Bumper1" using "Bumper" {
+    position: [-0.1, 0.04, -0.15]
+    glow_color: "#ff00ff"
   }
-  ambient: {
-    color: "#6b8cce"
-    intensity: 0.4
-  }
-  fog: {
-    type: "exponential"
-    color: "#c9d6e8"
-    density: 0.002
-  }
-}
 
-@zones {
-  "main_hall": {
-    bounds: [[-50, 0, -50], [50, 20, 50]]
-    lod_bias: 1.0
-    preload: true
+  object "Bumper2" using "Bumper" {
+    position: [0.08, 0.04, -0.1]
+    glow_color: "#00ffff"
   }
-  "east_wing": {
-    bounds: [[50, 0, -25], [100, 15, 25]]
-    lod_bias: 0.8
-    stream: true
-    load_trigger: "player_near"
-  }
-}
 
-@assets {
-  preload: [
-    "textures/common/*",
-    "audio/ambient/gallery.ogg"
-  ]
-  lazy: [
-    "textures/paintings/*",
-    "models/sculptures/*"
-  ]
-  cdn: "https://cdn.example.com/gallery/"
+  // Input bindings
+  on_key_down("a") { LeftFlipper.flip() }
+  on_key_up("a") { LeftFlipper.release() }
+
+  // UI panels with data binding
+  panel "HUD" {
+    position: "top-center"
+    text "Score" { bind: GameState.state.score; style: "score" }
+    text "Balls" { bind: GameState.state.balls; style: "info" }
+  }
+
+  panel "GameOver" {
+    position: "center"
+    visible: false
+    on "game_over" { visible = true }
+    button "Play Again" { @on_click: () => { GameState.reset_game() } }
+  }
 }
 ```
 
 **When to use `.holo`:**
-- Project-level configuration
-- World/environment setup
-- Asset pipeline configuration
-- Deployment and build settings
-- Multiplayer/networking config
-- Platform-specific overrides
+- Complete scene/world definitions
+- AI-generated content (natural language → .holo)
+- Games and interactive experiences
+- Templates and reusable patterns
+- UI panels and HUD definitions
+- Event-driven applications
 
 ---
 
@@ -315,16 +323,17 @@ orb gallery_room {
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │   ┌──────────────────┐                                          │
-│   │   .holo          │  ← Configuration Layer                   │
-│   │   World Config   │    Global settings, environments,        │
-│   │   Asset Manifest │    deployment, multiplayer config        │
+│   │   .holo          │  ← Composition Layer                     │
+│   │   Compositions   │    Full scenes, templates, objects,      │
+│   │   Templates      │    actions, event handlers, UI panels    │
+│   │   Objects        │                                          │
 │   └────────┬─────────┘                                          │
 │            │                                                     │
 │            ▼                                                     │
 │   ┌──────────────────┐                                          │
 │   │   .hsplus        │  ← Presentation Layer                    │
 │   │   Scenes         │    3D objects, traits, templates,        │
-│   │   Orbs           │    visual properties, interactions       │
+│   │   Modules        │    TypeScript code, system logic         │
 │   └────────┬─────────┘                                          │
 │            │                                                     │
 │            ▼                                                     │
@@ -342,14 +351,11 @@ orb gallery_room {
 my-vr-project/
 ├── holoscript.config.json     # Build configuration
 ├── src/
-│   ├── world.holo             # World configuration
-│   ├── environments/
-│   │   ├── day.holo           # Daytime environment
-│   │   └── night.holo         # Nighttime environment
+│   ├── main.holo              # Main composition (AI-generated)
 │   ├── scenes/
-│   │   ├── main.hsplus        # Main scene
-│   │   ├── lobby.hsplus       # Lobby scene
-│   │   └── game.hsplus        # Game scene
+│   │   ├── lobby.holo         # Lobby composition
+│   │   ├── game.holo          # Game composition
+│   │   └── game-systems.hsplus # Complex game modules
 │   ├── logic/
 │   │   ├── game-state.hs      # Game state machine
 │   │   ├── player.hs          # Player logic

@@ -100,18 +100,24 @@ When asked to build features:
 ### .hs - Classic HoloScript
 
 ```hs
-orb player {
-  position: { x: 0, y: 1.6, z: 0 }
-  health: 100
-  color: "#00ffff"
-}
+composition "PlayerDemo" {
+  template "Player" {
+    geometry: "humanoid"
+    color: "#00ffff"
 
-function attack(target) {
-  target.health -= 10
-}
+    state {
+      health: 100
+    }
+  }
 
-connect inventory to player as "items"
-execute init
+  object "Player" using "Player" {
+    position: [0, 1.6, 0]
+  }
+
+  action attack(target) {
+    target.state.health -= 10
+  }
+}
 ```
 
 ---
@@ -119,22 +125,27 @@ execute init
 ### .hsplus - HoloScript Plus (Advanced)
 
 ```hsplus
-orb player {
-  @grabbable
-  @collidable
-  @networked
-  
-  position: [0, 1.6, 0]
-  
-  state {
-    health: 100
-    isAlive: true
-  }
-}
+composition "NetworkedPlayerDemo" {
+  template "NetworkedPlayer" {
+    @grabbable
+    @collidable
+    @networked
+    geometry: "humanoid"
 
-networked_object syncedPlayer {
-  sync_rate: 20hz
-  position: synced
+    state {
+      health: 100
+      isAlive: true
+    }
+
+    networked {
+      sync_rate: 20hz
+      position: synced
+    }
+  }
+
+  object "Player" using "NetworkedPlayer" {
+    position: [0, 1.6, 0]
+  }
 }
 ```
 

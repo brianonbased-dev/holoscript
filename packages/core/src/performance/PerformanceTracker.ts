@@ -2,15 +2,12 @@
  * Performance Tracker - Monitors parser performance over time
  * Tracks baseline metrics and alerts on degradation >5%
  * Generates reports for CI/CD integration
+ *
+ * Browser-compatible: Uses in-memory storage when file system unavailable
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-
-// ESM-compatible __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Environment detection - safe for both browser and Node
+const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
 export interface PerformanceMetric {
   name: string;
@@ -43,30 +40,138 @@ export interface PerformanceComparison {
   status: 'OK' | 'WARN' | 'FAIL';
 }
 
-const METRICS_DIR = path.join(__dirname, '../../../.perf-metrics');
-const BASELINE_FILE = path.join(METRICS_DIR, 'baseline.json');
-const HISTORY_FILE = path.join(METRICS_DIR, 'history.json');
 const DEGRADATION_THRESHOLD = 5; // percent
+const STORAGE_KEY_BASELINE = 'holoscript_perf_baseline';
+const STORAGE_KEY_HISTORY = 'holoscript_perf_history';
+
+// Storage abstraction for browser/Node compatibility
+interface StorageProvider {
+  exists(key: string): boolean;
+  read(key: string): string | null;
+  write(key: string, value: string): void;
+  ensureDir(): void;
+}
+
+// In-memory fallback storage (works everywhere)
+class MemoryStorage implements StorageProvider {
+  private data: Map<string, string> = new Map();
+
+  exists(key: string): boolean {
+    return this.data.has(key);
+  }
+
+  read(key: string): string | null {
+    return this.data.get(key) ?? null;
+  }
+
+  write(key: string, value: string): void {
+    this.data.set(key, value);
+  }
+
+  ensureDir(): void {
+    // No-op for memory storage
+  }
+}
+
+// Browser localStorage storage (if available)
+class LocalStorage implements StorageProvider {
+  exists(key: string): boolean {
+    try {
+      return localStorage.getItem(key) !== null;
+    } catch {
+      return false;
+    }
+  }
+
+  read(key: string): string | null {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+
+  write(key: string, value: string): void {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // localStorage not available or quota exceeded
+    }
+  }
+
+  ensureDir(): void {
+    // No-op for localStorage
+  }
+}
+
+// Create storage provider based on environment
+function createStorage(): StorageProvider {
+  // Try localStorage first in browser
+  if (isBrowser) {
+    try {
+      // Test if localStorage is available
+      const testKey = '__holoscript_test__';
+      localStorage.setItem(testKey, 'test');
+      localStorage.removeItem(testKey);
+      return new LocalStorage();
+    } catch {
+      // localStorage not available, fall through to memory
+    }
+  }
+
+  // Default to memory storage
+  return new MemoryStorage();
+}
 
 export class PerformanceTracker {
   private baseline: PerformanceBaseline | null = null;
   private currentMetrics: PerformanceMetric[] = [];
+  private storage: StorageProvider;
+  private nodeStorage: NodeStorageProvider | null = null;
 
   constructor() {
-    this.ensureMetricsDir();
+    this.storage = createStorage();
+    this.storage.ensureDir();
     this.loadBaseline();
+
+    // Try to initialize Node.js file storage if available
+    this.initNodeStorage();
   }
 
-  private ensureMetricsDir(): void {
-    if (!fs.existsSync(METRICS_DIR)) {
-      fs.mkdirSync(METRICS_DIR, { recursive: true });
+  private async initNodeStorage(): Promise<void> {
+    if (isBrowser) return;
+
+    try {
+      // Dynamic import for Node.js modules - won't execute in browser bundles
+      const fs = await import('fs');
+      const path = await import('path');
+      const { fileURLToPath } = await import('url');
+
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
+      const metricsDir = path.join(__dirname, '../../../.perf-metrics');
+
+      this.nodeStorage = new NodeStorageProvider(fs, path, metricsDir);
+      this.nodeStorage.ensureDir();
+
+      // Reload baseline from file system if available
+      const fileBaseline = this.nodeStorage.read('baseline.json');
+      if (fileBaseline) {
+        try {
+          this.baseline = JSON.parse(fileBaseline);
+        } catch {
+          // Keep existing baseline
+        }
+      }
+    } catch {
+      // Not in Node.js environment, use existing storage
     }
   }
 
   private loadBaseline(): void {
-    if (fs.existsSync(BASELINE_FILE)) {
+    const content = this.storage.read(STORAGE_KEY_BASELINE);
+    if (content) {
       try {
-        const content = fs.readFileSync(BASELINE_FILE, 'utf-8');
         this.baseline = JSON.parse(content);
       } catch (e) {
         console.warn('Failed to load baseline metrics:', e);
@@ -78,12 +183,20 @@ export class PerformanceTracker {
    * Record a performance metric
    */
   recordMetric(name: string, timing: number, opsPerSec: number): void {
+    // Get environment safely (works in browser and Node)
+    let env = 'unknown';
+    if (!isBrowser && typeof process !== 'undefined' && process.env) {
+      env = process.env.NODE_ENV || 'test';
+    } else if (isBrowser) {
+      env = 'browser';
+    }
+
     this.currentMetrics.push({
       name,
       timing,
       opsPerSec,
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'test'
+      environment: env
     });
   }
 
@@ -95,7 +208,7 @@ export class PerformanceTracker {
 
     for (const metric of this.currentMetrics) {
       const baselineMetric = this.baseline?.metrics[metric.name];
-      
+
       const comparison: PerformanceComparison = {
         name: metric.name,
         current: metric.timing,
@@ -132,12 +245,12 @@ export class PerformanceTracker {
       if (comp.status === 'FAIL') {
         status = 'FAIL';
         alerts.push(
-          `❌ PERFORMANCE DEGRADATION: ${comp.name} ${comp.changePercent}% slower (${comp.current?.toFixed(3)}ms vs baseline ${comp.baseline?.toFixed(3)}ms)`
+          `PERFORMANCE DEGRADATION: ${comp.name} ${comp.changePercent}% slower (${comp.current?.toFixed(3)}ms vs baseline ${comp.baseline?.toFixed(3)}ms)`
         );
       } else if (comp.status === 'WARN') {
         status = status === 'FAIL' ? 'FAIL' : 'WARN';
         alerts.push(
-          `⚠️ PERFORMANCE TREND: ${comp.name} ${comp.changePercent}% slower (${comp.current?.toFixed(3)}ms)`
+          `PERFORMANCE TREND: ${comp.name} ${comp.changePercent}% slower (${comp.current?.toFixed(3)}ms)`
         );
       }
     }
@@ -167,8 +280,17 @@ export class PerformanceTracker {
     }
 
     this.baseline = baseline;
-    fs.writeFileSync(BASELINE_FILE, JSON.stringify(baseline, null, 2));
-    console.log(`✅ Baseline metrics saved (${this.currentMetrics.length} metrics)`);
+    const json = JSON.stringify(baseline, null, 2);
+
+    // Save to primary storage
+    this.storage.write(STORAGE_KEY_BASELINE, json);
+
+    // Also save to file system if available
+    if (this.nodeStorage) {
+      this.nodeStorage.write('baseline.json', json);
+    }
+
+    console.log(`Baseline metrics saved (${this.currentMetrics.length} metrics)`);
   }
 
   /**
@@ -177,9 +299,9 @@ export class PerformanceTracker {
   archiveToHistory(label: string = ''): void {
     let history: Array<{ label: string; timestamp: string; metrics: PerformanceMetric[] }> = [];
 
-    if (fs.existsSync(HISTORY_FILE)) {
+    const content = this.storage.read(STORAGE_KEY_HISTORY);
+    if (content) {
       try {
-        const content = fs.readFileSync(HISTORY_FILE, 'utf-8');
         history = JSON.parse(content);
       } catch (e) {
         console.warn('Failed to load history:', e);
@@ -197,7 +319,13 @@ export class PerformanceTracker {
       history = history.slice(-50);
     }
 
-    fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
+    const json = JSON.stringify(history, null, 2);
+    this.storage.write(STORAGE_KEY_HISTORY, json);
+
+    // Also save to file system if available
+    if (this.nodeStorage) {
+      this.nodeStorage.write('history.json', json);
+    }
   }
 
   /**
@@ -205,10 +333,10 @@ export class PerformanceTracker {
    */
   printReport(report: PerformanceReport): void {
     console.log('\n' + '='.repeat(60));
-    console.log('📊 PERFORMANCE REPORT');
+    console.log('PERFORMANCE REPORT');
     console.log('='.repeat(60));
 
-    console.log(`\n${report.status === 'PASS' ? '✅' : report.status === 'WARN' ? '⚠️' : '❌'} Status: ${report.status}`);
+    console.log(`\nStatus: ${report.status}`);
     console.log(`Timestamp: ${report.timestamp}`);
 
     if (report.baseline) {
@@ -218,8 +346,7 @@ export class PerformanceTracker {
     console.log('\nMetrics:');
     for (const comp of report.comparisons) {
       const change = comp.changePercent !== undefined ? ` (${comp.changePercent > 0 ? '+' : ''}${comp.changePercent}%)` : '';
-      const emoji = comp.status === 'OK' ? '✅' : comp.status === 'WARN' ? '⚠️' : '❌';
-      console.log(`  ${emoji} ${comp.name}: ${comp.current?.toFixed(3)}ms${change}`);
+      console.log(`  ${comp.status}: ${comp.name}: ${comp.current?.toFixed(3)}ms${change}`);
     }
 
     if (report.alerts.length > 0) {
@@ -280,6 +407,48 @@ export class PerformanceTracker {
       hasBaseline: !!this.baseline,
       percentWithinThreshold: (withinThreshold / comparisons.length) * 100
     };
+  }
+
+  /**
+   * Clear all recorded metrics (useful for testing)
+   */
+  clearMetrics(): void {
+    this.currentMetrics = [];
+  }
+}
+
+// Node.js file system storage provider (only used when in Node environment)
+class NodeStorageProvider implements StorageProvider {
+  constructor(
+    private fs: typeof import('fs'),
+    private path: typeof import('path'),
+    private metricsDir: string
+  ) {}
+
+  exists(key: string): boolean {
+    return this.fs.existsSync(this.path.join(this.metricsDir, key));
+  }
+
+  read(key: string): string | null {
+    const filePath = this.path.join(this.metricsDir, key);
+    if (this.fs.existsSync(filePath)) {
+      try {
+        return this.fs.readFileSync(filePath, 'utf-8');
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  write(key: string, value: string): void {
+    this.fs.writeFileSync(this.path.join(this.metricsDir, key), value);
+  }
+
+  ensureDir(): void {
+    if (!this.fs.existsSync(this.metricsDir)) {
+      this.fs.mkdirSync(this.metricsDir, { recursive: true });
+    }
   }
 }
 

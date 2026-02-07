@@ -113,7 +113,13 @@
       "Bash(pnpm run build:*)",
       "Bash(QDRANT_CLOUD_URL=\"https://e794fb51-3ffd-4b2d-8c93-e5986ae97ca6.us-east4-0.gcp.cloud.qdrant.io\" QDRANT_CLOUD_API_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.MwLEWcb_zpTzpAaJv4uOMbuTNuWy33xNzRvUAAm_5Lk\" npx tsx:*)",
       "Bash(QDRANT_URL=\"https://e794fb51-3ffd-4b2d-8c93-e5986ae97ca6.us-east4-0.gcp.cloud.qdrant.io\" QDRANT_API_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.MwLEWcb_zpTzpAaJv4uOMbuTNuWy33xNzRvUAAm_5Lk\" npx tsx -e \"\nimport { SemanticSearchService } from ''./uAA2++_Protocol/services/semantic-search-service.js'';\nasync function test\\(\\) {\n  const search = new SemanticSearchService\\({\n    qdrantUrl: process.env.QDRANT_URL,\n    qdrantApiKey: process.env.QDRANT_API_KEY\n  }\\);\n  await search.initialize\\(\\);\n  const results = await search.search\\(''HoloScript parser'', { limit: 3, minScore: 0.3 }\\);\n  console.log\\(''Results from Qdrant Cloud:''\\);\n  results.forEach\\(\\(r, i\\) => console.log\\(\\(i+1\\) + ''. ['' + r.score.toFixed\\(3\\) + ''] '' + r.metadata.source.split\\(''/''\\).pop\\(\\)\\)\\);\n}\ntest\\(\\).catch\\(console.error\\);\n\")",
-      "Bash(QDRANT_URL=\"https://e794fb51-3ffd-4b2d-8c93-e5986ae97ca6.us-east4-0.gcp.cloud.qdrant.io\" QDRANT_API_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.MwLEWcb_zpTzpAaJv4uOMbuTNuWy33xNzRvUAAm_5Lk\" npx tsx:*)"
+      "Bash(QDRANT_URL=\"https://e794fb51-3ffd-4b2d-8c93-e5986ae97ca6.us-east4-0.gcp.cloud.qdrant.io\" QDRANT_API_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.MwLEWcb_zpTzpAaJv4uOMbuTNuWy33xNzRvUAAm_5Lk\" npx tsx:*)",
+      "Bash(npm ls:*)",
+      "Bash(pnpm --filter @hololand/playcanvas-adapter build:*)",
+      "Bash(pnpm --filter @hololand/babylon-adapter build:*)",
+      "Bash(pnpm --filter @hololand/vrchat-export build:*)",
+      "Bash(pnpm --filter @hololand/brittney-service build:*)",
+      "Bash(pnpm --filter @hololand/accessibility build:*)"
     ]
   }
 }

@@ -7,24 +7,105 @@
  * - Progress tracking and cancellation
  * - Graceful fallback to sequential parsing
  * - Memory-bounded operation
+ * - Browser-compatible (falls back to sequential parsing)
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 
-import { cpus } from 'os';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import { EventEmitter } from 'events';
-import { WorkerPool, createWorkerPool, WorkerPoolStats } from './WorkerPool';
 import { HoloScriptPlusParser } from './HoloScriptPlusParser';
 import type { HSPlusParserOptions, ASTProgram } from '../types/AdvancedTypeSystem';
 import type { ParseTaskData, ParseTaskResult } from './ParseWorker';
+
+// Environment detection
+const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
+// Simple EventEmitter implementation for browser compatibility
+class SimpleEventEmitter {
+  private listeners: Map<string, Array<(...args: any[]) => void>> = new Map();
+
+  on(event: string, callback: (...args: any[]) => void): this {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event)!.push(callback);
+    return this;
+  }
+
+  off(event: string, callback: (...args: any[]) => void): this {
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      const index = eventListeners.indexOf(callback);
+      if (index > -1) {
+        eventListeners.splice(index, 1);
+      }
+    }
+    return this;
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      for (const listener of eventListeners) {
+        listener(...args);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  removeAllListeners(event?: string): this {
+    if (event) {
+      this.listeners.delete(event);
+    } else {
+      this.listeners.clear();
+    }
+    return this;
+  }
+}
+
+// Dynamic imports for Node.js modules (only executed in Node environment)
+let WorkerPool: any = null;
+let createWorkerPool: any = null;
+
+async function loadNodeModules(): Promise<{
+  cpuCount: number;
+  path: typeof import('path');
+  fileURLToPath: typeof import('url').fileURLToPath;
+  WorkerPool: any;
+  createWorkerPool: any;
+} | null> {
+  if (isBrowser) return null;
+
+  try {
+    const os = await import('os');
+    const path = await import('path');
+    const { fileURLToPath } = await import('url');
+    const workerPoolModule = await import('./WorkerPool');
+
+    return {
+      cpuCount: os.cpus().length,
+      path,
+      fileURLToPath,
+      WorkerPool: workerPoolModule.WorkerPool,
+      createWorkerPool: workerPoolModule.createWorkerPool,
+    };
+  } catch {
+    return null;
+  }
+}
 
 export interface FileInput {
   /** File path (used for error reporting and dependency resolution) */
   path: string;
   /** Source code content */
   content: string;
+}
+
+export interface WorkerPoolStats {
+  activeWorkers: number;
+  pendingTasks: number;
+  completedTasks: number;
+  failedTasks: number;
 }
 
 export interface ParallelParseResult {
@@ -77,41 +158,44 @@ export interface ParseProgress {
 
 /**
  * ParallelParser coordinates multi-threaded file parsing
+ * Falls back to sequential parsing in browser environments
  */
-export class ParallelParser extends EventEmitter {
-  private workerPool: WorkerPool | null = null;
+export class ParallelParser extends SimpleEventEmitter {
+  private workerPool: any = null;
   private options: Required<ParallelParserOptions>;
-  private workerPath: string;
+  private workerPath: string = '';
   private isInitialized: boolean = false;
   private fallbackParser: HoloScriptPlusParser | null = null;
+  private nodeModules: Awaited<ReturnType<typeof loadNodeModules>> = null;
 
   constructor(options: ParallelParserOptions = {}) {
     super();
 
+    // Default worker count - will be updated in Node.js environment
+    const defaultWorkerCount = isBrowser ? 1 : 4;
+
     this.options = {
-      workerCount: options.workerCount ?? cpus().length,
+      workerCount: options.workerCount ?? defaultWorkerCount,
       parserOptions: options.parserOptions ?? {},
       batchSize: options.batchSize ?? 50,
       enableProgress: options.enableProgress ?? true,
       fallbackToSequential: options.fallbackToSequential ?? true,
       debug: options.debug ?? false,
     };
-
-    // Worker script path - adjust based on build output
-    // Use import.meta.url for ESM compatibility
-    this.workerPath = path.join(this.getCurrentDir(), 'ParseWorker.js');
   }
 
   /**
-   * Get current directory in ESM-compatible way
+   * Get current directory in ESM-compatible way (Node.js only)
    */
   private getCurrentDir(): string {
+    if (!this.nodeModules) return '';
+
     try {
-      const __filename = fileURLToPath(import.meta.url);
-      return path.dirname(__filename);
+      const __filename = this.nodeModules.fileURLToPath(import.meta.url);
+      return this.nodeModules.path.dirname(__filename);
     } catch {
-      // Fallback for CommonJS or test environments
-      return __dirname;
+      // Fallback for test environments
+      return '';
     }
   }
 
@@ -121,8 +205,27 @@ export class ParallelParser extends EventEmitter {
   async initialize(): Promise<boolean> {
     if (this.isInitialized) return true;
 
+    // Load Node.js modules if available
+    this.nodeModules = await loadNodeModules();
+
+    // In browser or if Node modules unavailable, use fallback
+    if (!this.nodeModules) {
+      this.log('Running in browser or Node modules unavailable - using sequential parsing');
+      this.fallbackParser = new HoloScriptPlusParser(this.options.parserOptions);
+      this.isInitialized = true;
+      return true;
+    }
+
+    // Update worker count based on CPU cores
+    if (this.options.workerCount === 4) {
+      this.options.workerCount = this.nodeModules.cpuCount;
+    }
+
+    // Set worker path
+    this.workerPath = this.nodeModules.path.join(this.getCurrentDir(), 'ParseWorker.js');
+
     try {
-      this.workerPool = createWorkerPool(this.workerPath, {
+      this.workerPool = this.nodeModules.createWorkerPool(this.workerPath, {
         poolSize: this.options.workerCount,
         debug: this.options.debug,
       });
@@ -137,6 +240,7 @@ export class ParallelParser extends EventEmitter {
       if (this.options.fallbackToSequential) {
         this.log('Falling back to sequential parsing');
         this.fallbackParser = new HoloScriptPlusParser(this.options.parserOptions);
+        this.isInitialized = true;
         return true;
       }
 
@@ -270,7 +374,7 @@ export class ParallelParser extends EventEmitter {
     }));
 
     try {
-      const results = await this.workerPool.executeAll<ParseTaskData, ParseTaskResult>(
+      const results: ParseTaskResult[] = await this.workerPool.executeAll(
         'parse',
         tasks
       );

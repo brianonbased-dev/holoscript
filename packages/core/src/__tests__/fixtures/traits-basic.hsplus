@@ -1,15 +1,36 @@
 // Basic trait testing fixture
-orb#grabbable_ball @grabbable {
-  position: [0, 1, 0]
-  color: "#00ff00"
-}
 
-cube#throwable_cube @grabbable @throwable {
-  position: [2, 1, 0]
-  color: "#0000ff"
-}
+composition "TraitsBasic" {
+  template "GrabbableBall" {
+    @grabbable
+    geometry: "sphere"
+    color: "#00ff00"
+  }
 
-sphere#interactive @grabbable @hoverable @pointable {
-  position: [-2, 1, 0]
-  color: "#ffff00"
+  template "ThrowableCube" {
+    @grabbable
+    @throwable
+    geometry: "box"
+    color: "#0000ff"
+  }
+
+  template "InteractiveSphere" {
+    @grabbable
+    @hoverable
+    @pointable
+    geometry: "sphere"
+    color: "#ffff00"
+  }
+
+  object "GrabbableBall" using "GrabbableBall" {
+    position: [0, 1, 0]
+  }
+
+  object "ThrowableCube" using "ThrowableCube" {
+    position: [2, 1, 0]
+  }
+
+  object "Interactive" using "InteractiveSphere" {
+    position: [-2, 1, 0]
+  }
 }

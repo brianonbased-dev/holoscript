@@ -234,13 +234,56 @@ function extractFromHoloAST(ast: HoloComposition): LoadedComposition {
     state,
     environment,
     objects,
-    logic: {
-      actions: new Map(),
-      eventHandlers: new Map(),
-      frameHandlers: [],
-      keyboardHandlers: new Map(),
-    },
+    logic: extractLogicFromAST(ast),
   };
+}
+
+// Extract logic (actions and event handlers) from AST
+function extractLogicFromAST(ast: HoloComposition): CompositionLogic {
+  const actions = new Map<string, ActionDefinition>();
+  const eventHandlers = new Map<string, ActionDefinition>();
+  const frameHandlers: ActionDefinition[] = [];
+  const keyboardHandlers = new Map<string, ActionDefinition>();
+  
+  if (ast.logic) {
+    // Extract actions
+    for (const action of ast.logic.actions || []) {
+      const actionDef: ActionDefinition = {
+        name: action.name,
+        params: (action.parameters || []).map(p => p.name),
+        body: action.body,
+      };
+      actions.set(action.name, actionDef);
+    }
+    
+    // Extract event handlers
+    for (const handler of ast.logic.handlers || []) {
+      const handlerDef: ActionDefinition = {
+        name: handler.event,
+        params: (handler.parameters || []).map(p => p.name),
+        body: handler.body,
+      };
+      
+      // Check for special handlers
+      if (handler.event === 'on_frame' || handler.event === 'onFrame') {
+        frameHandlers.push(handlerDef);
+      } else if (handler.event.startsWith('on_key_') || handler.event.startsWith('onKey')) {
+        const key = handler.event.replace(/^on_?[Kk]ey_?/, '');
+        keyboardHandlers.set(key, handlerDef);
+      } else {
+        eventHandlers.set(handler.event, handlerDef);
+      }
+    }
+  }
+  
+  console.log('[HoloScript] Extracted logic:', {
+    actions: actions.size,
+    eventHandlers: eventHandlers.size,
+    frameHandlers: frameHandlers.length,
+    keyboardHandlers: keyboardHandlers.size,
+  });
+  
+  return { actions, eventHandlers, frameHandlers, keyboardHandlers };
 }
 
 function extractFromHsPlusAST(ast: unknown): LoadedComposition {
@@ -1536,7 +1579,10 @@ class BrowserRuntime implements HoloScriptRuntime {
                 const geometry = this.createGeometryForType(obj.type || 'sphere');
                 const material = new THREE.MeshStandardMaterial({ color: 0x00ffff });
                 const mesh = new THREE.Mesh(geometry, material);
-                if (obj.position) mesh.position.set(...obj.position);
+                if (obj.position) {
+                  const pos = obj.position as [number, number, number];
+                  mesh.position.set(pos[0], pos[1], pos[2]);
+                }
                 previewGroup.add(mesh);
               }
             }
@@ -1607,12 +1653,312 @@ class BrowserRuntime implements HoloScriptRuntime {
   }
   
   private interpretActionBody(body: unknown, context: Record<string, unknown>): unknown {
-    // Simplified interpreter - in production would be more complete
     if (!body) return undefined;
     
-    // For now just log what would execute
-    console.log('Would execute:', body);
+    // Handle array of statements
+    if (Array.isArray(body)) {
+      let lastResult: unknown = undefined;
+      for (const stmt of body) {
+        lastResult = this.executeStatement(stmt, context);
+      }
+      return lastResult;
+    }
+    
+    // Single statement
+    return this.executeStatement(body, context);
+  }
+  
+  private executeStatement(stmt: unknown, context: Record<string, unknown>): unknown {
+    if (!stmt || typeof stmt !== 'object') return undefined;
+    
+    const s = stmt as Record<string, unknown>;
+    const type = s.type as string;
+    
+    switch (type) {
+      case 'Assignment':
+        return this.executeAssignment(s, context);
+        
+      case 'MethodCall':
+        return this.executeMethodCall(s, context);
+        
+      case 'IfStatement':
+        return this.executeIfStatement(s, context);
+        
+      case 'ForStatement':
+        return this.executeForStatement(s, context);
+        
+      case 'ReturnStatement':
+        return this.evaluateExpression(s.value, context);
+        
+      case 'EmitStatement':
+        const eventName = s.event as string;
+        const data = this.evaluateExpression(s.data, context);
+        emit(eventName, data);
+        return undefined;
+        
+      case 'AnimateStatement':
+        // Queue animation on target object
+        const targetId = s.target as string;
+        this.queueAnimation(targetId, s.properties as Record<string, unknown>);
+        return undefined;
+        
+      case 'ExpressionStatement':
+        return this.evaluateExpression(s.expression, context);
+        
+      default:
+        console.log('[HoloScript] Unhandled statement type:', type, s);
+        return undefined;
+    }
+  }
+  
+  private executeAssignment(stmt: Record<string, unknown>, context: Record<string, unknown>): unknown {
+    const target = stmt.target as string;
+    const operator = stmt.operator as string;
+    const value = this.evaluateExpression(stmt.value, context);
+    
+    // Handle state mutations (e.g., "state.score")
+    if (target.startsWith('state.')) {
+      const key = target.slice(6);
+      const currentValue = this.state[key];
+      let newValue: unknown;
+      
+      switch (operator) {
+        case '=': newValue = value; break;
+        case '+=': newValue = (currentValue as number) + (value as number); break;
+        case '-=': newValue = (currentValue as number) - (value as number); break;
+        case '*=': newValue = (currentValue as number) * (value as number); break;
+        case '/=': newValue = (currentValue as number) / (value as number); break;
+        default: newValue = value;
+      }
+      
+      this.setState(key, newValue);
+      return newValue;
+    }
+    
+    // Handle object property mutations (e.g., "enemy.health")
+    const parts = target.split('.');
+    if (parts.length >= 2) {
+      const objId = parts[0];
+      const obj = this.objectMap.get(objId);
+      if (obj) {
+        const propPath = parts.slice(1).join('.');
+        this.updateObjectProperty(obj, propPath, value, operator);
+        return value;
+      }
+    }
+    
+    // Local context variable
+    context[target] = value;
+    return value;
+  }
+  
+  private executeMethodCall(stmt: Record<string, unknown>, context: Record<string, unknown>): unknown {
+    const obj = stmt.object as string;
+    const method = stmt.method as string;
+    const args = ((stmt.arguments as unknown[]) || []).map(arg => this.evaluateExpression(arg, context));
+    
+    // Handle built-in methods
+    if (obj === 'audio') {
+      if (method === 'play') {
+        // Load and play audio
+        const audioPath = args[0] as string;
+        console.log('[HoloScript] Audio play:', audioPath);
+        return undefined;
+      }
+    }
+    
+    if (obj === 'scene') {
+      if (method === 'transition') {
+        const config = args[0] as Record<string, unknown>;
+        console.log('[HoloScript] Scene transition:', config);
+        return undefined;
+      }
+    }
+    
+    if (obj === 'player') {
+      if (method === 'teleportTo') {
+        const pos = args[0] as number[];
+        this.camera.position.set(pos[0], pos[1], pos[2]);
+        return undefined;
+      }
+    }
+    
+    // Call action by name
+    const action = this.composition?.logic.actions.get(method);
+    if (action) {
+      return this.runAction(action, args);
+    }
+    
+    console.log('[HoloScript] Unknown method call:', obj, method);
     return undefined;
+  }
+  
+  private executeIfStatement(stmt: Record<string, unknown>, context: Record<string, unknown>): unknown {
+    const condition = this.evaluateExpression(stmt.condition, context);
+    
+    if (condition) {
+      return this.interpretActionBody(stmt.consequent, context);
+    } else if (stmt.alternate) {
+      return this.interpretActionBody(stmt.alternate, context);
+    }
+    
+    return undefined;
+  }
+  
+  private executeForStatement(stmt: Record<string, unknown>, context: Record<string, unknown>): unknown {
+    const varName = stmt.variable as string;
+    const start = this.evaluateExpression(stmt.start, context) as number;
+    const end = this.evaluateExpression(stmt.end, context) as number;
+    const step = (this.evaluateExpression(stmt.step, context) as number) || 1;
+    
+    let lastResult: unknown = undefined;
+    const maxIterations = 10000; // Safety limit
+    let iterations = 0;
+    
+    for (let i = start; step > 0 ? i < end : i > end; i += step) {
+      if (++iterations > maxIterations) {
+        console.warn('[HoloScript] Loop exceeded maximum iterations');
+        break;
+      }
+      context[varName] = i;
+      lastResult = this.interpretActionBody(stmt.body, context);
+    }
+    
+    return lastResult;
+  }
+  
+  private evaluateExpression(expr: unknown, context: Record<string, unknown>): unknown {
+    if (expr === null || expr === undefined) return expr;
+    
+    // Primitive values
+    if (typeof expr !== 'object') return expr;
+    
+    const e = expr as Record<string, unknown>;
+    const type = e.type as string;
+    
+    switch (type) {
+      case 'Identifier':
+        const name = e.name as string;
+        // Check context first, then state
+        if (name in context) return context[name];
+        if (name in this.state) return this.state[name];
+        return undefined;
+        
+      case 'MemberExpression':
+        const obj = this.evaluateExpression(e.object, context);
+        const prop = e.property as string;
+        if (obj && typeof obj === 'object') {
+          return (obj as Record<string, unknown>)[prop];
+        }
+        return undefined;
+        
+      case 'BinaryExpression':
+        const left = this.evaluateExpression(e.left, context);
+        const right = this.evaluateExpression(e.right, context);
+        return this.evaluateBinaryOp(e.operator as string, left, right);
+        
+      case 'UnaryExpression':
+        const arg = this.evaluateExpression(e.argument, context);
+        if (e.operator === '!') return !arg;
+        if (e.operator === '-') return -(arg as number);
+        return arg;
+        
+      case 'CallExpression':
+        // Handle function calls in expressions
+        return this.executeMethodCall(e, context);
+        
+      case 'ArrayExpression':
+        return ((e.elements as unknown[]) || []).map(el => this.evaluateExpression(el, context));
+        
+      case 'ObjectExpression':
+        const result: Record<string, unknown> = {};
+        for (const prop of (e.properties as Array<{ key: string; value: unknown }>) || []) {
+          result[prop.key] = this.evaluateExpression(prop.value, context);
+        }
+        return result;
+        
+      case 'Literal':
+        return e.value;
+        
+      default:
+        // Direct value object (e.g., from AST literal)
+        if ('value' in e) return e.value;
+        return undefined;
+    }
+  }
+  
+  private evaluateBinaryOp(op: string, left: unknown, right: unknown): unknown {
+    switch (op) {
+      case '+': return (left as number) + (right as number);
+      case '-': return (left as number) - (right as number);
+      case '*': return (left as number) * (right as number);
+      case '/': return (left as number) / (right as number);
+      case '%': return (left as number) % (right as number);
+      case '<': return (left as number) < (right as number);
+      case '>': return (left as number) > (right as number);
+      case '<=': return (left as number) <= (right as number);
+      case '>=': return (left as number) >= (right as number);
+      case '==': case '===': return left === right;
+      case '!=': case '!==': return left !== right;
+      case '&&': return left && right;
+      case '||': return left || right;
+      default: return undefined;
+    }
+  }
+  
+  private updateObjectProperty(obj: THREE.Object3D, propPath: string, value: unknown, operator: string): void {
+    // Handle common 3D object properties
+    const parts = propPath.split('.');
+    
+    if (parts[0] === 'position') {
+      if (parts[1] === 'x') obj.position.x = value as number;
+      else if (parts[1] === 'y') obj.position.y = value as number;
+      else if (parts[1] === 'z') obj.position.z = value as number;
+    } else if (parts[0] === 'rotation') {
+      if (parts[1] === 'x') obj.rotation.x = value as number;
+      else if (parts[1] === 'y') obj.rotation.y = value as number;
+      else if (parts[1] === 'z') obj.rotation.z = value as number;
+    } else if (parts[0] === 'scale') {
+      const s = value as number;
+      obj.scale.set(s, s, s);
+    }
+    
+    // Handle userData properties (like health, etc.)
+    if (!(parts[0] in obj)) {
+      obj.userData[propPath] = value;
+    }
+  }
+  
+  private queueAnimation(targetId: string, properties: Record<string, unknown>): void {
+    const obj = this.objectMap.get(targetId) || this.scene.getObjectByName(targetId);
+    if (!obj) {
+      console.warn('[HoloScript] Animation target not found:', targetId);
+      return;
+    }
+    
+    // Simple linear animation - in production would use a tween library
+    const duration = (properties.duration as number) || 1000;
+    const property = properties.property as string;
+    const toValue = properties.to as number;
+    
+    // Store animation on the object for the render loop to process
+    obj.userData.activeAnimations = obj.userData.activeAnimations || [];
+    obj.userData.activeAnimations.push({
+      property,
+      from: this.getPropertyValue(obj, property),
+      to: toValue,
+      duration,
+      startTime: performance.now(),
+      easing: properties.easing || 'linear',
+    });
+  }
+  
+  private getPropertyValue(obj: THREE.Object3D, property: string): number {
+    const parts = property.split('.');
+    if (parts[0] === 'position') return (obj.position as any)[parts[1]];
+    if (parts[0] === 'rotation') return (obj.rotation as any)[parts[1]];
+    if (parts[0] === 'scale') return obj.scale.x;
+    return 0;
   }
   
   private updateReactiveBindings(changedKey: string): void {
@@ -2002,11 +2348,11 @@ class BrowserRuntime implements HoloScriptRuntime {
     }
     
     // Update directive objects (action sequences with reps and rest)
-    const now = performance.now();
+    const directiveNow = performance.now();
     for (const directive of this.directiveObjects) {
       if (directive.isResting) {
         // Check if rest period is over
-        if (now >= directive.restEndTime) {
+        if (directiveNow >= directive.restEndTime) {
           directive.isResting = false;
           directive.currentIndex++;
           

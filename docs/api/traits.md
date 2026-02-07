@@ -30,10 +30,11 @@
 Makes object pickable with hands/controllers.
 
 ```hsplus
-orb item {
+template "Item" {
   @grabbable
   @grabbable(snap_to_hand: true)
   @grabbable(haptic_on_grab: 0.7, two_handed: false)
+  geometry: "sphere"
 }
 ```
 
@@ -54,10 +55,11 @@ orb item {
 Enables physics-based throwing.
 
 ```hsplus
-orb ball {
+template "Ball" {
   @grabbable
   @throwable
   @throwable(velocity_multiplier: 2.0, bounce: true)
+  geometry: "sphere"
 }
 ```
 
@@ -78,9 +80,10 @@ orb ball {
 Object stays in hand until button release.
 
 ```hsplus
-orb torch {
+template "Torch" {
   @grabbable
   @holdable(grip_button: "trigger")
+  geometry: "cylinder"
 }
 ```
 
@@ -91,10 +94,11 @@ orb torch {
 Object responds to click/tap/trigger.
 
 ```hsplus
-orb button {
+template "Button" {
   @clickable
   @clickable(hold_time: 500ms, double_click: true)
-  
+  geometry: "box"
+
   on_click: { activate_door() }
 }
 ```
@@ -108,9 +112,10 @@ orb button {
 Object responds to hover/gaze.
 
 ```hsplus
-orb indicator {
+template "Indicator" {
   @hoverable
   @hoverable(scale_on_hover: 1.2, glow: true)
+  geometry: "sphere"
 }
 ```
 
@@ -123,8 +128,9 @@ orb indicator {
 Object can be dragged in 2D/3D space.
 
 ```hsplus
-orb slider {
+template "Slider" {
   @draggable(axis: "x", min: 0, max: 10)
+  geometry: "box"
 }
 ```
 
@@ -137,9 +143,10 @@ orb slider {
 Participates in collision detection.
 
 ```hsplus
-orb wall {
+template "Wall" {
   @collidable
   @collidable(layer: "environment", continuous: true)
+  geometry: "box"
 }
 ```
 
@@ -152,9 +159,10 @@ orb wall {
 Full rigid body physics simulation.
 
 ```hsplus
-orb crate {
+template "Crate" {
   @physics
   @physics(mass: 5.0, drag: 0.1, angular_drag: 0.05)
+  geometry: "box"
 }
 ```
 
@@ -175,9 +183,10 @@ orb crate {
 Rigid body without gravity.
 
 ```hsplus
-orb floating_platform {
+template "FloatingPlatform" {
   @rigid
   @collidable
+  geometry: "box"
 }
 ```
 
@@ -188,10 +197,11 @@ orb floating_platform {
 Scripted movement that affects physics objects.
 
 ```hsplus
-orb elevator {
+template "Elevator" {
   @kinematic
   @collidable
-  
+  geometry: "box"
+
   function move_up() {
     animate position to [0, 10, 0] over 5s
   }
@@ -205,9 +215,10 @@ orb elevator {
 Collision detection without physical response.
 
 ```hsplus
-orb zone {
+template "Zone" {
   @trigger
-  
+  geometry: "box"
+
   on_trigger_enter: { start_battle() }
   on_trigger_exit: { end_battle() }
 }
@@ -220,9 +231,10 @@ orb zone {
 Object affected by gravity.
 
 ```hsplus
-orb ball {
+template "GravityBall" {
   @gravity
   @gravity(strength: 9.81, direction: [0, -1, 0])
+  geometry: "sphere"
 }
 ```
 
@@ -235,9 +247,10 @@ orb ball {
 Object emits light.
 
 ```hsplus
-orb lamp {
+template "Lamp" {
   @glowing
   @glowing(color: "#ff0000", intensity: 2.0, range: 10)
+  geometry: "sphere"
 }
 ```
 
@@ -248,8 +261,9 @@ orb lamp {
 Self-illuminating material (no light emission to scene).
 
 ```hsplus
-orb sign {
+template "Sign" {
   @emissive(color: "#00ffff", intensity: 1.5)
+  geometry: "plane"
 }
 ```
 
@@ -260,8 +274,9 @@ orb sign {
 Transparency/opacity control.
 
 ```hsplus
-orb glass {
+template "Glass" {
   @transparent(opacity: 0.5, double_sided: true)
+  geometry: "box"
 }
 ```
 
@@ -272,8 +287,9 @@ orb glass {
 Mirror-like surface.
 
 ```hsplus
-orb mirror {
+template "Mirror" {
   @reflective(strength: 1.0, blur: 0)
+  geometry: "plane"
 }
 ```
 
@@ -284,15 +300,16 @@ orb mirror {
 Object has animation states.
 
 ```hsplus
-orb character {
+template "Character" {
   @animated
-  
+  geometry: "humanoid"
+
   animations: {
     idle: "idle.anim",
     walk: "walk.anim",
     run: "run.anim"
   }
-  
+
   function start_walking() {
     play_animation("walk")
   }
@@ -306,9 +323,10 @@ orb character {
 Always faces the camera.
 
 ```hsplus
-orb label {
+template "Label" {
   @billboard
   @billboard(lock_y: true)  // Only rotate on Y axis
+  geometry: "plane"
 }
 ```
 
@@ -319,10 +337,11 @@ orb label {
 Continuous rotation animation.
 
 ```hsplus
-orb spinner {
+template "Spinner" {
   @rotating
   @rotating(speed: 45, axis: "y")
   @rotating(speed: 90, axis: [1, 0, 1])  // Custom axis
+  geometry: "sphere"
 }
 ```
 
@@ -343,10 +362,11 @@ orb spinner {
 General interactivity marker (enables all input modes).
 
 ```hsplus
-orb button {
+template "InteractiveButton" {
   @interactive
   @interactive(modes: ["click", "hover", "grab"])
   @interactive(cursor: "pointer", highlight: true)
+  geometry: "box"
 }
 ```
 
@@ -367,10 +387,11 @@ orb button {
 Level of Detail switching for performance optimization.
 
 ```hsplus
-orb complex_model {
+template "ComplexModel" {
   @lod
   @lod(distances: [10, 30, 100])
   @lod(levels: ["high.glb", "medium.glb", "low.glb"])
+  geometry: "mesh"
 }
 ```
 
@@ -394,9 +415,10 @@ orb complex_model {
 State syncs across network.
 
 ```hsplus
-orb shared_object {
+template "SharedObject" {
   @networked
   @networked(sync_rate: 30hz, interpolation: true)
+  geometry: "sphere"
 }
 ```
 
@@ -414,8 +436,9 @@ orb shared_object {
 Mark specific properties for sync.
 
 ```hsplus
-orb player {
+template "SyncedPlayer" {
   @synced(properties: [position, rotation, health])
+  geometry: "humanoid"
 }
 ```
 
@@ -426,9 +449,10 @@ orb player {
 State persists between sessions.
 
 ```hsplus
-orb save_point {
+template "SavePoint" {
   @persistent
   @persistent(key: "player_progress")
+  geometry: "cylinder"
 }
 ```
 
@@ -439,9 +463,10 @@ orb save_point {
 Has network ownership (only owner can modify).
 
 ```hsplus
-orb player_avatar {
+template "PlayerAvatar" {
   @networked
   @owned
+  geometry: "humanoid"
 }
 ```
 
@@ -452,9 +477,10 @@ orb player_avatar {
 Only host can modify.
 
 ```hsplus
-orb game_manager {
+template "GameManager" {
   @networked
   @host_only
+  geometry: "box"
 }
 ```
 
@@ -467,8 +493,9 @@ orb game_manager {
 Objects can stack on each other.
 
 ```hsplus
-orb block {
+template "Block" {
   @stackable(axis: "y", max_stack: 10)
+  geometry: "box"
 }
 ```
 
@@ -479,8 +506,9 @@ orb block {
 Object can attach to other objects.
 
 ```hsplus
-orb scope {
+template "Scope" {
   @attachable(attach_points: ["weapon_rail"])
+  geometry: "cylinder"
 }
 ```
 
@@ -491,8 +519,9 @@ orb scope {
 Can be equipped to avatar slots.
 
 ```hsplus
-orb helmet {
+template "Helmet" {
   @equippable(slot: "head", auto_fit: true)
+  geometry: "sphere"
 }
 ```
 
@@ -503,10 +532,11 @@ orb helmet {
 Object can be consumed/used up.
 
 ```hsplus
-orb potion {
+template "Potion" {
   @consumable
-  
-  on_consume: { 
+  geometry: "cylinder"
+
+  on_consume: {
     player.health += 50
     this.destroy()
   }
@@ -520,10 +550,11 @@ orb potion {
 Object can be destroyed.
 
 ```hsplus
-orb crate {
+template "DestructibleCrate" {
   @destructible
   @destructible(health: 100, fragments: 8, explosion: true)
-  
+  geometry: "box"
+
   on_destroy: { spawn_loot() }
 }
 ```
@@ -537,8 +568,9 @@ orb crate {
 Fixed position in world space.
 
 ```hsplus
-orb waypoint {
+template "Waypoint" {
   @anchor
+  geometry: "sphere"
 }
 ```
 
@@ -549,8 +581,9 @@ orb waypoint {
 Follows a tracked point (controller, hand, etc).
 
 ```hsplus
-orb pointer {
+template "Pointer" {
   @tracked(source: "right_controller")
+  geometry: "cone"
 }
 ```
 
@@ -561,8 +594,9 @@ orb pointer {
 Locked to world coordinates (AR).
 
 ```hsplus
-orb ar_marker {
+template "ARMarker" {
   @world_locked
+  geometry: "plane"
 }
 ```
 
@@ -573,8 +607,9 @@ orb ar_marker {
 Follows hand skeleton.
 
 ```hsplus
-orb ring {
+template "Ring" {
   @hand_tracked(hand: "left", joint: "ring_finger_tip")
+  geometry: "torus"
 }
 ```
 
@@ -585,11 +620,12 @@ orb ring {
 Responds to eye gaze with dwell activation and highlighting.
 
 ```hsplus
-orb gaze_target {
+template "GazeTarget" {
   @eye_tracked
   @eye_tracked(dwell_enabled: true, dwell_time: 1000ms)
   @eye_tracked(gaze_highlight: true, highlight_color: "#00ffff")
-  
+  geometry: "sphere"
+
   on_gaze_enter: { highlight() }
   on_gaze_exit: { unhighlight() }
   on_dwell_activate: { click() }
@@ -617,10 +653,11 @@ orb gaze_target {
 Optimizes object for seated VR users with comfort options.
 
 ```hsplus
-orb player {
+template "SeatedPlayer" {
   @seated
   @seated(auto_calibrate: true, snap_turn_angle: 45)
   @seated(comfort_vignette: true, max_reach: 1.0)
+  geometry: "humanoid"
 }
 ```
 
@@ -643,10 +680,11 @@ orb player {
 Advanced haptic feedback with patterns and proximity.
 
 ```hsplus
-orb vibrating_object {
+template "VibratingObject" {
   @haptic
   @haptic(intensity: 0.7, collision_pattern: "metal")
   @haptic(proximity_enabled: true, proximity_distance: 0.5)
+  geometry: "sphere"
 }
 ```
 
@@ -677,10 +715,10 @@ orb vibrating_object {
 3D positional audio.
 
 ```hsplus
-orb speaker {
+template "Speaker" {
   @spatial_audio
   @spatial_audio(falloff: "linear", max_distance: 20)
-  
+  geometry: "box"
   audio_source: "music.mp3"
 }
 ```
@@ -692,9 +730,9 @@ orb speaker {
 Background audio source.
 
 ```hsplus
-orb environment_sound {
+template "EnvironmentSound" {
   @ambient(loop: true, volume: 0.5)
-  
+  geometry: "sphere"
   audio_source: "forest.mp3"
 }
 ```
@@ -706,9 +744,10 @@ orb environment_sound {
 Responds to voice input.
 
 ```hsplus
-orb voice_controller {
+template "VoiceController" {
   @voice_activated
-  
+  geometry: "sphere"
+
   commands: {
     "open door": { open_door() },
     "lights on": { toggle_lights(true) }
@@ -725,13 +764,14 @@ orb voice_controller {
 Has reactive state.
 
 ```hsplus
-orb counter {
+template "Counter" {
   @state
-  
+  geometry: "box"
+
   state {
     count: 0
   }
-  
+
   on_click: { state.count++ }
 }
 ```
@@ -743,9 +783,10 @@ orb counter {
 Automatically updates on state change.
 
 ```hsplus
-orb display {
+template "Display" {
   @reactive
-  
+  geometry: "plane"
+
   text: "Count: ${state.count}"
 }
 ```
@@ -757,17 +798,19 @@ orb display {
 State can be observed by other objects.
 
 ```hsplus
-orb health_bar {
+template "HealthBar" {
   @observable
-  
+  geometry: "box"
+
   state {
     health: 100
   }
 }
 
-orb health_display {
+template "HealthDisplay" {
   @observe(target: "health_bar", property: "health")
-  
+  geometry: "plane"
+
   on_change: { update_display(value) }
 }
 ```
@@ -779,14 +822,15 @@ orb health_display {
 Derived state from other values.
 
 ```hsplus
-orb stats {
+template "Stats" {
   @state
-  
+  geometry: "box"
+
   state {
     attack: 10
     defense: 5
   }
-  
+
   @computed power = attack * 2 + defense
 }
 ```
@@ -800,7 +844,9 @@ orb stats {
 LLM-powered decision-making with bounded autonomy.
 
 ```hsplus
-npc#assistant @llm_agent(model: "gemini-1.5-pro", context_window: 10) {
+template "Assistant" {
+  @llm_agent(model: "gemini-1.5-pro", context_window: 10)
+  geometry: "humanoid"
   system_prompt: "You are a helpful museum guide."
   @on_llm_response: (text) -> { speak(text) }
 }
@@ -811,7 +857,9 @@ npc#assistant @llm_agent(model: "gemini-1.5-pro", context_window: 10) {
 Declarative behavior tree for complex NPC logic.
 
 ```hsplus
-npc#guard @behavior_tree {
+template "Guard" {
+  @behavior_tree
+  geometry: "humanoid"
   root: {
     type: "selector",
     children: [
@@ -831,7 +879,9 @@ npc#guard @behavior_tree {
 WebGPU-accelerated compute shaders.
 
 ```hsplus
-mesh#simulation @compute(shader_source: "fluid.wgsl", workgroup_size: [16, 16, 1]) {
+template "Simulation" {
+  @compute(shader_source: "fluid.wgsl", workgroup_size: [16, 16, 1])
+  geometry: "mesh"
   @on_compute_complete: () -> { update_mesh() }
 }
 ```

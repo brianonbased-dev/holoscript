@@ -74,12 +74,12 @@ parseProgram() {
 
 ---
 
-### 2.2 Support orb/object at Root Level
+### 2.2 Support object at Root Level
 **Issue:** Objects declared outside `composition {}` fail
 
 **Pattern failing:**
 ```holo
-orb "player" @grabbable { ... }  // ❌ Outside composition
+object "player" @grabbable { ... }  // ❌ Outside composition
 ```
 
 **Fix:** Same implicit composition wrapper
@@ -132,17 +132,24 @@ if (char === '#' && this.isHexDigit(this.peek())) {
 
 ---
 
-### 3.2 ID Selector Syntax
-**Issue:** `orb#mainOrb` syntax not supported
-**Pattern failing:**
+### 3.2 Modern Object Syntax
+**Issue:** Legacy ID selector syntax deprecated
+**Modern pattern:**
 ```hsplus
-orb#mainOrb { ... }  // ❌ # not valid in identifier
+composition "Demo" {
+  template "MainOrb" {
+    geometry: "sphere"
+  }
+  object "MainOrb" using "MainOrb" {
+    position: [0, 0, 0]
+  }
+}
 ```
 
-**Implementation:** Parse `orb#id` as shorthand for `orb id="mainOrb"`
+**Implementation:** Use `composition { template; object using template }` pattern
 
 **Effort:** 1 hour
-**Impact:** Better DX, fixes tutorial examples
+**Impact:** Better DX, aligns with modern syntax
 
 ---
 
@@ -206,7 +213,7 @@ template "Child" using "Base" { ... }
 | 2.1 | Root decorators | 3 hours | 8 |
 | 3.1 | Hash colors | 2 hours | 4 |
 | 2.3 | Audio blocks | 1 hour | 1 |
-| 3.2 | ID selectors | 1 hour | 2 |
+| 3.2 | Modern object syntax | 1 hour | 2 |
 | 3.3 | Template strings | 3 hours | 3 |
 | 4.1 | Spread operator | 4 hours | 2 |
 | 5.1 | Template using | 3 hours | 1 |

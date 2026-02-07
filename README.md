@@ -19,17 +19,60 @@ A declarative, open-source language that compiles to 9 platforms from one source
 
 ---
 
+## 🤖 AI Agents: Read This First
+
+**HoloScript is a language, not a library.** AI agents generate `.holo` files—the runtime executes them.
+
+### ✅ DO
+
+```holo
+// Generate HoloScript code
+object "ScoreButton" {
+  @pointable
+  
+  on_point() {
+    GameState.add_score(10)
+    flash_color("#00ff00", 100ms)
+  }
+}
+```
+
+### ❌ DON'T
+
+```javascript
+// Don't write JavaScript to implement features
+button.addEventListener('click', () => {
+  score += 10;
+  button.style.background = 'green';
+});
+```
+
+### The Rule
+
+| Ask yourself | Action |
+|--------------|--------|
+| Can this be a `.holo` composition? | **Yes → Write .holo** |
+| Does it need TypeScript modules? | Write `.hsplus` |
+| Is it shared logic/protocols? | Write `.hs` |
+| Is it tooling (parser, CLI)? | Only then write TypeScript |
+
+**The `.holo` file IS the source of truth.** Behaviors, state, collisions, input bindings, UI panels—all defined in HoloScript, executed by the runtime.
+
+---
+
 ## 📁 File Types
 
-| Format | What | When |
-|--------|------|------|
-| `.holo` | Graph | Worlds, agents, UI, objects, events |
-| `.hsplus` | Code | Systems, networking, behaviors |
+| Format | Purpose | Key Features |
+|--------|---------|--------------|
+| `.holo` | Compositions | Full worlds with templates, objects, actions, collision handlers, UI panels |
+| `.hsplus` | Systems | TypeScript modules, complex behaviors, networking, physics systems |
+| `.hs` | Logic | Protocols, state machines, shared utilities, AI behaviors |
 
-**.holo** — Worlds, agents, UI panels, traits, dialogue, AR anchors, templates  
-**.hsplus** — Game systems, networking, physics, procedural generation
+**.holo** — AI-generated worlds, game scenes, interactive experiences (composition-first)
+**.hsplus** — Game systems, networking modules, procedural generation
+**.hs** — Shared logic, protocols, reusable behaviors
 
-**Both AI-writable.** Use together.
+**All three are AI-writable.** Use together for complex projects.
 
 ---
 
@@ -39,13 +82,17 @@ A declarative, open-source language that compiles to 9 platforms from one source
 > - 🌍 **VRR (Virtual Reality Reality):** "Scan my storefront and make it a virtual showroom" *(coming soon)*
 > - 📱 **AR:** "Place a 3D model of this chair in my living room"
 
-```holoscript
-form#login @grabbable {
-  input#email { placeholder: "Email" }
-  input#password { type: "password" }
-  button#submit { 
-    text: "Sign In"
-    @on_click: () -> { await api.login() }
+```holo
+composition "Login UI" {
+  object "Form" {
+    @grabbable
+    
+    object "EmailInput" { type: "text"; placeholder: "Email" }
+    object "PasswordInput" { type: "password" }
+    object "SubmitBtn" {
+      text: "Sign In"
+      on_click() { api.login() }
+    }
   }
 }
 ```
@@ -212,9 +259,18 @@ import { HoloScriptPlusParser } from '@holoscript/core';
 
 const parser = new HoloScriptPlusParser();
 const result = parser.parse(`
-  orb#sphere @grabbable @throwable {
-    color: "#00ffff"
-    glow: true
+  composition "InteractiveDemo" {
+    template "GrabbableSphere" {
+      @grabbable
+      @throwable
+      geometry: "sphere"
+      color: "#00ffff"
+      glow: true
+    }
+
+    object "Sphere" using "GrabbableSphere" {
+      position: [0, 1, 0]
+    }
   }
 `);
 ```
@@ -240,7 +296,7 @@ const result = parser.parse(`
 | **State & Logic** | `@state`, `@reactive`, `@observable`, `@computed`, `@synced`, `@persistent` |
 
 ### 🛠️ Language Features
-- **@world Configuration** - Declarative scene setup in `.hsplus` files
+- **environment Configuration** - Declarative scene setup in `.hsplus` files
 - **Scale Magnitude** - Build from `galactic` to `atomic` scale with seamless transitions
 - **Reactive State** - `@state { count: 0 }` with automatic updates
 - **Control Flow** - `@for`, `@if`, `while`, `forEach`, `on_break` loops
@@ -326,20 +382,27 @@ await world.loadFile('/scenes/main.hsplus');
 world.start();
 ```
 
-**Declarative world config with `@world` trait:**
+**Declarative world config with `environment` block:**
 
 ```hsplus
-@world {
-  backgroundColor: "#16213e"
-  fog: { type: "linear", color: "#16213e", near: 10, far: 100 }
-  shadows: "high"
-  lighting: "outdoor"
-  camera: { position: [0, 2, 10], fov: 60 }
-}
+composition "DemoWorld" {
+  environment {
+    backgroundColor: "#16213e"
+    fog: { type: "linear", color: "#16213e", near: 10, far: 100 }
+    shadows: "high"
+    lighting: "outdoor"
+    camera: { position: [0, 2, 10], fov: 60 }
+  }
 
-orb#player @grabbable {
-  position: [0, 1, 0]
-  color: "#00ffff"
+  template "Player" {
+    @grabbable
+    geometry: "sphere"
+    color: "#00ffff"
+  }
+
+  object "Player" using "Player" {
+    position: [0, 1, 0]
+  }
 }
 ```
 
@@ -398,13 +461,27 @@ network.on('entitySpawned', (event) => {
 **HoloScript+ `@networked` trait:**
 
 ```hsplus
-orb#player @networked @grabbable {
-  position: [0, 1, 0]
-  color: "#00ffff"
-}
+composition "NetworkedDemo" {
+  template "NetworkedPlayer" {
+    @networked
+    @grabbable
+    geometry: "sphere"
+    color: "#00ffff"
+  }
 
-cube#shared_object @networked { sync: "shared" } {
-  position: [5, 0, 0]
+  template "SharedObject" {
+    @networked
+    geometry: "box"
+    sync: "shared"
+  }
+
+  object "Player" using "NetworkedPlayer" {
+    position: [0, 1, 0]
+  }
+
+  object "SharedCube" using "SharedObject" {
+    position: [5, 0, 0]
+  }
 }
 ```
 
@@ -422,19 +499,31 @@ npm install @hololand/vrchat-export
 
 ```holoscript
 // Define a VRChat-ready world
-world#my_club @vrchat {
+composition "MyClub" {
+  @vrchat
   spawn_point: [0, 0, 0]
   max_players: 32
-  
-  object#dance_floor @grabbable @synced {
-    position: [0, 0, 0]
+
+  template "DanceFloor" {
+    @grabbable
+    @synced
+    geometry: "plane"
     material: "neon_tiles"
     on_step: trigger_lights()
   }
-  
-  npc#dj @talkable {
+
+  template "DJ" {
+    @talkable
     dialog: "Welcome to the club!"
     animations: ["idle", "wave", "dance"]
+  }
+
+  object "DanceFloor" using "DanceFloor" {
+    position: [0, 0, 0]
+  }
+
+  npc "DJ" using "DJ" {
+    position: [5, 0, 0]
   }
 }
 ```
@@ -495,40 +584,78 @@ console.log(result.holoScript); // Ready to deploy
 
 ```holoscript
 // Interactive counter with VR support
-component#counter @state { count: 0 } @grabbable {
-  p { "Count: ${state.count}" }
-  button { 
-    text: "+"
-    @on_click: () -> { state.count++ }
+composition "Counter" {
+  state { count: 0 }
+
+  template "CounterUI" {
+    @grabbable
+    geometry: "box"
+
+    text { "Count: ${state.count}" }
+
+    on_click() { state.count++ }
+    on_grab(hand) { haptics.pulse(hand, 0.5) }
   }
-  
-  @on_grab: (hand) -> {
-    haptics.pulse(hand, 0.5)
+
+  object "Counter" using "CounterUI" {
+    position: [0, 1, -2]
   }
 }
 ```
 
 ```holoscript
 // Shopping cart
-component#cart @state { items: [] } {
-  @for item in state.items {
-    div.item { ${item.name} - $${item.price} }
+composition "ShoppingCart" {
+  state { items: [] }
+
+  template "CartDisplay" {
+    geometry: "plane"
   }
-  div.total { "Total: $${state.items.reduce((a,b) => a + b.price, 0)}" }
+
+  object "Cart" using "CartDisplay" {
+    @for item in state.items {
+      text { "${item.name} - $${item.price}" }
+    }
+    text { "Total: $${state.items.reduce((a,b) => a + b.price, 0)}" }
+  }
 }
 ```
 
 ```holoscript
 // Scale magnitude - universe to atom
-scale galactic {
-  orb#sun { color: "#ffcc00", glow: true }
-  orb#earth { position: [50, 0, 0] }
-}
+composition "ScaleMagnitude" {
+  scale galactic {
+    template "Star" {
+      geometry: "sphere"
+      color: "#ffcc00"
+      glow: true
+    }
 
-focus sun {
-  scale atomic {
-    orb#nucleus { color: "#ff0000" }
-    orb#electron { position: [1, 0, 0], scale: 0.1 }
+    template "Planet" {
+      geometry: "sphere"
+    }
+
+    object "Sun" using "Star" {
+      position: [0, 0, 0]
+    }
+
+    object "Earth" using "Planet" {
+      position: [50, 0, 0]
+    }
+  }
+
+  focus sun {
+    scale atomic {
+      object "Nucleus" using "Sphere" {
+        color: "#ff0000"
+        position: [0, 0, 0]
+      }
+
+      object "Electron" using "Sphere" {
+        position: [1, 0, 0]
+        scale: [0.1, 0.1, 0.1]
+      }
+    }
   }
 }
 ```

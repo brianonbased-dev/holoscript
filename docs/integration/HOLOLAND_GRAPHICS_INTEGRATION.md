@@ -15,12 +15,14 @@ This guide explains how to use HoloScript's graphics traits (MaterialTrait, Ligh
 │                  Hololand Creator Platform                 │
 │                                                             │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │          HoloScript Scene Description (.hs)          │  │
+│  │          HoloScript Scene Description (.hsplus)      │  │
 │  │                                                      │  │
-│  │  orb#scene {                                         │  │
-│  │    @material { type: pbr, metallic: 0.8 }           │  │
-│  │    @lighting { preset: studio }                      │  │
-│  │    @rendering { quality: high, platform: desktop }  │  │
+│  │  composition "Scene" {                               │  │
+│  │    template "SceneObj" {                             │  │
+│  │      @material { type: pbr, metallic: 0.8 }         │  │
+│  │      @lighting { preset: studio }                    │  │
+│  │      @rendering { quality: high, platform: desktop } │  │
+│  │    }                                                 │  │
 │  │  }                                                   │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                          ↓                                  │
@@ -471,25 +473,32 @@ export class SceneRenderer {
 
 HoloScript supports trait annotations directly in the language:
 
-```holoscript
-// Basic material specification
-orb#sphere {
-  @material {
-    type: pbr
-    baseColor: { r: 0.8, g: 0.2, b: 0.2 }
-    metallic: 0.5
-    roughness: 0.4
+```hsplus
+composition "MaterialDemo" {
+  // Basic material specification
+  template "Sphere" {
+    @material {
+      type: pbr
+      baseColor: { r: 0.8, g: 0.2, b: 0.2 }
+      metallic: 0.5
+      roughness: 0.4
+    }
+
+    @lighting {
+      preset: studio
+      shadows: true
+    }
+
+    @rendering {
+      quality: high
+      lod: true
+      culling: true
+    }
+    geometry: "sphere"
   }
-  
-  @lighting {
-    preset: studio
-    shadows: true
-  }
-  
-  @rendering {
-    quality: high
-    lod: true
-    culling: true
+
+  object "Sphere" using "Sphere" {
+    position: [0, 0, 0]
   }
 }
 ```

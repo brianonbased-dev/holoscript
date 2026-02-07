@@ -295,23 +295,29 @@ RenderingTrait
 ## Integration Ready
 
 ### For HoloScript+ DSL
-```holoscript
-orb#sphere {
-  position: [0, 0, 0]
-  @material {
-    type: pbr
-    baseColor: [0.8, 0.2, 0.2]
-    metallic: 0.5
-    roughness: 0.4
+```hsplus
+composition "GraphicsDemo" {
+  template "Sphere" {
+    @material {
+      type: pbr
+      baseColor: [0.8, 0.2, 0.2]
+      metallic: 0.5
+      roughness: 0.4
+    }
+    @lighting {
+      type: dynamic
+      shadows: true
+    }
+    @rendering {
+      quality: high
+      instancing: true
+      lod: automatic
+    }
+    geometry: "sphere"
   }
-  @lighting {
-    type: dynamic
-    shadows: true
-  }
-  @rendering {
-    quality: high
-    instancing: true
-    lod: automatic
+
+  object "Sphere" using "Sphere" {
+    position: [0, 0, 0]
   }
 }
 ```

@@ -1,6 +1,13 @@
 // Basic orb fixture for testing
-orb#test_orb {
-  position: [1, 2, 3]
-  color: "#ff0000"
-  size: 0.5
+
+composition "BasicOrb" {
+  template "TestOrb" {
+    geometry: "sphere"
+    color: "#ff0000"
+  }
+
+  object "TestOrb" using "TestOrb" {
+    position: [1, 2, 3]
+    scale: [0.5, 0.5, 0.5]
+  }
 }

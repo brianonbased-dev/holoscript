@@ -16,15 +16,20 @@ HoloScript includes **55 built-in traits** that make objects spatial and interac
 ### Example
 
 ```hsplus
-orb weapon {
-  @grabbable
-  @throwable
-  @holdable
-  
-  position: [0, 1, -2]
-  
-  on_grab: { play_sound("pickup") }
-  on_throw: { damage_on_impact(50) }
+composition "WeaponDemo" {
+  template "Weapon" {
+    @grabbable
+    @throwable
+    @holdable
+    geometry: "sphere"
+
+    on_grab: { play_sound("pickup") }
+    on_throw: { damage_on_impact(50) }
+  }
+
+  object "Weapon" using "Weapon" {
+    position: [0, 1, -2]
+  }
 }
 ```
 
@@ -42,14 +47,20 @@ orb weapon {
 ### Example
 
 ```hsplus
-orb ball {
-  @physics
-  @gravity
-  @collidable
-  
-  mass: 1.0
-  bounciness: 0.8
-  friction: 0.3
+composition "PhysicsDemo" {
+  template "Ball" {
+    @physics
+    @gravity
+    @collidable
+    geometry: "sphere"
+    mass: 1.0
+    bounciness: 0.8
+    friction: 0.3
+  }
+
+  object "Ball" using "Ball" {
+    position: [0, 2, 0]
+  }
 }
 ```
 
@@ -67,14 +78,20 @@ orb ball {
 ### Example
 
 ```hsplus
-orb powerup {
-  @glowing
-  @animated
-  @billboard
-  
-  glow_color: "#ff00ff"
-  glow_intensity: 1.5
-  animation: "pulse"
+composition "VisualDemo" {
+  template "Powerup" {
+    @glowing
+    @animated
+    @billboard
+    geometry: "sphere"
+    glow_color: "#ff00ff"
+    glow_intensity: 1.5
+    animation: "pulse"
+  }
+
+  object "Powerup" using "Powerup" {
+    position: [0, 1, 0]
+  }
 }
 ```
 
@@ -91,13 +108,19 @@ orb powerup {
 ### Example
 
 ```hsplus
-orb shared_display {
-  @networked
-  @synced
-  @persistent
-  
-  sync_rate: 20hz
-  sync_properties: [position, rotation, state]
+composition "NetworkDemo" {
+  template "SharedDisplay" {
+    @networked
+    @synced
+    @persistent
+    geometry: "sphere"
+    sync_rate: 20hz
+    sync_properties: [position, rotation, state]
+  }
+
+  object "SharedDisplay" using "SharedDisplay" {
+    position: [0, 1, 0]
+  }
 }
 ```
 
@@ -166,9 +189,16 @@ object "MagicSword" {
 Some traits accept parameters:
 
 ```hsplus
-orb ball {
-  @physics(mass: 2.0, drag: 0.1)
-  @glowing(color: "#ff0000", intensity: 1.5)
-  @networked(sync_rate: 30hz)
+composition "ParameterDemo" {
+  template "CustomBall" {
+    @physics(mass: 2.0, drag: 0.1)
+    @glowing(color: "#ff0000", intensity: 1.5)
+    @networked(sync_rate: 30hz)
+    geometry: "sphere"
+  }
+
+  object "Ball" using "CustomBall" {
+    position: [0, 1, 0]
+  }
 }
 ```

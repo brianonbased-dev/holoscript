@@ -108,6 +108,16 @@ export class HoloScriptRuntime {
     this.context = this.createEmptyContext();
     this.currentScope = { variables: this.context.variables };
     this.builtinFunctions = this.initBuiltins(customFunctions);
+
+    // Wire up state machine hook executor to this runtime's expression evaluator
+    stateMachineInterpreter.setHookExecutor((code: string, context: Record<string, any>) => {
+      // Merge hook context into variables temporarily
+      for (const [key, value] of Object.entries(context)) {
+        this.context.variables.set(key, value);
+      }
+      // Evaluate the hook code
+      return this.evaluateExpression(code);
+    });
   }
 
   /**
@@ -412,6 +422,21 @@ export class HoloScriptRuntime {
           break;
         case 'core_config':
           result = await this.executeCoreConfig(node as any);
+          break;
+        case 'for':
+          result = await this.executeForLoop(node as any);
+          break;
+        case 'forEach':
+          result = await this.executeForEachLoop(node as any);
+          break;
+        case 'while':
+          result = await this.executeWhileLoop(node as any);
+          break;
+        case 'if':
+          result = await this.executeIfStatement(node as any);
+          break;
+        case 'match':
+          result = await this.executeMatch(node as any);
           break;
         default:
           result = {
@@ -2007,17 +2032,244 @@ export class HoloScriptRuntime {
   private async executeCoreConfig(node: CoreConfigNode): Promise<ExecutionResult> {
     const startTime = Date.now();
     logger.info('[Zero-Config] Applying core configuration', node.properties);
-    
+
     // Merge into environment context
     for (const [key, value] of Object.entries(node.properties)) {
       this.context.environment[key] = value;
     }
 
-    return { 
-      success: true, 
-      output: 'Core configuration applied', 
-      executionTime: Date.now() - startTime 
+    return {
+      success: true,
+      output: 'Core configuration applied',
+      executionTime: Date.now() - startTime
     };
+  }
+
+  // =========================================================================
+  // Control Flow Execution
+  // =========================================================================
+
+  /**
+   * Execute a for loop: @for item in collection { ... }
+   */
+  private async executeForLoop(node: { variable: string; iterable: any; body: ASTNode[] }): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    const { variable, iterable, body } = node;
+
+    try {
+      // Evaluate the iterable expression
+      const collection = this.evaluateExpression(String(iterable));
+
+      if (!Array.isArray(collection) && typeof collection !== 'object') {
+        return {
+          success: false,
+          error: `Cannot iterate over non-iterable: ${typeof collection}`,
+          executionTime: Date.now() - startTime,
+        };
+      }
+
+      const items = Array.isArray(collection)
+        ? collection
+        : (collection && typeof collection === 'object' ? Object.entries(collection) : []);
+      let lastResult: ExecutionResult = { success: true, output: null };
+
+      for (const item of items) {
+        // Set loop variable in context
+        this.context.variables.set(variable, item as any);
+
+        // Execute body
+        for (const bodyNode of body) {
+          lastResult = await this.executeNode(bodyNode);
+          if (!lastResult.success) break;
+        }
+
+        if (!lastResult.success) break;
+      }
+
+      // Clean up loop variable
+      this.context.variables.delete(variable);
+
+      return {
+        success: true,
+        output: lastResult.output,
+        executionTime: Date.now() - startTime,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: `For loop error: ${error.message}`,
+        executionTime: Date.now() - startTime,
+      };
+    }
+  }
+
+  /**
+   * Execute a forEach loop: @forEach item in collection { ... }
+   */
+  private async executeForEachLoop(node: { variable: string; collection: any; body: ASTNode[] }): Promise<ExecutionResult> {
+    // forEach is functionally identical to for in this context
+    return this.executeForLoop({
+      variable: node.variable,
+      iterable: node.collection,
+      body: node.body,
+    });
+  }
+
+  /**
+   * Execute a while loop: @while condition { ... }
+   */
+  private async executeWhileLoop(node: { condition: any; body: ASTNode[] }): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    const { condition, body } = node;
+    const MAX_ITERATIONS = 10000; // Safety limit
+
+    try {
+      let iterations = 0;
+      let lastResult: ExecutionResult = { success: true, output: null };
+
+      while (this.evaluateCondition(String(condition))) {
+        iterations++;
+        if (iterations > MAX_ITERATIONS) {
+          return {
+            success: false,
+            error: `While loop exceeded maximum iterations (${MAX_ITERATIONS})`,
+            executionTime: Date.now() - startTime,
+          };
+        }
+
+        for (const bodyNode of body) {
+          lastResult = await this.executeNode(bodyNode);
+          if (!lastResult.success) break;
+        }
+
+        if (!lastResult.success) break;
+      }
+
+      return {
+        success: true,
+        output: lastResult.output,
+        executionTime: Date.now() - startTime,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: `While loop error: ${error.message}`,
+        executionTime: Date.now() - startTime,
+      };
+    }
+  }
+
+  /**
+   * Execute an if statement: @if condition { ... } @else { ... }
+   */
+  private async executeIfStatement(node: { condition: any; body: ASTNode[]; elseBody?: ASTNode[] }): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    const { condition, body, elseBody } = node;
+
+    try {
+      const conditionResult = this.evaluateCondition(String(condition));
+      const branchToExecute = conditionResult ? body : (elseBody || []);
+
+      let lastResult: ExecutionResult = { success: true, output: null };
+
+      for (const bodyNode of branchToExecute) {
+        lastResult = await this.executeNode(bodyNode);
+        if (!lastResult.success) break;
+      }
+
+      return {
+        success: true,
+        output: lastResult.output,
+        executionTime: Date.now() - startTime,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: `If statement error: ${error.message}`,
+        executionTime: Date.now() - startTime,
+      };
+    }
+  }
+
+  /**
+   * Execute a match expression: @match subject { pattern => result, ... }
+   */
+  private async executeMatch(node: { subject: any; cases: Array<{ pattern: any; guard?: any; body: any }> }): Promise<ExecutionResult> {
+    const startTime = Date.now();
+    const { subject, cases } = node;
+
+    try {
+      const subjectValue = this.evaluateExpression(String(subject));
+
+      for (const matchCase of cases || []) {
+        const patternValue = this.evaluateExpression(String(matchCase.pattern));
+
+        // Check pattern match
+        if (this.patternMatches(patternValue, subjectValue)) {
+          // Check guard if present
+          if (matchCase.guard && !this.evaluateCondition(String(matchCase.guard))) {
+            continue;
+          }
+
+          // Execute body
+          if (Array.isArray(matchCase.body)) {
+            let lastResult: ExecutionResult = { success: true, output: null };
+            for (const bodyNode of matchCase.body) {
+              lastResult = await this.executeNode(bodyNode);
+              if (!lastResult.success) break;
+            }
+            return lastResult;
+          } else {
+            const result = this.evaluateExpression(String(matchCase.body));
+            return { success: true, output: result, executionTime: Date.now() - startTime };
+          }
+        }
+      }
+
+      return {
+        success: false,
+        error: 'No pattern matched',
+        executionTime: Date.now() - startTime,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: `Match expression error: ${error.message}`,
+        executionTime: Date.now() - startTime,
+      };
+    }
+  }
+
+  /**
+   * Check if a pattern matches a value
+   */
+  private patternMatches(pattern: any, value: any): boolean {
+    // Wildcard pattern
+    if (pattern === '_' || pattern === 'else' || pattern === 'default') {
+      return true;
+    }
+
+    // Direct equality
+    if (pattern === value) {
+      return true;
+    }
+
+    // Type pattern: "string" matches any string
+    if (pattern === 'string' && typeof value === 'string') return true;
+    if (pattern === 'number' && typeof value === 'number') return true;
+    if (pattern === 'boolean' && typeof value === 'boolean') return true;
+    if (pattern === 'array' && Array.isArray(value)) return true;
+    if (pattern === 'object' && typeof value === 'object' && value !== null) return true;
+
+    // Range pattern: [1, 10] matches values 1-10
+    if (Array.isArray(pattern) && pattern.length === 2) {
+      const [min, max] = pattern;
+      if (typeof value === 'number' && value >= min && value <= max) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private async executeNarrative(node: NarrativeNode): Promise<ExecutionResult> {

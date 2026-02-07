@@ -1,43 +1,207 @@
-# Documentation & Roadmap Audit Report (2026-02-01)
+# Documentation & Implementation Audit Report (2026-02-06)
 
 ## 1. Executive Summary
 
-A comprehensive audit of the HoloScript documentation and roadmaps against the current `v2.1` source code reveals high alignment, with the recent parser evolution successfully delivering key "Foundation" and "Typescript Interop" capabilities.
+A comprehensive audit of HoloScript v3.0 documentation against actual implementation. This audit identifies what's working, what's documented but unimplemented, and what needs attention.
 
 | Category | Status | Notes |
 |----------|--------|-------|
-| **Core Parser** | ✅ Fully Aligned | `template`, `struct`, `module` supported. |
-| **Parser v2.1** | ✅ Documented | New `SYNTAX_EXTENSIONS.md` covers new features. |
-| **Roadmap** | ⚠️ Minor Gaps | Sprint 1 items (Spread, Coalescing) are pending. |
-| **Package Structure**| ✅ Aligned | `README.md` correctly reflects Hololand migration. |
-| **Examples** | ✅ Valid | examples in `objects.md` pass current parser. |
-
-## 2. Roadmap Alignment (ROADMAP.md)
-
-### ✅ Completed Items (Verified in Code)
-- **Semantic Scene Syntax**: `.hsplus` parsing logic (Orbs, Traits, Templates) is fully implemented.
-- **Logic Block Parsing**: `parseLogicBlock` handles `if/else`, `loops`.
-- **TypeScript Interop**: "Raw Code Block" support (added in v2.1) enables hybrid `.hsplus` files.
-- **AI Game Generation**: `npc`, `quest`, `ability`, `dialogue` structures are supported via generic/composition node parsing.
-
-### ⏳ Pending / In-Progress (Sprint 1)
-- **Spread Operator (`...`)**: Not yet observed in `parseValue`.
-- **Null Coalescing (`??`)**: Not yet observed in `parseValue`.
-- **Config Inheritance (`extends`)**: Referenced as Tooling task.
-
-## 3. Documentation Gaps & Fixes
-
-### Fixed
-- **Missing "Raw Block" syntax**: Created `docs/language/SYNTAX_EXTENSIONS.md`.
-- **README Updates**: Updated `README.md` to link to new syntax guide.
-
-### Recommendations
-1.  **Implement Spread/Coalescing**: To meet Sprint 1 goals, update `parseValue` to handle `...` and `??`.
-2.  **Standardize Formatter**: Ensure `@holoscript/formatter` handles the new Raw Blocks (currently `index.hsplus` in formatter package was failing, now likely valid but needs logic update).
-
-## 4. Hololand Integration
-
-The `integration/HOLOLAND_ROADMAP.md` correctly separates Platform concerns (Runtime, Physics, Audio) from the Language. The `packages/core` structure remains focused on the Language, while runtime packages are moved to the Hololand repository as documented.
+| **Core Parser** | ✅ Working | Parses composition/template/object, all 49 VR traits |
+| **Runtime Execution** | ✅ Working | Control flow (for/while/if/match), state machines, orbs |
+| **Browser Compatibility** | ✅ Fixed | Dynamic imports for Node.js modules, fallback storage |
+| **MCP Server** | ✅ Fixed | Generates modern syntax (composition pattern) |
+| **VRChat/Unity Export** | ⚠️ Documented | Packages exist but not fully wired to parser |
+| **49 VR Traits** | ⚠️ Partial | Parsed; 12 have handlers, 37 are stubs |
+| **Graphics Traits** | ✅ Working | MaterialTrait, LightingTrait, RenderingTrait complete |
 
 ---
-**Audit Conclusion**: The documentation is accurate. Recent parser upgrades have closed the gap on "Wild HoloScript" needs.
+
+## 2. What's Actually Working (Verified)
+
+### Parser (HoloScriptPlusParser)
+- ✅ `composition`, `template`, `object` syntax
+- ✅ `environment`, `system`, `core_config` blocks
+- ✅ Control flow: `@for`, `@forEach`, `@while`, `@if`/`@else`
+- ✅ All 49 VR trait annotations (`@grabbable`, `@physics`, etc.)
+- ✅ State declarations, reactive bindings
+- ✅ Narrative/quest/dialogue structures
+- ✅ Import/export (parsed, not executed)
+
+### Runtime (HoloScriptRuntime)
+- ✅ Orb/Object creation with spatial tracking
+- ✅ Function definition and invocation
+- ✅ Connections and reactive data flow
+- ✅ Gates (conditionals) and streams
+- ✅ Built-in functions (117+ commands)
+- ✅ Event system (EventBus)
+- ✅ **NEW**: Loop execution (`for`, `while`, `forEach`)
+- ✅ **NEW**: If/else statement execution
+- ✅ **NEW**: Match expression execution
+- ✅ **NEW**: State machine hook integration
+
+### Graphics Traits (packages/core/src/traits/)
+- ✅ MaterialTrait - PBR materials, textures, shaders
+- ✅ LightingTrait - Dynamic lights, shadows, GI
+- ✅ RenderingTrait - LOD, culling, batching, quality presets
+
+### Tests
+- ✅ 2338 passing tests
+- ✅ 101 test files
+- ✅ ~7s execution time
+
+---
+
+## 3. Documented But Not Fully Implemented
+
+### VR Traits (49 Documented, 12 Implemented)
+
+**Interaction Traits** - Parsed, handlers mostly stubs:
+| Trait | Handler Status |
+|-------|---------------|
+| `@grabbable` | ⚠️ Basic state tracking |
+| `@throwable` | ⚠️ Velocity calc, no physics |
+| `@clickable` | ⚠️ Event registration only |
+| `@hoverable` | ⚠️ Event registration only |
+| `@draggable` | ⚠️ Stub |
+| `@scalable` | ⚠️ Stub |
+
+**AI/Behavior Traits** - Parsed, minimal execution:
+| Trait | Handler Status |
+|-------|---------------|
+| `@behavior_tree` | ⚠️ State init, no tree traversal |
+| `@goal_oriented` | ⚠️ Stub |
+| `@llm_agent` | ⚠️ Stub (no LLM integration) |
+| `@perception` | ⚠️ Stub |
+| `@emotion` | ⚠️ Stub |
+
+**Physics Traits** - Parsed, no physics engine:
+| Trait | Handler Status |
+|-------|---------------|
+| `@cloth` | ❌ Stub |
+| `@fluid` | ❌ Stub |
+| `@soft_body` | ❌ Stub |
+| `@rope`, `@chain` | ❌ Stub |
+
+### Import/Export
+- ✅ Parsed by parser
+- ❌ Not executed at runtime (no module loading)
+
+### Parallel Execution
+- ❌ `@parallel`, `@spawn` keywords recognized but not executed
+
+### Exception Handling
+- ❌ `try/catch/throw` parsed but no runtime handlers
+
+---
+
+## 4. Platform Export Packages
+
+### @holoscript/vrchat-export
+- ✅ Package exists
+- ⚠️ Trait → UdonSharp mapping documented
+- ⚠️ Not wired to actual export pipeline
+
+### @holoscript/unity-adapter
+- ✅ Package exists
+- ⚠️ C# code generation documented
+- ⚠️ Not wired to actual export pipeline
+
+### @holoscript/three-adapter
+- ✅ Package exists
+- ⚠️ Three.js integration documented
+- ⚠️ Actual runtime rendering needs work
+
+---
+
+## 5. Documentation Accuracy
+
+### Accurate Documentation
+- ✅ `PHASE_1_2_IMPLEMENTATION_GUIDE.md` - Matches code
+- ✅ `GRAPHICS_IMPLEMENTATION_SUMMARY.md` - Complete, accurate
+- ✅ `SYNTAX_EXTENSIONS.md` - Matches parser
+
+### Needs Update
+- ⚠️ Trait examples use legacy `orb` syntax (updated in MCP server)
+- ⚠️ `spatial_group` documented but not a core construct
+- ⚠️ Some examples show features without noting they're aspirational
+
+### Updated Today
+- ✅ MCP server generators now output modern syntax
+- ✅ MCP server documentation notes legacy vs. modern syntax
+- ✅ Syntax reference prioritizes composition pattern
+
+---
+
+## 6. Recommendations
+
+### High Priority
+1. **Complete Trait Handlers**: Many traits have stub handlers - implement actual behavior
+2. **Module Loading**: Implement import/export execution
+3. **Physics Integration**: Connect physics traits to a physics engine
+
+### Medium Priority
+4. **Platform Exports**: Wire VRChat/Unity export to parser output
+5. **Three.js Rendering**: Complete the rendering pipeline
+6. **Parallel Execution**: Implement `@parallel`/`@spawn`
+
+### Low Priority
+7. **Exception Handling**: Add try/catch runtime execution
+8. **Update Legacy Docs**: Convert remaining `orb` examples to composition pattern
+
+---
+
+## 7. Additional Package Audit
+
+### @holoscript/lsp (Language Server)
+- ✅ **25 tests passing**
+- ✅ Real-time diagnostics
+- ✅ Auto-completion (with semantic intelligence)
+- ✅ Hover documentation
+- ✅ Go to definition
+- ✅ Find references
+- ✅ Rename support
+- ✅ Code actions
+- ✅ Document symbols
+- ✅ Semantic tokens (syntax highlighting)
+- ⚠️ AI completion provider (stub - needs API key)
+
+### @holoscript/formatter
+- ✅ **36 tests passing**
+- ✅ Configurable formatting (indent, braces, quotes)
+- ✅ Range formatting (format selection)
+- ✅ Import sorting
+- ✅ CLI support (`holoscript-format`)
+- ✅ Config file support (`.holoscriptrc`)
+
+### @holoscript/cli
+- ✅ **46 tests passing**
+- ✅ `holoscript validate` - Syntax validation
+- ✅ `holoscript build` - Multi-target compilation
+- ✅ `holoscript traits` - Trait documentation
+- ✅ `holoscript generate` - Code generation
+- ✅ `holoscript watch` - File watching
+- ✅ `holoscript publish` - Package publishing
+- ✅ REPL interactive mode
+
+### @holoscript/runtime
+- ✅ **Builds successfully**
+- ✅ BrowserRuntime with Three.js + WebXR
+- ✅ **NEW**: Logic extraction from AST
+- ✅ **NEW**: Statement execution (if/for/while/assign/emit)
+- ✅ **NEW**: Expression evaluation
+- ✅ Event handlers (frame, keyboard, collision)
+- ⚠️ 12 trait handlers implemented (49 documented)
+
+---
+
+## 8. Version History
+
+| Date | Version | Changes |
+|------|---------|---------|
+| 2026-02-06 | 3.0.1 | Runtime statement execution, package audit |
+| 2026-02-06 | 3.0.0 | Control flow execution, state machine hooks, browser compat fixes |
+| 2026-02-01 | 2.1.0 | Previous audit (superseded) |
+
+---
+
+**Audit Conclusion**: HoloScript v3.0 has a solid foundation with working parser and runtime. The main gaps are in trait handler implementations (12/49 have handlers) and platform export wiring. Documentation is largely accurate but should note which features are aspirational vs. implemented.

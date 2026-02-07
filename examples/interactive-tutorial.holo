@@ -1,78 +1,132 @@
-// Interactive Tutorial
+// Interactive Tutorial - HoloScript v2.1
 // Learn HoloScript basics step by step
 
-@world {
-  backgroundColor: "#1e3a5f"
-  ambient: 0.5
-  shadows: true
-}
+composition "Interactive Tutorial" {
+  environment {
+    skybox: "gradient"
+    background_color: "#1e3a5f"
+    ambient_light: 0.5
+    shadows: true
+  }
 
-// Welcome sign
-object "welcome_sign" @glowing {
-  position: [0, 2.5, -3]
-  scale: [3, 0.5, 0.1]
-  color: "#00ff88"
-  geometry: "cube"
-  emissive: "#00ff88"
-  emissiveIntensity: 0.5
-}
+  // ===================
+  // TUTORIAL STATE
+  // ===================
+  
+  object "TutorialState" {
+    state {
+      current_step: 1
+      steps_completed: 0
+    }
+    
+    action advance() {
+      state.current_step++
+      state.steps_completed++
+      trigger "step_completed"
+    }
+  }
 
-// Step 1: Basic cube
-object "step1_cube" @pointable {
-  position: [-3, 1, 0]
-  scale: [0.8, 0.8, 0.8]
-  color: "#ff6b6b"
-  geometry: "cube"
-  material: "plastic"
-}
+  // ===================
+  // TEMPLATES
+  // ===================
 
-// Step 2: Add interaction
-orb "step2_orb" @grabbable {
-  position: [0, 1, 0]
-  scale: [0.6, 0.6, 0.6]
-  color: "#4ecdc4"
-  geometry: "sphere"
-  material: "shiny"
-}
+  template "ProgressDot" {
+    @glowing
+    
+    geometry: "cylinder"
+    scale: [0.3, 0.1, 0.3]
+    
+    state {
+      completed: false
+    }
+  }
 
-// Step 3: Animation
-orb "step3_animated" @animated {
-  position: [3, 1, 0]
-  scale: [0.7, 0.7, 0.7]
-  color: "#ffe66d"
-  geometry: "sphere"
-  animate: "float"
-  animSpeed: 1
-}
+  // ===================
+  // OBJECTS
+  // ===================
 
-// Floor grid
-object "floor" @collidable {
-  position: [0, 0, 0]
-  scale: [10, 0.1, 10]
-  color: "#2d3436"
-  geometry: "cube"
-}
+  // Welcome sign
+  object "WelcomeSign" {
+    @glowing
+    
+    position: [0, 2.5, -3]
+    scale: [3, 0.5, 0.1]
+    geometry: "cube"
+    color: "#00ff88"
+    emissive: "#00ff88"
+    emissiveIntensity: 0.5
+  }
 
-// Progress indicator
-object "progress_1" @glowing {
-  position: [-3, 0.2, 2]
-  scale: [0.3, 0.1, 0.3]
-  color: "#00ff00"
-  geometry: "cylinder"
-  emissive: "#00ff00"
-  emissiveIntensity: 1
-}
+  // Step 1: Basic cube - learn about objects
+  object "Step1Cube" {
+    @pointable
+    
+    position: [-3, 1, 0]
+    scale: [0.8, 0.8, 0.8]
+    geometry: "cube"
+    color: "#ff6b6b"
+    material: "plastic"
+    
+    on_point() {
+      flash_color("#ffffff", 200ms)
+      TutorialState.advance()
+    }
+  }
 
-object "progress_2" {
-  position: [0, 0.2, 2]
-  scale: [0.3, 0.1, 0.3]
-  color: "#444444"
-  geometry: "cylinder"
-}
+  // Step 2: Grabbable orb - learn about interaction
+  object "Step2Orb" {
+    @grabbable
+    
+    position: [0, 1, 0]
+    scale: [0.6, 0.6, 0.6]
+    geometry: "sphere"
+    color: "#4ecdc4"
+    material: "shiny"
+    
+    on_grab() {
+      pulse_scale(1.2, 100ms)
+      TutorialState.advance()
+    }
+  }
 
-object "progress_3" {
-  position: [3, 0.2, 2]
-  scale: [0.3, 0.1, 0.3]
-  color: "#444444"
-  geometry: "cylinder"
+  // Step 3: Animated orb - learn about animations
+  object "Step3Animated" {
+    @animated
+    
+    position: [3, 1, 0]
+    scale: [0.7, 0.7, 0.7]
+    geometry: "sphere"
+    color: "#ffe66d"
+    animate: "float"
+    animSpeed: 1
+  }
+
+  // Floor grid
+  object "Floor" {
+    @collidable
+    
+    position: [0, 0, 0]
+    scale: [10, 0.1, 10]
+    geometry: "cube"
+    color: "#2d3436"
+  }
+
+  // Progress indicators
+  object "Progress1" using "ProgressDot" {
+    position: [-3, 0.2, 2]
+    color: "#00ff00"
+    emissive: "#00ff00"
+    emissiveIntensity: 1
+    state { completed: true }
+  }
+
+  object "Progress2" using "ProgressDot" {
+    position: [0, 0.2, 2]
+    color: "#444444"
+  }
+
+  object "Progress3" using "ProgressDot" {
+    position: [3, 0.2, 2]
+    color: "#444444"
+  }
 }

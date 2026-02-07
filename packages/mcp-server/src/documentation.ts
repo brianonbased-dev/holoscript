@@ -677,31 +677,46 @@ interface TraitDoc {
 export const SYNTAX_DOCS: Record<string, SyntaxDoc> = {
   orb: {
     topic: 'orb',
-    description: 'Define a 3D object in classic HoloScript or HoloScript Plus syntax.',
-    syntax: `orb <name> [traits] {
+    description: 'LEGACY: Define a 3D object. Prefer using composition/template/object pattern for new code.',
+    syntax: `// LEGACY SYNTAX (still supported):
+orb <name> [traits] {
   geometry: "<type>"
   position: [x, y, z]
-  rotation: [x, y, z]
-  scale: [x, y, z]
   color: "<hex>"
-  // ... other properties
+}
+
+// MODERN SYNTAX (recommended):
+composition "Scene" {
+  template "MyTemplate" {
+    @traits
+    geometry: "<type>"
+    color: "<hex>"
+  }
+  object "MyObject" using "MyTemplate" {
+    position: [x, y, z]
+  }
 }`,
     examples: [
       {
-        description: 'Simple sphere',
-        code: `orb MySphere {
-  geometry: "sphere"
-  color: "#00ffff"
-  position: [0, 1, 0]
+        description: 'Modern composition pattern (recommended)',
+        code: `composition "MyScene" {
+  template "SphereTemplate" {
+    @grabbable @glowing
+    geometry: "sphere"
+    color: "#00ffff"
+  }
+
+  object "MySphere" using "SphereTemplate" {
+    position: [0, 1, 0]
+  }
 }`,
       },
       {
-        description: 'Interactive cube with traits',
+        description: 'Legacy orb syntax (still works)',
         code: `orb MyCube @grabbable @glowing {
   geometry: "cube"
   color: "#ff8800"
   position: [2, 1, 0]
-  onGrab: { haptic.feedback('light') }
 }`,
       },
     ],
@@ -830,22 +845,31 @@ export const SYNTAX_DOCS: Record<string, SyntaxDoc> = {
   
   spatial_group: {
     topic: 'spatial_group',
-    description: 'Group objects spatially for organization and transformations.',
-    syntax: `spatial_group "<name>" [@traits] {
-  position: [x, y, z]  // Group offset
-  
-  object "<child>" { ... }
-  // ... more objects
+    description: 'DEPRECATED: Group objects. Instead, use multiple templates and objects within a composition.',
+    syntax: `// DEPRECATED - use composition pattern instead:
+composition "Scene" {
+  template "FurnitureTemplate" { ... }
+
+  // Objects can be organized logically without spatial_group
+  object "Couch" using "FurnitureTemplate" { position: [0, 0, 0] }
+  object "Table" using "FurnitureTemplate" { position: [2, 0, 1] }
 }`,
     examples: [
       {
-        description: 'Room group',
-        code: `spatial_group "LivingRoom" {
-  position: [10, 0, 0]
-  
-  object "Couch" { position: [0, 0, 0] }
-  object "Table" { position: [2, 0, 1] }
-  object "Lamp" { position: [3, 1, 0] }
+        description: 'Modern pattern (recommended)',
+        code: `composition "LivingRoom" {
+  environment {
+    name: "Living Room"
+  }
+
+  template "Furniture" {
+    @collidable
+    geometry: "model/furniture.glb"
+  }
+
+  object "Couch" using "Furniture" { position: [0, 0, 0] }
+  object "Table" using "Furniture" { position: [2, 0, 1] }
+  object "Lamp" using "Furniture" { position: [3, 1, 0] }
 }`,
       },
     ],

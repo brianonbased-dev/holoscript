@@ -1,34 +1,49 @@
 // Atomic/molecular building fixture
-sphere#hydrogen_1 @stretchable(mode: "bond", snap_to: "atoms", bond_type: "single") {
-  position: [0, 0, 0]
-  color: "#ffffff"
-  size: 0.3
-  tag: "atom"
-  element: "H"
 
-  @on_stretch(delta) => update_bond_visualization(delta)
-}
+composition "StretchableAtoms" {
+  template "HydrogenAtom" {
+    @stretchable(mode: "bond", snap_to: "atoms", bond_type: "single")
+    geometry: "sphere"
+    color: "#ffffff"
+    tag: "atom"
+    element: "H"
 
-sphere#hydrogen_2 @stretchable(mode: "bond", snap_to: "atoms", bond_type: "single") {
-  position: [1.5, 0, 0]
-  color: "#ffffff"
-  size: 0.3
-  tag: "atom"
-  element: "H"
-}
+    @on_stretch(delta) => update_bond_visualization(delta)
+  }
 
-sphere#oxygen @stretchable(mode: "bond", snap_to: "atoms", bond_type: "single") {
-  position: [0.75, 0.5, 0]
-  color: "#ff0000"
-  size: 0.4
-  tag: "atom"
-  element: "O"
-}
+  template "OxygenAtom" {
+    @stretchable(mode: "bond", snap_to: "atoms", bond_type: "single")
+    geometry: "sphere"
+    color: "#ff0000"
+    tag: "atom"
+    element: "O"
+  }
 
-// Clay sculpting example
-mesh#clay_block @moldable(tool: "fingers", softness: 0.7, symmetry: true) {
-  position: [5, 1, 0]
-  material: "clay"
+  template "ClayBlock" {
+    @moldable(tool: "fingers", softness: 0.7, symmetry: true)
+    geometry: "mesh"
+    material: "clay"
 
-  @on_sculpt(region, pressure) => update_mesh(region, pressure)
+    @on_sculpt(region, pressure) => update_mesh(region, pressure)
+  }
+
+  object "Hydrogen1" using "HydrogenAtom" {
+    position: [0, 0, 0]
+    scale: [0.3, 0.3, 0.3]
+  }
+
+  object "Hydrogen2" using "HydrogenAtom" {
+    position: [1.5, 0, 0]
+    scale: [0.3, 0.3, 0.3]
+  }
+
+  object "Oxygen" using "OxygenAtom" {
+    position: [0.75, 0.5, 0]
+    scale: [0.4, 0.4, 0.4]
+  }
+
+  // Clay sculpting example
+  object "ClayBlock" using "ClayBlock" {
+    position: [5, 1, 0]
+  }
 }

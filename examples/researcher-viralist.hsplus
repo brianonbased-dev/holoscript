@@ -1,69 +1,98 @@
 // Researcher Viralist
 // Data visualization research environment
 
-@world {
-  backgroundColor: "#0d1421"
-  ambient: 0.5
-  shadows: true
-}
+composition "ResearcherViralist" {
+  environment {
+    backgroundColor: "#0d1421"
+    ambient: 0.5
+    shadows: true
+  }
 
-// Central data sphere
-sphere#dataCore @glowing @animated {
-  position: [0, 2, 0]
-  color: "#00ffff"
-  size: 0.8
-}
+  // === TEMPLATES ===
 
-// Data ring 1
-torus#ring1 @animated {
-  position: [0, 2, 0]
-  color: "#ff00ff"
-  scale: [1.5, 1.5, 0.1]
-}
+  template "DataCore" {
+    @glowing
+    @animated
+    geometry: "sphere"
+    color: "#00ffff"
+  }
 
-// Data ring 2
-torus#ring2 @animated {
-  position: [0, 2, 0]
-  color: "#ffff00"
-  scale: [2, 2, 0.1]
-}
+  template "DataRing" {
+    @animated
+    geometry: "torus"
+  }
 
-// Connection nodes
-sphere#node1 @pointable @glowing {
-  position: [-2, 2, 0]
-  color: "#00ff88"
-  size: 0.2
-}
+  template "ConnectionNode" {
+    @pointable
+    @glowing
+    geometry: "sphere"
+    color: "#00ff88"
+  }
 
-sphere#node2 @pointable @glowing {
-  position: [2, 2, 0]
-  color: "#00ff88"
-  size: 0.2
-}
+  template "ResearchConsole" {
+    @pointable
+    geometry: "box"
+    color: "#2a2a4a"
+  }
 
-sphere#node3 @pointable @glowing {
-  position: [0, 2, -2]
-  color: "#00ff88"
-  size: 0.2
-}
+  template "Floor" {
+    geometry: "plane"
+    color: "#1a1a2a"
+  }
 
-sphere#node4 @pointable @glowing {
-  position: [0, 2, 2]
-  color: "#00ff88"
-  size: 0.2
-}
+  // === OBJECTS ===
 
-// Research console
-box#console @pointable {
-  position: [0, 1, 3]
-  color: "#2a2a4a"
-  scale: [1.5, 1, 0.5]
-}
+  // Central data sphere
+  object "DataCore" using "DataCore" {
+    position: [0, 2, 0]
+    scale: [0.8, 0.8, 0.8]
+  }
 
-// Floor
-plane#floor {
-  position: [0, 0, 0]
-  rotation: [-90, 0, 0]
-  scale: [12, 12, 1]
-  color: "#1a1a2a"
+  // Data ring 1
+  object "Ring1" using "DataRing" {
+    position: [0, 2, 0]
+    scale: [1.5, 1.5, 0.1]
+    color: "#ff00ff"
+  }
+
+  // Data ring 2
+  object "Ring2" using "DataRing" {
+    position: [0, 2, 0]
+    scale: [2, 2, 0.1]
+    color: "#ffff00"
+  }
+
+  // Connection nodes
+  object "Node1" using "ConnectionNode" {
+    position: [-2, 2, 0]
+    scale: [0.2, 0.2, 0.2]
+  }
+
+  object "Node2" using "ConnectionNode" {
+    position: [2, 2, 0]
+    scale: [0.2, 0.2, 0.2]
+  }
+
+  object "Node3" using "ConnectionNode" {
+    position: [0, 2, -2]
+    scale: [0.2, 0.2, 0.2]
+  }
+
+  object "Node4" using "ConnectionNode" {
+    position: [0, 2, 2]
+    scale: [0.2, 0.2, 0.2]
+  }
+
+  // Research console
+  object "Console" using "ResearchConsole" {
+    position: [0, 1, 3]
+    scale: [1.5, 1, 0.5]
+  }
+
+  // Floor
+  object "Floor" using "Floor" {
+    position: [0, 0, 0]
+    rotation: [-90, 0, 0]
+    scale: [12, 12, 1]
+  }
 }

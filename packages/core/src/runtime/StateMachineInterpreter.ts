@@ -7,11 +7,22 @@ export interface StateMachineInstance {
   context: Record<string, any>;
 }
 
+/** Hook executor function type */
+export type HookExecutor = (code: string, context: Record<string, any>) => any;
+
 /**
  * StateMachineInterpreter - Handles runtime execution of spatial state machines
  */
 export class StateMachineInterpreter {
   private instances: Map<string, StateMachineInstance> = new Map();
+  private hookExecutor: HookExecutor | null = null;
+
+  /**
+   * Set the hook executor function (called by runtime during initialization)
+   */
+  public setHookExecutor(executor: HookExecutor): void {
+    this.hookExecutor = executor;
+  }
 
   /**
    * Initialize a new state machine instance
@@ -88,11 +99,20 @@ export class StateMachineInterpreter {
   }
 
   /**
-   * Execute code block (to be integrated with actual runtime evaluator)
+   * Execute code block using the registered hook executor
    */
   private executeHook(id: string, code: string, context: Record<string, any>): void {
     logger.debug(`[StateMachine] Executing hook for ${id}: ${code.substring(0, 50)}...`);
-    // NOTE: This will be connected to the true evaluateCode() in HoloScriptRuntime
+
+    if (this.hookExecutor) {
+      try {
+        this.hookExecutor(code, context);
+      } catch (error: any) {
+        logger.error(`[StateMachine] Hook execution failed for ${id}: ${error.message}`);
+      }
+    } else {
+      logger.warn(`[StateMachine] No hook executor registered - hook code not executed`);
+    }
   }
 
   public getInstance(id: string): StateMachineInstance | undefined {

@@ -1,50 +1,118 @@
-// World Builder Example
+// World Builder - HoloScript v2.1
 // Interactive scene construction demo
 
-@world {
-  backgroundColor: "#1a1a2e"
-  ambient: 0.5
-  shadows: true
-}
+composition "World Builder" {
+  environment {
+    skybox: "night"
+    background_color: "#1a1a2e"
+    ambient_light: 0.5
+    shadows: true
+  }
 
-// Main building platform
-object "platform" @collidable {
-  position: [0, 0, 0]
-  scale: [10, 0.2, 10]
-  color: "#2d2d44"
-  geometry: "cube"
-  material: "concrete"
-}
+  // ===================
+  // BUILDER STATE
+  // ===================
+  
+  object "BuilderState" {
+    state {
+      selected_tool: "move"
+      blocks_placed: 0
+      undo_stack: []
+    }
+    
+    action place_block() {
+      state.blocks_placed++
+    }
+    
+    action select_tool(tool) {
+      state.selected_tool = tool
+      trigger "tool_changed"
+    }
+  }
 
-// Grabbable building blocks
-orb "block_red" @grabbable @collidable {
-  position: [-2, 1, 0]
-  scale: [0.5, 0.5, 0.5]
-  color: "#ff4444"
-  geometry: "cube"
-  material: "plastic"
-}
+  // ===================
+  // TEMPLATES
+  // ===================
 
-orb "block_blue" @grabbable @collidable {
-  position: [0, 1, 0]
-  scale: [0.5, 0.5, 0.5]
-  color: "#4444ff"
-  geometry: "cube"
-  material: "plastic"
-}
+  template "BuildingBlock" {
+    @grabbable
+    @collidable
+    @physics
+    
+    geometry: "cube"
+    material: "plastic"
+    
+    state {
+      is_placed: false
+    }
+    
+    on_grab() {
+      state.is_placed = false
+    }
+    
+    on_release() {
+      state.is_placed = true
+      BuilderState.place_block()
+    }
+  }
 
-orb "block_green" @grabbable @collidable {
-  position: [2, 1, 0]
-  scale: [0.5, 0.5, 0.5]
-  color: "#44ff44"
-  geometry: "cube"
-  material: "plastic"
-}
+  // ===================
+  // OBJECTS
+  // ===================
 
-// Tool palette
-object "palette" {
-  position: [-4, 1.5, -2]
-  scale: [1, 2, 0.1]
-  color: "#333344"
-  geometry: "cube"
+  // Main building platform
+  object "Platform" {
+    @collidable
+    @static
+    
+    position: [0, 0, 0]
+    scale: [10, 0.2, 10]
+    geometry: "cube"
+    color: "#2d2d44"
+    material: "concrete"
+  }
+
+  // Grabbable building blocks
+  object "BlockRed" using "BuildingBlock" {
+    position: [-2, 1, 0]
+    scale: [0.5, 0.5, 0.5]
+    color: "#ff4444"
+  }
+
+  object "BlockBlue" using "BuildingBlock" {
+    position: [0, 1, 0]
+    scale: [0.5, 0.5, 0.5]
+    color: "#4444ff"
+  }
+
+  object "BlockGreen" using "BuildingBlock" {
+    position: [2, 1, 0]
+    scale: [0.5, 0.5, 0.5]
+    color: "#44ff44"
+  }
+
+  // Tool palette
+  object "Palette" {
+    @pointable
+    
+    position: [-4, 1.5, -2]
+    scale: [1, 2, 0.1]
+    geometry: "cube"
+    color: "#333344"
+    
+    on_point() {
+      trigger "open_tools"
+    }
+  }
+
+  // ===================
+  // UI PANELS
+  // ===================
+
+  panel "HUD" {
+    position: "top-right"
+    
+    text "Blocks" { bind: BuilderState.state.blocks_placed; style: "info" }
+    text "Tool" { bind: BuilderState.state.selected_tool; style: "info" }
+  }
 }

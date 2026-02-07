@@ -49,18 +49,24 @@ voiceInput.stopListening();
 
 #### In HoloScript+ Code
 
-```holo
-orb#myOrb {
-  position: [0, 0, -2]
-  @grabbable
-  @voice_input(
-    mode: "continuous"
-    confidence_threshold: 0.7
-    commands: [
-      { phrase: "grab", action: "grab" },
-      { phrase: "throw", action: "throw" }
-    ]
-  )
+```hsplus
+composition "VoiceDemo" {
+  template "MyOrb" {
+    @grabbable
+    @voice_input(
+      mode: "continuous"
+      confidence_threshold: 0.7
+      commands: [
+        { phrase: "grab", action: "grab" },
+        { phrase: "throw", action: "throw" }
+      ]
+    )
+    geometry: "sphere"
+  }
+
+  object "MyOrb" using "MyOrb" {
+    position: [0, 0, -2]
+  }
 }
 ```
 
@@ -110,17 +116,23 @@ console.log('NPC mood:', context.mood);
 
 #### In HoloScript+ Code
 
-```holo
-npc#shopkeeper {
-  position: [0, 1.5, 0]
-  @ai_driven(
-    decision_mode: "hybrid"
-    personality: { sociability: 0.8, aggression: 0.1 }
-    goals: [
-      { id: "greet", priority: 1.0, name: "Greet customers" }
-    ]
-  )
-  @on_perception_change { ... }
+```hsplus
+composition "NPCDemo" {
+  template "Shopkeeper" {
+    @ai_driven(
+      decision_mode: "hybrid"
+      personality: { sociability: 0.8, aggression: 0.1 }
+      goals: [
+        { id: "greet", priority: 1.0, name: "Greet customers" }
+      ]
+    )
+    @on_perception_change { ... }
+    geometry: "humanoid"
+  }
+
+  object "Shopkeeper" using "Shopkeeper" {
+    position: [0, 1.5, 0]
+  }
 }
 ```
 
@@ -288,19 +300,26 @@ console.log('Top Items:', report.topItems);
 
 ### 1. Voice + Interaction
 
-```holo
-button#buyBtn {
-  @clickable
-  @voice_input(
-    commands: [
-      { phrase: "buy", action: "purchase" },
-      { phrase: "cancel", action: "cancel_purchase" }
-    ]
-  )
-  @on_voice_recognized { result } -> {
-    if (result.matched_command.action == "purchase") {
-      emit("shop:purchase_requested")
+```hsplus
+composition "VoiceInteraction" {
+  template "BuyButton" {
+    @clickable
+    @voice_input(
+      commands: [
+        { phrase: "buy", action: "purchase" },
+        { phrase: "cancel", action: "cancel_purchase" }
+      ]
+    )
+    @on_voice_recognized { result } -> {
+      if (result.matched_command.action == "purchase") {
+        emit("shop:purchase_requested")
+      }
     }
+    geometry: "box"
+  }
+
+  object "BuyBtn" using "BuyButton" {
+    position: [0, 1, 0]
   }
 }
 ```
@@ -324,28 +343,35 @@ const context = npc.getContext();
 
 ### 3. Inventory + Voice Commerce
 
-```holo
-orb#shopInventory {
-  @ai_driven(
-    personality: { sociability: 0.8 }
-  )
-  @voice_input(
-    commands: [
-      { phrase: "what do you have", action: "list_inventory" },
-      { phrase: "show me swords", action: "filter_category", params: { category: "weapons" } },
-      { phrase: "how much is the sword", action: "query_price" }
-    ]
-  )
-  @on_voice_recognized { result } -> {
-    action := result.matched_command.action
-    
-    if (action == "list_inventory") {
-      shopkeeper.show_inventory()
+```hsplus
+composition "VoiceCommerce" {
+  template "ShopInventory" {
+    @ai_driven(
+      personality: { sociability: 0.8 }
+    )
+    @voice_input(
+      commands: [
+        { phrase: "what do you have", action: "list_inventory" },
+        { phrase: "show me swords", action: "filter_category", params: { category: "weapons" } },
+        { phrase: "how much is the sword", action: "query_price" }
+      ]
+    )
+    @on_voice_recognized { result } -> {
+      action := result.matched_command.action
+
+      if (action == "list_inventory") {
+        shopkeeper.show_inventory()
+      }
+      else if (action == "query_price") {
+        price := shopkeeper.get_price("sword_001")
+        speak("That sword costs ${price} credits")
+      }
     }
-    else if (action == "query_price") {
-      price := shopkeeper.get_price("sword_001")
-      speak("That sword costs ${price} credits")
-    }
+    geometry: "sphere"
+  }
+
+  object "ShopInventory" using "ShopInventory" {
+    position: [0, 1, 0]
   }
 }
 ```

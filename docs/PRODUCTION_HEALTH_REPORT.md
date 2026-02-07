@@ -46,7 +46,7 @@
 
 7. **Hash Color Support** (PARTIAL)
    - Added HASH token handling to `parsePrimary()` in HoloScriptPlusParser
-   - Issue: `orb#id` CSS-like syntax still failing (different issue)
+   - Issue: Legacy CSS-like ID syntax deprecated (use modern composition syntax)
 
 ## Current Test Breakdown
 
@@ -54,7 +54,7 @@
 |-----------|--------|-------|-------|
 | .holo | 8/18 (44%) | 10/18 (56%) | +2 files |
 | .hs | 1/10 (10%) | 1/10 (10%) | No change - HoloScriptPlusParser issues |
-| .hsplus | 2/6 (33%) | 2/6 (33%) | HASH in `orb#id` syntax |
+| .hsplus | 2/6 (33%) | 2/6 (33%) | Modern composition syntax |
 | Error recovery | 7/8 (88%) | 8/8 (100%) | All passing |
 | Bug cases | 1/4 (25%) | 1/4 (25%) | Complex syntax |
 | Memory | 1/1 (100%) | 1/1 (100%) | Stable |
@@ -62,7 +62,7 @@
 ### Remaining Issues
 1. **@decorators inside composition blocks** - templates with inline traits
 2. **Assignment syntax in event handlers** - `variable = value` vs `property: value`
-3. **`orb#id` CSS-like ID syntax** - used in .hsplus files
+3. **Legacy CSS-like ID syntax deprecated** - use modern `composition { template; object }` pattern
 4. **Spread operator `...` syntax**
 
 ### Testing Infrastructure

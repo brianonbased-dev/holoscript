@@ -230,37 +230,53 @@ function generateHoloObject(name: string, geometry: string, color: string, trait
   const docComment = docs
     ? `  // ${name} - Generated from natural language description\n`
     : '';
-  
-  return `${docComment}  object "${name}" {
+
+  return `${docComment}  template "${name}Template" {
 ${traitsStr}
     geometry: "${geometry}"
     color: "${color}"
+  }
+
+  object "${name}" using "${name}Template" {
     position: [0, 1, 0]
   }`;
 }
 
 function generateHsplusObject(name: string, geometry: string, color: string, traits: string[], docs?: boolean): string {
-  const traitsStr = traits.join(' ');
+  const traitsStr = traits.map(t => `  ${t}`).join('\n');
   const docComment = docs
     ? `// ${name} - Generated from natural language description\n`
     : '';
-  
-  return `${docComment}orb ${name} ${traitsStr} {
-  geometry: "${geometry}"
-  color: "${color}"
-  position: [0, 1, 0]
+
+  return `${docComment}composition "${name}Scene" {
+  template "${name}Template" {
+${traitsStr}
+    geometry: "${geometry}"
+    color: "${color}"
+  }
+
+  object "${name}" using "${name}Template" {
+    position: [0, 1, 0]
+  }
 }`;
 }
 
 function generateHsObject(name: string, geometry: string, color: string, traits: string[], docs?: boolean): string {
+  const traitsStr = traits.map(t => `  ${t}`).join('\n');
   const docComment = docs
     ? `// ${name} - Generated from natural language description\n`
     : '';
-  
-  return `${docComment}orb ${name} {
-  geometry: "${geometry}"
-  color: "${color}"
-  position: { x: 0, y: 1, z: 0 }
+
+  return `${docComment}composition "${name}Scene" {
+  template "${name}Template" {
+${traitsStr}
+    geometry: "${geometry}"
+    color: "${color}"
+  }
+
+  object "${name}" using "${name}Template" {
+    position: [0, 1, 0]
+  }
 }`;
 }
 
@@ -298,11 +314,9 @@ export function generateScene(description: string, options: SceneOptions = {}): 
   const code = `composition "${elements.name}" {
   ${environment}
 
-  spatial_group "Main" {
-${objects.map(o => '    ' + o.replace(/\n/g, '\n    ')).join('\n\n')}
-  }
+${objects.map(o => '  ' + o.replace(/\n/g, '\n  ')).join('\n\n')}
 ${logic ? '\n  ' + logic : ''}}`;
-  
+
   return {
     code,
     stats: {

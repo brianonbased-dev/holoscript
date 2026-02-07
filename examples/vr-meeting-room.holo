@@ -1,75 +1,96 @@
-// VR Meeting Room
+// VR Meeting Room - HoloScript v2.1
 // Professional virtual conference space
 
-@world {
-  backgroundColor: "#0d1117"
-  ambient: 0.6
-  shadows: true
-}
+composition "VR Meeting Room" {
+  environment {
+    skybox: "office"
+    ambient_light: 0.6
+    shadows: true
+  }
 
-// Conference table
-object "table" @collidable {
-  position: [0, 0.75, 0]
-  scale: [3, 0.1, 1.5]
-  color: "#2c3e50"
-  geometry: "cube"
-  material: "wood"
-}
+  // ===================
+  // TEMPLATES
+  // ===================
 
-// Chairs around table
-object "chair_1" @collidable {
-  position: [-1, 0.5, 1.2]
-  scale: [0.4, 0.5, 0.4]
-  color: "#34495e"
-  geometry: "cube"
-}
+  template "Chair" {
+    @collidable
+    @sittable
+    
+    geometry: "cube"
+    color: "#34495e"
+  }
 
-object "chair_2" @collidable {
-  position: [1, 0.5, 1.2]
-  scale: [0.4, 0.5, 0.4]
-  color: "#34495e"
-  geometry: "cube"
-}
+  template "LightOrb" {
+    @glowing
+    
+    geometry: "sphere"
+    color: "#f0f0f0"
+    emissive: "#ffffff"
+    emissiveIntensity: 1
+  }
 
-object "chair_3" @collidable {
-  position: [-1, 0.5, -1.2]
-  scale: [0.4, 0.5, 0.4]
-  color: "#34495e"
-  geometry: "cube"
-}
+  // ===================
+  // OBJECTS
+  // ===================
 
-object "chair_4" @collidable {
-  position: [1, 0.5, -1.2]
-  scale: [0.4, 0.5, 0.4]
-  color: "#34495e"
-  geometry: "cube"
-}
+  // Conference table
+  object "Table" {
+    @collidable
+    
+    position: [0, 0.75, 0]
+    scale: [3, 0.1, 1.5]
+    geometry: "cube"
+    color: "#2c3e50"
+    material: "wood"
+  }
 
-// Presentation screen
-object "screen" @glowing {
-  position: [0, 2, -3]
-  scale: [4, 2.25, 0.1]
-  color: "#ffffff"
-  geometry: "cube"
-  emissive: "#ffffff"
-  emissiveIntensity: 0.8
-}
+  // Chairs around table
+  object "Chair1" using "Chair" {
+    position: [-1, 0.5, 1.2]
+    scale: [0.4, 0.5, 0.4]
+  }
 
-// Ambient lighting orbs
-orb "light_1" @glowing {
-  position: [-2, 3, -1]
-  scale: [0.2, 0.2, 0.2]
-  color: "#f0f0f0"
-  geometry: "sphere"
-  emissive: "#ffffff"
-  emissiveIntensity: 1
-}
+  object "Chair2" using "Chair" {
+    position: [1, 0.5, 1.2]
+    scale: [0.4, 0.5, 0.4]
+  }
 
-orb "light_2" @glowing {
-  position: [2, 3, -1]
-  scale: [0.2, 0.2, 0.2]
-  color: "#f0f0f0"
-  geometry: "sphere"
-  emissive: "#ffffff"
-  emissiveIntensity: 1
+  object "Chair3" using "Chair" {
+    position: [-1, 0.5, -1.2]
+    scale: [0.4, 0.5, 0.4]
+  }
+
+  object "Chair4" using "Chair" {
+    position: [1, 0.5, -1.2]
+    scale: [0.4, 0.5, 0.4]
+  }
+
+  // Presentation screen
+  object "Screen" {
+    @glowing
+    @pointable
+    
+    position: [0, 2, -3]
+    scale: [4, 2.25, 0.1]
+    geometry: "cube"
+    color: "#ffffff"
+    emissive: "#ffffff"
+    emissiveIntensity: 0.8
+    
+    on_point() {
+      // Toggle presentation mode
+      trigger "screen_activated"
+    }
+  }
+
+  // Ambient lighting orbs
+  object "Light1" using "LightOrb" {
+    position: [-2, 3, -1]
+    scale: [0.2, 0.2, 0.2]
+  }
+
+  object "Light2" using "LightOrb" {
+    position: [2, 3, -1]
+    scale: [0.2, 0.2, 0.2]
+  }
 }

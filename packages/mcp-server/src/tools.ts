@@ -188,8 +188,8 @@ export const tools: Tool[] = [
       properties: {
         topic: {
           type: 'string',
-          enum: ['orb', 'object', 'template', 'composition', 'environment', 'spatial_group', 'logic', 'animation', 'physics', 'events', 'networking', 'traits'],
-          description: 'The syntax topic to get documentation for',
+          enum: ['composition', 'template', 'object', 'environment', 'logic', 'animation', 'physics', 'events', 'networking', 'traits', 'orb', 'spatial_group'],
+          description: 'The syntax topic to get documentation for. Prefer composition/template/object (modern) over orb/spatial_group (legacy).',
         },
       },
       required: ['topic'],
