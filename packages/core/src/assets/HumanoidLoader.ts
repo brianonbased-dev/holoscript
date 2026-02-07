@@ -362,6 +362,7 @@ export class HumanoidLoader {
     // This allows the loader to work without Three.js being bundled
     try {
       // Dynamic import pattern for Three.js GLTFLoader
+      // @ts-expect-error - three.js is an optional peer dependency
       const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
       this.gltfLoader = new GLTFLoader();
 

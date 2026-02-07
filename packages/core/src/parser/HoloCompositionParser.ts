@@ -2039,6 +2039,24 @@ export class HoloCompositionParser {
     return { type: 'EmitStatement', event, data };
   }
 
+  private parseOnErrorStatement(): HoloStatement {
+    this.expect('ON_ERROR');
+    this.expect('LBRACE');
+    this.skipNewlines();
+
+    const body: HoloStatement[] = [];
+    while (!this.check('RBRACE') && !this.isAtEnd()) {
+      this.skipNewlines();
+      if (this.check('RBRACE')) break;
+      const stmt = this.parseStatement();
+      if (stmt) body.push(stmt);
+      this.skipNewlines();
+    }
+
+    this.expect('RBRACE');
+    return { type: 'OnErrorStatement', body };
+  }
+
   private parseAnimateStatement(): HoloStatement {
     this.expect('ANIMATE');
     const target = this.expectString();
