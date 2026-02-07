@@ -2,13 +2,20 @@
 
 **Write less code. Build more.**
 
-A declarative, open-source language that compiles to 9 platforms from one source.
+A declarative, open-source language that compiles to 18+ platforms from one source.
 
 <p align="center">
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="MIT License"></a>
   <a href="https://www.npmjs.com/package/@holoscript/core"><img src="https://img.shields.io/npm/v/@holoscript/core?style=for-the-badge&label=core" alt="npm"></a>
-  <a href="https://pypi.org/project/holoscript/"><img src="https://img.shields.io/pypi/v/holoscript?style=for-the-badge&label=pypi" alt="PyPI"></a>
-  <a href="#-vrchat-alpha"><img src="https://img.shields.io/badge/VRChat_Alpha-NOW_AVAILABLE-ff6600?style=for-the-badge" alt="VRChat Alpha"></a>
+  <a href="https://github.com/brianonbased-dev/Holoscript/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/brianonbased-dev/Holoscript/ci.yml?branch=main&style=for-the-badge&label=build" alt="Build Status"></a>
+  <a href="https://github.com/brianonbased-dev/Holoscript/releases/tag/v3.0.0"><img src="https://img.shields.io/badge/version-v3.0.0-green?style=for-the-badge" alt="v3.0.0"></a>
+</p>
+
+<p align="center">
+  <a href="#-compile-targets"><img src="https://img.shields.io/badge/platforms-18+-purple?style=flat-square" alt="18+ Platforms"></a>
+  <a href="docs/TRAITS_REFERENCE.md"><img src="https://img.shields.io/badge/VR_traits-49-orange?style=flat-square" alt="49 VR Traits"></a>
+  <a href="#-editor-support"><img src="https://img.shields.io/badge/editors-VS_Code_|_Neovim_|_IntelliJ-blue?style=flat-square" alt="Editor Support"></a>
+  <a href="https://discord.gg/holoscript"><img src="https://img.shields.io/badge/discord-join-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord"></a>
 </p>
 
 <p align="center">
@@ -568,17 +575,24 @@ console.log(result.holoScript); // Ready to deploy
 
 ## Deploy Targets
 
-| Platform | Status |
-|----------|--------|
-| Web (React/Vue/Angular) | ✅ |
-| WebXR (VR) | ✅ |
-| WebAR | ✅ |
-| React Native | ✅ |
-| Flutter | 🟡 *coming soon* |
-| iOS (SwiftUI) | 🟡 *coming soon* |
-| Android (Jetpack) | 🟡 *coming soon* |
-| Electron | ✅ |
-| Tauri | 🟡 *coming soon* |
+| Platform | Compiler | Status |
+|----------|----------|--------|
+| Web (R3F/Babylon) | R3FCompiler, BabylonCompiler | ✅ |
+| WebXR (VR) | OpenXRCompiler | ✅ |
+| WebGPU | WebGPUCompiler | ✅ |
+| WASM | WASMCompiler | ✅ |
+| iOS (ARKit/SwiftUI) | IOSCompiler | ✅ |
+| Android (ARCore) | AndroidCompiler, AndroidXRCompiler | ✅ |
+| Vision Pro | VisionOSCompiler | ✅ |
+| Unity | UnityCompiler | ✅ |
+| Unreal Engine 5 | UnrealCompiler | ✅ |
+| Godot | GodotCompiler | ✅ |
+| VRChat | VRChatCompiler | ✅ |
+| Robotics (URDF) | URDFCompiler | ✅ |
+| Digital Twins (DTDL) | DTDLCompiler | ✅ |
+| SDF (Gazebo) | SDFCompiler | ✅ |
+| Flutter | - | 🟡 *coming soon* |
+| Tauri | - | 🟡 *coming soon* |
 
 ## Examples
 
@@ -666,7 +680,7 @@ HoloScript is open source. Infrastructure and platform services are separately l
 
 | Layer | What | License |
 |-------|------|---------|
-| **HoloScript Core** | Language, parser, 139 traits, 8 compilers, CLI, runtime | MIT |
+| **HoloScript Core** | Language, parser, 139 traits, 16 compilers, CLI, runtime | MIT |
 | **Infrastructure** | Networking, multiplayer, state sync, streaming, LSP, MCP | ELv2 |
 | **[Hololand](https://github.com/brianonbased-dev/Hololand)** | VR/AR platform — cloud anchors, asset CDN, marketplace | Commercial |
 | **[Infinity Assistant](https://infinityassistant.io)** | AI building — natural language to .holo, agent orchestration | Commercial |

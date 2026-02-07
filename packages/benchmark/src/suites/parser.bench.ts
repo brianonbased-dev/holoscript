@@ -5,16 +5,19 @@
  */
 
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 import { Bench } from 'tinybench';
 import { HoloScriptPlusParser, ChunkBasedIncrementalParser, globalParseCache } from '@holoscript/core';
 
-const __dirname = new URL('.', import.meta.url).pathname;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-// Load fixtures
-const smallSource = readFileSync(resolve(__dirname, '../fixtures/small.hsplus'), 'utf-8');
-const mediumSource = readFileSync(resolve(__dirname, '../fixtures/medium.hsplus'), 'utf-8');
-const largeSource = readFileSync(resolve(__dirname, '../fixtures/large.hsplus'), 'utf-8');
+// Load fixtures - go up to package root (../.. from dist/suites or src/suites)
+const fixturesDir = resolve(__dirname, '../../fixtures');
+const smallSource = readFileSync(resolve(fixturesDir, 'small.hsplus'), 'utf-8');
+const mediumSource = readFileSync(resolve(fixturesDir, 'medium.hsplus'), 'utf-8');
+const largeSource = readFileSync(resolve(fixturesDir, 'large.hsplus'), 'utf-8');
 
 const bench = new Bench({ time: 1000 });
 
