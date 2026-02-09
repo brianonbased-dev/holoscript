@@ -1330,6 +1330,46 @@ describe('MATERIAL_PRESETS', () => {
     expect(MATERIAL_PRESETS.hologram.transparent).toBe(true);
     expect(MATERIAL_PRESETS.hologram.emissiveIntensity).toBe(1.0);
   });
+
+  it('should have stone preset', () => {
+    expect(MATERIAL_PRESETS.stone).toBeDefined();
+    expect(MATERIAL_PRESETS.stone.roughness).toBe(0.85);
+    expect(MATERIAL_PRESETS.stone.metalness).toBe(0.0);
+    expect(MATERIAL_PRESETS.stone.color).toBe('#808080');
+  });
+
+  it('should have marble preset with env reflection', () => {
+    expect(MATERIAL_PRESETS.marble).toBeDefined();
+    expect(MATERIAL_PRESETS.marble.roughness).toBe(0.15);
+    expect(MATERIAL_PRESETS.marble.envMapIntensity).toBe(0.8);
+    expect(MATERIAL_PRESETS.marble.color).toBe('#F0EDE6');
+  });
+
+  it('should have shiny preset with clearcoat', () => {
+    expect(MATERIAL_PRESETS.shiny).toBeDefined();
+    expect(MATERIAL_PRESETS.shiny.roughness).toBe(0.05);
+    expect(MATERIAL_PRESETS.shiny.clearcoat).toBe(0.8);
+    expect(MATERIAL_PRESETS.shiny.envMapIntensity).toBe(1.5);
+  });
+
+  it('should have neon preset with high emissive', () => {
+    expect(MATERIAL_PRESETS.neon).toBeDefined();
+    expect(MATERIAL_PRESETS.neon.emissiveIntensity).toBe(3.0);
+    expect(MATERIAL_PRESETS.neon.transparent).toBe(true);
+    expect(MATERIAL_PRESETS.neon.opacity).toBe(0.9);
+  });
+
+  it('should have toon preset', () => {
+    expect(MATERIAL_PRESETS.toon).toBeDefined();
+    expect(MATERIAL_PRESETS.toon.roughness).toBe(1.0);
+    expect(MATERIAL_PRESETS.toon.metalness).toBe(0.0);
+  });
+
+  it('should have wireframe preset', () => {
+    expect(MATERIAL_PRESETS.wireframe).toBeDefined();
+    expect(MATERIAL_PRESETS.wireframe.wireframe).toBe(true);
+    expect(MATERIAL_PRESETS.wireframe.metalness).toBe(0.5);
+  });
 });
 
 describe('ENVIRONMENT_PRESETS', () => {
