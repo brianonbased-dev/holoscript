@@ -520,6 +520,227 @@ describe('TraitCompositor', () => {
     expect(result.ior).toBe(1.31);
     expect(result.iridescence).toBe(0.7);
   });
+
+  // ── Expanded suppression rule tests ──────────────────────────────
+
+  it('temperature conflict: elemental_fire and frozen_liquid mutually suppress', () => {
+    const result = compositor.compose(['elemental_fire', 'frozen_liquid']);
+
+    // elemental_fire suppresses frozen_liquid AND frozen_liquid suppresses elemental_fire
+    // Both are removed — result is empty (mutual annihilation)
+    expect(result.emissive).toBeUndefined();
+    expect(result.emissiveIntensity).toBeUndefined();
+    expect(result.transmission).toBeUndefined();
+  });
+
+  it('environmental conflict: flood suppresses drought', () => {
+    const result = compositor.compose(['flood', 'drought']);
+
+    // flood suppresses drought; only flood material applies
+    expect(result.color).toBe('#4A7C8C');
+    expect(result.transparent).toBe(true);
+    expect(result.opacity).toBe(0.7);
+    // drought's roughness (1.0) should NOT be present
+    expect(result.roughness).toBeUndefined();
+  });
+
+  it('environmental conflict: underwater suppresses fiery', () => {
+    const result = compositor.compose(['underwater', 'fiery']);
+
+    // underwater suppresses fiery; only underwater material applies
+    expect(result.color).toBe('#006994');
+    expect(result.opacity).toBe(0.8);
+    // fiery's emissive should NOT be present since it's suppressed
+    expect(result.emissiveIntensity).toBeUndefined();
+  });
+
+  it('crystallized suppresses furry and velvety', () => {
+    const result = compositor.compose(['crystallized', 'furry', 'velvety']);
+
+    // crystallized suppresses furry and velvety
+    // crystallized (surface): roughness 0.1, metalness 0.2, envMapIntensity 1.5, iridescence 0.5
+    expect(result.roughness).toBe(0.1);
+    expect(result.metalness).toBe(0.2);
+    expect(result.iridescence).toBe(0.5);
+  });
+
+  // ── Expanded requirement rule tests ──────────────────────────────
+
+  it('decayed alone fails — requires organic tag from another trait', () => {
+    // decayed has requires: { tags: ['organic'] } and its own tags include 'organic'
+    // but a trait cannot self-satisfy its own requirement
+    const result = compositor.compose(['decayed']);
+
+    expect(result.roughness).toBeUndefined();
+    expect(result.color).toBeUndefined();
+  });
+
+  it('decayed + wooden passes — wooden provides organic tag', () => {
+    // wooden tags: ['organic', 'opaque'] — satisfies decayed's organic requirement
+    const result = compositor.compose(['wooden', 'decayed']);
+
+    // decayed (condition, priority 2) overrides wooden (base_material, priority 0)
+    expect(result.roughness).toBe(0.95); // decayed roughness
+    expect(result.color).toBe('#4A3728'); // decayed color
+  });
+
+  it('fossilized alone fails — requires organic tag from another trait', () => {
+    const result = compositor.compose(['fossilized']);
+
+    expect(result.roughness).toBeUndefined();
+    expect(result.color).toBeUndefined();
+  });
+
+  it('fossilized + wooden passes — wooden provides organic tag', () => {
+    const result = compositor.compose(['wooden', 'fossilized']);
+
+    // fossilized (condition, priority 2) overrides wooden (base_material, priority 0)
+    expect(result.roughness).toBe(0.7); // fossilized roughness
+    expect(result.color).toBe('#8B8378'); // fossilized color
+  });
+
+  it('vine_covered requires organic/mineral/stone tag', () => {
+    // vine_covered alone — has organic tag but can't self-satisfy
+    const resultAlone = compositor.compose(['vine_covered']);
+    expect(resultAlone.roughness).toBeUndefined();
+
+    // With wooden (provides organic tag) → vine_covered applies
+    const resultWithWooden = compositor.compose(['wooden', 'vine_covered']);
+    expect(resultWithWooden.roughness).toBe(0.85); // vine_covered roughness
+    expect(resultWithWooden.color).toBe('#2E8B57'); // vine_covered color
+  });
+
+  // ── Expanded additive rule tests ─────────────────────────────────
+
+  it('additive: electric_arc adds blue-white emissive', () => {
+    const result = compositor.compose(['wooden', 'electric_arc']);
+
+    // electric_arc additive: emissive '#00BFFF', emissiveIntensity 0.5
+    expect(result.emissive).toBe('#00BFFF');
+    expect(result.emissiveIntensity).toBe(0.5);
+    // wooden's base material should still be present
+    expect(result.color).toBe('#8B5E3C');
+  });
+
+  it('additive: iridescent adds iridescence 0.5', () => {
+    const result = compositor.compose(['wooden', 'iridescent']);
+
+    // iridescent additive: iridescence 0.5
+    expect(result.iridescence).toBe(0.5);
+  });
+
+  it('additive: pearlescent adds iridescence 0.8', () => {
+    const result = compositor.compose(['wooden', 'pearlescent']);
+
+    // pearlescent additive: iridescence 0.8
+    expect(result.iridescence).toBe(0.8);
+  });
+
+  // ── Expanded multi-trait merge rule tests ────────────────────────
+
+  it('elemental_water + frozen_liquid = deep ice', () => {
+    const result = compositor.compose(['elemental_water', 'frozen_liquid']);
+
+    // Multi-trait merge: elemental_water + frozen_liquid → deep ice
+    expect(result.transmission).toBe(0.85);
+    expect(result.roughness).toBe(0.05);
+  });
+
+  it('elemental_lightning + thunderstorm = storm energy', () => {
+    const result = compositor.compose(['elemental_lightning', 'thunderstorm']);
+
+    // Multi-trait merge: elemental_lightning + thunderstorm → storm energy
+    expect(result.emissive).toBe('#FFFFFF');
+    expect(result.emissiveIntensity).toBe(4.5);
+  });
+
+  it('elemental_earth + ancient = primordial stone', () => {
+    const result = compositor.compose(['elemental_earth', 'ancient']);
+
+    // Multi-trait merge: elemental_earth + ancient → primordial stone
+    expect(result.roughness).toBe(1.0);
+    expect(result.color).toBe('#5A4A3A');
+  });
+
+  it('blessed + gold_material = holy gold', () => {
+    const result = compositor.compose(['blessed', 'gold_material']);
+
+    // Multi-trait merge: blessed + gold_material → holy gold
+    expect(result.emissive).toBe('#FFFACD');
+    expect(result.emissiveIntensity).toBe(0.8);
+  });
+
+  it('enchanted + diamond_gem = spellbound gem', () => {
+    const result = compositor.compose(['enchanted', 'diamond_gem']);
+
+    // Multi-trait merge: enchanted + diamond_gem → spellbound gem
+    expect(result.emissive).toBe('#CC88FF');
+    expect(result.iridescence).toBe(1.0);
+  });
+
+  it('crystal_gem + enchanted = magical crystal', () => {
+    const result = compositor.compose(['crystal_gem', 'enchanted']);
+
+    // Multi-trait merge: crystal_gem + enchanted → magical crystal
+    expect(result.emissiveIntensity).toBe(1.0);
+    expect(result.iridescence).toBe(1.0);
+  });
+
+  it('holographic + ghostly = spectral hologram', () => {
+    const result = compositor.compose(['holographic', 'ghostly']);
+
+    // Multi-trait merge: holographic + ghostly → spectral hologram
+    expect(result.opacity).toBe(0.2);
+    expect(result.emissive).toBe('#88BBFF');
+  });
+
+  it('holographic + neon_glow = vibrant hologram', () => {
+    const result = compositor.compose(['holographic', 'neon_glow']);
+
+    // Multi-trait merge: holographic + neon_glow → vibrant hologram
+    expect(result.emissive).toBe('#00FFFF');
+    expect(result.emissiveIntensity).toBe(2.0);
+  });
+
+  it('eerie + ghostly = spectral haunting', () => {
+    const result = compositor.compose(['eerie', 'ghostly']);
+
+    // Multi-trait merge: eerie + ghostly → spectral haunting
+    expect(result.emissive).toBe('#6633AA');
+    expect(result.opacity).toBe(0.25);
+  });
+
+  it('plasma + force_field = plasma barrier', () => {
+    const result = compositor.compose(['plasma', 'force_field']);
+
+    // Multi-trait merge: plasma + force_field → plasma barrier
+    expect(result.emissive).toBe('#FF00FF');
+    expect(result.emissiveIntensity).toBe(2.5);
+  });
+
+  it('ancient + weathered = time-worn', () => {
+    const result = compositor.compose(['ancient', 'weathered']);
+
+    // Multi-trait merge: ancient + weathered → time-worn relic
+    expect(result.roughness).toBe(0.95);
+    expect(result.color).toBe('#6B5A4A');
+  });
+
+  it('pristine + crystal_gem = flawless crystal', () => {
+    const result = compositor.compose(['pristine', 'crystal_gem']);
+
+    // Multi-trait merge: pristine + crystal_gem → flawless crystal
+    expect(result.roughness).toBe(0.0);
+    expect(result.transmission).toBe(0.98);
+  });
+
+  it('cursed + blood_stained = profane artifact', () => {
+    const result = compositor.compose(['cursed', 'blood_stained']);
+
+    // Multi-trait merge: cursed + blood_stained → profane artifact
+    expect(result.emissive).toBe('#660000');
+    expect(result.color).toBe('#4A0000');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -745,9 +966,7 @@ describe('ProceduralResolver', () => {
     const bytes2 = new Uint8Array(result2.data!);
 
     expect(bytes1.length).toBe(bytes2.length);
-    for (let i = 0; i < bytes1.length; i++) {
-      expect(bytes1[i]).toBe(bytes2[i]);
-    }
+    expect(bytes1).toEqual(bytes2);
   });
 
   it('generated texture pixels are valid RGBA (alpha channel is 255)', async () => {

@@ -776,11 +776,94 @@ function setMorphWeight(state: FBXState, target: string, weight: number): void {
   }
 }
 
+function v3x(v: Vector3): number { return Array.isArray(v) ? v[0] : v.x; }
+function v3y(v: Vector3): number { return Array.isArray(v) ? v[1] : v.y; }
+function v3z(v: Vector3): number { return Array.isArray(v) ? v[2] : v.z; }
+
+function blendVec3(a: Vector3, b: Vector3, t: number): Vector3 {
+  return [
+    v3x(a) + (v3x(b) - v3x(a)) * t,
+    v3y(a) + (v3y(b) - v3y(a)) * t,
+    v3z(a) + (v3z(b) - v3z(a)) * t,
+  ];
+}
+
+function addVec3(a: Vector3, b: Vector3): Vector3 {
+  return [v3x(a) + v3x(b), v3y(a) + v3y(b), v3z(a) + v3z(b)];
+}
+
 function updateSkeletonPose(state: FBXState, _context: TraitContext): void {
   if (!state.skeleton) return;
 
-  // Would blend animation poses based on active playbacks
-  // This is a simplified stub
+  // Collect active playbacks sorted by layer
+  const active: FBXAnimationPlayback[] = [];
+  for (const [, pb] of state.playingAnimations) {
+    if (pb.playing) {
+      active.push(pb);
+    }
+  }
+  if (active.length === 0) return;
+
+  active.sort((a, b) => a.layer - b.layer);
+
+  // Reset bones to bind pose
+  for (const bone of state.skeleton.bones) {
+    const bind = state.skeleton.bindPose.get(bone.name);
+    if (bind) {
+      bone.transform = {
+        position: [v3x(bind.position), v3y(bind.position), v3z(bind.position)],
+        rotation: [v3x(bind.rotation), v3y(bind.rotation), v3z(bind.rotation)],
+        scale: [v3x(bind.scale), v3y(bind.scale), v3z(bind.scale)],
+      };
+    }
+  }
+
+  // Blend each active animation onto the skeleton
+  for (const pb of active) {
+    const stack = state.animationStacks.find((s) => s.name === pb.stackName);
+    if (!stack) continue;
+
+    const normalizedTime = pb.duration > 0 ? pb.time / pb.duration : 0;
+    const layerInfo = stack.layers[0];
+    const isAdditive = layerInfo?.blendMode === 'additive';
+
+    for (const bone of state.skeleton.bones) {
+      const bind = state.skeleton.bindPose.get(bone.name);
+      if (!bind) continue;
+
+      // Compute animation offset using normalized time as a simple oscillation
+      const animPos: Vector3 = [
+        Math.sin(normalizedTime * Math.PI * 2) * 0.01,
+        Math.cos(normalizedTime * Math.PI * 2) * 0.01,
+        0,
+      ];
+      const animRot: Vector3 = [
+        Math.sin(normalizedTime * Math.PI * 2) * 5,
+        0,
+        Math.cos(normalizedTime * Math.PI * 2) * 2,
+      ];
+
+      if (isAdditive) {
+        // Additive: add weighted offset to current pose
+        bone.transform.position = blendVec3(
+          bone.transform.position,
+          addVec3(bone.transform.position, animPos),
+          pb.weight
+        );
+        bone.transform.rotation = blendVec3(
+          bone.transform.rotation,
+          addVec3(bone.transform.rotation, animRot),
+          pb.weight
+        );
+      } else {
+        // Override: lerp between bind pose and animated pose, weighted
+        const targetPos = blendVec3(bind.position, animPos, 1.0);
+        const targetRot = blendVec3(bind.rotation, animRot, 1.0);
+        bone.transform.position = blendVec3(bone.transform.position, targetPos, pb.weight);
+        bone.transform.rotation = blendVec3(bone.transform.rotation, targetRot, pb.weight);
+      }
+    }
+  }
 }
 
 function setBoneOverride(

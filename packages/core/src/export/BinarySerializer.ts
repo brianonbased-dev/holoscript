@@ -17,7 +17,10 @@ import {
   IMaterial,
   ITexture,
   IMesh,
+  IMeshPrimitive,
   IAnimation,
+  type AttributeType,
+  type PrimitiveMode,
   createEmptySceneGraph,
   createIdentityTransform,
 } from './SceneGraph';
@@ -461,7 +464,7 @@ export class BinaryReader {
    */
   readBytes(): ArrayBuffer {
     const length = this.readUint32();
-    const bytes = this.view.buffer.slice(this.offset, this.offset + length);
+    const bytes = this.view.buffer.slice(this.offset, this.offset + length) as ArrayBuffer;
     this.offset += length;
     return bytes;
   }
@@ -1213,10 +1216,10 @@ export class BinarySerializer {
       const boundsMax = reader.readVector3();
 
       const primitiveCount = reader.readUint16();
-      const primitives = [];
+      const primitives: IMeshPrimitive[] = [];
       for (let j = 0; j < primitiveCount; j++) {
         const modeCode = reader.readUint8();
-        const mode =
+        const mode: PrimitiveMode =
           modeCode === 4
             ? 'triangles'
             : modeCode === 1
@@ -1228,7 +1231,7 @@ export class BinarySerializer {
           : undefined;
 
         primitives.push({
-          attributes: {},
+          attributes: {} as Record<AttributeType, number>,
           mode,
           materialRef,
         });

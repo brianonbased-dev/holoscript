@@ -44,7 +44,6 @@ export {
 export {
   HololandClient,
   HololandClientConfig,
-  ConnectionState,
   ConnectionInfo,
   RuntimeServices,
   AssetStreamingService,
@@ -105,7 +104,7 @@ export {
   WorldEvent as StreamWorldEvent,
   StreamHandler,
   getStreamProtocol,
-  createMessage,
+  createMessage as createStreamMessage,
   PROTOCOL_VERSION,
   MAX_MESSAGE_SIZE,
   MAX_CHUNK_SIZE,

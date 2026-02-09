@@ -592,7 +592,8 @@ fn fs_chromatic(input: VertexOutput) -> @location(0) vec4f {
 `;
 
 /**
- * Depth of Field shader (placeholder - full implementation requires multiple passes)
+ * Depth of Field shader
+ * Uses circle-of-confusion from depth to apply variable-radius disc blur.
  */
 export const DOF_SHADER = /* wgsl */ `
 ${SHADER_UTILS}
@@ -610,19 +611,63 @@ struct DOFUniforms {
 @group(0) @binding(0) var texSampler: sampler;
 @group(0) @binding(1) var inputTexture: texture_2d<f32>;
 @group(0) @binding(2) var<uniform> uniforms: DOFUniforms;
+@group(0) @binding(3) var depthTexture: texture_2d<f32>;
 
-// Note: Full DOF requires depth texture binding
+fn linearizeDepth(d: f32) -> f32 {
+  return uniforms.nearPlane * uniforms.farPlane /
+    (uniforms.farPlane - d * (uniforms.farPlane - uniforms.nearPlane));
+}
+
+fn circleOfConfusion(depth: f32) -> f32 {
+  let s1 = depth;
+  let s2 = uniforms.focusDistance;
+  let f = uniforms.focalLength;
+  let a = uniforms.aperture;
+  let coc = abs(a * f * (s2 - s1) / (s1 * (s2 - f)));
+  return clamp(coc, 0.0, uniforms.maxBlur);
+}
 
 @fragment
 fn fs_dof(input: VertexOutput) -> @location(0) vec4f {
-  // Placeholder - returns unmodified color
-  // Full implementation needs depth texture and multi-pass blur
-  return textureSample(inputTexture, texSampler, input.uv);
+  let dims = vec2f(textureDimensions(inputTexture));
+  let texelSize = 1.0 / dims;
+
+  let rawDepth = textureSample(depthTexture, texSampler, input.uv).r;
+  let depth = linearizeDepth(rawDepth);
+  let coc = circleOfConfusion(depth);
+
+  // Disc blur with 16 samples in a Poisson-like pattern
+  let offsets = array<vec2f, 16>(
+    vec2f(-0.94201, -0.39906), vec2f( 0.94558, -0.76890),
+    vec2f(-0.09418, -0.92938), vec2f( 0.34495,  0.29387),
+    vec2f(-0.91588,  0.45771), vec2f(-0.81544,  0.00298),
+    vec2f(-0.38277, -0.56270), vec2f( 0.97484,  0.75648),
+    vec2f( 0.44323, -0.97511), vec2f( 0.53742,  0.01683),
+    vec2f(-0.26496, -0.01497), vec2f(-0.44693,  0.93910),
+    vec2f( 0.79197,  0.19090), vec2f(-0.24188, -0.99706),
+    vec2f( 0.04578,  0.53300), vec2f(-0.75738, -0.81580)
+  );
+
+  var color = vec4f(0.0);
+  var totalWeight = 0.0;
+
+  for (var i = 0u; i < 16u; i++) {
+    let sampleUV = input.uv + offsets[i] * texelSize * coc * 8.0;
+    let sampleColor = textureSample(inputTexture, texSampler, sampleUV);
+    let sampleDepth = linearizeDepth(textureSample(depthTexture, texSampler, sampleUV).r);
+    let sampleCoC = circleOfConfusion(sampleDepth);
+    let w = max(sampleCoC, coc * 0.2);
+    color += sampleColor * w;
+    totalWeight += w;
+  }
+
+  return color / totalWeight;
 }
 `;
 
 /**
- * SSAO shader (placeholder)
+ * SSAO shader (Screen-Space Ambient Occlusion)
+ * Hemisphere sampling around each fragment using depth + reconstructed normals.
  */
 export const SSAO_SHADER = /* wgsl */ `
 ${SHADER_UTILS}
@@ -639,16 +684,66 @@ struct SSAOUniforms {
 @group(0) @binding(0) var texSampler: sampler;
 @group(0) @binding(1) var inputTexture: texture_2d<f32>;
 @group(0) @binding(2) var<uniform> uniforms: SSAOUniforms;
+@group(0) @binding(3) var depthTexture: texture_2d<f32>;
+
+fn hash3(p: vec2f) -> vec3f {
+  let q = vec3f(
+    dot(p, vec2f(127.1, 311.7)),
+    dot(p, vec2f(269.5, 183.3)),
+    dot(p, vec2f(419.2, 371.9))
+  );
+  return fract(sin(q) * 43758.5453) * 2.0 - 1.0;
+}
+
+fn reconstructNormal(uv: vec2f, texelSize: vec2f) -> vec3f {
+  let dc = textureSample(depthTexture, texSampler, uv).r;
+  let dl = textureSample(depthTexture, texSampler, uv - vec2f(texelSize.x, 0.0)).r;
+  let dr = textureSample(depthTexture, texSampler, uv + vec2f(texelSize.x, 0.0)).r;
+  let db = textureSample(depthTexture, texSampler, uv - vec2f(0.0, texelSize.y)).r;
+  let dt = textureSample(depthTexture, texSampler, uv + vec2f(0.0, texelSize.y)).r;
+  return normalize(vec3f(dl - dr, db - dt, 2.0 * texelSize.x));
+}
 
 @fragment
 fn fs_ssao(input: VertexOutput) -> @location(0) vec4f {
-  // Placeholder - needs depth and normal textures
-  return textureSample(inputTexture, texSampler, input.uv);
+  let dims = vec2f(textureDimensions(inputTexture));
+  let texelSize = 1.0 / dims;
+  let color = textureSample(inputTexture, texSampler, input.uv);
+  let centerDepth = textureSample(depthTexture, texSampler, input.uv).r;
+  let normal = reconstructNormal(input.uv, texelSize);
+
+  let sampleCount = u32(uniforms.samples);
+  var occlusion = 0.0;
+
+  for (var i = 0u; i < sampleCount; i++) {
+    let randSeed = input.uv * dims + vec2f(f32(i) * 7.0, f32(i) * 13.0);
+    var sampleDir = normalize(hash3(randSeed));
+    // Flip sample to hemisphere oriented by normal
+    if (dot(sampleDir, normal) < 0.0) {
+      sampleDir = -sampleDir;
+    }
+    let scale = f32(i + 1u) / f32(sampleCount);
+    let sampleOffset = sampleDir * uniforms.radius * mix(0.1, 1.0, scale * scale);
+
+    let sampleUV = input.uv + sampleOffset.xy * texelSize * 8.0;
+    let sampleDepth = textureSample(depthTexture, texSampler, sampleUV).r;
+
+    let rangeCheck = smoothstep(0.0, 1.0,
+      uniforms.falloff / abs(centerDepth - sampleDepth + 0.0001));
+    if (sampleDepth < centerDepth - uniforms.bias) {
+      occlusion += rangeCheck;
+    }
+  }
+
+  occlusion = 1.0 - pow(occlusion / f32(sampleCount), uniforms.power);
+  return vec4f(color.rgb * occlusion, color.a);
 }
 `;
 
 /**
- * Fog shader (placeholder)
+ * Fog shader
+ * Supports linear, exponential, and exponential-squared fog with height falloff.
+ * mode: 0 = linear, 1 = exponential, 2 = exponential-squared
  */
 export const FOG_SHADER = /* wgsl */ `
 ${SHADER_UTILS}
@@ -667,16 +762,41 @@ struct FogUniforms {
 @group(0) @binding(0) var texSampler: sampler;
 @group(0) @binding(1) var inputTexture: texture_2d<f32>;
 @group(0) @binding(2) var<uniform> uniforms: FogUniforms;
+@group(0) @binding(3) var depthTexture: texture_2d<f32>;
 
 @fragment
 fn fs_fog(input: VertexOutput) -> @location(0) vec4f {
-  // Placeholder - needs depth texture
-  return textureSample(inputTexture, texSampler, input.uv);
+  let color = textureSample(inputTexture, texSampler, input.uv);
+  let depth = textureSample(depthTexture, texSampler, input.uv).r;
+
+  // Compute fog factor based on mode
+  var fogFactor = 0.0;
+  let mode = u32(uniforms.mode);
+  if (mode == 0u) {
+    // Linear fog
+    fogFactor = clamp((uniforms.end - depth) / (uniforms.end - uniforms.start), 0.0, 1.0);
+  } else if (mode == 1u) {
+    // Exponential fog
+    fogFactor = exp(-uniforms.density * depth);
+  } else {
+    // Exponential-squared fog
+    let d = uniforms.density * depth;
+    fogFactor = exp(-d * d);
+  }
+
+  // Height-based attenuation
+  let heightUV = 1.0 - input.uv.y; // screen-space approximation of world height
+  let heightFactor = exp(-max(heightUV - uniforms.height, 0.0) * uniforms.heightFalloff);
+  fogFactor = mix(fogFactor, 1.0, 1.0 - heightFactor);
+
+  let foggedColor = mix(uniforms.color, color.rgb, fogFactor);
+  return vec4f(foggedColor, color.a);
 }
 `;
 
 /**
- * Motion blur shader (placeholder)
+ * Motion blur shader
+ * Samples along per-pixel velocity vector from a velocity buffer.
  */
 export const MOTION_BLUR_SHADER = /* wgsl */ `
 ${SHADER_UTILS}
@@ -691,11 +811,35 @@ struct MotionBlurUniforms {
 @group(0) @binding(0) var texSampler: sampler;
 @group(0) @binding(1) var inputTexture: texture_2d<f32>;
 @group(0) @binding(2) var<uniform> uniforms: MotionBlurUniforms;
+@group(0) @binding(3) var velocityTexture: texture_2d<f32>;
 
 @fragment
 fn fs_motionblur(input: VertexOutput) -> @location(0) vec4f {
-  // Placeholder - needs velocity texture
-  return textureSample(inputTexture, texSampler, input.uv);
+  let velocity = textureSample(velocityTexture, texSampler, input.uv).rg;
+
+  // Scale and clamp velocity
+  var vel = velocity * uniforms.velocityScale;
+  let speed = length(vel);
+  if (speed > uniforms.maxVelocity) {
+    vel = vel * (uniforms.maxVelocity / speed);
+  }
+
+  let sampleCount = u32(uniforms.samples);
+  var color = textureSample(inputTexture, texSampler, input.uv);
+  var totalWeight = 1.0;
+
+  for (var i = 1u; i <= sampleCount; i++) {
+    let t = (f32(i) / f32(sampleCount)) - 0.5;
+    let sampleUV = input.uv + vel * t;
+    let sampleColor = textureSample(inputTexture, texSampler, sampleUV);
+    let w = 1.0 - abs(t) * 2.0; // Center-weighted
+    color += sampleColor * w;
+    totalWeight += w;
+  }
+
+  let blurred = color / totalWeight;
+  let original = textureSample(inputTexture, texSampler, input.uv);
+  return mix(original, blurred, uniforms.intensity);
 }
 `;
 

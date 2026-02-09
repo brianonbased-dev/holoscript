@@ -10,6 +10,17 @@ import type { TraitHandler } from './TraitTypes';
 import { getPhysicsEngine } from '../runtime/PhysicsEngine';
 import { IslandDetector } from '../physics/IslandDetector';
 
+function extractPosition(node: any): [number, number, number] {
+  const pos = node?.properties?.position ?? node?.position;
+  if (Array.isArray(pos) && pos.length >= 3) {
+    return [pos[0], pos[1], pos[2]];
+  }
+  if (pos && typeof pos === 'object' && 'x' in pos) {
+    return [pos.x, pos.y, pos.z];
+  }
+  return [0, 0, 0];
+}
+
 /**
  * GPUPhysics Trait
  *
@@ -72,7 +83,7 @@ export const gpuPhysicsHandler: TraitHandler<GPUPhysicsConfig> = {
     engine?.addBody(node.name || '', {
       type: config.isStatic ? 'static' : 'dynamic',
       mass: config.mass ?? 1.0,
-      position: [0, 0, 0], // TODO: Get relative position from node
+      position: extractPosition(node),
       rotation: [0, 0, 0, 1],
       shape: config.shape ?? 'box',
       shapeParams: config.shapeParams ?? [1, 1, 1],

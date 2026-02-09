@@ -251,7 +251,25 @@ export const destructionHandler: TraitHandler<DestructionConfig> = {
     } else if (event.type === 'repair') {
       state.currentHealth = state.maxHealth;
       state.accumulatedDamage = 0;
-      // TODO: Restore original mesh
+
+      // Restore original mesh: remove fragments and reset state
+      if (state.isDestroyed) {
+        for (const frag of state.fragments) {
+          if (frag.mesh) {
+            context.emit?.('remove_object', { node: frag.mesh });
+          }
+        }
+        state.fragments = [];
+        state.isDestroyed = false;
+        state.chainReactionTriggered = false;
+
+        // Restore original node visibility/mesh
+        if (state.originalMesh) {
+          context.emit?.('restore_mesh', { node, mesh: state.originalMesh });
+        }
+        context.emit?.('set_visible', { node, visible: true });
+        context.emit?.('on_repaired', { node });
+      }
     }
   },
 };
@@ -296,6 +314,11 @@ function triggerDestruction(
   impactPoint: { x: number; y: number; z: number } | undefined
 ): void {
   if (state.isDestroyed) return;
+
+  // Store original mesh for repair restoration
+  if (!state.originalMesh) {
+    state.originalMesh = (node as any).mesh ?? (node as any).geometry ?? node;
+  }
 
   state.isDestroyed = true;
 

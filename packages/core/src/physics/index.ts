@@ -12,8 +12,8 @@ export {
   // Vector & Transform
   type IVector3,
   type IQuaternion,
-  type ITransform,
   zeroVector,
+  type ITransform,
   identityQuaternion,
   defaultTransform,
 

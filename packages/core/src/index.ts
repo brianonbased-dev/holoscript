@@ -41,6 +41,9 @@ export * from './constants';
 // Performance Tracking System
 export * from './performance';
 
+// Profiling (Sprint 7 - Performance Dashboard)
+export * from './profiling';
+
 // Parser
 export { HoloScriptParser } from './HoloScriptParser';
 export { HoloScript2DParser } from './HoloScript2DParser';
@@ -1466,10 +1469,10 @@ export * from './assets';
 export * from './semantics';
 
 // =============================================================================
-// Hololand Runtime Integration
+// Hololand Consumer Integration (Legacy Namespace)
 // =============================================================================
 
-export * from './hololand';
+export * as hololand from './hololand';
 
 // =============================================================================
 // Semantic Diff Engine (Sprint 2 - Visual Diff Tools)
@@ -1701,7 +1704,102 @@ export * from './negotiation';
 // Swarm Module (v3.2 Autonomous Agent Swarms)
 // =============================================================================
 
-export * from './swarm';
+export * as swarm from './swarm';
+
+export {
+  SwarmCoordinator,
+  PSOEngine,
+  ACOEngine,
+  LeaderElection,
+  CollectiveIntelligence,
+  VotingRound,
+  ContributionSynthesizer,
+  SwarmManager,
+  SwarmMembership,
+  QuorumPolicy,
+} from './swarm';
+
+export type {
+  AgentInfo,
+  TaskInfo,
+  PSOConfig,
+  PSOResult,
+  Particle,
+  ACOConfig,
+  ACOResult,
+  LeaderElectionConfig,
+  ElectionRole,
+  ElectionState,
+  ElectionMessage,
+  VoteRequestMessage,
+  VoteResponseMessage,
+  HeartbeatMessage as SwarmHeartbeatMessage,
+  CollectiveIntelligenceConfig,
+  Vote as SwarmVote,
+  VotingResult as SwarmVotingResult,
+  VotingRoundConfig,
+  SynthesisResult,
+  SynthesizerConfig,
+  SwarmInfo,
+  CreateSwarmRequest,
+  DisbandOptions,
+  SwarmManagerConfig,
+  SwarmEvent,
+  MemberInfo,
+  JoinRequest,
+  LeaveRequest,
+  MembershipEvent,
+  SwarmMembershipConfig,
+  QuorumConfig,
+  QuorumStatus,
+  QuorumState,
+} from './swarm';
+
+export {
+  Vector3 as SwarmVector3,
+  FlockingBehavior,
+  FormationController,
+  ZoneClaiming,
+} from './swarm/spatial';
+
+export type {
+  IBoid,
+  IFlockingConfig,
+  FormationType,
+  IFormationSlot,
+  IFormationConfig,
+  ZoneState,
+  IZone,
+  IZoneClaim,
+  IZoneEvent,
+  IZoneClaimingConfig,
+} from './swarm/spatial';
+
+export {
+  SwarmEventBus,
+  BroadcastChannel,
+  GossipProtocol,
+} from './swarm/messaging';
+
+export type {
+  EventPriority,
+  ISwarmEvent,
+  IEventSubscription,
+  EventHandler,
+  IEventBusConfig,
+  IEventBusStats,
+  IChannelMessage,
+  IChannelSubscriber,
+  IChannelConfig,
+  MessageHandler as SwarmMessageHandler,
+  IGossipMessage,
+  IGossipPeer,
+  IGossipConfig,
+  GossipHandler,
+  PeerSelector,
+} from './swarm/messaging';
+
+export * from './swarm/analytics';
 
 // =============================================================================
 // Recovery Module (v3.2 Self-Healing Infrastructure)
@@ -1731,6 +1829,10 @@ export * from './postfx';
 // Physics Module (v3.3 Rigid Body Dynamics)
 // =============================================================================
 
+// Explicit re-exports to resolve conflicts between physics and audio modules
+// (both define IVector3 and zeroVector — physics is canonical source)
+export { type IVector3, zeroVector } from './physics/PhysicsTypes';
+
 export * from './physics';
 
 // =============================================================================
@@ -1743,7 +1845,12 @@ export * from './audio';
 // Network Module (v3.3 State Synchronization)
 // =============================================================================
 
-export * from './network';
+export * as network from './network';
+export {
+  ConnectionState as NetworkConnectionState,
+  createMessage as createNetworkMessage,
+  MessageHandler as NetworkMessageHandler,
+} from './network';
 
 // =============================================================================
 // LOD Module (v3.3 Level of Detail System)
@@ -1766,3 +1873,24 @@ export {
 
 export { TraitCompositor } from './traits/visual/TraitCompositor';
 export { COMPOSITION_RULES } from './traits/visual/composition-rules';
+
+// =============================================================================
+// glTF/GLB Export Pipeline (Growth Vector 1 — Universal 3D Interop)
+// =============================================================================
+
+export {
+  GLTFPipeline,
+  createGLTFPipeline,
+  type GLTFPipelineOptions,
+  type GLTFExportResult,
+  type GLTFExportStats,
+} from './compiler/GLTFPipeline';
+
+// SceneGraph IR + GLTFExporter (for advanced pipelines)
+export { GLTFExporter } from './export/gltf/GLTFExporter';
+export type { IGLTFExportOptions, IGLTFExportResult } from './export/gltf/GLTFTypes';
+export type { ISceneGraph, ISceneNode, IMaterial as ISceneGraphMaterial } from './export/SceneGraph';
+export { createEmptySceneGraph, createEmptyNode, createDefaultMaterial } from './export/SceneGraph';
+
+// USDZ Pipeline
+export { USDZPipeline, type USDZPipelineOptions } from './compiler/USDZPipeline';

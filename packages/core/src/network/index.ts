@@ -9,8 +9,7 @@
 
 // Types and Interfaces
 export {
-  // Vector types
-  IVector3,
+  // Vector types (IVector3 exported from audio module to avoid duplicate)
   IQuaternion,
 
   // Connection

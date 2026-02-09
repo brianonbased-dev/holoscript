@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AudioTypes.ts
  *
  * Core type definitions for the HoloScript audio system.
@@ -47,6 +47,26 @@ export type OscillatorType = 'sine' | 'square' | 'sawtooth' | 'triangle' | 'cust
  * Noise types for procedural audio
  */
 export type NoiseType = 'white' | 'pink' | 'brown' | 'blue' | 'violet';
+
+/**
+ * Spatial audio model
+ */
+export type SpatialModel = 'HRTF' | 'panning' | 'equalpower';
+
+/**
+ * Distance rolloff types for spatial audio
+ */
+export type RolloffType = 'linear' | 'inverse' | 'exponential';
+
+/**
+ * Loop mode for sequencer
+ */
+export type LoopMode = 'none' | 'pattern' | 'sequence' | 'all';
+
+/**
+ * Sequencer state enum
+ */
+export type SequencerState = 'stopped' | 'playing' | 'paused' | 'recording';
 
 /**
  * Playback state of an audio source
@@ -146,6 +166,8 @@ export type EffectType =
   | 'distortion'
   | 'compressor'
   | 'eq'
+  | 'equalizer'
+  | 'spatial'
   | 'chorus'
   | 'flanger'
   | 'phaser'
@@ -212,6 +234,8 @@ export interface IReverbEffect extends IEffectConfig {
 export interface IDelayEffect extends IEffectConfig {
   type: 'delay';
   delayTime: number;
+  /** Alias for delayTime */
+  time?: number;
   feedback?: number;
   maxDelay?: number;
 }
@@ -275,7 +299,74 @@ export type AudioEffect =
   | IDistortionEffect
   | ICompressorEffect
   | IEQEffect
-  | IPanEffect;
+  | IPanEffect
+  | ISpatialEffect;
+
+// ============================================================================
+// Type Aliases for API Compatibility
+// ============================================================================
+
+/**
+ * Alias for EQ band (API compatibility)
+ */
+export type IEqualizerBand = IEQBand;
+
+/**
+ * Equalizer effect interface (extends EQ with 'equalizer' type)
+ */
+export interface IEqualizerEffect extends IEffectConfig {
+  type: 'equalizer';
+  bands: IEQBand[];
+}
+
+/**
+ * Spatial audio effect
+ */
+export interface ISpatialEffect extends IEffectConfig {
+  type: 'spatial';
+  model: SpatialModel;
+  refDistance: number;
+  maxDistance: number;
+  rolloff: RolloffType;
+  coneInnerAngle?: number;
+  coneOuterAngle?: number;
+  coneOuterGain?: number;
+}
+
+/**
+ * Audio bus interface
+ */
+export interface IAudioBus {
+  id: string;
+  name: string;
+  volume: number;
+  muted: boolean;
+  solo: boolean;
+  effects: string[];
+  inputs: string[];
+  output?: string;
+}
+
+/**
+ * Sequencer configuration
+ */
+export interface ISequencerConfig {
+  bpm: number;
+  beatsPerBar: number;
+  swingAmount?: number;
+  lookAheadTime?: number;
+  scheduleAheadTime?: number;
+}
+
+/**
+ * Pattern reference in track
+ */
+export interface IPatternRef {
+  patternId: string;
+  startBeat: number;
+  loop?: boolean;
+  loopCount?: number;
+}
 
 // ============================================================================
 // Audio Groups / Buses
@@ -306,6 +397,8 @@ export interface INote {
   velocity: number; // 0-127
   duration: number; // in beats
   startBeat: number;
+  /** Alias for startBeat (for compatibility) */
+  start?: number;
 }
 
 /**
@@ -313,9 +406,18 @@ export interface INote {
  */
 export interface IPattern {
   id: string;
-  name: string;
+  name?: string;
   notes: INote[];
-  lengthBeats: number;
+  lengthBeats?: number;
+  /** Alias for lengthBeats */
+  length?: number;
+  loop?: boolean;
+  /** Number of bars in pattern */
+  bars?: number;
+  /** Beats per bar */
+  beatsPerBar?: number;
+  /** Subdivision (notes per beat) */
+  subdivision?: number;
 }
 
 /**
@@ -323,18 +425,19 @@ export interface IPattern {
  */
 export interface ITrack {
   id: string;
-  name: string;
-  instrument: string;
-  patterns: Array<{
-    patternId: string;
-    startBeat: number;
-    loop?: boolean;
-    loopCount?: number;
-  }>;
-  volume: number;
-  pan: number;
-  muted: boolean;
-  solo: boolean;
+  name?: string;
+  instrument?: string;
+  patterns: IPatternRef[];
+  volume?: number;
+  pan?: number;
+  muted?: boolean;
+  solo?: boolean;
+  /** Source ID for this track */
+  sourceId?: string;
+  /** Effect chain IDs */
+  effects?: string[];
+  /** Output source ID */
+  outputSource?: string;
 }
 
 /**
@@ -342,12 +445,18 @@ export interface ITrack {
  */
 export interface ISequence {
   id: string;
-  name: string;
-  bpm: number;
-  beatsPerBar: number;
-  bars: number;
+  name?: string;
+  bpm?: number;
+  beatsPerBar?: number;
+  bars?: number;
   tracks: ITrack[];
-  patterns: IPattern[];
+  patterns?: IPattern[];
+  /** Order of patterns to play */
+  patternOrder?: string[];
+  /** Time signature [beats, noteValue] */
+  timeSignature?: [number, number];
+  /** Loop the sequence */
+  loop?: boolean;
 }
 
 /**
@@ -382,7 +491,18 @@ export type AudioEventType =
   | 'bufferError'
   | 'beatTick'
   | 'barTick'
-  | 'sequenceEnd';
+  | 'beat'
+  | 'bar'
+  | 'sequenceEnd'
+  | 'sequencerStarted'
+  | 'sequencerStopped'
+  | 'sequencerPaused'
+  | 'sequencerSeeked'
+  | 'sequenceLooped'
+  | 'noteTriggered'
+  | 'noteReleased'
+  | 'metronomeClick'
+  | 'bpmChanged';
 
 /**
  * Audio event
@@ -1003,6 +1123,7 @@ export function createNote(
 ): INote {
   return {
     pitch: typeof pitch === 'string' ? noteNameToMidi(pitch) : pitch,
+    startBeat: start,
     start,
     duration,
     velocity,
@@ -1017,7 +1138,10 @@ export function createPattern(
   notes: INote[],
   options: Partial<IPattern> = {},
 ): IPattern {
-  const maxEnd = notes.reduce((max, n) => Math.max(max, n.start + n.duration), 0);
+  const maxEnd = notes.reduce(
+    (max, n) => Math.max(max, (n.start ?? n.startBeat ?? 0) + n.duration),
+    0
+  );
   return {
     id,
     notes,
@@ -1065,3 +1189,7 @@ export function createSequence(
     ...options,
   };
 }
+
+
+
+

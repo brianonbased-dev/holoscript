@@ -495,7 +495,7 @@ describe('AgentMessaging', () => {
       expect(handler).toHaveBeenCalledWith(expect.objectContaining({
         id: message.id,
         type: 'test',
-      }));
+      }), expect.anything());
     });
 
     it('should invoke type handlers', () => {
