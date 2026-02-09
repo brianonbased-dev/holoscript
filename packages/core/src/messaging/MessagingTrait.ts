@@ -89,6 +89,9 @@ export function createMessagingTrait(
   const messaging = new AgentMessaging(entityId, channelManager, config);
 
   return {
+    traitId: 'messaging',
+    name: 'MessagingTrait',
+    enabled: true,
     // =========================================================================
     // CHANNEL OPERATIONS
     // =========================================================================

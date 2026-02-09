@@ -10,7 +10,6 @@
 // Types and Interfaces
 export {
   // Vector & Orientation
-  IVector3,
   IAudioOrientation,
 
   // Source Types

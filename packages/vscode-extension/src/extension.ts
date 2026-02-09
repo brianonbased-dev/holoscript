@@ -20,8 +20,26 @@ import {
   HoloScriptSemanticTokensRangeProvider,
   SEMANTIC_TOKENS_LEGEND,
 } from './semanticTokensProvider';
+import { 
+  registerCollaborationCommands, 
+  disposeCollaborationCommands 
+} from './collaboration';
+import {
+  SemanticGit,
+  DiffVisualizationProvider,
+  DiffDecorationProvider,
+  MergeDriver,
+  HoloScriptGitHooks,
+  registerGitCommands,
+  createGitStatusBarItem,
+  updateGitStatusBar,
+} from './git';
+import { MarketplaceWebview } from './webview/MarketplaceWebview';
 
 let client: LanguageClient | undefined;
+let semanticGit: SemanticGit | undefined;
+let gitStatusBarItem: vscode.StatusBarItem | undefined;
+let diffDecorationProvider: DiffDecorationProvider | undefined;
 
 export function activate(context: ExtensionContext) {
   // Register the preview command
@@ -132,6 +150,24 @@ export function activate(context: ExtensionContext) {
       vscode.env.openExternal(vscode.Uri.parse('https://holoscript.net/guides/'));
     })
   );
+
+  // Register Open Marketplace command
+  context.subscriptions.push(
+    commands.registerCommand('holoscript.openMarketplace', () => {
+      MarketplaceWebview.createOrShow(context.extensionUri);
+    })
+  );
+
+  // Register webview panel serializer for marketplace
+  if (window.registerWebviewPanelSerializer) {
+    context.subscriptions.push(
+      window.registerWebviewPanelSerializer(MarketplaceWebview.viewType, {
+        async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, _state: unknown) {
+          MarketplaceWebview.revive(webviewPanel, context.extensionUri);
+        },
+      })
+    );
+  }
 
   // Register Validate command for users
   context.subscriptions.push(
@@ -473,6 +509,59 @@ export function activate(context: ExtensionContext) {
   );
 
   console.log('HoloScript: Semantic tokens provider registered.');
+
+  // Register collaboration features
+  registerCollaborationCommands(context);
+  console.log('HoloScript: Collaboration features registered.');
+
+  // Register git integration features
+  const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  if (workspaceRoot) {
+    semanticGit = new SemanticGit(workspaceRoot);
+    const diffProvider = new DiffVisualizationProvider(context.extensionUri);
+    diffDecorationProvider = new DiffDecorationProvider();
+    const mergeDriver = new MergeDriver();
+    const hooks = new HoloScriptGitHooks();
+
+    // Register webview provider for diff visualization
+    context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider(
+        DiffVisualizationProvider.viewType,
+        diffProvider
+      )
+    );
+
+    // Register git commands
+    const gitDisposables = registerGitCommands(
+      context,
+      semanticGit,
+      diffProvider,
+      diffDecorationProvider,
+      mergeDriver,
+      hooks
+    );
+    context.subscriptions.push(...gitDisposables);
+
+    // Create status bar item
+    gitStatusBarItem = createGitStatusBarItem();
+    context.subscriptions.push(gitStatusBarItem);
+
+    // Update status bar on editor change
+    context.subscriptions.push(
+      vscode.window.onDidChangeActiveTextEditor(async () => {
+        if (semanticGit && gitStatusBarItem) {
+          await updateGitStatusBar(gitStatusBarItem, semanticGit);
+        }
+      })
+    );
+
+    // Initialize git (async, non-blocking)
+    semanticGit.initialize().catch((err) => {
+      console.log('HoloScript: Git not available:', err.message);
+    });
+
+    console.log('HoloScript: Git integration features registered.');
+  }
 }
 
 function isHoloScriptFile(document: TextDocument): boolean {
@@ -481,6 +570,23 @@ function isHoloScriptFile(document: TextDocument): boolean {
 }
 
 export function deactivate(): Thenable<void> | undefined {
+  // Dispose collaboration resources
+  disposeCollaborationCommands();
+
+  // Dispose git resources
+  if (semanticGit) {
+    semanticGit.dispose();
+    semanticGit = undefined;
+  }
+  if (gitStatusBarItem) {
+    gitStatusBarItem.dispose();
+    gitStatusBarItem = undefined;
+  }
+  if (diffDecorationProvider) {
+    diffDecorationProvider.dispose();
+    diffDecorationProvider = undefined;
+  }
+
   if (!client) {
     return undefined;
   }

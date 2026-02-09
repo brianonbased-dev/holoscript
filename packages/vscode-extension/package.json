@@ -86,6 +86,56 @@
           "type": "boolean",
           "default": true,
           "description": "Enable AI auto-suggestions while typing."
+        },
+        "holoscript.collaboration.serverUrl": {
+          "type": "string",
+          "default": "wss://collab.holoscript.dev",
+          "description": "WebSocket URL for collaboration server."
+        },
+        "holoscript.collaboration.autoJoin": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically join collaboration sessions from shared links."
+        },
+        "holoscript.collaboration.showCursors": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show other participants' cursors."
+        },
+        "holoscript.collaboration.showSelections": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show other participants' selections."
+        },
+        "holoscript.collaboration.showNames": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show participant names above cursors."
+        },
+        "holoscript.git.enableSemanticDiff": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable semantic diff for HoloScript files."
+        },
+        "holoscript.git.enable3DPreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable 3D diff preview."
+        },
+        "holoscript.git.formatOnCommit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-format HoloScript files on commit."
+        },
+        "holoscript.git.validateOnCommit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Validate HoloScript syntax on commit."
+        },
+        "holoscript.git.showInlineDiff": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline diff decorations in editor."
         }
       }
     },
@@ -103,6 +153,11 @@
         {
           "id": "holohub.assets",
           "name": "Marketplace"
+        },
+        {
+          "id": "holoscript.diffVisualization",
+          "name": "Diff Preview",
+          "type": "webview"
         }
       ]
     },
@@ -358,10 +413,124 @@
         "icon": "$(question)"
       },
       {
+        "command": "holoscript.openMarketplace",
+        "title": "Open Trait Marketplace",
+        "category": "HoloScript",
+        "icon": "$(package)"
+      },
+      {
         "command": "holoscript.validate",
         "title": "Validate Syntax",
         "category": "HoloScript",
         "icon": "$(check)"
+      },
+      {
+        "command": "holoscript.collaboration.start",
+        "title": "Start Collaboration Session",
+        "category": "HoloScript",
+        "icon": "$(broadcast)"
+      },
+      {
+        "command": "holoscript.collaboration.join",
+        "title": "Join Collaboration Session",
+        "category": "HoloScript",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "holoscript.collaboration.end",
+        "title": "End Collaboration Session",
+        "category": "HoloScript",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "holoscript.collaboration.share",
+        "title": "Share Collaboration Link",
+        "category": "HoloScript",
+        "icon": "$(link)"
+      },
+      {
+        "command": "holoscript.collaboration.showParticipants",
+        "title": "Show Collaboration Participants",
+        "category": "HoloScript",
+        "icon": "$(organization)"
+      },
+      {
+        "command": "holoscript.collaboration.addComment",
+        "title": "Add Inline Comment",
+        "category": "HoloScript",
+        "icon": "$(comment)"
+      },
+      {
+        "command": "holoscript.collaboration.lockSection",
+        "title": "Lock Section for Editing",
+        "category": "HoloScript",
+        "icon": "$(lock)"
+      },
+      {
+        "command": "holoscript.collaboration.toggle",
+        "title": "Toggle Collaboration",
+        "category": "HoloScript",
+        "icon": "$(live-share)"
+      },
+      {
+        "command": "holoscript.showSemanticDiff",
+        "title": "Show Semantic Diff",
+        "category": "HoloScript Git",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "holoscript.show3DDiff",
+        "title": "Show 3D Diff Preview",
+        "category": "HoloScript Git",
+        "icon": "$(preview)"
+      },
+      {
+        "command": "holoscript.toggleDiffDecorations",
+        "title": "Toggle Diff Decorations",
+        "category": "HoloScript Git",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "holoscript.blameLine",
+        "title": "Blame Line",
+        "category": "HoloScript Git",
+        "icon": "$(git-commit)"
+      },
+      {
+        "command": "holoscript.showFileHistory",
+        "title": "Show File History",
+        "category": "HoloScript Git",
+        "icon": "$(history)"
+      },
+      {
+        "command": "holoscript.stageWithValidation",
+        "title": "Stage with Validation",
+        "category": "HoloScript Git",
+        "icon": "$(add)"
+      },
+      {
+        "command": "holoscript.commitSemantic",
+        "title": "Commit with Semantic Message",
+        "category": "HoloScript Git",
+        "icon": "$(check)"
+      },
+      {
+        "command": "holoscript.showGitStatus",
+        "title": "Show HoloScript Git Status",
+        "category": "HoloScript Git",
+        "icon": "$(source-control)"
+      },
+      {
+        "command": "holoscript.resolveMergeConflicts",
+        "title": "Resolve Merge Conflicts",
+        "category": "HoloScript Git",
+        "icon": "$(merge)"
+      },
+      {
+        "command": "holoscript.runPreCommitHook",
+        "title": "Run Pre-Commit Hook",
+        "category": "HoloScript Git",
+        "icon": "$(run)"
       }
     ],
     "customEditors": [
@@ -389,6 +558,33 @@
           "command": "holoscript.openPreview",
           "when": "editorLangId == holoscript || editorLangId == holoscriptplus",
           "group": "holoscript"
+        },
+        {
+          "command": "holoscript.showSemanticDiff",
+          "when": "editorLangId == holoscript || editorLangId == holoscriptplus",
+          "group": "holoscript-git@1"
+        },
+        {
+          "command": "holoscript.blameLine",
+          "when": "editorLangId == holoscript || editorLangId == holoscriptplus",
+          "group": "holoscript-git@2"
+        },
+        {
+          "command": "holoscript.show3DDiff",
+          "when": "editorLangId == holoscript || editorLangId == holoscriptplus",
+          "group": "holoscript-git@3"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "holoscript.showSemanticDiff",
+          "when": "resourceExtname == .holo || resourceExtname == .hs",
+          "group": "holoscript-git"
+        },
+        {
+          "command": "holoscript.showFileHistory",
+          "when": "resourceExtname == .holo || resourceExtname == .hs",
+          "group": "holoscript-git"
         }
       ],
       "commandPalette": [
@@ -542,6 +738,8 @@
     "@holoscript/formatter": "workspace:*",
     "@types/adm-zip": "^0.5.7",
     "adm-zip": "^0.5.16",
-    "vscode-languageclient": "^9.0.1"
+    "vscode-languageclient": "^9.0.1",
+    "yjs": "^13.6.15",
+    "y-websocket": "^2.0.3"
   }
 }

@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 import { logger } from '../logger';
-import type { AgentManifest } from '../agents/AgentTypes';
+import type { AgentManifest } from '../agents/AgentManifest';
 import {
   TelemetryCollector,
   getTelemetryCollector,

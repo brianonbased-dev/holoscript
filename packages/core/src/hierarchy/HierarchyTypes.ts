@@ -5,7 +5,7 @@
  * Type definitions for agent hierarchies, delegation rules, and supervision.
  */
 
-import type { AgentManifest, AgentCapability } from '../agents/AgentTypes';
+import type { AgentManifest, AgentCapability } from '../agents/AgentManifest';
 
 // =============================================================================
 // HIERARCHY STRUCTURES

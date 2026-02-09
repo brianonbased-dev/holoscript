@@ -20,6 +20,23 @@ import {
 } from './ShaderGraphTypes';
 
 // ============================================================================
+// Serialization Types
+// ============================================================================
+
+/**
+ * Serialized shader graph representation
+ */
+export interface ISerializedShaderGraph {
+  id: string;
+  name: string;
+  description?: string;
+  version?: string;
+  metadata?: Record<string, unknown>;
+  nodes: IShaderNode[];
+  connections?: IShaderConnection[];
+}
+
+// ============================================================================
 // Shader Graph Builder
 // ============================================================================
 
@@ -443,17 +460,20 @@ export class ShaderGraph implements IShaderGraph {
   /**
    * Serialize to JSON
    */
-  toJSON(): object {
+  toJSON(): ISerializedShaderGraph {
     return {
       id: this.id,
       name: this.name,
       description: this.description,
       version: this.version,
       metadata: this.metadata,
-      nodes: Array.from(this.nodes.entries()).map(([id, node]) => ({
-        id,
-        ...node,
-      })),
+      nodes: Array.from(this.nodes.entries()).map(([id, node]) => {
+        const { id: _nodeId, ...rest } = node;
+        return {
+          id,
+          ...rest,
+        };
+      }),
       connections: this.connections,
     };
   }
@@ -461,7 +481,7 @@ export class ShaderGraph implements IShaderGraph {
   /**
    * Deserialize from JSON
    */
-  static fromJSON(json: ReturnType<ShaderGraph['toJSON']> & { nodes: IShaderNode[] }): ShaderGraph {
+  static fromJSON(json: ISerializedShaderGraph): ShaderGraph {
     const graph = new ShaderGraph(json.name, json.id);
     graph.description = json.description;
     graph.version = json.version ?? '1.0.0';

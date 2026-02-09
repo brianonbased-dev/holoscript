@@ -258,16 +258,18 @@ export class SwarmCoordinator implements ISwarmCoordinator {
     agents: AgentInfo[],
     tasks: TaskInfo[],
     config: ISwarmConfig
-  ): Promise<{ bestSolution: number[]; bestFitness: number }> {
+  ): Promise<{ bestSolution: number[]; bestFitness: number; converged: boolean; iterations: number }> {
     const fitnessFunction = this.createFitnessFunction(agents, tasks);
     
     // Create local search neighborhood
     let bestSolution = [...initialSolution];
     let bestFitness = fitnessFunction(bestSolution);
+    let iterations = 0;
 
     // Simple local search: try swapping assignments
     for (let i = 0; i < initialSolution.length; i++) {
       for (let agent = 0; agent < agents.length; agent++) {
+        iterations++;
         if (agent !== initialSolution[i]) {
           const candidate = [...bestSolution];
           candidate[i] = agent;
@@ -281,7 +283,7 @@ export class SwarmCoordinator implements ISwarmCoordinator {
       }
     }
 
-    return { bestSolution, bestFitness };
+    return { bestSolution, bestFitness, converged: true, iterations };
   }
 
   /**

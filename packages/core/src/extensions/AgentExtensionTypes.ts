@@ -332,7 +332,7 @@ export interface IHiveContribution {
   agentId: string;
   timestamp: number;
   type: 'idea' | 'critique' | 'consensus' | 'solution';
-  content: unknown;
+  content: string;
   confidence: number;
 }
 
@@ -357,41 +357,45 @@ export interface ICollectiveIntelligenceService {
   /**
    * Create a new session
    */
-  createSession(topic: string, goal: string, initiator: string): Promise<string>;
+  createSession(topic: string, goal: string, initiator: string): IHiveSession | Promise<string>;
   
   /**
    * Join a session
    */
-  join(sessionId: string, agentId: string): Promise<void>;
+  join(sessionId: string, agentId: string): void | Promise<void>;
   
   /**
    * Leave a session
    */
-  leave(sessionId: string, agentId: string): Promise<void>;
+  leave(sessionId: string, agentId: string): void | Promise<void>;
   
   /**
    * Contribute to session
    */
   contribute(
     sessionId: string,
-    agentId: string,
     contribution: Omit<IHiveContribution, 'id' | 'timestamp'>
-  ): Promise<void>;
+  ): IHiveContribution | Promise<void>;
   
   /**
    * Vote on contributions
    */
-  vote(sessionId: string, contributionId: string, vote: 'support' | 'oppose'): Promise<void>;
+  vote(
+    sessionId: string, 
+    contributionId: string, 
+    voterId: string,
+    vote: 'support' | 'oppose'
+  ): void | Promise<void>;
   
   /**
    * Synthesize collective wisdom
    */
-  synthesize(sessionId: string): Promise<unknown>;
+  synthesize(sessionId: string): unknown;
   
   /**
    * Resolve and close session
    */
-  resolve(sessionId: string, resolution: unknown): Promise<void>;
+  resolve(sessionId: string, resolution: string | unknown): void | Promise<void>;
 }
 
 // ============================================================================

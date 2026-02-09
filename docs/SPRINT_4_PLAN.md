@@ -12,6 +12,8 @@ Sprint 4 focuses on **Agentic Choreography** – enabling HoloScript to orchestr
 
 The core insight: HoloScript's reactive state system and trait composition naturally maps to agent capabilities, while spatial awareness enables physical-context-aware agent collaboration.
 
+**Positioning Update:** HoloScript is now the **full platform SDK**. Hololand and `uaa2-service` are **consumers** of the SDK, not the canonical source of system APIs.
+
 ## Sprint 4 Priorities
 
 | Priority | Focus                           | Effort | Dependencies         | Status       |

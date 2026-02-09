@@ -23,14 +23,14 @@ Sprint 6 delivers **Spatial Export & Rendering** capabilities, enabling HoloScri
 
 | Priority | Focus | Effort | Dependencies | Status |
 |----------|-------|--------|--------------|--------|
-| **1** | Scene Serialization | Medium | Core complete | Not started |
-| **2** | GLB/GLTF Export | High | Priority 1 | Not started |
-| **3** | USD/USDZ Export | High | Priority 1 | Not started |
-| **4** | Asset Optimization | Medium | Priority 2, 3 | Not started |
-| **5** | Render Network Integration | High | Priority 2 | Not started |
-| **6** | Mobile AR Optimization | Medium | Priority 2, 4 | Not started |
-| **7** | Volumetric Video Support | High | Priority 1 | Not started |
-| **8** | Export CLI & API | Medium | All priorities | Not started |
+| **1** | Scene Serialization | Medium | Core complete | ✅ Complete |
+| **2** | GLB/GLTF Export | High | Priority 1 | ✅ Complete |
+| **3** | USD/USDZ Export | High | Priority 1 | ✅ Complete |
+| **4** | Asset Optimization | Medium | Priority 2, 3 | ✅ Complete |
+| **5** | Render Network Integration | High | Priority 2 | ✅ Complete |
+| **6** | Mobile AR Optimization | Medium | Priority 2, 4 | ✅ Complete |
+| **7** | Volumetric Video Support | High | Priority 1 | ✅ Complete |
+| **8** | Export CLI & API | Medium | All priorities | ✅ Complete |
 
 ---
 

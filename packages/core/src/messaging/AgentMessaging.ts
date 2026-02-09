@@ -266,6 +266,7 @@ export class AgentMessaging extends EventEmitter {
       timestamp: Date.now(),
       encrypted: channel.encryption !== 'none',
       priority,
+      status: 'sent',
     };
 
     // Track pending message
@@ -441,12 +442,14 @@ export class AgentMessaging extends EventEmitter {
       payload,
     };
 
+    const channel = this.channelManager.getChannel(message.channelId);
+
     // Invoke channel handlers
     const channelHandlers = this.handlers.get(message.channelId);
-    if (channelHandlers) {
+    if (channelHandlers && channel) {
       for (const handler of channelHandlers) {
         try {
-          handler(decryptedMessage);
+          handler(decryptedMessage, channel);
         } catch (error) {
           this.emit('handler:error', { message, error });
         }
@@ -454,13 +457,15 @@ export class AgentMessaging extends EventEmitter {
     }
 
     // Invoke type handlers
-    const typeHandlers = this.typeHandlers.get(message.type);
-    if (typeHandlers) {
-      for (const handler of typeHandlers) {
-        try {
-          handler(decryptedMessage);
-        } catch (error) {
-          this.emit('handler:error', { message, error });
+    if (message.type) {
+      const typeHandlers = this.typeHandlers.get(message.type);
+      if (typeHandlers && channel) {
+        for (const handler of typeHandlers) {
+          try {
+            handler(decryptedMessage, channel);
+          } catch (error) {
+            this.emit('handler:error', { message, error });
+          }
         }
       }
     }

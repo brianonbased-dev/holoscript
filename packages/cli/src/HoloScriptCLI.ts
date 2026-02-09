@@ -10,6 +10,9 @@ import * as path from 'path';
 import * as readline from 'readline';
 import { ConfigLoader } from './config/loader';
 import { HoloScriptConfig } from './config/schema';
+import { importUnity } from './importers/unity-importer';
+import { importGodot } from './importers/godot-importer';
+import { importGltf as importGltfRaw, importGltfToFile } from './importers/gltf-importer';
 
 export class HoloScriptCLI {
   private parser: HoloScriptParser;
@@ -50,6 +53,8 @@ export class HoloScriptCLI {
           return this.astCommand();
         case 'repl':
           return this.replCommand();
+        case 'import':
+          return this.importCommand();
         default:
           return 0;
       }
@@ -240,5 +245,108 @@ export class HoloScriptCLI {
         resolve(0);
       });
     });
+  }
+
+  private async importCommand(): Promise<number> {
+    if (!this.options.input) {
+      console.error('Error: No input file specified.');
+      console.error('Usage: holo import <file> --from <unity|godot|gltf> [--output <file>]');
+      return 1;
+    }
+
+    const inputPath = path.resolve(this.options.input);
+    if (!fs.existsSync(inputPath)) {
+      console.error(`Error: File not found: ${inputPath}`);
+      return 1;
+    }
+
+    // Auto-detect source from file extension if not specified
+    let source = this.options.importSource;
+    if (!source) {
+      const ext = path.extname(inputPath).toLowerCase();
+      if (ext === '.unity' || ext === '.prefab') {
+        source = 'unity';
+      } else if (ext === '.tscn' || ext === '.escn') {
+        source = 'godot';
+      } else if (ext === '.gltf' || ext === '.glb') {
+        source = 'gltf';
+      } else {
+        console.error(`Error: Cannot detect import source for ${ext}. Use --from <unity|godot|gltf>`);
+        return 1;
+      }
+    }
+
+    // Determine output path
+    const outputPath = this.options.output
+      ? path.resolve(this.options.output)
+      : inputPath.replace(/\.[^.]+$/, '.holo');
+
+    console.log(`Importing ${source} file: ${inputPath}`);
+
+    try {
+      let result: { success: boolean; sceneName: string; objectCount: number; errors: string[]; warnings: string[] };
+      switch (source) {
+        case 'unity':
+          result = await importUnity({
+            inputPath,
+            outputPath,
+            sceneName: this.options.sceneName,
+          });
+          break;
+        case 'godot':
+          result = await importGodot({
+            inputPath,
+            outputPath,
+            sceneName: this.options.sceneName,
+          });
+          break;
+        case 'gltf':
+          try {
+            importGltfToFile(inputPath, outputPath);
+            const sceneName = this.options.sceneName || path.basename(inputPath, path.extname(inputPath));
+            result = {
+              success: true,
+              sceneName,
+              objectCount: -1, // Unknown count
+              errors: [],
+              warnings: [],
+            };
+          } catch (err) {
+            result = {
+              success: false,
+              sceneName: '',
+              objectCount: 0,
+              errors: [err instanceof Error ? err.message : String(err)],
+              warnings: [],
+            };
+          }
+          break;
+        default:
+          console.error(`Error: Unknown import source: ${source}`);
+          return 1;
+      }
+
+      if (result.success) {
+        console.log(`✓ Successfully imported to: ${outputPath}`);
+        console.log(`  Scene: ${result.sceneName}`);
+        console.log(`  Objects: ${result.objectCount}`);
+        if (result.warnings.length > 0) {
+          console.log(`  Warnings: ${result.warnings.length}`);
+          for (const warning of result.warnings) {
+            console.log(`    - ${warning}`);
+          }
+        }
+        return 0;
+      } else {
+        console.error(`✗ Import failed:`);
+        for (const error of result.errors) {
+          console.error(`  - ${error}`);
+        }
+        return 1;
+      }
+    } catch (error) {
+      console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
+      return 1;
+    }
   }
 }

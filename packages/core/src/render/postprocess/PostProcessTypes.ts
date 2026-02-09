@@ -530,3 +530,22 @@ export const UNIFORM_SIZES: Record<PostProcessEffectType, number> = {
   fog: 48,       // color, density, start, end, height, falloff
   custom: 256,   // generic uniform buffer for custom effects
 };
+
+// =============================================================================
+// Type Aliases for API Compatibility
+// =============================================================================
+
+/**
+ * FXAA quality levels
+ */
+export type FXAAQuality = 'low' | 'medium' | 'high' | 'ultra';
+
+/**
+ * Alias for IEffectParams (API compatibility)
+ */
+export type IBaseEffectParams = IEffectParams;
+
+/**
+ * Alias for IDepthOfFieldParams (API compatibility)
+ */
+export type IDOFParams = IDepthOfFieldParams;

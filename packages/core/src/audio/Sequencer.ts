@@ -15,6 +15,7 @@ import {
   INote,
   SequencerState,
   LoopMode,
+  ISequencerState,
   IAudioContext,
   AudioEventType,
   AudioEventCallback,
@@ -79,6 +80,21 @@ export class SequencerImpl implements ISequencer {
   // ==========================================================================
   // Lifecycle
   // ==========================================================================
+
+  public load(sequence: ISequence): void {
+    this.createSequence(sequence);
+    this.loadSequence(sequence.id);
+  }
+
+  public unload(): void {
+    if (this.currentSequenceId) {
+      this.removeSequence(this.currentSequenceId);
+    }
+  }
+
+  public play(): void {
+    this.start();
+  }
 
   public start(): void {
     if (this._state === 'playing') return;
@@ -147,6 +163,23 @@ export class SequencerImpl implements ISequencer {
     return this._state;
   }
 
+  public getState(): ISequencerState {
+    return {
+      isPlaying: this._state === 'playing',
+      isPaused: this._state === 'paused',
+      currentBeat: this._currentBeat,
+      currentBar: this._currentBar,
+      bpm: this._bpm,
+      looping: this._loopMode !== 'none',
+      loopStart: this._loopStart,
+      loopEnd: this._loopEnd,
+    };
+  }
+
+  public get isPlaying(): boolean {
+    return this._state === 'playing';
+  }
+
   public dispose(): void {
     this.stop();
     this.sequences.clear();
@@ -196,12 +229,27 @@ export class SequencerImpl implements ISequencer {
     return this._currentPatternIndex;
   }
 
+  public setBPM(bpm: number): void {
+    this.bpm = bpm;
+  }
+
+  public getBPM(): number {
+    return this.bpm;
+  }
+
   public get loopMode(): LoopMode {
     return this._loopMode;
   }
 
   public set loopMode(value: LoopMode) {
     this._loopMode = value;
+  }
+
+  public setLoop(enabled: boolean, startBeat?: number, endBeat?: number): void {
+    this._loopMode = enabled ? 'sequence' : 'none';
+    if (startBeat !== undefined && endBeat !== undefined) {
+      this.setLoopRange(startBeat, endBeat);
+    }
   }
 
   public get metronomeEnabled(): boolean {
@@ -345,6 +393,10 @@ export class SequencerImpl implements ISequencer {
     return config.id;
   }
 
+  public addPattern(pattern: IPattern): void {
+    this.createPattern(pattern);
+  }
+
   public getPattern(id: string): IPattern | undefined {
     const pattern = this.patterns.get(id);
     if (!pattern) return undefined;
@@ -382,13 +434,31 @@ export class SequencerImpl implements ISequencer {
     }
   }
 
+  public scheduleNote(trackId: string, note: INote): void {
+    const track = this.tracks.get(trackId);
+    const patternRef = track?.patterns[0];
+    if (!patternRef) return;
+
+    const pattern = this.patterns.get(patternRef.patternId);
+    if (!pattern) return;
+
+    pattern.notes.push({ ...note });
+  }
+
+  public quantize(beat: number, grid: number): number {
+    if (grid <= 0) return beat;
+    return Math.round(beat / grid) * grid;
+  }
+
   public quantizePattern(patternId: string, subdivision: number): void {
     const pattern = this.patterns.get(patternId);
     if (!pattern || subdivision <= 0) return;
 
     const step = 1 / subdivision;
     for (const note of pattern.notes) {
-      note.start = Math.round(note.start / step) * step;
+      const start = note.start ?? note.startBeat ?? 0;
+      note.start = Math.round(start / step) * step;
+      note.startBeat = note.start;
       if (note.duration !== undefined) {
         note.duration = Math.max(step, Math.round(note.duration / step) * step);
       }
@@ -439,6 +509,13 @@ export class SequencerImpl implements ISequencer {
 
   public removeTrack(id: string): boolean {
     return this.tracks.delete(id);
+  }
+
+  public setTrackVolume(trackId: string, volume: number): void {
+    const track = this.tracks.get(trackId);
+    if (track) {
+      track.volume = volume;
+    }
   }
 
   public setTrackMuted(trackId: string, muted: boolean): void {
@@ -534,9 +611,10 @@ export class SequencerImpl implements ISequencer {
 
   private getCurrentPattern(): IPattern | undefined {
     const sequence = this.getCurrentSequence();
-    if (!sequence || !sequence.patternOrder.length) return undefined;
+    const patternOrder = sequence?.patternOrder ?? sequence?.patterns?.map((p) => p.id) ?? [];
+    if (!sequence || patternOrder.length === 0) return undefined;
 
-    const patternId = sequence.patternOrder[this._currentPatternIndex];
+    const patternId = patternOrder[this._currentPatternIndex];
     return patternId ? this.patterns.get(patternId) : undefined;
   }
 
@@ -622,22 +700,24 @@ export class SequencerImpl implements ISequencer {
     if (!pattern) return;
 
     // Get tracks for this sequence
-    for (const trackId of sequence.tracks) {
-      const track = this.tracks.get(trackId);
+    for (const trackEntry of sequence.tracks) {
+      const trackId = trackEntry.id;
+      const track = this.tracks.get(trackId) ?? trackEntry;
       if (!track || track.muted) continue;
 
       // Find notes in pattern that fall within schedule window
-      const patternOffset = this._currentPatternIndex * pattern.bars * (pattern.beatsPerBar ?? 4);
+      const patternBars = pattern.bars ?? 1;
+      const patternOffset = this._currentPatternIndex * patternBars * (pattern.beatsPerBar ?? 4);
 
       for (const note of pattern.notes) {
-        const noteStartBeat = patternOffset + note.start;
+        const noteStartBeat = patternOffset + (note.start ?? note.startBeat ?? 0);
         const noteEndBeat = noteStartBeat + (note.duration ?? 0.25);
 
         if (noteStartBeat >= elapsedBeats && noteStartBeat < lookAheadEnd) {
           // Check if already scheduled
           const alreadyScheduled = this.scheduledNotes.some(
             sn =>
-              sn.track === trackId &&
+                sn.track === trackId &&
               Math.abs(sn.startTime - this.beatsToSeconds(noteStartBeat)) < 0.001 &&
               sn.note.pitch === note.pitch
           );
@@ -709,10 +789,12 @@ export class SequencerImpl implements ISequencer {
     const pattern = this.getCurrentPattern();
     if (!pattern) return;
 
-    const patternLength = pattern.bars * (pattern.beatsPerBar ?? 4);
+    const patternBars = pattern.bars ?? 1;
+    const patternLength = patternBars * (pattern.beatsPerBar ?? 4);
     const totalBeats = this._currentBar * this.getBeatsPerBar() + this._currentBeat;
     const patternEnd = (this._currentPatternIndex + 1) * patternLength;
 
+    const patternOrder = sequence.patternOrder ?? sequence.patterns?.map((p) => p.id) ?? [];
     if (totalBeats >= patternEnd) {
       if (this._loopMode === 'pattern') {
         // Loop current pattern
@@ -720,7 +802,7 @@ export class SequencerImpl implements ISequencer {
       } else if (this._loopMode === 'sequence') {
         // Move to next pattern or loop
         this._currentPatternIndex++;
-        if (this._currentPatternIndex >= sequence.patternOrder.length) {
+        if (this._currentPatternIndex >= patternOrder.length) {
           this._currentPatternIndex = 0;
           this.seek(0, 0);
           this.emit({
@@ -731,7 +813,7 @@ export class SequencerImpl implements ISequencer {
       } else if (this._loopMode === 'none') {
         // Move to next pattern or stop
         this._currentPatternIndex++;
-        if (this._currentPatternIndex >= sequence.patternOrder.length) {
+        if (this._currentPatternIndex >= patternOrder.length) {
           this.stop();
         }
       }

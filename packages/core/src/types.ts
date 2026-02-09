@@ -19,6 +19,8 @@ import type { HSPlusNode } from './types/HoloScriptPlus';
 
 export type { HSPlusDirective, HSPlusAST, ASTProgram, HSPlusCompileResult, HSPlusNode };
 
+export type { TraitBehavior } from './types/index';
+
 // ============================================================================
 // Spatial Types
 // ============================================================================

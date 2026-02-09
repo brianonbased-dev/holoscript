@@ -431,7 +431,7 @@ export class WebGPURenderer {
       usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     });
 
-    this.context.device.queue.writeBuffer(buffer, 0, data);
+    this.context.device.queue.writeBuffer(buffer, 0, data as unknown as ArrayBuffer);
 
     return {
       buffer,
@@ -454,7 +454,7 @@ export class WebGPURenderer {
       usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
     });
 
-    this.context.device.queue.writeBuffer(buffer, 0, data);
+    this.context.device.queue.writeBuffer(buffer, 0, data as unknown as ArrayBuffer);
 
     return {
       buffer,

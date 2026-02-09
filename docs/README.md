@@ -12,6 +12,7 @@
 
 - [AI Architecture](architecture/AI_ARCHITECTURE.md) - AI integration design
 - [AI Use Cases](architecture/AI_USE_CASES.md) - How AI agents use HoloScript
+- [Interoperability](architecture/INTEROPERABILITY.md) - 22-connection language interop matrix
 
 ### 🎨 Graphics
 

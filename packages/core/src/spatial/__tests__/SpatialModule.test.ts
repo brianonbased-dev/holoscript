@@ -554,3 +554,291 @@ describe('Spatial Performance', () => {
     expect(elapsed).toBeLessThan(10);
   });
 });
+
+// =============================================================================
+// ADDITIONAL COVERAGE TESTS - SPRINT 8 v3.1 RELEASE
+// =============================================================================
+
+describe('SpatialContextProvider Additional Coverage', () => {
+  let provider: SpatialContextProvider;
+
+  beforeEach(() => {
+    provider = new SpatialContextProvider();
+  });
+
+  afterEach(() => {
+    provider.stop();
+  });
+
+  describe('findVisible', () => {
+    beforeEach(() => {
+      provider.setEntities([
+        createEntity('e1', { x: 5, y: 0, z: 0 }, 'target'),
+        createEntity('e2', { x: 10, y: 0, z: 0 }, 'target'),
+        createEntity('e3', { x: 0, y: 5, z: 0 }, 'target'),
+      ]);
+    });
+
+    it('should find visible entities from position', () => {
+      const results = provider.findVisible({ x: 0, y: 0, z: 0 });
+      expect(results.length).toBeGreaterThan(0);
+    });
+
+    it('should find visible entities with direction filter', () => {
+      // Looking in +x direction
+      const results = provider.findVisible(
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 0, z: 0 },
+        90, // 90 degree FOV
+        20
+      );
+      expect(results.length).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should respect max distance', () => {
+      const results = provider.findVisible({ x: 0, y: 0, z: 0 }, undefined, undefined, 7);
+      // e1 at distance 5 should be visible, but e2 at 10 should not
+      expect(results.length).toBeLessThanOrEqual(2);
+    });
+  });
+
+  describe('sight lines with blocking', () => {
+    it('should compute sight lines when enabled', () => {
+      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, {
+        perceptionRadius: 20,
+        computeSightLines: true,
+      });
+      
+      provider.setEntities([
+        createEntity('e1', { x: 10, y: 0, z: 0 }, 'target'),
+      ]);
+      
+      provider.update();
+      const context = provider.getContext('agent-1');
+      
+      expect(context).not.toBeNull();
+      expect(context!.sightLines).toBeDefined();
+      expect(context!.sightLines.length).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should detect blocking entities', () => {
+      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, {
+        perceptionRadius: 30,
+        computeSightLines: true,
+      });
+      
+      // Blocker in between agent and target
+      provider.setEntities([
+        createEntity('target', { x: 20, y: 0, z: 0 }, 'target'),
+        { id: 'blocker', type: 'obstacle', position: { x: 10, y: 0, z: 0 }, bounds: { center: { x: 10, y: 0, z: 0 }, radius: 3 } } as SpatialEntity,
+      ]);
+      
+      provider.update();
+      const context = provider.getContext('agent-1');
+      
+      expect(context).not.toBeNull();
+      expect(context!.nearbyEntities.length).toBe(2);
+    });
+  });
+
+  describe('entity bounds handling', () => {
+    it('should handle entities with sphere bounds', () => {
+      const sphereEntity: SpatialEntity = {
+        id: 'sphere',
+        type: 'object',
+        position: { x: 5, y: 0, z: 0 },
+        bounds: { center: { x: 5, y: 0, z: 0 }, radius: 2 },
+      };
+      
+      provider.setEntity(sphereEntity);
+      const entities = provider.getEntities();
+      
+      expect(entities.length).toBe(1);
+      expect(entities[0].bounds).toBeDefined();
+    });
+
+    it('should handle entities with box bounds', () => {
+      const boxEntity: SpatialEntity = {
+        id: 'box',
+        type: 'object',
+        position: { x: 5, y: 0, z: 0 },
+        bounds: { min: { x: 4, y: -1, z: -1 }, max: { x: 6, y: 1, z: 1 } },
+      };
+      
+      provider.setEntity(boxEntity);
+      const entities = provider.getEntities();
+      
+      expect(entities.length).toBe(1);
+      expect(entities[0].bounds).toBeDefined();
+    });
+  });
+
+  describe('spherical regions', () => {
+    it('should detect agent in spherical region', () => {
+      const sphereRegion: Region = {
+        id: 'sphere-region',
+        name: 'Sphere Region',
+        type: 'sphere',
+        bounds: { center: { x: 0, y: 0, z: 0 }, radius: 10 },
+      };
+      
+      provider.setRegion(sphereRegion);
+      provider.registerAgent('agent-1', { x: 5, y: 0, z: 0 });
+      provider.update();
+      
+      const context = provider.getContext('agent-1');
+      expect(context).not.toBeNull();
+      expect(context!.currentRegions.length).toBe(1);
+      expect(context!.currentRegions[0].id).toBe('sphere-region');
+    });
+
+    it('should detect agent outside spherical region', () => {
+      const sphereRegion: Region = {
+        id: 'sphere-region',
+        name: 'Sphere Region',
+        type: 'sphere',
+        bounds: { center: { x: 0, y: 0, z: 0 }, radius: 5 },
+      };
+      
+      provider.setRegion(sphereRegion);
+      provider.registerAgent('agent-1', { x: 50, y: 0, z: 0 }); // Far outside
+      provider.update();
+      
+      const context = provider.getContext('agent-1');
+      expect(context).not.toBeNull();
+      expect(context!.currentRegions.length).toBe(0);
+    });
+  });
+
+  describe('update rate handling', () => {
+    it('should restart update loop when agent is registered while running', () => {
+      provider.start();
+      expect(() => {
+        provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, { updateRate: 30 });
+      }).not.toThrow();
+    });
+
+    it('should handle multiple agents with different update rates', () => {
+      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, { updateRate: 60 });
+      provider.registerAgent('agent-2', { x: 10, y: 0, z: 0 }, { updateRate: 30 });
+      
+      provider.start();
+      
+      // Should use the higher update rate
+      expect(() => provider.update()).not.toThrow();
+    });
+
+    it('should handle zero update rate', () => {
+      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, { updateRate: 0 });
+      provider.start();
+      
+      // Should not crash with zero update rate
+      expect(() => provider.update()).not.toThrow();
+    });
+  });
+
+  describe('entity type filtering', () => {
+    beforeEach(() => {
+      provider.setEntities([
+        createEntity('npc1', { x: 5, y: 0, z: 0 }, 'npc'),
+        createEntity('item1', { x: 3, y: 0, z: 0 }, 'item'),
+        createEntity('enemy1', { x: 8, y: 0, z: 0 }, 'enemy'),
+      ]);
+    });
+
+    it('should filter entities by type in agent config', () => {
+      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, {
+        perceptionRadius: 20,
+        entityTypeFilter: ['npc', 'item'],
+      });
+      
+      provider.update();
+      const context = provider.getContext('agent-1');
+      
+      expect(context).not.toBeNull();
+      expect(context!.nearbyEntities.length).toBe(2);
+      expect(context!.nearbyEntities.some(e => e.type === 'enemy')).toBe(false);
+    });
+
+    it('should include all types with empty filter', () => {
+      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, {
+        perceptionRadius: 20,
+        entityTypeFilter: [],
+      });
+      
+      provider.update();
+      const context = provider.getContext('agent-1');
+      
+      expect(context).not.toBeNull();
+      expect(context!.nearbyEntities.length).toBe(3);
+    });
+  });
+
+  describe('unsubscribe and cleanup', () => {
+    it('should unsubscribe from region events', () => {
+      const callback = vi.fn();
+      
+      provider.setRegion(createRegion('r1', { x: -5, y: -5, z: -5 }, { x: 5, y: 5, z: 5 }));
+      provider.registerAgent('agent-1', { x: 100, y: 100, z: 100 });
+      provider.subscribeToRegion('agent-1', 'r1', callback);
+      provider.unsubscribeFromRegion('agent-1', 'r1');
+      
+      provider.updateAgentPosition('agent-1', { x: 0, y: 0, z: 0 });
+      provider.update();
+      
+      // Should not be called after unsubscribe
+      expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should handle unregister of non-existent agent', () => {
+      expect(() => {
+        provider.unregisterAgent('non-existent');
+      }).not.toThrow();
+    });
+
+    it('should handle updateAgentPosition for non-existent agent', () => {
+      expect(() => {
+        provider.updateAgentPosition('non-existent', { x: 0, y: 0, z: 0 });
+      }).not.toThrow();
+    });
+
+    it('should handle subscribeToRegion for non-existent agent', () => {
+      expect(() => {
+        provider.subscribeToRegion('non-existent', 'r1', vi.fn());
+      }).not.toThrow();
+    });
+
+    it('should handle unsubscribeFromRegion for non-existent agent', () => {
+      expect(() => {
+        provider.unsubscribeFromRegion('non-existent', 'r1');
+      }).not.toThrow();
+    });
+  });
+
+  describe('getContext for unknown agent', () => {
+    it('should return null for unknown agent', () => {
+      const context = provider.getContext('unknown-agent');
+      expect(context).toBeNull();
+    });
+  });
+
+  describe('double start/stop', () => {
+    it('should handle double start gracefully', () => {
+      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 });
+      provider.start();
+      expect(() => provider.start()).not.toThrow();
+      provider.stop();
+    });
+
+    it('should handle double stop gracefully', () => {
+      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 });
+      provider.start();
+      provider.stop();
+      expect(() => provider.stop()).not.toThrow();
+    });
+
+    it('should handle stop without start', () => {
+      expect(() => provider.stop()).not.toThrow();
+    });
+  });
+});

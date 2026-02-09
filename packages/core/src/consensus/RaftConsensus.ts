@@ -110,7 +110,7 @@ export class RaftConsensus extends EventEmitter implements ConsensusProtocol {
   // Pending proposals waiting for commit
   private pendingProposals: Map<
     number,
-    { resolve: (result: ProposalResult) => void; key: string; value: unknown }
+    { resolve: (result: ProposalResult<unknown>) => void; key: string; value: unknown }
   > = new Map();
 
   // Message sender callback
@@ -179,7 +179,11 @@ export class RaftConsensus extends EventEmitter implements ConsensusProtocol {
 
     // Create promise for when entry is committed
     return new Promise((resolve) => {
-      this.pendingProposals.set(entry.index, { resolve, key, value });
+      this.pendingProposals.set(entry.index, {
+        resolve: resolve as (result: ProposalResult<unknown>) => void,
+        key,
+        value,
+      });
 
       // Immediately try to replicate
       this.replicateLog();

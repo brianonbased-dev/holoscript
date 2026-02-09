@@ -2157,6 +2157,185 @@ async function main(): Promise<void> {
       break;
     }
 
+    case 'screenshot': {
+      if (!options.input) {
+        console.error('\x1b[31mError: No input file specified.\x1b[0m');
+        console.log('Usage: holoscript screenshot <file.holo> [--output out.png] [--width 1920] [--height 1080]');
+        process.exit(1);
+      }
+
+      const fs = await import('fs');
+      const path = await import('path');
+
+      const filePath = path.resolve(options.input);
+      if (!fs.existsSync(filePath)) {
+        console.error(`\x1b[31mError: File not found: ${filePath}\x1b[0m`);
+        process.exit(1);
+      }
+
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const outputPath = options.output || options.input.replace(/\.(holo|hs|hsplus)$/, '.png');
+
+      console.log(`\n\x1b[36mCapturing screenshot of ${options.input}...\x1b[0m\n`);
+
+      try {
+        const { PuppeteerRenderer } = await import('@holoscript/core');
+        const renderer = new PuppeteerRenderer({ debug: options.verbose });
+
+        await renderer.initialize();
+
+        const result = await renderer.screenshot(content, {
+          width: options.width || 1920,
+          height: options.height || 1080,
+          format: options.imageFormat || 'png',
+          quality: options.quality || 90,
+          deviceScaleFactor: options.scale || 1,
+          waitForStable: options.waitFor || 2000,
+        });
+
+        await renderer.close();
+
+        if (result.success && result.data) {
+          fs.writeFileSync(path.resolve(outputPath), result.data as Buffer);
+          console.log(`\x1b[32m✓ Screenshot saved to ${outputPath}\x1b[0m`);
+          console.log(`  Size: ${result.metadata?.width}x${result.metadata?.height}`);
+          console.log(`  Format: ${result.metadata?.format}`);
+          console.log(`  File size: ${(result.metadata?.size || 0 / 1024).toFixed(1)} KB`);
+          if (result.timing) {
+            console.log(`  Total time: ${result.timing.totalMs}ms`);
+          }
+          process.exit(0);
+        } else {
+          console.error(`\x1b[31mError: ${result.error}\x1b[0m`);
+          process.exit(1);
+        }
+      } catch (error) {
+        const err = error as Error;
+        if (err.message.includes('puppeteer')) {
+          console.error('\x1b[31mError: Puppeteer not installed.\x1b[0m');
+          console.log('Run: npm install puppeteer');
+        } else {
+          console.error(`\x1b[31mError: ${err.message}\x1b[0m`);
+        }
+        process.exit(1);
+      }
+      break;
+    }
+
+    case 'pdf': {
+      if (!options.input) {
+        console.error('\x1b[31mError: No input file specified.\x1b[0m');
+        console.log('Usage: holoscript pdf <file.holo> [--output out.pdf] [--page-format A4] [--landscape]');
+        process.exit(1);
+      }
+
+      const fs = await import('fs');
+      const path = await import('path');
+
+      const filePath = path.resolve(options.input);
+      if (!fs.existsSync(filePath)) {
+        console.error(`\x1b[31mError: File not found: ${filePath}\x1b[0m`);
+        process.exit(1);
+      }
+
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const outputPath = options.output || options.input.replace(/\.(holo|hs|hsplus)$/, '.pdf');
+
+      console.log(`\n\x1b[36mGenerating PDF of ${options.input}...\x1b[0m\n`);
+
+      try {
+        const { PuppeteerRenderer } = await import('@holoscript/core');
+        const renderer = new PuppeteerRenderer({ debug: options.verbose });
+
+        await renderer.initialize();
+
+        const result = await renderer.generatePDF(content, {
+          format: options.pageFormat || 'A4',
+          landscape: options.landscape || false,
+          printBackground: true,
+        });
+
+        await renderer.close();
+
+        if (result.success && result.data) {
+          fs.writeFileSync(path.resolve(outputPath), result.data as Buffer);
+          console.log(`\x1b[32m✓ PDF saved to ${outputPath}\x1b[0m`);
+          console.log(`  File size: ${((result.metadata?.size || 0) / 1024).toFixed(1)} KB`);
+          process.exit(0);
+        } else {
+          console.error(`\x1b[31mError: ${result.error}\x1b[0m`);
+          process.exit(1);
+        }
+      } catch (error) {
+        const err = error as Error;
+        if (err.message.includes('puppeteer')) {
+          console.error('\x1b[31mError: Puppeteer not installed.\x1b[0m');
+          console.log('Run: npm install puppeteer');
+        } else {
+          console.error(`\x1b[31mError: ${err.message}\x1b[0m`);
+        }
+        process.exit(1);
+      }
+      break;
+    }
+
+    case 'prerender': {
+      if (!options.input) {
+        console.error('\x1b[31mError: No input file specified.\x1b[0m');
+        console.log('Usage: holoscript prerender <file.holo> [--output out.html]');
+        process.exit(1);
+      }
+
+      const fs = await import('fs');
+      const path = await import('path');
+
+      const filePath = path.resolve(options.input);
+      if (!fs.existsSync(filePath)) {
+        console.error(`\x1b[31mError: File not found: ${filePath}\x1b[0m`);
+        process.exit(1);
+      }
+
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const outputPath = options.output || options.input.replace(/\.(holo|hs|hsplus)$/, '.html');
+
+      console.log(`\n\x1b[36mPre-rendering ${options.input}...\x1b[0m\n`);
+
+      try {
+        const { PuppeteerRenderer } = await import('@holoscript/core');
+        const renderer = new PuppeteerRenderer({ debug: options.verbose });
+
+        await renderer.initialize();
+
+        const result = await renderer.prerender(content, {
+          waitUntil: 'networkidle0',
+          removeScripts: true,
+          addMetaTags: true,
+        });
+
+        await renderer.close();
+
+        if (result.success && result.data) {
+          fs.writeFileSync(path.resolve(outputPath), result.data as string);
+          console.log(`\x1b[32m✓ Pre-rendered HTML saved to ${outputPath}\x1b[0m`);
+          console.log(`  File size: ${((result.metadata?.size || 0) / 1024).toFixed(1)} KB`);
+          process.exit(0);
+        } else {
+          console.error(`\x1b[31mError: ${result.error}\x1b[0m`);
+          process.exit(1);
+        }
+      } catch (error) {
+        const err = error as Error;
+        if (err.message.includes('puppeteer')) {
+          console.error('\x1b[31mError: Puppeteer not installed.\x1b[0m');
+          console.log('Run: npm install puppeteer');
+        } else {
+          console.error(`\x1b[31mError: ${err.message}\x1b[0m`);
+        }
+        process.exit(1);
+      }
+      break;
+    }
+
     default:
       const cli = new HoloScriptCLI(options);
       const exitCode = await cli.run();

@@ -1,0 +1,70 @@
+{
+  "name": "tree-sitter-holoscript",
+  "version": "1.0.0",
+  "description": "Tree-sitter grammar for HoloScript - VR scene description language",
+  "main": "bindings/node",
+  "types": "bindings/node/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brianonbased-dev/HoloScript.git",
+    "directory": "packages/tree-sitter-holoscript"
+  },
+  "keywords": [
+    "tree-sitter",
+    "parser",
+    "holoscript",
+    "vr",
+    "ar",
+    "xr",
+    "metaverse",
+    "syntax-highlighting"
+  ],
+  "files": [
+    "grammar.js",
+    "binding.gyp",
+    "prebuilds/**",
+    "bindings/node/*",
+    "queries/*",
+    "src/**"
+  ],
+  "author": "Brian X Base Team",
+  "license": "MIT",
+  "dependencies": {
+    "node-addon-api": "^7.1.0",
+    "node-gyp-build": "^4.8.0"
+  },
+  "peerDependencies": {
+    "tree-sitter": "^0.21.0"
+  },
+  "peerDependenciesMeta": {
+    "tree-sitter": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.22.0",
+    "prebuildify": "^6.0.0"
+  },
+  "scripts": {
+    "build": "tree-sitter generate && node-gyp rebuild",
+    "build:wasm": "tree-sitter build --wasm",
+    "test": "tree-sitter test",
+    "parse": "tree-sitter parse",
+    "highlight": "tree-sitter highlight",
+    "prebuildify": "prebuildify --napi --strip"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.holoscript",
+      "injection-regex": "^(holoscript|holo|hs|hsplus)$",
+      "file-types": [
+        "hs",
+        "hsplus",
+        "holo"
+      ],
+      "highlights": "queries/highlights.scm",
+      "indents": "queries/indents.scm",
+      "locals": "queries/locals.scm"
+    }
+  ]
+}

@@ -6,6 +6,10 @@ export type RuntimeProfileName = 'headless' | 'minimal' | 'standard' | 'vr';
 
 export type EdgePlatform = 'linux-arm64' | 'linux-x64' | 'windows-x64' | 'wasm';
 
+export type ExportFormat = 'gltf' | 'glb' | 'usdz' | 'babylon' | 'unity' | 'unreal';
+
+export type ImportSource = 'unity' | 'godot' | 'gltf';
+
 export interface CLIOptions {
   command:
     | 'parse'
@@ -39,6 +43,11 @@ export interface CLIOptions {
     | 'access'
     | 'org'
     | 'token'
+    | 'export'
+    | 'import'
+    | 'screenshot'
+    | 'prerender'
+    | 'pdf'
     | 'help'
     | 'version';
   input?: string;
@@ -107,6 +116,32 @@ export interface CLIOptions {
   scopes?: string[];
   /** Expiration in days for token */
   expiresInDays?: number;
+  /** Export format for export command */
+  exportFormat?: ExportFormat;
+  /** Pretty-print output (for gltf export) */
+  prettyPrint?: boolean;
+  /** Enable Draco compression (for gltf/glb export) */
+  dracoCompression?: boolean;
+  /** Import source format for import command */
+  importSource?: ImportSource;
+  /** Scene name override for import */
+  sceneName?: string;
+  /** Screenshot/render width */
+  width?: number;
+  /** Screenshot/render height */
+  height?: number;
+  /** Screenshot format (png, jpeg, webp) */
+  imageFormat?: 'png' | 'jpeg' | 'webp';
+  /** Image quality (0-100) for jpeg/webp */
+  quality?: number;
+  /** Device scale factor for retina screenshots */
+  scale?: number;
+  /** Wait time for scene to stabilize (ms) */
+  waitFor?: number;
+  /** PDF page format */
+  pageFormat?: 'A4' | 'Letter' | 'Legal' | 'Tabloid' | 'A3' | 'A5';
+  /** PDF landscape mode */
+  landscape?: boolean;
 }
 
 const DEFAULT_OPTIONS: CLIOptions = {
@@ -167,6 +202,8 @@ export function parseArgs(args: string[]): CLIOptions {
           'access',
           'org',
           'token',
+          'export',
+          'import',
           'help',
           'version',
         ].includes(arg)
@@ -317,6 +354,37 @@ export function parseArgs(args: string[]): CLIOptions {
       case '--expires':
         options.expiresInDays = parseInt(args[++i], 10) || 30;
         break;
+      case '--from':
+        options.importSource = args[++i] as ImportSource;
+        break;
+      case '--scene-name':
+        options.sceneName = args[++i];
+        break;
+      // Screenshot/render options
+      case '--width':
+        options.width = parseInt(args[++i], 10) || 1920;
+        break;
+      case '--height':
+        options.height = parseInt(args[++i], 10) || 1080;
+        break;
+      case '--format':
+        options.imageFormat = args[++i] as 'png' | 'jpeg' | 'webp';
+        break;
+      case '--quality':
+        options.quality = parseInt(args[++i], 10) || 90;
+        break;
+      case '--scale':
+        options.scale = parseFloat(args[++i]) || 1;
+        break;
+      case '--wait-for':
+        options.waitFor = parseInt(args[++i], 10) || 2000;
+        break;
+      case '--page-format':
+        options.pageFormat = args[++i] as 'A4' | 'Letter' | 'Legal' | 'Tabloid' | 'A3' | 'A5';
+        break;
+      case '--landscape':
+        options.landscape = true;
+        break;
     }
     i++;
   }
@@ -389,6 +457,14 @@ Usage: holoscript <command> [options] [input]
   monitor <host>    Monitor deployed HoloScript on remote device
                     Live dashboard with CPU, memory, and metrics
 
+  \x1b[33mHeadless Rendering:\x1b[0m
+  screenshot <file> Capture PNG/JPEG/WebP screenshot of scene
+                    Uses Puppeteer for headless Chrome rendering
+  pdf <file>        Generate PDF document of scene
+                    Supports A4, Letter, and other page formats
+  prerender <file>  Pre-render HTML for SEO/social sharing
+                    Outputs fully rendered HTML with meta tags
+
   help              Show this help message
   version           Show version information
 
@@ -434,6 +510,16 @@ Usage: holoscript <command> [options] [input]
   --readonly          Create read-only token
   --scope <scope>     Token scope (can be repeated)
   --expires <days>    Token expiration in days
+
+  \x1b[2m# Headless Rendering Options\x1b[0m
+  --width <px>        Screenshot width (default: 1920)
+  --height <px>       Screenshot height (default: 1080)
+  --format <fmt>      Image format: png, jpeg, webp (default: png)
+  --quality <n>       JPEG/WebP quality 0-100 (default: 90)
+  --scale <n>         Device scale factor for retina (default: 1)
+  --wait-for <ms>     Wait time for scene to stabilize (default: 2000)
+  --page-format       PDF page format: A4, Letter, Legal, etc.
+  --landscape         PDF landscape orientation
 
 \x1b[1mExamples:\x1b[0m
   holoscript parse world.hs
@@ -499,6 +585,15 @@ Usage: holoscript <command> [options] [input]
   holoscript deploy dist/edge --host pi.local -u pi      # Deploy with username
   holoscript monitor 192.168.1.100                       # Live monitoring
   holoscript monitor 192.168.1.100 --dashboard           # Real-time dashboard
+
+  \x1b[2m# Headless Chrome Rendering (Puppeteer)\x1b[0m
+  holoscript screenshot scene.holo                       # Capture PNG screenshot
+  holoscript screenshot scene.holo -o preview.png        # Custom output path
+  holoscript screenshot scene.holo --width 1920 --height 1080
+  holoscript screenshot scene.holo --format jpeg --quality 85
+  holoscript pdf scene.holo                              # Generate PDF
+  holoscript pdf scene.holo --page-format A4 --landscape
+  holoscript prerender scene.holo                        # SEO-ready HTML
 
 \x1b[1mAliases:\x1b[0m
   hs              Short alias for holoscript

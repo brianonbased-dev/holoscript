@@ -15,9 +15,9 @@
 export type EncryptionMode = 'none' | 'aes-256' | 'e2e';
 
 /**
- * Message priority levels
+ * Message priority levels (numeric 0-10 or named priorities)
  */
-export type MessagePriority = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type MessagePriority = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 'low' | 'normal' | 'high' | 'urgent' | 'critical';
 
 /**
  * JSON Schema type (simplified for demonstration)
@@ -150,6 +150,9 @@ export interface Message<T = unknown> {
   /** Channel ID */
   channelId: string;
 
+  /** Intended recipient ID (for direct messages) */
+  recipientId?: string;
+
   /** Sender agent ID */
   senderId: string;
 
@@ -182,13 +185,20 @@ export interface Message<T = unknown> {
 }
 
 /**
+ * Message acknowledgment status
+ */
+export type MessageAckStatus = 'delivered' | 'read' | 'failed' | 'pending';
+
+/**
  * Message acknowledgment
  */
 export interface MessageAck {
   messageId: string;
-  receiverId: string;
+  receiverId?: string;
+  recipientId?: string;
   timestamp: number;
-  success: boolean;
+  success?: boolean;
+  status?: MessageAckStatus;
   error?: string;
 }
 
@@ -197,11 +207,14 @@ export interface MessageAck {
  */
 export interface BroadcastMessage<T = unknown> {
   id: string;
+  channelId: string;
   senderId: string;
   payload: T;
   type?: string;
   priority: MessagePriority;
   timestamp: number;
+  encrypted?: boolean;
+  recipients?: string[];
   targetFilter?: (agentId: string) => boolean;
 }
 

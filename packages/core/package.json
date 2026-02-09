@@ -71,10 +71,19 @@
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0"
   },
+  "peerDependencies": {
+    "puppeteer": "^21.0.0 || ^22.0.0 || ^23.0.0"
+  },
+  "peerDependenciesMeta": {
+    "puppeteer": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@types/pixelmatch": "^5.2.6",
     "@types/pngjs": "^6.0.4",
     "@vitest/coverage-v8": "^4.0.18",
+    "@webgpu/types": "^0.1.40",
     "tsup": "^8.0.1",
     "typedoc": "^0.28.16",
     "typescript": "^5.3.3",

@@ -549,7 +549,7 @@ export class SceneSerializer {
 
     // Remove empty arrays if not including empty
     if (!options.includeEmpty) {
-      this.removeEmptyArrays(graph);
+      this.removeEmptyArrays(graph as unknown as Record<string, unknown>);
     }
 
     return graph;

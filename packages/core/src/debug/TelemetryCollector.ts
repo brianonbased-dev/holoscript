@@ -375,7 +375,7 @@ export class TelemetryCollector extends EventEmitter {
       try {
         await callback(eventsToExport, completedSpans);
       } catch (error) {
-        logger.error('[TelemetryCollector] Export failed:', error);
+        logger.error('[TelemetryCollector] Export failed:', { error });
       }
     }
 

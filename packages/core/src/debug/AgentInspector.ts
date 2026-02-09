@@ -6,7 +6,7 @@
  */
 
 import { EventEmitter } from 'events';
-import type { AgentManifest } from '../agents/AgentTypes';
+import type { AgentManifest, AgentCapability } from '../agents/AgentManifest';
 import type {
   AgentInspection,
   InspectedTask,
@@ -299,7 +299,7 @@ export class AgentInspector extends EventEmitter {
       name: manifest.name,
       status,
       state: state ? { ...state.values } : {},
-      capabilities: manifest.capabilities?.map((c) => `${c.type}:${c.domain}`) || [],
+      capabilities: manifest.capabilities?.map((c: AgentCapability) => `${c.type}:${c.domain}`) || [],
       currentTask: task,
       recentEvents,
       breakpoints: agentBreakpoints,

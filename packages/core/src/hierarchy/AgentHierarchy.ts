@@ -6,7 +6,7 @@
  */
 
 import { EventEmitter } from 'events';
-import type { AgentManifest } from '../agents/AgentTypes';
+import type { AgentManifest, AgentCapability } from '../agents/AgentManifest';
 import {
   AgentHierarchy,
   DelegationRule,
@@ -324,7 +324,7 @@ export class HierarchyManager extends EventEmitter {
     const hierarchy = this.getHierarchy(hierarchyId);
 
     return hierarchy.subordinates.find((sub) =>
-      sub.capabilities.some((cap) => cap.type === capabilityType)
+      sub.capabilities.some((cap: AgentCapability) => cap.type === capabilityType)
     );
   }
 

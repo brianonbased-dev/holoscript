@@ -50,3 +50,14 @@ export {
   type PublishOptions,
   type PublishResult,
 } from './publish';
+// Importers (Sprint 8)
+export {
+  importUnity,
+  importGodot,
+  importGltf,
+  importGltfToFile,
+  type UnityImportResult,
+  type UnityImportOptions,
+  type GodotImportResult,
+  type GodotImportOptions,
+} from './importers';

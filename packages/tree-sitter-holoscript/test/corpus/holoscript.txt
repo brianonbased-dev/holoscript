@@ -1,0 +1,366 @@
+================================================================================
+Composition
+================================================================================
+
+composition "My Scene" {
+  environment {
+    skybox: "nebula"
+    ambient_light: 0.5
+  }
+
+  object "Cube" @grabbable @glowing {
+    geometry: "cube"
+    position: [0, 1, 0]
+    color: "#ff0000"
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (composition
+    name: (string)
+    (environment
+      (property
+        key: (identifier)
+        value: (string))
+      (property
+        key: (identifier)
+        value: (number)))
+    (object
+      name: (string)
+      (trait_inline
+        name: (identifier))
+      (trait_inline
+        name: (identifier))
+      (property
+        key: (identifier)
+        value: (string))
+      (property
+        key: (identifier)
+        value: (array
+          (number)
+          (number)
+          (number)))
+      (property
+        key: (identifier)
+        value: (color)))))
+
+================================================================================
+Template with State
+================================================================================
+
+template "Enemy" {
+  geometry: "humanoid"
+  color: "#ff0000"
+
+  state {
+    health: 100
+    isAlive: true
+  }
+
+  onTriggerEnter: {
+    this.health -= 10
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (template
+    name: (string)
+    (property
+      key: (identifier)
+      value: (string))
+    (property
+      key: (identifier)
+      value: (color))
+    (state_block
+      (property
+        key: (identifier)
+        value: (number))
+      (property
+        key: (identifier)
+        value: (boolean)))
+    (event_handler
+      event: (event_name)
+      (block
+        (assignment
+          left: (property_access
+            property: (identifier))
+          right: (number))))))
+
+================================================================================
+Object with Physics
+================================================================================
+
+object "Ball" @grabbable @throwable {
+  geometry: "sphere"
+  scale: [0.2, 0.2, 0.2]
+  
+  physics: {
+    mass: 0.5
+    restitution: 0.8
+    friction: 0.3
+  }
+  
+  onGrab: {
+    haptic.feedback("medium")
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object
+    name: (string)
+    (trait_inline
+      name: (identifier))
+    (trait_inline
+      name: (identifier))
+    (property
+      key: (identifier)
+      value: (string))
+    (property
+      key: (identifier)
+      value: (array
+        (number)
+        (number)
+        (number)))
+    (physics_block
+      (property
+        key: (identifier)
+        value: (number))
+      (property
+        key: (identifier)
+        value: (number))
+      (property
+        key: (identifier)
+        value: (number)))
+    (event_handler
+      event: (event_name)
+      (block
+        (function_call
+          function: (property_access
+            object: (identifier)
+            property: (identifier))
+          (argument
+            (string)))))))
+
+================================================================================
+Timeline Animation
+================================================================================
+
+timeline "intro" {
+  0: animate Crystal {
+    position.y: 2.0
+    duration: 1000
+    easing: "easeOut"
+  }
+  
+  1500: emit "crystalReady"
+  
+  2000: call audio.play("chime.wav")
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (timeline
+    name: (string)
+    (timeline_entry
+      time: (number)
+      (animate_action
+        target: (identifier)
+        (property
+          key: (identifier)
+          value: (number))
+        (property
+          key: (identifier)
+          value: (number))
+        (property
+          key: (identifier)
+          value: (string))))
+    (timeline_entry
+      time: (number)
+      (emit_action
+        event: (string)))
+    (timeline_entry
+      time: (number)
+      (call_action
+        function: (property_access
+          object: (identifier)
+          property: (identifier))
+        (argument
+          (string))))))
+
+================================================================================
+Networked Object
+================================================================================
+
+object "SharedBall" @grabbable @networked {
+  geometry: "sphere"
+  
+  networked {
+    position: synced
+    rotation: synced
+    owner: owner_only
+  }
+  
+  onGrab: {
+    network.claim(this)
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object
+    name: (string)
+    (trait_inline
+      name: (identifier))
+    (trait_inline
+      name: (identifier))
+    (property
+      key: (identifier)
+      value: (string))
+    (networked_block
+      (networked_property
+        name: (identifier))
+      (networked_property
+        name: (identifier))
+      (networked_property
+        name: (identifier)))
+    (event_handler
+      event: (event_name)
+      (block
+        (function_call
+          function: (property_access
+            object: (identifier)
+            property: (identifier))
+          (argument
+            (identifier)))))))
+
+================================================================================
+Action with Parameters
+================================================================================
+
+action attack(target, damage) {
+  if (target.health > 0) {
+    target.health -= damage
+    audio.play("hit.wav")
+  } else {
+    return
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (action
+    name: (identifier)
+    (parameter_list
+      (parameter
+        name: (identifier))
+      (parameter
+        name: (identifier)))
+    (block
+      (if_statement
+        condition: (binary_expression
+          left: (property_access
+            object: (identifier)
+            property: (identifier))
+          right: (number))
+        (block
+          (assignment
+            left: (property_access
+              object: (identifier)
+              property: (identifier))
+            right: (identifier))
+          (function_call
+            function: (property_access
+              object: (identifier)
+              property: (identifier))
+            (argument
+              (string))))
+        (block
+          (return_statement))))))
+
+================================================================================
+Comments
+================================================================================
+
+// This is a line comment
+composition "Test" {
+  /* Block comment
+     spanning multiple lines */
+  object "Cube" {
+    // Property comment
+    geometry: "cube"
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (comment
+    (line_comment))
+  (composition
+    name: (string)
+    (comment
+      (block_comment))
+    (object
+      name: (string)
+      (comment
+        (line_comment))
+      (property
+        key: (identifier)
+        value: (string)))))
+
+================================================================================
+World with Entity
+================================================================================
+
+world "GameWorld" @persistent {
+  entity "Player" @networked {
+    position: [0, 0, 0]
+    
+    component Transform {
+      scale: [1, 1, 1]
+    }
+    
+    state {
+      score: 0
+    }
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (world
+    name: (string)
+    (trait_inline
+      name: (identifier))
+    (entity
+      name: (string)
+      (trait_inline
+        name: (identifier))
+      (property
+        key: (identifier)
+        value: (array
+          (number)
+          (number)
+          (number)))
+      (component
+        name: (identifier)
+        (property
+          key: (identifier)
+          value: (array
+            (number)
+            (number)
+            (number))))
+      (state_block
+        (property
+          key: (identifier)
+          value: (number))))))
