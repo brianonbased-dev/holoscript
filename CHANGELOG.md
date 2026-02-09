@@ -2,6 +2,26 @@
 
 ### Added
 
+#### Trait Visual System (Feb 2026)
+
+- **TraitVisualRegistry** — Singleton registry mapping 600+ trait names to PBR material configs
+  - 23 preset categories: material-properties, surface-texture, lighting, gems-minerals, fabric-cloth, visual-effects, age-condition, water-fluid, weather-phenomena, emotion-mood, size-scale, environmental-biome, magic-fantasy, scifi-technology, creatures-mythical, nature-life, furniture-decor, construction-building, containers-storage, shape-form, animals, maritime-naval, time-period
+  - Auto-registration on import via barrel `packages/core/src/traits/visual/index.ts`
+- **TraitCompositor** — 9-layer priority merge engine for multi-trait visual composition
+  - Layer ordering: base_material → surface → condition → physical → scale → lighting → visual_effect → environmental → mood
+  - Composition rules: requirements, suppression, additive, and multi-trait merge
+- **AssetResolverPipeline** — Plugin-based asset resolution (cache → procedural → AI → PBR fallback)
+  - `CacheManager` with LRU eviction and configurable memory limits
+  - `ProceduralResolver` for noise-based texture generation (wood grain, marble, voronoi, rust)
+  - `TextureResolver` adapter for AI text-to-texture services
+- **R3FCompiler integration** — Catch-all block now queries TraitVisualRegistry for material props
+- **70-test suite** covering all visual system components
+
+#### VR Traits Modularization (Feb 2026)
+
+- Modularized 1,525 VR traits from monolithic `constants.ts` into 61 category-per-file modules
+- Barrel index with `as const` tuple spreading for type-safe trait names
+
 #### New Platform Compilers
 
 - **VRChatCompiler** - Compile to VRChat SDK3 worlds with UdonSharp scripts
