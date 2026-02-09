@@ -7,6 +7,7 @@ import {
   UI_COMPONENT_PRESETS,
 } from './R3FCompiler';
 import type { HSPlusAST, ASTNode } from '../types';
+import { TraitVisualRegistry } from '../traits/visual/TraitVisualRegistry';
 
 // Helper to create a minimal AST node
 function createASTNode(
@@ -1367,5 +1368,180 @@ describe('UI_COMPONENT_PRESETS', () => {
   it('should have UISlider preset', () => {
     expect(UI_COMPONENT_PRESETS.UISlider).toBeDefined();
     expect(UI_COMPONENT_PRESETS.UISlider.defaultProps.width).toBe(200);
+  });
+});
+
+describe('R3FCompiler — TraitCompositor integration', () => {
+  let compiler: R3FCompiler;
+
+  beforeEach(() => {
+    compiler = new R3FCompiler();
+  });
+
+  it('should apply single visual trait material properties', () => {
+    const composition = createComposition({
+      objects: [
+        createObjectDecl('ironOrb', {
+          traits: [{ name: 'iron_material', config: {} }],
+        }),
+      ],
+    });
+
+    const result = compiler.compileComposition(composition);
+    const obj = result.children?.find((c) => c.id === 'ironOrb');
+
+    expect(obj?.props.materialProps).toBeDefined();
+    expect(obj?.props.materialProps.metalness).toBe(0.9);
+    expect(obj?.props.materialProps.roughness).toBe(0.5);
+  });
+
+  it('should compose multiple traits with layer ordering', () => {
+    const composition = createComposition({
+      objects: [
+        createObjectDecl('multiTrait', {
+          traits: [
+            { name: 'wooden', config: {} },    // base_material (layer 0), roughness 0.8
+            { name: 'glowing', config: {} },   // lighting (layer 5), roughness 0.3
+          ],
+        }),
+      ],
+    });
+
+    const result = compiler.compileComposition(composition);
+    const obj = result.children?.find((c) => c.id === 'multiTrait');
+
+    expect(obj?.props.materialProps).toBeDefined();
+    // Glowing (layer 5) overrides wooden (layer 0) for roughness
+    expect(obj?.props.materialProps.roughness).toBe(0.3);
+    // Glowing emissive should be present
+    expect(obj?.props.materialProps.emissive).toBe('#FFDD44');
+    expect(obj?.props.materialProps.emissiveIntensity).toBe(0.4);
+  });
+
+  it('should apply suppression rules (pristine suppresses rusted)', () => {
+    const composition = createComposition({
+      objects: [
+        createObjectDecl('pristineObj', {
+          traits: [
+            { name: 'iron_material', config: {} },
+            { name: 'pristine', config: {} },
+            { name: 'rusted', config: {} },
+          ],
+        }),
+      ],
+    });
+
+    const result = compiler.compileComposition(composition);
+    const obj = result.children?.find((c) => c.id === 'pristineObj');
+
+    // Pristine suppresses rusted, so rusted's high roughness shouldn't appear
+    expect(obj?.props.materialProps).toBeDefined();
+    // Pristine (layer 2) roughness 0.1 overrides iron_material (layer 0) roughness 0.5
+    // Rusted's 0.85 roughness should NOT be present (suppressed)
+    expect(obj?.props.materialProps.roughness).toBe(0.1);
+  });
+
+  it('should apply multi-trait merge rules (gold + polished)', () => {
+    const composition = createComposition({
+      objects: [
+        createObjectDecl('shinyGold', {
+          traits: [
+            { name: 'gold_material', config: {} },
+            { name: 'polished', config: {} },
+          ],
+        }),
+      ],
+    });
+
+    const result = compiler.compileComposition(composition);
+    const obj = result.children?.find((c) => c.id === 'shinyGold');
+
+    // Multi-trait rule: gold_material + polished = high-shine gold
+    expect(obj?.props.materialProps).toBeDefined();
+    expect(obj?.props.materialProps.roughness).toBeLessThanOrEqual(0.05);
+    expect(obj?.props.materialProps.envMapIntensity).toBeGreaterThanOrEqual(2.0);
+  });
+
+  it('should apply requirement rules (rusted without metallic tag fails)', () => {
+    const composition = createComposition({
+      objects: [
+        createObjectDecl('woodenRusted', {
+          traits: [
+            { name: 'wooden', config: {} },   // tags: ['organic', 'opaque'] — no 'metallic'
+            { name: 'rusted', config: {} },    // requires tag 'metallic'
+          ],
+        }),
+      ],
+    });
+
+    const result = compiler.compileComposition(composition);
+    const obj = result.children?.find((c) => c.id === 'woodenRusted');
+
+    // Rusted should not apply because wooden doesn't have metallic tag
+    expect(obj?.props.materialProps).toBeDefined();
+    // metalness should be 0.0 (wooden), not 0.6 (rusted)
+    expect(obj?.props.materialProps.metalness).toBe(0.0);
+    // roughness should be 0.8 (wooden), not 0.85 (rusted)
+    expect(obj?.props.materialProps.roughness).toBe(0.8);
+  });
+
+  it('should handle NPC role traits with emissive visuals', () => {
+    const composition = createComposition({
+      objects: [
+        createObjectDecl('healerNPC', {
+          traits: [{ name: 'healer_npc', config: {} }],
+        }),
+      ],
+    });
+
+    const result = compiler.compileComposition(composition);
+    const obj = result.children?.find((c) => c.id === 'healerNPC');
+
+    expect(obj?.props.materialProps).toBeDefined();
+    expect(obj?.props.materialProps.emissive).toBe('#00FF88');
+    expect(obj?.props.materialProps.emissiveIntensity).toBe(0.25);
+  });
+
+  it('should handle game mechanic traits (explosive)', () => {
+    const composition = createComposition({
+      objects: [
+        createObjectDecl('bomb', {
+          traits: [{ name: 'explosive', config: {} }],
+        }),
+      ],
+    });
+
+    const result = compiler.compileComposition(composition);
+    const obj = result.children?.find((c) => c.id === 'bomb');
+
+    expect(obj?.props.materialProps).toBeDefined();
+    expect(obj?.props.materialProps.emissive).toBe('#FF4400');
+    expect(obj?.props.materialProps.emissiveIntensity).toBeGreaterThanOrEqual(0.3);
+  });
+
+  it('should still pass trait config as props alongside material', () => {
+    const composition = createComposition({
+      objects: [
+        createObjectDecl('configObj', {
+          traits: [
+            { name: 'grabbable', config: { snapZone: true } },
+            { name: 'iron_material', config: {} },
+          ],
+        }),
+      ],
+    });
+
+    const result = compiler.compileComposition(composition);
+    const obj = result.children?.find((c) => c.id === 'configObj');
+
+    // Grabbable should still set its specific props via the if-branch
+    expect(obj?.props.grabbable).toEqual({ snapZone: true });
+    // iron_material should apply material via compositor
+    expect(obj?.props.materialProps.metalness).toBe(0.9);
+  });
+
+  it('should have 1500+ registered visual traits', () => {
+    const registry = TraitVisualRegistry.getInstance();
+    expect(registry.size).toBeGreaterThanOrEqual(1500);
   });
 });

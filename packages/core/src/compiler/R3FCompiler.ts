@@ -1,5 +1,5 @@
 import { HSPlusAST, ASTNode, HSPlusDirective, VRTraitName } from '../types';
-import { TraitVisualRegistry } from '../traits/visual/TraitVisualRegistry';
+import { TraitCompositor } from '../traits/visual/TraitCompositor';
 // Side-effect import: registers all preset visuals into the registry
 import '../traits/visual';
 
@@ -1087,33 +1087,22 @@ export class R3FCompiler {
           props.voiceProximity = trait.config || { max_distance: 20 };
           props.spatial = true;
         }
-        // ── Visual registry lookup for remaining traits ────────────
+        // ── Fallthrough: pass trait config as prop ────────────────
         else {
-          const visual = TraitVisualRegistry.getInstance().get(name);
-          if (visual) {
-            if (visual.material) {
-              props.materialProps = { ...props.materialProps, ...visual.material };
-            }
-            if (visual.emissive) {
-              props.materialProps = {
-                ...props.materialProps,
-                emissive: visual.emissive.color,
-                emissiveIntensity: visual.emissive.intensity,
-              };
-            }
-            if (visual.opacity !== undefined) {
-              props.materialProps = {
-                ...props.materialProps,
-                opacity: visual.opacity,
-                transparent: visual.opacity < 1,
-              };
-            }
-            if (visual.scale) {
-              props.scale = visual.scale;
-            }
-          }
           props[name] = trait.config || true;
         }
+      }
+    }
+
+    // ── Batch composition: apply multi-trait visual rules ────────────
+    // Uses TraitCompositor for layer-ordered merge with suppression,
+    // requirement, additive, and multi-trait merge rules.
+    if (obj.traits && Array.isArray(obj.traits)) {
+      const traitNames = obj.traits.map((t: any) => t.name as string);
+      const compositor = new TraitCompositor();
+      const composedMaterial = compositor.compose(traitNames);
+      if (Object.keys(composedMaterial).length > 0) {
+        props.materialProps = { ...props.materialProps, ...composedMaterial };
       }
     }
 

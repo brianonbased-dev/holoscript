@@ -263,33 +263,32 @@ describe('TraitCompositor', () => {
     expect(result.metalness).toBeUndefined();
   });
 
-  it('compose(["rusted"]) - rusted satisfies its own metallic tag requirement', () => {
+  it('compose(["rusted"]) - rusted alone cannot self-satisfy metallic requirement', () => {
     // rusted has requires: { tags: ['metallic'] }
-    // rusted's own tags include 'metallic', so allTags contains 'metallic'
-    // Therefore rusted satisfies its own requirement
+    // rusted's own tags include 'metallic', but a trait cannot satisfy its own requirement
+    // Therefore rusted is filtered out — result is empty
     const result = compositor.compose(['rusted']);
 
-    expect(result.roughness).toBe(0.85);
-    expect(result.metalness).toBe(0.6);
-    expect(result.color).toBe('#8B4513');
+    expect(result.roughness).toBeUndefined();
+    expect(result.metalness).toBeUndefined();
+    expect(result.color).toBeUndefined();
   });
 
-  it('compose(["wooden", "rusted"]) - rusted self-satisfies metallic requirement', () => {
+  it('compose(["wooden", "rusted"]) - rusted filtered because wooden lacks metallic tag', () => {
     // wooden tags: ['organic', 'opaque'] - no 'metallic' tag
-    // rusted tags: ['metallic', 'corroded', 'aged'] - provides its own 'metallic' tag
-    // allTags is collected from ALL traits before filtering, so 'metallic' is present
+    // rusted requires 'metallic' from another trait — wooden doesn't provide it
+    // rusted is filtered out, only wooden applies
     const result = compositor.compose(['wooden', 'rusted']);
 
-    // wooden (base_material, priority 0): roughness 0.8, metalness 0.0, color '#8B5E3C'
-    // rusted (condition, priority 2): roughness 0.85, metalness 0.6, color '#8B4513'
-    // rusted overrides wooden because condition layer > base_material layer
-    expect(result.roughness).toBe(0.85);
-    expect(result.metalness).toBe(0.6);
-    expect(result.color).toBe('#8B4513');
+    // Only wooden (base_material): roughness 0.8, metalness 0.0, color '#8B5E3C'
+    expect(result.roughness).toBe(0.8);
+    expect(result.metalness).toBe(0.0);
+    expect(result.color).toBe('#8B5E3C');
   });
 
   it('compose(["iron_material", "rusted"]) - multi-trait merge rule applies', () => {
     // iron_material (base_material, priority 0): roughness 0.5, metalness 0.9, color '#434343'
+    //   tags: ['metallic'] — satisfies rusted's requirement
     // rusted (condition, priority 2): roughness 0.85, metalness 0.6, color '#8B4513'
     // After layer merge: rusted overrides iron_material
     // Then multi-trait merge rule: ['rusted', 'iron_material'] -> color '#6B3A1F', roughness 0.9, metalness 0.5
