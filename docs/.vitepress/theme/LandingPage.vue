@@ -288,6 +288,38 @@ animate();</code></pre>
               Digital Twins, and W3C WoT for IoT devices.
             </p>
           </div>
+          <div class="use-card">
+            <div class="use-icon">&#x1F52C;</div>
+            <h3>Scientific Research</h3>
+            <p>
+              Visualize molecular structures, simulate physics experiments, and build interactive
+              data landscapes. From lab robotics (URDF) to publication-ready 3D figures.
+            </p>
+          </div>
+          <div class="use-card">
+            <div class="use-icon">&#x1F3D7;&#xFE0F;</div>
+            <h3>Architecture</h3>
+            <p>
+              Walkthrough building designs in VR before they're built. Export to OpenUSD for
+              Omniverse or compile digital twins for facility management.
+            </p>
+          </div>
+          <div class="use-card">
+            <div class="use-icon">&#x1F3AC;</div>
+            <h3>Film &amp; Media</h3>
+            <p>
+              Pre-viz scenes, virtual production sets, and interactive storytelling. Compile to
+              OpenUSD for Pixar/Apple/NVIDIA pipelines.
+            </p>
+          </div>
+          <div class="use-card">
+            <div class="use-icon">&#x1FA7A;</div>
+            <h3>Healthcare</h3>
+            <p>
+              Medical training simulations, surgical rehearsal, and therapeutic VR environments.
+              Accessible creation without engineering teams.
+            </p>
+          </div>
         </div>
       </div>
     </section>
