@@ -164,7 +164,7 @@ export class CircuitBreakerStrategy implements IRecoveryStrategy {
     return circuit;
   }
 
-  private handleClosed(circuit: CircuitInfo, failure: IAgentFailure): IRecoveryResult {
+  private handleClosed(circuit: CircuitInfo, _failure: IAgentFailure): IRecoveryResult {
     circuit.failureCount++;
     circuit.lastFailureTime = Date.now();
 
@@ -188,7 +188,7 @@ export class CircuitBreakerStrategy implements IRecoveryStrategy {
     };
   }
 
-  private handleHalfOpen(circuit: CircuitInfo, failure: IAgentFailure): IRecoveryResult {
+  private handleHalfOpen(circuit: CircuitInfo, _failure: IAgentFailure): IRecoveryResult {
     // Any failure in half-open immediately opens the circuit
     circuit.state = 'open';
     circuit.lastFailureTime = Date.now();

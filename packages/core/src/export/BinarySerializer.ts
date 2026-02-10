@@ -22,7 +22,6 @@ import {
   type AttributeType,
   type PrimitiveMode,
   createEmptySceneGraph,
-  createIdentityTransform,
 } from './SceneGraph';
 
 // ============================================================================
@@ -85,7 +84,7 @@ export interface IBinaryDecoderOptions {
 /**
  * Chunk header
  */
-interface IChunkHeader {
+interface _IChunkHeader {
   type: number;
   size: number;
   flags: number;
@@ -557,7 +556,7 @@ export class BinarySerializer {
     writer.writeUint32(0); // Placeholder for total size
     writer.writeUint32(0); // Placeholder for chunk count
 
-    const chunkCountOffset = writer.getOffset() - 4;
+    const _chunkCountOffset = writer.getOffset() - 4;
     let chunkCount = 0;
 
     // Write string table chunk
@@ -613,7 +612,7 @@ export class BinarySerializer {
   /**
    * Decode a scene graph from binary
    */
-  decode(buffer: ArrayBuffer, options: IBinaryDecoderOptions = {}): ISceneGraph {
+  decode(buffer: ArrayBuffer, _options: IBinaryDecoderOptions = {}): ISceneGraph {
     const reader = new BinaryReader(buffer, this.options.littleEndian);
 
     // Read file header
@@ -627,7 +626,7 @@ export class BinarySerializer {
       throw new Error(`Unsupported binary version: ${version}`);
     }
 
-    const totalSize = reader.readUint32();
+    const _totalSize = reader.readUint32();
     const chunkCount = reader.readUint32();
 
     // Initialize scene graph
@@ -973,8 +972,8 @@ export class BinarySerializer {
   private readChunk(reader: BinaryReader, sceneGraph: ISceneGraph): void {
     const type = reader.readUint32();
     const size = reader.readUint32();
-    const flags = reader.readUint32();
-    const checksum = reader.readUint32();
+    const _flags = reader.readUint32();
+    const _checksum = reader.readUint32();
 
     const startOffset = reader.getOffset();
 
@@ -1082,7 +1081,7 @@ export class BinarySerializer {
       tags.push(this.stringTable.get(reader.readStringIndex()));
     }
 
-    const componentCount = reader.readUint16();
+    const _componentCount = reader.readUint16();
     // Skip component data for now
 
     const hasPrefabRef = reader.readBoolean();
@@ -1255,8 +1254,8 @@ export class BinarySerializer {
       const id = this.stringTable.get(reader.readStringIndex());
       const name = this.stringTable.get(reader.readStringIndex());
       const duration = reader.readFloat32();
-      const channelCount = reader.readUint16();
-      const samplerCount = reader.readUint16();
+      const _channelCount = reader.readUint16();
+      const _samplerCount = reader.readUint16();
 
       sceneGraph.animations.push({
         id,

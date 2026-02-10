@@ -363,7 +363,7 @@ export class LODGenerator {
 
     // Collapse edges until target is reached
     let currentTriangles = triangleCount;
-    const trianguesToRemove = triangleCount - targetTriangles;
+    const _trianguesToRemove = triangleCount - targetTriangles;
 
     while (currentTriangles > targetTriangles && edgeQueue.length > 0) {
       // Find minimum error edge
@@ -777,7 +777,7 @@ export class LODGenerator {
     edge: Edge,
     v1: Vertex,
     v2: Vertex,
-    mesh: MeshData
+    _mesh: MeshData
   ): boolean {
     // Preserve UV seams
     if (this.options.preserveUVSeams && v1.uv && v2.uv) {

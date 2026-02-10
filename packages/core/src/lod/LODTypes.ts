@@ -551,7 +551,7 @@ export function calculateScreenCoverage(
   distance: number,
   objectRadius: number,
   fov: number = 60,
-  screenHeight: number = 1080
+  _screenHeight: number = 1080
 ): number {
   if (distance <= 0) return 1;
   
@@ -656,7 +656,7 @@ export function mergeLODConfigs(base: LODConfig, override: Partial<LODConfig>): 
  */
 export function getRecommendedLODCount(
   triangleCount: number,
-  boundingRadius: number
+  _boundingRadius: number
 ): number {
   // Small objects need fewer LODs
   if (triangleCount < 1000) return 2;

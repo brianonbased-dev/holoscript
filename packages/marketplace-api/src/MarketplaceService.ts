@@ -45,7 +45,7 @@ export class DownloadStatsTracker {
   /**
    * Record a download
    */
-  record(traitId: string, version: string): void {
+  record(traitId: string, _version: string): void {
     const today = new Date().toISOString().split('T')[0];
 
     // Update daily count

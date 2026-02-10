@@ -168,7 +168,7 @@ export class SwarmMembership {
   /**
    * Force remove a member (for leadership or timeouts)
    */
-  removeForcefully(agentId: string, reason: string): void {
+  removeForcefully(agentId: string, _reason: string): void {
     const member = this.members.get(agentId);
     if (!member) {
       return;

@@ -12,7 +12,7 @@ import { ConfigLoader } from './config/loader';
 import { HoloScriptConfig } from './config/schema';
 import { importUnity } from './importers/unity-importer';
 import { importGodot } from './importers/godot-importer';
-import { importGltf as importGltfRaw, importGltfToFile } from './importers/gltf-importer';
+import { importGltfToFile } from './importers/gltf-importer';
 
 export class HoloScriptCLI {
   private parser: HoloScriptParser;

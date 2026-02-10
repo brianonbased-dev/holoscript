@@ -14,7 +14,7 @@ import type {
   TrustLevel,
   SpatialScope,
   Vector3,
-  LATENCY_THRESHOLDS,
+  LATENCY_THRESHOLDS as _LATENCY_THRESHOLDS,
 } from './AgentManifest';
 
 // ============================================================================

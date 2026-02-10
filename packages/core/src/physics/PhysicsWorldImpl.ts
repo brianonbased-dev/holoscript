@@ -25,7 +25,6 @@ import {
   IRaycastOptions,
   IOverlapResult,
   PHYSICS_DEFAULTS,
-  zeroVector,
 } from './PhysicsTypes';
 import { RigidBody } from './PhysicsBody';
 import { IslandDetector } from './IslandDetector';

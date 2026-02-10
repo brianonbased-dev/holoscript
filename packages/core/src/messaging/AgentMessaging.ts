@@ -16,7 +16,6 @@ import {
   MessagePriority,
   generateMessageId,
   validateMessageSchema,
-  JSONSchema,
 } from './MessagingTypes';
 import { ChannelManager } from './ChannelManager';
 
@@ -31,7 +30,7 @@ class EncryptionService {
   /**
    * Encrypt a message payload
    */
-  static encrypt(payload: unknown, mode: 'aes-256' | 'e2e', key?: string): string {
+  static encrypt(payload: unknown, _mode: 'aes-256' | 'e2e', _key?: string): string {
     // Simulated encryption - just base64 encode for now
     const json = JSON.stringify(payload);
     return Buffer.from(json).toString('base64');
@@ -40,7 +39,7 @@ class EncryptionService {
   /**
    * Decrypt a message payload
    */
-  static decrypt<T>(encrypted: string, mode: 'aes-256' | 'e2e', key?: string): T {
+  static decrypt<T>(encrypted: string, _mode: 'aes-256' | 'e2e', _key?: string): T {
     // Simulated decryption - just base64 decode
     const json = Buffer.from(encrypted, 'base64').toString('utf-8');
     return JSON.parse(json) as T;
@@ -425,7 +424,7 @@ export class AgentMessaging extends EventEmitter {
             channel.encryption,
             this.keyPair.privateKey
           );
-        } catch (error) {
+        } catch (_error) {
           return {
             messageId: message.id,
             recipientId: this.agentId,

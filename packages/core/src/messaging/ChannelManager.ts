@@ -10,8 +10,6 @@ import {
   AgentChannel,
   ChannelConfig,
   ChannelMember,
-  EncryptionMode,
-  JSONSchema,
   DEFAULT_CHANNEL_CONFIG,
   generateChannelId,
 } from './MessagingTypes';

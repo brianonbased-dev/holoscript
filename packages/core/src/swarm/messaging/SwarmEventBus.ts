@@ -258,7 +258,7 @@ export class SwarmEventBus {
       if (this.matchesPattern(event.type, sub.pattern)) {
         // Check if targeted and matches
         if (event.target) {
-          const targets = Array.isArray(event.target) ? event.target : [event.target];
+          const _targets = Array.isArray(event.target) ? event.target : [event.target];
           // Target filtering could be applied here if needed
         }
 
@@ -356,7 +356,7 @@ export class SwarmEventBus {
           if (sub.once) {
             this.subscriptions.delete(id);
           }
-        } catch (error) {
+        } catch (_error) {
           // Handler error - continue
         }
       }

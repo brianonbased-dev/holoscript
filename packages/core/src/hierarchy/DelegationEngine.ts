@@ -7,7 +7,6 @@
  */
 
 import { EventEmitter } from 'events';
-import type { AgentManifest } from '../agents/AgentManifest';
 import { HierarchyManager, getHierarchyManager } from './AgentHierarchy';
 import {
   DelegatedTask,
@@ -16,7 +15,6 @@ import {
   TaskError,
   EscalationEvent,
   EscalationReason,
-  DelegationRule,
   HierarchyConfig,
   DEFAULT_HIERARCHY_CONFIG,
 } from './HierarchyTypes';

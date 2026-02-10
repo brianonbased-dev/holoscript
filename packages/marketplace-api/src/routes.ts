@@ -6,7 +6,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import type { MarketplaceService } from './MarketplaceService.js';
-import type { SearchQuery, TraitCategory, Platform, LicenseType } from './types.js';
+import type { SearchQuery, TraitCategory } from './types.js';
 
 // =============================================================================
 // VALIDATION SCHEMAS
@@ -169,7 +169,7 @@ function validateQuery<T>(schema: z.ZodSchema<T>) {
 /**
  * Error handler middleware
  */
-function errorHandler(err: Error, req: Request, res: Response, next: NextFunction): void {
+function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction): void {
   console.error('API Error:', err);
 
   res.status(500).json({

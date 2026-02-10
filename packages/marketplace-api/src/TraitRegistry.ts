@@ -12,7 +12,6 @@ import type {
   SearchQuery,
   SearchResult,
   TraitCategory,
-  Platform,
   SearchFacets,
 } from './types.js';
 import { createHash } from 'crypto';
@@ -246,7 +245,7 @@ export class InMemoryTraitDatabase implements ITraitDatabase {
   }
 
   async getFacets(query: SearchQuery): Promise<SearchFacets> {
-    const results = await this.search({ ...query, limit: 1000 });
+    const _results = await this.search({ ...query, limit: 1000 });
     const allTraits = Array.from(this.traits.values());
 
     const categoryCount = new Map<string, number>();
@@ -373,7 +372,7 @@ export class TraitRegistry {
    */
   async publish(request: PublishRequest, author: { name: string; email?: string; verified: boolean }): Promise<PublishResult> {
     const warnings: string[] = [];
-    const errors: string[] = [];
+    const _errors: string[] = [];
 
     // Validate request
     const validationErrors = this.validatePublishRequest(request);

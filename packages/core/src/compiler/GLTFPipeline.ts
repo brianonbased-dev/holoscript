@@ -23,7 +23,6 @@ import type {
   HoloComposition,
   HoloObjectDecl,
   HoloObjectTrait,
-  HoloObjectProperty,
   HoloSpatialGroup,
   HoloValue,
   HoloTimeline,
@@ -875,7 +874,7 @@ export class GLTFPipeline {
   ): number {
     const byteOffset = this.bufferData.length;
     const componentType = data instanceof Uint16Array ? 5123 : 5126; // UNSIGNED_SHORT or FLOAT
-    const bytesPerComponent = data instanceof Uint16Array ? 2 : 4;
+    const _bytesPerComponent = data instanceof Uint16Array ? 2 : 4;
 
     // Append data to buffer
     const view = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);

@@ -7,10 +7,8 @@
 import type {
   IShaderGraph,
   IShaderNode,
-  IShaderPort,
   IShaderConnection,
   INodeTemplate,
-  ShaderDataType,
   NodeCategory,
 } from './ShaderGraphTypes';
 import {

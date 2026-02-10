@@ -21,12 +21,10 @@ import type {
   NegotiationSession,
   Proposal,
   Vote,
-  Resolution,
   VotingMechanism,
   ProposalInput,
   VoteInput,
   InitiateOptions,
-  NegotiationConfig,
 } from '../negotiation/NegotiationTypes';
 import {
   NegotiationProtocol,
@@ -226,7 +224,7 @@ export const negotiationHandler: TraitHandler<NegotiationTraitConfig> = {
 
   defaultConfig: DEFAULT_NEGOTIATION_CONFIG,
 
-  onAttach(node: HSPlusNode, config: NegotiationTraitConfig, context: TraitContext) {
+  onAttach(node: HSPlusNode, config: NegotiationTraitConfig, _context: TraitContext) {
     const cfg = { ...DEFAULT_NEGOTIATION_CONFIG, ...config };
     const state = createDefaultState();
     state.role = cfg.role;

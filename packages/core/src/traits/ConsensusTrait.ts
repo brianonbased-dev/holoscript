@@ -14,7 +14,7 @@ import {
   ConsensusMechanism,
 } from '../consensus/ConsensusTypes';
 import { ConsensusManager } from '../consensus/ConsensusManager';
-import { RaftConsensus, RaftMessageUnion } from '../consensus/RaftConsensus';
+import { RaftConsensus } from '../consensus/RaftConsensus';
 
 // =============================================================================
 // TRAIT CONFIGURATION

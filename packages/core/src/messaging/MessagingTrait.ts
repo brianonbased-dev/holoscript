@@ -241,7 +241,7 @@ export const MessagingTrait = {
   /**
    * Detach trait from entity
    */
-  detach(trait: MessagingTraitBehavior): void {
+  detach(_trait: MessagingTraitBehavior): void {
     // Cleanup if needed
   },
 };

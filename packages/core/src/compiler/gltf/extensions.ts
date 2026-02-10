@@ -35,6 +35,7 @@ export type GLTFExtension = (typeof SUPPORTED_EXTENSIONS)[number];
 /**
  * Unlit material extension - renders without lighting calculations
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface KHRMaterialsUnlit {
   /** Empty object - presence indicates unlit */
 }

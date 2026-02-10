@@ -364,7 +364,7 @@ export class LeaderElection implements ILeaderElection {
     for (const callback of this.callbacks) {
       try {
         callback(this.state.leaderId);
-      } catch (error) {
+      } catch (_error) {
         // Ignore callback errors
       }
     }

@@ -22,7 +22,6 @@ import type {
   VoteTally,
   VotingMechanism,
   Proposal,
-  Resolution,
   ResolutionOutcome,
   NegotiationConfig,
 } from './NegotiationTypes';
@@ -265,7 +264,7 @@ export const majorityHandler: VotingHandler = {
  * Supermajority voting (≥66.67% wins)
  */
 export const supermajorityHandler: VotingHandler = {
-  count(votes, proposals, config, _round): VotingResult {
+  count(votes, proposals, _config, _round): VotingResult {
     const tallies = initializeTallies(proposals);
     const totalWeight = getTotalWeight(votes);
 
@@ -339,7 +338,7 @@ export const weightedHandler: VotingHandler = {
  * Consensus voting (all must agree)
  */
 export const consensusHandler: VotingHandler = {
-  count(votes, proposals, config, _round): VotingResult {
+  count(votes, proposals, _config, _round): VotingResult {
     if (votes.length === 0) {
       return {
         tallies: [],
@@ -415,7 +414,7 @@ export const consensusHandler: VotingHandler = {
  * Ranked choice voting with instant runoff
  */
 export const rankedHandler: VotingHandler = {
-  count(votes, proposals, config, _round): VotingResult {
+  count(votes, proposals, _config, _round): VotingResult {
     const eliminated = new Set<string>();
     const runoffVotes = votes.map((v) => ({
       ...v,

@@ -10,7 +10,6 @@ import type { AgentManifest, AgentCapability } from '../agents/AgentManifest';
 import type {
   AgentInspection,
   InspectedTask,
-  TelemetryEvent,
   BreakpointInfo,
 } from './TelemetryTypes';
 import type { TelemetryCollector } from './TelemetryCollector';
@@ -369,7 +368,7 @@ export class AgentInspector extends EventEmitter {
    * Remove a breakpoint
    */
   removeBreakpoint(breakpointId: string): boolean {
-    for (const [agentId, breakpoints] of this.breakpoints.entries()) {
+    for (const [_agentId, breakpoints] of this.breakpoints.entries()) {
       const index = breakpoints.findIndex((bp) => bp.id === breakpointId);
       if (index !== -1) {
         const removed = breakpoints.splice(index, 1)[0];

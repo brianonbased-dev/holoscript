@@ -48,7 +48,7 @@ interface UnityMeshFilter {
 }
 
 /** Unity MeshRenderer component */
-interface UnityMeshRenderer {
+interface _UnityMeshRenderer {
   m_Materials?: Array<{ fileID: string; guid?: string }>;
   m_Enabled?: number;
 }
@@ -69,13 +69,13 @@ interface UnityCollider {
 }
 
 /** Unity BoxCollider */
-interface UnityBoxCollider extends UnityCollider {
+interface _UnityBoxCollider extends UnityCollider {
   m_Size: { x: number; y: number; z: number };
   m_Center: { x: number; y: number; z: number };
 }
 
 /** Unity SphereCollider */
-interface UnitySphereCollider extends UnityCollider {
+interface _UnitySphereCollider extends UnityCollider {
   m_Radius: number;
   m_Center: { x: number; y: number; z: number };
 }

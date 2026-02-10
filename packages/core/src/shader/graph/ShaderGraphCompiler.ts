@@ -13,7 +13,6 @@ import type {
   IShaderUniform,
   IShaderTexture,
   ShaderDataType,
-  INodeTemplate,
 } from './ShaderGraphTypes';
 import { getNodeTemplate, getTypeConversion } from './ShaderGraphTypes';
 

@@ -8,12 +8,9 @@
 
 import {
   LODConfig,
-  LODLevel,
   LODState,
   LODGroup,
   LODMetrics,
-  LODStrategy,
-  LODTransition,
   DEFAULT_LOD_CONFIG,
   createLODState,
   createLODMetrics,
@@ -343,7 +340,7 @@ export class LODManager {
   /**
    * Update LOD for a group of objects
    */
-  private updateGroup(group: LODGroup, deltaTime: number): void {
+  private updateGroup(group: LODGroup, _deltaTime: number): void {
     // Calculate distance from group center to camera
     const dx = group.boundingCenter[0] - this.cameraPosition[0];
     const dy = group.boundingCenter[1] - this.cameraPosition[1];

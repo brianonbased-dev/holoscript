@@ -9,7 +9,6 @@ import { EventEmitter } from 'events';
 import type {
   AgentManifest,
   TrustLevel,
-  ValidationResult,
 } from './AgentManifest';
 import { validateManifest } from './AgentManifest';
 import { CapabilityMatcher, type CapabilityQuery, type AgentMatch } from './CapabilityMatcher';
@@ -372,7 +371,7 @@ export class AgentRegistry extends EventEmitter {
     let removedCount = 0;
 
     for (const [agentId, entry] of this.agents) {
-      const age = now - entry.registeredAt;
+      const _age = now - entry.registeredAt;
       const timeSinceHeartbeat = now - entry.lastHeartbeat;
 
       // Remove if TTL exceeded and offline

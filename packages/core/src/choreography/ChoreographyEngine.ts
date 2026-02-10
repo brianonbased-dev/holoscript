@@ -7,16 +7,14 @@
 
 import { EventEmitter } from 'events';
 import type { AgentManifest } from '../agents/AgentManifest';
-import { AgentRegistry, getDefaultRegistry } from '../agents/AgentRegistry';
+import { AgentRegistry } from '../agents/AgentRegistry';
 import type {
   ChoreographyPlan,
   ChoreographyStep,
   ChoreographyResult,
   ChoreographyStatus,
   StepResult,
-  ExecutionConstraint,
   StepContext,
-  ChoreographyEvents,
 } from './ChoreographyTypes';
 import { ChoreographyPlanner, getDefaultPlanner } from './ChoreographyPlanner';
 import type { ExecutionOrder } from './ChoreographyPlanner';
@@ -106,7 +104,7 @@ export class ChoreographyEngine extends EventEmitter {
       }
     });
 
-    this.executor.on('step:retrying', (step, attempt, delay) => {
+    this.executor.on('step:retrying', (step, attempt, _delay) => {
       const state = this.findPlanWithStep(step.id);
       if (state) {
         this.emit('step:retrying', step, attempt, state.plan);
@@ -363,7 +361,7 @@ export class ChoreographyEngine extends EventEmitter {
    * Execute the plan
    */
   private async executePlan(state: PlanState): Promise<ChoreographyResult> {
-    const { plan, executionOrder } = state;
+    const { plan: _plan, executionOrder } = state;
 
     // Execute groups in order
     for (const group of executionOrder.parallelGroups) {

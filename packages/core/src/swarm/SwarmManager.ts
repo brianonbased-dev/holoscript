@@ -4,7 +4,7 @@
  * Orchestrates swarm formation, disbandment, and lifecycle.
  */
 
-import { SwarmMembership, type SwarmMembershipConfig, type MemberInfo, type MembershipEvent } from './SwarmMembership';
+import { SwarmMembership, type SwarmMembershipConfig, type MembershipEvent } from './SwarmMembership';
 import type { QuorumState } from './QuorumPolicy';
 
 export interface SwarmInfo {

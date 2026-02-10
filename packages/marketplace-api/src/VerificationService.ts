@@ -5,10 +5,8 @@
 
 import { createHash, randomBytes } from 'crypto';
 import type {
-  VerificationRequest,
   VerificationStatus,
   VerificationEvidence,
-  Author,
 } from './types.js';
 
 // =============================================================================

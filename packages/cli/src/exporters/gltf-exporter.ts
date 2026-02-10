@@ -1229,7 +1229,7 @@ export async function exportGLTF(options: GLTFExportOptions): Promise<void> {
     }
   } else {
     // Write .gltf JSON
-    const json = options.pretty ? JSON.stringify(gltf, null, 2) : JSON.stringify(gltf);
+    const _json = options.pretty ? JSON.stringify(gltf, null, 2) : JSON.stringify(gltf);
     gltf.buffers[0].uri = path.basename(outputPath, '.gltf') + '.bin';
     fs.writeFileSync(outputPath, JSON.stringify(gltf, null, options.pretty ? 2 : undefined));
 

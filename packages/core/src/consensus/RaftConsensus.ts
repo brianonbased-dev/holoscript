@@ -14,16 +14,10 @@ import {
   ConsensusNode,
   ConsensusProtocol,
   ConsensusMechanism,
-  Proposal,
   ProposalResult,
   RaftNodeState,
   RaftLogEntry,
-  AppendEntriesRequest,
-  AppendEntriesResponse,
-  RequestVoteRequest,
-  RequestVoteResponse,
   DEFAULT_CONSENSUS_CONFIG,
-  generateProposalId,
   calculateQuorum,
 } from './ConsensusTypes';
 
@@ -588,7 +582,7 @@ export class RaftConsensus extends EventEmitter implements ConsensusProtocol {
     for (let n = this.log.length - 1; n > this.commitIndex; n--) {
       if (this.log[n].term === this.currentTerm) {
         let count = 1; // Self
-        for (const [nodeId, matchIdx] of this.matchIndex) {
+        for (const [_nodeId, matchIdx] of this.matchIndex) {
           if (matchIdx >= n) count++;
         }
 

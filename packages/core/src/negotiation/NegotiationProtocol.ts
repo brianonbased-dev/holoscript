@@ -43,7 +43,6 @@
 import type {
   NegotiationSession,
   NegotiationConfig,
-  NegotiationStatus,
   Proposal,
   Vote,
   Resolution,
@@ -341,7 +340,7 @@ export class NegotiationProtocol {
   /**
    * Cancel a session
    */
-  async cancel(sessionId: string, reason?: string): Promise<void> {
+  async cancel(sessionId: string, _reason?: string): Promise<void> {
     const session = this.getSession(sessionId);
 
     if (session.status === 'resolved' || session.status === 'cancelled') {

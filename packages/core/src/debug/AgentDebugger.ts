@@ -521,7 +521,7 @@ export class AgentDebugger extends EventEmitter {
     return Promise.resolve();
   }
 
-  private handleBreakpointHit(breakpoint: BreakpointInfo, context: Record<string, any>): void {
+  private handleBreakpointHit(breakpoint: BreakpointInfo, _context: Record<string, any>): void {
     this.collector.recordEvent('breakpoint_hit', breakpoint.agentId, {
       breakpointId: breakpoint.id,
       condition: breakpoint.condition,

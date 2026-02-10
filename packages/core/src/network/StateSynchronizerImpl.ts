@@ -282,7 +282,7 @@ export class StateSynchronizerImpl implements IStateSynchronizer {
    * Merge remote state with local state
    */
   public mergeRemoteState(remoteState: Map<string, ISyncStateEntry>): void {
-    remoteState.forEach((entry, key) => {
+    remoteState.forEach((entry, _key) => {
       this.applyRemoteUpdate(entry);
     });
   }

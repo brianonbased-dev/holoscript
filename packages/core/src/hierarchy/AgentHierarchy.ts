@@ -11,7 +11,6 @@ import {
   AgentHierarchy,
   DelegationRule,
   HierarchyConfig,
-  HierarchyMetadata,
   HierarchyStats,
   HierarchyEvent,
   HierarchyEventHandler,

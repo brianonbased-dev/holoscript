@@ -25,7 +25,7 @@ import type {
   SpatialScope,
   TrustLevel,
 } from '../agents/AgentManifest';
-import type { CapabilityQuery, AgentMatch } from '../agents/CapabilityMatcher';
+import type { CapabilityQuery } from '../agents/CapabilityMatcher';
 import {
   AgentRegistry,
   getDefaultRegistry,

@@ -13,7 +13,6 @@ import type {
   DownloadStats,
   DependencyTree,
   TraitRating,
-  ApiResponse,
   ApiError,
 } from '../types';
 

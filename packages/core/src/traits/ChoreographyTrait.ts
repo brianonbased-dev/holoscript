@@ -19,14 +19,12 @@ import type { HSPlusNode } from '../types/HoloScriptPlus';
 import type { AgentManifest } from '../agents/AgentManifest';
 import type {
   ChoreographyPlan,
-  ChoreographyStep,
   ChoreographyResult,
   ChoreographyStatus,
   StepContext,
 } from '../choreography/ChoreographyTypes';
 import {
   ChoreographyEngine,
-  getDefaultEngine,
 } from '../choreography/ChoreographyEngine';
 import {
   ChoreographyPlanner,

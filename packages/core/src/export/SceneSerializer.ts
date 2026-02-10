@@ -11,20 +11,8 @@
 import {
   ISceneGraph,
   ISceneNode,
-  ISceneMetadata,
-  IMaterial,
-  ITexture,
-  IMesh,
-  IAnimation,
-  ISkin,
-  IBuffer,
-  IBufferView,
-  IAccessor,
   ITransform,
-  IVector3,
   IQuaternion,
-  IComponent,
-  createEmptySceneGraph,
   createIdentityTransform,
 } from './SceneGraph';
 
@@ -410,7 +398,7 @@ export class SceneSerializer {
 
     // Check material references
     const materialIds = new Set(sceneGraph.materials.map((m) => m.id));
-    const meshIds = new Set(sceneGraph.meshes.map((m) => m.id));
+    const _meshIds = new Set(sceneGraph.meshes.map((m) => m.id));
     const textureIds = new Set(sceneGraph.textures.map((t) => t.id));
 
     // Validate meshes reference valid materials

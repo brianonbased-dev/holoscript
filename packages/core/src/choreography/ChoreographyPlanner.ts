@@ -5,7 +5,7 @@
  * Part of HoloScript v3.1 Agentic Choreography.
  */
 
-import type { AgentManifest, AgentCapability } from '../agents/AgentManifest';
+import type { AgentManifest } from '../agents/AgentManifest';
 import type { CapabilityQuery } from '../agents/CapabilityMatcher';
 import { CapabilityMatcher } from '../agents/CapabilityMatcher';
 import type {
@@ -120,7 +120,7 @@ export class ChoreographyPlanner {
    */
   createPlan(definition: PlanDefinition): ChoreographyPlan {
     const planId = generateId();
-    const agents = new Map(definition.agents.map((a) => [a.id, a]));
+    const _agents = new Map(definition.agents.map((a) => [a.id, a]));
 
     // Resolve steps
     const steps: ChoreographyStep[] = definition.steps.map((stepDef) => {

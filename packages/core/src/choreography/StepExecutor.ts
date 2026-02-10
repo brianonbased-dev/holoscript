@@ -9,11 +9,9 @@ import { EventEmitter } from 'events';
 import type { AgentManifest } from '../agents/AgentManifest';
 import type {
   ChoreographyStep,
-  ChoreographyPlan,
   StepContext,
   StepResult,
   RetryConfig,
-  StepStatus,
 } from './ChoreographyTypes';
 import { DEFAULT_RETRY_CONFIG } from './ChoreographyTypes';
 

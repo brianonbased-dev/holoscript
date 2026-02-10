@@ -257,7 +257,7 @@ export class SwarmCoordinator implements ISwarmCoordinator {
     initialSolution: number[],
     agents: AgentInfo[],
     tasks: TaskInfo[],
-    config: ISwarmConfig
+    _config: ISwarmConfig
   ): Promise<{ bestSolution: number[]; bestFitness: number; converged: boolean; iterations: number }> {
     const fitnessFunction = this.createFitnessFunction(agents, tasks);
     

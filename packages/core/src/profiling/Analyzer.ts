@@ -195,7 +195,7 @@ export class Analyzer {
     }
   }
 
-  private generateRecommendations(profile: ProfileResult, budget: PerformanceBudget): Recommendation[] {
+  private generateRecommendations(profile: ProfileResult, _budget: PerformanceBudget): Recommendation[] {
     const recommendations: Recommendation[] = [];
     const summary = profile.summary;
     let recommendationId = 1;

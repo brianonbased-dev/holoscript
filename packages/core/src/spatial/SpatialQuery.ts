@@ -14,7 +14,6 @@ import {
   Region,
   SightLine,
   distance,
-  distanceSquared,
   isPointInBox,
   isPointInSphere,
   normalize,
@@ -252,7 +251,7 @@ export class SpatialQueryExecutor {
    * Find entities within radius
    */
   private executeWithin(query: WithinQuery, candidates: SpatialEntity[]): QueryResult[] {
-    const radiusSq = query.radius * query.radius;
+    const _radiusSq = query.radius * query.radius;
 
     return candidates
       .map((entity) => {

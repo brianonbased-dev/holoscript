@@ -13,16 +13,11 @@ import {
   IEffectRenderContext,
   IBloomParams,
   IToneMapParams,
-  IDepthOfFieldParams,
   IFXAAParams,
   IVignetteParams,
-  IColorGradeParams,
   IFilmGrainParams,
   ISharpenParams,
-  ISSAOParams,
   IChromaticAberrationParams,
-  IFogParams,
-  IMotionBlurParams,
   UNIFORM_SIZES,
   getDefaultParams,
 } from './PostProcessTypes';
@@ -35,11 +30,11 @@ import {
   FILM_GRAIN_SHADER,
   SHARPEN_SHADER,
   CHROMATIC_ABERRATION_SHADER,
-  DOF_SHADER,
-  SSAO_SHADER,
-  FOG_SHADER,
-  MOTION_BLUR_SHADER,
-  COLOR_GRADE_SHADER,
+  DOF_SHADER as _DOF_SHADER,
+  SSAO_SHADER as _SSAO_SHADER,
+  FOG_SHADER as _FOG_SHADER,
+  MOTION_BLUR_SHADER as _MOTION_BLUR_SHADER,
+  COLOR_GRADE_SHADER as _COLOR_GRADE_SHADER,
 } from './PostProcessShaders';
 
 /**

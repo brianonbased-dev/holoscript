@@ -14,13 +14,10 @@ import {
   ConsensusMechanism,
   Proposal,
   ProposalResult,
-  ProposalStatus,
-  ConsensusEvent,
   DEFAULT_CONSENSUS_CONFIG,
   generateProposalId,
   calculateQuorum,
   hasQuorum,
-  isProposalExpired,
 } from './ConsensusTypes';
 
 // =============================================================================

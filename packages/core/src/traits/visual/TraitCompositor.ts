@@ -1,4 +1,4 @@
-import type { R3FMaterialProps, TraitVisualConfig, VisualLayer } from './types';
+import type { R3FMaterialProps, TraitVisualConfig } from './types';
 import { VISUAL_LAYER_PRIORITY } from './types';
 import { TraitVisualRegistry } from './TraitVisualRegistry';
 import { COMPOSITION_RULES, type CompositionRule } from './composition-rules';

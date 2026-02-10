@@ -14,9 +14,6 @@ import type {
   ITextureDescriptor,
   ISamplerDescriptor,
   IGPUTexture,
-  IRenderPassDescriptor,
-  IRenderMesh,
-  IRenderMaterial,
   IDrawCall,
   ICameraUniforms,
   ISceneUniforms,
@@ -619,7 +616,7 @@ export class WebGPURenderer {
    *
    * Requires the texture to have been created with RENDER_ATTACHMENT usage.
    */
-  private async generateMipmaps(texture: GPUTexture, width: number, height: number): Promise<void> {
+  private async generateMipmaps(texture: GPUTexture, _width: number, _height: number): Promise<void> {
     if (!this.context) return;
 
     const { device } = this.context;
@@ -981,7 +978,7 @@ export class WebGPURenderer {
    * Destroy the renderer and release resources
    */
   destroy(): void {
-    this.pipelines.forEach((pipeline) => {
+    this.pipelines.forEach((_pipeline) => {
       // Pipelines don't have destroy method
     });
     this.pipelines.clear();

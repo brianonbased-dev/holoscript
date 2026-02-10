@@ -155,7 +155,7 @@ export class Profiler {
   /**
    * Begin a profiling span
    */
-  beginSpan(name: string, category: ProfileCategory = 'user', args?: Record<string, unknown>): void {
+  beginSpan(name: string, _category: ProfileCategory = 'user', _args?: Record<string, unknown>): void {
     if (!this.isRunning) return;
 
     const now = this.getHighResTime();
