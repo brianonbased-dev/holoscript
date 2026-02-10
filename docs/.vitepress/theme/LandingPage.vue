@@ -296,7 +296,7 @@ animate();</code></pre>
             <p>
               Auto-mint scenes as Zora Coins (ERC-20) on Base. Token-gated experiences,
               NFT-linked objects, bonding curve pricing, and royalties on secondary sales.
-              Built-in wallet, marketplace, and Clanker token integration.
+              Built-in wallet, marketplace, and Clanker token integration in Hololand, a HoloScript-built app.
             </p>
           </div>
           <div class="use-card">
