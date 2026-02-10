@@ -565,6 +565,20 @@ export default {
   line-height: 1.6;
 }
 
+/* Reset VitePress default heading styles inside landing page */
+.landing-page h1,
+.landing-page h2,
+.landing-page h3,
+.landing-page p {
+  margin: 0;
+  padding: 0;
+  border: none;
+  line-height: 1.3;
+}
+.landing-page p {
+  line-height: 1.6;
+}
+
 /* ========= NAV ========= */
 .landing-nav {
   position: fixed;
@@ -641,6 +655,7 @@ export default {
   font-size: clamp(2rem, 4vw, 3rem);
   margin-bottom: 1rem;
   line-height: 1.3;
+  padding-bottom: 0.05em;
 }
 .section-sub {
   text-align: center;
@@ -648,6 +663,7 @@ export default {
   font-size: 1.125rem;
   max-width: 700px;
   margin: 0 auto 3rem;
+  line-height: 1.6;
 }
 
 /* ========= BUTTONS ========= */
@@ -793,6 +809,7 @@ export default {
   color: var(--text2);
   max-width: 800px;
   margin: 0 auto 2.5rem;
+  line-height: 1.6;
 }
 .hero-sub strong {
   color: var(--text);
@@ -1093,6 +1110,7 @@ export default {
   font-style: italic;
   color: var(--text2);
   margin-bottom: 1.5rem;
+  line-height: 1.6;
   position: relative;
   z-index: 1;
 }
@@ -1127,6 +1145,7 @@ export default {
   background-clip: text;
   line-height: 1.3;
   padding-bottom: 0.1em;
+  margin-bottom: 1rem;
 }
 
 /* ========= FOOTER ========= */
