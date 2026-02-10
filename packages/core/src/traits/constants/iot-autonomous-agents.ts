@@ -4,6 +4,8 @@
 export const IOT_AUTONOMOUS_AGENTS_TRAITS = [
   'sensor',
   'digital_twin',
+  'twin_sync',
+  'twin_actuator',
   'data_binding',
   'alert',
   'heatmap_3d',
@@ -16,4 +18,5 @@ export const IOT_AUTONOMOUS_AGENTS_TRAITS = [
   'dialogue',
   'faction',
   'patrol',
+  'mitosis',
 ] as const;

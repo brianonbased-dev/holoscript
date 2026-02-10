@@ -38,7 +38,13 @@ KNOWN_TRAITS = {
     "attachable", "equippable", "consumable", "destructible", "anchor",
     "tracked", "world_locked", "hand_tracked", "eye_tracked",
     "spatial_audio", "ambient", "voice_activated", "state", "reactive",
-    "observable", "computed", "shareable", "collaborative", "tweetable"
+    "observable", "computed", "shareable", "collaborative", "tweetable",
+    # Digital Twin / Industrial
+    "digital_twin", "twin_sync", "twin_actuator", "sensor",
+    # Agent Mitosis
+    "mitosis",
+    # Web3 / Marketplace
+    "nft", "token_gated", "wallet", "marketplace"
 }
 
 # Known geometry types
