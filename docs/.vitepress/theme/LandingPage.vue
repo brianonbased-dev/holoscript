@@ -291,11 +291,28 @@ animate();</code></pre>
             </p>
           </div>
           <div class="use-card">
-            <div class="use-icon">&#x1F916;</div>
-            <h3>Robotics &amp; IoT</h3>
+            <div class="use-icon">&#x1F517;</div>
+            <h3>Web3 &amp; Creator Economy</h3>
             <p>
-              Compile scenes to URDF for ROS 2 robots, SDF for Gazebo simulation, DTDL for Azure
-              Digital Twins, and W3C WoT for IoT devices.
+              Auto-mint scenes as Zora Coins (ERC-20) on Base. Token-gated experiences,
+              NFT-linked objects, bonding curve pricing, and royalties on secondary sales.
+              Built-in wallet, marketplace, and Clanker token integration.
+            </p>
+          </div>
+          <div class="use-card">
+            <div class="use-icon">&#x1F9BE;</div>
+            <h3>Robotics</h3>
+            <p>
+              Compile scenes to URDF for ROS 2 robots or SDF for Gazebo simulation. Design
+              robotic environments in VR, then deploy to real hardware.
+            </p>
+          </div>
+          <div class="use-card">
+            <div class="use-icon">&#x1F4E1;</div>
+            <h3>IoT &amp; Digital Twins</h3>
+            <p>
+              Export to DTDL for Azure Digital Twins and W3C WoT for IoT devices. Live sensor
+              data visualization and facility management dashboards.
             </p>
           </div>
           <div class="use-card">
@@ -328,6 +345,14 @@ animate();</code></pre>
             <p>
               Medical training simulations, surgical rehearsal, and therapeutic VR environments.
               Accessible creation without engineering teams.
+            </p>
+          </div>
+          <div class="use-card">
+            <div class="use-icon">&#x1F3AF;</div>
+            <h3>Training &amp; Simulation</h3>
+            <p>
+              Enterprise VR training, safety drills, and industrial simulation. Compile to any
+              platform for consistent training experiences across organizations.
             </p>
           </div>
         </div>
