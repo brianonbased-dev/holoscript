@@ -247,7 +247,7 @@ animate();</code></pre>
     <section class="section" id="use-cases">
       <div class="container">
         <h2 class="section-title">Built for Every Creator</h2>
-        <div class="grid-4">
+        <div class="grid-3">
           <div class="use-card">
             <div class="use-icon">&#x1F393;</div>
             <h3>Education</h3>
@@ -270,6 +270,14 @@ animate();</code></pre>
             <p>
               Indie VR games, physics sandboxes, and interactive experiences. Rapid prototyping for
               game developers and hobbyists.
+            </p>
+          </div>
+          <div class="use-card">
+            <div class="use-icon">&#x1FA69;</div>
+            <h3>AI Choreography</h3>
+            <p>
+              MCP server with 34+ tools lets Claude, GPT, and Brittney generate entire VR scenes
+              from natural language. AI builds your world while you direct.
             </p>
           </div>
           <div class="use-card">
