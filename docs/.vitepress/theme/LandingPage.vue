@@ -1,6 +1,31 @@
 <script setup>
 import { useData } from 'vitepress';
+import { onMounted } from 'vue';
 const { isDark } = useData();
+
+onMounted(() => {
+  // Intersection Observer for scroll-in animations
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    },
+    { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+  );
+  document.querySelectorAll('.landing-page section:not(#hero)').forEach((s) => observer.observe(s));
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('.landing-page a[href^="#"]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+});
 </script>
 
 <template>
@@ -23,13 +48,14 @@ const { isDark } = useData();
     </nav>
 
     <!-- HERO -->
-    <section class="hero">
+    <section id="hero">
       <div class="hero-grid-bg"></div>
       <div class="container hero-content">
-        <h1>Create VR Worlds<br />Without the Complexity</h1>
+        <h1>One Language, Every Platform</h1>
         <p class="hero-sub">
-          HoloScript is an open-source language that makes building VR/AR experiences as simple as
-          writing HTML. <strong>56 traits. Any browser. Zero setup.</strong>
+          HoloScript is an open-source programming language that compiles to 18+ targets including
+          Unity, Unreal, Godot, visionOS, Android XR, WebGPU, and robotics/IoT formats.
+          <strong>1,525 traits. One source, every platform.</strong>
         </p>
         <div class="hero-buttons">
           <a href="/guides/quick-start" class="btn btn-primary">Get Started Free</a>
@@ -39,44 +65,48 @@ const { isDark } = useData();
         </div>
         <div class="code-preview">
           <div class="code-tab">example.holo</div>
-          <pre><code><span class="kw">composition</span> <span class="st">"My World"</span> {
-  <span class="kw">object</span> <span class="st">"Crystal"</span> <span class="tr">@spinning</span> <span class="tr">@glowing</span> {
-    <span class="pr">geometry:</span> <span class="st">"sphere"</span>
-    <span class="pr">color:</span> <span class="st">"#00ffff"</span>
-    <span class="pr">position:</span> [<span class="nm">0</span>, <span class="nm">2</span>, <span class="nm">-3</span>]
-  }
-}</code></pre>
+          <pre><code><span class="code-line" style="animation-delay: 0.1s"><span class="kw">composition</span> <span class="st">"My World"</span> {</span>
+<span class="code-line" style="animation-delay: 0.3s">  <span class="kw">object</span> <span class="st">"Crystal"</span> <span class="tr">@spinning</span> <span class="tr">@glowing</span> {</span>
+<span class="code-line" style="animation-delay: 0.5s">    <span class="pr">geometry:</span> <span class="st">"sphere"</span></span>
+<span class="code-line" style="animation-delay: 0.7s">    <span class="pr">color:</span> <span class="st">"#00ffff"</span></span>
+<span class="code-line" style="animation-delay: 0.9s">    <span class="pr">position:</span> [<span class="nm">0</span>, <span class="nm">2</span>, <span class="nm">-3</span>]</span>
+<span class="code-line" style="animation-delay: 1.1s">  }</span>
+<span class="code-line" style="animation-delay: 1.3s">}</span></code></pre>
         </div>
+      </div>
+      <div class="scroll-indicator">
+        <div class="scroll-arrow">&#x2193;</div>
       </div>
     </section>
 
     <!-- PROBLEM -->
-    <section class="section">
+    <section class="section" id="problem">
       <div class="container">
         <h2 class="section-title">The Problem with VR Development</h2>
         <div class="grid-3">
-          <div class="card">
-            <div class="card-icon">&#x1F4DA;</div>
+          <div class="card problem-card">
+            <span class="problem-icon">&#x1F4DA;</span>
             <h3 class="card-title card-title--red">Steep Learning Curve</h3>
             <p>
-              Unity and Unreal require months of study. Complex SDKs and verbose code block
-              creativity before it begins.
+              Traditional VR tools like Unity or Unreal require months of study before you can build
+              even simple experiences. Complex SDKs, engine-specific APIs, and verbose code block
+              creativity.
             </p>
           </div>
-          <div class="card">
-            <div class="card-icon">&#x1F9E9;</div>
+          <div class="card problem-card">
+            <span class="problem-icon">&#x1F9E9;</span>
             <h3 class="card-title card-title--red">Too Much Boilerplate</h3>
             <p>
-              A simple 3D scene takes 200+ lines. Scene graphs, materials, renderers, cameras —
-              endless configuration.
+              Creating a simple 3D scene requires 200+ lines of setup code. Scene graphs, materials,
+              renderers, cameras &mdash; endless configuration before you see results.
             </p>
           </div>
-          <div class="card">
-            <div class="card-icon">&#x1F512;</div>
+          <div class="card problem-card">
+            <span class="problem-icon">&#x1F512;</span>
             <h3 class="card-title card-title--red">Platform Lock-in</h3>
             <p>
-              Build for Unity? Can't use in Unreal. No universal format means wasted time and
-              duplicated effort.
+              Build for Unity, can't use in Unreal. Target VR but can't reach robotics or IoT. No
+              universal language means rewriting for every platform.
             </p>
           </div>
         </div>
@@ -84,31 +114,32 @@ const { isDark } = useData();
     </section>
 
     <!-- SOLUTION -->
-    <section class="section section--alt">
+    <section class="section section--alt" id="solution">
       <div class="container">
         <h2 class="section-title">The HoloScript Solution</h2>
         <div class="grid-3">
-          <div class="card card--glow">
-            <div class="card-icon">&#x270D;&#xFE0F;</div>
+          <div class="card card--glow solution-card">
+            <span class="solution-icon">&#x270D;&#xFE0F;</span>
             <h3 class="card-title card-title--cyan">Write It</h3>
             <p>
-              Describe your VR world in plain .holo files. No complex APIs or framework knowledge
-              required.
+              Describe your VR world in plain .holo files using intuitive syntax. No complex APIs or
+              framework knowledge required. Just write what you want to see.
             </p>
           </div>
-          <div class="card card--glow">
-            <div class="card-icon">&#x1F441;&#xFE0F;</div>
+          <div class="card card--glow solution-card">
+            <span class="solution-icon">&#x1F441;&#xFE0F;</span>
             <h3 class="card-title card-title--cyan">See It</h3>
             <p>
-              Instant browser preview with WebXR. Test on desktop, mobile, or VR headset — no
-              compilation steps.
+              Instant browser preview with WebXR support. See changes in real-time. Test on desktop,
+              mobile, or VR headset without exports or compilation steps.
             </p>
           </div>
-          <div class="card card--glow">
-            <div class="card-icon">&#x1F680;</div>
+          <div class="card card--glow solution-card">
+            <span class="solution-icon">&#x1F680;</span>
             <h3 class="card-title card-title--cyan">Share It</h3>
             <p>
-              One-click share links that run everywhere. True write-once, deploy-anywhere for VR.
+              One-click share links that run everywhere. Your VR world works in any modern browser
+              on any device. True write-once, deploy-anywhere.
             </p>
           </div>
         </div>
@@ -116,11 +147,12 @@ const { isDark } = useData();
     </section>
 
     <!-- CODE COMPARISON -->
-    <section class="section">
+    <section class="section" id="comparison">
       <div class="container">
         <h2 class="section-title">See the Difference</h2>
         <p class="section-sub">
-          A spinning, glowing sphere. Same result — vastly different effort.
+          Creating a simple 3D scene with a glowing, spinning sphere. Compare traditional Three.js
+          with HoloScript.
         </p>
         <div class="comparison">
           <div class="code-block">
@@ -134,25 +166,29 @@ const { isDark } = useData();
 
 <span class="kw">const</span> scene = <span class="kw">new</span> THREE.Scene();
 <span class="kw">const</span> camera = <span class="kw">new</span> THREE.PerspectiveCamera(
-  <span class="nm">75</span>, innerWidth / innerHeight, <span class="nm">0.1</span>, <span class="nm">1000</span>
+  <span class="nm">75</span>, window.innerWidth / window.innerHeight,
+  <span class="nm">0.1</span>, <span class="nm">1000</span>
 );
+
 <span class="kw">const</span> renderer = <span class="kw">new</span> THREE.WebGLRenderer();
-renderer.setSize(innerWidth, innerHeight);
+renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-<span class="kw">const</span> geo = <span class="kw">new</span> THREE.SphereGeometry(<span class="nm">1</span>,<span class="nm">32</span>,<span class="nm">32</span>);
-<span class="kw">const</span> mat = <span class="kw">new</span> THREE.MeshStandardMaterial({
+<span class="kw">const</span> geometry = <span class="kw">new</span> THREE.SphereGeometry(<span class="nm">1</span>, <span class="nm">32</span>, <span class="nm">32</span>);
+<span class="kw">const</span> material = <span class="kw">new</span> THREE.MeshStandardMaterial({
   color: <span class="nm">0x00ffff</span>,
   emissive: <span class="nm">0x00ffff</span>,
   emissiveIntensity: <span class="nm">0.5</span>
 });
-<span class="kw">const</span> sphere = <span class="kw">new</span> THREE.Mesh(geo, mat);
+
+<span class="kw">const</span> sphere = <span class="kw">new</span> THREE.Mesh(geometry, material);
 sphere.position.set(<span class="nm">0</span>, <span class="nm">2</span>, <span class="nm">-3</span>);
 scene.add(sphere);
 
-<span class="kw">const</span> light = <span class="kw">new</span> THREE.PointLight(<span class="nm">0xffffff</span>);
+<span class="kw">const</span> light = <span class="kw">new</span> THREE.PointLight(<span class="nm">0xffffff</span>, <span class="nm">1</span>);
 light.position.set(<span class="nm">5</span>, <span class="nm">5</span>, <span class="nm">5</span>);
 scene.add(light);
+
 camera.position.z = <span class="nm">5</span>;
 
 <span class="kw">function</span> animate() {
@@ -182,10 +218,13 @@ animate();</code></pre>
     </section>
 
     <!-- TRAITS -->
-    <section class="section section--alt">
+    <section class="section section--alt" id="traits">
       <div class="container">
-        <h2 class="section-title">56 Built-in Traits</h2>
-        <p class="section-sub">Add powerful behaviors with simple decorators. No code required.</p>
+        <h2 class="section-title">1,525 Built-in Traits</h2>
+        <p class="section-sub">
+          61 trait categories covering VR, robotics, IoT, AI, networking, audio, and more. Add
+          powerful behaviors with simple decorators.
+        </p>
         <div class="traits-grid">
           <div class="trait" v-for="t in traits" :key="t.name">
             <span class="trait-cat" :class="'cat-' + t.cat">{{ t.catLabel }}</span>
@@ -198,14 +237,14 @@ animate();</code></pre>
             href="/api/traits"
             class="btn btn-outline"
             style="padding: 0.75rem 2rem; font-size: 1rem"
-            >See All 56 Traits &rarr;</a
+            >See All 1,525 Traits &rarr;</a
           >
         </p>
       </div>
     </section>
 
     <!-- USE CASES -->
-    <section class="section">
+    <section class="section" id="use-cases">
       <div class="container">
         <h2 class="section-title">Built for Every Creator</h2>
         <div class="grid-4">
@@ -213,38 +252,86 @@ animate();</code></pre>
             <div class="use-icon">&#x1F393;</div>
             <h3>Education</h3>
             <p>
-              Virtual classrooms, interactive labs, and historical recreations without technical
-              barriers.
+              Virtual classrooms, interactive science labs, and historical recreations. Make learning
+              immersive without technical barriers.
             </p>
           </div>
           <div class="use-card">
             <div class="use-icon">&#x1F3A8;</div>
             <h3>Art &amp; Design</h3>
-            <p>3D galleries, interactive exhibits, and digital installations in virtual space.</p>
+            <p>
+              3D galleries, interactive exhibits, and digital installations. Express your creativity
+              in virtual space without code complexity.
+            </p>
           </div>
           <div class="use-card">
             <div class="use-icon">&#x1F3AE;</div>
             <h3>Gaming</h3>
-            <p>Indie VR games, physics sandboxes, and interactive worlds. Rapid prototyping.</p>
+            <p>
+              Indie VR games, physics sandboxes, and interactive experiences. Rapid prototyping for
+              game developers and hobbyists.
+            </p>
           </div>
           <div class="use-card">
-            <div class="use-icon">&#x1F3D7;&#xFE0F;</div>
-            <h3>Architecture</h3>
-            <p>Walkthrough models, client presentations, and design reviews in immersive VR.</p>
+            <div class="use-icon">&#x1F916;</div>
+            <h3>Robotics &amp; IoT</h3>
+            <p>
+              Compile scenes to URDF for ROS 2 robots, SDF for Gazebo simulation, DTDL for Azure
+              Digital Twins, and W3C WoT for IoT devices.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SAMPLE CODE TABS -->
+    <section class="section section--alt" id="examples-section">
+      <div class="container">
+        <h2 class="section-title">See What You Can Build</h2>
+        <p class="section-sub">
+          Explore real-world examples. From art galleries to multiplayer rooms.
+        </p>
+        <div class="tabs">
+          <div class="tab-labels">
+            <button
+              v-for="(tab, i) in tabs"
+              :key="tab.label"
+              :class="{ active: activeTab === i }"
+              @click="activeTab = i"
+            >
+              {{ tab.label }}
+            </button>
+          </div>
+          <div class="tab-body">
+            <pre class="tab-code"><code v-html="tabs[activeTab].code"></code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="section" id="testimonials">
+      <div class="container">
+        <h2 class="section-title">Loved by Creators</h2>
+        <div class="grid-3">
+          <div class="testimonial-card" v-for="t in testimonials" :key="t.author">
+            <div class="quote-icon">&ldquo;</div>
+            <p class="testimonial-text">{{ t.text }}</p>
+            <p class="testimonial-author">&mdash; {{ t.author }}</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- FEATURES -->
-    <section class="section section--alt">
+    <section class="section section--alt" id="features">
       <div class="container">
         <h2 class="section-title">Everything You Need</h2>
         <div class="grid-3">
           <div class="card card--glow" style="text-align: center">
-            <div class="feature-number">56</div>
+            <div class="feature-number">1,525</div>
             <h3 class="card-title card-title--cyan">Built-in Traits</h3>
-            <p>From physics to AI, every behavior is one decorator away</p>
+            <p>61 categories: VR, physics, AI, networking, robotics, IoT, and more</p>
           </div>
           <div class="card card--glow" style="text-align: center">
             <div class="card-icon">&#x26A1;</div>
@@ -264,12 +351,15 @@ animate();</code></pre>
           <div class="card card--glow" style="text-align: center">
             <div class="card-icon">&#x1F916;</div>
             <h3 class="card-title card-title--cyan">AI-Powered</h3>
-            <p>Grok and Claude can generate scenes from plain text</p>
+            <p>MCP server with 34+ tools. Claude, GPT, and Brittney generate scenes natively</p>
           </div>
           <div class="card card--glow" style="text-align: center">
             <div class="card-icon">&#x1F504;</div>
-            <h3 class="card-title card-title--cyan">Cross-Platform</h3>
-            <p>Export to Unity, Blender, VRChat. No lock-in</p>
+            <h3 class="card-title card-title--cyan">18+ Compilation Targets</h3>
+            <p>
+              Unity, Unreal, Godot, VRChat, Babylon, WebGPU, visionOS, Android XR, URDF, SDF, DTDL,
+              OpenUSD, and more
+            </p>
           </div>
         </div>
       </div>
@@ -280,7 +370,7 @@ animate();</code></pre>
       <div class="container" style="text-align: center">
         <h2 class="cta-title">Ready to Build Your First VR World?</h2>
         <p class="section-sub" style="margin-bottom: 2.5rem">
-          Join creators worldwide. Free and open-source.
+          Join creators worldwide using HoloScript. Free and open-source.
         </p>
         <a href="/guides/quick-start" class="btn btn-primary btn-large">Start Building Now</a>
       </div>
@@ -296,7 +386,7 @@ animate();</code></pre>
           <a href="/examples/">Examples</a>
           <a href="https://x.com/holoscript">X / Twitter</a>
         </div>
-        <p class="footer-tagline">Made with love for the VR community</p>
+        <p class="footer-tagline">Made with love for the spatial computing community</p>
         <span class="license-badge">MIT License</span>
       </div>
     </footer>
@@ -304,76 +394,145 @@ animate();</code></pre>
 </template>
 
 <script>
+function hl(code) {
+  // Simple syntax highlight helper to reduce template noise
+  return code
+    .replace(/\b(composition|object|environment|template|player)\b/g, '<span class="kw">$1</span>')
+    .replace(/@(\w+)/g, '<span class="tr">@$1</span>')
+    .replace(/"([^"]*)"/g, '<span class="st">"$1"</span>')
+    .replace(/\b(\d+\.?\d*)\b/g, '<span class="nm">$1</span>')
+    .replace(
+      /(\w+):/g,
+      (m, p1) =>
+        ['composition', 'object', 'environment', 'template', 'player'].includes(p1)
+          ? m
+          : '<span class="pr">' + p1 + ':</span>'
+    );
+}
+
 export default {
   data() {
     return {
+      activeTab: 0,
       traits: [
-        {
-          name: 'grabbable',
-          desc: 'Pick up and move objects in VR',
-          cat: 'interact',
-          catLabel: 'Interaction',
-        },
-        {
-          name: 'teleport',
-          desc: 'Teleport movement with arc indicator',
-          cat: 'interact',
-          catLabel: 'Interaction',
-        },
-        {
-          name: 'clickable',
-          desc: 'Respond to user clicks and taps',
-          cat: 'interact',
-          catLabel: 'Interaction',
-        },
+        { name: 'grabbable', desc: 'Pick up and move objects in VR', cat: 'interact', catLabel: 'Interaction' },
+        { name: 'teleport', desc: 'Enable teleport movement targets', cat: 'interact', catLabel: 'Interaction' },
+        { name: 'clickable', desc: 'Respond to user clicks and taps', cat: 'interact', catLabel: 'Interaction' },
         { name: 'glowing', desc: 'Add emissive glow effects', cat: 'visual', catLabel: 'Visual' },
+        { name: 'particle_system', desc: 'Generate particle effects and animations', cat: 'visual', catLabel: 'Visual' },
+        { name: 'weather', desc: 'Add rain, snow, or fog atmospherics', cat: 'visual', catLabel: 'Visual' },
+        { name: 'physics', desc: 'Enable realistic physics simulation', cat: 'physics', catLabel: 'Physics' },
+        { name: 'cloth', desc: 'Simulate fabric and soft body dynamics', cat: 'physics', catLabel: 'Physics' },
+        { name: 'portal', desc: 'Create portals between spaces', cat: 'physics', catLabel: 'Physics' },
+        { name: 'behavior_tree', desc: 'AI-driven object behaviors', cat: 'smart', catLabel: 'Smart' },
+        { name: 'networked', desc: 'Sync objects across multiplayer sessions', cat: 'smart', catLabel: 'Smart' },
+        { name: 'hand_tracking', desc: 'Interact with natural hand gestures', cat: 'smart', catLabel: 'Smart' },
+      ],
+      testimonials: [
         {
-          name: 'particle_system',
-          desc: 'Generate particle effects',
-          cat: 'visual',
-          catLabel: 'Visual',
+          text: "I'm a teacher with zero coding skills. HoloScript let me build a VR history lesson in a weekend. My students were blown away!",
+          author: 'Sarah T., Educator',
         },
         {
-          name: 'weather',
-          desc: 'Rain, snow, or fog atmospherics',
-          cat: 'visual',
-          catLabel: 'Visual',
+          text: "As an artist, I never thought I could create in VR. HoloScript made it so simple - I focus on the vision, not the code.",
+          author: 'Miguel R., Visual Artist',
         },
         {
-          name: 'physics',
-          desc: 'Realistic physics simulation',
-          cat: 'physics',
-          catLabel: 'Physics',
+          text: 'I built a VR game for my kids in a single day. No Unity tutorials, no frustration. Just pure creativity. Incredible tool.',
+          author: 'Priya K., Hobbyist',
+        },
+      ],
+      tabs: [
+        {
+          label: 'Art Gallery',
+          code: hl(`composition "Virtual Gallery" {
+  environment {
+    skybox: "museum"
+    lighting: "gallery"
+  }
+
+  object "Floor" @teleport {
+    geometry: "plane"
+    scale: [20, 1, 20]
+    material: "marble"
+  }
+
+  object "Painting1" @clickable @info_panel {
+    geometry: "plane"
+    texture: "starry-night.jpg"
+    position: [-3, 2, -5]
+    info: "The Starry Night by Vincent van Gogh"
+  }
+
+  object "Sculpture" @rotating @grabbable {
+    model: "abstract-sculpture.glb"
+    position: [3, 1, -3]
+  }
+}`),
         },
         {
-          name: 'cloth',
-          desc: 'Fabric and soft body dynamics',
-          cat: 'physics',
-          catLabel: 'Physics',
+          label: 'Physics Playground',
+          code: hl(`composition "Physics Sandbox" {
+  environment {
+    gravity: [0, -9.8, 0]
+  }
+
+  object "Ground" @physics @static {
+    geometry: "plane"
+    scale: [50, 1, 50]
+  }
+
+  object "Tower" @physics @grabbable {
+    geometry: "box"
+    position: [0, 5, -5]
+    mass: 2
+  }
+
+  object "Ball" @physics @grabbable @bouncy {
+    geometry: "sphere"
+    position: [0, 10, -5]
+    radius: 0.5
+    bounciness: 0.9
+  }
+
+  object "Cloth" @cloth @grabbable {
+    geometry: "plane"
+    position: [3, 5, -5]
+    color: "#ff00ff"
+  }
+}`),
         },
         {
-          name: 'portal',
-          desc: 'Teleportation gateways between spaces',
-          cat: 'physics',
-          catLabel: 'Physics',
-        },
-        {
-          name: 'behavior_tree',
-          desc: 'AI-driven object behaviors',
-          cat: 'smart',
-          catLabel: 'Smart',
-        },
-        {
-          name: 'networked',
-          desc: 'Sync across multiplayer sessions',
-          cat: 'smart',
-          catLabel: 'Smart',
-        },
-        {
-          name: 'hand_tracking',
-          desc: 'Natural hand gesture interaction',
-          cat: 'smart',
-          catLabel: 'Smart',
+          label: 'Multiplayer Room',
+          code: hl(`composition "Multiplayer Lounge" @networked {
+  environment {
+    skybox: "space"
+    ambient_sound: "chill-music.mp3"
+  }
+
+  object "Floor" @teleport {
+    geometry: "plane"
+    scale: [15, 1, 15]
+    material: "neon-grid"
+  }
+
+  object "Whiteboard" @networked @drawable {
+    geometry: "plane"
+    position: [0, 2, -5]
+    scale: [4, 2, 1]
+  }
+
+  object "SharedBall" @networked @physics @grabbable {
+    geometry: "sphere"
+    position: [0, 2, 0]
+    color: "#00ffff"
+  }
+
+  player @avatar @voice_chat {
+    spawn_point: [0, 0, 5]
+    avatar_model: "default"
+  }
+}`),
         },
       ],
     };
@@ -392,6 +551,7 @@ export default {
   --text2: #a0a0b8;
   --border: rgba(255, 255, 255, 0.1);
   --glow: 0 0 30px rgba(0, 255, 255, 0.15);
+  --gradient: linear-gradient(135deg, var(--cyan), var(--purple));
 
   font-family:
     system-ui,
@@ -463,6 +623,15 @@ export default {
 }
 .section {
   padding: 6rem 0;
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
+}
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 .section--alt {
   background: rgba(18, 18, 42, 0.3);
@@ -561,8 +730,23 @@ export default {
   font-size: 0.95rem;
 }
 
+/* ========= PROBLEM / SOLUTION ========= */
+.problem-card,
+.solution-card {
+  text-align: center;
+}
+.problem-icon,
+.solution-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+.solution-icon {
+  font-size: 4rem;
+}
+
 /* ========= HERO ========= */
-.hero {
+#hero {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -571,6 +755,8 @@ export default {
   position: relative;
   overflow: hidden;
   padding-top: 5rem;
+  opacity: 1 !important;
+  transform: none !important;
 }
 .hero-grid-bg {
   position: absolute;
@@ -591,9 +777,9 @@ export default {
   position: relative;
   z-index: 1;
 }
-.hero h1 {
+#hero h1 {
   font-size: clamp(2.5rem, 6vw, 4.5rem);
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -603,7 +789,7 @@ export default {
 .hero-sub {
   font-size: clamp(1.1rem, 2.5vw, 1.4rem);
   color: var(--text2);
-  max-width: 750px;
+  max-width: 800px;
   margin: 0 auto 2.5rem;
 }
 .hero-sub strong {
@@ -622,7 +808,7 @@ export default {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  max-width: 550px;
+  max-width: 600px;
   margin: 0 auto;
   text-align: left;
   overflow: hidden;
@@ -646,6 +832,40 @@ export default {
 }
 .code-preview code {
   background: none;
+}
+.code-line {
+  opacity: 0;
+  animation: typewriter 0.1s forwards;
+}
+@keyframes typewriter {
+  to {
+    opacity: 1;
+  }
+}
+
+/* ========= SCROLL INDICATOR ========= */
+.scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  40% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+  60% {
+    transform: translateX(-50%) translateY(-5px);
+  }
+}
+.scroll-arrow {
+  font-size: 2rem;
+  color: var(--cyan);
+  opacity: 0.6;
 }
 
 /* ========= SYNTAX COLORS ========= */
@@ -785,7 +1005,7 @@ export default {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  background: var(--gradient);
 }
 .use-card:hover {
   transform: translateY(-4px);
@@ -803,11 +1023,87 @@ export default {
   font-size: 0.9rem;
 }
 
+/* ========= TABS ========= */
+.tabs {
+  margin-top: 3rem;
+}
+.tab-labels {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.tab-labels button {
+  padding: 1rem 2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  color: var(--text2);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.tab-labels button:hover {
+  background: rgba(0, 255, 255, 0.1);
+}
+.tab-labels button.active {
+  background: rgba(0, 255, 255, 0.1);
+  color: var(--cyan);
+  border-color: var(--cyan);
+  border-bottom-color: transparent;
+}
+.tab-body {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0 12px 12px 12px;
+  overflow-x: auto;
+}
+.tab-code {
+  padding: 2rem;
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+.tab-code code {
+  background: none;
+}
+
+/* ========= TESTIMONIALS ========= */
+.testimonial-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+}
+.quote-icon {
+  font-size: 3rem;
+  color: var(--cyan);
+  opacity: 0.2;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
+.testimonial-text {
+  font-size: 1.125rem;
+  font-style: italic;
+  color: var(--text2);
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+.testimonial-author {
+  color: var(--cyan);
+  font-weight: 600;
+}
+
 /* ========= FEATURES ========= */
 .feature-number {
   font-size: 3rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -823,7 +1119,7 @@ export default {
 }
 .cta-title {
   font-size: clamp(2rem, 4vw, 2.75rem);
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
