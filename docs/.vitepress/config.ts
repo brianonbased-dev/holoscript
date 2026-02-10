@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress';
 
 export default defineConfig({
   title: 'HoloScript',
-  description: 'The spatial programming language for VR, AR, and 3D applications',
+  description: 'Open-source programming language compiling to 18+ targets — Unity, Unreal, Godot, visionOS, robotics, IoT, and more',
 
   // Ignore dead links for now - many docs reference planned pages
   ignoreDeadLinks: true,
@@ -14,35 +14,35 @@ export default defineConfig({
     ['link', { rel: 'icon', href: '/logo.svg' }],
     ['meta', { name: 'theme-color', content: '#00ffff' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:url', content: 'https://www.holoscript.net' }],
+    ['meta', { property: 'og:url', content: 'https://holoscript.net' }],
     [
       'meta',
-      { property: 'og:title', content: 'HoloScript - Create VR Worlds Without the Complexity' },
+      { property: 'og:title', content: 'HoloScript - One Language, Every Platform' },
     ],
     [
       'meta',
       {
         property: 'og:description',
         content:
-          'Open-source declarative language for building VR/AR experiences. 56 built-in traits, deploy to 9 platforms from a single source.',
+          'Open-source programming language for VR, AR, robotics, IoT, and digital twins. 1,525 traits. 18+ compilation targets. One source, every platform.',
       },
     ],
-    ['meta', { property: 'og:image', content: 'https://www.holoscript.net/og-image.png' }],
+    ['meta', { property: 'og:image', content: 'https://holoscript.net/og-image.png' }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { name: 'twitter:site', content: '@holoscript' }],
     [
       'meta',
-      { name: 'twitter:title', content: 'HoloScript - Create VR Worlds Without the Complexity' },
+      { name: 'twitter:title', content: 'HoloScript - One Language, Every Platform' },
     ],
     [
       'meta',
       {
         name: 'twitter:description',
         content:
-          'Open-source declarative language for building VR/AR experiences. 56 built-in traits, deploy to 9 platforms.',
+          'Open-source programming language for VR, AR, robotics, IoT, and digital twins. 1,525 traits. 18+ compilation targets.',
       },
     ],
-    ['meta', { name: 'twitter:image', content: 'https://www.holoscript.net/og-image.png' }],
+    ['meta', { name: 'twitter:image', content: 'https://holoscript.net/og-image.png' }],
   ],
 
   themeConfig: {
