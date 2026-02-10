@@ -276,8 +276,9 @@ animate();</code></pre>
             <div class="use-icon">&#x1FA69;</div>
             <h3>AI Choreography</h3>
             <p>
-              MCP server with 34+ tools lets Claude, GPT, and Brittney generate entire VR scenes
-              from natural language. AI builds your world while you direct.
+              Multi-agent orchestration with 34 MCP tools, a choreography engine for multi-step
+              workflows, spatial-aware agent negotiation, and Brittney &mdash; a fine-tuned model
+              that writes native HoloScript. AI agents collaborate to build your world.
             </p>
           </div>
           <div class="use-card">
@@ -390,8 +391,8 @@ animate();</code></pre>
           </div>
           <div class="card card--glow" style="text-align: center">
             <div class="card-icon">&#x1F916;</div>
-            <h3 class="card-title card-title--cyan">AI-Powered</h3>
-            <p>MCP server with 34+ tools. Claude, GPT, and Brittney generate scenes natively</p>
+            <h3 class="card-title card-title--cyan">AI Choreography</h3>
+            <p>34 MCP tools, multi-agent orchestration, spatial negotiation, and Brittney fine-tuned model</p>
           </div>
           <div class="card card--glow" style="text-align: center">
             <div class="card-icon">&#x1F504;</div>
