@@ -313,8 +313,8 @@ importers:
         specifier: ^8.11.3
         version: 8.18.0
       rate-limiter-flexible:
-        specifier: ^4.0.1
-        version: 4.0.1
+        specifier: ^9.1.1
+        version: 9.1.1
       redis:
         specifier: ^4.6.12
         version: 4.7.1
@@ -4523,16 +4523,6 @@ packages:
       esbuild: '>=0.18'
     dependencies:
       esbuild: 0.27.2
-      load-tsconfig: 0.2.5
-    dev: true
-
-  /bundle-require@5.1.0(esbuild@0.27.3):
-    resolution: {integrity: sha512-3WrrOuZiyaaZPWiEt4G3+IffISVC9HYlWueJEBWED4ZH4aIAC2PnkdnuRrR94M+w6yGWn4AglWtJtBI8YqvgoA==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-    peerDependencies:
-      esbuild: '>=0.18'
-    dependencies:
-      esbuild: 0.27.3
       load-tsconfig: 0.2.5
     dev: true
 
@@ -8855,8 +8845,8 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
-  /rate-limiter-flexible@4.0.1:
-    resolution: {integrity: sha512-2/dGHpDFpeA0+755oUkW+EKyklqLS9lu0go9pDsbhqQjZcxfRyJ6LA4JI0+HAdZ2bemD/oOjUeZQB2lCZqXQfQ==}
+  /rate-limiter-flexible@9.1.1:
+    resolution: {integrity: sha512-imxFjzPCmvDLMe7d2tsgiSQvs5EI2fI9SNymmslAfOqznZhsZ+PqbIjIYKpuSbd3pKovR1aMG47qfCLIO/adVg==}
     dev: false
 
   /raw-body@2.5.3:
@@ -10011,12 +10001,12 @@ packages:
       typescript:
         optional: true
     dependencies:
-      bundle-require: 5.1.0(esbuild@0.27.3)
+      bundle-require: 5.1.0(esbuild@0.27.2)
       cac: 6.7.14
       chokidar: 4.0.3
       consola: 3.4.2
       debug: 4.4.3
-      esbuild: 0.27.3
+      esbuild: 0.27.2
       fix-dts-default-cjs-exports: 1.0.1
       joycon: 3.1.1
       picocolors: 1.1.1
