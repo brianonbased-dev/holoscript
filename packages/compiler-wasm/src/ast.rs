@@ -1,9 +1,11 @@
 //! AST (Abstract Syntax Tree) types for HoloScript.
 
 use serde::{Deserialize, Serialize};
+use typeshare::typeshare;
 
 /// Root AST node representing a HoloScript file
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[typeshare]
 pub struct Ast {
     #[serde(rename = "type")]
     pub node_type: String,
@@ -24,6 +26,7 @@ impl Default for Ast {
 /// Any AST node
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
+#[typeshare]
 pub enum AstNode {
     // Object definitions
     Composition(CompositionNode),
@@ -84,12 +87,14 @@ pub enum AstNode {
 
 /// Location information for AST nodes
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[typeshare]
 pub struct Location {
     pub start: Position,
     pub end: Position,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[typeshare]
 pub struct Position {
     pub line: usize,
     pub column: usize,

@@ -1,11 +1,11 @@
 [package]
 name = "holoscript-wasm"
-version = "1.0.0"
-authors = ["HoloScript Team"]
-edition = "2021"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
 description = "HoloScript parser and type checker compiled to WebAssembly"
-license = "MIT"
-repository = "https://github.com/brianonbased-dev/HoloScript"
+license.workspace = true
+repository.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -14,21 +14,16 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-wasm-bindgen = "0.2.93"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+wasm-bindgen.workspace = true
+serde.workspace = true
+serde_json.workspace = true
 console_error_panic_hook = { version = "0.1.7", optional = true }
-js-sys = "0.3"
+js-sys.workspace = true
+typeshare.workspace = true
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
 
-# Sprint 2: Performance Optimization
-# Optimized release profile for smallest bundle size
-[profile.release]
-opt-level = "z"           # Optimize for size (smaller than 's')
-lto = true                # Enable link-time optimization
-codegen-units = 1         # Better inlining, single codegen unit
-panic = "abort"           # Smaller panic handling (no unwinding)
-strip = true              # Strip symbols from binary
+# Profiles now inherited from workspace root Cargo.toml
+# See ../../Cargo.toml for shared optimization profiles
 

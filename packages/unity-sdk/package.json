@@ -1,0 +1,45 @@
+{
+  "name": "com.holoscript.core",
+  "version": "3.0.0",
+  "displayName": "HoloScript for Unity",
+  "description": "HoloScript compiler and runtime for Unity. Compile .hs/.hsplus files to Unity scenes and prefabs.",
+  "unity": "2021.3",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://holoscript.dev/docs/unity",
+  "changelogUrl": "https://holoscript.dev/changelog",
+  "licensesUrl": "https://holoscript.dev/licenses",
+  "dependencies": {},
+  "keywords": [
+    "holoscript",
+    "vr",
+    "ar",
+    "xr",
+    "webxr",
+    "spatial",
+    "compiler",
+    "scene-description"
+  ],
+  "author": {
+    "name": "HoloScript Team",
+    "email": "support@holoscript.dev",
+    "url": "https://holoscript.dev"
+  },
+  "type": "tool",
+  "samples": [
+    {
+      "displayName": "Basic VR Scene",
+      "description": "Simple VR scene with grabbable objects",
+      "path": "Samples~/BasicVRScene"
+    },
+    {
+      "displayName": "Interactive UI",
+      "description": "HoloScript UI toolkit integration",
+      "path": "Samples~/InteractiveUI"
+    },
+    {
+      "displayName": "Voice Commands",
+      "description": "Voice command integration example",
+      "path": "Samples~/VoiceCommands"
+    }
+  ]
+}

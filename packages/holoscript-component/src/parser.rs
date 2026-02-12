@@ -789,16 +789,16 @@ mod tests {
     
     #[test]
     fn test_parse_with_template() {
-        let source = r#"composition "Demo" {
+        let source = r##"composition "Demo" {
             template "Ball" {
                 geometry: "sphere"
                 color: "#ff0000"
             }
-            
+
             object "RedBall" using "Ball" {
                 position: [0, 2, 0]
             }
-        }"#;
+        }"##;
         
         let result = parse_holoscript(source);
         assert!(result.is_ok());

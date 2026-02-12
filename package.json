@@ -18,10 +18,13 @@
     "bench": "pnpm --filter @holoscript/benchmark bench",
     "bench:ci": "pnpm --filter @holoscript/benchmark bench:ci",
     "clean": "pnpm -r exec rm -rf dist",
-    "version:patch": "node scripts/version.js patch",
-    "version:minor": "node scripts/version.js minor",
-    "version:major": "node scripts/version.js major",
-    "version:prerelease": "node scripts/version.js prerelease",
+    "types:generate": "bash scripts/generate-types.sh",
+    "types:generate:win": "powershell -File scripts/generate-types.ps1",
+    "prebuild": "pnpm types:generate || pnpm types:generate:win",
+    "version:patch": "node scripts/sync-versions.js patch",
+    "version:minor": "node scripts/sync-versions.js minor",
+    "version:major": "node scripts/sync-versions.js major",
+    "version:prerelease": "node scripts/sync-versions.js prerelease",
     "publish": "pnpm -r publish --access public"
   },
   "devDependencies": {

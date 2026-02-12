@@ -25,10 +25,16 @@ generate!({
     }
 });
 
-use exports::holoscript::core::parser::*;
-use exports::holoscript::core::validator::*;
-use exports::holoscript::core::compiler::*;
-use exports::holoscript::core::generator::*;
+// Import common types and interfaces from generated bindings
+use exports::holoscript::core::{
+    parser::{self, Guest as ParserGuest, ParseResult, CompositionNode},
+    validator::{self, Guest as ValidatorGuest, ValidationResult, TraitDef},
+    compiler::{self, Guest as CompilerGuest, CompileTarget, CompileResult},
+    generator::{self, Guest as GeneratorGuest},
+};
+
+// Re-export generated types for use by submodules (compiler, parser, etc.)
+pub(crate) use exports;
 
 // =============================================================================
 // PARSER IMPLEMENTATION
@@ -36,14 +42,14 @@ use exports::holoscript::core::generator::*;
 
 struct ParserImpl;
 
-impl Guest for ParserImpl {
+impl ParserGuest for ParserImpl {
     fn parse(source: String) -> ParseResult {
         match parser::parse_holoscript(&source) {
             Ok(composition) => ParseResult::Ok(composition),
             Err(errors) => ParseResult::Err(errors),
         }
     }
-    
+
     fn parse_header(source: String) -> Result<String, String> {
         parser::parse_header(&source)
     }
@@ -55,7 +61,7 @@ impl Guest for ParserImpl {
 
 struct ValidatorImpl;
 
-impl exports::holoscript::core::validator::Guest for ValidatorImpl {
+impl ValidatorGuest for ValidatorImpl {
     fn validate(source: String) -> ValidationResult {
         let (valid, diagnostics) = parser::validate_holoscript(&source);
         ValidationResult { valid, diagnostics }
@@ -84,7 +90,7 @@ impl exports::holoscript::core::validator::Guest for ValidatorImpl {
 
 struct CompilerImpl;
 
-impl exports::holoscript::core::compiler::Guest for CompilerImpl {
+impl CompilerGuest for CompilerImpl {
     fn compile(source: String, target: CompileTarget) -> CompileResult {
         match parser::parse_holoscript(&source) {
             Ok(ast) => Self::compile_ast(ast, target),
@@ -158,7 +164,7 @@ impl exports::holoscript::core::compiler::Guest for CompilerImpl {
 
 struct GeneratorImpl;
 
-impl exports::holoscript::core::generator::Guest for GeneratorImpl {
+impl GeneratorGuest for GeneratorImpl {
     fn generate_object(description: String) -> Result<String, String> {
         // Simple template-based generation
         let traits = traits::suggest_traits_for_description(&description);
@@ -262,28 +268,28 @@ fn generate_objects_from_description(description: &str) -> String {
     
     // Check for common scene elements
     if lower.contains("floor") || lower.contains("ground") {
-        objects.push(r#"  object "Ground" @collidable {
+        objects.push(r##"  object "Ground" @collidable {
     geometry: "plane"
     scale: [10, 1, 10]
     position: [0, 0, 0]
     color: "#444444"
-  }"#.to_string());
+  }"##.to_string());
     }
     
     if lower.contains("player") {
-        objects.push(r#"  object "Player" @physics @collidable {
+        objects.push(r##"  object "Player" @physics @collidable {
     geometry: "capsule"
     position: [0, 1, 0]
     color: "#00ff00"
-  }"#.to_string());
+  }"##.to_string());
     }
     
     if lower.contains("light") || lower.contains("sun") {
-        objects.push(r#"  directional_light "Sun" {
+        objects.push(r##"  directional_light "Sun" {
     position: [5, 10, 5]
     color: "#ffffff"
     intensity: 1.0
-  }"#.to_string());
+  }"##.to_string());
     }
     
     if lower.contains("camera") {
@@ -295,11 +301,11 @@ fn generate_objects_from_description(description: &str) -> String {
     
     // Default object if nothing specific found
     if objects.is_empty() {
-        objects.push(r#"  object "MainObject" @grabbable {
+        objects.push(r##"  object "MainObject" @grabbable {
     geometry: "cube"
     position: [0, 1, 0]
     color: "#3399ff"
-  }"#.to_string());
+  }"##.to_string());
     }
     
     objects.join("\n\n")
