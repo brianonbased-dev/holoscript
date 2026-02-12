@@ -1,9 +1,10 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "cd ../.. && pnpm install && pnpm build --filter holoscript-llm-service"
+buildCommand = "pnpm install && pnpm --filter holoscript-llm-service build"
+watchPatterns = ["services/llm-service/**"]
 
 [deploy]
-startCommand = "cd services/llm-service && pnpm start"
+startCommand = "pnpm --filter holoscript-llm-service start"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"

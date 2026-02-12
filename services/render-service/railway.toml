@@ -1,9 +1,10 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "cd ../.. && pnpm install"
+buildCommand = "pnpm install"
+watchPatterns = ["services/render-service/**"]
 
 [deploy]
-startCommand = "cd services/render-service && pnpm start"
+startCommand = "pnpm --filter @holoscript/render-service start"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"

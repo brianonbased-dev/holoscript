@@ -1,6 +1,7 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "cd ../.. && pnpm install && pnpm -r --filter @holoscript/marketplace-api build"
+buildCommand = "pnpm install && pnpm --filter @holoscript/marketplace-api build"
+watchPatterns = ["packages/marketplace-api/**", "packages/registry/**", "packages/core/**"]
 
 [deploy]
 startCommand = "pnpm --filter @holoscript/marketplace-api start"

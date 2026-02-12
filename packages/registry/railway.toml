@@ -1,6 +1,7 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "cd ../.. && pnpm install && pnpm -r --filter @holoscript/registry build"
+buildCommand = "pnpm install && pnpm --filter @holoscript/registry build"
+watchPatterns = ["packages/registry/**"]
 
 [deploy]
 startCommand = "pnpm --filter @holoscript/registry start"
