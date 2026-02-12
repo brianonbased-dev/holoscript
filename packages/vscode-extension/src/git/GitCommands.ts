@@ -24,65 +24,59 @@ export function registerGitCommands(
 
   // Show semantic diff
   disposables.push(
-    vscode.commands.registerCommand(
-      'holoscript.showSemanticDiff',
-      async (uri?: vscode.Uri) => {
-        const filePath = uri?.fsPath || vscode.window.activeTextEditor?.document.uri.fsPath;
-        if (!filePath) {
-          vscode.window.showInformationMessage('No HoloScript file selected');
-          return;
-        }
-
-        try {
-          const revision = await vscode.window.showQuickPick(
-            ['HEAD', 'HEAD~1', 'HEAD~2', 'Select commit...'],
-            { placeHolder: 'Compare with...' }
-          );
-
-          let targetRevision = revision;
-          if (revision === 'Select commit...') {
-            const commits = await semanticGit.getFileHistory(filePath, 20);
-            const picked = await vscode.window.showQuickPick(
-              commits.map((c) => ({
-                label: c.message.slice(0, 60),
-                description: c.sha.slice(0, 7),
-                detail: `${c.author} - ${new Date(c.date).toLocaleDateString()}`,
-                sha: c.sha,
-              })),
-              { placeHolder: 'Select commit' }
-            );
-            targetRevision = picked?.sha;
-          }
-
-          if (!targetRevision) return;
-
-          await semanticGit.showDiff(filePath, targetRevision, 'split');
-        } catch (error) {
-          vscode.window.showErrorMessage(`Failed to show diff: ${error}`);
-        }
+    vscode.commands.registerCommand('holoscript.showSemanticDiff', async (uri?: vscode.Uri) => {
+      const filePath = uri?.fsPath || vscode.window.activeTextEditor?.document.uri.fsPath;
+      if (!filePath) {
+        vscode.window.showInformationMessage('No HoloScript file selected');
+        return;
       }
-    )
+
+      try {
+        const revision = await vscode.window.showQuickPick(
+          ['HEAD', 'HEAD~1', 'HEAD~2', 'Select commit...'],
+          { placeHolder: 'Compare with...' }
+        );
+
+        let targetRevision = revision;
+        if (revision === 'Select commit...') {
+          const commits = await semanticGit.getFileHistory(filePath, 20);
+          const picked = await vscode.window.showQuickPick(
+            commits.map((c) => ({
+              label: c.message.slice(0, 60),
+              description: c.sha.slice(0, 7),
+              detail: `${c.author} - ${new Date(c.date).toLocaleDateString()}`,
+              sha: c.sha,
+            })),
+            { placeHolder: 'Select commit' }
+          );
+          targetRevision = picked?.sha;
+        }
+
+        if (!targetRevision) return;
+
+        await semanticGit.showDiff(filePath, targetRevision, 'split');
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to show diff: ${error}`);
+      }
+    })
   );
 
   // Show 3D diff preview
   disposables.push(
-    vscode.commands.registerCommand(
-      'holoscript.show3DDiff',
-      async (uri?: vscode.Uri) => {
-        const filePath = uri?.fsPath || vscode.window.activeTextEditor?.document.uri.fsPath;
-        if (!filePath) {
-          vscode.window.showInformationMessage('No HoloScript file selected');
-          return;
-        }
-
-        try {
-          const visual = await semanticGit.getVisualDiff(filePath, 'HEAD');
-          diffProvider.showDiff(visual);
-        } catch (error) {
-          vscode.window.showErrorMessage(`Failed to show 3D diff: ${error}`);
-        }
+    vscode.commands.registerCommand('holoscript.show3DDiff', async (uri?: vscode.Uri) => {
+      const filePath = uri?.fsPath || vscode.window.activeTextEditor?.document.uri.fsPath;
+      if (!filePath) {
+        vscode.window.showInformationMessage('No HoloScript file selected');
+        return;
       }
-    )
+
+      try {
+        const visual = await semanticGit.getVisualDiff(filePath, 'HEAD');
+        diffProvider.showDiff(visual);
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to show 3D diff: ${error}`);
+      }
+    })
   );
 
   // Toggle inline diff decorations
@@ -136,50 +130,44 @@ export function registerGitCommands(
 
   // Show file history
   disposables.push(
-    vscode.commands.registerCommand(
-      'holoscript.showFileHistory',
-      async (uri?: vscode.Uri) => {
-        const filePath = uri?.fsPath || vscode.window.activeTextEditor?.document.uri.fsPath;
-        if (!filePath) return;
+    vscode.commands.registerCommand('holoscript.showFileHistory', async (uri?: vscode.Uri) => {
+      const filePath = uri?.fsPath || vscode.window.activeTextEditor?.document.uri.fsPath;
+      if (!filePath) return;
 
-        try {
-          const history = await semanticGit.getFileHistory(filePath, 50);
-          const picked = await vscode.window.showQuickPick(
-            history.map((c) => ({
-              label: c.message,
-              description: c.sha.slice(0, 7),
-              detail: `${c.author} - ${new Date(c.date).toLocaleDateString()}`,
-              sha: c.sha,
-            })),
-            { placeHolder: 'File History' }
-          );
+      try {
+        const history = await semanticGit.getFileHistory(filePath, 50);
+        const picked = await vscode.window.showQuickPick(
+          history.map((c) => ({
+            label: c.message,
+            description: c.sha.slice(0, 7),
+            detail: `${c.author} - ${new Date(c.date).toLocaleDateString()}`,
+            sha: c.sha,
+          })),
+          { placeHolder: 'File History' }
+        );
 
-          if (picked) {
-            await semanticGit.showDiff(filePath, picked.sha);
-          }
-        } catch (error) {
-          vscode.window.showErrorMessage(`Failed to get history: ${error}`);
+        if (picked) {
+          await semanticGit.showDiff(filePath, picked.sha);
         }
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to get history: ${error}`);
       }
-    )
+    })
   );
 
   // Stage with validation
   disposables.push(
-    vscode.commands.registerCommand(
-      'holoscript.stageWithValidation',
-      async (uri?: vscode.Uri) => {
-        const filePath = uri?.fsPath || vscode.window.activeTextEditor?.document.uri.fsPath;
-        if (!filePath) return;
+    vscode.commands.registerCommand('holoscript.stageWithValidation', async (uri?: vscode.Uri) => {
+      const filePath = uri?.fsPath || vscode.window.activeTextEditor?.document.uri.fsPath;
+      if (!filePath) return;
 
-        try {
-          await semanticGit.stageFile(filePath, true);
-          vscode.window.showInformationMessage('File staged successfully');
-        } catch (error) {
-          vscode.window.showErrorMessage(`Failed to stage: ${error}`);
-        }
+      try {
+        await semanticGit.stageFile(filePath, true);
+        vscode.window.showInformationMessage('File staged successfully');
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to stage: ${error}`);
       }
-    )
+    })
   );
 
   // Commit with semantic message
@@ -216,7 +204,7 @@ export function registerGitCommands(
     vscode.commands.registerCommand('holoscript.showGitStatus', async () => {
       try {
         const statuses = await semanticGit.getAllHoloScriptStatus();
-        
+
         if (statuses.length === 0) {
           vscode.window.showInformationMessage('No HoloScript files changed');
           return;
@@ -240,7 +228,8 @@ export function registerGitCommands(
         });
 
         if (picked) {
-          await vscode.commands.executeCommand('holoscript.showSemanticDiff', 
+          await vscode.commands.executeCommand(
+            'holoscript.showSemanticDiff',
             vscode.Uri.file(picked.status.filePath)
           );
         }
@@ -259,11 +248,11 @@ export function registerGitCommands(
         if (!filePath) return;
 
         const resolver = new MergeConflictResolver(context.extensionUri);
-        
+
         try {
           // Get conflict info (would need to read file and parse)
           const mockConflicts: MergeConflict[] = []; // Would extract from file
-          
+
           if (mockConflicts.length === 0) {
             vscode.window.showInformationMessage('No merge conflicts found');
             return;
@@ -309,18 +298,14 @@ export function registerGitCommands(
     vscode.commands.registerCommand('holoscript.runPreCommitHook', async () => {
       try {
         const statuses = await semanticGit.getAllHoloScriptStatus();
-        const stagedFiles = statuses
-          .filter((s) => s.staged)
-          .map((s) => s.filePath);
+        const stagedFiles = statuses.filter((s) => s.staged).map((s) => s.filePath);
 
         const result = await hooks.preCommit(stagedFiles);
 
         if (result.passed) {
           vscode.window.showInformationMessage('Pre-commit checks passed');
         } else {
-          vscode.window.showErrorMessage(
-            `Pre-commit failed:\n${result.errors.join('\n')}`
-          );
+          vscode.window.showErrorMessage(`Pre-commit failed:\n${result.errors.join('\n')}`);
         }
       } catch (error) {
         vscode.window.showErrorMessage(`Hook failed: ${error}`);
@@ -375,10 +360,7 @@ function getStatusIcon(status: HoloScriptGitStatus): string {
  * Create git status bar item
  */
 export function createGitStatusBarItem(): vscode.StatusBarItem {
-  const item = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Left,
-    99
-  );
+  const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
   item.name = 'HoloScript Git';
   item.command = 'holoscript.showGitStatus';
   return item;
@@ -406,13 +388,13 @@ export async function updateGitStatusBar(
   try {
     const status = await semanticGit.getFileStatus(filePath);
     const icon = getStatusIcon(status);
-    
+
     let text = `$(git-commit) ${icon}`;
     if (status.diffSummary) {
       const { added, removed, modified } = status.diffSummary;
       text += ` +${added} -${removed} ~${modified}`;
     }
-    
+
     item.text = text;
     item.tooltip = `HoloScript: ${status.status}${status.staged ? ' (staged)' : ''}`;
     item.show();

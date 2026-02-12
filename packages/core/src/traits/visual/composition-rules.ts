@@ -10,11 +10,7 @@ import type { R3FMaterialProps } from './types';
  * - **multi-trait merge**: When all listed traits are present, override with merged values
  */
 
-export type CompositionRule =
-  | RequiresRule
-  | SuppressesRule
-  | AdditiveRule
-  | MultiTraitMergeRule;
+export type CompositionRule = RequiresRule | SuppressesRule | AdditiveRule | MultiTraitMergeRule;
 
 export interface RequiresRule {
   trait: string;
@@ -73,17 +69,43 @@ export const COMPOSITION_RULES: CompositionRule[] = [
   {
     trait: 'pristine',
     suppresses: [
-      'rusted', 'worn', 'weathered', 'decayed', 'tarnished', 'corroded',
-      'crumbling', 'faded', 'stained', 'scratched', 'dented', 'chipped',
-      'cracked', 'shattered', 'battle_scarred', 'charred', 'tattered',
-      'dust_covered', 'moss_covered', 'vine_covered',
+      'rusted',
+      'worn',
+      'weathered',
+      'decayed',
+      'tarnished',
+      'corroded',
+      'crumbling',
+      'faded',
+      'stained',
+      'scratched',
+      'dented',
+      'chipped',
+      'cracked',
+      'shattered',
+      'battle_scarred',
+      'charred',
+      'tattered',
+      'dust_covered',
+      'moss_covered',
+      'vine_covered',
     ],
   },
   {
     trait: 'brand_new',
     suppresses: [
-      'rusted', 'worn', 'weathered', 'decayed', 'tarnished', 'corroded',
-      'faded', 'stained', 'scratched', 'dented', 'chipped', 'antique',
+      'rusted',
+      'worn',
+      'weathered',
+      'decayed',
+      'tarnished',
+      'corroded',
+      'faded',
+      'stained',
+      'scratched',
+      'dented',
+      'chipped',
+      'antique',
       'dust_covered',
     ],
   },

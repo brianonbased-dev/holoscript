@@ -13,6 +13,7 @@ import { TRAIT_DOCS, SYNTAX_DOCS, EXAMPLES } from './documentation';
 import { handleGraphTool } from './graph-tools';
 import { handleIDETool } from './ide-tools';
 import { handleBrittneyLiteTool } from './brittney-lite';
+import { PluginManager } from './PluginManager';
 
 // Trait categories mapping
 const TRAIT_CATEGORIES: Record<string, string[]> = {
@@ -117,6 +118,12 @@ export async function handleTool(name: string, args: Record<string, unknown>): P
     return handleGenerate3DObject(args);
   }
 
+  // Handle plugins
+  const pluginResult = await PluginManager.handleTool(name, args);
+  if (pluginResult !== null) {
+    return pluginResult;
+  }
+
   throw new Error(`Unknown tool: ${name}`);
 }
 
@@ -135,7 +142,7 @@ async function handleParseHs(args: Record<string, unknown>) {
       ast: result.ast,
       errors: result.errors || [],
       warnings: result.warnings || [],
-      ...(args.includeSourceMap && { sourceMap: result.sourceMap }),
+      ...(args.includeSourceMap ? { sourceMap: result.sourceMap } : {}),
     };
   } catch (error) {
     return {
@@ -155,7 +162,7 @@ async function handleParseHolo(args: Record<string, unknown>) {
     return {
       success: true,
       composition: result,
-      errors: result.errors || [],
+      errors: ('errors' in result ? result.errors : []) || [],
     };
   } catch (error) {
     return {
@@ -284,7 +291,7 @@ async function handleGenerateObject(args: Record<string, unknown>) {
   const format = (args.format as string) || 'hsplus';
   const includeDocs = args.includeDocs as boolean;
 
-  return generateObject(description, { format, includeDocs });
+  return generateObject(description, { format: format as 'hs' | 'hsplus' | 'holo', includeDocs });
 }
 
 async function handleGenerateScene(args: Record<string, unknown>) {
@@ -292,7 +299,10 @@ async function handleGenerateScene(args: Record<string, unknown>) {
   const style = (args.style as string) || 'detailed';
   const features = (args.features as string[]) || [];
 
-  return generateScene(description, { style, features });
+  return generateScene(description, {
+    style: style as 'minimal' | 'detailed' | 'production',
+    features,
+  });
 }
 
 // === DOCUMENTATION HANDLERS ===
@@ -384,11 +394,11 @@ async function handleAnalyzeCode(args: Record<string, unknown>) {
 async function handleRenderPreview(args: Record<string, unknown>) {
   return renderPreview({
     code: args.code as string,
-    format: (args.format as string) || 'png',
+    format: ((args.format as string) || 'png') as 'png' | 'gif' | 'mp4' | 'webp',
     resolution: (args.resolution as number[]) || [800, 600],
     camera: args.camera as { position?: number[]; target?: number[] },
     duration: args.duration as number,
-    quality: (args.quality as string) || 'preview',
+    quality: ((args.quality as string) || 'preview') as 'draft' | 'preview' | 'production',
   });
 }
 
@@ -397,7 +407,7 @@ async function handleCreateShareLink(args: Record<string, unknown>) {
     code: args.code as string,
     title: args.title as string,
     description: args.description as string,
-    platform: (args.platform as string) || 'x',
+    platform: ((args.platform as string) || 'x') as 'x' | 'generic' | 'codesandbox' | 'stackblitz',
   });
 }
 
@@ -855,8 +865,9 @@ async function handleGenerate3DObject(args: Record<string, unknown>) {
 
   try {
     // Dynamic import to avoid loading heavy deps when not needed
-    const { MeshyProvider, TripoProvider, textTo3DToHolo } =
-      await import('../../../cli/src/importers/text-to-3d-importer');
+    const { MeshyProvider, TripoProvider, textTo3DToHolo } = await import(
+      '../../../cli/src/importers/text-to-3d-importer' as string
+    );
 
     let provider;
     if (providerName === 'tripo') {

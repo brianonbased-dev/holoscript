@@ -23,9 +23,7 @@ import type {
   ChoreographyStatus,
   StepContext,
 } from '../choreography/ChoreographyTypes';
-import {
-  ChoreographyEngine,
-} from '../choreography/ChoreographyEngine';
+import { ChoreographyEngine } from '../choreography/ChoreographyEngine';
 import {
   ChoreographyPlanner,
   PlanBuilder,
@@ -61,7 +59,10 @@ interface ChoreographyState {
 
 interface ActionDefinition {
   name: string;
-  handler: (inputs: Record<string, unknown>, context: StepContext) => Promise<Record<string, unknown>>;
+  handler: (
+    inputs: Record<string, unknown>,
+    context: StepContext
+  ) => Promise<Record<string, unknown>>;
   description?: string;
   inputs?: string[];
   outputs?: string[];
@@ -358,7 +359,10 @@ export function rejectHitl(node: HSPlusNode, planId: string, stepId: string, rea
 export function registerAction(
   node: HSPlusNode,
   name: string,
-  handler: (inputs: Record<string, unknown>, context: StepContext) => Promise<Record<string, unknown>>,
+  handler: (
+    inputs: Record<string, unknown>,
+    context: StepContext
+  ) => Promise<Record<string, unknown>>,
   options?: { description?: string; inputs?: string[]; outputs?: string[] }
 ): void {
   const state = getState(node);

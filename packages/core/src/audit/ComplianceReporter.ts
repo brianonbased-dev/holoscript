@@ -120,8 +120,25 @@ function buildSummary(events: AuditEvent[], dateRange: DateRange): ReportSummary
 // SOC2 action categories
 // =============================================================================
 
-const SOC2_ACCESS_ACTIONS = ['login', 'logout', 'authenticate', 'authorize', 'access', 'view', 'read'];
-const SOC2_CONFIG_ACTIONS = ['configure', 'update_config', 'set_policy', 'create', 'update', 'delete', 'deploy', 'publish'];
+const SOC2_ACCESS_ACTIONS = [
+  'login',
+  'logout',
+  'authenticate',
+  'authorize',
+  'access',
+  'view',
+  'read',
+];
+const SOC2_CONFIG_ACTIONS = [
+  'configure',
+  'update_config',
+  'set_policy',
+  'create',
+  'update',
+  'delete',
+  'deploy',
+  'publish',
+];
 const SOC2_SECURITY_ACTIONS = ['deny', 'block', 'revoke', 'suspend', 'alert', 'scan', 'audit'];
 
 // =============================================================================
@@ -129,8 +146,21 @@ const SOC2_SECURITY_ACTIONS = ['deny', 'block', 'revoke', 'suspend', 'alert', 's
 // =============================================================================
 
 const GDPR_DATA_ACCESS_ACTIONS = ['read', 'view', 'access', 'download', 'export', 'query'];
-const GDPR_CONSENT_ACTIONS = ['consent', 'withdraw_consent', 'update_consent', 'consent_granted', 'consent_revoked'];
-const GDPR_DELETION_ACTIONS = ['delete', 'erase', 'purge', 'anonymize', 'forget', 'right_to_erasure'];
+const GDPR_CONSENT_ACTIONS = [
+  'consent',
+  'withdraw_consent',
+  'update_consent',
+  'consent_granted',
+  'consent_revoked',
+];
+const GDPR_DELETION_ACTIONS = [
+  'delete',
+  'erase',
+  'purge',
+  'anonymize',
+  'forget',
+  'right_to_erasure',
+];
 
 // =============================================================================
 // ComplianceReporter
@@ -180,8 +210,7 @@ export class ComplianceReporter {
     const sections: ReportSection[] = [
       {
         title: 'Access Events',
-        description:
-          'Records of user authentication, authorization, and access control events.',
+        description: 'Records of user authentication, authorization, and access control events.',
         items: accessEvents.map(eventToReportItem),
         count: accessEvents.length,
       },
@@ -240,22 +269,19 @@ export class ComplianceReporter {
     const sections: ReportSection[] = [
       {
         title: 'Data Access Log',
-        description:
-          'Records of personal data access events for data subject rights compliance.',
+        description: 'Records of personal data access events for data subject rights compliance.',
         items: dataAccessEvents.map(eventToReportItem),
         count: dataAccessEvents.length,
       },
       {
         title: 'Consent Records',
-        description:
-          'Records of consent grants, withdrawals, and modifications.',
+        description: 'Records of consent grants, withdrawals, and modifications.',
         items: consentEvents.map(eventToReportItem),
         count: consentEvents.length,
       },
       {
         title: 'Deletion Requests',
-        description:
-          'Records of data deletion requests and right-to-erasure fulfillment.',
+        description: 'Records of data deletion requests and right-to-erasure fulfillment.',
         items: deletionEvents.map(eventToReportItem),
         count: deletionEvents.length,
       },

@@ -74,6 +74,7 @@ import { MARITIME_NAVAL_TRAITS } from './maritime-naval';
 import { FURNITURE_DECOR_TRAITS } from './furniture-decor';
 import { TIME_PERIOD_TRAITS } from './time-period';
 import { MATERIAL_PROPERTIES_TRAITS } from './material-properties';
+import { FABRICATION_DEVICES_TRAITS } from './fabrication-devices';
 
 /**
  * Combined VR_TRAITS array - the single source of truth for all valid VR trait names.
@@ -146,6 +147,7 @@ export const VR_TRAITS = [
   ...FURNITURE_DECOR_TRAITS,
   ...TIME_PERIOD_TRAITS,
   ...MATERIAL_PROPERTIES_TRAITS,
+  ...FABRICATION_DEVICES_TRAITS,
 ] as const;
 
 /**
@@ -221,3 +223,4 @@ export { MARITIME_NAVAL_TRAITS } from './maritime-naval';
 export { FURNITURE_DECOR_TRAITS } from './furniture-decor';
 export { TIME_PERIOD_TRAITS } from './time-period';
 export { MATERIAL_PROPERTIES_TRAITS } from './material-properties';
+export { FABRICATION_DEVICES_TRAITS } from './fabrication-devices';

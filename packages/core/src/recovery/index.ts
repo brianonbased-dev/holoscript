@@ -1,6 +1,6 @@
 /**
  * Recovery Module
- * 
+ *
  * Self-healing infrastructure for agent failure recovery.
  */
 

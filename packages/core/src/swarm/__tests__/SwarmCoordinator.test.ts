@@ -9,7 +9,7 @@ describe('SwarmCoordinator', () => {
 
   beforeEach(() => {
     coordinator = new SwarmCoordinator();
-    
+
     agents = [
       { id: 'agent-1', capacity: 100, load: 20 },
       { id: 'agent-2', capacity: 100, load: 30 },
@@ -44,7 +44,7 @@ describe('SwarmCoordinator', () => {
       const result = await coordinator.optimize(agents, tasks);
 
       expect(result.bestSolution).toHaveLength(tasks.length);
-      expect(result.bestSolution.every(a => a >= 0 && a < agents.length)).toBe(true);
+      expect(result.bestSolution.every((a) => a >= 0 && a < agents.length)).toBe(true);
     });
 
     it('should complete with PSO algorithm', async () => {
@@ -119,7 +119,7 @@ describe('SwarmCoordinator', () => {
       const result = await coordinator.optimize(singleAgent, tasks);
 
       // All tasks should go to the only agent
-      expect(result.bestSolution.every(a => a === 0)).toBe(true);
+      expect(result.bestSolution.every((a) => a === 0)).toBe(true);
     });
   });
 

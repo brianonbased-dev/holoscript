@@ -24,7 +24,7 @@ import {
 // Events
 // ============================================================================
 
-export type LODEventType = 
+export type LODEventType =
   | 'levelChanged'
   | 'transitionStart'
   | 'transitionEnd'
@@ -50,28 +50,28 @@ export type LODEventHandler = (event: LODEvent) => void;
 export interface LODManagerOptions {
   /** Target frame rate for performance-based LOD */
   targetFrameRate: number;
-  
+
   /** Enable automatic LOD updates each frame */
   autoUpdate: boolean;
-  
+
   /** Update frequency (updates per second) */
   updateFrequency: number;
-  
+
   /** Global LOD bias (-1 to 1, affects all objects) */
   globalBias: number;
-  
+
   /** Maximum transition time (seconds) */
   maxTransitionTime: number;
-  
+
   /** Enable LOD metrics collection */
   collectMetrics: boolean;
-  
+
   /** Camera field of view (degrees) */
   cameraFOV: number;
-  
+
   /** Screen height for coverage calculation */
   screenHeight: number;
-  
+
   /** Enable debug logging */
   debug: boolean;
 }
@@ -172,14 +172,14 @@ export class LODManager {
    */
   createGroup(group: LODGroup): void {
     this.groups.set(group.id, group);
-    
+
     // Register config for all objects in group
     for (const objectId of group.objectIds) {
       if (!this.configs.has(objectId)) {
         this.registerConfig(objectId, group.config);
       }
     }
-    
+
     this.emit({ type: 'groupCreated', groupId: group.id, timestamp: Date.now() });
   }
 
@@ -215,7 +215,7 @@ export class LODManager {
   removeFromGroup(groupId: string, objectId: string): void {
     const group = this.groups.get(groupId);
     if (group) {
-      group.objectIds = group.objectIds.filter(id => id !== objectId);
+      group.objectIds = group.objectIds.filter((id) => id !== objectId);
     }
   }
 
@@ -278,22 +278,22 @@ export class LODManager {
   update(deltaTime: number): void {
     const startTime = performance.now();
     this.frameTime = deltaTime * 1000;
-    
+
     // Reset per-frame metrics
     this.metrics.transitionsThisFrame = 0;
-    
+
     // Update each registered object
     for (const [objectId, config] of this.configs) {
       if (config.enabled) {
         this.updateObject(objectId, config, deltaTime);
       }
     }
-    
+
     // Update group states
     for (const [, group] of this.groups) {
       this.updateGroup(group, deltaTime);
     }
-    
+
     // Record metrics
     this.metrics.selectionTimeMs = performance.now() - startTime;
     this.lastUpdateTime = Date.now();
@@ -302,38 +302,34 @@ export class LODManager {
   /**
    * Update LOD for single object
    */
-  private updateObject(
-    objectId: string,
-    config: LODConfig,
-    deltaTime: number
-  ): void {
+  private updateObject(objectId: string, config: LODConfig, deltaTime: number): void {
     const state = this.states.get(objectId);
     if (!state) return;
 
     // Get object position (would normally come from scene graph)
     const objectPosition = this.getObjectPosition(objectId);
-    
+
     // Calculate distance from camera
     const dx = objectPosition[0] - this.cameraPosition[0];
     const dy = objectPosition[1] - this.cameraPosition[1];
     const dz = objectPosition[2] - this.cameraPosition[2];
     const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    
+
     state.cameraDistance = distance;
-    
+
     // Select appropriate LOD level
     const newLevel = this.selectLevel(config, state);
-    
+
     // Handle level change
     if (newLevel !== state.currentLevel && !state.isTransitioning) {
       this.startTransition(objectId, config, state, newLevel);
     }
-    
+
     // Update transition
     if (state.isTransitioning) {
       this.updateTransition(objectId, config, state, deltaTime);
     }
-    
+
     state.lastUpdate = Date.now();
   }
 
@@ -346,7 +342,7 @@ export class LODManager {
     const dy = group.boundingCenter[1] - this.cameraPosition[1];
     const dz = group.boundingCenter[2] - this.cameraPosition[2];
     const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    
+
     // Select level for the group
     const newLevel = selectLODLevelByDistance(
       distance,
@@ -354,10 +350,10 @@ export class LODManager {
       group.config.hysteresis,
       group.currentLevel
     );
-    
+
     if (newLevel !== group.currentLevel) {
       group.currentLevel = newLevel;
-      
+
       // Update all objects in group
       for (const objectId of group.objectIds) {
         const state = this.states.get(objectId);
@@ -376,12 +372,12 @@ export class LODManager {
     if (config.forcedLevel !== undefined) {
       return config.forcedLevel;
     }
-    
+
     // Check max level limit
     const maxLevel = config.maxLevel ?? config.levels.length - 1;
-    
+
     let selectedLevel: number;
-    
+
     switch (config.strategy) {
       case 'distance':
         selectedLevel = selectLODLevelByDistance(
@@ -391,7 +387,7 @@ export class LODManager {
           state.currentLevel
         );
         break;
-        
+
       case 'screenSize':
         const objectRadius = 1; // Would come from object bounds
         state.screenCoverage = calculateScreenCoverage(
@@ -400,17 +396,14 @@ export class LODManager {
           this.options.cameraFOV,
           this.options.screenHeight
         );
-        selectedLevel = selectLODLevelByScreenCoverage(
-          state.screenCoverage,
-          config.levels
-        );
+        selectedLevel = selectLODLevelByScreenCoverage(state.screenCoverage, config.levels);
         break;
-        
+
       case 'performance':
         // Base selection on frame time
         selectedLevel = this.selectLevelByPerformance(config, state);
         break;
-        
+
       case 'hybrid':
         // Combine distance and performance
         const distanceLevel = selectLODLevelByDistance(
@@ -422,19 +415,19 @@ export class LODManager {
         const perfLevel = this.selectLevelByPerformance(config, state);
         selectedLevel = Math.max(distanceLevel, perfLevel);
         break;
-        
+
       case 'manual':
       default:
         selectedLevel = state.currentLevel;
         break;
     }
-    
+
     // Apply global and local bias
     const biasAdjustment = Math.round(
       (config.bias + this.options.globalBias) * (config.levels.length - 1)
     );
     selectedLevel = Math.max(0, Math.min(maxLevel, selectedLevel + biasAdjustment));
-    
+
     return selectedLevel;
   }
 
@@ -443,7 +436,7 @@ export class LODManager {
    */
   private selectLevelByPerformance(config: LODConfig, state: LODState): number {
     const targetFrameTime = 1000 / this.options.targetFrameRate;
-    
+
     if (this.frameTime > targetFrameTime * 1.2) {
       // Frame time too high, increase LOD level (lower detail)
       return Math.min(config.levels.length - 1, state.currentLevel + 1);
@@ -451,7 +444,7 @@ export class LODManager {
       // Frame time low, can decrease LOD level (higher detail)
       return Math.max(0, state.currentLevel - 1);
     }
-    
+
     return state.currentLevel;
   }
 
@@ -468,9 +461,9 @@ export class LODManager {
     state.currentLevel = newLevel;
     state.transitionProgress = 0;
     state.isTransitioning = config.transition !== 'instant';
-    
+
     this.metrics.transitionsThisFrame++;
-    
+
     this.emit({
       type: 'transitionStart',
       objectId,
@@ -478,12 +471,12 @@ export class LODManager {
       newLevel,
       timestamp: Date.now(),
     });
-    
+
     // For instant transitions, complete immediately
     if (config.transition === 'instant') {
       this.completeTransition(objectId, state);
     }
-    
+
     if (this.options.debug) {
       console.log(`[LOD] ${objectId}: Level ${state.previousLevel} -> ${newLevel}`);
     }
@@ -500,7 +493,7 @@ export class LODManager {
   ): void {
     const duration = Math.min(config.transitionDuration, this.options.maxTransitionTime);
     state.transitionProgress = Math.min(1, state.transitionProgress + deltaTime / duration);
-    
+
     if (state.transitionProgress >= 1) {
       this.completeTransition(objectId, state);
     }
@@ -512,7 +505,7 @@ export class LODManager {
   private completeTransition(objectId: string, state: LODState): void {
     state.isTransitioning = false;
     state.transitionProgress = 1;
-    
+
     this.emit({
       type: 'transitionEnd',
       objectId,
@@ -520,7 +513,7 @@ export class LODManager {
       newLevel: state.currentLevel,
       timestamp: Date.now(),
     });
-    
+
     this.emit({
       type: 'levelChanged',
       objectId,
@@ -548,19 +541,19 @@ export class LODManager {
     if (!this.options.collectMetrics) {
       return createLODMetrics();
     }
-    
+
     // Update metrics
     this.metrics.totalObjects = this.configs.size;
     this.metrics.objectsPerLevel = new Map();
-    
+
     let totalLevel = 0;
-    
+
     for (const [objectId, state] of this.states) {
       const level = state.currentLevel;
       const count = this.metrics.objectsPerLevel.get(level) ?? 0;
       this.metrics.objectsPerLevel.set(level, count + 1);
       totalLevel += level;
-      
+
       // Calculate triangles saved
       const config = this.configs.get(objectId);
       if (config) {
@@ -568,11 +561,11 @@ export class LODManager {
         this.metrics.trianglesSaved += saved;
       }
     }
-    
+
     if (this.metrics.totalObjects > 0) {
       this.metrics.averageLODLevel = totalLevel / this.metrics.totalObjects;
     }
-    
+
     return { ...this.metrics };
   }
 
@@ -595,7 +588,7 @@ export class LODManager {
       this.eventHandlers.set(event, new Set());
     }
     this.eventHandlers.get(event)!.add(handler);
-    
+
     // Return unsubscribe function
     return () => {
       this.eventHandlers.get(event)?.delete(handler);

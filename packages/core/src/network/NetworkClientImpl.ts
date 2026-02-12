@@ -257,7 +257,7 @@ export class NetworkClientImpl implements INetworkClient {
     type: string,
     payload: T,
     target: MessageTarget = 'all',
-    options: Partial<INetworkMessage<T>> = {},
+    options: Partial<INetworkMessage<T>> = {}
   ): void {
     if (this._state !== 'connected') {
       return;

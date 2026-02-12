@@ -240,7 +240,13 @@ export class MarketplaceService implements IMarketplaceAPI {
   /**
    * Validate token and get user info
    */
-  private getUser(token: string): { userId: string; name: string; email?: string; verified: boolean; tier: RateLimitTier } | null {
+  private getUser(token: string): {
+    userId: string;
+    name: string;
+    email?: string;
+    verified: boolean;
+    tier: RateLimitTier;
+  } | null {
     const session = this.sessions.get(token);
     if (!session) return null;
 
@@ -400,12 +406,7 @@ export class MarketplaceService implements IMarketplaceAPI {
   // RATINGS
   // ===========================================================================
 
-  async rateTrait(
-    traitId: string,
-    rating: number,
-    review?: string,
-    token?: string
-  ): Promise<void> {
+  async rateTrait(traitId: string, rating: number, review?: string, token?: string): Promise<void> {
     const user = this.getUser(token ?? '');
     if (!user) {
       throw new Error('Authentication required to rate traits');
@@ -461,7 +462,10 @@ export class MarketplaceService implements IMarketplaceAPI {
   /**
    * Get service health status
    */
-  async getHealth(): Promise<{ status: 'ok' | 'degraded' | 'down'; components: Record<string, 'ok' | 'error'> }> {
+  async getHealth(): Promise<{
+    status: 'ok' | 'degraded' | 'down';
+    components: Record<string, 'ok' | 'error'>;
+  }> {
     return {
       status: 'ok',
       components: {

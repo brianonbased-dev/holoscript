@@ -300,7 +300,7 @@ export interface CollaborationEvents {
   /** Connection status changed */
   'connection:status': (status: ConnectionStatus) => void;
   /** Error occurred */
-  'error': (error: CollaborationError) => void;
+  error: (error: CollaborationError) => void;
 }
 
 /**

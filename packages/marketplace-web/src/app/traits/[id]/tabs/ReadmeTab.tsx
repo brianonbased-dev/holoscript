@@ -38,9 +38,7 @@ export function ReadmeTab({ trait }: ReadmeTabProps) {
               key={i}
               className="bg-zinc-900 dark:bg-zinc-950 rounded-lg p-4 overflow-x-auto my-4"
             >
-              <code className="text-sm text-zinc-100 font-mono">
-                {codeContent.join('\n')}
-              </code>
+              <code className="text-sm text-zinc-100 font-mono">{codeContent.join('\n')}</code>
             </pre>
           );
           codeContent = [];

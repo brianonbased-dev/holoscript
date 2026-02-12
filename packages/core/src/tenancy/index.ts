@@ -42,8 +42,4 @@ export {
 } from './IsolationEnforcer';
 
 // Namespace Manager - tenant-scoped namespace management
-export {
-  NamespaceManager,
-  type Namespace,
-  type NamespaceInfo,
-} from './NamespaceManager';
+export { NamespaceManager, type Namespace, type NamespaceInfo } from './NamespaceManager';

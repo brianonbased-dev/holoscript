@@ -13,6 +13,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 > **⚠️ CRITICAL: Codebase Maturity Warning**
 >
 > Audit reveals significant immaturity requiring stabilization before feature work:
+>
 > - **Test coverage**: 154 tests / 22,689 source files (~0.7%)
 > - **Stub implementations**: NetworkedTrait, RenderNetworkTrait, ZoraCoinsTrait, HITLTrait
 > - **Incomplete compilers**: OpenXRCompiler contains `// TODO` placeholders
@@ -22,26 +23,26 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 
 ### Key Adjustments
 
-| Change | Original | Adjusted | Reason |
-|--------|----------|----------|--------|
-| MCP-based MAS | v3.2 | **v3.1** | 34 tools already deployed, ready for orchestration |
-| @zkPrivate | v3.1 | **v4.0** | Noir contract compilation adds 3+ months complexity |
-| OpenXR HAL | Not specified | **v3.1** | Blocks ALL haptic traits - critical blocker |
-| HITL Architecture | Not specified | **v3.1** | 40% agentic AI project failure rate without it |
-| Gaussian Splatting | v3.2 | **v4.1** | PLY/SPLAT support exists, Levy flight optimization pending |
-| Zora Coins | v3.2 | **v3.2 STRENGTHEN** | Film3 creator economy - high priority |
+| Change             | Original      | Adjusted            | Reason                                                     |
+| ------------------ | ------------- | ------------------- | ---------------------------------------------------------- |
+| MCP-based MAS      | v3.2          | **v3.1**            | 34 tools already deployed, ready for orchestration         |
+| @zkPrivate         | v3.1          | **v4.0**            | Noir contract compilation adds 3+ months complexity        |
+| OpenXR HAL         | Not specified | **v3.1**            | Blocks ALL haptic traits - critical blocker                |
+| HITL Architecture  | Not specified | **v3.1**            | 40% agentic AI project failure rate without it             |
+| Gaussian Splatting | v3.2          | **v4.1**            | PLY/SPLAT support exists, Levy flight optimization pending |
+| Zora Coins         | v3.2          | **v3.2 STRENGTHEN** | Film3 creator economy - high priority                      |
 
 ---
 
 ## Market Context (2026-2030)
 
-| Market | 2026 Value | 2030 Projection | HoloScript Opportunity |
-|--------|------------|-----------------|----------------------|
-| VR Hardware | $15.64B | $45B+ | OpenXR HAL + Haptics |
-| AI Agents | $8.5B | $180B+ | MCP MAS + HITL + LLMAgentTrait |
-| RWA Tokenization | $50B | $230B+ | TokenGatedTrait + Zora Coins |
-| Spatial Computing | $12B | $60B+ | USD-Z export + Gaussian Splatting |
-| Creator Economy | $127B | $250B+ | Film3 + Zora Protocol |
+| Market            | 2026 Value | 2030 Projection | HoloScript Opportunity            |
+| ----------------- | ---------- | --------------- | --------------------------------- |
+| VR Hardware       | $15.64B    | $45B+           | OpenXR HAL + Haptics              |
+| AI Agents         | $8.5B      | $180B+          | MCP MAS + HITL + LLMAgentTrait    |
+| RWA Tokenization  | $50B       | $230B+          | TokenGatedTrait + Zora Coins      |
+| Spatial Computing | $12B       | $60B+           | USD-Z export + Gaussian Splatting |
+| Creator Economy   | $127B      | $250B+          | Film3 + Zora Protocol             |
 
 ---
 
@@ -53,16 +54,17 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 
 ### Maturity Criteria (Exit Gates)
 
-| Metric | Current | Target | Status |
-|--------|---------|--------|--------|
-| Test Coverage | 0.7% | 40%+ | ❌ |
-| Stub Traits Completed | 0/6 | 6/6 | ❌ |
-| Security Audit | None | Passed | ❌ |
-| CI/CD Pipeline | Partial | Full | ❌ |
+| Metric                | Current | Target | Status |
+| --------------------- | ------- | ------ | ------ |
+| Test Coverage         | 0.7%    | 40%+   | ❌     |
+| Stub Traits Completed | 0/6     | 6/6    | ❌     |
+| Security Audit        | None    | Passed | ❌     |
+| CI/CD Pipeline        | Partial | Full   | ❌     |
 
 ### Sprint 1: Core Trait Completion (2 weeks)
 
 #### NetworkedTrait → Production
+
 - **Current**: Stub with `console.log` only
 - **Required**:
   - WebSocket transport layer
@@ -72,6 +74,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
   - Reconnection handling
 
 #### OpenXRHALTrait → Real Device Detection
+
 - **Current**: Simulated device profiles
 - **Required**:
   - WebXR API integration
@@ -82,6 +85,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 ### Sprint 2: Web3 Trait Completion (2 weeks)
 
 #### RenderNetworkTrait → Real API
+
 - **Current**: `simulateApiCall()` fake responses
 - **Required**:
   - Render Network API key integration
@@ -91,6 +95,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
   - Error recovery
 
 #### ZoraCoinsTrait → Real Minting
+
 - **Current**: `simulateMinting()` returns fake txHash
 - **Required**:
   - Zora SDK integration
@@ -102,6 +107,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 ### Sprint 3: Safety & Testing (2 weeks)
 
 #### HITLTrait → Backend Integration
+
 - **Current**: Local-only approval simulation
 - **Required**:
   - Approval request API
@@ -110,6 +116,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
   - Rollback execution
 
 #### Test Coverage Push
+
 - **Target**: 40% coverage on core package
 - **Priority files**:
   - All trait handlers
@@ -120,11 +127,13 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 ### Sprint 4: Security & DevOps (1 week)
 
 #### Security Hardening
+
 - Replace PartnerSDK placeholder hash with `crypto.subtle`
 - Audit wallet connection flows
 - Add input validation to all API surfaces
 
 #### CI/CD Completion
+
 - GitHub Actions test pipeline
 - Automated lint + type check
 - Pre-release staging environment
@@ -141,6 +150,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 ### Core Deliverables
 
 #### ⚠️ OpenXR HAL (STUB - Needs v3.0.x Completion)
+
 - **File**: `packages/core/src/traits/OpenXRHALTrait.ts` (Created)
 - **Current State**: Simulated device profiles, no real WebXR integration
 - **Purpose**: Universal hardware abstraction for ALL haptic traits
@@ -158,6 +168,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 - **Impact**: Unblocks 8+ haptic traits including HapticTrait, HapticCueTrait, ProprioceptiveTrait
 
 #### ⚠️ HITL Architecture (STUB - Needs v3.0.x Completion)
+
 - **File**: `packages/core/src/traits/HITLTrait.ts` (Created)
 - **Current State**: Local simulation only, no backend integration
 - **Purpose**: Human-in-the-Loop for agentic AI safety
@@ -172,6 +183,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 - **Integration**: Works with LLMAgentTrait bounded autonomy
 
 #### ✅ MCP Multi-Agent Orchestration
+
 - **Status**: 34 tools deployed in `packages/mcp-server/src/`
 - **Tool Categories**:
   - 15 Core tools (parse, validate, explain)
@@ -185,13 +197,14 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
   - Conflict resolution
 
 #### Existing Assets Verified
-| Asset | Location | Lines | Status |
-|-------|----------|-------|--------|
-| LLMAgentTrait | `traits/LLMAgentTrait.ts` | 347 | Tool calling, bounded autonomy |
-| HapticTrait | `traits/HapticTrait.ts` | 293 | Collision patterns, proximity |
-| HapticCueTrait | `traits/HapticCueTrait.ts` | 180 | Cue-based haptics |
-| HapticsContext | `traits/HapticsContext.ts` | 89 | Shared haptic state |
-| VRTraitSystem | `uaa2-service/.../VRTraitSystem.ts` | 1068 | @grabbable, @throwable |
+
+| Asset          | Location                            | Lines | Status                         |
+| -------------- | ----------------------------------- | ----- | ------------------------------ |
+| LLMAgentTrait  | `traits/LLMAgentTrait.ts`           | 347   | Tool calling, bounded autonomy |
+| HapticTrait    | `traits/HapticTrait.ts`             | 293   | Collision patterns, proximity  |
+| HapticCueTrait | `traits/HapticCueTrait.ts`          | 180   | Cue-based haptics              |
+| HapticsContext | `traits/HapticsContext.ts`          | 89    | Shared haptic state            |
+| VRTraitSystem  | `uaa2-service/.../VRTraitSystem.ts` | 1068  | @grabbable, @throwable         |
 
 ---
 
@@ -202,6 +215,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 ### Core Deliverables
 
 #### ⚠️ Zora Coins Integration (STUB - Needs v3.0.x Completion)
+
 - **File**: `packages/core/src/traits/ZoraCoinsTrait.ts` (Created)
 - **Current State**: `simulateMinting()` returns fake transactions
 - **Purpose**: Auto-mint .holo scenes as tradeable ERC-20s on Base
@@ -217,13 +231,15 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 - **Use Case**: Every spatial experience becomes a collectible
 
 #### Web3 Trait Ecosystem (Verified)
-| Trait | File | Lines | Features |
-|-------|------|-------|----------|
-| NFTTrait | `NFTTrait.ts` | 237 | ERC721/ERC1155/SPL, Base chain |
-| TokenGatedTrait | `TokenGatedTrait.ts` | 252 | Access control, combine policies |
-| WalletTrait | `WalletTrait.ts` | 314 | MetaMask, WalletConnect, Coinbase |
+
+| Trait           | File                 | Lines | Features                          |
+| --------------- | -------------------- | ----- | --------------------------------- |
+| NFTTrait        | `NFTTrait.ts`        | 237   | ERC721/ERC1155/SPL, Base chain    |
+| TokenGatedTrait | `TokenGatedTrait.ts` | 252   | Access control, combine policies  |
+| WalletTrait     | `WalletTrait.ts`     | 314   | MetaMask, WalletConnect, Coinbase |
 
 #### Film3 Creator Stack
+
 - Zora Coins auto-mint for scenes
 - TokenGated experiences for premium content
 - Royalty distribution on secondary sales
@@ -238,6 +254,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 ### Core Deliverables
 
 #### ⚠️ Render Network Integration (STUB - Needs v3.0.x Completion)
+
 - **File**: `packages/core/src/traits/RenderNetworkTrait.ts` (Created)
 - **Current State**: `simulateApiCall()` returns fake job IDs
 - **Purpose**: Distributed GPU rendering via Render Network
@@ -252,6 +269,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 - **Integration**: Pipes from HoloScriptToGLB.ts (1010 lines verified)
 
 #### USD-Z Export Pipeline
+
 - **Status**: HoloScriptToGLB.ts exists (1010 lines)
 - **v3.3 Additions**:
   - USDZ output format
@@ -261,6 +279,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
   - Look-at behaviors
 
 #### GLB Compression
+
 - KTX2 texture compression (verified in HoloScriptToGLB.ts)
 - Draco mesh compression (verified)
 - Quantized animations
@@ -275,6 +294,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 ### Core Deliverables
 
 #### @zkPrivate Trait (DELAYED from v3.1)
+
 - **Reason for delay**: Noir contract compilation adds 3+ months
 - **Features**:
   - Zero-knowledge proofs for spatial data
@@ -284,6 +304,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 - **Dependencies**: Aztec Noir SDK, zkSNARK circuits
 
 #### Enhanced LLMAgent Capabilities
+
 - Multi-model orchestration
 - Long-horizon planning
 - Tool composition
@@ -291,6 +312,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 - Reflection and self-correction
 
 #### HITL v2.0
+
 - ML-based confidence calibration
 - Anomaly detection triggers
 - Batch approval workflows
@@ -305,6 +327,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 ### Core Deliverables
 
 #### Gaussian Splatting v2.0
+
 - **Existing**: GaussianSplatTrait.ts (211 lines, PLY/SPLAT support)
 - **v4.1 Additions**:
   - Levy flight optimization (research pending)
@@ -314,6 +337,7 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 - **Integration**: Render Network baking pipeline
 
 #### Volumetric Video
+
 - NeRF capture integration
 - Temporal coherence
 - Streaming protocols
@@ -328,12 +352,14 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 ### Core Deliverables
 
 #### Multi-tenant Architecture
+
 - Organization isolation
 - Role-based access control
 - Usage quotas
 - Custom trait registries
 
 #### Analytics & Observability
+
 - Scene performance metrics
 - User engagement tracking
 - A/B testing framework
@@ -348,18 +374,21 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 ### Core Deliverables
 
 #### Autonomous Agent Networks
+
 - Cross-scene agent communication
 - Emergent behavior frameworks
 - Agent marketplaces
 - Training pipelines
 
 #### Economic Primitives
+
 - In-scene microtransactions
 - Creator subscriptions
 - Agent bounties
 - Compute credits
 
 #### Self-Improving Systems
+
 - User feedback loops
 - Automated optimization
 - Scene evolution
@@ -369,12 +398,12 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 
 ## Gap Implementation Summary
 
-| Gap Identified | Resolution | File Created | Status |
-|----------------|------------|--------------|--------|
-| OpenXR HAL missing | Created hardware abstraction layer | `OpenXRHALTrait.ts` | ✅ Complete |
-| HITL not formalized | Created governance trait | `HITLTrait.ts` | ✅ Complete |
+| Gap Identified             | Resolution                          | File Created            | Status      |
+| -------------------------- | ----------------------------------- | ----------------------- | ----------- |
+| OpenXR HAL missing         | Created hardware abstraction layer  | `OpenXRHALTrait.ts`     | ✅ Complete |
+| HITL not formalized        | Created governance trait            | `HITLTrait.ts`          | ✅ Complete |
 | Render Network integration | Created distributed rendering trait | `RenderNetworkTrait.ts` | ✅ Complete |
-| Zora Coins underspecified | Created full tokenization trait | `ZoraCoinsTrait.ts` | ✅ Complete |
+| Zora Coins underspecified  | Created full tokenization trait     | `ZoraCoinsTrait.ts`     | ✅ Complete |
 
 ---
 
@@ -415,16 +444,16 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 
 ## Milestone Summary
 
-| Version | Quarter | Theme | Key Deliverables |
-|---------|---------|-------|------------------|
+| Version    | Quarter     | Theme                | Key Deliverables                                  |
+| ---------- | ----------- | -------------------- | ------------------------------------------------- |
 | **v3.0.x** | **Q1 2026** | **⚠️ Stabilization** | Complete stubs, 40% test coverage, security audit |
-| v3.1 | Q2 2026 | Foundation & Safety | OpenXR HAL, HITL, MCP MAS |
-| v3.2 | Q3 2026 | Creator Economy | Zora Coins, Film3 stack |
-| v3.3 | Q4 2026 | Spatial Export | Render Network, USD-Z |
-| v4.0 | Q1 2027 | Privacy & AI | @zkPrivate, Enhanced Agents |
-| v4.1 | Q2 2027 | Volumetric Media | Gaussian Splatting v2, Video |
-| v4.2 | Q3 2027 | Enterprise | Multi-tenant, Analytics |
-| v5.0 | H2 2027 | Autonomous | Agent Networks, Economics |
+| v3.1       | Q2 2026     | Foundation & Safety  | OpenXR HAL, HITL, MCP MAS                         |
+| v3.2       | Q3 2026     | Creator Economy      | Zora Coins, Film3 stack                           |
+| v3.3       | Q4 2026     | Spatial Export       | Render Network, USD-Z                             |
+| v4.0       | Q1 2027     | Privacy & AI         | @zkPrivate, Enhanced Agents                       |
+| v4.1       | Q2 2027     | Volumetric Media     | Gaussian Splatting v2, Video                      |
+| v4.2       | Q3 2027     | Enterprise           | Multi-tenant, Analytics                           |
+| v5.0       | H2 2027     | Autonomous           | Agent Networks, Economics                         |
 
 ---
 
@@ -438,4 +467,4 @@ This roadmap consolidates findings from the uAA2++ Research Protocol against the
 
 ---
 
-*This roadmap supersedes previous versions and incorporates all uAA2++ Research Protocol findings with honest maturity assessment.*
+_This roadmap supersedes previous versions and incorporates all uAA2++ Research Protocol findings with honest maturity assessment._

@@ -1,6 +1,6 @@
 /**
  * Swarm Coordinator
- * 
+ *
  * Implements ISwarmCoordinator interface for agent-task optimization.
  * Supports PSO, ACO, and hybrid algorithms.
  */
@@ -53,7 +53,7 @@ export class SwarmCoordinator implements ISwarmCoordinator {
 
   /**
    * Optimize agent-task assignment
-   * 
+   *
    * Uses PSO to find optimal task-to-agent mapping that:
    * - Balances load across agents
    * - Respects capacity constraints
@@ -86,11 +86,7 @@ export class SwarmCoordinator implements ISwarmCoordinator {
         convergenceThreshold: mergedConfig.convergenceThreshold,
       });
 
-      const psoResult = await psoEngine.optimize(
-        agents.length,
-        tasks.length,
-        fitnessFunction
-      );
+      const psoResult = await psoEngine.optimize(agents.length, tasks.length, fitnessFunction);
 
       // For hybrid, optionally refine with ACO if not converged
       if (algorithm === 'hybrid' && !psoResult.converged) {
@@ -100,7 +96,7 @@ export class SwarmCoordinator implements ISwarmCoordinator {
           tasks,
           mergedConfig
         );
-        
+
         if (acoRefinement.bestFitness > psoResult.bestFitness) {
           return this.formatResult(acoRefinement.bestSolution, acoRefinement, agents, tasks);
         }
@@ -113,10 +109,10 @@ export class SwarmCoordinator implements ISwarmCoordinator {
       // Use ACO - create distance matrix from task complexity/agent capacity
       const distanceMatrix = this.createDistanceMatrix(agents, tasks);
       const acoResult = await this.acoEngine.optimize(tasks.length, distanceMatrix);
-      
+
       // Convert path to assignment (using modular agent mapping)
       const assignment = acoResult.bestPath.map((_, i) => i % agents.length);
-      
+
       return {
         bestSolution: assignment,
         bestFitness: 1 / (acoResult.bestCost + 1),
@@ -137,21 +133,13 @@ export class SwarmCoordinator implements ISwarmCoordinator {
         socialWeight: 1.0,
       });
 
-      const beesResult = await beesEngine.optimize(
-        agents.length,
-        tasks.length,
-        fitnessFunction
-      );
+      const beesResult = await beesEngine.optimize(agents.length, tasks.length, fitnessFunction);
 
       return this.formatResult(beesResult.bestSolution, beesResult, agents, tasks);
     }
 
     // Fallback to PSO
-    const result = await this.psoEngine.optimize(
-      agents.length,
-      tasks.length,
-      fitnessFunction
-    );
+    const result = await this.psoEngine.optimize(agents.length, tasks.length, fitnessFunction);
 
     return this.formatResult(result.bestSolution, result, agents, tasks);
   }
@@ -200,7 +188,7 @@ export class SwarmCoordinator implements ISwarmCoordinator {
         } else {
           // Reward for valid assignment
           fitness += task.priority; // Prioritize high-priority tasks
-          
+
           // Reward for good capacity utilization (sweet spot at 70-90%)
           const utilization = newLoad / agent.capacity;
           if (utilization >= 0.7 && utilization <= 0.9) {
@@ -216,9 +204,10 @@ export class SwarmCoordinator implements ISwarmCoordinator {
       // Load balancing bonus - reward even distribution
       const loads = Array.from(agentLoads.values());
       const avgLoad = loads.reduce((a, b) => a + b, 0) / loads.length;
-      const variance = loads.reduce((sum, load) => sum + Math.pow(load - avgLoad, 2), 0) / loads.length;
+      const variance =
+        loads.reduce((sum, load) => sum + Math.pow(load - avgLoad, 2), 0) / loads.length;
       const stdDev = Math.sqrt(variance);
-      
+
       // Lower stdDev = better balance = higher fitness
       fitness += 10 / (1 + stdDev);
 
@@ -258,9 +247,14 @@ export class SwarmCoordinator implements ISwarmCoordinator {
     agents: AgentInfo[],
     tasks: TaskInfo[],
     _config: ISwarmConfig
-  ): Promise<{ bestSolution: number[]; bestFitness: number; converged: boolean; iterations: number }> {
+  ): Promise<{
+    bestSolution: number[];
+    bestFitness: number;
+    converged: boolean;
+    iterations: number;
+  }> {
     const fitnessFunction = this.createFitnessFunction(agents, tasks);
-    
+
     // Create local search neighborhood
     let bestSolution = [...initialSolution];
     let bestFitness = fitnessFunction(bestSolution);
@@ -274,7 +268,7 @@ export class SwarmCoordinator implements ISwarmCoordinator {
           const candidate = [...bestSolution];
           candidate[i] = agent;
           const candidateFitness = fitnessFunction(candidate);
-          
+
           if (candidateFitness > bestFitness) {
             bestFitness = candidateFitness;
             bestSolution = candidate;
@@ -291,19 +285,27 @@ export class SwarmCoordinator implements ISwarmCoordinator {
    */
   private formatResult(
     solution: number[],
-    engineResult: { bestFitness: number; converged: boolean; iterations: number; fitnessHistory?: number[] },
+    engineResult: {
+      bestFitness: number;
+      converged: boolean;
+      iterations: number;
+      fitnessHistory?: number[];
+    },
     agents: AgentInfo[],
     tasks: TaskInfo[]
   ): ISwarmResult {
     const fitnessFunction = this.createFitnessFunction(agents, tasks);
-    
+
     // Calculate improvement over random assignment
     const randomAssignment = tasks.map(() => Math.floor(Math.random() * agents.length));
     const randomFitness = fitnessFunction(randomAssignment);
-    
-    const improvement = randomFitness > 0
-      ? ((engineResult.bestFitness - randomFitness) / randomFitness) * 100
-      : engineResult.bestFitness > 0 ? 100 : 0;
+
+    const improvement =
+      randomFitness > 0
+        ? ((engineResult.bestFitness - randomFitness) / randomFitness) * 100
+        : engineResult.bestFitness > 0
+          ? 100
+          : 0;
 
     return {
       bestSolution: solution,
@@ -322,11 +324,9 @@ export class SwarmCoordinator implements ISwarmCoordinator {
     fitnessFunction: (a: number[]) => number
   ): number {
     const solutionFitness = fitnessFunction(solution);
-    
+
     // Generate random baseline
-    const randomSolution = solution.map(() => 
-      Math.floor(Math.random() * solution.length)
-    );
+    const randomSolution = solution.map(() => Math.floor(Math.random() * solution.length));
     const randomFitness = fitnessFunction(randomSolution);
 
     if (randomFitness <= 0) return solutionFitness > 0 ? 100 : 0;

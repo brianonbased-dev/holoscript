@@ -133,3 +133,23 @@ export {
 
 // Signaling (Sprint 2)
 export * from './signaling';
+
+// Latency Compensation System
+export {
+  LatencyCompensator,
+  InputPatternAnalyzer,
+  IntentPredictor,
+  AdaptiveHorizon,
+  CorrectionBlender,
+  StateHistoryBuffer,
+  createLocalPlayerCompensator,
+  createRemotePlayerCompensator,
+  DEFAULT_LATENCY_CONFIG,
+  type PredictionTier,
+  type ICorrectionThresholds,
+  type ILatencyCompConfig,
+  type IPredictedEntityState,
+  type IActiveCorrection,
+  type IRTTSample,
+  type IInteractable,
+} from './LatencyCompensation';

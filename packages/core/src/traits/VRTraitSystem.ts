@@ -151,6 +151,8 @@ import { fluidHandler } from './FluidTrait';
 import { softBodyHandler } from './SoftBodyTrait';
 import { ropeHandler } from './RopeTrait';
 import { chainHandler } from './ChainTrait';
+import { roadmapNodeHandler } from './RoadmapTrait';
+import { mitosisHandler } from './MitosisTrait';
 import { windHandler } from './WindTrait';
 import { buoyancyHandler } from './BuoyancyTrait';
 import { destructionHandler } from './DestructionTrait';
@@ -1128,6 +1130,8 @@ export class VRTraitRegistry {
     this.register(seatedHandler as TraitHandler);
     this.register(hapticHandler as TraitHandler);
     this.register(eyeTrackedHandler as TraitHandler);
+    this.register(roadmapNodeHandler as TraitHandler);
+    this.register(mitosisHandler as TraitHandler);
 
     // Phase 1: Environment Understanding
     this.register(planeDetectionHandler as TraitHandler);
@@ -1372,6 +1376,8 @@ export {
   seatedHandler,
   hapticHandler,
   eyeTrackedHandler,
+  roadmapNodeHandler,
+  mitosisHandler,
   // Phase 1: Environment Understanding
   planeDetectionHandler,
   meshDetectionHandler,

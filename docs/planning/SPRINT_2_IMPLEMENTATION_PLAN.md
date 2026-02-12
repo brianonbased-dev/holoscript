@@ -282,17 +282,17 @@ Fix timeouts and achieve 9/9 visual tests passing reliably.
 
 #### Test Matrix
 
-| Test                 | Current    | Target |
-| -------------------- | ---------- | ------ |
-| Basic composition rendering  | ✅         | ✅     |
-| Trait composition    | ❌ timeout | ✅     |
-| Template inheritance | ❌ flaky   | ✅     |
-| Animation keyframes  | ❌ timeout | ✅     |
-| Physics simulation   | ✅         | ✅     |
-| Lighting/shadows     | ❌ flaky   | ✅     |
-| Multi-object scene   | ✅         | ✅     |
-| State transitions    | ❌ timeout | ✅     |
-| Event handlers       | ✅         | ✅     |
+| Test                        | Current    | Target |
+| --------------------------- | ---------- | ------ |
+| Basic composition rendering | ✅         | ✅     |
+| Trait composition           | ❌ timeout | ✅     |
+| Template inheritance        | ❌ flaky   | ✅     |
+| Animation keyframes         | ❌ timeout | ✅     |
+| Physics simulation          | ✅         | ✅     |
+| Lighting/shadows            | ❌ flaky   | ✅     |
+| Multi-object scene          | ✅         | ✅     |
+| State transitions           | ❌ timeout | ✅     |
+| Event handlers              | ✅         | ✅     |
 
 #### Files to Modify
 

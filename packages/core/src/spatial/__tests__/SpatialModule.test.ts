@@ -25,11 +25,7 @@ import { SpatialContextProvider } from '../SpatialContextProvider';
 // HELPER FUNCTIONS
 // =============================================================================
 
-function createEntity(
-  id: string,
-  position: Vector3,
-  type: string = 'default'
-): SpatialEntity {
+function createEntity(id: string, position: Vector3, type: string = 'default'): SpatialEntity {
   return {
     id,
     type,
@@ -37,12 +33,7 @@ function createEntity(
   };
 }
 
-function createRegion(
-  id: string,
-  min: Vector3,
-  max: Vector3,
-  name?: string
-): Region {
+function createRegion(id: string, min: Vector3, max: Vector3, name?: string): Region {
   return {
     id,
     name: name || id,
@@ -400,9 +391,12 @@ describe('SpatialContextProvider', () => {
       provider.setEntity(createEntity('e1', { x: 5, y: 0, z: 0 }));
       provider.update();
 
-      expect(handler).toHaveBeenCalledWith('agent-1', expect.objectContaining({
-        type: 'entity_entered',
-      }));
+      expect(handler).toHaveBeenCalledWith(
+        'agent-1',
+        expect.objectContaining({
+          type: 'entity_entered',
+        })
+      );
     });
 
     it('should emit entity:exited when entity leaves range', () => {
@@ -416,9 +410,12 @@ describe('SpatialContextProvider', () => {
       provider.removeEntity('e1');
       provider.update();
 
-      expect(handler).toHaveBeenCalledWith('agent-1', expect.objectContaining({
-        type: 'entity_exited',
-      }));
+      expect(handler).toHaveBeenCalledWith(
+        'agent-1',
+        expect.objectContaining({
+          type: 'entity_exited',
+        })
+      );
     });
   });
 
@@ -431,9 +428,12 @@ describe('SpatialContextProvider', () => {
       provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 });
       provider.update();
 
-      expect(handler).toHaveBeenCalledWith('agent-1', expect.objectContaining({
-        type: 'region_entered',
-      }));
+      expect(handler).toHaveBeenCalledWith(
+        'agent-1',
+        expect.objectContaining({
+          type: 'region_entered',
+        })
+      );
     });
 
     it('should emit region:exited when agent leaves region', () => {
@@ -447,9 +447,12 @@ describe('SpatialContextProvider', () => {
       provider.updateAgentPosition('agent-1', { x: 100, y: 100, z: 100 });
       provider.update();
 
-      expect(handler).toHaveBeenCalledWith('agent-1', expect.objectContaining({
-        type: 'region_exited',
-      }));
+      expect(handler).toHaveBeenCalledWith(
+        'agent-1',
+        expect.objectContaining({
+          type: 'region_exited',
+        })
+      );
     });
   });
 
@@ -493,9 +496,11 @@ describe('SpatialContextProvider', () => {
       provider.updateAgentPosition('agent-1', { x: 0, y: 0, z: 0 });
       provider.update();
 
-      expect(callback).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'region_entered',
-      }));
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'region_entered',
+        })
+      );
     });
   });
 });
@@ -510,11 +515,13 @@ describe('Spatial Performance', () => {
     const entities: SpatialEntity[] = [];
 
     for (let i = 0; i < 1000; i++) {
-      entities.push(createEntity(`e${i}`, {
-        x: Math.random() * 1000,
-        y: Math.random() * 1000,
-        z: Math.random() * 1000,
-      }));
+      entities.push(
+        createEntity(`e${i}`, {
+          x: Math.random() * 1000,
+          y: Math.random() * 1000,
+          z: Math.random() * 1000,
+        })
+      );
     }
 
     provider.setEntities(entities);
@@ -533,11 +540,13 @@ describe('Spatial Performance', () => {
     const entities: SpatialEntity[] = [];
 
     for (let i = 0; i < 1000; i++) {
-      entities.push(createEntity(`e${i}`, {
-        x: Math.random() * 1000,
-        y: Math.random() * 1000,
-        z: Math.random() * 1000,
-      }));
+      entities.push(
+        createEntity(`e${i}`, {
+          x: Math.random() * 1000,
+          y: Math.random() * 1000,
+          z: Math.random() * 1000,
+        })
+      );
     }
 
     executor.updateEntities(entities);
@@ -604,38 +613,49 @@ describe('SpatialContextProvider Additional Coverage', () => {
 
   describe('sight lines with blocking', () => {
     it('should compute sight lines when enabled', () => {
-      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, {
-        perceptionRadius: 20,
-        computeSightLines: true,
-      });
-      
-      provider.setEntities([
-        createEntity('e1', { x: 10, y: 0, z: 0 }, 'target'),
-      ]);
-      
+      provider.registerAgent(
+        'agent-1',
+        { x: 0, y: 0, z: 0 },
+        {
+          perceptionRadius: 20,
+          computeSightLines: true,
+        }
+      );
+
+      provider.setEntities([createEntity('e1', { x: 10, y: 0, z: 0 }, 'target')]);
+
       provider.update();
       const context = provider.getContext('agent-1');
-      
+
       expect(context).not.toBeNull();
       expect(context!.sightLines).toBeDefined();
       expect(context!.sightLines.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should detect blocking entities', () => {
-      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, {
-        perceptionRadius: 30,
-        computeSightLines: true,
-      });
-      
+      provider.registerAgent(
+        'agent-1',
+        { x: 0, y: 0, z: 0 },
+        {
+          perceptionRadius: 30,
+          computeSightLines: true,
+        }
+      );
+
       // Blocker in between agent and target
       provider.setEntities([
         createEntity('target', { x: 20, y: 0, z: 0 }, 'target'),
-        { id: 'blocker', type: 'obstacle', position: { x: 10, y: 0, z: 0 }, bounds: { center: { x: 10, y: 0, z: 0 }, radius: 3 } } as SpatialEntity,
+        {
+          id: 'blocker',
+          type: 'obstacle',
+          position: { x: 10, y: 0, z: 0 },
+          bounds: { center: { x: 10, y: 0, z: 0 }, radius: 3 },
+        } as SpatialEntity,
       ]);
-      
+
       provider.update();
       const context = provider.getContext('agent-1');
-      
+
       expect(context).not.toBeNull();
       expect(context!.nearbyEntities.length).toBe(2);
     });
@@ -649,10 +669,10 @@ describe('SpatialContextProvider Additional Coverage', () => {
         position: { x: 5, y: 0, z: 0 },
         bounds: { center: { x: 5, y: 0, z: 0 }, radius: 2 },
       };
-      
+
       provider.setEntity(sphereEntity);
       const entities = provider.getEntities();
-      
+
       expect(entities.length).toBe(1);
       expect(entities[0].bounds).toBeDefined();
     });
@@ -664,10 +684,10 @@ describe('SpatialContextProvider Additional Coverage', () => {
         position: { x: 5, y: 0, z: 0 },
         bounds: { min: { x: 4, y: -1, z: -1 }, max: { x: 6, y: 1, z: 1 } },
       };
-      
+
       provider.setEntity(boxEntity);
       const entities = provider.getEntities();
-      
+
       expect(entities.length).toBe(1);
       expect(entities[0].bounds).toBeDefined();
     });
@@ -681,11 +701,11 @@ describe('SpatialContextProvider Additional Coverage', () => {
         type: 'sphere',
         bounds: { center: { x: 0, y: 0, z: 0 }, radius: 10 },
       };
-      
+
       provider.setRegion(sphereRegion);
       provider.registerAgent('agent-1', { x: 5, y: 0, z: 0 });
       provider.update();
-      
+
       const context = provider.getContext('agent-1');
       expect(context).not.toBeNull();
       expect(context!.currentRegions.length).toBe(1);
@@ -699,11 +719,11 @@ describe('SpatialContextProvider Additional Coverage', () => {
         type: 'sphere',
         bounds: { center: { x: 0, y: 0, z: 0 }, radius: 5 },
       };
-      
+
       provider.setRegion(sphereRegion);
       provider.registerAgent('agent-1', { x: 50, y: 0, z: 0 }); // Far outside
       provider.update();
-      
+
       const context = provider.getContext('agent-1');
       expect(context).not.toBeNull();
       expect(context!.currentRegions.length).toBe(0);
@@ -721,9 +741,9 @@ describe('SpatialContextProvider Additional Coverage', () => {
     it('should handle multiple agents with different update rates', () => {
       provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, { updateRate: 60 });
       provider.registerAgent('agent-2', { x: 10, y: 0, z: 0 }, { updateRate: 30 });
-      
+
       provider.start();
-      
+
       // Should use the higher update rate
       expect(() => provider.update()).not.toThrow();
     });
@@ -731,7 +751,7 @@ describe('SpatialContextProvider Additional Coverage', () => {
     it('should handle zero update rate', () => {
       provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, { updateRate: 0 });
       provider.start();
-      
+
       // Should not crash with zero update rate
       expect(() => provider.update()).not.toThrow();
     });
@@ -747,28 +767,36 @@ describe('SpatialContextProvider Additional Coverage', () => {
     });
 
     it('should filter entities by type in agent config', () => {
-      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, {
-        perceptionRadius: 20,
-        entityTypeFilter: ['npc', 'item'],
-      });
-      
+      provider.registerAgent(
+        'agent-1',
+        { x: 0, y: 0, z: 0 },
+        {
+          perceptionRadius: 20,
+          entityTypeFilter: ['npc', 'item'],
+        }
+      );
+
       provider.update();
       const context = provider.getContext('agent-1');
-      
+
       expect(context).not.toBeNull();
       expect(context!.nearbyEntities.length).toBe(2);
-      expect(context!.nearbyEntities.some(e => e.type === 'enemy')).toBe(false);
+      expect(context!.nearbyEntities.some((e) => e.type === 'enemy')).toBe(false);
     });
 
     it('should include all types with empty filter', () => {
-      provider.registerAgent('agent-1', { x: 0, y: 0, z: 0 }, {
-        perceptionRadius: 20,
-        entityTypeFilter: [],
-      });
-      
+      provider.registerAgent(
+        'agent-1',
+        { x: 0, y: 0, z: 0 },
+        {
+          perceptionRadius: 20,
+          entityTypeFilter: [],
+        }
+      );
+
       provider.update();
       const context = provider.getContext('agent-1');
-      
+
       expect(context).not.toBeNull();
       expect(context!.nearbyEntities.length).toBe(3);
     });
@@ -777,15 +805,15 @@ describe('SpatialContextProvider Additional Coverage', () => {
   describe('unsubscribe and cleanup', () => {
     it('should unsubscribe from region events', () => {
       const callback = vi.fn();
-      
+
       provider.setRegion(createRegion('r1', { x: -5, y: -5, z: -5 }, { x: 5, y: 5, z: 5 }));
       provider.registerAgent('agent-1', { x: 100, y: 100, z: 100 });
       provider.subscribeToRegion('agent-1', 'r1', callback);
       provider.unsubscribeFromRegion('agent-1', 'r1');
-      
+
       provider.updateAgentPosition('agent-1', { x: 0, y: 0, z: 0 });
       provider.update();
-      
+
       // Should not be called after unsubscribe
       expect(callback).not.toHaveBeenCalled();
     });

@@ -1463,8 +1463,8 @@ describe('R3FCompiler — TraitCompositor integration', () => {
       objects: [
         createObjectDecl('multiTrait', {
           traits: [
-            { name: 'wooden', config: {} },    // base_material (layer 0), roughness 0.8
-            { name: 'glowing', config: {} },   // lighting (layer 5), roughness 0.3
+            { name: 'wooden', config: {} }, // base_material (layer 0), roughness 0.8
+            { name: 'glowing', config: {} }, // lighting (layer 5), roughness 0.3
           ],
         }),
       ],
@@ -1530,8 +1530,8 @@ describe('R3FCompiler — TraitCompositor integration', () => {
       objects: [
         createObjectDecl('woodenRusted', {
           traits: [
-            { name: 'wooden', config: {} },   // tags: ['organic', 'opaque'] — no 'metallic'
-            { name: 'rusted', config: {} },    // requires tag 'metallic'
+            { name: 'wooden', config: {} }, // tags: ['organic', 'opaque'] — no 'metallic'
+            { name: 'rusted', config: {} }, // requires tag 'metallic'
           ],
         }),
       ],

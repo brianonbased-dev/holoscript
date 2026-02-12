@@ -490,7 +490,9 @@ class HoloParser {
   private expect(s: string): void {
     for (let i = 0; i < s.length; i++) {
       if (this.src[this.pos + i] !== s[i]) {
-        throw new Error(`Expected '${s}' at position ${this.pos}, got '${this.src.slice(this.pos, this.pos + 10)}'`);
+        throw new Error(
+          `Expected '${s}' at position ${this.pos}, got '${this.src.slice(this.pos, this.pos + 10)}'`
+        );
       }
     }
     this.pos += s.length;
@@ -1015,7 +1017,8 @@ class GLTFBuilder {
       target: componentType === 5126 ? 34962 : 34963,
     });
 
-    const componentsPerElement = type === 'SCALAR' ? 1 : type === 'VEC2' ? 2 : type === 'VEC3' ? 3 : 4;
+    const componentsPerElement =
+      type === 'SCALAR' ? 1 : type === 'VEC2' ? 2 : type === 'VEC3' ? 3 : 4;
     const count = data.length / componentsPerElement;
 
     const accessor: GLTFAccessor = {
@@ -1070,7 +1073,11 @@ class GLTFBuilder {
       if (val.startsWith('#')) {
         const hex = val.slice(1);
         if (hex.length === 6) {
-          return [parseInt(hex.slice(0, 2), 16) / 255, parseInt(hex.slice(2, 4), 16) / 255, parseInt(hex.slice(4, 6), 16) / 255];
+          return [
+            parseInt(hex.slice(0, 2), 16) / 255,
+            parseInt(hex.slice(2, 4), 16) / 255,
+            parseInt(hex.slice(4, 6), 16) / 255,
+          ];
         }
       }
       const colors: Record<string, [number, number, number]> = {
@@ -1217,7 +1224,8 @@ export async function exportGLTF(options: GLTFExportOptions): Promise<void> {
 
   // Determine output path
   const ext = format === 'glb' ? '.glb' : '.gltf';
-  const outputPath = output || path.join(path.dirname(input), path.basename(input, path.extname(input)) + ext);
+  const outputPath =
+    output || path.join(path.dirname(input), path.basename(input, path.extname(input)) + ext);
 
   // Write output
   if (format === 'glb') {

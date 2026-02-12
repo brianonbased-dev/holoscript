@@ -179,7 +179,7 @@ export class PerformancePanel implements vscode.WebviewViewProvider {
     });
 
     vscode.window.showInformationMessage('HoloScript: Profiling stopped');
-    
+
     // Persist history after profiling
     this.persistHistory();
   }
@@ -188,14 +188,16 @@ export class PerformancePanel implements vscode.WebviewViewProvider {
    * Set alert threshold
    */
   public setThreshold(threshold: AlertThreshold): void {
-    const index = this._thresholds.findIndex(t => t.metric === threshold.metric);
+    const index = this._thresholds.findIndex((t) => t.metric === threshold.metric);
     if (index >= 0) {
       this._thresholds[index] = threshold;
     } else {
       this._thresholds.push(threshold);
     }
-    
-    vscode.workspace.getConfiguration('holoscript').update('alertThresholds', this._thresholds, true);
+
+    vscode.workspace
+      .getConfiguration('holoscript')
+      .update('alertThresholds', this._thresholds, true);
     this.sendToWebview({ type: 'thresholdsUpdated', thresholds: this._thresholds });
   }
 
@@ -251,7 +253,7 @@ export class PerformancePanel implements vscode.WebviewViewProvider {
       filters: { JSON: ['json'] },
       title: 'Load Performance History',
     });
-    
+
     if (uri && uri[0]) {
       try {
         const data = await vscode.workspace.fs.readFile(uri[0]);
@@ -259,7 +261,9 @@ export class PerformancePanel implements vscode.WebviewViewProvider {
         if (parsed.history || parsed.metricsHistory) {
           this._metricsHistory = parsed.history || parsed.metricsHistory;
           this.sendToWebview({ type: 'historyLoaded', history: this._metricsHistory });
-          vscode.window.showInformationMessage(`Loaded ${this._metricsHistory.length} history entries`);
+          vscode.window.showInformationMessage(
+            `Loaded ${this._metricsHistory.length} history entries`
+          );
         }
       } catch (_error) {
         vscode.window.showErrorMessage('Failed to load history file');
@@ -293,22 +297,24 @@ export class PerformancePanel implements vscode.WebviewViewProvider {
       'packet_loss',
     ].join(',');
 
-    const rows = this._metricsHistory.map((m, i) => [
-      new Date(Date.now() - (this._metricsHistory.length - i) * 100).toISOString(),
-      m.parse.avgTime.toFixed(2),
-      m.parse.p95Time.toFixed(2),
-      m.parse.throughput.toFixed(0),
-      m.compile.avgTime.toFixed(2),
-      m.compile.p95Time.toFixed(2),
-      m.compile.outputSize.toFixed(0),
-      m.runtime.fps.toFixed(1),
-      m.runtime.frameTime.toFixed(2),
-      m.runtime.gpuTime.toFixed(2),
-      (m.runtime.memoryUsage / 1024 / 1024).toFixed(2),
-      m.network.latency.toFixed(1),
-      m.network.bandwidth.toFixed(1),
-      m.network.packetLoss.toFixed(3),
-    ].join(','));
+    const rows = this._metricsHistory.map((m, i) =>
+      [
+        new Date(Date.now() - (this._metricsHistory.length - i) * 100).toISOString(),
+        m.parse.avgTime.toFixed(2),
+        m.parse.p95Time.toFixed(2),
+        m.parse.throughput.toFixed(0),
+        m.compile.avgTime.toFixed(2),
+        m.compile.p95Time.toFixed(2),
+        m.compile.outputSize.toFixed(0),
+        m.runtime.fps.toFixed(1),
+        m.runtime.frameTime.toFixed(2),
+        m.runtime.gpuTime.toFixed(2),
+        (m.runtime.memoryUsage / 1024 / 1024).toFixed(2),
+        m.network.latency.toFixed(1),
+        m.network.bandwidth.toFixed(1),
+        m.network.packetLoss.toFixed(3),
+      ].join(',')
+    );
 
     const csvContent = [headers, ...rows].join('\n');
     const fileName = `holoscript-perf-${Date.now()}.csv`;
@@ -366,7 +372,9 @@ export class PerformancePanel implements vscode.WebviewViewProvider {
         );
         if (openAction) {
           vscode.env.openExternal(
-            vscode.Uri.parse('https://www.chromium.org/developers/how-tos/trace-event-profiling-tool/')
+            vscode.Uri.parse(
+              'https://www.chromium.org/developers/how-tos/trace-event-profiling-tool/'
+            )
           );
         }
       }
@@ -473,9 +481,11 @@ export class PerformancePanel implements vscode.WebviewViewProvider {
     }
 
     const parseAvg =
-      this._metricsHistory.reduce((sum, m) => sum + m.parse.avgTime, 0) / this._metricsHistory.length;
+      this._metricsHistory.reduce((sum, m) => sum + m.parse.avgTime, 0) /
+      this._metricsHistory.length;
     const compileAvg =
-      this._metricsHistory.reduce((sum, m) => sum + m.compile.avgTime, 0) / this._metricsHistory.length;
+      this._metricsHistory.reduce((sum, m) => sum + m.compile.avgTime, 0) /
+      this._metricsHistory.length;
     const fpsAvg =
       this._metricsHistory.reduce((sum, m) => sum + m.runtime.fps, 0) / this._metricsHistory.length;
     const memoryMax = Math.max(...this._metricsHistory.map((m) => m.runtime.memoryUsage));
@@ -666,7 +676,14 @@ export class PerformancePanel implements vscode.WebviewViewProvider {
       vscode.Uri.joinPath(this._extensionUri, 'webview', 'performance', 'performance.css')
     );
     const codiconsUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode', 'codicons', 'dist', 'codicon.css')
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        'node_modules',
+        '@vscode',
+        'codicons',
+        'dist',
+        'codicon.css'
+      )
     );
 
     const nonce = this.getNonce();

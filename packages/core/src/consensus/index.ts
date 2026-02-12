@@ -11,27 +11,27 @@ export {
   ConsensusMechanism,
   ConsensusConfig,
   DEFAULT_CONSENSUS_CONFIG,
-  
+
   // Node types
   RaftNodeState,
   ConsensusNode,
-  
+
   // Proposal types
   ProposalStatus,
   Proposal,
   Vote,
   ProposalResult,
-  
+
   // Raft types
   RaftLogEntry,
   AppendEntriesRequest,
   AppendEntriesResponse,
   RequestVoteRequest,
   RequestVoteResponse,
-  
+
   // Simple majority types
   Ballot,
-  
+
   // Events
   ConsensusEventType,
   ConsensusEvent,
@@ -41,10 +41,10 @@ export {
   StateChangeEvent,
   NodeEvent,
   PartitionEvent,
-  
+
   // Protocol interface
   ConsensusProtocol,
-  
+
   // Utility functions
   calculateQuorum,
   hasQuorum,
@@ -53,10 +53,7 @@ export {
 } from './ConsensusTypes';
 
 // Simple Majority Consensus
-export {
-  ConsensusManager,
-  ConsensusManagerEvents,
-} from './ConsensusManager';
+export { ConsensusManager, ConsensusManagerEvents } from './ConsensusManager';
 
 // Raft Consensus
 export {

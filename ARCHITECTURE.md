@@ -79,44 +79,44 @@ But HoloScript works without Hololand.
 
 ### Core Language
 
-| Package                  | Purpose                                    | Version |
-| ------------------------ | ------------------------------------------ | ------- |
-| `@holoscript/core`       | Parser, AST, validator, 16 compilers       | v3.0.0  |
-| `@holoscript/runtime`    | Browser runtime, 50+ traits, physics       | v3.0.0  |
-| `@holoscript/std`        | Standard library (types, math, collections)| v3.0.0  |
-| `@holoscript/fs`         | Filesystem utilities & file watching       | v3.0.0  |
-| `@holoscript/cli`        | Command-line tools (32+ commands)          | v3.0.0  |
+| Package               | Purpose                                     | Version |
+| --------------------- | ------------------------------------------- | ------- |
+| `@holoscript/core`    | Parser, AST, validator, 16 compilers        | v3.0.0  |
+| `@holoscript/runtime` | Browser runtime, 50+ traits, physics        | v3.0.0  |
+| `@holoscript/std`     | Standard library (types, math, collections) | v3.0.0  |
+| `@holoscript/fs`      | Filesystem utilities & file watching        | v3.0.0  |
+| `@holoscript/cli`     | Command-line tools (32+ commands)           | v3.0.0  |
 
 ### Developer Tools
 
-| Package                    | Purpose                                  | Version |
-| -------------------------- | ---------------------------------------- | ------- |
-| `@holoscript/lsp`          | Language Server Protocol                 | v3.0.0  |
-| `@holoscript/formatter`    | Code formatting                          | v3.0.0  |
-| `@holoscript/linter`       | Static analysis                          | v3.0.0  |
-| `@holoscript/test`         | Testing framework & visual regression    | v3.0.0  |
-| `@holoscript/benchmark`    | Performance benchmarks                   | v3.0.0  |
+| Package                 | Purpose                               | Version |
+| ----------------------- | ------------------------------------- | ------- |
+| `@holoscript/lsp`       | Language Server Protocol              | v3.0.0  |
+| `@holoscript/formatter` | Code formatting                       | v3.0.0  |
+| `@holoscript/linter`    | Static analysis                       | v3.0.0  |
+| `@holoscript/test`      | Testing framework & visual regression | v3.0.0  |
+| `@holoscript/benchmark` | Performance benchmarks                | v3.0.0  |
 
 ### Editor Extensions
 
-| Package                    | Purpose                                  | Version |
-| -------------------------- | ---------------------------------------- | ------- |
-| `holoscript-vscode`        | VS Code extension                        | v3.0.0  |
-| `@holoscript/neovim`       | Neovim plugin                            | v3.0.0  |
-| `@holoscript/intellij`     | IntelliJ / JetBrains plugin              | v3.0.0  |
-| `@holoscript/visual`       | Node-based visual programming editor     | v3.0.0  |
+| Package                | Purpose                              | Version |
+| ---------------------- | ------------------------------------ | ------- |
+| `holoscript-vscode`    | VS Code extension                    | v3.0.0  |
+| `@holoscript/neovim`   | Neovim plugin                        | v3.0.0  |
+| `@holoscript/intellij` | IntelliJ / JetBrains plugin          | v3.0.0  |
+| `@holoscript/visual`   | Node-based visual programming editor | v3.0.0  |
 
 ### Integration & Platform
 
-| Package                          | Purpose                                  | Version |
-| -------------------------------- | ---------------------------------------- | ------- |
-| `@holoscript/mcp-server`         | MCP for AI agent integration (35 tools)  | v3.0.0  |
-| `@holoscript/sdk`                | Smart Asset SDK & HoloHub client         | v3.0.0  |
-| `@holoscript/wasm`               | WebAssembly parser for browsers          | v3.0.0  |
-| `@holoscript/registry`           | Package registry & team workspace API    | v3.0.0  |
-| `@holoscript/partner-sdk`        | Partner integration SDK                  | v3.0.0  |
-| `@holoscript/adapter-postgres`   | PostgreSQL database adapter              | v3.0.0  |
-| `holoscript` (Python)            | Python bindings                          | v3.0.0  |
+| Package                        | Purpose                                 | Version |
+| ------------------------------ | --------------------------------------- | ------- |
+| `@holoscript/mcp-server`       | MCP for AI agent integration (35 tools) | v3.0.0  |
+| `@holoscript/sdk`              | Smart Asset SDK & HoloHub client        | v3.0.0  |
+| `@holoscript/wasm`             | WebAssembly parser for browsers         | v3.0.0  |
+| `@holoscript/registry`         | Package registry & team workspace API   | v3.0.0  |
+| `@holoscript/partner-sdk`      | Partner integration SDK                 | v3.0.0  |
+| `@holoscript/adapter-postgres` | PostgreSQL database adapter             | v3.0.0  |
+| `holoscript` (Python)          | Python bindings                         | v3.0.0  |
 
 ## Data Flow
 
@@ -198,7 +198,7 @@ pip install holoscript
 
 | Extension | Purpose                     | Example                            |
 | --------- | --------------------------- | ---------------------------------- |
-| `.hs`     | Classic HoloScript          | `composition player { ... }`               |
+| `.hs`     | Classic HoloScript          | `composition player { ... }`       |
 | `.hsplus` | HoloScript Plus with traits | `object Player @grabbable { ... }` |
 | `.holo`   | Declarative compositions    | `composition "Scene" { ... }`      |
 

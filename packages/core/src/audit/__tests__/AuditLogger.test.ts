@@ -117,10 +117,18 @@ describe('AuditLogger', () => {
 
   describe('query()', () => {
     beforeEach(() => {
-      logger.log(createEvent({ tenantId: 't1', actorId: 'u1', action: 'compile', outcome: 'success' }));
-      logger.log(createEvent({ tenantId: 't1', actorId: 'u2', action: 'deploy', outcome: 'failure' }));
-      logger.log(createEvent({ tenantId: 't2', actorId: 'u1', action: 'compile', outcome: 'denied' }));
-      logger.log(createEvent({ tenantId: 't2', actorId: 'u3', action: 'login', outcome: 'success' }));
+      logger.log(
+        createEvent({ tenantId: 't1', actorId: 'u1', action: 'compile', outcome: 'success' })
+      );
+      logger.log(
+        createEvent({ tenantId: 't1', actorId: 'u2', action: 'deploy', outcome: 'failure' })
+      );
+      logger.log(
+        createEvent({ tenantId: 't2', actorId: 'u1', action: 'compile', outcome: 'denied' })
+      );
+      logger.log(
+        createEvent({ tenantId: 't2', actorId: 'u3', action: 'login', outcome: 'success' })
+      );
     });
 
     it('should return all events when no filter is provided', () => {
@@ -540,12 +548,36 @@ describe('ComplianceReporter', () => {
     // Seed with various event types
     logger.log(createEvent({ tenantId: 't1', action: 'login', outcome: 'success', actorId: 'u1' }));
     logger.log(createEvent({ tenantId: 't1', action: 'login', outcome: 'denied', actorId: 'u2' }));
-    logger.log(createEvent({ tenantId: 't1', action: 'update_config', outcome: 'success', actorId: 'u1' }));
-    logger.log(createEvent({ tenantId: 't1', action: 'deploy', outcome: 'success', actorId: 'u1' }));
-    logger.log(createEvent({ tenantId: 't1', action: 'read', outcome: 'success', actorId: 'u1', resource: 'user_data' }));
-    logger.log(createEvent({ tenantId: 't1', action: 'consent_granted', outcome: 'success', actorId: 'u1' }));
-    logger.log(createEvent({ tenantId: 't1', action: 'delete', outcome: 'success', actorId: 'u1', resource: 'user_data' }));
-    logger.log(createEvent({ tenantId: 't1', action: 'compile', outcome: 'success', actorId: 'u3' }));
+    logger.log(
+      createEvent({ tenantId: 't1', action: 'update_config', outcome: 'success', actorId: 'u1' })
+    );
+    logger.log(
+      createEvent({ tenantId: 't1', action: 'deploy', outcome: 'success', actorId: 'u1' })
+    );
+    logger.log(
+      createEvent({
+        tenantId: 't1',
+        action: 'read',
+        outcome: 'success',
+        actorId: 'u1',
+        resource: 'user_data',
+      })
+    );
+    logger.log(
+      createEvent({ tenantId: 't1', action: 'consent_granted', outcome: 'success', actorId: 'u1' })
+    );
+    logger.log(
+      createEvent({
+        tenantId: 't1',
+        action: 'delete',
+        outcome: 'success',
+        actorId: 'u1',
+        resource: 'user_data',
+      })
+    );
+    logger.log(
+      createEvent({ tenantId: 't1', action: 'compile', outcome: 'success', actorId: 'u3' })
+    );
   });
 
   describe('generateSOC2Report()', () => {

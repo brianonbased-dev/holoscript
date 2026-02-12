@@ -381,12 +381,16 @@ export class SpatialQueryExecutor {
           distance: hit.distance,
           direction: dir,
         });
-
-        if (query.hitFirst) break;
       }
     }
 
-    return results.sort((a, b) => a.distance - b.distance);
+    results.sort((a, b) => a.distance - b.distance);
+
+    if (query.hitFirst && results.length > 0) {
+      return [results[0]];
+    }
+
+    return results;
   }
 
   /**

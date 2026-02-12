@@ -26,7 +26,12 @@ function dynamicSphere(id: string, radius: number, position: IVector3, mass = 1)
 }
 
 // Helper: create a dynamic box body config
-function dynamicBox(id: string, halfExtents: IVector3, position: IVector3, mass = 1): IRigidBodyConfig {
+function dynamicBox(
+  id: string,
+  halfExtents: IVector3,
+  position: IVector3,
+  mass = 1
+): IRigidBodyConfig {
   return dynamicBody(id, boxShape(halfExtents), mass, position);
 }
 
@@ -36,7 +41,13 @@ function staticBox(id: string, halfExtents: IVector3, position: IVector3): IRigi
 }
 
 // Helper: create a dynamic capsule body config
-function dynamicCapsule(id: string, radius: number, height: number, position: IVector3, mass = 1): IRigidBodyConfig {
+function dynamicCapsule(
+  id: string,
+  radius: number,
+  height: number,
+  position: IVector3,
+  mass = 1
+): IRigidBodyConfig {
   return dynamicBody(id, capsuleShape(radius, height), mass, position);
 }
 
@@ -64,7 +75,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
       const contacts = world.getContacts();
 
       expect(contacts.length).toBeGreaterThan(0);
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(1);
       expect(beginEvents[0].bodyA).toBeDefined();
       expect(beginEvents[0].bodyB).toBeDefined();
@@ -77,7 +88,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
       world.step(1 / 60);
       const contacts = world.getContacts();
 
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(0);
     });
 
@@ -87,7 +98,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
 
       expect(beginEvents.length).toBe(1);
       const contact = beginEvents[0].contacts[0];
@@ -104,7 +115,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(0);
     });
 
@@ -114,7 +125,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(1);
       expect(beginEvents[0].contacts[0].penetration).toBeCloseTo(3, 1); // radiusA + radiusB
     });
@@ -131,7 +142,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
 
       expect(beginEvents.length).toBe(1);
       expect(beginEvents[0].contacts[0].penetration).toBeGreaterThan(0);
@@ -143,7 +154,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(0);
     });
 
@@ -153,7 +164,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
 
       expect(beginEvents.length).toBe(1);
       const contact = beginEvents[0].contacts[0];
@@ -170,7 +181,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
 
       // The boxes overlap by 0.2 on the Y axis
       expect(beginEvents.length).toBe(1);
@@ -189,7 +200,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
 
       expect(beginEvents.length).toBe(1);
       expect(beginEvents[0].contacts[0].penetration).toBeGreaterThan(0);
@@ -201,7 +212,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(0);
     });
 
@@ -211,7 +222,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
 
       // Ball at y=1.3 with r=0.5 touches floor-top at y=1.0
       // Penetration should be about 0.2
@@ -231,7 +242,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
 
       expect(beginEvents.length).toBe(1);
       expect(beginEvents[0].contacts[0].penetration).toBeGreaterThan(0);
@@ -243,7 +254,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
 
       expect(beginEvents.length).toBe(1);
     });
@@ -254,7 +265,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(0);
     });
   });
@@ -271,12 +282,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
         type: 'dynamic',
         shape: {
           type: 'convex',
-          vertices: [
-            -1, -1, -1,
-             1, -1, -1,
-             0,  1, -1,
-             0,  0,  1,
-          ],
+          vertices: [-1, -1, -1, 1, -1, -1, 0, 1, -1, 0, 0, 1],
         },
         mass: 1,
         transform: { position: { x: 0, y: 0, z: 0 }, rotation: identityQuaternion() },
@@ -287,12 +293,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
         type: 'dynamic',
         shape: {
           type: 'convex',
-          vertices: [
-            -1, -1, -1,
-             1, -1, -1,
-             0,  1, -1,
-             0,  0,  1,
-          ],
+          vertices: [-1, -1, -1, 1, -1, -1, 0, 1, -1, 0, 0, 1],
         },
         mass: 1,
         transform: { position: { x: 0.5, y: 0, z: 0 }, rotation: identityQuaternion() },
@@ -303,7 +304,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
 
       expect(beginEvents.length).toBe(1);
       expect(beginEvents[0].contacts[0].penetration).toBeGreaterThan(0);
@@ -315,12 +316,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
         type: 'dynamic',
         shape: {
           type: 'convex',
-          vertices: [
-            -1, -1, -1,
-             1, -1, -1,
-             0,  1, -1,
-             0,  0,  1,
-          ],
+          vertices: [-1, -1, -1, 1, -1, -1, 0, 1, -1, 0, 0, 1],
         },
         mass: 1,
         transform: { position: { x: 0, y: 0, z: 0 }, rotation: identityQuaternion() },
@@ -331,12 +327,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
         type: 'dynamic',
         shape: {
           type: 'convex',
-          vertices: [
-            -1, -1, -1,
-             1, -1, -1,
-             0,  1, -1,
-             0,  0,  1,
-          ],
+          vertices: [-1, -1, -1, 1, -1, -1, 0, 1, -1, 0, 0, 1],
         },
         mass: 1,
         transform: { position: { x: 10, y: 0, z: 0 }, rotation: identityQuaternion() },
@@ -347,7 +338,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(0);
     });
   });
@@ -364,13 +355,13 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
       // First step: begin
       world.step(1 / 60);
       let contacts = world.getContacts();
-      let beginEvents = contacts.filter(c => c.type === 'begin');
+      let beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(1);
 
       // Second step: should persist (bodies are still overlapping, may have moved slightly)
       world.step(1 / 60);
       contacts = world.getContacts();
-      const persistOrBegin = contacts.filter(c => c.type === 'persist' || c.type === 'begin');
+      const persistOrBegin = contacts.filter((c) => c.type === 'persist' || c.type === 'begin');
       // Either persist or the collision might have ended and restarted
       expect(contacts.length).toBeGreaterThan(0);
     });
@@ -389,7 +380,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
       // Next step: should report end
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const endEvents = contacts.filter(c => c.type === 'end');
+      const endEvents = contacts.filter((c) => c.type === 'end');
       expect(endEvents.length).toBe(1);
     });
   });
@@ -485,7 +476,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
       }).not.toThrow();
 
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(1);
     });
 
@@ -495,7 +486,7 @@ describe('PhysicsWorldImpl - Collision Detection', () => {
 
       world.step(1 / 60);
       const contacts = world.getContacts();
-      const beginEvents = contacts.filter(c => c.type === 'begin');
+      const beginEvents = contacts.filter((c) => c.type === 'begin');
       expect(beginEvents.length).toBe(0);
     });
   });

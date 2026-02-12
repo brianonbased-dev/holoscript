@@ -11,15 +11,8 @@ import { marketplaceApi } from '@/lib/api';
 import { Sparkles, TrendingUp, Clock, Layers } from 'lucide-react';
 
 export default function MarketplacePage() {
-  const {
-    query,
-    results,
-    isSearching,
-    error,
-    filters,
-    setQuery,
-    performSearch,
-  } = useMarketplaceSearch();
+  const { query, results, isSearching, error, filters, setQuery, performSearch } =
+    useMarketplaceSearch();
 
   // Initial search on mount
   useEffect(() => {
@@ -137,34 +130,28 @@ export default function MarketplacePage() {
             <TraitGrid
               traits={results?.traits || []}
               isLoading={isSearching}
-              emptyMessage={
-                query
-                  ? `No traits found for "${query}"`
-                  : "No traits available"
-              }
+              emptyMessage={query ? `No traits found for "${query}"` : 'No traits available'}
             />
 
             {/* Pagination */}
             {results && results.totalPages > 1 && (
               <div className="mt-8 flex justify-center">
                 <nav className="flex gap-2">
-                  {Array.from({ length: Math.min(results.totalPages, 5) }).map(
-                    (_, i) => (
-                      <button
-                        key={i}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          results.page === i + 1
-                            ? 'bg-holoscript-500 text-white'
-                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                        }`}
-                        onClick={() => {
-                          // Handle pagination
-                        }}
-                      >
-                        {i + 1}
-                      </button>
-                    )
-                  )}
+                  {Array.from({ length: Math.min(results.totalPages, 5) }).map((_, i) => (
+                    <button
+                      key={i}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        results.page === i + 1
+                          ? 'bg-holoscript-500 text-white'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                      }`}
+                      onClick={() => {
+                        // Handle pagination
+                      }}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
                 </nav>
               </div>
             )}

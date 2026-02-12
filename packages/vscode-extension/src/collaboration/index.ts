@@ -9,8 +9,15 @@ export * from './CollaborationTypes';
 // Core classes
 export { CollaborativeDocument, createCollaborativeDocument } from './CollaborativeDocument';
 export { PresenceProvider, getPresenceProvider, disposePresenceProvider } from './PresenceProvider';
-export { CollaborationSession, getCollaborationSession, disposeCollaborationSession } from './CollaborationSession';
+export {
+  CollaborationSession,
+  getCollaborationSession,
+  disposeCollaborationSession,
+} from './CollaborationSession';
 export type { SessionState } from './CollaborationSession';
 
 // Commands registration
-export { registerCollaborationCommands, disposeCollaborationCommands } from './CollaborationCommands';
+export {
+  registerCollaborationCommands,
+  disposeCollaborationCommands,
+} from './CollaborationCommands';

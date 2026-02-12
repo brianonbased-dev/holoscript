@@ -236,7 +236,8 @@ export const openXRHALHandler: TraitHandler<OpenXRHALConfig> = {
 
     // Request to start XR session
     if (event.type === 'request_xr_session') {
-      const mode = (event.payload?.mode as 'immersive-vr' | 'immersive-ar' | 'inline') || 'immersive-vr';
+      const mode =
+        (event.payload?.mode as 'immersive-vr' | 'immersive-ar' | 'inline') || 'immersive-vr';
       requestXRSession(state, config, context, node, mode);
     }
 
@@ -394,7 +395,11 @@ function detectDeviceFromSession(
   }
 
   // Fallback check for Vision Pro (hand tracking only, no controller profiles)
-  if (!detectedProfile && session.environmentBlendMode === 'alpha-blend' && inputSources.length === 0) {
+  if (
+    !detectedProfile &&
+    session.environmentBlendMode === 'alpha-blend' &&
+    inputSources.length === 0
+  ) {
     detectedProfile = deviceProfiles['apple vision pro'];
   }
 

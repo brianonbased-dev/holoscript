@@ -4,13 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import {
-  SceneNode,
-  MergeConflict,
-  MergeResult,
-  HookResult,
-  PropertyChange,
-} from './GitTypes';
+import { SceneNode, MergeConflict, MergeResult, HookResult, PropertyChange } from './GitTypes';
 
 interface ASTNode {
   type: string;
@@ -24,7 +18,7 @@ interface ASTNode {
 
 /**
  * Three-way merge driver for HoloScript files
- * 
+ *
  * Performs semantic merging of scene graphs rather than text-based merge.
  * Understands object identity, transforms, and traits.
  */
@@ -37,7 +31,7 @@ export class MergeDriver {
 
   /**
    * Perform a three-way merge
-   * 
+   *
    * @param baseContent - Common ancestor content
    * @param oursContent - Our version content
    * @param theirsContent - Their version content
@@ -64,11 +58,7 @@ export class MergeDriver {
     let theirsApplied = 0;
 
     // Get all unique node IDs
-    const allIds = new Set([
-      ...baseNodes.keys(),
-      ...oursNodes.keys(),
-      ...theirsNodes.keys(),
-    ]);
+    const allIds = new Set([...baseNodes.keys(), ...oursNodes.keys(), ...theirsNodes.keys()]);
 
     for (const id of allIds) {
       const base = baseNodes.get(id);
@@ -100,7 +90,9 @@ export class MergeDriver {
       hasBase: baseContent.trim().length > 0,
     };
 
-    this.log(`Merge complete: ${conflicts.length} conflicts, ${oursApplied} ours, ${theirsApplied} theirs`);
+    this.log(
+      `Merge complete: ${conflicts.length} conflicts, ${oursApplied} ours, ${theirsApplied} theirs`
+    );
     return result;
   }
 
@@ -332,23 +324,20 @@ export class MergeDriver {
   private extractNodes(ast: ASTNode): Map<string, ASTNode> {
     const nodes = new Map<string, ASTNode>();
     const children = ast.children || [];
-    
+
     for (const child of children) {
       if (child.name) {
         nodes.set(child.name, child);
       }
     }
-    
+
     return nodes;
   }
 
   /**
    * Build merged AST
    */
-  private buildMergedAST(
-    nodes: Map<string, ASTNode>,
-    conflicts: MergeConflict[]
-  ): ASTNode {
+  private buildMergedAST(nodes: Map<string, ASTNode>, conflicts: MergeConflict[]): ASTNode {
     return {
       type: 'Scene',
       children: Array.from(nodes.values()),
@@ -360,7 +349,7 @@ export class MergeDriver {
    */
   private generateHoloScript(ast: ASTNode, conflicts: MergeConflict[]): string {
     const lines: string[] = [];
-    
+
     // Add header
     lines.push('// Merged HoloScript file');
     if (conflicts.length > 0) {
@@ -398,7 +387,7 @@ export class MergeDriver {
     if (!node) return '// (deleted)';
 
     const parts: string[] = [];
-    
+
     // Type and name
     parts.push(`${node.type} ${node.name}`);
 
@@ -452,14 +441,14 @@ export class MergeDriver {
   private simpleParseScene(content: string): ASTNode[] {
     const nodes: ASTNode[] = [];
     const objectRegex = /(\w+)\s+(\w+)\s*(?:@\s*\(([^)]*)\))?\s*{([^}]*)}/g;
-    
+
     let match;
     let line = 1;
-    
+
     while ((match = objectRegex.exec(content)) !== null) {
       const [, type, name, position, body] = match;
       line = content.slice(0, match.index).split('\n').length;
-      
+
       nodes.push({
         type,
         name,
@@ -468,7 +457,7 @@ export class MergeDriver {
         properties: this.parseProperties(body),
       });
     }
-    
+
     return nodes;
   }
 
@@ -480,13 +469,13 @@ export class MergeDriver {
   private parseProperties(body: string): Record<string, unknown> {
     const props: Record<string, unknown> = {};
     const propRegex = /(\w+)\s*[:=]\s*(.+?)(?:;|$)/g;
-    
+
     let match;
     while ((match = propRegex.exec(body)) !== null) {
       const [, key, value] = match;
       props[key] = this.parseValue(value.trim());
     }
-    
+
     return props;
   }
 
@@ -560,11 +549,7 @@ export class HoloScriptGitHooks {
   /**
    * Pre-merge hook - check for potential conflicts
    */
-  async preMerge(
-    _baseRef: string,
-    _oursRef: string,
-    _theirsRef: string
-  ): Promise<HookResult> {
+  async preMerge(_baseRef: string, _oursRef: string, _theirsRef: string): Promise<HookResult> {
     // Placeholder for merge checking
     return {
       passed: true,
@@ -629,11 +614,9 @@ export class HoloScriptGitHooks {
       const uri = vscode.Uri.file(filePath);
       const bytes = await vscode.workspace.fs.readFile(uri);
       const content = Buffer.from(bytes).toString('utf-8');
-      
+
       return (
-        content.includes('<<<<<<<') ||
-        content.includes('=======') ||
-        content.includes('>>>>>>>')
+        content.includes('<<<<<<<') || content.includes('=======') || content.includes('>>>>>>>')
       );
     } catch {
       return false;

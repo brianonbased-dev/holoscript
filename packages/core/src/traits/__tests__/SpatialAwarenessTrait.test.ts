@@ -253,10 +253,7 @@ describe('SpatialAwarenessTrait - Context Access', () => {
   });
 
   it('should check if in region', () => {
-    const region = createBoxRegion('zone1', 
-      { x: -10, y: -10, z: -10 }, 
-      { x: 10, y: 10, z: 10 }
-    );
+    const region = createBoxRegion('zone1', { x: -10, y: -10, z: -10 }, { x: 10, y: 10, z: 10 });
     trait.registerRegion(region);
     provider.update();
 
@@ -324,7 +321,7 @@ describe('SpatialAwarenessTrait - Queries', () => {
     const results = trait.findWithin(50, ['npc']);
 
     expect(results.length).toBe(2);
-    expect(results.every(r => r.entity.type === 'npc')).toBe(true);
+    expect(results.every((r) => r.entity.type === 'npc')).toBe(true);
   });
 
   it('should get distance to entity', () => {
@@ -418,10 +415,7 @@ describe('SpatialAwarenessTrait - Region Management', () => {
   });
 
   it('should register a region', () => {
-    const region = createBoxRegion('zone1', 
-      { x: -10, y: -10, z: -10 }, 
-      { x: 10, y: 10, z: 10 }
-    );
+    const region = createBoxRegion('zone1', { x: -10, y: -10, z: -10 }, { x: 10, y: 10, z: 10 });
     trait.registerRegion(region);
     provider.update();
 
@@ -429,10 +423,7 @@ describe('SpatialAwarenessTrait - Region Management', () => {
   });
 
   it('should unregister a region', () => {
-    const region = createBoxRegion('zone1', 
-      { x: -10, y: -10, z: -10 }, 
-      { x: 10, y: 10, z: 10 }
-    );
+    const region = createBoxRegion('zone1', { x: -10, y: -10, z: -10 }, { x: 10, y: 10, z: 10 });
     trait.registerRegion(region);
     provider.update();
 
@@ -444,10 +435,7 @@ describe('SpatialAwarenessTrait - Region Management', () => {
 
   it('should watch region', () => {
     const callback = vi.fn();
-    const region = createBoxRegion('zone1', 
-      { x: -10, y: -10, z: -10 }, 
-      { x: 10, y: 10, z: 10 }
-    );
+    const region = createBoxRegion('zone1', { x: -10, y: -10, z: -10 }, { x: 10, y: 10, z: 10 });
 
     trait.registerRegion(region);
     trait.watchRegion('zone1', callback);
@@ -459,10 +447,7 @@ describe('SpatialAwarenessTrait - Region Management', () => {
 
   it('should unwatch region', () => {
     const callback = vi.fn();
-    const region = createBoxRegion('zone1',
-      { x: -10, y: -10, z: -10 },
-      { x: 10, y: 10, z: 10 }
-    );
+    const region = createBoxRegion('zone1', { x: -10, y: -10, z: -10 }, { x: 10, y: 10, z: 10 });
 
     trait.registerRegion(region);
     trait.watchRegion('zone1', callback);
@@ -576,10 +561,9 @@ describe('SpatialAwarenessTrait - Events', () => {
     const handler = vi.fn();
     trait.on('region:entered', handler);
 
-    trait.registerRegion(createBoxRegion('zone1',
-      { x: -10, y: -10, z: -10 },
-      { x: 10, y: 10, z: 10 }
-    ));
+    trait.registerRegion(
+      createBoxRegion('zone1', { x: -10, y: -10, z: -10 }, { x: 10, y: 10, z: 10 })
+    );
     provider.update();
 
     expect(handler).toHaveBeenCalled();
@@ -589,10 +573,9 @@ describe('SpatialAwarenessTrait - Events', () => {
     const handler = vi.fn();
     trait.on('region:exited', handler);
 
-    trait.registerRegion(createBoxRegion('zone1',
-      { x: -10, y: -10, z: -10 },
-      { x: 10, y: 10, z: 10 }
-    ));
+    trait.registerRegion(
+      createBoxRegion('zone1', { x: -10, y: -10, z: -10 }, { x: 10, y: 10, z: 10 })
+    );
     provider.update();
 
     // Move outside region
@@ -608,9 +591,11 @@ describe('SpatialAwarenessTrait - Events', () => {
 
     provider.update();
 
-    expect(handler).toHaveBeenCalledWith(expect.objectContaining({
-      agentPosition: expect.any(Object),
-    }));
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agentPosition: expect.any(Object),
+      })
+    );
   });
 
   it('should not emit events for other agents', async () => {

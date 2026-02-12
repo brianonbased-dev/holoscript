@@ -1,6 +1,6 @@
 /**
  * Post-Processing Effects Module (v3.3)
- * 
+ *
  * Screen-space effects for HoloScript rendering pipeline.
  * @module postfx
  */
@@ -226,9 +226,7 @@ export const DEFAULT_POSTFX_PIPELINE: PostFXPipeline = {
 /**
  * Create a post-processing pipeline from partial config
  */
-export function createPostFXPipeline(
-  config: Partial<PostFXPipeline>
-): PostFXPipeline {
+export function createPostFXPipeline(config: Partial<PostFXPipeline>): PostFXPipeline {
   return {
     ...DEFAULT_POSTFX_PIPELINE,
     ...config,
@@ -242,10 +240,7 @@ export function createPostFXPipeline(
 /**
  * Merge effect configurations
  */
-export function mergeEffectConfig<T extends PostFXConfig>(
-  base: T,
-  override: Partial<T>
-): T {
+export function mergeEffectConfig<T extends PostFXConfig>(base: T, override: Partial<T>): T {
   return {
     ...base,
     ...override,

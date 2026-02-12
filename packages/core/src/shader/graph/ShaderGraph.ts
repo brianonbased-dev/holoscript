@@ -11,11 +11,7 @@ import type {
   INodeTemplate,
   NodeCategory,
 } from './ShaderGraphTypes';
-import {
-  getNodeTemplate,
-  areTypesCompatible,
-  ALL_NODE_TEMPLATES,
-} from './ShaderGraphTypes';
+import { getNodeTemplate, areTypesCompatible, ALL_NODE_TEMPLATES } from './ShaderGraphTypes';
 
 // ============================================================================
 // Serialization Types
@@ -265,9 +261,7 @@ export class ShaderGraph implements IShaderGraph {
    * Get all connections for a node
    */
   getNodeConnections(nodeId: string): IShaderConnection[] {
-    return this.connections.filter(
-      (c) => c.fromNode === nodeId || c.toNode === nodeId
-    );
+    return this.connections.filter((c) => c.fromNode === nodeId || c.toNode === nodeId);
   }
 
   /**
@@ -385,7 +379,9 @@ export class ShaderGraph implements IShaderGraph {
     for (const node of this.nodes.values()) {
       for (const input of node.inputs) {
         if (input.required && !input.connected && input.defaultValue === undefined) {
-          errors.push(`Node "${node.name}" (${node.id}): Required input "${input.name}" is not connected`);
+          errors.push(
+            `Node "${node.name}" (${node.id}): Required input "${input.name}" is not connected`
+          );
         }
       }
     }

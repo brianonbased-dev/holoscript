@@ -58,7 +58,13 @@ interface EscalationRule {
 }
 
 interface EscalationCondition {
-  type: 'confidence_below' | 'risk_above' | 'category_match' | 'keyword_match' | 'action_count' | 'time_based';
+  type:
+    | 'confidence_below'
+    | 'risk_above'
+    | 'category_match'
+    | 'keyword_match'
+    | 'action_count'
+    | 'time_based';
   value: number | string | string[];
 }
 
@@ -241,9 +247,7 @@ export const hitlHandler: TraitHandler<HITLConfig> = {
 
     // Clean expired rollback checkpoints
     if (config.enable_rollback) {
-      state.rollbackCheckpoints = state.rollbackCheckpoints.filter(
-        (cp) => cp.expiresAt > now
-      );
+      state.rollbackCheckpoints = state.rollbackCheckpoints.filter((cp) => cp.expiresAt > now);
     }
 
     // Check if max autonomous actions reached
@@ -267,15 +271,14 @@ export const hitlHandler: TraitHandler<HITLConfig> = {
 
     // Handle action request from agent
     if (event.type === 'agent_action_request') {
-      const { action, category, confidence, riskScore, description, metadata } =
-        event.payload as {
-          action: string;
-          category: ActionCategory;
-          confidence: number;
-          riskScore: number;
-          description: string;
-          metadata: Record<string, unknown>;
-        };
+      const { action, category, confidence, riskScore, description, metadata } = event.payload as {
+        action: string;
+        category: ActionCategory;
+        confidence: number;
+        riskScore: number;
+        description: string;
+        metadata: Record<string, unknown>;
+      };
 
       const decision = evaluateAction(node, state, config, {
         action,
@@ -293,7 +296,7 @@ export const hitlHandler: TraitHandler<HITLConfig> = {
           createRollbackCheckpoint(state, config, {
             action,
             agentId: (node as any).id || 'unknown',
-            stateBefore: metadata.stateBefore as Record<string, unknown> || {},
+            stateBefore: (metadata.stateBefore as Record<string, unknown>) || {},
           });
         }
 
@@ -356,10 +359,7 @@ export const hitlHandler: TraitHandler<HITLConfig> = {
       };
 
       // Verify operator is authorized
-      if (
-        config.approved_operators.length > 0 &&
-        !config.approved_operators.includes(operator)
-      ) {
+      if (config.approved_operators.length > 0 && !config.approved_operators.includes(operator)) {
         context.emit?.('hitl_unauthorized_operator', { node, operator, approvalId });
         return;
       }
@@ -428,10 +428,7 @@ export const hitlHandler: TraitHandler<HITLConfig> = {
         operator: string;
       };
 
-      if (
-        config.approved_operators.length === 0 ||
-        config.approved_operators.includes(operator)
-      ) {
+      if (config.approved_operators.length === 0 || config.approved_operators.includes(operator)) {
         const oldMode = state.currentMode;
         state.currentMode = newMode;
 
@@ -477,11 +474,14 @@ function evaluateAction(
   action: ActionEvaluation
 ): EvaluationResult {
   // 1. Constitutional Gating (New in v3.4)
-  const validation = ConstitutionalValidator.validate({
-    name: action.action,
-    category: action.category,
-    description: action.description || ''
-  }, config.constitution);
+  const validation = ConstitutionalValidator.validate(
+    {
+      name: action.action,
+      category: action.category,
+      description: action.description || '',
+    },
+    config.constitution
+  );
 
   if (!validation.allowed) {
     return {
@@ -489,7 +489,7 @@ function evaluateAction(
       reason: 'constitutional_violation',
       escalationLevel: validation.escalationLevel,
       isViolation: true,
-      violations: validation.violations
+      violations: validation.violations,
     };
   }
 

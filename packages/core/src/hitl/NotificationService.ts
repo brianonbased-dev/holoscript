@@ -101,7 +101,11 @@ export interface NotificationResult {
 // =============================================================================
 
 interface NotificationProvider {
-  send(payload: NotificationPayload, config: unknown, recipients: unknown): Promise<NotificationResult>;
+  send(
+    payload: NotificationPayload,
+    config: unknown,
+    recipients: unknown
+  ): Promise<NotificationResult>;
 }
 
 class EmailProvider implements NotificationProvider {
@@ -351,7 +355,10 @@ class SlackProvider implements NotificationProvider {
           { type: 'mrkdwn', text: `*Action:*\n${payload.approval.action}` },
           { type: 'mrkdwn', text: `*Category:*\n${payload.approval.category}` },
           { type: 'mrkdwn', text: `*Priority:*\n${payload.priority.toUpperCase()}` },
-          { type: 'mrkdwn', text: `*Confidence:*\n${(payload.approval.confidence * 100).toFixed(1)}%` },
+          {
+            type: 'mrkdwn',
+            text: `*Confidence:*\n${(payload.approval.confidence * 100).toFixed(1)}%`,
+          },
           { type: 'mrkdwn', text: `*Risk:*\n${(payload.approval.riskScore * 100).toFixed(1)}%` },
         ],
       },
@@ -596,7 +603,10 @@ export class HITLNotificationService {
   /**
    * Send notifications for an approval request
    */
-  async notify(approval: ApprovalRequest, options: Partial<NotificationPayload> = {}): Promise<NotificationResult[]> {
+  async notify(
+    approval: ApprovalRequest,
+    options: Partial<NotificationPayload> = {}
+  ): Promise<NotificationResult[]> {
     const payload: NotificationPayload = {
       title: options.title || `Approval Required: ${approval.action}`,
       message: options.message || approval.description,
@@ -615,12 +625,17 @@ export class HITLNotificationService {
 
     // Log notification results
     const successCount = results.filter((r) => r.success).length;
-    logger.info(`[Notification] Sent ${successCount}/${results.length} notifications for ${approval.id}`);
+    logger.info(
+      `[Notification] Sent ${successCount}/${results.length} notifications for ${approval.id}`
+    );
 
     return results;
   }
 
-  private async sendToChannel(channel: NotificationChannel, payload: NotificationPayload): Promise<NotificationResult> {
+  private async sendToChannel(
+    channel: NotificationChannel,
+    payload: NotificationPayload
+  ): Promise<NotificationResult> {
     const provider = this.providers.get(channel);
     if (!provider) {
       return {
@@ -724,7 +739,9 @@ export class HITLNotificationService {
 
 let notificationServiceInstance: HITLNotificationService | null = null;
 
-export function getNotificationService(config?: Partial<NotificationServiceConfig>): HITLNotificationService {
+export function getNotificationService(
+  config?: Partial<NotificationServiceConfig>
+): HITLNotificationService {
   if (!notificationServiceInstance) {
     notificationServiceInstance = new HITLNotificationService(config);
   }

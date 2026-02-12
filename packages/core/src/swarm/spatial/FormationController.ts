@@ -1,7 +1,7 @@
 /**
  * FormationController - Geometric swarm formations
  * HoloScript v3.2 - Autonomous Agent Swarms
- * 
+ *
  * Manages precise geometric arrangements of swarm agents
  */
 
@@ -10,14 +10,7 @@ import { Vector3 } from './Vector3';
 /**
  * Formation patterns
  */
-export type FormationType = 
-  | 'line'
-  | 'circle'
-  | 'grid'
-  | 'wedge'
-  | 'diamond'
-  | 'sphere'
-  | 'custom';
+export type FormationType = 'line' | 'circle' | 'grid' | 'wedge' | 'diamond' | 'sphere' | 'custom';
 
 /**
  * Formation slot - assigned position for an agent
@@ -134,11 +127,7 @@ export class FormationController {
 
     for (let i = 0; i < count; i++) {
       const angle = (2 * Math.PI * i) / count;
-      positions.push(new Vector3(
-        Math.cos(angle) * radius,
-        0,
-        Math.sin(angle) * radius
-      ));
+      positions.push(new Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
     }
 
     return positions;
@@ -158,11 +147,9 @@ export class FormationController {
     let index = 0;
     for (let row = 0; row < rows && index < count; row++) {
       for (let col = 0; col < cols && index < count; col++) {
-        positions.push(new Vector3(
-          xOffset + col * this.config.spacing,
-          0,
-          zOffset + row * this.config.spacing
-        ));
+        positions.push(
+          new Vector3(xOffset + col * this.config.spacing, 0, zOffset + row * this.config.spacing)
+        );
         index++;
       }
     }
@@ -203,7 +190,7 @@ export class FormationController {
     const positions: Vector3[] = [];
 
     // Calculate diamond dimensions
-    const n = Math.ceil((Math.sqrt(2 * count + 0.25) - 0.5));
+    const n = Math.ceil(Math.sqrt(2 * count + 0.25) - 0.5);
     let placed = 0;
 
     // Top half (expanding)
@@ -213,11 +200,7 @@ export class FormationController {
       const z = -row * this.config.spacing;
 
       for (let i = 0; i < rowWidth && placed < count; i++) {
-        positions.push(new Vector3(
-          xOffset + i * this.config.spacing,
-          0,
-          z
-        ));
+        positions.push(new Vector3(xOffset + i * this.config.spacing, 0, z));
         placed++;
       }
     }
@@ -229,11 +212,7 @@ export class FormationController {
       const z = (n - row) * this.config.spacing;
 
       for (let i = 0; i < rowWidth && placed < count; i++) {
-        positions.push(new Vector3(
-          xOffset + i * this.config.spacing,
-          0,
-          z
-        ));
+        positions.push(new Vector3(xOffset + i * this.config.spacing, 0, z));
         placed++;
       }
     }
@@ -246,7 +225,7 @@ export class FormationController {
    */
   private generateSphereFormation(count: number): Vector3[] {
     const positions: Vector3[] = [];
-    const radius = this.config.spacing * Math.cbrt(count) / 2;
+    const radius = (this.config.spacing * Math.cbrt(count)) / 2;
 
     // Use Fibonacci sphere algorithm for even distribution
     const goldenAngle = Math.PI * (3 - Math.sqrt(5));
@@ -256,11 +235,13 @@ export class FormationController {
       const radiusAtY = Math.sqrt(1 - y * y);
       const theta = goldenAngle * i;
 
-      positions.push(new Vector3(
-        Math.cos(theta) * radiusAtY * radius,
-        y * radius,
-        Math.sin(theta) * radiusAtY * radius
-      ));
+      positions.push(
+        new Vector3(
+          Math.cos(theta) * radiusAtY * radius,
+          y * radius,
+          Math.sin(theta) * radiusAtY * radius
+        )
+      );
     }
 
     return positions;
@@ -355,14 +336,14 @@ export class FormationController {
    * Get available (unassigned) slots
    */
   getAvailableSlots(): IFormationSlot[] {
-    return this.getAllSlots().filter(s => s.agentId === null);
+    return this.getAllSlots().filter((s) => s.agentId === null);
   }
 
   /**
    * Get assigned slots
    */
   getAssignedSlots(): IFormationSlot[] {
-    return this.getAllSlots().filter(s => s.agentId !== null);
+    return this.getAllSlots().filter((s) => s.agentId !== null);
   }
 
   /**

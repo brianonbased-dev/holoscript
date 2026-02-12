@@ -121,7 +121,10 @@ interface RenderNetworkConfig {
 
 const RENDER_NETWORK_API = 'https://api.rendernetwork.com/v2';
 
-const QUALITY_PRESETS: Record<RenderQuality, { samples: number; bounces: number; resolution: number }> = {
+const QUALITY_PRESETS: Record<
+  RenderQuality,
+  { samples: number; bounces: number; resolution: number }
+> = {
   preview: { samples: 32, bounces: 2, resolution: 0.5 },
   draft: { samples: 128, bounces: 4, resolution: 0.75 },
   production: { samples: 512, bounces: 8, resolution: 1.0 },

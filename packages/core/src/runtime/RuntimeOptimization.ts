@@ -185,6 +185,36 @@ export function MemoizedProperty() {
 }
 
 /**
+ * Method memoization decorator
+ */
+export function MethodMemoize(maxSize: number = 100) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+    const cache = new Map<string, any>();
+
+    descriptor.value = function (...args: any[]) {
+      const key = JSON.stringify(args);
+      if (cache.has(key)) {
+        return cache.get(key);
+      }
+
+      if (cache.size >= maxSize) {
+        const firstKey = cache.keys().next().value;
+        if (firstKey !== undefined) {
+          cache.delete(firstKey);
+        }
+      }
+
+      const result = originalMethod.apply(this, args);
+      cache.set(key, result);
+      return result;
+    };
+
+    return descriptor;
+  };
+}
+
+/**
  * LRU Cache with maximum size
  */
 export class LRUCache<K, V> {

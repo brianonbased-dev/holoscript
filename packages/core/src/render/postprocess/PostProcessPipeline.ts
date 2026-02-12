@@ -16,10 +16,7 @@ import {
   IEffectRenderContext,
   EffectParams,
 } from './PostProcessTypes';
-import {
-  PostProcessEffect,
-  createEffect,
-} from './PostProcessEffect';
+import { PostProcessEffect, createEffect } from './PostProcessEffect';
 
 /**
  * Default pipeline configuration
@@ -76,14 +73,14 @@ export class PostProcessPipeline {
    * Get effect by name
    */
   public getEffect(name: string): PostProcessEffect | undefined {
-    return this.effects.find(e => e.name === name);
+    return this.effects.find((e) => e.name === name);
   }
 
   /**
    * Get effect by type
    */
   public getEffectByType(type: PostProcessEffectType): PostProcessEffect | undefined {
-    return this.effects.find(e => e.type === type);
+    return this.effects.find((e) => e.type === type);
   }
 
   /**
@@ -200,9 +197,7 @@ export class PostProcessPipeline {
    * Remove an effect from the pipeline
    */
   public removeEffect(nameOrType: string | PostProcessEffectType): boolean {
-    const index = this.effects.findIndex(
-      e => e.name === nameOrType || e.type === nameOrType
-    );
+    const index = this.effects.findIndex((e) => e.name === nameOrType || e.type === nameOrType);
 
     if (index === -1) return false;
 
@@ -220,7 +215,7 @@ export class PostProcessPipeline {
     const newEffects: PostProcessEffect[] = [];
 
     for (const name of order) {
-      const effect = this.effects.find(e => e.name === name);
+      const effect = this.effects.find((e) => e.name === name);
       if (effect) {
         newEffects.push(effect);
       }
@@ -241,11 +236,9 @@ export class PostProcessPipeline {
    */
   public updateEffectParams(
     nameOrType: string | PostProcessEffectType,
-    params: Partial<EffectParams>,
+    params: Partial<EffectParams>
   ): boolean {
-    const effect = this.effects.find(
-      e => e.name === nameOrType || e.type === nameOrType
-    );
+    const effect = this.effects.find((e) => e.name === nameOrType || e.type === nameOrType);
 
     if (!effect) return false;
 
@@ -257,9 +250,7 @@ export class PostProcessPipeline {
    * Enable/disable an effect
    */
   public setEffectEnabled(nameOrType: string | PostProcessEffectType, enabled: boolean): boolean {
-    const effect = this.effects.find(
-      e => e.name === nameOrType || e.type === nameOrType
-    );
+    const effect = this.effects.find((e) => e.name === nameOrType || e.type === nameOrType);
 
     if (!effect) return false;
 
@@ -279,14 +270,14 @@ export class PostProcessPipeline {
     commandEncoder: GPUCommandEncoder,
     inputView: GPUTextureView,
     outputView: GPUTextureView,
-    frameData: Partial<IFrameData> = {},
+    frameData: Partial<IFrameData> = {}
   ): void {
     if (!this._initialized || !this.device) {
       console.warn('PostProcessPipeline not initialized');
       return;
     }
 
-    const enabledEffects = this.effects.filter(e => e.enabled);
+    const enabledEffects = this.effects.filter((e) => e.enabled);
 
     // If no effects, just copy input to output
     if (enabledEffects.length === 0) {
@@ -366,16 +357,18 @@ export class PostProcessPipeline {
   private copyTexture(
     commandEncoder: GPUCommandEncoder,
     source: GPUTextureView,
-    dest: GPUTextureView,
+    dest: GPUTextureView
   ): void {
     // Simple copy - in production, use copyTextureToTexture
     const passEncoder = commandEncoder.beginRenderPass({
-      colorAttachments: [{
-        view: dest,
-        loadOp: 'clear',
-        storeOp: 'store',
-        clearValue: { r: 0, g: 0, b: 0, a: 1 },
-      }],
+      colorAttachments: [
+        {
+          view: dest,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
     });
     passEncoder.end();
   }
@@ -386,7 +379,7 @@ export class PostProcessPipeline {
   private copyToTarget(
     commandEncoder: GPUCommandEncoder,
     source: GPUTextureView,
-    target: IRenderTarget,
+    target: IRenderTarget
   ): void {
     this.copyTexture(commandEncoder, source, target.view);
   }
@@ -395,14 +388,23 @@ export class PostProcessPipeline {
    * Create a preset pipeline configuration
    */
   public static createPreset(
-    preset: 'minimal' | 'standard' | 'cinematic' | 'performance',
+    preset: 'minimal' | 'standard' | 'cinematic' | 'performance'
   ): Partial<IPostProcessPipelineConfig> {
     switch (preset) {
       case 'minimal':
         return {
           hdrEnabled: false,
           effects: [
-            { type: 'fxaa', params: { enabled: true, intensity: 1.0, quality: 'medium', edgeThreshold: 0.166, edgeThresholdMin: 0.0833 } },
+            {
+              type: 'fxaa',
+              params: {
+                enabled: true,
+                intensity: 1.0,
+                quality: 'medium',
+                edgeThreshold: 0.166,
+                edgeThresholdMin: 0.0833,
+              },
+            },
           ],
         };
 
@@ -410,9 +412,42 @@ export class PostProcessPipeline {
         return {
           hdrEnabled: true,
           effects: [
-            { type: 'bloom', params: { enabled: true, intensity: 0.5, threshold: 1.0, softThreshold: 0.5, radius: 4, iterations: 5, anamorphic: 0, highQuality: false } },
-            { type: 'tonemap', params: { enabled: true, intensity: 1.0, operator: 'aces', exposure: 1.0, gamma: 2.2, whitePoint: 1.0, contrast: 1.0, saturation: 1.0 } },
-            { type: 'fxaa', params: { enabled: true, intensity: 1.0, quality: 'high', edgeThreshold: 0.166, edgeThresholdMin: 0.0833 } },
+            {
+              type: 'bloom',
+              params: {
+                enabled: true,
+                intensity: 0.5,
+                threshold: 1.0,
+                softThreshold: 0.5,
+                radius: 4,
+                iterations: 5,
+                anamorphic: 0,
+                highQuality: false,
+              },
+            },
+            {
+              type: 'tonemap',
+              params: {
+                enabled: true,
+                intensity: 1.0,
+                operator: 'aces',
+                exposure: 1.0,
+                gamma: 2.2,
+                whitePoint: 1.0,
+                contrast: 1.0,
+                saturation: 1.0,
+              },
+            },
+            {
+              type: 'fxaa',
+              params: {
+                enabled: true,
+                intensity: 1.0,
+                quality: 'high',
+                edgeThreshold: 0.166,
+                edgeThresholdMin: 0.0833,
+              },
+            },
           ],
         };
 
@@ -420,11 +455,62 @@ export class PostProcessPipeline {
         return {
           hdrEnabled: true,
           effects: [
-            { type: 'bloom', params: { enabled: true, intensity: 0.8, threshold: 0.8, softThreshold: 0.5, radius: 6, iterations: 6, anamorphic: 0.2, highQuality: true } },
-            { type: 'tonemap', params: { enabled: true, intensity: 1.0, operator: 'aces', exposure: 1.1, gamma: 2.2, whitePoint: 1.0, contrast: 1.05, saturation: 1.1 } },
-            { type: 'vignette', params: { enabled: true, intensity: 0.3, roundness: 1.2, smoothness: 0.4, color: [0, 0, 0] } },
-            { type: 'filmGrain', params: { enabled: true, intensity: 0.05, size: 1.5, luminanceContribution: 0.8, animated: true } },
-            { type: 'fxaa', params: { enabled: true, intensity: 1.0, quality: 'ultra', edgeThreshold: 0.125, edgeThresholdMin: 0.0625 } },
+            {
+              type: 'bloom',
+              params: {
+                enabled: true,
+                intensity: 0.8,
+                threshold: 0.8,
+                softThreshold: 0.5,
+                radius: 6,
+                iterations: 6,
+                anamorphic: 0.2,
+                highQuality: true,
+              },
+            },
+            {
+              type: 'tonemap',
+              params: {
+                enabled: true,
+                intensity: 1.0,
+                operator: 'aces',
+                exposure: 1.1,
+                gamma: 2.2,
+                whitePoint: 1.0,
+                contrast: 1.05,
+                saturation: 1.1,
+              },
+            },
+            {
+              type: 'vignette',
+              params: {
+                enabled: true,
+                intensity: 0.3,
+                roundness: 1.2,
+                smoothness: 0.4,
+                color: [0, 0, 0],
+              },
+            },
+            {
+              type: 'filmGrain',
+              params: {
+                enabled: true,
+                intensity: 0.05,
+                size: 1.5,
+                luminanceContribution: 0.8,
+                animated: true,
+              },
+            },
+            {
+              type: 'fxaa',
+              params: {
+                enabled: true,
+                intensity: 1.0,
+                quality: 'ultra',
+                edgeThreshold: 0.125,
+                edgeThresholdMin: 0.0625,
+              },
+            },
           ],
         };
 
@@ -433,7 +519,19 @@ export class PostProcessPipeline {
           hdrEnabled: false,
           msaaSamples: 1,
           effects: [
-            { type: 'tonemap', params: { enabled: true, intensity: 1.0, operator: 'reinhardLum', exposure: 1.0, gamma: 2.2, whitePoint: 1.0, contrast: 1.0, saturation: 1.0 } },
+            {
+              type: 'tonemap',
+              params: {
+                enabled: true,
+                intensity: 1.0,
+                operator: 'reinhardLum',
+                exposure: 1.0,
+                gamma: 2.2,
+                whitePoint: 1.0,
+                contrast: 1.0,
+                saturation: 1.0,
+              },
+            },
           ],
         };
     }
@@ -467,11 +565,14 @@ export class PostProcessPipeline {
   } {
     const bytesPerPixel = this.config.hdrEnabled ? 8 : 4; // RGBA16F vs RGBA8
     const pixelCount = this.currentWidth * this.currentHeight;
-    const renderTargetMemory = (this.pingPongTargets.filter(t => t !== null).length + this.renderTargets.size) * pixelCount * bytesPerPixel;
+    const renderTargetMemory =
+      (this.pingPongTargets.filter((t) => t !== null).length + this.renderTargets.size) *
+      pixelCount *
+      bytesPerPixel;
 
     return {
       effectCount: this.effects.length,
-      enabledEffects: this.effects.filter(e => e.enabled).length,
+      enabledEffects: this.effects.filter((e) => e.enabled).length,
       renderTargetCount: this.renderTargets.size + 2,
       estimatedMemoryMB: renderTargetMemory / (1024 * 1024),
     };
@@ -483,7 +584,7 @@ export class PostProcessPipeline {
  */
 export function createPostProcessPipeline(
   preset?: 'minimal' | 'standard' | 'cinematic' | 'performance',
-  customConfig?: Partial<IPostProcessPipelineConfig>,
+  customConfig?: Partial<IPostProcessPipelineConfig>
 ): PostProcessPipeline {
   const presetConfig = preset ? PostProcessPipeline.createPreset(preset) : {};
   return new PostProcessPipeline({ ...presetConfig, ...customConfig });

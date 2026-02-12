@@ -29,12 +29,13 @@ composition "Cyberpunk City" {
 ```
 
 ### Supported Metadata
-| Trait | Value | Description |
-| :--- | :--- | :--- |
-| **@author** | `string` | Your unique HoloHub username. |
+
+| Trait        | Value    | Description                                            |
+| :----------- | :------- | :----------------------------------------------------- |
+| **@author**  | `string` | Your unique HoloHub username.                          |
 | **@license** | `string` | The license for your scene (e.g., `MIT`, `CC-BY-4.0`). |
-| **@version** | `string` | Semantic versioning for your composition. |
-| **@tags** | `array` | Keywords used for semantic search. |
+| **@version** | `string` | Semantic versioning for your composition.              |
+| **@tags**    | `array`  | Keywords used for semantic search.                     |
 
 ---
 
@@ -87,6 +88,7 @@ composition "CreativeBuilder Portfolio" {
 ## Summary
 
 In this lesson, you learned:
+
 - How to add attribution via metadata traits.
 - The requirements for HoloHub discovery.
 - How your work is linked to the HoloHub ecosystem.

@@ -2,15 +2,7 @@
 
 import { useState } from 'react';
 import type { TraitPackage } from '@/types';
-import {
-  Code,
-  Copy,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  FileCode,
-  Play,
-} from 'lucide-react';
+import { Code, Copy, Check, ChevronDown, ChevronUp, FileCode, Play } from 'lucide-react';
 
 interface ExamplesTabProps {
   trait: TraitPackage;
@@ -61,14 +53,18 @@ export function ExamplesTab({ trait }: ExamplesTabProps) {
         </h3>
         <ol className="list-decimal list-inside space-y-2 text-sm text-holoscript-700 dark:text-holoscript-300">
           <li>
-            Install the trait: <code className="px-1 bg-holoscript-100 dark:bg-holoscript-900/40 rounded">holo trait add {trait.name}</code>
+            Install the trait:{' '}
+            <code className="px-1 bg-holoscript-100 dark:bg-holoscript-900/40 rounded">
+              holo trait add {trait.name}
+            </code>
           </li>
           <li>
-            Import in your HoloScript: <code className="px-1 bg-holoscript-100 dark:bg-holoscript-900/40 rounded">use {trait.name}::*;</code>
+            Import in your HoloScript:{' '}
+            <code className="px-1 bg-holoscript-100 dark:bg-holoscript-900/40 rounded">
+              use {trait.name}::*;
+            </code>
           </li>
-          <li>
-            Use the exported traits and functions in your code
-          </li>
+          <li>Use the exported traits and functions in your code</li>
         </ol>
       </div>
     </div>
@@ -100,9 +96,7 @@ function ExampleBlock({ example, index }: ExampleBlockProps) {
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50">
         <div className="flex items-center gap-3">
           <FileCode className="h-4 w-4 text-holoscript-500" />
-          <span className="font-medium text-zinc-900 dark:text-white">
-            {example.title}
-          </span>
+          <span className="font-medium text-zinc-900 dark:text-white">{example.title}</span>
           <span className="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 text-xs rounded">
             {example.language}
           </span>
@@ -112,11 +106,7 @@ function ExampleBlock({ example, index }: ExampleBlockProps) {
             onClick={handleCopy}
             className="flex items-center gap-1.5 px-2 py-1 text-sm text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
           >
-            {copied ? (
-              <Check className="h-4 w-4 text-green-500" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
+            {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
             {copied ? 'Copied!' : 'Copy'}
           </button>
         </div>
@@ -176,26 +166,33 @@ function HighlightedCode({ code, language }: HighlightedCodeProps) {
   // Simple syntax highlighting - in production, you'd use a proper highlighter
   const highlightLine = (line: string) => {
     // HoloScript keywords
-    const keywords = /\b(trait|fn|let|const|if|else|for|while|loop|match|use|pub|impl|struct|enum|type|return|await|async|spawn|entity|component|world)\b/g;
+    const keywords =
+      /\b(trait|fn|let|const|if|else|for|while|loop|match|use|pub|impl|struct|enum|type|return|await|async|spawn|entity|component|world)\b/g;
     const strings = /(["'`])(.*?)\1/g;
     const comments = /(\/\/.*$|\/\*[\s\S]*?\*\/)/gm;
     const numbers = /\b(\d+\.?\d*)\b/g;
     const functions = /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g;
 
     let result = line;
-    
+
     // Comments
     result = result.replace(comments, '<span class="text-zinc-400 dark:text-zinc-500">$1</span>');
-    
+
     // Strings
-    result = result.replace(strings, '<span class="text-amber-600 dark:text-amber-400">$1$2$1</span>');
-    
+    result = result.replace(
+      strings,
+      '<span class="text-amber-600 dark:text-amber-400">$1$2$1</span>'
+    );
+
     // Keywords
-    result = result.replace(keywords, '<span class="text-purple-600 dark:text-purple-400 font-semibold">$1</span>');
-    
+    result = result.replace(
+      keywords,
+      '<span class="text-purple-600 dark:text-purple-400 font-semibold">$1</span>'
+    );
+
     // Numbers
     result = result.replace(numbers, '<span class="text-cyan-600 dark:text-cyan-400">$1</span>');
-    
+
     // Functions (simple detection)
     result = result.replace(functions, '<span class="text-blue-600 dark:text-blue-400">$1</span>(');
 
@@ -203,7 +200,7 @@ function HighlightedCode({ code, language }: HighlightedCodeProps) {
   };
 
   const lines = code.split('\n');
-  
+
   return (
     <div className="space-y-0">
       {lines.map((line, i) => (
@@ -211,7 +208,7 @@ function HighlightedCode({ code, language }: HighlightedCodeProps) {
           <span className="w-8 text-right pr-4 text-zinc-400 dark:text-zinc-600 select-none text-xs">
             {i + 1}
           </span>
-          <span 
+          <span
             dangerouslySetInnerHTML={{ __html: highlightLine(line) || '&nbsp;' }}
             className="flex-1 text-zinc-800 dark:text-zinc-200"
           />
@@ -248,7 +245,7 @@ entity MyEntity {
       description: 'Example showing integration with required dependencies.',
       code: `// Import all required traits
 use ${trait.name}::*;
-${deps.map(d => `use ${d}::*;`).join('\n')}
+${deps.map((d) => `use ${d}::*;`).join('\n')}
 
 // Create a world with integrated components
 world IntegratedWorld {
@@ -256,7 +253,7 @@ world IntegratedWorld {
         component ${toPascalCase(trait.name)} {
             // Primary configuration
         }
-        ${deps.map(d => `component ${toPascalCase(d)} { }`).join('\n        ')}
+        ${deps.map((d) => `component ${toPascalCase(d)} { }`).join('\n        ')}
     }
 }`,
       language: 'holoscript',
@@ -305,6 +302,6 @@ function toPascalCase(str: string): string {
   return str
     .split(/[-_@/]/)
     .filter(Boolean)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join('');
 }

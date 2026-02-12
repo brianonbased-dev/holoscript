@@ -64,7 +64,8 @@ export class SequencerImpl implements ISequencer {
   private readonly tracks: Map<string, ITrack> = new Map();
   private readonly scheduledNotes: ScheduledNote[] = [];
   private readonly eventListeners: Map<AudioEventType, Set<AudioEventCallback>> = new Map();
-  private readonly triggerCallbacks: Map<string, Set<(note: INote, time: number) => void>> = new Map();
+  private readonly triggerCallbacks: Map<string, Set<(note: INote, time: number) => void>> =
+    new Map();
 
   private currentSequenceId: string | null = null;
   private startTime: number = 0;
@@ -716,8 +717,8 @@ export class SequencerImpl implements ISequencer {
         if (noteStartBeat >= elapsedBeats && noteStartBeat < lookAheadEnd) {
           // Check if already scheduled
           const alreadyScheduled = this.scheduledNotes.some(
-            sn =>
-                sn.track === trackId &&
+            (sn) =>
+              sn.track === trackId &&
               Math.abs(sn.startTime - this.beatsToSeconds(noteStartBeat)) < 0.001 &&
               sn.note.pitch === note.pitch
           );

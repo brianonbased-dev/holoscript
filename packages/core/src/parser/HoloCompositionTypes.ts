@@ -303,10 +303,19 @@ export interface HoloStateProperty extends HoloNode {
 export interface HoloTemplate extends HoloNode {
   type: 'Template';
   name: string;
+  version?: number;
+  migrations?: HoloMigration[];
   properties: HoloTemplateProperty[];
   state?: HoloState;
   actions: HoloAction[];
   traits: HoloObjectTrait[];
+  directives?: any[]; // For lifecycle hooks, etc.
+}
+
+export interface HoloMigration extends HoloNode {
+  type: 'Migration';
+  fromVersion: number;
+  body: any; // Statement list or raw code string
 }
 
 export interface HoloTemplateProperty extends HoloNode {
@@ -322,10 +331,12 @@ export interface HoloTemplateProperty extends HoloNode {
 export interface HoloObjectDecl extends HoloNode {
   type: 'Object';
   name: string;
+  __holo_id?: string; // Stable identity for hot-reload reference preservation
   template?: string; // "using" clause
   properties: HoloObjectProperty[];
   state?: HoloState;
   traits: HoloObjectTrait[];
+  directives?: any[]; // for compatibility with newer runtime
   children?: HoloObjectDecl[];
   subOrbs?: HoloSubOrb[];
 }
@@ -426,12 +437,21 @@ export type HoloStatement =
   | HoloMethodCall
   | HoloIfStatement
   | HoloForStatement
+  | HoloWhileStatement
+  | HoloClassicForStatement
+  | HoloVariableDeclaration
   | HoloAwaitStatement
   | HoloReturnStatement
   | HoloEmitStatement
   | HoloAnimateStatement
   | HoloOnErrorStatement
   | HoloExpressionStatement;
+
+export interface HoloWhileStatement extends HoloNode {
+  type: 'WhileStatement';
+  condition: HoloExpression;
+  body: HoloStatement[];
+}
 
 export interface HoloOnErrorStatement extends HoloNode {
   type: 'OnErrorStatement';
@@ -457,6 +477,21 @@ export interface HoloIfStatement extends HoloNode {
   condition: HoloExpression;
   consequent: HoloStatement[];
   alternate?: HoloStatement[];
+}
+
+export interface HoloClassicForStatement extends HoloNode {
+  type: 'ClassicForStatement';
+  init?: HoloStatement;
+  test?: HoloExpression;
+  update?: HoloStatement;
+  body: HoloStatement[];
+}
+
+export interface HoloVariableDeclaration extends HoloNode {
+  type: 'VariableDeclaration';
+  kind: 'let' | 'var' | 'const';
+  name: string;
+  value?: HoloExpression;
 }
 
 export interface HoloForStatement extends HoloNode {
@@ -506,6 +541,8 @@ export type HoloExpression =
   | HoloCallExpression
   | HoloArrayExpression
   | HoloObjectExpression
+  | HoloConditionalExpression
+  | HoloUpdateExpression
   | HoloBindExpression;
 
 export interface HoloLiteral extends HoloNode {
@@ -552,6 +589,20 @@ export interface HoloArrayExpression extends HoloNode {
 export interface HoloObjectExpression extends HoloNode {
   type: 'ObjectExpression';
   properties: { key: string; value: HoloExpression }[];
+}
+
+export interface HoloConditionalExpression extends HoloNode {
+  type: 'ConditionalExpression';
+  test: HoloExpression;
+  consequent: HoloExpression;
+  alternate: HoloExpression;
+}
+
+export interface HoloUpdateExpression extends HoloNode {
+  type: 'UpdateExpression';
+  operator: '++' | '--';
+  argument: HoloExpression;
+  prefix: boolean;
 }
 
 export interface HoloBindExpression extends HoloNode {

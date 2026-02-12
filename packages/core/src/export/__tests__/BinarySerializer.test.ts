@@ -8,11 +8,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  BinaryWriter,
-  BinaryReader,
-  BinarySerializer,
-} from '../BinarySerializer';
+import { BinaryWriter, BinaryReader, BinarySerializer } from '../BinarySerializer';
 import {
   createEmptySceneGraph,
   createEmptyNode,
@@ -45,9 +41,7 @@ describe('BinaryWriter', () => {
       writer.writeUint32(0x12345678);
 
       const buffer = writer.getBuffer();
-      expect(new Uint8Array(buffer)).toEqual(
-        new Uint8Array([0x78, 0x56, 0x34, 0x12])
-      );
+      expect(new Uint8Array(buffer)).toEqual(new Uint8Array([0x78, 0x56, 0x34, 0x12]));
     });
 
     it('should write int32', () => {
@@ -113,9 +107,7 @@ describe('BinaryWriter', () => {
       const buffer = writer.getBuffer();
       const view = new DataView(buffer);
       expect(view.getUint32(0, true)).toBe(5); // Length
-      expect(new TextDecoder().decode(new Uint8Array(buffer, 4, 5))).toBe(
-        'hello'
-      );
+      expect(new TextDecoder().decode(new Uint8Array(buffer, 4, 5))).toBe('hello');
     });
 
     it('should handle empty string', () => {
@@ -337,7 +329,7 @@ describe('BinarySerializer', () => {
 
     it('should reject invalid magic number', () => {
       const invalidBuffer = new ArrayBuffer(32);
-      new DataView(invalidBuffer).setUint32(0, 0xDEADBEEF, true);
+      new DataView(invalidBuffer).setUint32(0, 0xdeadbeef, true);
 
       const serializer = new BinarySerializer();
       expect(() => serializer.decode(invalidBuffer)).toThrow(/wrong magic/);

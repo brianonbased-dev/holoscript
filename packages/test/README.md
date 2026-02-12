@@ -125,7 +125,9 @@ Vitest integration:
 
 ```typescript
 const test = createCoverageTest(globalCoverageTracker);
-test('parses objects', () => { /* auto-tracks coverage */ });
+test('parses objects', () => {
+  /* auto-tracks coverage */
+});
 ```
 
 ## E2E Testing
@@ -168,7 +170,9 @@ const health = observability.getHealth();
 // Decorator
 class Parser {
   @traced('parse')
-  parse(code: string) { /* auto-traced */ }
+  parse(code: string) {
+    /* auto-traced */
+  }
 }
 
 // Wrapper

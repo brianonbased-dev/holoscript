@@ -328,11 +328,7 @@ export class AgentManifestBuilder {
   /**
    * Set classification
    */
-  classify(
-    categories: AgentCategory[],
-    position?: AgentPosition,
-    section?: AgentSection
-  ): this {
+  classify(categories: AgentCategory[], position?: AgentPosition, section?: AgentSection): this {
     this.manifest.categories = categories;
     this.manifest.position = position;
     this.manifest.section = section;

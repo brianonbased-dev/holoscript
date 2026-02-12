@@ -263,6 +263,8 @@ export type VRTraitName =
   | 'material_x'
   | 'scene_graph'
   // Co-Presence & Shared Experiences
+  | 'mitosis'
+  | 'logic'
   | 'co_located'
   | 'remote_presence'
   | 'shared_world'
@@ -292,6 +294,7 @@ export type VRTraitName =
   | 'buoyancy'
   | 'destruction'
   | 'zk_private'
+  | 'roadmap_node'
   | 'proactive';
 
 export { VRHand } from './types/HoloScriptPlus';
@@ -620,6 +623,8 @@ export interface TemplateNode extends ASTNode {
   name: string;
   parameters: string[];
   children: ASTNode[];
+  properties?: Record<string, HoloScriptValue>;
+  directives?: HSPlusDirective[];
   version?: string | number;
   migrations?: MigrationNode[];
 }

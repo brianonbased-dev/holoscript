@@ -552,14 +552,12 @@ function handleSecondarySale(
   }
 
   coin.stats.secondarySales++;
-  coin.stats.totalVolume = (parseFloat(coin.stats.totalVolume) + parseFloat(params.price)).toString();
-  coin.stats.royaltiesEarned = (
-    parseFloat(coin.stats.royaltiesEarned) + royaltyAmount
+  coin.stats.totalVolume = (
+    parseFloat(coin.stats.totalVolume) + parseFloat(params.price)
   ).toString();
+  coin.stats.royaltiesEarned = (parseFloat(coin.stats.royaltiesEarned) + royaltyAmount).toString();
 
-  state.totalRoyaltiesEarned = (
-    parseFloat(state.totalRoyaltiesEarned) + royaltyAmount
-  ).toString();
+  state.totalRoyaltiesEarned = (parseFloat(state.totalRoyaltiesEarned) + royaltyAmount).toString();
 
   context.emit?.('zora_royalty_earned', {
     node,
@@ -570,11 +568,7 @@ function handleSecondarySale(
   });
 }
 
-function calculateBondingCurvePrice(
-  currentSupply: number,
-  amount: number,
-  factor: number
-): number {
+function calculateBondingCurvePrice(currentSupply: number, amount: number, factor: number): number {
   // Exponential bonding curve
   let totalPrice = 0;
   for (let i = 0; i < amount; i++) {
@@ -596,25 +590,17 @@ function generateSymbol(name: string): string {
     .toUpperCase();
 }
 
-function checkMintStatus(
-  _mint: PendingMint,
-  _state: ZoraCoinsState,
-  _context: any
-): void {
+function checkMintStatus(_mint: PendingMint, _state: ZoraCoinsState, _context: any): void {
   // In production, this would check the blockchain for tx confirmation
 }
 
 // Production API helpers
-async function executeZoraApiCall<T>(
-  method: string,
-  url: string,
-  data?: any
-): Promise<T> {
+async function executeZoraApiCall<T>(method: string, url: string, data?: any): Promise<T> {
   const options: RequestInit = {
     method,
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     },
   };
 
@@ -623,7 +609,7 @@ async function executeZoraApiCall<T>(
   }
 
   const response = await fetch(url, options);
-  
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || `Zora API request failed: ${response.status}`);
@@ -657,7 +643,7 @@ async function executeMinting(
     chain: config.default_chain,
     metadata: {
       holoFileHash: mint.holoFileHash,
-    }
+    },
   });
 
   return {

@@ -96,7 +96,10 @@ export async function sha256(message: string): Promise<string> {
 
   if (crypto?.subtle) {
     const messageData = stringToBytes(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', messageData as unknown as BufferSource);
+    const hashBuffer = await crypto.subtle.digest(
+      'SHA-256',
+      messageData as unknown as BufferSource
+    );
     return bufferToHex(hashBuffer);
   }
 

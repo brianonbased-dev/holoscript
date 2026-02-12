@@ -39,12 +39,12 @@ import { SwarmCoordinator, AgentInfo, TaskInfo } from '@holoscript/core/swarm';
 new SwarmCoordinator(config?: SwarmCoordinatorConfig)
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `config.algorithm` | `'pso' \| 'aco' \| 'hybrid'` | `'pso'` | Optimization algorithm |
-| `config.maxIterations` | `number` | `100` | Maximum iterations |
-| `config.convergenceThreshold` | `number` | `0.001` | Stop when improvement < threshold |
-| `config.populationSize` | `number` | `30` | Swarm population size |
+| Parameter                     | Type                         | Default | Description                       |
+| ----------------------------- | ---------------------------- | ------- | --------------------------------- |
+| `config.algorithm`            | `'pso' \| 'aco' \| 'hybrid'` | `'pso'` | Optimization algorithm            |
+| `config.maxIterations`        | `number`                     | `100`   | Maximum iterations                |
+| `config.convergenceThreshold` | `number`                     | `0.001` | Stop when improvement < threshold |
+| `config.populationSize`       | `number`                     | `30`    | Swarm population size             |
 
 ### Methods
 
@@ -55,18 +55,18 @@ Optimize task assignment across agents.
 ```typescript
 const result = await coordinator.optimize(agents, tasks, {
   fitnessFunction: (assignment) => calculateScore(assignment),
-  constraints: [{ type: 'maxLoad', value: 0.8 }]
+  constraints: [{ type: 'maxLoad', value: 0.8 }],
 });
 ```
 
 **Returns:** `Promise<OptimizationResult>`
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `bestSolution` | `number[]` | Agent index per task |
-| `bestFitness` | `number` | Solution quality (0-1) |
-| `iterations` | `number` | Iterations run |
-| `converged` | `boolean` | Whether convergence reached |
+| Property       | Type       | Description                 |
+| -------------- | ---------- | --------------------------- |
+| `bestSolution` | `number[]` | Agent index per task        |
+| `bestFitness`  | `number`   | Solution quality (0-1)      |
+| `iterations`   | `number`   | Iterations run              |
+| `converged`    | `boolean`  | Whether convergence reached |
 
 #### `addAgent(agent: AgentInfo)`
 
@@ -98,14 +98,14 @@ import { PSOEngine, PSOConfig, PSOResult } from '@holoscript/core/swarm';
 new PSOEngine(config?: PSOConfig)
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `config.particleCount` | `number` | `30` | Number of particles |
-| `config.inertia` | `number` | `0.729` | Inertia weight |
-| `config.cognitive` | `number` | `1.49445` | Cognitive coefficient |
-| `config.social` | `number` | `1.49445` | Social coefficient |
-| `config.maxIterations` | `number` | `100` | Maximum iterations |
-| `config.convergenceThreshold` | `number` | `0.001` | Convergence threshold |
+| Parameter                     | Type     | Default   | Description           |
+| ----------------------------- | -------- | --------- | --------------------- |
+| `config.particleCount`        | `number` | `30`      | Number of particles   |
+| `config.inertia`              | `number` | `0.729`   | Inertia weight        |
+| `config.cognitive`            | `number` | `1.49445` | Cognitive coefficient |
+| `config.social`               | `number` | `1.49445` | Social coefficient    |
+| `config.maxIterations`        | `number` | `100`     | Maximum iterations    |
+| `config.convergenceThreshold` | `number` | `0.001`   | Convergence threshold |
 
 ### Methods
 
@@ -115,8 +115,8 @@ Run PSO optimization.
 
 ```typescript
 const result = await pso.optimize(
-  3,  // dimensions
-  (position) => -rastrigin(position),  // fitness (maximize)
+  3, // dimensions
+  (position) => -rastrigin(position), // fitness (maximize)
   { min: [-5, -5, -5], max: [5, 5, 5] }
 );
 ```
@@ -151,13 +151,13 @@ import { ACOEngine, ACOConfig } from '@holoscript/core/swarm';
 new ACOEngine(config?: ACOConfig)
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `config.antCount` | `number` | `20` | Number of ants |
-| `config.alpha` | `number` | `1.0` | Pheromone importance |
-| `config.beta` | `number` | `2.0` | Heuristic importance |
-| `config.evaporationRate` | `number` | `0.5` | Pheromone evaporation |
-| `config.maxIterations` | `number` | `100` | Maximum iterations |
+| Parameter                | Type     | Default | Description           |
+| ------------------------ | -------- | ------- | --------------------- |
+| `config.antCount`        | `number` | `20`    | Number of ants        |
+| `config.alpha`           | `number` | `1.0`   | Pheromone importance  |
+| `config.beta`            | `number` | `2.0`   | Heuristic importance  |
+| `config.evaporationRate` | `number` | `0.5`   | Pheromone evaporation |
+| `config.maxIterations`   | `number` | `100`   | Maximum iterations    |
 
 ### Methods
 
@@ -166,10 +166,7 @@ new ACOEngine(config?: ACOConfig)
 Find optimal path through graph.
 
 ```typescript
-const result = await aco.optimize(
-  adjacencyMatrix,
-  (path) => calculatePathCost(path)
-);
+const result = await aco.optimize(adjacencyMatrix, (path) => calculatePathCost(path));
 ```
 
 ---
@@ -190,11 +187,11 @@ import { LeaderElection, LeaderElectionConfig } from '@holoscript/core/swarm';
 new LeaderElection(nodeId: string, config?: LeaderElectionConfig)
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `config.heartbeatInterval` | `number` | `150` | Heartbeat interval (ms) |
-| `config.electionTimeout` | `{ min, max }` | `{ min: 300, max: 500 }` | Election timeout range |
-| `config.votingQuorum` | `number` | `0.5` | Quorum percentage for victory |
+| Parameter                  | Type           | Default                  | Description                   |
+| -------------------------- | -------------- | ------------------------ | ----------------------------- |
+| `config.heartbeatInterval` | `number`       | `150`                    | Heartbeat interval (ms)       |
+| `config.electionTimeout`   | `{ min, max }` | `{ min: 300, max: 500 }` | Election timeout range        |
+| `config.votingQuorum`      | `number`       | `0.5`                    | Quorum percentage for victory |
 
 ### Methods
 
@@ -239,10 +236,7 @@ Manage collaborative decision-making sessions.
 ### Import
 
 ```typescript
-import { 
-  CollectiveIntelligence, 
-  CollectiveIntelligenceConfig 
-} from '@holoscript/core/swarm';
+import { CollectiveIntelligence, CollectiveIntelligenceConfig } from '@holoscript/core/swarm';
 ```
 
 ### Constructor
@@ -251,11 +245,11 @@ import {
 new CollectiveIntelligence(config?: CollectiveIntelligenceConfig)
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `config.sessionTimeout` | `number` | `300000` | Session timeout (ms) |
-| `config.minParticipants` | `number` | `2` | Minimum participants |
-| `config.synthesisMode` | `'merge' \| 'vote' \| 'consensus'` | `'merge'` | Synthesis strategy |
+| Parameter                | Type                               | Default   | Description          |
+| ------------------------ | ---------------------------------- | --------- | -------------------- |
+| `config.sessionTimeout`  | `number`                           | `300000`  | Session timeout (ms) |
+| `config.minParticipants` | `number`                           | `2`       | Minimum participants |
+| `config.synthesisMode`   | `'merge' \| 'vote' \| 'consensus'` | `'merge'` | Synthesis strategy   |
 
 ### Methods
 
@@ -284,11 +278,12 @@ await collective.contribute(session.id, 'agent-1', {
   type: 'evidence',
   content: 'Found SQL injection vulnerability on line 45',
   confidence: 0.95,
-  references: ['OWASP-A03']
+  references: ['OWASP-A03'],
 });
 ```
 
 **Contribution Types:**
+
 - `hypothesis` - Proposed explanation or theory
 - `evidence` - Supporting or refuting data
 - `solution` - Proposed resolution
@@ -333,7 +328,7 @@ Cast votes.
 ```typescript
 round.vote('agent-1', [
   { contributionId: 'c1', score: 5 },
-  { contributionId: 'c2', score: 3 }
+  { contributionId: 'c2', score: 3 },
 ]);
 ```
 
@@ -397,7 +392,7 @@ const swarm = await manager.createSwarm({
   name: 'DataProcessingSwarm',
   objective: 'Process incoming data streams',
   minMembers: 3,
-  maxMembers: 10
+  maxMembers: 10,
 });
 ```
 
@@ -408,7 +403,7 @@ Gracefully disband a swarm.
 ```typescript
 await manager.disbandSwarm(swarm.id, {
   redistributeTasks: true,
-  notifyMembers: true
+  notifyMembers: true,
 });
 ```
 
@@ -451,7 +446,7 @@ Request to join a swarm.
 await membership.join('swarm-1', {
   id: 'agent-5',
   capabilities: ['analyze', 'render'],
-  load: 0.3
+  load: 0.3,
 });
 ```
 
@@ -485,10 +480,10 @@ import { QuorumPolicy, QuorumConfig, QuorumStatus } from '@holoscript/core/swarm
 new QuorumPolicy(config: QuorumConfig)
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `config.minMembers` | `number` | Minimum members required |
-| `config.minHealthy` | `number` | Minimum healthy members |
+| Parameter              | Type     | Description                 |
+| ---------------------- | -------- | --------------------------- |
+| `config.minMembers`    | `number` | Minimum members required    |
+| `config.minHealthy`    | `number` | Minimum healthy members     |
 | `config.quorumPercent` | `number` | Percentage for quorum (0-1) |
 
 ### Methods
@@ -522,7 +517,7 @@ const flocking = new FlockingBehavior({
   alignmentWeight: 1.0,
   cohesionWeight: 1.0,
   maxSpeed: 5.0,
-  neighborRadius: 10.0
+  neighborRadius: 10.0,
 });
 
 // Update each frame
@@ -561,7 +556,7 @@ const zones = new ZoneClaiming();
 // Claim a zone
 const result = await zones.claim('agent-1', {
   id: 'zone-a',
-  bounds: { min: { x: 0, y: 0, z: 0 }, max: { x: 10, y: 10, z: 10 } }
+  bounds: { min: { x: 0, y: 0, z: 0 }, max: { x: 10, y: 10, z: 10 } },
 });
 
 // Check ownership
@@ -581,13 +576,13 @@ import { Vector3 } from '@holoscript/core/swarm/spatial';
 const v1 = new Vector3(1, 2, 3);
 const v2 = new Vector3(4, 5, 6);
 
-v1.add(v2);           // Vector3(5, 7, 9)
-v1.subtract(v2);      // Vector3(-3, -3, -3)
-v1.multiply(2);       // Vector3(2, 4, 6)
-v1.normalize();       // Unit vector
-v1.length();          // Magnitude
-v1.distanceTo(v2);    // Distance between points
-Vector3.dot(v1, v2);  // Dot product
+v1.add(v2); // Vector3(5, 7, 9)
+v1.subtract(v2); // Vector3(-3, -3, -3)
+v1.multiply(2); // Vector3(2, 4, 6)
+v1.normalize(); // Unit vector
+v1.length(); // Magnitude
+v1.distanceTo(v2); // Distance between points
+Vector3.dot(v1, v2); // Dot product
 Vector3.cross(v1, v2); // Cross product
 ```
 
@@ -614,7 +609,7 @@ await bus.publish({
   type: 'swarm.taskAssigned',
   source: 'coordinator',
   payload: { taskId: 't1', agentId: 'a1' },
-  priority: 'high'
+  priority: 'high',
 });
 
 // Unsubscribe
@@ -632,7 +627,7 @@ import { BroadcastChannel, ChannelManager } from '@holoscript/core/swarm/messagi
 
 const channel = new BroadcastChannel('leader-updates', {
   requireAck: true,
-  historySize: 100
+  historySize: 100,
 });
 
 // Subscribe
@@ -658,7 +653,7 @@ const gossip = new GossipProtocol('node-1', {
   fanout: 3,
   gossipInterval: 1000,
   maxTTL: 30000,
-  maxHops: 10
+  maxHops: 10,
 });
 
 gossip.addPeer('node-2', 'ws://node2:8080');
@@ -698,10 +693,10 @@ metrics.observeHistogram('response_time', 0.234);
 metrics.observeSummary('request_size', 1024);
 
 // Query
-metrics.getCounter('tasks_completed');  // 1
-metrics.getGauge('agent_load');         // 0.75
-metrics.getHistogram('response_time');  // { count, sum, counts, boundaries }
-metrics.getSummary('request_size');     // { p50, p75, p90, p95, p99, count, sum }
+metrics.getCounter('tasks_completed'); // 1
+metrics.getGauge('agent_load'); // 0.75
+metrics.getHistogram('response_time'); // { count, sum, counts, boundaries }
+metrics.getSummary('request_size'); // { p50, p75, p90, p95, p99, count, sum }
 
 // Export
 console.log(metrics.toPrometheus());
@@ -725,7 +720,7 @@ inspector.updateAgent({
   load: 0.4,
   lastActive: Date.now(),
   position: { x: 10, y: 0, z: 5 },
-  properties: {}
+  properties: {},
 });
 
 // Track swarms
@@ -736,7 +731,7 @@ inspector.updateSwarm({
   leaderId: 'agent-1',
   state: 'active',
   createdAt: Date.now(),
-  properties: {}
+  properties: {},
 });
 
 // Track relations
@@ -744,7 +739,7 @@ inspector.addRelation({
   sourceId: 'agent-1',
   targetId: 'agent-2',
   type: 'neighbor',
-  strength: 0.8
+  strength: 0.8,
 });
 
 // Health checks
@@ -752,7 +747,7 @@ inspector.registerHealthCheck({
   name: 'coordinator',
   status: 'healthy',
   latency: 5,
-  lastCheck: Date.now()
+  lastCheck: Date.now(),
 });
 
 // Debug logging
@@ -787,30 +782,30 @@ import {
   AgentInfo,
   TaskInfo,
   OptimizationResult,
-  
+
   // PSO/ACO
   PSOConfig,
   PSOResult,
   Particle,
   ACOConfig,
   ACOResult,
-  
+
   // Leader Election
   LeaderElectionConfig,
   ElectionRole,
   ElectionState,
-  
+
   // Collective Intelligence
   CollectiveIntelligenceConfig,
   ContributionType,
   Contribution,
   SynthesisResult,
-  
+
   // Voting
   Vote,
   VotingResult,
   VotingRoundConfig,
-  
+
   // Swarm Lifecycle
   SwarmInfo,
   CreateSwarmRequest,
@@ -820,27 +815,27 @@ import {
   LeaveRequest,
   QuorumConfig,
   QuorumStatus,
-  
+
   // Spatial
   Vector3,
   FlockingConfig,
   FormationPattern,
   Zone,
   ClaimResult,
-  
+
   // Messaging
   ISwarmEvent,
   EventPriority,
   IChannelMessage,
   IGossipMessage,
-  
+
   // Analytics
   MetricType,
   IMetricStats,
   IAgentSnapshot,
   ISwarmSnapshot,
   IHealthCheck,
-  IInspectionResult
+  IInspectionResult,
 } from '@holoscript/core/swarm';
 ```
 

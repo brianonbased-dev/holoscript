@@ -116,9 +116,10 @@ function shapeSupport(shape: CollisionShape, position: IVector3, direction: IVec
 
       // Pick the endpoint of the line segment farthest along direction
       const dotSeg = vec3Dot(direction, segDir);
-      const endPoint = dotSeg >= 0
-        ? vec3Add(position, vec3Scale(segDir, halfH))
-        : vec3Sub(position, vec3Scale(segDir, halfH));
+      const endPoint =
+        dotSeg >= 0
+          ? vec3Add(position, vec3Scale(segDir, halfH))
+          : vec3Sub(position, vec3Scale(segDir, halfH));
 
       // Then extend by sphere radius in the direction
       const norm = vec3Normalize(direction);
@@ -135,16 +136,12 @@ function shapeSupport(shape: CollisionShape, position: IVector3, direction: IVec
 
       // Component of direction along axis
       const dotAxis = vec3Dot(direction, axisDir);
-      const axisPoint = dotAxis >= 0
-        ? vec3Scale(axisDir, halfH)
-        : vec3Scale(axisDir, -halfH);
+      const axisPoint = dotAxis >= 0 ? vec3Scale(axisDir, halfH) : vec3Scale(axisDir, -halfH);
 
       // Component of direction perpendicular to axis
       const perpDir = vec3Sub(direction, vec3Scale(axisDir, dotAxis));
       const perpLen = vec3Length(perpDir);
-      const discPoint = perpLen > 1e-10
-        ? vec3Scale(perpDir, r / perpLen)
-        : { x: 0, y: 0, z: 0 };
+      const discPoint = perpLen > 1e-10 ? vec3Scale(perpDir, r / perpLen) : { x: 0, y: 0, z: 0 };
 
       return vec3Add(position, vec3Add(axisPoint, discPoint));
     }
@@ -160,17 +157,14 @@ function shapeSupport(shape: CollisionShape, position: IVector3, direction: IVec
 
       // Base center point farthest in direction on the base disc
       const baseCenter: IVector3 = { x: 0, y: -halfH, z: 0 };
-      const basePoint = perpLen > 1e-10
-        ? vec3Add(baseCenter, vec3Scale(perpDir, r / perpLen))
-        : baseCenter;
+      const basePoint =
+        perpLen > 1e-10 ? vec3Add(baseCenter, vec3Scale(perpDir, r / perpLen)) : baseCenter;
 
       // Pick whichever support point is farthest along direction
       const dotApex = vec3Dot(apex, direction);
       const dotBase = vec3Dot(basePoint, direction);
 
-      return dotApex >= dotBase
-        ? vec3Add(position, apex)
-        : vec3Add(position, basePoint);
+      return dotApex >= dotBase ? vec3Add(position, apex) : vec3Add(position, basePoint);
     }
     case 'convex': {
       // Brute-force search through vertices
@@ -201,9 +195,11 @@ function shapeSupport(shape: CollisionShape, position: IVector3, direction: IVec
  * Minkowski difference support: support_A(d) - support_B(-d)
  */
 function minkowskiSupport(
-  shapeA: CollisionShape, posA: IVector3,
-  shapeB: CollisionShape, posB: IVector3,
-  direction: IVector3,
+  shapeA: CollisionShape,
+  posA: IVector3,
+  shapeB: CollisionShape,
+  posB: IVector3,
+  direction: IVector3
 ): IVector3 {
   const pointA = shapeSupport(shapeA, posA, direction);
   const pointB = shapeSupport(shapeB, posB, vec3Negate(direction));
@@ -235,8 +231,10 @@ interface GJKResult {
  * if so, the final simplex (tetrahedron) for use by EPA.
  */
 function gjk(
-  shapeA: CollisionShape, posA: IVector3,
-  shapeB: CollisionShape, posB: IVector3,
+  shapeA: CollisionShape,
+  posA: IVector3,
+  shapeB: CollisionShape,
+  posB: IVector3
 ): GJKResult {
   // Initial direction: from A to B
   let direction = vec3Sub(posB, posA);
@@ -356,7 +354,8 @@ function doSimplexTriangle(simplex: IVector3[], _direction: IVector3): SimplexRe
       // Region AC: remove B
       simplex.splice(1, 1); // [C, A]
       const newDir = vec3TripleProduct(ac, ao, ac);
-      if (vec3LengthSq(newDir) < 1e-20) return { containsOrigin: false, direction: vec3Perpendicular(ac) };
+      if (vec3LengthSq(newDir) < 1e-20)
+        return { containsOrigin: false, direction: vec3Perpendicular(ac) };
       return { containsOrigin: false, direction: newDir };
     } else {
       // Region A or AB
@@ -392,14 +391,15 @@ function doSimplexLineCheck(
   a: IVector3,
   b: IVector3,
   ao: IVector3,
-  ab: IVector3,
+  ab: IVector3
 ): SimplexResult {
   if (vec3Dot(ab, ao) > 0) {
     // Region AB: keep only A and B
     simplex.length = 0;
     simplex.push(b, a);
     const newDir = vec3TripleProduct(ab, ao, ab);
-    if (vec3LengthSq(newDir) < 1e-20) return { containsOrigin: false, direction: vec3Perpendicular(ab) };
+    if (vec3LengthSq(newDir) < 1e-20)
+      return { containsOrigin: false, direction: vec3Perpendicular(ab) };
     return { containsOrigin: false, direction: newDir };
   } else {
     // Region A only
@@ -509,8 +509,10 @@ interface EPAResult {
  */
 function epa(
   simplex: IVector3[],
-  shapeA: CollisionShape, posA: IVector3,
-  shapeB: CollisionShape, posB: IVector3,
+  shapeA: CollisionShape,
+  posA: IVector3,
+  shapeB: CollisionShape,
+  posB: IVector3
 ): EPAResult {
   // The simplex should be a tetrahedron (4 points)
   // Build initial polytope from the 4 faces
@@ -602,9 +604,9 @@ function epa(
 
     // Create new faces from the horizon edges to the new point
     const newCentroid: IVector3 = {
-      x: centroid.x * (polytope.length - 1) / polytope.length + newPoint.x / polytope.length,
-      y: centroid.y * (polytope.length - 1) / polytope.length + newPoint.y / polytope.length,
-      z: centroid.z * (polytope.length - 1) / polytope.length + newPoint.z / polytope.length,
+      x: (centroid.x * (polytope.length - 1)) / polytope.length + newPoint.x / polytope.length,
+      y: (centroid.y * (polytope.length - 1)) / polytope.length + newPoint.y / polytope.length,
+      z: (centroid.z * (polytope.length - 1)) / polytope.length + newPoint.z / polytope.length,
     };
 
     for (const [edgeA, edgeB] of edges) {
@@ -645,7 +647,7 @@ function buildEPAFace(
   ia: number,
   ib: number,
   ic: number,
-  centroid: IVector3,
+  centroid: IVector3
 ): EPAFace | null {
   const a = polytope[ia];
   const b = polytope[ib];
@@ -798,7 +800,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
     }
 
     this.bodies.delete(id);
-    this.bodiesArray = this.bodiesArray.filter(b => b.id !== id);
+    this.bodiesArray = this.bodiesArray.filter((b) => b.id !== id);
 
     return true;
   }
@@ -809,7 +811,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
   }
 
   public getAllBodies(): IRigidBodyState[] {
-    return this.bodiesArray.map(b => b.getState());
+    return this.bodiesArray.map((b) => b.getState());
   }
 
   // ============================================================================
@@ -927,8 +929,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
     this.accumulator += deltaTime;
     let substeps = 0;
 
-    while (this.accumulator >= this.config.fixedTimestep &&
-           substeps < this.config.maxSubsteps) {
+    while (this.accumulator >= this.config.fixedTimestep && substeps < this.config.maxSubsteps) {
       this.fixedStep(this.config.fixedTimestep);
       this.accumulator -= this.config.fixedTimestep;
       substeps++;
@@ -1050,8 +1051,10 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
 
   private checkCollision(
     bodyA: RigidBody,
-    bodyB: RigidBody,
-  ): { contacts: Array<{ position: IVector3; normal: IVector3; penetration: number; impulse: number }> } | null {
+    bodyB: RigidBody
+  ): {
+    contacts: Array<{ position: IVector3; normal: IVector3; penetration: number; impulse: number }>;
+  } | null {
     // ---- Fast path: sphere-sphere (exact, avoids GJK overhead) ----
     if (bodyA.shape.type === 'sphere' && bodyB.shape.type === 'sphere') {
       return this.checkSphereSphere(bodyA, bodyB);
@@ -1066,8 +1069,10 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
    */
   private checkSphereSphere(
     bodyA: RigidBody,
-    bodyB: RigidBody,
-  ): { contacts: Array<{ position: IVector3; normal: IVector3; penetration: number; impulse: number }> } | null {
+    bodyB: RigidBody
+  ): {
+    contacts: Array<{ position: IVector3; normal: IVector3; penetration: number; impulse: number }>;
+  } | null {
     const posA = bodyA.position;
     const posB = bodyB.position;
     const radiusA = (bodyA.shape as { radius: number }).radius;
@@ -1086,9 +1091,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
     const dist = Math.sqrt(distSq);
     const penetration = radiusSum - dist;
 
-    const normal = dist > 0
-      ? { x: dx / dist, y: dy / dist, z: dz / dist }
-      : { x: 0, y: 1, z: 0 };
+    const normal = dist > 0 ? { x: dx / dist, y: dy / dist, z: dz / dist } : { x: 0, y: 1, z: 0 };
 
     const contactPoint = {
       x: posA.x + normal.x * radiusA,
@@ -1097,12 +1100,14 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
     };
 
     return {
-      contacts: [{
-        position: contactPoint,
-        normal,
-        penetration,
-        impulse: 0,
-      }],
+      contacts: [
+        {
+          position: contactPoint,
+          normal,
+          penetration,
+          impulse: 0,
+        },
+      ],
     };
   }
 
@@ -1115,8 +1120,10 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
    */
   private checkGJKEPA(
     bodyA: RigidBody,
-    bodyB: RigidBody,
-  ): { contacts: Array<{ position: IVector3; normal: IVector3; penetration: number; impulse: number }> } | null {
+    bodyB: RigidBody
+  ): {
+    contacts: Array<{ position: IVector3; normal: IVector3; penetration: number; impulse: number }>;
+  } | null {
     const posA = bodyA.position;
     const posB = bodyB.position;
 
@@ -1128,11 +1135,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
     }
 
     // Step 2: EPA to find penetration depth and contact normal
-    const epaResult = epa(
-      gjkResult.simplex,
-      bodyA.shape, posA,
-      bodyB.shape, posB,
-    );
+    const epaResult = epa(gjkResult.simplex, bodyA.shape, posA, bodyB.shape, posB);
 
     // The normal from EPA points from A to B (direction to push B away from A).
     // Ensure the normal points from A toward B.
@@ -1155,19 +1158,28 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
     };
 
     return {
-      contacts: [{
-        position: contactPoint,
-        normal,
-        penetration,
-        impulse: 0,
-      }],
+      contacts: [
+        {
+          position: contactPoint,
+          normal,
+          penetration,
+          impulse: 0,
+        },
+      ],
     };
   }
 
   private resolveCollision(
     bodyA: RigidBody,
     bodyB: RigidBody,
-    collision: { contacts: Array<{ position: IVector3; normal: IVector3; penetration: number; impulse: number }> },
+    collision: {
+      contacts: Array<{
+        position: IVector3;
+        normal: IVector3;
+        penetration: number;
+        impulse: number;
+      }>;
+    }
   ): void {
     for (const contact of collision.contacts) {
       // Simple impulse-based resolution
@@ -1193,7 +1205,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
       const invMassSum = bodyA.inverseMass + bodyB.inverseMass;
       if (invMassSum === 0) continue;
 
-      const impulseMag = -(1 + restitution) * normalVelocity / invMassSum;
+      const impulseMag = (-(1 + restitution) * normalVelocity) / invMassSum;
 
       // Apply impulse
       const impulse = {
@@ -1209,7 +1221,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
       const percent = 0.8; // Correction percentage
       const slop = 0.01; // Penetration allowance
 
-      const correctionMag = Math.max(contact.penetration - slop, 0) / invMassSum * percent;
+      const correctionMag = (Math.max(contact.penetration - slop, 0) / invMassSum) * percent;
       const correction = {
         x: normal.x * correctionMag,
         y: normal.y * correctionMag,
@@ -1454,7 +1466,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
   public sphereOverlap(
     center: IVector3,
     radius: number,
-    filter?: ICollisionFilter,
+    filter?: ICollisionFilter
   ): IOverlapResult[] {
     const results: IOverlapResult[] = [];
 
@@ -1481,9 +1493,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
         results.push({
           bodyId: body.id,
           penetration: radius - dist,
-          direction: dist > 0
-            ? { x: dx / dist, y: dy / dist, z: dz / dist }
-            : { x: 0, y: 1, z: 0 },
+          direction: dist > 0 ? { x: dx / dist, y: dy / dist, z: dz / dist } : { x: 0, y: 1, z: 0 },
         });
       }
     }
@@ -1495,7 +1505,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
     center: IVector3,
     halfExtents: IVector3,
     _rotation?: IQuaternion,
-    filter?: ICollisionFilter,
+    filter?: ICollisionFilter
   ): IOverlapResult[] {
     const results: IOverlapResult[] = [];
 
@@ -1520,9 +1530,18 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
 
       if (this.aabbOverlap(queryAABB, bodyAABB)) {
         // Calculate penetration
-        const overlapX = Math.min(queryAABB.max.x - bodyAABB.min.x, bodyAABB.max.x - queryAABB.min.x);
-        const overlapY = Math.min(queryAABB.max.y - bodyAABB.min.y, bodyAABB.max.y - queryAABB.min.y);
-        const overlapZ = Math.min(queryAABB.max.z - bodyAABB.min.z, bodyAABB.max.z - queryAABB.min.z);
+        const overlapX = Math.min(
+          queryAABB.max.x - bodyAABB.min.x,
+          bodyAABB.max.x - queryAABB.min.x
+        );
+        const overlapY = Math.min(
+          queryAABB.max.y - bodyAABB.min.y,
+          bodyAABB.max.y - queryAABB.min.y
+        );
+        const overlapZ = Math.min(
+          queryAABB.max.z - bodyAABB.min.z,
+          bodyAABB.max.z - queryAABB.min.z
+        );
         const penetration = Math.min(overlapX, overlapY, overlapZ);
 
         const dx = body.position.x - center.x;
@@ -1533,9 +1552,7 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
         results.push({
           bodyId: body.id,
           penetration,
-          direction: len > 0
-            ? { x: dx / len, y: dy / len, z: dz / len }
-            : { x: 0, y: 1, z: 0 },
+          direction: len > 0 ? { x: dx / len, y: dy / len, z: dz / len } : { x: 0, y: 1, z: 0 },
         });
       }
     }
@@ -1581,9 +1598,12 @@ export class PhysicsWorldImpl implements IPhysicsWorld {
 
   private aabbOverlap(a: IAABB, b: IAABB): boolean {
     return (
-      a.min.x <= b.max.x && a.max.x >= b.min.x &&
-      a.min.y <= b.max.y && a.max.y >= b.min.y &&
-      a.min.z <= b.max.z && a.max.z >= b.min.z
+      a.min.x <= b.max.x &&
+      a.max.x >= b.min.x &&
+      a.min.y <= b.max.y &&
+      a.max.y >= b.min.y &&
+      a.min.z <= b.max.z &&
+      a.max.z >= b.min.z
     );
   }
 

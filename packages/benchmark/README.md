@@ -89,7 +89,7 @@ npm run bench -- --compare=baseline.json
 import { extractResults, detectRegressions } from '@holoscript/benchmark';
 
 const current = extractResults(bench, 'parser');
-const report = detectRegressions(current, baseline, 0.10); // 10% threshold
+const report = detectRegressions(current, baseline, 0.1); // 10% threshold
 ```
 
 ## Metrics Analysis
@@ -111,11 +111,11 @@ if (regression.isRegression) {
 
 Test fixtures in `fixtures/`:
 
-| File | Description |
-|------|-------------|
-| `small.hsplus` | Small scene (1 template, 2 objects) |
-| `medium.hsplus` | Medium scene (2 templates, grid layout) |
-| `large.hsplus` | Large scene (multiple templates, complex traits) |
+| File            | Description                                      |
+| --------------- | ------------------------------------------------ |
+| `small.hsplus`  | Small scene (1 template, 2 objects)              |
+| `medium.hsplus` | Medium scene (2 templates, grid layout)          |
+| `large.hsplus`  | Large scene (multiple templates, complex traits) |
 
 ## Exported Types
 

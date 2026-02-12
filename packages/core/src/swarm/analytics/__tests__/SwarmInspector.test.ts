@@ -134,7 +134,12 @@ describe('SwarmInspector', () => {
 
     it('should allow different relation types', () => {
       inspector.addRelation({ sourceId: 'a1', targetId: 'a2', type: 'neighbor', strength: 0.5 });
-      inspector.addRelation({ sourceId: 'a1', targetId: 'a2', type: 'communication', strength: 0.8 });
+      inspector.addRelation({
+        sourceId: 'a1',
+        targetId: 'a2',
+        type: 'communication',
+        strength: 0.8,
+      });
 
       expect(inspector.getAllRelations()).toHaveLength(2);
     });
@@ -207,7 +212,7 @@ describe('SwarmInspector', () => {
 
       const log = inspector.getEventLog();
       expect(log).toHaveLength(5);
-      expect(log.map(e => e.level)).toEqual(['trace', 'debug', 'info', 'warn', 'error']);
+      expect(log.map((e) => e.level)).toEqual(['trace', 'debug', 'info', 'warn', 'error']);
     });
 
     it('should filter events by level', () => {
@@ -244,7 +249,7 @@ describe('SwarmInspector', () => {
 
     it('should support event listeners', () => {
       const events: string[] = [];
-      const unsubscribe = inspector.addEventListener(e => events.push(e.message));
+      const unsubscribe = inspector.addEventListener((e) => events.push(e.message));
 
       inspector.info('src', 'message1');
       inspector.info('src', 'message2');
@@ -406,13 +411,13 @@ describe('SwarmInspector', () => {
 
       const graph = inspector.toGraph();
 
-      expect(graph.nodes.find(n => n.id === 'swarm-1')).toBeDefined();
-      expect(graph.nodes.find(n => n.id === 'a1')).toBeDefined();
+      expect(graph.nodes.find((n) => n.id === 'swarm-1')).toBeDefined();
+      expect(graph.nodes.find((n) => n.id === 'a1')).toBeDefined();
 
       // Edge for swarm membership
-      expect(graph.edges.find(e => e.source === 'a1' && e.target === 'swarm-1')).toBeDefined();
+      expect(graph.edges.find((e) => e.source === 'a1' && e.target === 'swarm-1')).toBeDefined();
       // Edge for relation
-      expect(graph.edges.find(e => e.source === 'a1' && e.target === 'a2')).toBeDefined();
+      expect(graph.edges.find((e) => e.source === 'a1' && e.target === 'a2')).toBeDefined();
     });
   });
 

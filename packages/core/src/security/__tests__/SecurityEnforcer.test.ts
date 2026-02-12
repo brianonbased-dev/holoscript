@@ -12,17 +12,9 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  createDefaultPolicy,
-  createStrictPolicy,
-  mergePolicy,
-} from '../SecurityPolicy';
+import { createDefaultPolicy, createStrictPolicy, mergePolicy } from '../SecurityPolicy';
 import type { SecurityPolicy } from '../SecurityPolicy';
-import {
-  validateComposition,
-  validateImports,
-  scanForVulnerabilities,
-} from '../SecurityEnforcer';
+import { validateComposition, validateImports, scanForVulnerabilities } from '../SecurityEnforcer';
 import type { ASTNode, ImportDeclaration } from '../SecurityEnforcer';
 import {
   generateKeyPair,
@@ -31,11 +23,7 @@ import {
   createPackageManifest,
   canonicalizeManifest,
 } from '../PackageSigner';
-import {
-  createSandbox,
-  execute,
-  destroy,
-} from '../SandboxExecutor';
+import { createSandbox, execute, destroy } from '../SandboxExecutor';
 
 // =============================================================================
 // SECURITY POLICY TESTS
@@ -402,9 +390,7 @@ describe('validateImports', () => {
       network: { allowedHosts: ['api.holoscript.dev'] },
     });
 
-    const imports: ImportDeclaration[] = [
-      { source: 'https://api.holoscript.dev/v1/lib.js' },
-    ];
+    const imports: ImportDeclaration[] = [{ source: 'https://api.holoscript.dev/v1/lib.js' }];
 
     const result = validateImports(imports, policy);
     expect(result.passed).toBe(true);
@@ -661,7 +647,8 @@ describe('PackageSigner', () => {
 
     it('should handle unicode content', () => {
       const keyPair = generateKeyPair();
-      const content = 'object "Orbe Brillante" @grabbable @glowing {\n  geometry: "sphere"\n  position: [0, 1, -3]\n}';
+      const content =
+        'object "Orbe Brillante" @grabbable @glowing {\n  geometry: "sphere"\n  position: [0, 1, -3]\n}';
 
       const signature = signPackage(content, keyPair.privateKey);
       const isValid = verifySignature(content, signature, keyPair.publicKey);
@@ -671,11 +658,11 @@ describe('PackageSigner', () => {
 
   describe('createPackageManifest', () => {
     it('should create a valid manifest', async () => {
-      const manifest = await createPackageManifest(
-        '@holoscript/my-package',
-        '1.0.0',
-        ['src/index.hs', 'src/scene.holo', 'README.md']
-      );
+      const manifest = await createPackageManifest('@holoscript/my-package', '1.0.0', [
+        'src/index.hs',
+        'src/scene.holo',
+        'README.md',
+      ]);
 
       expect(manifest.name).toBe('@holoscript/my-package');
       expect(manifest.version).toBe('1.0.0');
@@ -686,11 +673,11 @@ describe('PackageSigner', () => {
     });
 
     it('should sort files alphabetically', async () => {
-      const manifest = await createPackageManifest(
-        'test-pkg',
-        '2.0.0',
-        ['z-file.ts', 'a-file.ts', 'm-file.ts']
-      );
+      const manifest = await createPackageManifest('test-pkg', '2.0.0', [
+        'z-file.ts',
+        'a-file.ts',
+        'm-file.ts',
+      ]);
 
       expect(manifest.files).toEqual(['a-file.ts', 'm-file.ts', 'z-file.ts']);
     });
@@ -698,11 +685,7 @@ describe('PackageSigner', () => {
 
   describe('canonicalizeManifest', () => {
     it('should produce deterministic JSON', async () => {
-      const manifest = await createPackageManifest(
-        'test-pkg',
-        '1.0.0',
-        ['file1.hs', 'file2.hs']
-      );
+      const manifest = await createPackageManifest('test-pkg', '1.0.0', ['file1.hs', 'file2.hs']);
 
       const json1 = canonicalizeManifest(manifest);
       const json2 = canonicalizeManifest(manifest);
@@ -715,11 +698,11 @@ describe('PackageSigner', () => {
   describe('full signing roundtrip', () => {
     it('should sign and verify a complete package manifest', async () => {
       const keyPair = generateKeyPair();
-      const manifest = await createPackageManifest(
-        '@holoscript/vr-scene',
-        '3.1.0',
-        ['scene.holo', 'assets/orb.hs', 'assets/portal.hsplus']
-      );
+      const manifest = await createPackageManifest('@holoscript/vr-scene', '3.1.0', [
+        'scene.holo',
+        'assets/orb.hs',
+        'assets/portal.hsplus',
+      ]);
 
       const canonical = canonicalizeManifest(manifest);
       const signature = signPackage(canonical, keyPair.privateKey);
@@ -788,10 +771,7 @@ describe('SandboxExecutor', () => {
       const policy = createDefaultPolicy();
       const sandbox = createSandbox(policy);
 
-      const result = await execute(
-        'return JSON.stringify({ name: "test", value: 42 });',
-        sandbox
-      );
+      const result = await execute('return JSON.stringify({ name: "test", value: 42 });', sandbox);
 
       expect(result.success).toBe(true);
       expect(result.result).toBe('{"name":"test","value":42}');

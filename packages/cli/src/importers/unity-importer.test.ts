@@ -139,7 +139,7 @@ Transform:
 `;
       const documents = parseUnityYAML(content);
       const scene = buildSceneTree(documents, 'TestScene');
-      
+
       expect(scene.name).toBe('TestScene');
       expect(scene.gameObjects.length).toBeGreaterThan(0);
     });
@@ -164,7 +164,7 @@ Transform:
       const documents = parseUnityYAML(content);
       const scene = buildSceneTree(documents, 'TestScene');
       const { code, stats } = generateHoloCode(scene);
-      
+
       expect(code).toContain('composition "TestScene"');
       expect(code).toContain('environment {');
       expect(stats.gameObjectsImported).toBeGreaterThanOrEqual(0);
@@ -188,7 +188,7 @@ Transform:
       const documents = parseUnityYAML(content);
       const scene = buildSceneTree(documents, 'TestScene');
       const { code } = generateHoloCode(scene);
-      
+
       expect(code).toContain('position: [5, 10, 15]');
     });
 
@@ -217,7 +217,7 @@ Rigidbody:
       const documents = parseUnityYAML(content);
       const scene = buildSceneTree(documents, 'TestScene');
       const { code } = generateHoloCode(scene);
-      
+
       expect(code).toContain('@physics');
     });
 
@@ -245,7 +245,7 @@ BoxCollider:
       const documents = parseUnityYAML(content);
       const scene = buildSceneTree(documents, 'TestScene');
       const { code } = generateHoloCode(scene);
-      
+
       expect(code).toContain('@collidable');
     });
 
@@ -273,7 +273,7 @@ BoxCollider:
       const documents = parseUnityYAML(content);
       const scene = buildSceneTree(documents, 'TestScene');
       const { code } = generateHoloCode(scene);
-      
+
       expect(code).toContain('@trigger');
     });
 
@@ -302,7 +302,7 @@ Light:
       const documents = parseUnityYAML(content);
       const scene = buildSceneTree(documents, 'TestScene');
       const { code, stats } = generateHoloCode(scene);
-      
+
       expect(code).toContain('directional_light');
       expect(stats.lightsImported).toBe(1);
     });
@@ -332,7 +332,7 @@ Camera:
       const documents = parseUnityYAML(content);
       const scene = buildSceneTree(documents, 'TestScene');
       const { code, stats } = generateHoloCode(scene);
-      
+
       expect(code).toContain('perspective_camera');
       expect(stats.camerasImported).toBe(1);
     });
@@ -343,7 +343,7 @@ Camera:
       const result = await importUnity({
         inputPath: '/non/existent/file.unity',
       });
-      
+
       expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
     });
@@ -357,7 +357,7 @@ Camera:
         const result = await importUnity({
           inputPath: tempFile,
         });
-        
+
         expect(result.success).toBe(false);
         expect(result.errors[0]).toContain('Unsupported file type');
       } finally {
@@ -390,7 +390,7 @@ Transform:
           inputPath: tempFile,
           sceneName: 'CustomSceneName',
         });
-        
+
         expect(result.success).toBe(true);
         expect(result.sceneName).toBe('CustomSceneName');
         expect(result.holoCode).toContain('composition "CustomSceneName"');
@@ -404,7 +404,7 @@ Transform:
       const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'unity-test-'));
       const inputFile = path.join(tempDir, 'test.unity');
       const outputFile = path.join(tempDir, 'output.holo');
-      
+
       const content = `
 --- !u!1 &100001
 GameObject:
@@ -426,10 +426,10 @@ Transform:
           inputPath: inputFile,
           outputPath: outputFile,
         });
-        
+
         expect(result.success).toBe(true);
         expect(fs.existsSync(outputFile)).toBe(true);
-        
+
         const outputContent = fs.readFileSync(outputFile, 'utf-8');
         expect(outputContent).toContain('composition');
       } finally {

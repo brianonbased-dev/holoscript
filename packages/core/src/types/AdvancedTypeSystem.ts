@@ -384,6 +384,7 @@ export interface ASTProgram extends HSPlusNode {
   hasState: boolean;
   hasVRTraits: boolean;
   hasControlFlow: boolean;
+  migrations?: any[];
 }
 
 export type HSPlusAST = ASTProgram;
@@ -397,7 +398,9 @@ export type HSPlusDirective =
   | HSPlusForEachDirective
   | HSPlusWhileDirective
   | HSPlusIfDirective
-  | HSPlusImportDirective;
+  | HSPlusImportDirective
+  | HSPlusVersionDirective
+  | HSPlusMigrateDirective;
 
 export interface HSPlusBaseDirective extends HSPlusNode {
   type: 'directive' | 'fragment' | 'external_api' | 'generate';
@@ -458,6 +461,17 @@ export interface HSPlusImportDirective extends HSPlusNode {
   type: 'import';
   source: string;
   specifiers: string[];
+}
+
+export interface HSPlusVersionDirective extends HSPlusNode {
+  type: 'version';
+  version: number;
+}
+
+export interface HSPlusMigrateDirective extends HSPlusNode {
+  type: 'migrate';
+  fromVersion: number;
+  body: string;
 }
 
 export interface HSPlusCompileResult {

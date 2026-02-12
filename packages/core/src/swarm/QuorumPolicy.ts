@@ -1,6 +1,6 @@
 /**
  * Quorum Policy
- * 
+ *
  * Enforces minimum size requirements for swarm operations.
  */
 
@@ -117,7 +117,7 @@ export class QuorumPolicy {
   getState(): QuorumState {
     const requiredForQuorum = Math.ceil(this.config.optimalSize * this.config.quorumPercentage);
     const actualRequired = Math.max(this.config.minimumSize, requiredForQuorum);
-    
+
     return {
       currentSize: this.currentSize,
       status: this.getStatus(),
@@ -148,7 +148,7 @@ export class QuorumPolicy {
   getHealthScore(): number {
     if (this.currentSize === 0) return 0;
     if (this.currentSize < this.config.minimumSize) {
-      return this.currentSize / this.config.minimumSize * 0.5;
+      return (this.currentSize / this.config.minimumSize) * 0.5;
     }
     if (this.currentSize > this.config.maximumSize) {
       const excess = this.currentSize - this.config.maximumSize;

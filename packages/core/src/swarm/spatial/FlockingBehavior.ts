@@ -1,7 +1,7 @@
 /**
  * FlockingBehavior - Boid-based swarm movement
  * HoloScript v3.2 - Autonomous Agent Swarms
- * 
+ *
  * Implements Craig Reynolds' Boids algorithm:
  * - Separation: Steer to avoid crowding neighbors
  * - Alignment: Steer towards average heading of neighbors
@@ -80,11 +80,13 @@ export class FlockingBehavior {
     const boid: IBoid = {
       id,
       position: position.clone(),
-      velocity: velocity?.clone() ?? new Vector3(
-        (Math.random() - 0.5) * 2,
-        (Math.random() - 0.5) * 2,
-        (Math.random() - 0.5) * 2
-      ),
+      velocity:
+        velocity?.clone() ??
+        new Vector3(
+          (Math.random() - 0.5) * 2,
+          (Math.random() - 0.5) * 2,
+          (Math.random() - 0.5) * 2
+        ),
       acceleration: Vector3.zero(),
       maxSpeed: this.config.maxSpeed,
       maxForce: this.config.maxForce,
@@ -165,11 +167,14 @@ export class FlockingBehavior {
     const boidList = this.getAllBoids();
 
     for (const boid of boidList) {
-      const neighbors = this.findNeighbors(boid, Math.max(
-        this.config.separationRadius,
-        this.config.alignmentRadius,
-        this.config.cohesionRadius
-      ));
+      const neighbors = this.findNeighbors(
+        boid,
+        Math.max(
+          this.config.separationRadius,
+          this.config.alignmentRadius,
+          this.config.cohesionRadius
+        )
+      );
       this.updateBoid(boid, neighbors);
     }
   }

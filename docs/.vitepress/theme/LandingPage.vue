@@ -42,6 +42,7 @@ onMounted(() => {
           <a href="/guides/quick-start">Quick Start</a>
           <a href="/examples/">Examples</a>
           <a href="/api/traits">Traits</a>
+          <a href="https://studio.holoscript.net" class="nav-studio">Studio</a>
           <a href="https://github.com/brianonbased-dev/Holoscript" class="nav-github">GitHub</a>
         </div>
       </div>
@@ -56,7 +57,13 @@ onMounted(() => {
             <img src="/logo.svg" alt="HoloScript" class="hero-logo" />
           </a>
           <span class="hero-logo-x">&times;</span>
-          <a href="https://base.org" target="_blank" rel="noopener" class="hero-logo-link" aria-label="Base">
+          <a
+            href="https://base.org"
+            target="_blank"
+            rel="noopener"
+            class="hero-logo-link"
+            aria-label="Base"
+          >
             <img src="/base-logo.svg" alt="Base" class="hero-logo hero-logo--base" />
           </a>
         </div>
@@ -67,6 +74,7 @@ onMounted(() => {
           <strong>1,525 traits. One source, every platform.</strong>
         </p>
         <div class="hero-buttons">
+          <a href="https://studio.holoscript.net" class="btn btn-studio">Try Studio</a>
           <a href="/guides/quick-start" class="btn btn-primary">Get Started Free</a>
           <a href="https://github.com/brianonbased-dev/Holoscript" class="btn btn-outline"
             >View on GitHub</a
@@ -152,6 +160,67 @@ onMounted(() => {
             </p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- TRY STUDIO -->
+    <section class="section" id="studio">
+      <div class="container" style="text-align: center">
+        <h2 class="section-title">No Code? No Problem.</h2>
+        <p class="section-sub">
+          HoloScript Studio lets you build 3D scenes just by describing them. Type what you want,
+          see it in real-time. No install, no setup, no coding required.
+        </p>
+        <div class="studio-preview">
+          <div class="studio-mock">
+            <div class="studio-mock-header">
+              <span class="studio-dot studio-dot--red"></span>
+              <span class="studio-dot studio-dot--yellow"></span>
+              <span class="studio-dot studio-dot--green"></span>
+              <span class="studio-mock-title">HoloScript Studio</span>
+            </div>
+            <div class="studio-mock-body">
+              <div class="studio-mock-prompt">
+                <span class="studio-mock-cursor">|</span>
+                <span class="studio-mock-text"
+                  >"A floating crystal castle with glowing towers"</span
+                >
+              </div>
+              <div class="studio-mock-viewport">
+                <div class="studio-mock-grid"></div>
+                <div class="studio-mock-object studio-mock-obj1"></div>
+                <div class="studio-mock-object studio-mock-obj2"></div>
+                <div class="studio-mock-object studio-mock-obj3"></div>
+                <span class="studio-mock-label">Live 3D Preview</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="studio-features">
+          <div class="studio-feat">
+            <span class="studio-feat-icon">&#x1F4AC;</span>
+            <span>Describe in plain English</span>
+          </div>
+          <div class="studio-feat">
+            <span class="studio-feat-icon">&#x1F3A8;</span>
+            <span>Instant 3D preview</span>
+          </div>
+          <div class="studio-feat">
+            <span class="studio-feat-icon">&#x1F4BE;</span>
+            <span>Save &amp; share your scenes</span>
+          </div>
+          <div class="studio-feat">
+            <span class="studio-feat-icon">&#x1F4BB;</span>
+            <span>Works in any browser</span>
+          </div>
+        </div>
+        <a
+          href="https://studio.holoscript.net"
+          class="btn btn-studio btn-large"
+          style="margin-top: 2rem"
+        >
+          Open Studio &rarr;
+        </a>
       </div>
     </section>
 
@@ -261,8 +330,8 @@ animate();</code></pre>
             <div class="use-icon">&#x1F393;</div>
             <h3>Education</h3>
             <p>
-              Virtual classrooms, interactive science labs, and historical recreations. Make learning
-              immersive without technical barriers.
+              Virtual classrooms, interactive science labs, and historical recreations. Make
+              learning immersive without technical barriers.
             </p>
           </div>
           <div class="use-card">
@@ -294,25 +363,25 @@ animate();</code></pre>
             <div class="use-icon">&#x1F517;</div>
             <h3>Web3 &amp; Creator Economy</h3>
             <p>
-              Auto-mint scenes as Zora Coins (ERC-20) on Base. Token-gated experiences,
-              NFT-linked objects, bonding curve pricing, and royalties on secondary sales.
-              Built-in wallet, marketplace, and Clanker token integration in Hololand, a HoloScript-built app.
+              Auto-mint scenes as Zora Coins (ERC-20) on Base. Token-gated experiences, NFT-linked
+              objects, bonding curve pricing, and royalties on secondary sales. Built-in wallet,
+              marketplace, and Clanker token integration in Hololand, a HoloScript-built app.
             </p>
           </div>
           <div class="use-card">
             <div class="use-icon">&#x1F9BE;</div>
             <h3>Robotics</h3>
             <p>
-              Compile scenes to URDF for ROS 2 robots or SDF for Gazebo simulation. Design
-              robotic environments in VR, then deploy to real hardware.
+              Compile scenes to URDF for ROS 2 robots or SDF for Gazebo simulation. Design robotic
+              environments in VR, then deploy to real hardware.
             </p>
           </div>
           <div class="use-card">
             <div class="use-icon">&#x1F4E1;</div>
             <h3>IoT &amp; Digital Twins</h3>
             <p>
-              Export to DTDL for Azure Digital Twins and W3C WoT for IoT devices. Live sensor
-              data visualization and facility management dashboards.
+              Export to DTDL for Azure Digital Twins and W3C WoT for IoT devices. Live sensor data
+              visualization and facility management dashboards.
             </p>
           </div>
           <div class="use-card">
@@ -426,7 +495,10 @@ animate();</code></pre>
           <div class="card card--glow" style="text-align: center">
             <div class="card-icon">&#x1F916;</div>
             <h3 class="card-title card-title--cyan">AI Choreography</h3>
-            <p>34 MCP tools, multi-agent orchestration, spatial negotiation, and Brittney fine-tuned model</p>
+            <p>
+              34 MCP tools, multi-agent orchestration, spatial negotiation, and Brittney fine-tuned
+              model
+            </p>
           </div>
           <div class="card card--glow" style="text-align: center">
             <div class="card-icon">&#x1F504;</div>
@@ -459,9 +531,19 @@ animate();</code></pre>
           <a href="/guides/">Docs</a>
           <a href="/guides/quick-start">Quick Start</a>
           <a href="/examples/">Examples</a>
+          <a href="https://studio.holoscript.net">Studio</a>
           <a href="https://x.com/holoscript">X / Twitter</a>
         </div>
-        <p class="footer-tagline">Made with &#x1F49A; for the spatial computing community by Brian X Base LLC / <a href="https://x.com/OnBaseBrian" target="_blank" rel="noopener" class="footer-author-link">@onbasebrian</a></p>
+        <p class="footer-tagline">
+          Made with &#x1F49A; for the spatial computing community by Brian X Base LLC /
+          <a
+            href="https://x.com/OnBaseBrian"
+            target="_blank"
+            rel="noopener"
+            class="footer-author-link"
+            >@onbasebrian</a
+          >
+        </p>
         <span class="license-badge">MIT License</span>
       </div>
     </footer>
@@ -476,12 +558,10 @@ function hl(code) {
     .replace(/@(\w+)/g, '<span class="tr">@$1</span>')
     .replace(/"([^"]*)"/g, '<span class="st">"$1"</span>')
     .replace(/\b(\d+\.?\d*)\b/g, '<span class="nm">$1</span>')
-    .replace(
-      /(\w+):/g,
-      (m, p1) =>
-        ['composition', 'object', 'environment', 'template', 'player'].includes(p1)
-          ? m
-          : '<span class="pr">' + p1 + ':</span>'
+    .replace(/(\w+):/g, (m, p1) =>
+      ['composition', 'object', 'environment', 'template', 'player'].includes(p1)
+        ? m
+        : '<span class="pr">' + p1 + ':</span>'
     );
 }
 
@@ -490,18 +570,73 @@ export default {
     return {
       activeTab: 0,
       traits: [
-        { name: 'grabbable', desc: 'Pick up and move objects in VR', cat: 'interact', catLabel: 'Interaction' },
-        { name: 'teleport', desc: 'Enable teleport movement targets', cat: 'interact', catLabel: 'Interaction' },
-        { name: 'clickable', desc: 'Respond to user clicks and taps', cat: 'interact', catLabel: 'Interaction' },
+        {
+          name: 'grabbable',
+          desc: 'Pick up and move objects in VR',
+          cat: 'interact',
+          catLabel: 'Interaction',
+        },
+        {
+          name: 'teleport',
+          desc: 'Enable teleport movement targets',
+          cat: 'interact',
+          catLabel: 'Interaction',
+        },
+        {
+          name: 'clickable',
+          desc: 'Respond to user clicks and taps',
+          cat: 'interact',
+          catLabel: 'Interaction',
+        },
         { name: 'glowing', desc: 'Add emissive glow effects', cat: 'visual', catLabel: 'Visual' },
-        { name: 'particle_system', desc: 'Generate particle effects and animations', cat: 'visual', catLabel: 'Visual' },
-        { name: 'weather', desc: 'Add rain, snow, or fog atmospherics', cat: 'visual', catLabel: 'Visual' },
-        { name: 'physics', desc: 'Enable realistic physics simulation', cat: 'physics', catLabel: 'Physics' },
-        { name: 'cloth', desc: 'Simulate fabric and soft body dynamics', cat: 'physics', catLabel: 'Physics' },
-        { name: 'portal', desc: 'Create portals between spaces', cat: 'physics', catLabel: 'Physics' },
-        { name: 'behavior_tree', desc: 'AI-driven object behaviors', cat: 'smart', catLabel: 'Smart' },
-        { name: 'networked', desc: 'Sync objects across multiplayer sessions', cat: 'smart', catLabel: 'Smart' },
-        { name: 'hand_tracking', desc: 'Interact with natural hand gestures', cat: 'smart', catLabel: 'Smart' },
+        {
+          name: 'particle_system',
+          desc: 'Generate particle effects and animations',
+          cat: 'visual',
+          catLabel: 'Visual',
+        },
+        {
+          name: 'weather',
+          desc: 'Add rain, snow, or fog atmospherics',
+          cat: 'visual',
+          catLabel: 'Visual',
+        },
+        {
+          name: 'physics',
+          desc: 'Enable realistic physics simulation',
+          cat: 'physics',
+          catLabel: 'Physics',
+        },
+        {
+          name: 'cloth',
+          desc: 'Simulate fabric and soft body dynamics',
+          cat: 'physics',
+          catLabel: 'Physics',
+        },
+        {
+          name: 'portal',
+          desc: 'Create portals between spaces',
+          cat: 'physics',
+          catLabel: 'Physics',
+        },
+        {
+          name: 'behavior_tree',
+          desc: 'AI-driven object behaviors',
+          cat: 'smart',
+          catLabel: 'Smart',
+        },
+        {
+          name: 'networked',
+          desc: 'Sync objects across multiplayer sessions',
+          cat: 'smart',
+          catLabel: 'Smart',
+        },
+        {
+          name: 'hand_tracking',
+          desc: 'Interact with natural hand gestures',
+          cat: 'smart',
+          catLabel: 'Smart',
+        },
       ],
       testimonials: [
         {
@@ -509,7 +644,7 @@ export default {
           author: 'Sarah T., Educator',
         },
         {
-          text: "As an artist, I never thought I could create in VR. HoloScript made it so simple - I focus on the vision, not the code.",
+          text: 'As an artist, I never thought I could create in VR. HoloScript made it so simple - I focus on the vision, not the code.',
           author: 'Miguel R., Visual Artist',
         },
         {
@@ -707,6 +842,17 @@ export default {
 .nav-links a:hover {
   color: var(--cyan);
 }
+.nav-studio {
+  color: var(--purple) !important;
+  font-weight: 600;
+  background: rgba(139, 92, 246, 0.15);
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.nav-studio:hover {
+  background: rgba(139, 92, 246, 0.3);
+}
 .nav-github {
   color: var(--cyan) !important;
   font-weight: 600;
@@ -790,6 +936,15 @@ export default {
 .btn-outline:hover {
   background: rgba(0, 255, 255, 0.1);
   transform: translateY(-2px);
+}
+.btn-studio {
+  background: linear-gradient(135deg, var(--purple), #a855f7);
+  color: #fff;
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.25);
+}
+.btn-studio:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.4);
 }
 .btn-large {
   font-size: 1.25rem;
@@ -921,7 +1076,8 @@ export default {
   z-index: -1;
 }
 @keyframes logoPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.7;
     transform: translate(-50%, -50%) scale(1);
   }
@@ -1028,7 +1184,11 @@ export default {
   animation: bounce 2s infinite;
 }
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateX(-50%) translateY(0);
   }
   40% {
@@ -1359,6 +1519,174 @@ export default {
   font-weight: 600;
 }
 
+/* ========= STUDIO SECTION ========= */
+.studio-preview {
+  margin: 2.5rem auto;
+  max-width: 700px;
+}
+.studio-mock {
+  background: #0d0d14;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(139, 92, 246, 0.15);
+}
+.studio-mock-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(139, 92, 246, 0.08);
+  border-bottom: 1px solid var(--border);
+}
+.studio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.studio-dot--red {
+  background: #ef4444;
+}
+.studio-dot--yellow {
+  background: #fbbf24;
+}
+.studio-dot--green {
+  background: #22c55e;
+}
+.studio-mock-title {
+  margin-left: 8px;
+  font-size: 0.8rem;
+  color: var(--text2);
+  font-weight: 600;
+}
+.studio-mock-body {
+  display: flex;
+  min-height: 250px;
+}
+.studio-mock-prompt {
+  width: 40%;
+  padding: 1.5rem;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.studio-mock-cursor {
+  color: var(--purple);
+  animation: cursorBlink 1s infinite;
+}
+@keyframes cursorBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.studio-mock-text {
+  color: var(--text2);
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+.studio-mock-viewport {
+  flex: 1;
+  position: relative;
+  background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.studio-mock-grid {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 30px,
+      rgba(139, 92, 246, 0.06) 30px,
+      rgba(139, 92, 246, 0.06) 31px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 30px,
+      rgba(139, 92, 246, 0.06) 30px,
+      rgba(139, 92, 246, 0.06) 31px
+    );
+}
+.studio-mock-object {
+  position: absolute;
+  border-radius: 50%;
+  animation: float 3s ease-in-out infinite;
+}
+.studio-mock-obj1 {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, var(--cyan), rgba(0, 255, 255, 0.3));
+  top: 35%;
+  left: 45%;
+  animation-delay: 0s;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+.studio-mock-obj2 {
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle, var(--purple), rgba(139, 92, 246, 0.3));
+  top: 55%;
+  left: 65%;
+  animation-delay: 0.5s;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+}
+.studio-mock-obj3 {
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, #fbbf24, rgba(251, 191, 36, 0.3));
+  top: 25%;
+  left: 70%;
+  animation-delay: 1s;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.studio-mock-label {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: var(--text2);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+.studio-features {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+.studio-feat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: var(--text2);
+}
+.studio-feat-icon {
+  font-size: 1.3rem;
+}
+
 /* ========= RESPONSIVE ========= */
 @media (max-width: 768px) {
   .nav-links a:not(.nav-github) {
@@ -1400,6 +1728,26 @@ export default {
   .grid-3 {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+  .studio-mock-body {
+    flex-direction: column;
+  }
+  .studio-mock-prompt {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 1rem;
+  }
+  .studio-mock-viewport {
+    min-height: 180px;
+  }
+  .studio-features {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .nav-studio {
+    display: none;
   }
 }
 </style>

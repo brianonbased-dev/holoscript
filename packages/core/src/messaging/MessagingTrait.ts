@@ -24,10 +24,7 @@ import { AgentMessaging, AgentMessagingConfig } from './AgentMessaging';
 
 export interface MessagingTraitBehavior extends TraitBehavior {
   // Channel operations
-  createChannel: (
-    participants: string[],
-    config?: Partial<ChannelConfig>
-  ) => AgentChannel;
+  createChannel: (participants: string[], config?: Partial<ChannelConfig>) => AgentChannel;
   joinChannel: (channelId: string) => boolean;
   leaveChannel: (channelId: string) => boolean;
   getChannels: () => AgentChannel[];
@@ -46,11 +43,7 @@ export interface MessagingTraitBehavior extends TraitBehavior {
     payload: T,
     priority?: MessagePriority
   ) => BroadcastMessage<T> | null;
-  reply: <T>(
-    originalMessage: Message<unknown>,
-    type: string,
-    payload: T
-  ) => Message<T> | null;
+  reply: <T>(originalMessage: Message<unknown>, type: string, payload: T) => Message<T> | null;
 
   // Subscriptions
   subscribe: <T>(channelId: string, handler: MessageHandler<T>) => () => void;
@@ -96,10 +89,7 @@ export function createMessagingTrait(
     // CHANNEL OPERATIONS
     // =========================================================================
 
-    createChannel(
-      participants: string[],
-      channelConfig?: Partial<ChannelConfig>
-    ): AgentChannel {
+    createChannel(participants: string[], channelConfig?: Partial<ChannelConfig>): AgentChannel {
       return messaging.createChannel(participants, channelConfig);
     },
 
@@ -138,11 +128,7 @@ export function createMessagingTrait(
       return messaging.broadcast(channelId, type, payload, priority);
     },
 
-    reply<T>(
-      originalMessage: Message<unknown>,
-      type: string,
-      payload: T
-    ): Message<T> | null {
+    reply<T>(originalMessage: Message<unknown>, type: string, payload: T): Message<T> | null {
       return messaging.reply(originalMessage, type, payload);
     },
 
@@ -150,17 +136,11 @@ export function createMessagingTrait(
     // SUBSCRIPTIONS
     // =========================================================================
 
-    subscribe<T>(
-      channelId: string,
-      handler: MessageHandler<T>
-    ): () => void {
+    subscribe<T>(channelId: string, handler: MessageHandler<T>): () => void {
       return messaging.subscribe(channelId, handler);
     },
 
-    subscribeToType<T>(
-      type: string,
-      handler: MessageHandler<T>
-    ): () => void {
+    subscribeToType<T>(type: string, handler: MessageHandler<T>): () => void {
       return messaging.subscribeToType(type, handler);
     },
 
@@ -258,10 +238,7 @@ export class MessagingTraitManager {
   private defaultConfig: Partial<AgentMessagingConfig>;
   private traits: Map<string, MessagingTraitBehavior> = new Map();
 
-  constructor(
-    channelManager?: ChannelManager,
-    config: Partial<AgentMessagingConfig> = {}
-  ) {
+  constructor(channelManager?: ChannelManager, config: Partial<AgentMessagingConfig> = {}) {
     this.channelManager = channelManager || new ChannelManager();
     this.defaultConfig = config;
   }
@@ -269,17 +246,13 @@ export class MessagingTraitManager {
   /**
    * Get or create messaging trait for entity
    */
-  getOrCreate(
-    entityId: string,
-    config?: Partial<AgentMessagingConfig>
-  ): MessagingTraitBehavior {
+  getOrCreate(entityId: string, config?: Partial<AgentMessagingConfig>): MessagingTraitBehavior {
     let trait = this.traits.get(entityId);
     if (!trait) {
-      trait = createMessagingTrait(
-        entityId,
-        this.channelManager,
-        { ...this.defaultConfig, ...config }
-      );
+      trait = createMessagingTrait(entityId, this.channelManager, {
+        ...this.defaultConfig,
+        ...config,
+      });
       this.traits.set(entityId, trait);
     }
     return trait;

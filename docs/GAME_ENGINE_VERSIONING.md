@@ -16,15 +16,15 @@ HoloScript compiles to **15+ game engine targets**, each with multiple LTS versi
 
 ## Support Matrix (Feb 2026)
 
-| Engine | Versions Supported | HoloScript SDK Version | Support Until | Priority |
-|--------|-------------------|----------------------|---------------|----------|
-| **Unity 6** | 6.0 LTS, 6.3 LTS | 3.0.0+ | Oct 2026 (6.0), Dec 2027 (6.3) | 🔥 High |
-| **Unity 2022 LTS** | 2022.3 | 3.0.0+ | Mid-2024 (fixes) | ⚠️ Medium |
-| **Unity 2021 LTS** | 2021.3 | 2.5.x (legacy) | 2026 Extended | ⏳ Legacy |
-| **Unreal Engine 5** | 5.3+, 5.4 | 3.0.0+ | Ongoing | 🔥 High |
-| **Unreal Engine 4** | 4.27 | 2.8.x (legacy) | 2025 | ⏳ Legacy |
-| **Godot 4** | 4.0+, 4.2 | 3.0.0+ | Ongoing | 🔥 High |
-| **Godot 3** | 3.5 | 2.7.x (legacy) | 2025 | ⏳ Legacy |
+| Engine              | Versions Supported | HoloScript SDK Version | Support Until                  | Priority  |
+| ------------------- | ------------------ | ---------------------- | ------------------------------ | --------- |
+| **Unity 6**         | 6.0 LTS, 6.3 LTS   | 3.0.0+                 | Oct 2026 (6.0), Dec 2027 (6.3) | 🔥 High   |
+| **Unity 2022 LTS**  | 2022.3             | 3.0.0+                 | Mid-2024 (fixes)               | ⚠️ Medium |
+| **Unity 2021 LTS**  | 2021.3             | 2.5.x (legacy)         | 2026 Extended                  | ⏳ Legacy |
+| **Unreal Engine 5** | 5.3+, 5.4          | 3.0.0+                 | Ongoing                        | 🔥 High   |
+| **Unreal Engine 4** | 4.27               | 2.8.x (legacy)         | 2025                           | ⏳ Legacy |
+| **Godot 4**         | 4.0+, 4.2          | 3.0.0+                 | Ongoing                        | 🔥 High   |
+| **Godot 3**         | 3.5                | 2.7.x (legacy)         | 2025                           | ⏳ Legacy |
 
 ---
 
@@ -95,11 +95,13 @@ namespace HoloScript.Runtime
 ```
 
 **Benefits**:
+
 - ✅ Single codebase
 - ✅ Easy to maintain
 - ✅ Automatic version detection
 
 **Limitations**:
+
 - ⚠️ Package manifest locked to minimum version (`unity: "2022.3"`)
 - ⚠️ Can't optimize for older versions
 
@@ -119,6 +121,7 @@ packages/
 ```
 
 **package.json (Modern)**:
+
 ```json
 {
   "name": "com.holoscript.core",
@@ -128,6 +131,7 @@ packages/
 ```
 
 **package.json (Legacy)**:
+
 ```json
 {
   "name": "com.holoscript.core",
@@ -137,16 +141,19 @@ packages/
 ```
 
 **Unity Package Manager Resolution**:
+
 - Unity 6 → Downloads `3.0.0` (compatible)
 - Unity 2022 → Downloads `3.0.0` (compatible)
 - Unity 2021 → Downloads `2.5.10` (only compatible version)
 
 **Benefits**:
+
 - ✅ Full API compatibility per version
 - ✅ Can deprecate old versions cleanly
 - ✅ Unity auto-selects correct package
 
 **Limitations**:
+
 - ⚠️ Code duplication
 - ⚠️ Must backport critical fixes to legacy
 
@@ -203,11 +210,13 @@ namespace HoloScript.Runtime.Features
 ```
 
 **Benefits**:
+
 - ✅ Graceful degradation
 - ✅ Works across all Unity versions
 - ✅ No compile errors on older versions
 
 **Limitations**:
+
 - ⚠️ Runtime overhead (reflection)
 - ⚠️ No compile-time type safety
 
@@ -232,6 +241,7 @@ HoloScript 2.5.x (com.holoscript.core@2.5.x) - LEGACY
 ### Migration Path
 
 **Unity 2021 users upgrading to Unity 6**:
+
 1. Upgrade Unity 2021 → 2022 LTS (or directly to 6)
 2. Update HoloScript 2.5.x → 3.0.0 via Package Manager
 3. Fix breaking changes (compiler API changes documented in CHANGELOG)
@@ -382,6 +392,7 @@ jobs:
 **Migration Guide**: https://holoscript.dev/docs/unity/migration-2021-to-2022
 
 **Steps**:
+
 1. **T-6 months**: Announce deprecation in CHANGELOG, website, Discord
 2. **T-3 months**: Add deprecation warning to Unity 2021 builds
 3. **T-0**: Stop publishing HoloScript 2.5.x updates
@@ -413,17 +424,21 @@ Is the change Unity 6 specific?
 ## [3.0.0] - 2026-02-12
 
 ### Added
+
 - Unity 6 support (volumetric rendering, enhanced XR)
 - Unity 2022.3 LTS support
 
 ### Changed
+
 - **BREAKING**: Minimum Unity version is now 2022.3
 - **BREAKING**: Replaced legacy XR with XR Interaction Toolkit 2.3+
 
 ### Deprecated
+
 - Unity 2021 support (use HoloScript 2.5.x for Unity 2021)
 
 ### Compatibility
+
 - Unity 6.0+ ✅
 - Unity 2022.3+ ✅
 - Unity 2021 ❌ (EOL)

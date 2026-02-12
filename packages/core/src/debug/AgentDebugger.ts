@@ -388,16 +388,13 @@ export class AgentDebugger extends EventEmitter {
     if (!recording) return;
 
     const normalizedPosition = Math.min(100, Math.max(0, position));
-    const targetTime =
-      recording.startTime + (recording.duration * normalizedPosition) / 100;
+    const targetTime = recording.startTime + (recording.duration * normalizedPosition) / 100;
 
     this.replayState.position = normalizedPosition;
     this.replayState.currentTime = targetTime;
 
     // Find matching event index
-    this.replayState.eventIndex = recording.events.findIndex(
-      (e) => e.timestamp >= targetTime
-    );
+    this.replayState.eventIndex = recording.events.findIndex((e) => e.timestamp >= targetTime);
     if (this.replayState.eventIndex === -1) {
       this.replayState.eventIndex = recording.events.length;
     }
@@ -503,7 +500,7 @@ export class AgentDebugger extends EventEmitter {
     if (!this.config.enabled) return Promise.resolve();
 
     const breakpoints = this.inspector.getBreakpoints(context.agentId);
-    
+
     for (const bp of breakpoints) {
       if (!bp.enabled) continue;
 
@@ -672,9 +669,7 @@ let defaultDebugger: AgentDebugger | null = null;
 /**
  * Get or create the default AgentDebugger instance
  */
-export function getAgentDebugger(options?: {
-  config?: Partial<DebuggerConfig>;
-}): AgentDebugger {
+export function getAgentDebugger(options?: { config?: Partial<DebuggerConfig> }): AgentDebugger {
   if (!defaultDebugger) {
     defaultDebugger = new AgentDebugger(options);
   }

@@ -24,16 +24,16 @@ Sprint 6 successfully delivered **Spatial Export & Rendering** capabilities, ena
 
 ## Priority Completion Status
 
-| Priority | Focus | Status | Tests | Key Files |
-|----------|-------|--------|-------|-----------|
-| **1** | Scene Serialization | ✅ Complete | 72+ | `SceneSerializer.ts`, `SceneGraph.ts`, `BinarySerializer.ts` |
-| **2** | GLB/GLTF Export | ✅ Complete | 61+ | `gltf/GLTFExporter.ts`, `gltf/GLTFDocument.ts` |
-| **3** | USD/USDZ Export | ✅ Complete | 50+ | `USDExporter.ts`, `USDZPackager.ts` |
-| **4** | Asset Optimization | ✅ Complete | 100+ | `LODManager.ts`, `LODGenerator.ts`, `AssetOptimizer.ts` |
-| **5** | Render Network Integration | ✅ Complete | 35+ | `RenderNetworkTrait.ts`, `RenderNetworkClient.ts` |
-| **6** | Mobile AR Optimization | ✅ Complete | 40+ | `MobileARExporter.ts`, `ARKitOptimizer.ts` |
-| **7** | Volumetric Video Support | ✅ Complete | 50+ | `GaussianSplatTrait.ts`, `VolumetricVideoTrait.ts` |
-| **8** | Export CLI & API | ✅ Complete | 30+ | Export API in `index.ts`, CLI integration |
+| Priority | Focus                      | Status      | Tests | Key Files                                                    |
+| -------- | -------------------------- | ----------- | ----- | ------------------------------------------------------------ |
+| **1**    | Scene Serialization        | ✅ Complete | 72+   | `SceneSerializer.ts`, `SceneGraph.ts`, `BinarySerializer.ts` |
+| **2**    | GLB/GLTF Export            | ✅ Complete | 61+   | `gltf/GLTFExporter.ts`, `gltf/GLTFDocument.ts`               |
+| **3**    | USD/USDZ Export            | ✅ Complete | 50+   | `USDExporter.ts`, `USDZPackager.ts`                          |
+| **4**    | Asset Optimization         | ✅ Complete | 100+  | `LODManager.ts`, `LODGenerator.ts`, `AssetOptimizer.ts`      |
+| **5**    | Render Network Integration | ✅ Complete | 35+   | `RenderNetworkTrait.ts`, `RenderNetworkClient.ts`            |
+| **6**    | Mobile AR Optimization     | ✅ Complete | 40+   | `MobileARExporter.ts`, `ARKitOptimizer.ts`                   |
+| **7**    | Volumetric Video Support   | ✅ Complete | 50+   | `GaussianSplatTrait.ts`, `VolumetricVideoTrait.ts`           |
+| **8**    | Export CLI & API           | ✅ Complete | 30+   | Export API in `index.ts`, CLI integration                    |
 
 ---
 
@@ -257,32 +257,32 @@ Sprint 6 successfully delivered **Spatial Export & Rendering** capabilities, ena
 
 ## Test Coverage Summary
 
-| Category | Tests | Status |
-|----------|-------|--------|
-| Scene Serialization | 72+ | ✅ |
-| GLTF Export | 61+ | ✅ |
-| USD/USDZ Export | 27+ | ✅ |
-| LOD System | 100 | ✅ |
-| Render Network | 35+ | ✅ |
-| Mobile AR | 40+ | ✅ |
-| Volumetric | 32+ | ✅ |
-| Post-Processing | 85 | ✅ |
-| Audio | 125 | ✅ |
-| Streaming Protocol | 44 | ✅ |
-| Network/Physics | 176+ | ✅ |
-| **Total** | **4,616** | ✅ |
+| Category            | Tests     | Status |
+| ------------------- | --------- | ------ |
+| Scene Serialization | 72+       | ✅     |
+| GLTF Export         | 61+       | ✅     |
+| USD/USDZ Export     | 27+       | ✅     |
+| LOD System          | 100       | ✅     |
+| Render Network      | 35+       | ✅     |
+| Mobile AR           | 40+       | ✅     |
+| Volumetric          | 32+       | ✅     |
+| Post-Processing     | 85        | ✅     |
+| Audio               | 125       | ✅     |
+| Streaming Protocol  | 44        | ✅     |
+| Network/Physics     | 176+      | ✅     |
+| **Total**           | **4,616** | ✅     |
 
 ---
 
 ## Performance Metrics
 
-| Metric | Target | Actual |
-|--------|--------|--------|
-| Parse Simple Scene | <10ms | 0.72ms |
-| Parse Complex Scene | <20ms | 0.81ms |
-| Compile to visionOS | <10ms | 0.04ms |
-| Generate USDA | <5ms | 0.05ms |
-| Full Pipeline | <50ms | 1.83ms |
+| Metric              | Target | Actual |
+| ------------------- | ------ | ------ |
+| Parse Simple Scene  | <10ms  | 0.72ms |
+| Parse Complex Scene | <20ms  | 0.81ms |
+| Compile to visionOS | <10ms  | 0.04ms |
+| Generate USDA       | <5ms   | 0.05ms |
+| Full Pipeline       | <50ms  | 1.83ms |
 
 ---
 
@@ -307,7 +307,7 @@ To use new export features:
 
 scene#my_scene {
   @render_network(quality: "production")
-  
+
   object#volumetric {
     @volumetric(source: "capture.splat")
   }

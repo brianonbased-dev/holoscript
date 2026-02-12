@@ -15,12 +15,12 @@ In this lesson, you'll learn how to use the `state_machine` construct to manage 
 
 A State Machine (FSM) is a model of behavior that can be in exactly **one of a several finite states** at any given time.
 
-| Concept | Description |
-| :--- | :--- |
-| **State** | A specific mode of behavior (e.g., `Idle`, `Walking`, `Open`, `Locked`). |
-| **Transition** | The act of moving from one state to another. |
-| **Trigger** | What caused the transition (an `event` or a boolean `condition`). |
-| **Action** | Code that runs when a state is entered (`entry`) or left (`exit`). |
+| Concept        | Description                                                              |
+| :------------- | :----------------------------------------------------------------------- |
+| **State**      | A specific mode of behavior (e.g., `Idle`, `Walking`, `Open`, `Locked`). |
+| **Transition** | The act of moving from one state to another.                             |
+| **Trigger**    | What caused the transition (an `event` or a boolean `condition`).        |
+| **Action**     | Code that runs when a state is entered (`entry`) or left (`exit`).       |
 
 ---
 
@@ -53,6 +53,7 @@ state_machine "DoorSystem" {
 ```
 
 ### Key Components:
+
 - **`entry`**: Executes a statement block exactly once when the state becomes active.
 - **`exit`**: Executes when leaving the state.
 - **`timeout`**: Automatically triggers `onTimeout` after a set duration in seconds.
@@ -90,7 +91,7 @@ composition "Security Scene" {
                 }
 
                 "Unlocked": {
-                    entry: { 
+                    entry: {
                         self.color = "#00FF00"
                         self.play_sound("unlock.wav")
                     }
@@ -135,6 +136,7 @@ composition "Security Scene" {
 ## Summary
 
 In this lesson, you learned:
+
 - How to structure a `state_machine`.
 - Using `entry`, `exit`, and `timeout` for state-specific behavior.
 - Defining `transitions` to move between states based on events or data.

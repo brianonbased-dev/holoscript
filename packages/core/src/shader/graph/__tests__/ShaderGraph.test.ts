@@ -328,7 +328,7 @@ describe('ShaderGraph', () => {
     it('should return all nodes', () => {
       graph.createNode('input_position');
       graph.createNode('output_surface');
-      
+
       const order = graph.getTopologicalOrder();
       expect(order.length).toBe(2);
     });
@@ -349,7 +349,7 @@ describe('ShaderGraph', () => {
 
       const result = graph.validate();
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('output'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('output'))).toBe(true);
     });
   });
 
@@ -609,7 +609,7 @@ describe('Node Template Code Generation', () => {
       inMin: '0.0',
       inMax: '1.0',
       outMin: '0.0',
-      outMax: '10.0'
+      outMax: '10.0',
     });
     expect(code).toContain('v');
     expect(code).toContain('0.0');

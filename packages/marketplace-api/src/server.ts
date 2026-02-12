@@ -35,7 +35,10 @@ const DEFAULT_CONFIG: ServerConfig = {
 /**
  * Create configured Express application
  */
-export function createApp(marketplace?: MarketplaceService, config?: Partial<ServerConfig>): Express {
+export function createApp(
+  marketplace?: MarketplaceService,
+  config?: Partial<ServerConfig>
+): Express {
   const app = express();
   const cfg = { ...DEFAULT_CONFIG, ...config };
   const service = marketplace ?? new MarketplaceService();
@@ -46,19 +49,28 @@ export function createApp(marketplace?: MarketplaceService, config?: Partial<Ser
   }
 
   // Security middleware
-  app.use(helmet({
-    contentSecurityPolicy: false, // Allow inline scripts for API docs
-    crossOriginEmbedderPolicy: false,
-  }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // Allow inline scripts for API docs
+      crossOriginEmbedderPolicy: false,
+    })
+  );
 
   // CORS
-  app.use(cors({
-    origin: cfg.corsOrigins,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
-    exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset', 'Retry-After'],
-  }));
+  app.use(
+    cors({
+      origin: cfg.corsOrigins,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+      exposedHeaders: [
+        'X-RateLimit-Limit',
+        'X-RateLimit-Remaining',
+        'X-RateLimit-Reset',
+        'Retry-After',
+      ],
+    })
+  );
 
   // Compression
   app.use(compression());
@@ -69,7 +81,9 @@ export function createApp(marketplace?: MarketplaceService, config?: Partial<Ser
 
   // Request ID middleware
   app.use((req, res, next) => {
-    const requestId = req.headers['x-request-id'] as string || `req_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const requestId =
+      (req.headers['x-request-id'] as string) ||
+      `req_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     req.headers['x-request-id'] = requestId;
     res.setHeader('X-Request-ID', requestId);
     next();
@@ -115,16 +129,18 @@ export function createApp(marketplace?: MarketplaceService, config?: Partial<Ser
   });
 
   // Global error handler
-  app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    console.error('Unhandled error:', err);
-    res.status(500).json({
-      success: false,
-      error: {
-        code: 'INTERNAL_ERROR',
-        message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
-      },
-    });
-  });
+  app.use(
+    (err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      console.error('Unhandled error:', err);
+      res.status(500).json({
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
+        },
+      });
+    }
+  );
 
   return app;
 }
@@ -132,7 +148,9 @@ export function createApp(marketplace?: MarketplaceService, config?: Partial<Ser
 /**
  * Start the server
  */
-export async function startServer(config?: Partial<ServerConfig>): Promise<{ app: Express; port: number }> {
+export async function startServer(
+  config?: Partial<ServerConfig>
+): Promise<{ app: Express; port: number }> {
   const cfg = { ...DEFAULT_CONFIG, ...config };
   const marketplace = new MarketplaceService();
   const app = createApp(marketplace, cfg);

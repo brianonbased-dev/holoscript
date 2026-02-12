@@ -1,6 +1,6 @@
 /**
  * Agent Extensions Module
- * 
+ *
  * Extensibility interfaces for building advanced agent systems.
  * Consumers can implement these interfaces to add:
  * - Actor model (tell/ask, mailboxes, wake-on-demand)

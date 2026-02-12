@@ -45,14 +45,17 @@ export function VersionsTab({ traitId, versions }: VersionsTabProps) {
   }
 
   // Group versions by major version
-  const groupedVersions = versions.reduce((acc, version) => {
-    const major = version.version.split('.')[0];
-    if (!acc[major]) {
-      acc[major] = [];
-    }
-    acc[major].push(version);
-    return acc;
-  }, {} as Record<string, VersionInfo[]>);
+  const groupedVersions = versions.reduce(
+    (acc, version) => {
+      const major = version.version.split('.')[0];
+      if (!acc[major]) {
+        acc[major] = [];
+      }
+      acc[major].push(version);
+      return acc;
+    },
+    {} as Record<string, VersionInfo[]>
+  );
 
   const latestVersion = versions[0]?.version;
 
@@ -116,7 +119,9 @@ export function VersionsTab({ traitId, versions }: VersionsTabProps) {
                         <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
                           <Calendar className="h-4 w-4" />
                           <span title={format(new Date(version.publishedAt), 'PPpp')}>
-                            {formatDistanceToNow(new Date(version.publishedAt), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(version.publishedAt), {
+                              addSuffix: true,
+                            })}
                           </span>
                         </div>
 
@@ -137,10 +142,10 @@ export function VersionsTab({ traitId, versions }: VersionsTabProps) {
                             installed
                               ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                               : version.deprecated
-                              ? 'bg-zinc-100 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed'
-                              : installing
-                              ? 'bg-holoscript-100 dark:bg-holoscript-900/30 text-holoscript-600 dark:text-holoscript-400'
-                              : 'bg-holoscript-500 hover:bg-holoscript-600 text-white'
+                                ? 'bg-zinc-100 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed'
+                                : installing
+                                  ? 'bg-holoscript-100 dark:bg-holoscript-900/30 text-holoscript-600 dark:text-holoscript-400'
+                                  : 'bg-holoscript-500 hover:bg-holoscript-600 text-white'
                           }
                         `}
                       >
@@ -179,8 +184,8 @@ export function VersionsTab({ traitId, versions }: VersionsTabProps) {
                 Some versions are deprecated
               </h4>
               <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                Deprecated versions may have known issues or security vulnerabilities.
-                Consider upgrading to the latest version.
+                Deprecated versions may have known issues or security vulnerabilities. Consider
+                upgrading to the latest version.
               </p>
             </div>
           </div>

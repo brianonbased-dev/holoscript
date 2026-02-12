@@ -425,7 +425,9 @@ export class TelemetryCollector extends EventEmitter {
       attributes: Object.entries(span.attributes).map(([key, value]) => ({
         key,
         value:
-          typeof value === 'number' ? { intValue: value.toString() } : { stringValue: String(value) },
+          typeof value === 'number'
+            ? { intValue: value.toString() }
+            : { stringValue: String(value) },
       })),
       events: span.events.map((e) => ({
         timeUnixNano: (e.timestamp * 1_000_000).toString(),

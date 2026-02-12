@@ -40,31 +40,31 @@ composition "DistributedVoting" {
       type: "voter"
       capabilities: ["voting", "proposal"]
     }
-    
+
     @consensus {
       mechanism: "simple_majority"
       timeout: 5000
       quorum: 0.51
     }
-    
+
     state {
       proposals: []
       votes: {}
     }
-    
+
     action propose(key, value) {
       return consensus.propose(key, value)
     }
-    
+
     action vote(proposalId, vote) {
       return consensus.vote(proposalId, vote)
     }
-    
+
     on "consensus:accepted"(proposal) {
       applyState(proposal.key, proposal.value)
     }
   }
-  
+
   object "Voter1" using "VotingAgent" {}
   object "Voter2" using "VotingAgent" {}
   object "Voter3" using "VotingAgent" {}
@@ -81,7 +81,7 @@ import { ConsensusTrait, createConsensusTrait } from '@holoscript/core';
 // Create consensus trait for an entity
 const consensus = createConsensusTrait('agent-001', {
   mechanism: 'simple_majority',
-  timeout: 5000
+  timeout: 5000,
 });
 
 // Start and connect to cluster
@@ -120,7 +120,7 @@ const raft = new ConsensusTrait('node-001', {
   mechanism: 'raft',
   timeout: 3000,
   heartbeatInterval: 1000,
-  electionTimeout: [3000, 5000] // Random range
+  electionTimeout: [3000, 5000], // Random range
 });
 
 // Set up message transport
@@ -141,7 +141,7 @@ raft.addNode({ id: 'node-003', address: 'host3:5000' });
 // Events
 raft.on('leader:elected', (leaderId) => {
   console.log(`New leader: ${leaderId}`);
-  
+
   if (leaderId === raft.getNodeId()) {
     console.log('I am the leader!');
   }
@@ -189,7 +189,7 @@ Manage consensus cluster membership:
 consensus.addNode({
   id: 'node-004',
   address: 'host4:5000',
-  metadata: { region: 'us-west' }
+  metadata: { region: 'us-west' },
 });
 
 // Remove a node
@@ -197,7 +197,7 @@ consensus.removeNode('node-002');
 
 // Get all nodes
 const nodes = consensus.getNodes();
-nodes.forEach(node => {
+nodes.forEach((node) => {
   console.log(`${node.id} at ${node.address}`);
 });
 
@@ -220,9 +220,9 @@ React to network issues:
 ```typescript
 consensus.on('node:unreachable', (nodeId) => {
   console.warn(`Lost connection to ${nodeId}`);
-  
+
   // Check if we still have quorum
-  const activeNodes = consensus.getNodes().filter(n => n.connected);
+  const activeNodes = consensus.getNodes().filter((n) => n.connected);
   if (activeNodes.length < Math.ceil(consensus.getNodes().length / 2)) {
     console.error('Lost quorum - entering read-only mode');
     enterReadOnlyMode();
@@ -254,26 +254,26 @@ composition "MultiplayerGame" {
       quorum: 3
     }
   }
-  
+
   // Game state manager
   template "GameStateManager" {
     @consensus {
       mechanism: "raft"
       timeout: 3000
     }
-    
+
     state {
       game_state: "lobby"
       players: []
       current_round: 0
       scores: {}
     }
-    
+
     action addPlayer(playerId) {
       const players = consensus.get("players") || []
       await consensus.propose("players", [...players, playerId])
     }
-    
+
     action updateScore(playerId, points) {
       const scores = consensus.get("scores") || {}
       await consensus.propose("scores", {
@@ -281,7 +281,7 @@ composition "MultiplayerGame" {
         [playerId]: (scores[playerId] || 0) + points
       })
     }
-    
+
     action startGame() {
       if (!consensus.isLeader()) {
         throw new Error("Only leader can start game")
@@ -289,36 +289,36 @@ composition "MultiplayerGame" {
       await consensus.propose("game_state", "playing")
       await consensus.propose("current_round", 1)
     }
-    
+
     on "consensus:accepted"(result) {
       if (result.key == "game_state") {
         broadcast("game_state_changed", result.value)
       }
     }
   }
-  
+
   // Player agent
   template "PlayerAgent" {
     @agent {
       type: "player"
     }
-    
+
     on "game_state_changed"(state) {
       if (state == "playing") {
         startPlaying()
       }
     }
-    
+
     action submitScore(points) {
       gameState.updateScore(this.id, points)
     }
   }
-  
+
   // Game state singleton
   object "GameState" using "GameStateManager" {
     @singleton
   }
-  
+
   // Player instances
   object "Player1" using "PlayerAgent" {}
   object "Player2" using "PlayerAgent" {}
@@ -336,16 +336,15 @@ function optimisticUpdate(key: string, value: any) {
   // Apply immediately
   localState[key] = value;
   updateUI();
-  
+
   // Then reach consensus
-  consensus.propose(key, value)
-    .then(accepted => {
-      if (!accepted) {
-        // Rollback on rejection
-        localState[key] = consensus.get(key);
-        updateUI();
-      }
-    });
+  consensus.propose(key, value).then((accepted) => {
+    if (!accepted) {
+      // Rollback on rejection
+      localState[key] = consensus.get(key);
+      updateUI();
+    }
+  });
 }
 ```
 
@@ -354,11 +353,11 @@ function optimisticUpdate(key: string, value: any) {
 ```typescript
 async function compareAndSwap(key: string, expected: any, newValue: any) {
   const current = consensus.get(key);
-  
+
   if (current !== expected) {
     return false; // Value changed
   }
-  
+
   return consensus.propose(key, newValue);
 }
 ```
@@ -369,21 +368,21 @@ async function compareAndSwap(key: string, expected: any, newValue: any) {
 async function acquireLock(resource: string, timeout: number) {
   const lockKey = `lock:${resource}`;
   const lockValue = { holder: consensus.getNodeId(), expires: Date.now() + timeout };
-  
+
   const acquired = await consensus.propose(lockKey, lockValue);
-  
+
   if (acquired) {
     // Set auto-release
     setTimeout(() => releaseLock(resource), timeout);
   }
-  
+
   return acquired;
 }
 
 async function releaseLock(resource: string) {
   const lockKey = `lock:${resource}`;
   const current = consensus.get(lockKey);
-  
+
   if (current?.holder === consensus.getNodeId()) {
     await consensus.propose(lockKey, null);
   }
@@ -424,20 +423,20 @@ consensus.on('log:appended', (entry) => {
 ```typescript
 const consensus = new ConsensusTrait('node-001', {
   mechanism: 'raft',
-  
+
   // Batch small updates
   batchUpdates: true,
   batchWindow: 50, // ms
-  
+
   // Compress large state
   compression: true,
-  
+
   // Snapshot for faster recovery
   snapshotInterval: 1000, // entries
-  
+
   // Tune timeouts for network
   heartbeatInterval: 500,
-  electionTimeout: [1500, 3000]
+  electionTimeout: [1500, 3000],
 });
 ```
 

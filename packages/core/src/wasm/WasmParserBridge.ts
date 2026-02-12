@@ -64,7 +64,7 @@ export class WasmParserBridge {
   constructor(config: WasmParserConfig = {}) {
     this.config = {
       wasmUrl: config.wasmUrl ?? '/holoscript_wasm_bg.wasm',
-      useWorker: config.useWorker ?? (typeof window !== 'undefined'),
+      useWorker: config.useWorker ?? typeof window !== 'undefined',
       maxWorkers: config.maxWorkers ?? Math.min(4, navigator?.hardwareConcurrency ?? 2),
       enableFallback: config.enableFallback ?? true,
       preload: config.preload ?? true,
@@ -200,7 +200,9 @@ export class WasmParserBridge {
       const parseTime = performance.now() - startTime;
 
       if (this.config.enableFallback) {
-        logger.warn('[WasmParserBridge] WASM parse failed, using fallback:', { error: String(err) });
+        logger.warn('[WasmParserBridge] WASM parse failed, using fallback:', {
+          error: String(err),
+        });
         return this.fallbackParse(source);
       }
 
@@ -216,7 +218,9 @@ export class WasmParserBridge {
   /**
    * Validate HoloScript source code
    */
-  async validate(source: string): Promise<{ valid: boolean; errors: Array<{ message: string; line: number; column: number }> }> {
+  async validate(
+    source: string
+  ): Promise<{ valid: boolean; errors: Array<{ message: string; line: number; column: number }> }> {
     try {
       await this.load();
 
@@ -287,7 +291,10 @@ export class WasmParserBridge {
   /**
    * Get bridge statistics
    */
-  getStats(): { initialized: boolean; cacheStats: { memoryEntries: number; dbAvailable: boolean } } {
+  getStats(): {
+    initialized: boolean;
+    cacheStats: { memoryEntries: number; dbAvailable: boolean };
+  } {
     return {
       initialized: this.initialized,
       cacheStats: wasmModuleCache.getStats(),

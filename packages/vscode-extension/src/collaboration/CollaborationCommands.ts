@@ -4,14 +4,8 @@
  */
 
 import * as vscode from 'vscode';
-import { 
-  getCollaborationSession, 
-  disposeCollaborationSession 
-} from './CollaborationSession';
-import { 
-  getPresenceProvider, 
-  disposePresenceProvider 
-} from './PresenceProvider';
+import { getCollaborationSession, disposeCollaborationSession } from './CollaborationSession';
+import { getPresenceProvider, disposePresenceProvider } from './PresenceProvider';
 import type { UserInfo } from './CollaborationTypes';
 
 /**
@@ -67,8 +61,9 @@ export function registerCollaborationCommands(context: vscode.ExtensionContext):
       }
 
       try {
-        const serverUrl = vscode.workspace.getConfiguration('holoscript.collaboration').get<string>('serverUrl') 
-          || 'wss://collab.holoscript.dev';
+        const serverUrl =
+          vscode.workspace.getConfiguration('holoscript.collaboration').get<string>('serverUrl') ||
+          'wss://collab.holoscript.dev';
 
         const sessionInfo = await session.startSession({
           serverUrl,
@@ -76,15 +71,16 @@ export function registerCollaborationCommands(context: vscode.ExtensionContext):
           user,
         });
 
-        await vscode.window.showInformationMessage(
-          `Collaboration session started! Share this link: ${session.getShareUrl()}`,
-          'Copy Link'
-        ).then(action => {
-          if (action === 'Copy Link') {
-            session.copyShareUrl();
-          }
-        });
-
+        await vscode.window
+          .showInformationMessage(
+            `Collaboration session started! Share this link: ${session.getShareUrl()}`,
+            'Copy Link'
+          )
+          .then((action) => {
+            if (action === 'Copy Link') {
+              session.copyShareUrl();
+            }
+          });
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to start collaboration: ${error}`);
       }
@@ -267,8 +263,10 @@ export function disposeCollaborationCommands(): void {
  */
 async function getUserInfo(context: vscode.ExtensionContext): Promise<UserInfo | null> {
   // Try to get from VS Code session
-  const session = await vscode.authentication.getSession('github', ['read:user'], { createIfNone: false });
-  
+  const session = await vscode.authentication.getSession('github', ['read:user'], {
+    createIfNone: false,
+  });
+
   if (session) {
     return {
       id: session.account.id,
@@ -278,7 +276,7 @@ async function getUserInfo(context: vscode.ExtensionContext): Promise<UserInfo |
 
   // Try stored info
   const storedName = context.globalState.get<string>('holoscript.collaboration.userName');
-  
+
   if (storedName) {
     return {
       id: `local_${storedName.toLowerCase().replace(/\s+/g, '_')}`,

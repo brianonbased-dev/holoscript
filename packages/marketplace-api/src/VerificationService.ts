@@ -4,10 +4,7 @@
  */
 
 import { createHash, randomBytes } from 'crypto';
-import type {
-  VerificationStatus,
-  VerificationEvidence,
-} from './types.js';
+import type { VerificationStatus, VerificationEvidence } from './types.js';
 
 // =============================================================================
 // VERIFICATION LEVELS
@@ -55,14 +52,19 @@ export class VerificationService {
   // Mock email sender (would be real in production)
   private emailSender?: (to: string, subject: string, body: string) => Promise<void>;
 
-  constructor(options: { emailSender?: (to: string, subject: string, body: string) => Promise<void> } = {}) {
+  constructor(
+    options: { emailSender?: (to: string, subject: string, body: string) => Promise<void> } = {}
+  ) {
     this.emailSender = options.emailSender;
   }
 
   /**
    * Start email verification
    */
-  async startEmailVerification(userId: string, email: string): Promise<{ sent: boolean; expiresIn: number }> {
+  async startEmailVerification(
+    userId: string,
+    email: string
+  ): Promise<{ sent: boolean; expiresIn: number }> {
     const code = randomBytes(3).toString('hex').toUpperCase();
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
@@ -151,7 +153,10 @@ export class VerificationService {
   /**
    * Start domain verification
    */
-  async startDomainVerification(userId: string, domain: string): Promise<{ method: 'dns' | 'file'; value: string }> {
+  async startDomainVerification(
+    userId: string,
+    domain: string
+  ): Promise<{ method: 'dns' | 'file'; value: string }> {
     const verificationToken = createHash('sha256')
       .update(`${userId}:${domain}:${Date.now()}`)
       .digest('hex')
@@ -200,7 +205,10 @@ export class VerificationService {
   /**
    * Request manual verification (for official status)
    */
-  async requestManualVerification(userId: string, evidence: string): Promise<{ requestId: string }> {
+  async requestManualVerification(
+    userId: string,
+    evidence: string
+  ): Promise<{ requestId: string }> {
     const requestId = randomBytes(8).toString('hex');
 
     this.pendingVerifications.set(`manual:${requestId}`, {

@@ -10,17 +10,17 @@ v3.4.0 introduces the **Agentic Choreography** system - a comprehensive multi-ag
 
 ### What's New
 
-| Feature | Description |
-|---------|-------------|
-| Agent Registry | Centralized agent discovery and lifecycle |
-| Choreography Engine | Multi-step agent workflows with HITL |
-| Negotiation Protocol | Multi-agent decision making |
-| Spatial Context | Location-aware agent coordination |
-| Consensus Mechanisms | Byzantine-fault-tolerant voting |
-| Agent Channels | Secure inter-agent messaging |
-| Hierarchy & Delegation | Organizational agent structures |
-| Debug & Telemetry | Session recording, breakpoints, tracing |
-| Extension Interfaces | Extensibility points for consumers |
+| Feature                | Description                               |
+| ---------------------- | ----------------------------------------- |
+| Agent Registry         | Centralized agent discovery and lifecycle |
+| Choreography Engine    | Multi-step agent workflows with HITL      |
+| Negotiation Protocol   | Multi-agent decision making               |
+| Spatial Context        | Location-aware agent coordination         |
+| Consensus Mechanisms   | Byzantine-fault-tolerant voting           |
+| Agent Channels         | Secure inter-agent messaging              |
+| Hierarchy & Delegation | Organizational agent structures           |
+| Debug & Telemetry      | Session recording, breakpoints, tracing   |
+| Extension Interfaces   | Extensibility points for consumers        |
 
 ---
 
@@ -37,6 +37,7 @@ v3.4.0 introduces the **Agentic Choreography** system - a comprehensive multi-ag
 The standalone `HITLTrait` from v3.3.0 continues to work but is now better used through the Choreography Engine for complex workflows.
 
 **v3.3.0 (still works):**
+
 ```typescript
 import { HITLTrait } from '@holoscript/core/traits';
 
@@ -45,13 +46,12 @@ await trait.requestApproval({ ... });
 ```
 
 **v3.4.0 (recommended for workflows):**
+
 ```typescript
 import { ChoreographyEngine } from '@holoscript/core/choreography';
 
 await engine.execute({
-  steps: [
-    { type: 'hitl', action: 'approve', onApproval: async () => ({ approved: true }) }
-  ]
+  steps: [{ type: 'hitl', action: 'approve', onApproval: async () => ({ approved: true }) }],
 });
 ```
 
@@ -78,6 +78,7 @@ pnpm add @holoscript/core@^3.1.0
 If you have custom agent discovery, consider migrating to the unified registry:
 
 **Before (custom discovery):**
+
 ```typescript
 // Custom agent tracking
 const agents = new Map<string, AgentInfo>();
@@ -87,11 +88,12 @@ function registerAgent(info: AgentInfo) {
 }
 
 function findAgentsByCapability(cap: string) {
-  return Array.from(agents.values()).filter(a => a.capabilities.includes(cap));
+  return Array.from(agents.values()).filter((a) => a.capabilities.includes(cap));
 }
 ```
 
 **After (AgentRegistry):**
+
 ```typescript
 import { AgentRegistry } from '@holoscript/core/agents';
 
@@ -103,7 +105,7 @@ await registry.register({
   version: '1.0.0',
   capabilities: [{ type: 'analyze', domain: 'vision' }],
   endpoints: [],
-  trustLevel: 'local'
+  trustLevel: 'local',
 });
 
 const agents = await registry.discover({ domain: 'vision' });
@@ -114,21 +116,27 @@ const agents = await registry.discover({ domain: 'vision' });
 If you have sequential agent tasks, wrap them in choreography:
 
 **Before (manual sequencing):**
+
 ```typescript
 async function runPipeline() {
   const result1 = await agent1.execute(input);
-  
+
   // Manual HITL check
   const approved = await promptUser('Approve?');
   if (!approved) return;
-  
+
   const result2 = await agent2.execute(result1);
 }
 ```
 
 **After (ChoreographyEngine):**
+
 ```typescript
-import { ChoreographyEngine, ChoreographyPlanner, StepExecutor } from '@holoscript/core/choreography';
+import {
+  ChoreographyEngine,
+  ChoreographyPlanner,
+  StepExecutor,
+} from '@holoscript/core/choreography';
 
 const engine = new ChoreographyEngine(new ChoreographyPlanner(), new StepExecutor());
 
@@ -137,16 +145,26 @@ await engine.execute({
   name: 'Pipeline',
   steps: [
     { id: 'step1', type: 'action', agentId: 'agent1', action: 'execute', params: { input } },
-    { id: 'approve', type: 'hitl', agentId: 'human', action: 'approve', params: {},
+    {
+      id: 'approve',
+      type: 'hitl',
+      agentId: 'human',
+      action: 'approve',
+      params: {},
       onApproval: async () => {
         const approved = await promptUser('Approve?');
         return { approved };
-      }
+      },
     },
-    { id: 'step2', type: 'action', agentId: 'agent2', action: 'execute', params: {}, 
-      dependsOn: ['approve'] 
-    }
-  ]
+    {
+      id: 'step2',
+      type: 'action',
+      agentId: 'agent2',
+      action: 'execute',
+      params: {},
+      dependsOn: ['approve'],
+    },
+  ],
 });
 ```
 
@@ -210,7 +228,11 @@ import { HierarchyManager, DelegationEngine } from '@holoscript/core/hierarchy';
 import { AgentDebugger, TelemetryCollector, AgentInspector } from '@holoscript/core/debug';
 
 // Extensions (interfaces for consumers)
-import type { IAgentRef, ISelfHealingService, IMarketplaceService } from '@holoscript/core/extensions';
+import type {
+  IAgentRef,
+  ISelfHealingService,
+  IMarketplaceService,
+} from '@holoscript/core/extensions';
 ```
 
 ---
@@ -225,17 +247,19 @@ import { AgentRegistry } from '@holoscript/core/agents';
 
 describe('My Agent Tests', () => {
   let registry: AgentRegistry;
-  
+
   beforeEach(() => {
     registry = new AgentRegistry({ heartbeatInterval: 100 });
   });
-  
+
   afterEach(() => {
     registry.shutdown(); // Clean up
   });
-  
+
   it('should register and discover', async () => {
-    await registry.register({ /* ... */ });
+    await registry.register({
+      /* ... */
+    });
     const found = await registry.discover({ domain: 'vision' });
     expect(found).toHaveLength(1);
   });
@@ -311,6 +335,7 @@ All v3.3.0 code continues to work. Remove any v3.4 imports if you added them.
 ### v3.4.0 (February 2026)
 
 **Added:**
+
 - `AgentRegistry` - Centralized agent discovery
 - `ChoreographyEngine` - Multi-step workflow execution
 - `NegotiationProtocol` - Multi-agent negotiation
@@ -322,12 +347,15 @@ All v3.3.0 code continues to work. Remove any v3.4 imports if you added them.
 - Extension interfaces for consumers
 
 **Changed:**
+
 - None (backward compatible)
 
 **Deprecated:**
+
 - Direct `HITLTrait` usage (use `ChoreographyEngine` for workflows)
 
 **Removed:**
+
 - None
 
 ---

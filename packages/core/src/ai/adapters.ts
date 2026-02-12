@@ -165,7 +165,7 @@ export class OpenAIAdapter implements AIAdapter {
       messages.push({ role: 'user', content: message });
     }
 
-    return this.callAPI(messages);
+    return this.callAPI(messages, history);
   }
 
   private buildSystemPrompt(options?: GenerateOptions): string {
@@ -182,7 +182,10 @@ export class OpenAIAdapter implements AIAdapter {
     return match ? match[1].trim() : response.trim();
   }
 
-  private async callAPI(messages: Array<{ role: string; content: string }>): Promise<string> {
+  private async callAPI(
+    messages: Array<{ role: string; content: string }>,
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>
+  ): Promise<string> {
     const baseUrl = this.config.baseUrl || 'https://api.openai.com/v1';
 
     const headers: Record<string, string> = {
@@ -204,6 +207,12 @@ export class OpenAIAdapter implements AIAdapter {
       }),
     });
 
+    if (response.status === 429) {
+      throw new Error('OpenAI rate limited (429) - please retry after backoff');
+    }
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('OpenAI auth failed - check API key and permissions');
+    }
     if (!response.ok) {
       throw new Error('OpenAI API error: ' + response.statusText);
     }
@@ -255,7 +264,7 @@ export class AnthropicAdapter implements AIAdapter {
 
   constructor(config: AnthropicAdapterConfig) {
     this.config = config;
-    this.model = config.model || 'claude-3-haiku-20240307';
+    this.model = config.model || 'claude-3-5-sonnet-20241022';
   }
 
   isReady(): boolean {
@@ -263,7 +272,10 @@ export class AnthropicAdapter implements AIAdapter {
   }
 
   async generateHoloScript(prompt: string, options?: GenerateOptions): Promise<GenerateResult> {
-    const response = await this.callAPI('Create a HoloScript scene: ' + prompt, options);
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+      { role: 'user', content: 'Create a HoloScript scene: ' + prompt },
+    ];
+    const response = await this.callAPI(messages, options);
 
     return {
       holoScript: this.extractCode(response),
@@ -272,7 +284,10 @@ export class AnthropicAdapter implements AIAdapter {
   }
 
   async explainHoloScript(holoScript: string): Promise<ExplainResult> {
-    const response = await this.callAPI('Explain this HoloScript code clearly:\n\n' + holoScript);
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+      { role: 'user', content: 'Explain this HoloScript code clearly:\n\n' + holoScript },
+    ];
+    const response = await this.callAPI(messages);
     return { explanation: response };
   }
 
@@ -280,12 +295,17 @@ export class AnthropicAdapter implements AIAdapter {
     holoScript: string,
     target: 'mobile' | 'desktop' | 'vr' | 'ar'
   ): Promise<OptimizeResult> {
-    const response = await this.callAPI(
-      'Optimize this HoloScript for ' +
-        target +
-        '. Return only the optimized code:\n\n' +
-        holoScript
-    );
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+      {
+        role: 'user',
+        content:
+          'Optimize this HoloScript for ' +
+          target +
+          '. Return only the optimized code:\n\n' +
+          holoScript,
+      },
+    ];
+    const response = await this.callAPI(messages);
     return {
       holoScript: this.extractCode(response),
       improvements: ['Optimized for ' + target],
@@ -293,12 +313,17 @@ export class AnthropicAdapter implements AIAdapter {
   }
 
   async fixHoloScript(holoScript: string, errors: string[]): Promise<FixResult> {
-    const response = await this.callAPI(
-      'Fix these errors in the HoloScript:\nErrors: ' +
-        errors.join(', ') +
-        '\n\nCode:\n' +
-        holoScript
-    );
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+      {
+        role: 'user',
+        content:
+          'Fix these errors in the HoloScript:\nErrors: ' +
+          errors.join(', ') +
+          '\n\nCode:\n' +
+          holoScript,
+      },
+    ];
+    const response = await this.callAPI(messages);
     return {
       holoScript: this.extractCode(response),
       fixes: errors.map((e) => ({ line: 0, issue: e, fix: 'auto-fixed' })),
@@ -308,12 +333,22 @@ export class AnthropicAdapter implements AIAdapter {
   async chat(
     message: string,
     holoScript?: string,
-    _history?: Array<{ role: 'user' | 'assistant'; content: string }>
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>
   ): Promise<string> {
-    const fullMessage = holoScript
-      ? 'Context:\n' + holoScript + '\n\nQuestion: ' + message
-      : message;
-    return this.callAPI(fullMessage);
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = history
+      ? [...history]
+      : [];
+
+    if (holoScript) {
+      messages.push({
+        role: 'user',
+        content: 'Context:\n' + holoScript + '\n\nQuestion: ' + message,
+      });
+    } else {
+      messages.push({ role: 'user', content: message });
+    }
+
+    return this.callAPI(messages);
   }
 
   private extractCode(response: string): string {
@@ -321,7 +356,10 @@ export class AnthropicAdapter implements AIAdapter {
     return match ? match[1].trim() : response.trim();
   }
 
-  private async callAPI(message: string, _options?: GenerateOptions): Promise<string> {
+  private async callAPI(
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+    _options?: GenerateOptions
+  ): Promise<string> {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -333,16 +371,32 @@ export class AnthropicAdapter implements AIAdapter {
         model: this.model,
         max_tokens: 4096,
         system: HOLOSCRIPT_SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: message }],
+        messages,
       }),
     });
 
+    if (response.status === 429) {
+      throw new Error('Anthropic rate limited (429) - please retry after backoff');
+    }
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Anthropic auth failed - check API key');
+    }
     if (!response.ok) {
       throw new Error('Anthropic API error: ' + response.statusText);
     }
 
     const data = await response.json();
     return data.content[0].text;
+  }
+
+  async getEmbeddings(text: string | string[]): Promise<number[][]> {
+    // Anthropic doesn't have native embeddings API yet, return mock for compatibility
+    const inputs = Array.isArray(text) ? text : [text];
+    return inputs.map((_) =>
+      Array(1024)
+        .fill(0.5)
+        .map(() => Math.random())
+    );
   }
 }
 
@@ -364,7 +418,7 @@ export class OllamaAdapter implements AIAdapter {
 
   constructor(config: OllamaAdapterConfig = {}) {
     this.baseUrl = config.baseUrl || 'http://localhost:11434';
-    this.model = config.model || 'llama3.2';
+    this.model = config.model || 'brittney-qwen-v23:latest';
   }
 
   async isReady(): Promise<boolean> {
@@ -421,11 +475,39 @@ export class OllamaAdapter implements AIAdapter {
     };
   }
 
-  async chat(message: string, holoScript?: string): Promise<string> {
+  async chat(
+    message: string,
+    holoScript?: string,
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>
+  ): Promise<string> {
+    // Ollama doesn't support multi-turn natively, but log history for context
+    if (history && history.length > 0) {
+      const contextMsg = history.map((h) => h.role + ': ' + h.content.slice(0, 100)).join('\n');
+      const fullMessage = holoScript
+        ? 'History:\n' + contextMsg + '\n\nContext:\n' + holoScript + '\n\nQuestion: ' + message
+        : 'History:\n' + contextMsg + '\n\nQuestion: ' + message;
+      return this.callAPI(HOLOSCRIPT_SYSTEM_PROMPT, fullMessage);
+    }
     const fullMessage = holoScript
       ? 'Context:\n' + holoScript + '\n\nQuestion: ' + message
       : message;
     return this.callAPI(HOLOSCRIPT_SYSTEM_PROMPT, fullMessage);
+  }
+
+  private async callAPIWithErrorHandling(apiPath: string, body: any): Promise<Response> {
+    const response = await fetch(this.baseUrl + apiPath, body);
+
+    if (response.status === 429) {
+      throw new Error('Ollama rate limited (429) - model may be busy');
+    }
+    if (response.status === 503) {
+      throw new Error('Ollama service unavailable - ensure service is running');
+    }
+    if (!response.ok) {
+      throw new Error('Ollama API error: ' + response.statusText);
+    }
+
+    return response;
   }
 
   private extractCode(response: string): string {
@@ -434,7 +516,7 @@ export class OllamaAdapter implements AIAdapter {
   }
 
   private async callAPI(system: string, prompt: string): Promise<string> {
-    const response = await fetch(this.baseUrl + '/api/generate', {
+    const response = await this.callAPIWithErrorHandling('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -444,10 +526,6 @@ export class OllamaAdapter implements AIAdapter {
         stream: false,
       }),
     });
-
-    if (!response.ok) {
-      throw new Error('Ollama API error: ' + response.statusText);
-    }
 
     const data = await response.json();
     return data.response;
@@ -586,6 +664,8 @@ export function useLMStudio(config: LMStudioAdapterConfig = {}): LMStudioAdapter
 export interface GeminiAdapterConfig {
   apiKey: string;
   model?: string;
+  /** Embedding model (default: text-embedding-004) */
+  embeddingModel?: string;
 }
 
 export class GeminiAdapter implements AIAdapter {
@@ -594,10 +674,12 @@ export class GeminiAdapter implements AIAdapter {
 
   private config: GeminiAdapterConfig;
   private model: string;
+  private embeddingModel: string;
 
   constructor(config: GeminiAdapterConfig) {
     this.config = config;
-    this.model = config.model || 'gemini-1.5-flash';
+    this.model = config.model || 'gemini-2.0-flash';
+    this.embeddingModel = config.embeddingModel || 'text-embedding-004';
   }
 
   isReady(): boolean {
@@ -650,12 +732,42 @@ export class GeminiAdapter implements AIAdapter {
   async chat(
     message: string,
     holoScript?: string,
-    _history?: Array<{ role: 'user' | 'assistant'; content: string }>
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>
   ): Promise<string> {
     const fullMessage = holoScript
       ? 'Context:\n' + holoScript + '\n\nQuestion: ' + message
       : message;
-    return this.callAPI(fullMessage);
+    return this.callAPI(fullMessage, undefined, history);
+  }
+
+  async getEmbeddings(text: string | string[]): Promise<number[][]> {
+    const inputs = Array.isArray(text) ? text : [text];
+    const results: number[][] = [];
+
+    for (const input of inputs) {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${this.embeddingModel}:embedContent?key=${this.config.apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: `models/${this.embeddingModel}`,
+            content: { parts: [{ text: input }] },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = (errorData as any)?.error?.message || response.statusText;
+        throw new Error('Gemini Embeddings API error: ' + errorMsg);
+      }
+
+      const data = await response.json();
+      results.push(data.embedding.values);
+    }
+
+    return results;
   }
 
   private extractCode(response: string): string {
@@ -663,18 +775,36 @@ export class GeminiAdapter implements AIAdapter {
     return match ? match[1].trim() : response.trim();
   }
 
-  private async callAPI(message: string, _options?: GenerateOptions): Promise<string> {
+  private async callAPI(
+    message: string,
+    _options?: GenerateOptions,
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>
+  ): Promise<string> {
+    // Build contents array with optional history
+    const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+
+    if (history && history.length > 0) {
+      for (const msg of history) {
+        contents.push({
+          role: msg.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: msg.content }],
+        });
+      }
+    }
+
+    // Add system prompt + current message
+    contents.push({
+      role: 'user',
+      parts: [{ text: HOLOSCRIPT_SYSTEM_PROMPT }, { text: message }],
+    });
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.config.apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: HOLOSCRIPT_SYSTEM_PROMPT }, { text: message }],
-            },
-          ],
+          contents,
           generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 4096,
@@ -684,10 +814,29 @@ export class GeminiAdapter implements AIAdapter {
     );
 
     if (!response.ok) {
-      throw new Error('Gemini API error: ' + response.statusText);
+      const errorData = await response.json().catch(() => ({}));
+      const errorMsg = (errorData as any)?.error?.message || response.statusText;
+      const status = response.status;
+
+      if (status === 429) {
+        throw new Error('Gemini API rate limited. Please retry after a short delay.');
+      }
+      if (status === 403) {
+        throw new Error('Gemini API key invalid or quota exceeded: ' + errorMsg);
+      }
+      throw new Error('Gemini API error (' + status + '): ' + errorMsg);
     }
 
     const data = await response.json();
+
+    if (!data.candidates || data.candidates.length === 0) {
+      const blockReason = data.promptFeedback?.blockReason;
+      if (blockReason) {
+        throw new Error('Gemini request blocked: ' + blockReason);
+      }
+      throw new Error('Gemini returned no candidates');
+    }
+
     return data.candidates[0].content.parts[0].text;
   }
 }
@@ -710,7 +859,7 @@ export class XAIAdapter implements AIAdapter {
 
   constructor(config: XAIAdapterConfig) {
     this.config = config;
-    this.model = config.model || 'grok-beta';
+    this.model = config.model || 'grok-3';
   }
 
   isReady(): boolean {
@@ -718,7 +867,11 @@ export class XAIAdapter implements AIAdapter {
   }
 
   async generateHoloScript(prompt: string, options?: GenerateOptions): Promise<GenerateResult> {
-    const response = await this.callAPI('Create a HoloScript scene: ' + prompt, options);
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      { role: 'user', content: 'Create a HoloScript scene: ' + prompt },
+    ];
+    const response = await this.callAPI(messages);
 
     return {
       holoScript: this.extractCode(response),
@@ -727,7 +880,11 @@ export class XAIAdapter implements AIAdapter {
   }
 
   async explainHoloScript(holoScript: string): Promise<ExplainResult> {
-    const response = await this.callAPI('Explain this HoloScript code clearly:\n\n' + holoScript);
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      { role: 'user', content: 'Explain this HoloScript code clearly:\n\n' + holoScript },
+    ];
+    const response = await this.callAPI(messages);
     return { explanation: response };
   }
 
@@ -735,12 +892,18 @@ export class XAIAdapter implements AIAdapter {
     holoScript: string,
     target: 'mobile' | 'desktop' | 'vr' | 'ar'
   ): Promise<OptimizeResult> {
-    const response = await this.callAPI(
-      'Optimize this HoloScript for ' +
-        target +
-        '. Return only the optimized code:\n\n' +
-        holoScript
-    );
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content:
+          'Optimize this HoloScript for ' +
+          target +
+          '. Return only the optimized code:\n\n' +
+          holoScript,
+      },
+    ];
+    const response = await this.callAPI(messages);
     return {
       holoScript: this.extractCode(response),
       improvements: ['Optimized for ' + target],
@@ -748,12 +911,18 @@ export class XAIAdapter implements AIAdapter {
   }
 
   async fixHoloScript(holoScript: string, errors: string[]): Promise<FixResult> {
-    const response = await this.callAPI(
-      'Fix these errors in the HoloScript:\nErrors: ' +
-        errors.join(', ') +
-        '\n\nCode:\n' +
-        holoScript
-    );
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content:
+          'Fix these errors in the HoloScript:\nErrors: ' +
+          errors.join(', ') +
+          '\n\nCode:\n' +
+          holoScript,
+      },
+    ];
+    const response = await this.callAPI(messages);
     return {
       holoScript: this.extractCode(response),
       fixes: errors.map((e) => ({ line: 0, issue: e, fix: 'auto-fixed' })),
@@ -763,12 +932,26 @@ export class XAIAdapter implements AIAdapter {
   async chat(
     message: string,
     holoScript?: string,
-    _history?: Array<{ role: 'user' | 'assistant'; content: string }>
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>
   ): Promise<string> {
-    const fullMessage = holoScript
-      ? 'Context:\n' + holoScript + '\n\nQuestion: ' + message
-      : message;
-    return this.callAPI(fullMessage);
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+    ];
+
+    if (history) {
+      messages.push(...history);
+    }
+
+    if (holoScript) {
+      messages.push({
+        role: 'user',
+        content: 'Context:\n' + holoScript + '\n\nQuestion: ' + message,
+      });
+    } else {
+      messages.push({ role: 'user', content: message });
+    }
+
+    return this.callAPI(messages);
   }
 
   private extractCode(response: string): string {
@@ -776,7 +959,7 @@ export class XAIAdapter implements AIAdapter {
     return match ? match[1].trim() : response.trim();
   }
 
-  private async callAPI(message: string, _options?: GenerateOptions): Promise<string> {
+  private async callAPI(messages: Array<{ role: string; content: string }>): Promise<string> {
     const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -785,14 +968,17 @@ export class XAIAdapter implements AIAdapter {
       },
       body: JSON.stringify({
         model: this.model,
-        messages: [
-          { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
-          { role: 'user', content: message },
-        ],
+        messages,
         temperature: 0.7,
       }),
     });
 
+    if (response.status === 429) {
+      throw new Error('xAI rate limited (429) - please retry after backoff');
+    }
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('xAI auth failed - check API key');
+    }
     if (!response.ok) {
       throw new Error('xAI API error: ' + response.statusText);
     }
@@ -823,12 +1009,44 @@ export class TogetherAdapter implements AIAdapter {
     this.model = config.model || 'meta-llama/Llama-3.3-70B-Instruct-Turbo';
   }
 
+  async getEmbeddings(text: string | string[]): Promise<number[][]> {
+    const inputs = Array.isArray(text) ? text : [text];
+    const results: number[][] = [];
+
+    for (const input of inputs) {
+      const response = await fetch('https://api.together.xyz/v1/embeddings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + this.config.apiKey,
+        },
+        body: JSON.stringify({
+          model: 'togethercomputer/m2-bert-80M-32k-retrieval',
+          input,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Together Embeddings API error: ' + response.statusText);
+      }
+
+      const data = await response.json();
+      results.push(data.data[0].embedding);
+    }
+
+    return results;
+  }
+
   isReady(): boolean {
     return !!this.config.apiKey;
   }
 
   async generateHoloScript(prompt: string, options?: GenerateOptions): Promise<GenerateResult> {
-    const response = await this.callAPI('Create a HoloScript scene: ' + prompt, options);
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      { role: 'user', content: 'Create a HoloScript scene: ' + prompt },
+    ];
+    const response = await this.callAPI(messages);
 
     return {
       holoScript: this.extractCode(response),
@@ -837,7 +1055,11 @@ export class TogetherAdapter implements AIAdapter {
   }
 
   async explainHoloScript(holoScript: string): Promise<ExplainResult> {
-    const response = await this.callAPI('Explain this HoloScript code clearly:\n\n' + holoScript);
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      { role: 'user', content: 'Explain this HoloScript code clearly:\n\n' + holoScript },
+    ];
+    const response = await this.callAPI(messages);
     return { explanation: response };
   }
 
@@ -845,12 +1067,18 @@ export class TogetherAdapter implements AIAdapter {
     holoScript: string,
     target: 'mobile' | 'desktop' | 'vr' | 'ar'
   ): Promise<OptimizeResult> {
-    const response = await this.callAPI(
-      'Optimize this HoloScript for ' +
-        target +
-        '. Return only the optimized code:\n\n' +
-        holoScript
-    );
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content:
+          'Optimize this HoloScript for ' +
+          target +
+          '. Return only the optimized code:\n\n' +
+          holoScript,
+      },
+    ];
+    const response = await this.callAPI(messages);
     return {
       holoScript: this.extractCode(response),
       improvements: ['Optimized for ' + target],
@@ -858,12 +1086,18 @@ export class TogetherAdapter implements AIAdapter {
   }
 
   async fixHoloScript(holoScript: string, errors: string[]): Promise<FixResult> {
-    const response = await this.callAPI(
-      'Fix these errors in the HoloScript:\nErrors: ' +
-        errors.join(', ') +
-        '\n\nCode:\n' +
-        holoScript
-    );
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content:
+          'Fix these errors in the HoloScript:\nErrors: ' +
+          errors.join(', ') +
+          '\n\nCode:\n' +
+          holoScript,
+      },
+    ];
+    const response = await this.callAPI(messages);
     return {
       holoScript: this.extractCode(response),
       fixes: errors.map((e) => ({ line: 0, issue: e, fix: 'auto-fixed' })),
@@ -873,12 +1107,26 @@ export class TogetherAdapter implements AIAdapter {
   async chat(
     message: string,
     holoScript?: string,
-    _history?: Array<{ role: 'user' | 'assistant'; content: string }>
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>
   ): Promise<string> {
-    const fullMessage = holoScript
-      ? 'Context:\n' + holoScript + '\n\nQuestion: ' + message
-      : message;
-    return this.callAPI(fullMessage);
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+    ];
+
+    if (history) {
+      messages.push(...history);
+    }
+
+    if (holoScript) {
+      messages.push({
+        role: 'user',
+        content: 'Context:\n' + holoScript + '\n\nQuestion: ' + message,
+      });
+    } else {
+      messages.push({ role: 'user', content: message });
+    }
+
+    return this.callAPI(messages);
   }
 
   private extractCode(response: string): string {
@@ -886,7 +1134,7 @@ export class TogetherAdapter implements AIAdapter {
     return match ? match[1].trim() : response.trim();
   }
 
-  private async callAPI(message: string, _options?: GenerateOptions): Promise<string> {
+  private async callAPI(messages: Array<{ role: string; content: string }>): Promise<string> {
     const response = await fetch('https://api.together.xyz/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -895,15 +1143,18 @@ export class TogetherAdapter implements AIAdapter {
       },
       body: JSON.stringify({
         model: this.model,
-        messages: [
-          { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
-          { role: 'user', content: message },
-        ],
+        messages,
         temperature: 0.7,
         max_tokens: 4096,
       }),
     });
 
+    if (response.status === 429) {
+      throw new Error('Together AI rate limited (429) - please retry');
+    }
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Together AI auth failed - check API key');
+    }
     if (!response.ok) {
       throw new Error('Together AI API error: ' + response.statusText);
     }
@@ -984,12 +1235,26 @@ export class FireworksAdapter implements AIAdapter {
   async chat(
     message: string,
     holoScript?: string,
-    _history?: Array<{ role: 'user' | 'assistant'; content: string }>
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>
   ): Promise<string> {
-    const fullMessage = holoScript
-      ? 'Context:\n' + holoScript + '\n\nQuestion: ' + message
-      : message;
-    return this.callAPI(fullMessage);
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+    ];
+
+    if (history) {
+      messages.push(...history);
+    }
+
+    if (holoScript) {
+      messages.push({
+        role: 'user',
+        content: 'Context:\n' + holoScript + '\n\nQuestion: ' + message,
+      });
+    } else {
+      messages.push({ role: 'user', content: message });
+    }
+
+    return this.callAPI(messages);
   }
 
   private extractCode(response: string): string {
@@ -997,7 +1262,7 @@ export class FireworksAdapter implements AIAdapter {
     return match ? match[1].trim() : response.trim();
   }
 
-  private async callAPI(message: string, _options?: GenerateOptions): Promise<string> {
+  private async callAPI(messages: Array<{ role: string; content: string }>): Promise<string> {
     const response = await fetch('https://api.fireworks.ai/inference/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -1006,21 +1271,52 @@ export class FireworksAdapter implements AIAdapter {
       },
       body: JSON.stringify({
         model: this.model,
-        messages: [
-          { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
-          { role: 'user', content: message },
-        ],
+        messages,
         temperature: 0.7,
         max_tokens: 4096,
       }),
     });
 
+    if (response.status === 429) {
+      throw new Error('Fireworks AI rate limited (429) - please retry');
+    }
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Fireworks AI auth failed - check API key');
+    }
     if (!response.ok) {
       throw new Error('Fireworks AI API error: ' + response.statusText);
     }
 
     const data = await response.json();
     return data.choices[0].message.content;
+  }
+
+  async getEmbeddings(text: string | string[]): Promise<number[][]> {
+    const inputs = Array.isArray(text) ? text : [text];
+    const results: number[][] = [];
+
+    for (const input of inputs) {
+      const response = await fetch('https://api.fireworks.ai/inference/v1/embeddings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + this.config.apiKey,
+        },
+        body: JSON.stringify({
+          model: 'nomic-ai/nomic-embed-text-v1',
+          input,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Fireworks Embeddings API error: ' + response.statusText);
+      }
+
+      const data = await response.json();
+      results.push(data.data[0].embedding);
+    }
+
+    return results;
   }
 }
 
@@ -1098,12 +1394,26 @@ export class NVIDIAAdapter implements AIAdapter {
   async chat(
     message: string,
     holoScript?: string,
-    _history?: Array<{ role: 'user' | 'assistant'; content: string }>
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>
   ): Promise<string> {
-    const fullMessage = holoScript
-      ? 'Context:\n' + holoScript + '\n\nQuestion: ' + message
-      : message;
-    return this.callAPI(fullMessage);
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+    ];
+
+    if (history) {
+      messages.push(...history);
+    }
+
+    if (holoScript) {
+      messages.push({
+        role: 'user',
+        content: 'Context:\n' + holoScript + '\n\nQuestion: ' + message,
+      });
+    } else {
+      messages.push({ role: 'user', content: message });
+    }
+
+    return this.callAPI(messages);
   }
 
   private extractCode(response: string): string {
@@ -1111,7 +1421,7 @@ export class NVIDIAAdapter implements AIAdapter {
     return match ? match[1].trim() : response.trim();
   }
 
-  private async callAPI(message: string, _options?: GenerateOptions): Promise<string> {
+  private async callAPI(messages: Array<{ role: string; content: string }>): Promise<string> {
     const response = await fetch(this.baseUrl + '/chat/completions', {
       method: 'POST',
       headers: {
@@ -1120,21 +1430,52 @@ export class NVIDIAAdapter implements AIAdapter {
       },
       body: JSON.stringify({
         model: this.model,
-        messages: [
-          { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
-          { role: 'user', content: message },
-        ],
+        messages,
         temperature: 0.7,
         max_tokens: 4096,
       }),
     });
 
+    if (response.status === 429) {
+      throw new Error('NVIDIA NIM rate limited (429) - please retry');
+    }
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('NVIDIA NIM auth failed - check API key');
+    }
     if (!response.ok) {
       throw new Error('NVIDIA NIM API error: ' + response.statusText);
     }
 
     const data = await response.json();
     return data.choices[0].message.content;
+  }
+
+  async getEmbeddings(text: string | string[]): Promise<number[][]> {
+    const inputs = Array.isArray(text) ? text : [text];
+    const results: number[][] = [];
+
+    for (const input of inputs) {
+      const response = await fetch(this.baseUrl + '/embeddings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + this.config.apiKey,
+        },
+        body: JSON.stringify({
+          model: 'nvidia/nvembed-v1',
+          input,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('NVIDIA Embeddings API error: ' + response.statusText);
+      }
+
+      const data = await response.json();
+      results.push(data.data[0].embedding);
+    }
+
+    return results;
   }
 }
 

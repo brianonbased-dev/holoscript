@@ -141,6 +141,8 @@ export type NodeCategory =
   | 'color'
   | 'texture'
   | 'utility'
+  | 'material'
+  | 'volumetric'
   | 'custom';
 
 /**
@@ -704,8 +706,7 @@ export const VECTOR_NODES: INodeTemplate[] = [
       { id: 'w', name: 'W', type: 'float', defaultValue: 1 },
     ],
     outputs: [{ id: 'vector', name: 'Vector', type: 'vec4' }],
-    generateCode: (_, inputs) =>
-      `vec4<f32>(${inputs.x}, ${inputs.y}, ${inputs.z}, ${inputs.w})`,
+    generateCode: (_, inputs) => `vec4<f32>(${inputs.x}, ${inputs.y}, ${inputs.z}, ${inputs.w})`,
   },
   {
     type: 'vector_split_vec2',
@@ -1066,6 +1067,258 @@ export const UTILITY_NODES: INodeTemplate[] = [
 ];
 
 /**
+ * Advanced material nodes — exotic optics, animation, weathering
+ */
+export const ADVANCED_MATERIAL_NODES: INodeTemplate[] = [
+  {
+    type: 'blackbody',
+    name: 'Blackbody Radiation',
+    category: 'material',
+    description: 'Convert temperature (Kelvin) to emission color via Planck approximation',
+    inputs: [
+      { id: 'temperature', name: 'Temperature K', type: 'float', defaultValue: 5500 },
+      { id: 'intensity', name: 'Intensity', type: 'float', defaultValue: 1 },
+    ],
+    outputs: [{ id: 'color', name: 'Color', type: 'vec3' }],
+    generateCode: (_, inputs) => `blackbodyColor(${inputs.temperature}, ${inputs.intensity})`,
+  },
+  {
+    type: 'sparkle',
+    name: 'Sparkle / Glitter',
+    category: 'material',
+    description: 'Stochastic micro-facet flashing for glitter, metallic paint, mica',
+    inputs: [
+      { id: 'uv', name: 'UV', type: 'vec2', defaultValue: [0, 0] },
+      { id: 'density', name: 'Density', type: 'float', defaultValue: 50 },
+      { id: 'size', name: 'Size', type: 'float', defaultValue: 0.02 },
+      { id: 'intensity', name: 'Intensity', type: 'float', defaultValue: 1 },
+      { id: 'viewDir', name: 'View Dir', type: 'vec3', defaultValue: [0, 0, 1] },
+      { id: 'normal', name: 'Normal', type: 'vec3', defaultValue: [0, 0, 1] },
+    ],
+    outputs: [
+      { id: 'flash', name: 'Flash', type: 'float' },
+      { id: 'color', name: 'Color', type: 'vec3' },
+    ],
+    generateCode: (_, inputs) =>
+      `sparkleFlash(${inputs.uv}, ${inputs.density}, ${inputs.size}, ${inputs.intensity}, ${inputs.viewDir}, ${inputs.normal})`,
+  },
+  {
+    type: 'animated_pattern',
+    name: 'Animated Pattern',
+    category: 'material',
+    description: 'Time-varying surface patterns: ripple, flicker, pulse, flow, wave, noise',
+    inputs: [
+      { id: 'uv', name: 'UV', type: 'vec2', defaultValue: [0, 0] },
+      { id: 'time', name: 'Time', type: 'float', defaultValue: 0 },
+      { id: 'patternType', name: 'Pattern (0-7)', type: 'float', defaultValue: 0 },
+      { id: 'speed', name: 'Speed', type: 'float', defaultValue: 1 },
+      { id: 'amplitude', name: 'Amplitude', type: 'float', defaultValue: 1 },
+      { id: 'scale', name: 'Scale', type: 'float', defaultValue: 1 },
+    ],
+    outputs: [
+      { id: 'value', name: 'Value', type: 'float' },
+      { id: 'offset', name: 'UV Offset', type: 'vec2' },
+    ],
+    generateCode: (_, inputs) =>
+      `animatedPattern(${inputs.uv}, ${inputs.time}, ${inputs.patternType}, ${inputs.speed}, ${inputs.amplitude}, ${inputs.scale})`,
+  },
+  {
+    type: 'weathering',
+    name: 'Weathering',
+    category: 'material',
+    description: 'Procedural surface degradation: rust, moss, crack, peel, patina, frost',
+    inputs: [
+      { id: 'uv', name: 'UV', type: 'vec2', defaultValue: [0, 0] },
+      { id: 'progress', name: 'Progress', type: 'float', defaultValue: 0 },
+      { id: 'weatherType', name: 'Type (0-9)', type: 'float', defaultValue: 0 },
+      { id: 'seed', name: 'Seed', type: 'float', defaultValue: 42 },
+      { id: 'baseColor', name: 'Base Color', type: 'vec3', defaultValue: [1, 1, 1] },
+    ],
+    outputs: [
+      { id: 'color', name: 'Weathered Color', type: 'vec3' },
+      { id: 'mask', name: 'Mask', type: 'float' },
+      { id: 'roughnessMod', name: 'Roughness Mod', type: 'float' },
+    ],
+    generateCode: (_, inputs) =>
+      `weatheringSurface(${inputs.uv}, ${inputs.progress}, ${inputs.weatherType}, ${inputs.seed}, ${inputs.baseColor})`,
+  },
+  {
+    type: 'dual_layer_blend',
+    name: 'Dual Layer Blend',
+    category: 'material',
+    description: 'Blend two material layers (paint over rust, moss over stone, snow on branches)',
+    inputs: [
+      { id: 'baseColor', name: 'Base Color', type: 'vec3', defaultValue: [0.5, 0.5, 0.5] },
+      { id: 'baseRoughness', name: 'Base Rough', type: 'float', defaultValue: 0.5 },
+      { id: 'baseMetallic', name: 'Base Metal', type: 'float', defaultValue: 0 },
+      { id: 'topColor', name: 'Top Color', type: 'vec3', defaultValue: [1, 1, 1] },
+      { id: 'topRoughness', name: 'Top Rough', type: 'float', defaultValue: 0.5 },
+      { id: 'topMetallic', name: 'Top Metal', type: 'float', defaultValue: 0 },
+      { id: 'blendFactor', name: 'Blend', type: 'float', defaultValue: 0.5 },
+      { id: 'blendMode', name: 'Mode (0-3)', type: 'float', defaultValue: 0 },
+      { id: 'normal', name: 'Normal', type: 'vec3', defaultValue: [0, 0, 1] },
+      { id: 'uv', name: 'UV', type: 'vec2', defaultValue: [0, 0] },
+    ],
+    outputs: [
+      { id: 'color', name: 'Color', type: 'vec3' },
+      { id: 'roughness', name: 'Roughness', type: 'float' },
+      { id: 'metallic', name: 'Metallic', type: 'float' },
+    ],
+    generateCode: (_, inputs) =>
+      `dualLayerBlend(${inputs.baseColor}, ${inputs.baseRoughness}, ${inputs.baseMetallic}, ${inputs.topColor}, ${inputs.topRoughness}, ${inputs.topMetallic}, ${inputs.blendFactor}, ${inputs.blendMode}, ${inputs.normal}, ${inputs.uv})`,
+  },
+  {
+    type: 'fluorescence',
+    name: 'Fluorescence',
+    category: 'material',
+    description: 'UV-reactive emission: absorb short wavelengths, emit longer ones',
+    inputs: [
+      { id: 'lightColor', name: 'Light Color', type: 'vec3', defaultValue: [1, 1, 1] },
+      { id: 'excitationColor', name: 'Excitation', type: 'vec3', defaultValue: [0.2, 0, 0.5] },
+      { id: 'emissionColor', name: 'Emission', type: 'vec3', defaultValue: [0, 1, 0] },
+      { id: 'intensity', name: 'Intensity', type: 'float', defaultValue: 1 },
+    ],
+    outputs: [{ id: 'emission', name: 'Emission', type: 'vec3' }],
+    generateCode: (_, inputs) =>
+      `fluorescenceEmit(${inputs.lightColor}, ${inputs.excitationColor}, ${inputs.emissionColor}, ${inputs.intensity})`,
+  },
+  {
+    type: 'retroreflection',
+    name: 'Retroreflection',
+    category: 'material',
+    description: 'Light bounces back toward source (road signs, safety vests, cat eyes)',
+    inputs: [
+      { id: 'viewDir', name: 'View Dir', type: 'vec3', defaultValue: [0, 0, 1] },
+      { id: 'lightDir', name: 'Light Dir', type: 'vec3', defaultValue: [0, 1, 0] },
+      { id: 'normal', name: 'Normal', type: 'vec3', defaultValue: [0, 0, 1] },
+      { id: 'intensity', name: 'Intensity', type: 'float', defaultValue: 1 },
+    ],
+    outputs: [{ id: 'reflectance', name: 'Reflectance', type: 'float' }],
+    generateCode: (_, inputs) =>
+      `retroReflect(${inputs.viewDir}, ${inputs.lightDir}, ${inputs.normal}, ${inputs.intensity})`,
+  },
+];
+
+/**
+ * Volumetric material nodes — ray marching, 3D noise, scattering
+ */
+export const VOLUMETRIC_NODES: INodeTemplate[] = [
+  {
+    type: 'volume_density',
+    name: 'Volume Density',
+    category: 'volumetric',
+    description: 'Sample/generate volume density at a 3D position',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'baseDensity', name: 'Base Density', type: 'float', defaultValue: 0.5 },
+      { id: 'noiseScale', name: 'Noise Scale', type: 'float', defaultValue: 4 },
+      { id: 'noiseOctaves', name: 'Octaves', type: 'float', defaultValue: 4 },
+      { id: 'time', name: 'Time', type: 'float', defaultValue: 0 },
+    ],
+    outputs: [{ id: 'density', name: 'Density', type: 'float' }],
+    generateCode: (_, inputs) =>
+      `volumeDensity(${inputs.position}, ${inputs.baseDensity}, ${inputs.noiseScale}, ${inputs.noiseOctaves}, ${inputs.time})`,
+  },
+  {
+    type: 'volume_noise_3d',
+    name: '3D FBM Noise',
+    category: 'volumetric',
+    description: 'Fractal Brownian motion noise in 3D for volumetric density',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'octaves', name: 'Octaves', type: 'float', defaultValue: 4 },
+      { id: 'lacunarity', name: 'Lacunarity', type: 'float', defaultValue: 2 },
+      { id: 'gain', name: 'Gain', type: 'float', defaultValue: 0.5 },
+    ],
+    outputs: [{ id: 'noise', name: 'Noise', type: 'float' }],
+    generateCode: (_, inputs) =>
+      `fbmNoise3D(${inputs.position}, i32(${inputs.octaves}), ${inputs.lacunarity}, ${inputs.gain})`,
+  },
+  {
+    type: 'volume_curl_noise',
+    name: 'Curl Noise 3D',
+    category: 'volumetric',
+    description: 'Divergence-free curl noise for smoke/fire turbulence',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'scale', name: 'Scale', type: 'float', defaultValue: 1 },
+    ],
+    outputs: [{ id: 'curl', name: 'Curl', type: 'vec3' }],
+    generateCode: (_, inputs) => `curlNoise3D(${inputs.position} * ${inputs.scale})`,
+  },
+  {
+    type: 'volume_scatter',
+    name: 'Volume Scattering',
+    category: 'volumetric',
+    description: 'Beer-Lambert absorption + Henyey-Greenstein phase function',
+    inputs: [
+      { id: 'density', name: 'Density', type: 'float', defaultValue: 0.5 },
+      { id: 'scattering', name: 'Scattering', type: 'float', defaultValue: 0.5 },
+      { id: 'absorption', name: 'Absorption', type: 'float', defaultValue: 0.1 },
+      { id: 'stepLength', name: 'Step Length', type: 'float', defaultValue: 0.1 },
+      { id: 'lightDir', name: 'Light Dir', type: 'vec3', defaultValue: [0, 1, 0] },
+      { id: 'viewDir', name: 'View Dir', type: 'vec3', defaultValue: [0, 0, 1] },
+      { id: 'anisotropy', name: 'Phase Aniso', type: 'float', defaultValue: 0.3 },
+    ],
+    outputs: [
+      { id: 'transmittance', name: 'Transmittance', type: 'float' },
+      { id: 'inScatter', name: 'In-Scatter', type: 'float' },
+    ],
+    generateCode: (_, inputs) =>
+      `volumeScatter(${inputs.density}, ${inputs.scattering}, ${inputs.absorption}, ${inputs.stepLength}, ${inputs.lightDir}, ${inputs.viewDir}, ${inputs.anisotropy})`,
+  },
+  {
+    type: 'volume_emission',
+    name: 'Volume Emission',
+    category: 'volumetric',
+    description: 'Self-luminous volume contribution (fire, neon gas, aurora)',
+    inputs: [
+      { id: 'density', name: 'Density', type: 'float', defaultValue: 0.5 },
+      { id: 'emissionColor', name: 'Emission Color', type: 'vec3', defaultValue: [1, 0.5, 0] },
+      { id: 'intensity', name: 'Intensity', type: 'float', defaultValue: 1 },
+      { id: 'temperature', name: 'Temperature K', type: 'float', defaultValue: 0 },
+    ],
+    outputs: [{ id: 'emission', name: 'Emission', type: 'vec3' }],
+    generateCode: (_, inputs) =>
+      `volumeEmission(${inputs.density}, ${inputs.emissionColor}, ${inputs.intensity}, ${inputs.temperature})`,
+  },
+  {
+    type: 'volume_height_fog',
+    name: 'Height Fog',
+    category: 'volumetric',
+    description: 'Height-attenuated fog density with exponential falloff',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'groundLevel', name: 'Ground Y', type: 'float', defaultValue: 0 },
+      { id: 'density', name: 'Density', type: 'float', defaultValue: 0.5 },
+      { id: 'falloff', name: 'Falloff', type: 'float', defaultValue: 2 },
+    ],
+    outputs: [{ id: 'density', name: 'Density', type: 'float' }],
+    generateCode: (_, inputs) =>
+      `heightFogDensity(${inputs.position}, ${inputs.groundLevel}, ${inputs.density}, ${inputs.falloff})`,
+  },
+  {
+    type: 'volume_fire_density',
+    name: 'Fire Density',
+    category: 'volumetric',
+    description: 'Fire-specific density: buoyancy, turbulence, temperature → emission',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'time', name: 'Time', type: 'float', defaultValue: 0 },
+      { id: 'turbulence', name: 'Turbulence', type: 'float', defaultValue: 0.5 },
+      { id: 'riseSpeed', name: 'Rise Speed', type: 'float', defaultValue: 1 },
+      { id: 'scale', name: 'Scale', type: 'float', defaultValue: 2 },
+    ],
+    outputs: [
+      { id: 'density', name: 'Density', type: 'float' },
+      { id: 'temperature', name: 'Temperature', type: 'float' },
+    ],
+    generateCode: (_, inputs) =>
+      `fireDensity(${inputs.position}, ${inputs.time}, ${inputs.turbulence}, ${inputs.riseSpeed}, ${inputs.scale})`,
+  },
+];
+
+/**
  * Output nodes
  */
 export const OUTPUT_NODES: INodeTemplate[] = [
@@ -1073,7 +1326,7 @@ export const OUTPUT_NODES: INodeTemplate[] = [
     type: 'output_surface',
     name: 'Surface Output',
     category: 'output',
-    description: 'PBR surface output',
+    description: 'PBR surface output with SSS, sheen, anisotropy, clearcoat, iridescence',
     inputs: [
       { id: 'baseColor', name: 'Base Color', type: 'vec3', defaultValue: [1, 1, 1] },
       { id: 'metallic', name: 'Metallic', type: 'float', defaultValue: 0 },
@@ -1082,6 +1335,23 @@ export const OUTPUT_NODES: INodeTemplate[] = [
       { id: 'emission', name: 'Emission', type: 'vec3', defaultValue: [0, 0, 0] },
       { id: 'alpha', name: 'Alpha', type: 'float', defaultValue: 1 },
       { id: 'ao', name: 'AO', type: 'float', defaultValue: 1 },
+      // Advanced PBR
+      { id: 'sheenColor', name: 'Sheen Color', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'sheenRoughness', name: 'Sheen Roughness', type: 'float', defaultValue: 0 },
+      { id: 'subsurfaceThickness', name: 'SSS Thickness', type: 'float', defaultValue: 0 },
+      { id: 'subsurfaceColor', name: 'SSS Color', type: 'vec3', defaultValue: [1, 1, 1] },
+      { id: 'anisotropy', name: 'Anisotropy', type: 'float', defaultValue: 0 },
+      { id: 'anisotropyRotation', name: 'Aniso Rotation', type: 'float', defaultValue: 0 },
+      { id: 'clearcoat', name: 'Clearcoat', type: 'float', defaultValue: 0 },
+      { id: 'clearcoatRoughness', name: 'Clearcoat Rough', type: 'float', defaultValue: 0 },
+      { id: 'iridescence', name: 'Iridescence', type: 'float', defaultValue: 0 },
+      // Exotic optics
+      { id: 'sparkleIntensity', name: 'Sparkle', type: 'float', defaultValue: 0 },
+      { id: 'sparkleDensity', name: 'Sparkle Density', type: 'float', defaultValue: 0 },
+      { id: 'fluorescenceColor', name: 'Fluorescence', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'fluorescenceIntensity', name: 'Fluor Intensity', type: 'float', defaultValue: 0 },
+      { id: 'blackbodyTemp', name: 'Blackbody K', type: 'float', defaultValue: 0 },
+      { id: 'retroreflection', name: 'Retroreflect', type: 'float', defaultValue: 0 },
     ],
     outputs: [],
     generateCode: (_, inputs) => {
@@ -1092,7 +1362,22 @@ export const OUTPUT_NODES: INodeTemplate[] = [
         ${inputs.normal},
         ${inputs.emission},
         ${inputs.alpha},
-        ${inputs.ao}
+        ${inputs.ao},
+        ${inputs.sheenColor},
+        ${inputs.sheenRoughness},
+        ${inputs.subsurfaceThickness},
+        ${inputs.subsurfaceColor},
+        ${inputs.anisotropy},
+        ${inputs.anisotropyRotation},
+        ${inputs.clearcoat},
+        ${inputs.clearcoatRoughness},
+        ${inputs.iridescence},
+        ${inputs.sparkleIntensity},
+        ${inputs.sparkleDensity},
+        ${inputs.fluorescenceColor},
+        ${inputs.fluorescenceIntensity},
+        ${inputs.blackbodyTemp},
+        ${inputs.retroreflection}
       )`;
     },
   },
@@ -1101,9 +1386,7 @@ export const OUTPUT_NODES: INodeTemplate[] = [
     name: 'Unlit Output',
     category: 'output',
     description: 'Unlit color output',
-    inputs: [
-      { id: 'color', name: 'Color', type: 'vec4', defaultValue: [1, 1, 1, 1] },
-    ],
+    inputs: [{ id: 'color', name: 'Color', type: 'vec4', defaultValue: [1, 1, 1, 1] }],
     outputs: [],
     generateCode: (_, inputs) => `${inputs.color}`,
   },
@@ -1115,6 +1398,207 @@ export const OUTPUT_NODES: INodeTemplate[] = [
     inputs: [{ id: 'offset', name: 'Offset', type: 'vec3', defaultValue: [0, 0, 0] }],
     outputs: [],
     generateCode: (_, inputs) => inputs.offset,
+  },
+  {
+    type: 'output_volume',
+    name: 'Volume Output',
+    category: 'output',
+    description: 'Volumetric output — ray-marched density, color, emission, scattering',
+    inputs: [
+      { id: 'density', name: 'Density', type: 'float', defaultValue: 0.5 },
+      { id: 'color', name: 'Color', type: 'vec3', defaultValue: [1, 1, 1] },
+      { id: 'emission', name: 'Emission', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'scattering', name: 'Scattering', type: 'float', defaultValue: 0.5 },
+      { id: 'absorption', name: 'Absorption', type: 'float', defaultValue: 0.1 },
+      { id: 'steps', name: 'Steps', type: 'float', defaultValue: 64 },
+      { id: 'maxDistance', name: 'Max Dist', type: 'float', defaultValue: 10 },
+    ],
+    outputs: [],
+    generateCode: (_, inputs) => {
+      return `VolumeOutput(
+        ${inputs.density},
+        ${inputs.color},
+        ${inputs.emission},
+        ${inputs.scattering},
+        ${inputs.absorption},
+        ${inputs.steps},
+        ${inputs.maxDistance}
+      )`;
+    },
+  },
+];
+
+/**
+ * Screen-space, caustics, and displacement nodes
+ */
+export const SCREEN_SPACE_NODES: INodeTemplate[] = [
+  {
+    type: 'caustics',
+    name: 'Caustics',
+    category: 'material',
+    description: 'Underwater caustic light patterns from refracted light',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'time', name: 'Time', type: 'float', defaultValue: 0 },
+      { id: 'scale', name: 'Scale', type: 'float', defaultValue: 1 },
+      { id: 'speed', name: 'Speed', type: 'float', defaultValue: 1 },
+      { id: 'intensity', name: 'Intensity', type: 'float', defaultValue: 1 },
+      { id: 'color', name: 'Color', type: 'vec3', defaultValue: [0.2, 0.5, 0.8] },
+    ],
+    outputs: [
+      { id: 'caustic', name: 'Caustic', type: 'vec3' },
+      { id: 'mask', name: 'Mask', type: 'float' },
+    ],
+    generateCode: (_, inputs) =>
+      `causticPattern(${inputs.position}, ${inputs.time}, ${inputs.scale}, ${inputs.speed}, ${inputs.intensity}, ${inputs.color})`,
+  },
+  {
+    type: 'displacement_map',
+    name: 'Displacement Map',
+    category: 'material',
+    description: 'Vertex displacement from height/normal map',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'normal', name: 'Normal', type: 'vec3', defaultValue: [0, 1, 0] },
+      { id: 'height', name: 'Height', type: 'float', defaultValue: 0 },
+      { id: 'strength', name: 'Strength', type: 'float', defaultValue: 1 },
+      { id: 'midLevel', name: 'Mid Level', type: 'float', defaultValue: 0.5 },
+    ],
+    outputs: [{ id: 'displaced', name: 'Displaced', type: 'vec3' }],
+    generateCode: (_, inputs) =>
+      `displacementMap(${inputs.position}, ${inputs.normal}, ${inputs.height}, ${inputs.strength}, ${inputs.midLevel})`,
+  },
+  {
+    type: 'parallax_occlusion',
+    name: 'Parallax Occlusion',
+    category: 'material',
+    description: 'Parallax occlusion mapping for depth illusion without extra geometry',
+    inputs: [
+      { id: 'uv', name: 'UV', type: 'vec2', defaultValue: [0, 0] },
+      { id: 'viewDir', name: 'View Dir', type: 'vec3', defaultValue: [0, 0, 1] },
+      { id: 'heightScale', name: 'Height Scale', type: 'float', defaultValue: 0.05 },
+      { id: 'numLayers', name: 'Layers', type: 'float', defaultValue: 32 },
+    ],
+    outputs: [
+      { id: 'adjustedUV', name: 'Adjusted UV', type: 'vec2' },
+      { id: 'depth', name: 'Depth', type: 'float' },
+    ],
+    generateCode: (_, inputs) =>
+      `parallaxOcclusionMap(${inputs.uv}, ${inputs.viewDir}, ${inputs.heightScale}, ${inputs.numLayers})`,
+  },
+  {
+    type: 'screen_space_reflection',
+    name: 'Screen Space Reflection',
+    category: 'material',
+    description: 'SSR — ray-marched reflections in screen space',
+    inputs: [
+      { id: 'uv', name: 'UV', type: 'vec2', defaultValue: [0, 0] },
+      { id: 'normal', name: 'Normal', type: 'vec3', defaultValue: [0, 1, 0] },
+      { id: 'viewDir', name: 'View Dir', type: 'vec3', defaultValue: [0, 0, 1] },
+      { id: 'roughness', name: 'Roughness', type: 'float', defaultValue: 0.1 },
+      { id: 'maxSteps', name: 'Max Steps', type: 'float', defaultValue: 64 },
+      { id: 'stepSize', name: 'Step Size', type: 'float', defaultValue: 0.1 },
+    ],
+    outputs: [
+      { id: 'reflection', name: 'Reflection', type: 'vec3' },
+      { id: 'hitMask', name: 'Hit Mask', type: 'float' },
+    ],
+    generateCode: (_, inputs) =>
+      `screenSpaceReflect(${inputs.uv}, ${inputs.normal}, ${inputs.viewDir}, ${inputs.roughness}, ${inputs.maxSteps}, ${inputs.stepSize})`,
+  },
+  {
+    type: 'screen_space_gi',
+    name: 'Screen Space GI',
+    category: 'material',
+    description: 'Approximate global illumination from screen-space data',
+    inputs: [
+      { id: 'uv', name: 'UV', type: 'vec2', defaultValue: [0, 0] },
+      { id: 'normal', name: 'Normal', type: 'vec3', defaultValue: [0, 1, 0] },
+      { id: 'radius', name: 'Radius', type: 'float', defaultValue: 1 },
+      { id: 'samples', name: 'Samples', type: 'float', defaultValue: 16 },
+      { id: 'bounceIntensity', name: 'Bounce', type: 'float', defaultValue: 1 },
+    ],
+    outputs: [{ id: 'indirectLight', name: 'Indirect', type: 'vec3' }],
+    generateCode: (_, inputs) =>
+      `screenSpaceGI(${inputs.uv}, ${inputs.normal}, ${inputs.radius}, ${inputs.samples}, ${inputs.bounceIntensity})`,
+  },
+  {
+    type: 'water_surface',
+    name: 'Water Surface',
+    category: 'material',
+    description: 'Combined water surface effect with waves, refraction, foam, and caustics',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'time', name: 'Time', type: 'float', defaultValue: 0 },
+      { id: 'waveScale', name: 'Wave Scale', type: 'float', defaultValue: 1 },
+      { id: 'waveSpeed', name: 'Wave Speed', type: 'float', defaultValue: 1 },
+      { id: 'depth', name: 'Water Depth', type: 'float', defaultValue: 5 },
+      { id: 'foamThreshold', name: 'Foam Thresh', type: 'float', defaultValue: 0.7 },
+    ],
+    outputs: [
+      { id: 'displacement', name: 'Displacement', type: 'vec3' },
+      { id: 'normal', name: 'Normal', type: 'vec3' },
+      { id: 'foam', name: 'Foam', type: 'float' },
+      { id: 'caustic', name: 'Caustic', type: 'float' },
+    ],
+    generateCode: (_, inputs) =>
+      `waterSurface(${inputs.position}, ${inputs.time}, ${inputs.waveScale}, ${inputs.waveSpeed}, ${inputs.depth}, ${inputs.foamThreshold})`,
+  },
+  {
+    type: 'caustics_refractive',
+    name: 'Refractive Caustics',
+    category: 'material',
+    description: 'Chromatic refractive caustics with RGB dispersion for prismatic light patterns',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'time', name: 'Time', type: 'float', defaultValue: 0 },
+      { id: 'scale', name: 'Scale', type: 'float', defaultValue: 1 },
+      { id: 'speed', name: 'Speed', type: 'float', defaultValue: 1 },
+      { id: 'intensity', name: 'Intensity', type: 'float', defaultValue: 1 },
+      { id: 'dispersion', name: 'Dispersion', type: 'float', defaultValue: 0.05 },
+    ],
+    outputs: [
+      { id: 'caustic', name: 'Caustic', type: 'vec3' },
+      { id: 'mask', name: 'Mask', type: 'float' },
+    ],
+    generateCode: (_, inputs) =>
+      `causticChromatic(${inputs.position}, ${inputs.time}, ${inputs.scale}, ${inputs.speed}, ${inputs.intensity}, ${inputs.dispersion})`,
+  },
+  {
+    type: 'displacement_enhanced',
+    name: 'Enhanced Displacement',
+    category: 'material',
+    description: 'Displacement with reconstructed normal and optional anisotropic weighting',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'normal', name: 'Normal', type: 'vec3', defaultValue: [0, 1, 0] },
+      { id: 'tangent', name: 'Tangent', type: 'vec3', defaultValue: [1, 0, 0] },
+      { id: 'height', name: 'Height', type: 'float', defaultValue: 0 },
+      { id: 'strength', name: 'Strength', type: 'float', defaultValue: 1 },
+      { id: 'anisotropy', name: 'Anisotropy', type: 'float', defaultValue: 0 },
+      { id: 'midLevel', name: 'Mid Level', type: 'float', defaultValue: 0.5 },
+    ],
+    outputs: [
+      { id: 'displaced', name: 'Displaced', type: 'vec3' },
+      { id: 'reconstructedNormal', name: 'Normal', type: 'vec3' },
+    ],
+    generateCode: (_, inputs) =>
+      `anisotropicDisplacement(${inputs.position}, ${inputs.normal}, ${inputs.tangent}, ${inputs.height}, ${inputs.strength}, ${inputs.anisotropy}, ${inputs.midLevel})`,
+  },
+  {
+    type: 'underwater_foam',
+    name: 'Underwater Foam',
+    category: 'material',
+    description: 'Procedural underwater foam patches driven by turbulence',
+    inputs: [
+      { id: 'position', name: 'Position', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'time', name: 'Time', type: 'float', defaultValue: 0 },
+      { id: 'scale', name: 'Scale', type: 'float', defaultValue: 1 },
+      { id: 'threshold', name: 'Threshold', type: 'float', defaultValue: 0.6 },
+    ],
+    outputs: [{ id: 'foam', name: 'Foam', type: 'float' }],
+    generateCode: (_, inputs) =>
+      `underwaterFoam(${inputs.position}, ${inputs.time}, ${inputs.scale}, ${inputs.threshold})`,
   },
 ];
 
@@ -1129,6 +1613,9 @@ export const ALL_NODE_TEMPLATES: INodeTemplate[] = [
   ...COLOR_NODES,
   ...TEXTURE_NODES,
   ...UTILITY_NODES,
+  ...ADVANCED_MATERIAL_NODES,
+  ...VOLUMETRIC_NODES,
+  ...SCREEN_SPACE_NODES,
   ...OUTPUT_NODES,
 ];
 

@@ -2,7 +2,8 @@ import { defineConfig } from 'vitepress';
 
 export default defineConfig({
   title: 'HoloScript',
-  description: 'Open-source programming language compiling to 18+ targets — Unity, Unreal, Godot, visionOS, robotics, IoT, and more',
+  description:
+    'Open-source programming language compiling to 18+ targets — Unity, Unreal, Godot, visionOS, robotics, IoT, and more',
 
   // Ignore dead links for now - many docs reference planned pages
   ignoreDeadLinks: true,
@@ -15,10 +16,7 @@ export default defineConfig({
     ['meta', { name: 'theme-color', content: '#00ffff' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:url', content: 'https://holoscript.net' }],
-    [
-      'meta',
-      { property: 'og:title', content: 'HoloScript - One Language, Every Platform' },
-    ],
+    ['meta', { property: 'og:title', content: 'HoloScript - One Language, Every Platform' }],
     [
       'meta',
       {
@@ -30,10 +28,7 @@ export default defineConfig({
     ['meta', { property: 'og:image', content: 'https://holoscript.net/og-image.png' }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { name: 'twitter:site', content: '@holoscript' }],
-    [
-      'meta',
-      { name: 'twitter:title', content: 'HoloScript - One Language, Every Platform' },
-    ],
+    ['meta', { name: 'twitter:title', content: 'HoloScript - One Language, Every Platform' }],
     [
       'meta',
       {
@@ -53,14 +48,21 @@ export default defineConfig({
       { text: 'Reference', link: '/api/' },
       { text: 'Examples', link: '/examples/' },
       {
+        text: 'Studio',
+        link: 'https://studio.holoscript.net',
+      },
+      {
         text: 'Tools',
         items: [
+          {
+            text: 'Studio (AI Scene Builder)',
+            link: 'https://studio.holoscript.net',
+          },
           {
             text: 'VS Code Extension',
             link: 'https://marketplace.visualstudio.com/items?itemName=holoscript.holoscript-vscode',
           },
           { text: 'MCP Server', link: '/guides/mcp-server' },
-          { text: 'Playground', link: 'https://holoscript.studio' },
         ],
       },
     ],

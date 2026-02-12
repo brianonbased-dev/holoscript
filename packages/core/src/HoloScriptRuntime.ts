@@ -15,9 +15,34 @@
  */
 
 import { logger } from './logger';
+import { WebSocketServer, WebSocket } from 'ws';
+import { TimeManager } from './orbital/TimeManager';
+// KeplerianCalculator used via OrbitalTrait handler at runtime
 import { ExpressionEvaluator, createState } from './ReactiveState';
 import { eventBus } from './runtime/EventBus';
 import { stateMachineInterpreter } from './runtime/StateMachineInterpreter';
+import { HoloScriptAgentRuntime } from './HoloScriptAgentRuntime';
+import { mitosisHandler } from './traits/MitosisTrait';
+import { orbitalHandler } from './traits/OrbitalTrait';
+import { TraitHandler } from './traits/TraitTypes';
+import { ExtensionRegistry } from './extensions/ExtensionRegistry';
+// ExtensionInterface consumed by ExtensionRegistry
+import type {
+  HoloComposition,
+  HoloTemplate,
+  HoloObjectDecl,
+  HoloValue,
+  HoloStatement,
+  HoloExpression,
+} from './parser/HoloCompositionTypes';
+import { BaseVoiceSynthesizer } from './runtime/BaseVoiceSynthesizer';
+import { registerVoiceSynthesizer } from './runtime/VoiceSynthesizer';
+import { LocalEmotionDetector } from './runtime/LocalEmotionDetector';
+import { registerEmotionDetector } from './runtime/EmotionDetector';
+import { MockSpeechRecognizer } from './runtime/MockSpeechRecognizer';
+import { registerSpeechRecognizer } from './runtime/SpeechRecognizer';
+import { MethodMemoize, ObjectPool } from './runtime/RuntimeOptimization';
+import { HoloScriptAgentRuntime } from './HoloScriptAgentRuntime';
 import type {
   ASTNode,
   OrbNode,
@@ -51,6 +76,7 @@ import type {
   QuestNode,
   DialogueNode,
   VisualMetadataNode,
+  VRTraitName,
 } from './types';
 import type { ImportLoader } from './types';
 
@@ -71,7 +97,7 @@ type EventHandler = (data?: HoloScriptValue) => void | Promise<void>;
 /**
  * Scope for variable resolution
  */
-interface Scope {
+export interface Scope {
   variables: Map<string, HoloScriptValue>;
   parent?: Scope;
 }
@@ -90,8 +116,12 @@ interface UIElementState {
 
 export class HoloScriptRuntime {
   private context: RuntimeContext;
+  private wss: WebSocketServer | undefined;
+  private timeManager: TimeManager | undefined;
   private particleSystems: Map<string, ParticleSystem> = new Map();
   private executionHistory: ExecutionResult[] = [];
+  private agentRuntimes: Map<string, HoloScriptAgentRuntime> = new Map();
+  private agentPool: ObjectPool<HoloScriptAgentRuntime>;
   private startTime: number = 0;
   private nodeCount: number = 0;
 
@@ -101,15 +131,48 @@ export class HoloScriptRuntime {
   private eventHandlers: Map<string, EventHandler[]> = new Map();
   private animations: Map<string, Animation> = new Map();
   private uiElements: Map<string, UIElementState> = new Map();
-  private builtinFunctions: Map<string, (args: HoloScriptValue[]) => HoloScriptValue>;
+  private builtinFunctions: Map<
+    string,
+    (args: HoloScriptValue[]) => HoloScriptValue | Promise<HoloScriptValue>
+  >;
+  private traitHandlers: Map<VRTraitName, TraitHandler<any>> = new Map();
+  private extensionRegistry: ExtensionRegistry;
 
   constructor(
     _importLoader?: ImportLoader,
-    customFunctions?: Record<string, (args: HoloScriptValue[]) => HoloScriptValue>
+    customFunctions?: Record<
+      string,
+      (args: HoloScriptValue[]) => HoloScriptValue | Promise<HoloScriptValue>
+    >
   ) {
     this.context = this.createEmptyContext();
     this.currentScope = { variables: this.context.variables };
     this.builtinFunctions = this.initBuiltins(customFunctions);
+
+    // Initialize Agent Pool
+    this.agentPool = new ObjectPool<HoloScriptAgentRuntime>(
+      () => new (HoloScriptAgentRuntime as any)(), // Dummy constructor for pooling
+      (agent) => agent.destroy(),
+      50
+    );
+
+    // Register Edge Intelligence Providers
+    registerVoiceSynthesizer('default', new BaseVoiceSynthesizer());
+    registerEmotionDetector('default', new LocalEmotionDetector());
+    registerSpeechRecognizer('default', new MockSpeechRecognizer());
+
+    for (const [name, fn] of this.builtinFunctions) {
+      // Wrap builtins so they work when called via spread args from evaluateHoloExpression.
+      // Builtins expect (args: HoloScriptValue[]) but the expression evaluator calls callee(...args).
+      this.context.functions.set(name, ((...spreadArgs: any[]) => fn(spreadArgs)) as any);
+    }
+
+    // Register Trait Handlers
+    this.traitHandlers.set('mitosis' as any, mitosisHandler);
+    this.traitHandlers.set('orbital' as any, orbitalHandler);
+
+    // Initialize Extension Registry
+    this.extensionRegistry = new ExtensionRegistry(this);
 
     // Wire up state machine hook executor to this runtime's expression evaluator
     stateMachineInterpreter.setHookExecutor(
@@ -128,9 +191,15 @@ export class HoloScriptRuntime {
    * Initialize built-in functions
    */
   private initBuiltins(
-    customFunctions?: Record<string, (args: HoloScriptValue[]) => HoloScriptValue>
-  ): Map<string, (args: HoloScriptValue[]) => HoloScriptValue> {
-    const builtins = new Map<string, (args: HoloScriptValue[]) => HoloScriptValue>();
+    customFunctions?: Record<
+      string,
+      (args: HoloScriptValue[]) => HoloScriptValue | Promise<HoloScriptValue>
+    >
+  ): Map<string, (args: HoloScriptValue[]) => HoloScriptValue | Promise<HoloScriptValue>> {
+    const builtins = new Map<
+      string,
+      (args: HoloScriptValue[]) => HoloScriptValue | Promise<HoloScriptValue>
+    >();
 
     // Inject Custom Functions
     if (customFunctions) {
@@ -194,14 +263,99 @@ export class HoloScriptRuntime {
     });
 
     // Spatial commands
-    builtins.set('spawn', (args): HoloScriptValue => {
+    builtins.set('spawn', async (args): Promise<HoloScriptValue> => {
+      const config = args[0] as any;
+      // Legacy support for (name, position)
+      if (typeof config === 'string') {
+        const target = config;
+        const position = (args[1] as SpatialPosition) || { x: 0, y: 0, z: 0 };
+        this.context.spatialMemory.set(target, position);
+        this.createParticleEffect(`${target}_spawn`, position, '#00ff00', 25);
+        return { spawned: target, at: position };
+      }
+
+      // Mitosis support for ({ template, id, position, ... })
+      const templateName = config.template;
+      const id = config.id || `${templateName}_${Date.now()}`;
+      const position = config.position || { x: 0, y: 0, z: 0 };
+
+      const template = this.context.templates.get(templateName);
+      if (!template) {
+        logger.error(`[Mitosis] Template ${templateName} not found`);
+        return { error: `Template ${templateName} not found` };
+      }
+
+      // Create an OrbNode from the template
+      const spawnNode: OrbNode = {
+        type: 'orb',
+        name: id,
+        position: position,
+        properties: { ...config.config }, // Initial state from config
+        children: template.children,
+        traits: template.traits,
+        directives: template.directives,
+      };
+
+      // Merge template state and default properties if not overridden in config
+      const holoTpl = template as unknown as HoloTemplate;
+      if (holoTpl.state) {
+        for (const prop of holoTpl.state.properties) {
+          if (spawnNode.properties[prop.key] === undefined) {
+            spawnNode.properties[prop.key] = this.resolveHoloValue(prop.value as any);
+          }
+        }
+      }
+      for (const prop of holoTpl.properties) {
+        if (spawnNode.properties[prop.key] === undefined) {
+          spawnNode.properties[prop.key] = this.resolveHoloValue(prop.value as any);
+        }
+      }
+
+      // Execute the newly created orb
+      await this.executeOrb(spawnNode);
+
+      // If there's a parent, notify them of the mitosis event
+      if (config.parentId || config.parent_id) {
+        const parentId = config.parentId || config.parent_id;
+        await this.emit(`mitosis_spawned`, { parentId, childId: id });
+
+        // Also emit on the specific orb event bus if needed
+        await this.emit(`${parentId}.mitosis_spawned`, { childId: id });
+      }
+
+      return { spawned: id, template: templateName };
+    });
+
+    builtins.set('notifyParent', async (args): Promise<HoloScriptValue> => {
+      const parentId = String(args[0]);
+      const data = args[1];
+
+      await this.emit(`mitosis_child_complete`, {
+        parentId,
+        childId: (args[2] as string) || 'unknown',
+        result: data,
+      });
+
+      await this.emit(`${parentId}.mitosis_child_complete`, {
+        childId: (args[2] as string) || 'unknown',
+        result: data,
+      });
+
+      return { notified: parentId };
+    });
+
+    builtins.set('despawn', (args): HoloScriptValue => {
       const target = String(args[0]);
-      const position = (args[1] as SpatialPosition) || { x: 0, y: 0, z: 0 };
-
-      this.context.spatialMemory.set(target, position);
-      this.createParticleEffect(`${target}_spawn`, position, '#00ff00', 25);
-
-      return { spawned: target, at: position };
+      if (this.context.hologramState.has(target)) {
+        const pos = this.context.spatialMemory.get(target) || { x: 0, y: 0, z: 0 };
+        this.createParticleEffect(`${target}_despawn`, pos, '#ff0000', 30);
+        this.context.hologramState.delete(target);
+        this.context.variables.delete(target);
+        this.context.spatialMemory.delete(target);
+        logger.info('despawn', { target });
+        return { despawned: target };
+      }
+      return { msg: 'Target not found', target };
     });
 
     builtins.set('move', (args): HoloScriptValue => {
@@ -259,6 +413,17 @@ export class HoloScriptRuntime {
       'substring',
       (args): HoloScriptValue => String(args[0]).substring(Number(args[1]), Number(args[2]))
     );
+
+    builtins.set('wait', async (args): Promise<HoloScriptValue> => {
+      const ms = Number(args[0]) || 0;
+      await new Promise((resolve) => setTimeout(resolve, ms));
+      return { waited: ms };
+    });
+
+    builtins.set('print', (args): HoloScriptValue => {
+      console.log(`[HoloScript]`, ...args);
+      return { printed: args.join(' ') };
+    });
     builtins.set('uppercase', (args): HoloScriptValue => String(args[0]).toUpperCase());
     builtins.set('lowercase', (args): HoloScriptValue => String(args[0]).toLowerCase());
 
@@ -326,8 +491,46 @@ export class HoloScriptRuntime {
     builtins.set('collide', (args) => this.handleCollide(args));
     builtins.set('animate', (args) => this.handleAnimate(args));
     builtins.set('calculate_arc', (args) => this.handleCalculateArc(args));
+    builtins.set(
+      'sleep',
+      (args) => new Promise((resolve) => setTimeout(resolve, Number(args[0]) || 0))
+    );
+    builtins.set('think', async (args) => {
+      const activeNode = this.context.executionStack[this.context.executionStack.length - 1];
+      if (!activeNode) return 'No context';
+      const agentId = (activeNode as any).name;
+      const agentRuntime = this.agentRuntimes.get(agentId);
+      if (agentRuntime) {
+        return await agentRuntime.think(String(args[0] || ''));
+      }
+      return 'Thinking only available for agents.';
+    });
 
     return builtins;
+  }
+
+  /**
+   * Register a global function from an extension
+   */
+  public registerGlobalFunction(name: string, fn: Function): void {
+    // Wrap function to accept spread arguments from evaluator
+    this.context.functions.set(name, ((...spreadArgs: any[]) => fn(spreadArgs)) as any);
+  }
+
+  /**
+   * Register a custom trait from an extension
+   */
+  public registerTrait(name: string, handler: TraitHandler<any>): void {
+    const vrName = name as VRTraitName; // Cast for now, dynamic traits expand the type implicitly
+    this.traitHandlers.set(vrName, handler);
+    logger.info(`Registered trait: ${name}`);
+  }
+
+  /**
+   * Get the extension registry
+   */
+  public getExtensionRegistry(): ExtensionRegistry {
+    return this.extensionRegistry;
   }
 
   /**
@@ -335,13 +538,15 @@ export class HoloScriptRuntime {
    */
   async executeNode(node: ASTNode): Promise<ExecutionResult> {
     const startTime = Date.now();
+    console.log(`[RUNTIME_DEBUG] executeNode: ${node.type} (Line: ${(node as any).line})`);
 
     try {
       this.context.executionStack.push(node);
 
       let result: ExecutionResult;
 
-      switch (node.type) {
+      const nodeType = (node as any).type;
+      switch (nodeType) {
         case 'orb':
         case 'object':
           result = await this.executeOrb(node as OrbNode);
@@ -409,10 +614,24 @@ export class HoloScriptRuntime {
           result = await this.executeEnvironment(node as EnvironmentNode);
           break;
         case 'composition':
-          result = await this.executeComposition(node as CompositionNode);
+        case 'Composition':
+          if (node.type === 'Composition') {
+            result = await this.executeHoloComposition(node as unknown as HoloComposition);
+          } else {
+            result = await this.executeComposition(node as CompositionNode);
+          }
           break;
         case 'template':
-          result = await this.executeTemplate(node as TemplateNode);
+        case 'Template':
+          if (node.type === 'Template') {
+            result = await this.executeHoloTemplate(node as unknown as HoloTemplate);
+          } else {
+            result = await this.executeTemplate(node as TemplateNode);
+          }
+          break;
+        case 'migration':
+          // Migration nodes are usually inside templates, but if executed directly, skip or log
+          result = { success: true, output: 'Migration block registered' };
           break;
         case 'server':
           result = await this.executeServerNode(node as ServerNode);
@@ -578,7 +797,7 @@ export class HoloScriptRuntime {
     const builtin = this.builtinFunctions.get(name);
     if (builtin) {
       try {
-        const result = builtin(args);
+        const result = await builtin(args);
         return {
           success: true,
           output: result,
@@ -591,13 +810,33 @@ export class HoloScriptRuntime {
       }
     }
 
-    // Check user-defined functions
+    // Check user-defined functions or registered extensions
     const func = this.context.functions.get(name);
     if (!func) {
       return {
         success: false,
         error: `Function '${name}' not found`,
       };
+    }
+
+    // Handle registered extension functions (JS Functions)
+    if (typeof func === 'function') {
+      try {
+        // The function is already wrapped to accept spread args, but callFunction passes array
+        // We need to unwrap or call it correctly.
+        // Wait, initBuiltins wraps it as: ((...spreadArgs: any[]) => fn(spreadArgs))
+        // So we should call it as func(...args)
+        const result = await (func as Function)(...args);
+        return {
+          success: true,
+          output: result,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: `Extension function ${name} failed: ${error}`,
+        };
+      }
     }
 
     // Check call stack depth
@@ -653,17 +892,18 @@ export class HoloScriptRuntime {
   /**
    * Set a variable in current scope
    */
-  setVariable(name: string, value: HoloScriptValue): void {
+  setVariable(name: string, value: HoloScriptValue, scopeOverride?: Scope): void {
     // Handle property access (e.g., "obj.prop")
     if (name.includes('.')) {
       const parts = name.split('.');
       const objName = parts[0];
       const propPath = parts.slice(1);
 
-      let obj = this.getVariable(objName);
+      let obj = this.getVariable(objName, scopeOverride);
       if (obj === undefined || typeof obj !== 'object' || obj === null) {
         obj = {};
-        this.currentScope.variables.set(objName, obj as HoloScriptValue);
+        const scope = scopeOverride || this.currentScope;
+        scope.variables.set(objName, obj as HoloScriptValue);
       }
 
       let current = obj as Record<string, HoloScriptValue>;
@@ -675,18 +915,36 @@ export class HoloScriptRuntime {
       }
       current[propPath[propPath.length - 1]] = value;
     } else {
-      this.currentScope.variables.set(name, value);
+      const scope = scopeOverride || this.currentScope;
+      scope.variables.set(name, value);
+    }
+
+    // Visualizer Hook: specific variable updates
+    if (
+      this.wss &&
+      typeof value === 'object' &&
+      value !== null &&
+      (value as any).__type === 'orb'
+    ) {
+      this.broadcast('orb_update', { orb: value });
+    } else if (this.wss && name.includes('.')) {
+      // If updating a property of an orb, broadcast the orb
+      const root = name.split('.')[0];
+      const rootVar = this.getVariable(root, scopeOverride);
+      if (rootVar && typeof rootVar === 'object' && (rootVar as any).__type === 'orb') {
+        this.broadcast('orb_update', { orb: rootVar });
+      }
     }
   }
 
   /**
    * Get a variable from scope chain
    */
-  getVariable(name: string): HoloScriptValue {
+  getVariable(name: string, scopeOverride?: Scope): HoloScriptValue {
     // Handle property access (e.g., "obj.prop")
     if (name.includes('.')) {
       const parts = name.split('.');
-      let value = this.getVariable(parts[0]);
+      let value = this.getVariable(parts[0], scopeOverride);
 
       for (let i = 1; i < parts.length && value !== undefined; i++) {
         if (typeof value === 'object' && value !== null) {
@@ -699,7 +957,7 @@ export class HoloScriptRuntime {
     }
 
     // Walk scope chain
-    let scope: Scope | undefined = this.currentScope;
+    let scope: Scope | undefined = scopeOverride || this.currentScope;
     while (scope) {
       if (scope.variables.has(name)) {
         return scope.variables.get(name);
@@ -723,7 +981,8 @@ export class HoloScriptRuntime {
   /**
    * Evaluate an expression
    */
-  evaluateExpression(expr: string): HoloScriptValue {
+  @MethodMemoize(200)
+  public evaluateExpression(expr: string): HoloScriptValue {
     if (!expr || typeof expr !== 'string') return expr;
 
     const evaluator = new ExpressionEvaluator(this.context.state.getSnapshot());
@@ -740,89 +999,230 @@ export class HoloScriptRuntime {
   // ============================================================================
 
   private async executeOrb(node: OrbNode): Promise<ExecutionResult> {
+    console.log(`[RUNTIME_DEBUG] Entering executeOrb for: ${node.name}`);
     const scale = this.context.currentScale || 1;
-    const adjustedPos = node.position
-      ? {
-          x: node.position.x * scale,
-          y: node.position.y * scale,
-          z: node.position.z * scale,
-        }
-      : { x: 0, y: 0, z: 0 };
+
+    // 1. STATE RECONCILIATION: Check for existing orb instance
+    const existingOrb = this.context.variables.get(node.name) as any;
+    const isUpdate = !!existingOrb && existingOrb.__type === 'orb';
+
+    let pos = { x: 0, y: 0, z: 0 };
+    if (Array.isArray(node.position)) {
+      pos = {
+        x: Number(node.position[0]) || 0,
+        y: Number(node.position[1]) || 0,
+        z: Number(node.position[2]) || 0,
+      };
+    } else if (node.position) {
+      pos = {
+        x: Number(node.position.x) || 0,
+        y: Number(node.position.y) || 0,
+        z: Number(node.position.z) || 0,
+      };
+    }
+
+    const adjustedPos = {
+      x: pos.x * scale,
+      y: pos.y * scale,
+      z: pos.z * scale,
+    };
 
     if (node.position) {
       this.context.spatialMemory.set(node.name, adjustedPos);
     }
 
-    const hologram = node.hologram
-      ? {
-          ...node.hologram,
-          size: (node.hologram.size || 1) * scale,
-        }
-      : undefined;
-
-    // Create orb object with reactive properties
+    // 2. PROPERTY EVALUATION
     const evaluatedProperties: Record<string, HoloScriptValue> = {};
-    for (const [key, val] of Object.entries(node.properties)) {
-      if (typeof val === 'string') {
-        evaluatedProperties[key] = this.evaluateExpression(val);
-      } else {
-        evaluatedProperties[key] = val;
+
+    // Handle both Record (HS+ Type) and Array (HS Composition ObjectProperty)
+    if (Array.isArray(node.properties)) {
+      for (const prop of node.properties as any[]) {
+        const key = prop.key;
+        const val = prop.value;
+        if (typeof val === 'string') {
+          evaluatedProperties[key] = this.evaluateExpression(val);
+        } else {
+          evaluatedProperties[key] = val;
+        }
+      }
+    } else if (node.properties) {
+      for (const [key, val] of Object.entries(node.properties)) {
+        if (typeof val === 'string') {
+          evaluatedProperties[key] = this.evaluateExpression(val);
+        } else {
+          evaluatedProperties[key] = val;
+        }
       }
     }
 
-    const orbData = {
-      __type: 'orb',
-      name: node.name,
-      properties: evaluatedProperties,
-      traits: node.directives?.filter((d) => d.type === 'trait').map((d) => (d as any).name) || [],
-      directives: node.directives || [],
-      position: adjustedPos,
-      hologram: hologram,
-      created: Date.now(),
-      // Methods bound to this orb
-      show: () => this.builtinFunctions.get('show')!([node.name]),
-      hide: () => this.builtinFunctions.get('hide')!([node.name]),
-      pulse: (opts?: Record<string, unknown>) =>
-        this.builtinFunctions.get('pulse')!([node.name, opts]),
-    };
+    // 3. TEMPLATE MERGING (Inherit properties from template)
+    if (node.template) {
+      const tpl = this.context.templates.get(node.template) as unknown as TemplateNode | undefined;
+      console.log(
+        `[RUNTIME_DEBUG] executeOrb: ${node.name} using template: ${node.template}. Found template: ${!!tpl}`
+      );
+      if (tpl) {
+        // Merge template properties if not overridden by orb
+        if (tpl.properties) {
+          console.log(
+            `[RUNTIME_DEBUG] Merging properties from template ${node.template} into ${node.name}`
+          );
+          for (const [key, val] of Object.entries(tpl.properties)) {
+            if (evaluatedProperties[key] === undefined) {
+              if (typeof val === 'string') {
+                evaluatedProperties[key] = this.evaluateExpression(val);
+              } else {
+                evaluatedProperties[key] = val;
+              }
+            }
+          }
+        }
 
-    this.context.variables.set(node.name, orbData as any);
+        // Note: Template children/traits are handled via directives
+        if (tpl.directives) {
+          console.log(
+            `[RUNTIME_DEBUG] Merging ${tpl.directives.length} directives from template ${node.template} into ${node.name}`
+          );
+          // Prepend template directives so orb directives can override if needed (though usually directives accumulate)
+          // Actually for things like @state, we might want unique processing.
+          // For now, simpler concatenation.
+          // Careful: node.directives might be undefined.
+          const existingDirectives = node.directives || [];
+          // We want template directives to be processed, but maybe orb directives take precedence?
+          // Directives are usually "actions" or "metadata". Accumulating them is standard.
+          node.directives = [...tpl.directives, ...existingDirectives];
+        }
+      }
+    }
+
+    if (node.directives) {
+      console.log(`[RUNTIME_DEBUG] Total directives for ${node.name}: ${node.directives.length}`);
+      console.log(`[RUNTIME_DEBUG] Directives for ${node.name}:`, JSON.stringify(node.directives));
+    }
+
+    const hologram = node.hologram
+      ? {
+          ...node.hologram,
+          size:
+            (node.hologram.size ||
+              Number(evaluatedProperties.size) ||
+              Number(evaluatedProperties.scale) ||
+              1) * scale,
+        }
+      : {
+          color: (evaluatedProperties.color as string) || '#ffffff',
+          size:
+            (Number(evaluatedProperties.size) || Number(evaluatedProperties.scale) || 1) * scale,
+          shape: (evaluatedProperties.geometry || 'sphere') as any,
+          glow: !!evaluatedProperties.glow,
+          interactive: !!evaluatedProperties.interactive,
+        };
+
+    // 4. MIGRATION LOGIC
+    if (isUpdate && node.template) {
+      const tpl = this.context.templates.get(node.template) as TemplateNode | undefined;
+      const oldTpl = existingOrb._templateRef as TemplateNode | undefined;
+
+      if (tpl && oldTpl && tpl.version !== undefined && oldTpl.version !== undefined) {
+        if (Number(tpl.version) > Number(oldTpl.version)) {
+          logger.info(
+            `Template version increase detected for ${node.name}: ${oldTpl.version} -> ${tpl.version}`
+          );
+
+          // Find applicable migrations
+          const migrations = tpl.migrations || [];
+          const migration = migrations.find((m) => m.fromVersion === Number(oldTpl.version));
+
+          if (migration) {
+            logger.info(`Executing migration from version ${oldTpl.version} for ${node.name}`);
+            await this.executeMigrationBlock(existingOrb, migration);
+          }
+        }
+      }
+    }
+
+    const orbData = isUpdate
+      ? existingOrb
+      : {
+          __type: 'orb',
+          id: node.name,
+          name: node.name,
+          created: Date.now(),
+          // Methods bound to this orb
+          show: () => this.builtinFunctions.get('show')!([node.name]),
+          hide: () => this.builtinFunctions.get('hide')!([node.name]),
+          pulse: (opts?: Record<string, unknown>) =>
+            this.builtinFunctions.get('pulse')!([node.name, opts]),
+        };
+
+    // Update dynamic properties but preserve existing ones that aren't in the new definition (State Preservation)
+    if (isUpdate) {
+      // Merge new properties into existing ones, but we might want to be selective
+      // For now, new script properties take precedence, but old ones not in script are kept
+      orbData.properties = { ...orbData.properties, ...evaluatedProperties };
+    } else {
+      orbData.properties = evaluatedProperties;
+    }
+
+    orbData.directives = node.directives || [];
+    orbData.position = adjustedPos;
+    orbData.hologram = hologram;
+    orbData._templateRef = node.template ? this.context.templates.get(node.template) : undefined;
+
+    if (!isUpdate) {
+      this.context.variables.set(node.name, orbData as any);
+    }
 
     if (hologram) {
       this.context.hologramState.set(node.name, hologram);
     }
 
-    // Apply directives if any
+    // Apply directives
     if (node.directives) {
-      this.applyDirectives(node);
+      this.applyDirectives(orbData as any);
 
-      // Phase 13: Check for @logic with machine config
-      const logicDirective = node.directives.find(
-        (d) => d.type === 'trait' && (d as any).name === 'logic'
-      );
-      if (
-        logicDirective &&
-        (logicDirective as any).config &&
-        (logicDirective as any).config.machine
-      ) {
-        const machineName = (logicDirective as any).config.machine;
-        const machineDef = this.context.stateMachines.get(machineName);
-        if (machineDef) {
-          stateMachineInterpreter.createInstance(node.name, machineDef, orbData.properties);
-        } else {
-          logger.warn(
-            `[StateMachine] Machine definition ${machineName} not found for orb ${node.name}`
-          );
-        }
+      // State handling: if @state is present, it might override some properties
+      // Historically applyDirectives updates global state, we might need a local merge
+    }
+
+    if (!isUpdate) {
+      this.createParticleEffect(`${node.name}_creation`, adjustedPos, '#00ffff', 20);
+    }
+
+    // If it's an LLM agent, initialize its specialized runtime
+    if (this.isAgent(node)) {
+      if (!isUpdate || !this.agentRuntimes.has(node.name)) {
+        let agentRuntime = this.agentPool.acquire();
+        agentRuntime.reset(node, this);
+        this.agentRuntimes.set(node.name, agentRuntime);
+        (orbData as any).state = agentRuntime.getState();
+
+        // Bind all methods
+        (node.directives as any[])
+          ?.filter((d) => d.type === 'method')
+          .forEach((m) => {
+            (orbData as any)[m.name] = (...args: any[]) => agentRuntime.executeAction(m.name, args);
+          });
       }
     }
 
-    this.createParticleEffect(`${node.name}_creation`, adjustedPos, '#00ffff', 20);
-
-    logger.info('Orb created', {
+    logger.info(isUpdate ? 'Orb updated' : 'Orb created', {
       name: node.name,
-      properties: Object.keys(node.properties),
+      properties: Object.keys(orbData.properties),
       scale,
+    });
+
+    // Broadcast update
+    this.broadcast(isUpdate ? 'orb_updated' : 'orb_created', {
+      orb: {
+        id: node.name,
+        name: node.name,
+        position: adjustedPos,
+        properties: orbData.properties,
+        hologram: hologram,
+        traits:
+          node.directives?.filter((d) => d.type === 'trait').map((d) => (d as any).name) || [],
+      },
     });
 
     return {
@@ -1577,6 +1977,36 @@ export class HoloScriptRuntime {
    * Emit event
    */
   async emit(event: string, data?: unknown): Promise<void> {
+    console.log(`[RUNTIME_DEBUG] EMIT: ${event}`, data);
+    logger.info(`[Runtime] Emitting event: ${event}`, data as Record<string, unknown> | undefined);
+    // 1. Dotted event handling: e.g. "AlphaCommander.mitosis_spawned"
+    if (event.includes('.')) {
+      const [target, eventName] = event.split('.');
+      const agent = this.agentRuntimes.get(target);
+      if (agent) {
+        await agent.onEvent(eventName, data);
+      }
+
+      const orb = this.context.variables.get(target);
+      if (orb && typeof orb === 'object' && (orb as any).__type === 'orb') {
+        this.forwardToTraits(orb, eventName, data);
+      }
+    }
+
+    // 2. Broadcast to all agents and traits
+    const orbs = Array.from(this.context.variables.values()).filter(
+      (v) => v && typeof v === 'object' && (v as any).__type === 'orb'
+    );
+    console.log(`[EMIT_DEBUG] Event: ${event}, Orbs Found: ${orbs.length}`);
+
+    for (const agent of this.agentRuntimes.values()) {
+      await agent.onEvent(event, data);
+    }
+
+    for (const variable of orbs) {
+      await this.forwardToTraits(variable, event, data);
+    }
+
     // Local handlers
     const handlers = this.eventHandlers.get(event) || [];
     for (const handler of handlers) {
@@ -1593,6 +2023,29 @@ export class HoloScriptRuntime {
     // Phase 13: State Machine transitions
     if (data && typeof data === 'object' && (data as any).id) {
       stateMachineInterpreter.sendEvent((data as any).id, event);
+    }
+  }
+
+  private async forwardToTraits(orb: any, event: string, data: any) {
+    if (orb.directives) {
+      for (const d of orb.directives) {
+        if (d.type === 'trait') {
+          console.log(`[FORWARD_TRAIT] Orb: ${orb.id}, Trait: ${d.name}, Event: ${event}`);
+          const handler = this.traitHandlers.get(d.name);
+          if (handler && handler.onEvent) {
+            // Ensure onEvent is handled properly (it might return a promise even if typed void)
+            await handler.onEvent(
+              orb,
+              d.config || {},
+              {
+                emit: async (e: string, p: any) => await this.emit(e, p),
+                getScaleMultiplier: () => this.context.currentScale || 1,
+              } as any,
+              { type: event, ...data }
+            );
+          }
+        }
+      }
     }
   }
 
@@ -1949,6 +2402,141 @@ export class HoloScriptRuntime {
   }
 
   // ============================================================================
+  // Visualizer Server
+  // ============================================================================
+
+  public startVisualizationServer(port: number = 8080): void {
+    try {
+      this.wss = new WebSocketServer({ port });
+      logger.info(`[Visualizer] WebSocket server started on port ${port}`);
+
+      // Initialize time manager
+      this.timeManager = new TimeManager(new Date());
+
+      // Broadcast time updates to all connected clients
+      this.timeManager.onUpdate((julianDate, date) => {
+        // Update all orbs that have traits (like @orbital)
+        this.updateTraits(julianDate);
+
+        // Broadcast time update to clients
+        this.broadcast('time_update', {
+          julianDate,
+          date: date.toISOString(),
+          timeScale: this.timeManager!.getTimeScale(),
+          isPaused: this.timeManager!.getIsPaused(),
+        });
+      });
+
+      // Start time simulation
+      this.timeManager.start();
+
+      // Calculate initial states immediately
+      this.updateTraits(this.timeManager.getJulianDate());
+
+      this.wss.on('connection', (ws) => {
+        logger.info('[Visualizer] Client connected');
+
+        // Send initial state (all orbs)
+        const orbs = Array.from(this.context.variables.entries())
+          .filter(([_, v]) => v && typeof v === 'object' && (v as any).__type === 'orb')
+          .map(([id, v]) => {
+            const orbData = v as any;
+            return {
+              id,
+              name: orbData.name || id,
+              position: Array.isArray(orbData.position)
+                ? { x: orbData.position[0], y: orbData.position[1], z: orbData.position[2] }
+                : orbData.position,
+              properties: orbData.properties || {},
+              hologram: orbData.hologram || {
+                color: orbData.properties?.color || '#ffffff',
+                size: orbData.properties?.size || orbData.properties?.scale || 1,
+                shape: (orbData.properties?.geometry || 'sphere') as 'sphere' | 'cube',
+                glow: orbData.properties?.glow || false,
+              },
+              traits: orbData.traits || [],
+            };
+          });
+
+        console.log('[Visualizer] Sending init with', orbs.length, 'orbs');
+        orbs.forEach((orb) => {
+          console.log(
+            `[Visualizer Init] ${orb.name}: pos=(${orb.position.x}, ${orb.position.y}, ${orb.position.z})`
+          );
+        });
+
+        // Send initial state with time info
+        ws.send(
+          JSON.stringify({
+            type: 'init',
+            orbs,
+            time: this.timeManager ? this.timeManager.getState() : null,
+          })
+        );
+
+        ws.on('message', (message) => {
+          try {
+            const data = JSON.parse(message.toString());
+
+            // Handle time control commands
+            if (data.type === 'time_control') {
+              this.handleTimeControl(data.command, data.value);
+            }
+          } catch (e) {
+            logger.error('[Visualizer] Failed to parse message', e as any);
+          }
+        });
+      });
+    } catch (error) {
+      logger.error('[Visualizer] Failed to start server', error as any);
+    }
+  }
+
+  /**
+   * Handle time control commands from visualizer
+   */
+  private handleTimeControl(command: string, value?: any): void {
+    if (!this.timeManager) return;
+
+    switch (command) {
+      case 'play':
+        this.timeManager.play();
+        break;
+      case 'pause':
+        this.timeManager.pause();
+        break;
+      case 'toggle':
+        this.timeManager.togglePause();
+        break;
+      case 'setSpeed':
+        if (typeof value === 'number') {
+          this.timeManager.setTimeScale(value);
+        }
+        break;
+      case 'setDate':
+        if (value) {
+          this.timeManager.setDate(new Date(value));
+        }
+        break;
+      case 'syncRealTime':
+        this.timeManager.setDate(new Date());
+        this.timeManager.setTimeScale(1);
+        this.timeManager.play();
+        break;
+    }
+  }
+
+  public broadcast(type: string, payload: any): void {
+    if (!this.wss) return;
+    const message = JSON.stringify({ type, payload });
+    this.wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
+
+  // ============================================================================
   // Public API
   // ============================================================================
 
@@ -2096,6 +2684,357 @@ export class HoloScriptRuntime {
       ),
       output: `Composition ${node.name} executed`,
     };
+  }
+
+  private resolveHoloValue(value: HoloValue): HoloScriptValue {
+    if (value === null) return null;
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value.map((e) => this.resolveHoloValue(e));
+    }
+    // Handle Bind (pass through or resolve?)
+    if ((value as any).__bind) {
+      return value as any;
+    }
+    // Handle Object
+    const obj: Record<string, HoloScriptValue> = {};
+    for (const k in value as any) {
+      obj[k] = this.resolveHoloValue((value as any)[k]);
+    }
+    return obj;
+  }
+
+  private async executeHoloComposition(node: HoloComposition): Promise<ExecutionResult> {
+    console.log(
+      `[Visualizer] Executing composition "${node.name}" with ${node.objects.length} objects`
+    );
+
+    // Register templates
+    for (const template of node.templates) {
+      await this.executeHoloTemplate(template);
+    }
+
+    // Execute environment
+    if (node.environment) {
+      // Convert environment properties to record
+      const envSettings: Record<string, HoloScriptValue> = {};
+      for (const prop of node.environment.properties) {
+        envSettings[prop.key] = this.resolveHoloValue(prop.value as any);
+      }
+      this.context.environment = { ...this.context.environment, ...envSettings };
+    }
+
+    // Execute objects
+    const results: ExecutionResult[] = [];
+    for (const object of node.objects) {
+      console.log(`[Visualizer] Executing object "${object.name}"`);
+      results.push(await this.executeHoloObject(object));
+    }
+
+    return {
+      success: results.every((r) => r.success),
+      output: `HoloComposition ${node.name} executed`,
+    };
+  }
+
+  private async executeHoloTemplate(node: HoloTemplate): Promise<ExecutionResult> {
+    // Store template in context
+    this.context.templates.set(node.name, node as any);
+    return { success: true, output: `Template ${node.name} registered` };
+  }
+
+  private async executeHoloObject(node: HoloObjectDecl): Promise<ExecutionResult> {
+    // Convert HoloObjectDecl to OrbNode-like structure and execute logic
+    const properties: Record<string, HoloScriptValue> = {};
+
+    // Convert properties
+    for (const prop of node.properties) {
+      properties[prop.key] = this.resolveHoloValue(prop.value);
+    }
+
+    // Handle state
+    if (node.state) {
+      for (const prop of node.state.properties) {
+        properties[prop.key] = this.resolveHoloValue(prop.value);
+      }
+    }
+
+    // Extract position if present
+    const position = properties.position as any;
+
+    // Extract hologram properties
+    const hologram = {
+      shape: (properties.geometry as string) || 'sphere',
+      color: (properties.color as string) || '#ffffff',
+      size: (properties.scale as number) || (properties.size as number) || 1,
+      glow: (properties.glow as boolean) || false,
+      interactive: properties.interactive !== false,
+    } as HologramProperties;
+
+    // Construct OrbNode
+    const orbNode: OrbNode = {
+      type: 'orb',
+      name: node.name,
+      position: position, // Direct property for executeOrb
+      hologram: hologram, // Direct property for executeOrb
+      properties: properties,
+      directives: [
+        ...(node.directives || []),
+        ...(node.traits || []).map((t) => ({ type: 'trait' as const, name: t.name, ...t.config })),
+        ...(node.template ? this.context.templates.get(node.template)?.directives || [] : []), // Inherit template directives/traits
+      ],
+      traits: new Map((node.traits || []).map((t) => [t.name as VRTraitName, t.config])),
+      children: (node.children as any) || [],
+    };
+
+    // Handle 'using' template
+    if (node.template) {
+      const tpl = this.context.templates.get(node.template) as unknown as HoloTemplate | undefined;
+      if (tpl) {
+        // Merge template state
+        if (tpl.state) {
+          for (const prop of tpl.state.properties) {
+            if (properties[prop.key] === undefined) {
+              properties[prop.key] = this.resolveHoloValue(prop.value);
+            }
+          }
+        }
+        // Merge template properties
+        for (const prop of tpl.properties) {
+          if (properties[prop.key] === undefined) {
+            properties[prop.key] = this.resolveHoloValue(prop.value);
+          }
+        }
+      }
+    }
+
+    return this.executeOrb(orbNode);
+  }
+
+  /**
+   * Execute a block of HoloStatements (HoloNode AST)
+   */
+  async executeHoloProgram(
+    statements: HoloStatement[],
+    scopeOverride?: Scope
+  ): Promise<ExecutionResult[]> {
+    const results: ExecutionResult[] = [];
+    for (const stmt of statements) {
+      results.push(await this.executeHoloStatement(stmt, scopeOverride));
+      // If a result has an output that indicates a return, stop execution
+      const last = results[results.length - 1];
+      if (last.success && last.output !== undefined && stmt.type === 'ReturnStatement') {
+        break;
+      }
+    }
+    return results;
+  }
+
+  private async executeHoloStatement(
+    stmt: HoloStatement,
+    scopeOverride?: Scope
+  ): Promise<ExecutionResult> {
+    // console.log(`[EXEC] Statement: ${stmt.type}`, JSON.stringify(stmt).substring(0, 100));
+    const _startTime = Date.now();
+    try {
+      switch (stmt.type) {
+        case 'Assignment': {
+          const value = await this.evaluateHoloExpression(stmt.value, scopeOverride);
+          let finalValue = value;
+          if (stmt.operator !== '=') {
+            const current = this.getVariable(stmt.target, scopeOverride);
+            if (stmt.operator === '+=') finalValue = (current as any) + (value as any);
+            else if (stmt.operator === '-=') finalValue = (current as any) - (value as any);
+            else if (stmt.operator === '*=') finalValue = (current as any) * (value as any);
+            else if (stmt.operator === '/=') finalValue = (current as any) / (value as any);
+          }
+          this.setVariable(stmt.target, finalValue, scopeOverride);
+          return { success: true };
+        }
+        case 'IfStatement': {
+          const condition = await this.evaluateHoloExpression(stmt.condition, scopeOverride);
+          if (condition) {
+            await this.executeHoloProgram(stmt.consequent, scopeOverride);
+          } else if (stmt.alternate) {
+            await this.executeHoloProgram(stmt.alternate, scopeOverride);
+          }
+          return { success: true };
+        }
+        case 'WhileStatement': {
+          const MAX_ITERATIONS = 1000;
+          let iter = 0;
+          while (await this.evaluateHoloExpression(stmt.condition, scopeOverride)) {
+            if (iter++ > MAX_ITERATIONS) return { success: false, error: 'Infinite loop' };
+            await this.executeHoloProgram(stmt.body, scopeOverride);
+          }
+          return { success: true };
+        }
+        case 'ClassicForStatement': {
+          if (stmt.init) await this.executeHoloStatement(stmt.init, scopeOverride);
+          const MAX_ITERATIONS = 1000;
+          let iter = 0;
+          while (!stmt.test || (await this.evaluateHoloExpression(stmt.test, scopeOverride))) {
+            if (iter++ > MAX_ITERATIONS) return { success: false, error: 'Infinite loop' };
+            await this.executeHoloProgram(stmt.body, scopeOverride);
+            if (stmt.update) await this.executeHoloStatement(stmt.update, scopeOverride);
+          }
+          return { success: true };
+        }
+        case 'VariableDeclaration': {
+          const value = stmt.value
+            ? await this.evaluateHoloExpression(stmt.value, scopeOverride)
+            : undefined;
+          const scope = scopeOverride || this.currentScope;
+          scope.variables.set(stmt.name, value as any);
+          return { success: true };
+        }
+        case 'EmitStatement': {
+          const data = stmt.data
+            ? await this.evaluateHoloExpression(stmt.data, scopeOverride)
+            : undefined;
+          this.emit(stmt.event, data);
+          return { success: true };
+        }
+        case 'AwaitStatement': {
+          const value = await this.evaluateHoloExpression(stmt.expression, scopeOverride);
+          if (value instanceof Promise) await value;
+          return { success: true };
+        }
+        case 'ReturnStatement': {
+          const value = stmt.value
+            ? await this.evaluateHoloExpression(stmt.value, scopeOverride)
+            : null;
+          return { success: true, output: value };
+        }
+        case 'ExpressionStatement': {
+          const val = await this.evaluateHoloExpression(stmt.expression, scopeOverride);
+          return { success: true, output: val };
+        }
+        default:
+          return { success: false, error: `Unknown stmt type: ${(stmt as any).type}` };
+      }
+    } catch (err: any) {
+      console.error(`[EXEC_ERROR] Statement ${stmt.type} failed:`, err.message || err);
+      return { success: false, error: err.message || String(err) };
+    }
+  }
+
+  private async evaluateHoloExpression(
+    expr: HoloExpression,
+    scopeOverride?: Scope
+  ): Promise<HoloScriptValue> {
+    switch (expr.type) {
+      case 'Literal':
+        return expr.value;
+      case 'Identifier':
+        return this.getVariable(expr.name, scopeOverride);
+      case 'MemberExpression': {
+        const obj = await this.evaluateHoloExpression(expr.object, scopeOverride);
+        if (obj && typeof obj === 'object') {
+          return (obj as any)[expr.property];
+        }
+        return undefined;
+      }
+      case 'CallExpression': {
+        if (!Array.isArray(expr.arguments)) {
+          console.error('[CRITICAL] arguments is not an array for', JSON.stringify(expr));
+          return undefined;
+        }
+        const callee = await this.evaluateHoloExpression(expr.callee, scopeOverride);
+        const args = await Promise.all(
+          expr.arguments.map((a: HoloExpression) => this.evaluateHoloExpression(a, scopeOverride))
+        );
+
+        if (typeof callee === 'function') {
+          return (callee as any)(...args); // Spread args
+        }
+        if (expr.callee.type === 'Identifier') {
+          const result = await this.callFunction(expr.callee.name, args);
+          return result.output;
+        }
+        return undefined;
+      }
+      case 'BinaryExpression': {
+        const left = await this.evaluateHoloExpression(expr.left, scopeOverride);
+        const right = await this.evaluateHoloExpression(expr.right, scopeOverride);
+        switch (expr.operator) {
+          case '+':
+            return (left as any) + (right as any);
+          case '-':
+            return (left as any) - (right as any);
+          case '*':
+            return (left as any) * (right as any);
+          case '/':
+            return (left as any) / (right as any);
+          case '==':
+            return left == right;
+          case '===':
+            return left === right;
+          case '!=':
+            return left != right;
+          case '!==':
+            return left !== right;
+          case '<':
+            return (left as any) < (right as any);
+          case '>':
+            return (left as any) > (right as any);
+          case '<=':
+            return (left as any) <= (right as any);
+          case '>=':
+            return (left as any) >= (right as any);
+          case '&&':
+            return left && right;
+          case '||':
+            return left || right;
+          default:
+            return undefined;
+        }
+      }
+      case 'ConditionalExpression': {
+        const test = await this.evaluateHoloExpression(expr.test, scopeOverride);
+        return test
+          ? await this.evaluateHoloExpression(expr.consequent, scopeOverride)
+          : await this.evaluateHoloExpression(expr.alternate, scopeOverride);
+      }
+      case 'UpdateExpression': {
+        const val = await this.evaluateHoloExpression(expr.argument, scopeOverride);
+        const newVal = expr.operator === '++' ? (val as number) + 1 : (val as number) - 1;
+        const path = this.getMemberPath(expr.argument);
+        if (path) {
+          this.setVariable(path, newVal as any, scopeOverride);
+        }
+        return expr.prefix ? newVal : val;
+      }
+      case 'ArrayExpression': {
+        return await Promise.all(
+          expr.elements.map((e) => this.evaluateHoloExpression(e, scopeOverride))
+        );
+      }
+      case 'ObjectExpression': {
+        const obj: Record<string, any> = {};
+        for (const prop of expr.properties) {
+          obj[prop.key] = await this.evaluateHoloExpression(prop.value, scopeOverride);
+        }
+        return obj;
+      }
+      default:
+        return undefined;
+    }
+  }
+
+  /**
+   * Get member path from expression
+   */
+  @MethodMemoize(500)
+  private getMemberPath(expr: HoloExpression): string | null {
+    if (expr.type === 'Identifier') return expr.name;
+    if (expr.type === 'MemberExpression') {
+      const parentPath = this.getMemberPath(expr.object);
+      if (parentPath) return `${parentPath}.${expr.property}`;
+    }
+    return null;
   }
 
   private async executeSystem(node: SystemNode): Promise<ExecutionResult> {
@@ -2463,8 +3402,47 @@ export class HoloScriptRuntime {
   }
 
   private async executeTemplate(node: TemplateNode): Promise<ExecutionResult> {
+    const existing = this.context.templates.get(node.name);
+    if (existing) {
+      node._previousVersion = existing.version;
+    }
     this.context.templates.set(node.name, node);
-    return { success: true, output: `Template ${node.name} registered` };
+    return {
+      success: true,
+      output: `Template ${node.name} registered (v${node.version || 'unknown'})`,
+    };
+  }
+
+  /**
+   * Execute a migration script for an object
+   */
+  private async executeMigrationBlock(orb: any, migration: MigrationNode): Promise<void> {
+    logger.info(`Running migration for ${orb.name}...`);
+
+    const previousScope = this.currentScope;
+    this.currentScope = {
+      variables: new Map([
+        ['this', orb],
+        ['self', orb],
+      ]),
+      parent: previousScope,
+    };
+
+    try {
+      const parser = new HoloScriptCodeParser();
+      const result = parser.parse(migration.body);
+
+      if (result.errors.length > 0) {
+        logger.error(`Migration parse errors for ${orb.name}:`, result.errors);
+        return;
+      }
+
+      await this.executeProgram(result.ast, 0);
+    } finally {
+      this.currentScope = previousScope;
+    }
+
+    logger.info(`Migration complete for ${orb.name}`);
   }
 
   private async executeServerNode(node: ServerNode): Promise<ExecutionResult> {
@@ -2566,14 +3544,28 @@ export class HoloScriptRuntime {
     for (const d of node.directives) {
       if (d.type === 'trait') {
         logger.info(`Applying trait ${d.name} to ${node.type}`);
+
+        const handler = this.traitHandlers.get(d.name as VRTraitName);
+        if (handler) {
+          handler.onAttach?.(node as any, d.config || {}, {
+            emit: (event: string, payload: any) => this.emit(event, payload),
+            getScaleMultiplier: () => this.context.currentScale || 1,
+          } as any);
+        }
+
         // Optional: Trigger custom initialization for specific traits
         if (d.name === 'chat') {
           this.emit('show-chat', d.config);
         }
       } else if (d.type === 'state') {
+        // Ensure local state is merged into orb properties
+        if (node && (node as any).__type === 'orb') {
+          console.log(`[RUNTIME_DEBUG] Merging @state into orb ${node.name}:`, d.body);
+          (node as any).properties = { ...(node as any).properties, ...(d.body as any) };
+        }
         this.context.state.update(d.body as any);
       } else if (d.type === 'lifecycle') {
-        if (d.hook === 'on_mount') {
+        if (d.hook === 'on_mount' || d.hook === 'mount') {
           this.evaluateExpression(d.body);
         }
       }
@@ -2594,5 +3586,96 @@ export class HoloScriptRuntime {
 
   getState(): Record<string, HoloScriptValue> {
     return this.context.state.getSnapshot();
+  }
+
+  getRootScope(): Scope {
+    return this.currentScope;
+  }
+
+  private isAgent(node: OrbNode): boolean {
+    return !!node.directives?.some(
+      (d) =>
+        d.type === 'trait' &&
+        ((d as any).name === 'llm_agent' ||
+          (d as any).name === 'agent' ||
+          (d as any).name === 'companion')
+    );
+  }
+
+  /**
+   * Get current simulation time (Julian date) for orbital calculations
+   */
+  getSimulationTime(): number {
+    return this.timeManager?.getJulianDate() || 0;
+  }
+
+  /**
+   * Set orb position and broadcast update
+   */
+  setOrbPosition(orbName: string, position: { x: number; y: number; z: number }): void {
+    const orb = this.context.variables.get(orbName);
+    if (orb && typeof orb === 'object' && (orb as any).__type === 'orb') {
+      (orb as any).position = position;
+
+      // Broadcast position update to visualizer
+      this.broadcast('orb_update', {
+        orb: {
+          id: orbName,
+          name: orbName,
+          position,
+        },
+      });
+    }
+  }
+
+  /**
+   * Update all orbs that have traits with an onUpdate method
+   */
+  private updateTraits(julianDate: number): void {
+    const delta = 1 / 60; // Delta time for simulation step
+    const isLogFrame = Math.floor(julianDate * 1440) % 60 === 0;
+
+    for (const [name, value] of this.context.variables.entries()) {
+      if (value && typeof value === 'object' && (value as any).__type === 'orb') {
+        const orb = value as any;
+        if (orb.directives) {
+          for (const d of orb.directives) {
+            if (d.type === 'trait') {
+              const handler = this.traitHandlers.get(d.name);
+              if (handler && handler.onUpdate) {
+                // Execute trait update
+                handler.onUpdate(
+                  orb,
+                  d.config || {},
+                  {
+                    emit: (event: string, payload: any) => {
+                      if (event === 'position_update') {
+                        // Special handling for position updates to sync with visualizer
+                        // Using 'name' (variable key) as the authoritative ID for the visualizer
+                        this.setOrbPosition(name, payload.position);
+
+                        if (isLogFrame && name === 'Earth') {
+                          const date = this.timeManager?.getDate().toISOString();
+                          console.log(
+                            `[Orbital Sync] Date: ${date}, JD: ${julianDate.toFixed(4)}, Earth: (${payload.position.x.toFixed(2)}, ${payload.position.y.toFixed(2)}, ${payload.position.z.toFixed(2)})`
+                          );
+                        }
+                      }
+                      return this.emit(event, payload);
+                    },
+                    getScaleMultiplier: () => this.context.currentScale || 1,
+                    julianDate,
+                    getNode: (nodeName: string) => this.context.variables.get(nodeName),
+                    getState: () => this.getState(),
+                    setState: (updates: any) => this.context.state.update(updates),
+                  } as any,
+                  delta
+                );
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

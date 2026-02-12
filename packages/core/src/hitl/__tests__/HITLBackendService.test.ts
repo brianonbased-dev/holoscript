@@ -43,12 +43,13 @@ describe('HITLBackendService', () => {
       ok: true,
       status: 200,
       statusText: 'OK',
-      json: () => Promise.resolve({
-        success: true,
-        requestId: 'response_123',
-        status: 'pending',
-        timestamp: Date.now(),
-      }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          requestId: 'response_123',
+          status: 'pending',
+          timestamp: Date.now(),
+        }),
       headers: { get: () => null },
     });
     service = new HITLBackendService(testConfig);
@@ -138,12 +139,10 @@ describe('HITLBackendService', () => {
     });
 
     it('should retry on failure', async () => {
-      mockFetch
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve({ success: true, requestId: 'req_123' }),
-        });
+      mockFetch.mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ success: true, requestId: 'req_123' }),
+      });
 
       const response = await service.submitApprovalRequest(mockRequest);
 

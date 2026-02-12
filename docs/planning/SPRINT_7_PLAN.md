@@ -23,16 +23,16 @@ Sprint 7 delivers **Developer Experience & Ecosystem** capabilities, transformin
 
 ## Sprint Priorities
 
-| Priority | Focus | Effort | Dependencies | Status |
-|----------|-------|--------|--------------|--------|
-| **1** | VS Code Extension Core | High | LSP complete | ✅ Complete |
-| **2** | Live Preview System | High | Priority 1 | ✅ Complete |
-| **3** | Real-time Collaboration | High | Priority 1 | ✅ Complete |
-| **4** | Version Control Integration | Medium | Priority 3 | ✅ Complete |
-| **5** | Trait Marketplace Backend | High | Registry complete | ✅ Complete |
-| **6** | Trait Marketplace UI | Medium | Priority 5 | ✅ Complete |
-| **7** | Analytics & Telemetry | Medium | Telemetry module | ✅ Complete |
-| **8** | Performance Dashboard | Medium | Priority 7 | ✅ Complete |
+| Priority | Focus                       | Effort | Dependencies      | Status      |
+| -------- | --------------------------- | ------ | ----------------- | ----------- |
+| **1**    | VS Code Extension Core      | High   | LSP complete      | ✅ Complete |
+| **2**    | Live Preview System         | High   | Priority 1        | ✅ Complete |
+| **3**    | Real-time Collaboration     | High   | Priority 1        | ✅ Complete |
+| **4**    | Version Control Integration | Medium | Priority 3        | ✅ Complete |
+| **5**    | Trait Marketplace Backend   | High   | Registry complete | ✅ Complete |
+| **6**    | Trait Marketplace UI        | Medium | Priority 5        | ✅ Complete |
+| **7**    | Analytics & Telemetry       | Medium | Telemetry module  | ✅ Complete |
+| **8**    | Performance Dashboard       | Medium | Priority 7        | ✅ Complete |
 
 ---
 
@@ -100,17 +100,17 @@ export interface IHoloScriptExtension {
 // Language Server Protocol implementation
 export class HoloScriptLanguageServer {
   constructor(connection: Connection);
-  
+
   // Core capabilities
   onCompletion(params: CompletionParams): CompletionItem[];
   onHover(params: HoverParams): Hover | null;
   onDefinition(params: DefinitionParams): Location[];
   onReferences(params: ReferenceParams): Location[];
   onRename(params: RenameParams): WorkspaceEdit;
-  
+
   // Diagnostics
   validateDocument(document: TextDocument): Diagnostic[];
-  
+
   // Code actions
   getCodeActions(params: CodeActionParams): CodeAction[];
 }
@@ -134,31 +134,35 @@ export interface CompletionContext {
   "description": "HoloScript language support for VS Code",
   "categories": ["Programming Languages", "Debuggers", "Formatters"],
   "contributes": {
-    "languages": [{
-      "id": "holoscript",
-      "extensions": [".holo", ".hs+"],
-      "configuration": "./language-configuration.json"
-    }],
-    "grammars": [{
-      "language": "holoscript",
-      "scopeName": "source.holoscript",
-      "path": "./syntaxes/holoscript.tmLanguage.json"
-    }],
+    "languages": [
+      {
+        "id": "holoscript",
+        "extensions": [".holo", ".hs+"],
+        "configuration": "./language-configuration.json",
+      },
+    ],
+    "grammars": [
+      {
+        "language": "holoscript",
+        "scopeName": "source.holoscript",
+        "path": "./syntaxes/holoscript.tmLanguage.json",
+      },
+    ],
     "commands": [
       { "command": "holoscript.preview", "title": "HoloScript: Open Preview" },
       { "command": "holoscript.compile", "title": "HoloScript: Compile Scene" },
       { "command": "holoscript.export", "title": "HoloScript: Export..." },
-      { "command": "holoscript.debug", "title": "HoloScript: Start Debugging" }
+      { "command": "holoscript.debug", "title": "HoloScript: Start Debugging" },
     ],
     "configuration": {
       "title": "HoloScript",
       "properties": {
         "holoscript.livePreview": { "type": "boolean", "default": true },
         "holoscript.autoFormat": { "type": "boolean", "default": true },
-        "holoscript.telemetry": { "type": "boolean", "default": false }
-      }
-    }
-  }
+        "holoscript.telemetry": { "type": "boolean", "default": false },
+      },
+    },
+  },
 }
 ```
 
@@ -209,7 +213,7 @@ The Live Preview is fully implemented with:
 // packages/vscode-extension/src/previewPanel.ts (2,196 lines)
 export class HoloScriptPreviewPanel {
   createOrShow(extensionUri: Uri, document: TextDocument): void;
-  
+
   // Toolbar buttons implemented:
   // - 🎥 Reset Camera
   // - 🔲 Wireframe
@@ -244,17 +248,17 @@ export interface IPreviewPanel {
 
 export class LivePreviewProvider implements WebviewViewProvider {
   constructor(context: ExtensionContext);
-  
+
   // Lifecycle
   resolveWebviewView(view: WebviewView): void;
   updateScene(document: TextDocument): void;
   dispose(): void;
-  
+
   // Interaction
   handleMessage(message: PreviewMessage): void;
   selectObject(objectId: string): void;
   highlightCode(range: Range): void;
-  
+
   // Hot reload
   onDocumentChange(event: TextDocumentChangeEvent): void;
   debounceUpdate(delay: number): void;
@@ -269,10 +273,10 @@ export interface PreviewMessage {
 export class CodeSceneSync {
   // Code → Scene
   updateSceneFromCode(code: string): Promise<void>;
-  
+
   // Scene → Code
   updateCodeFromScene(edit: SceneEdit): Promise<TextEdit[]>;
-  
+
   // Selection sync
   selectInScene(codeRange: Range): void;
   selectInCode(objectId: string): Range;
@@ -377,17 +381,17 @@ export interface Participant {
 export class CollaborativeDocument {
   private yDoc: Y.Doc;
   private provider: WebsocketProvider;
-  
+
   constructor(options: CollabOptions);
-  
+
   // Operations
   applyEdit(edit: TextEdit): void;
   getContent(): string;
-  
+
   // Awareness
   updateCursor(position: Position): void;
   updateSelection(selection: Selection): void;
-  
+
   // Events
   on(event: 'update' | 'awareness', callback: Function): void;
 }
@@ -395,7 +399,7 @@ export class CollaborativeDocument {
 export class ConflictResolver {
   // Operational Transform for conflict resolution
   transform(op1: Operation, op2: Operation): [Operation, Operation];
-  
+
   // Merge strategies
   merge(local: string, remote: string, base: string): MergeResult;
 }
@@ -405,7 +409,7 @@ export interface ICollaborationServer {
   createSession(documentUri: string): Promise<SessionInfo>;
   joinSession(sessionId: string, user: User): Promise<void>;
   leaveSession(sessionId: string, userId: string): Promise<void>;
-  
+
   // Presence
   broadcastCursor(sessionId: string, cursor: CursorPosition): void;
   broadcastSelection(sessionId: string, selection: Selection[]): void;
@@ -461,13 +465,13 @@ object#player {
 export class SemanticGit {
   // Scene-aware diff
   diffScenes(before: Scene, after: Scene): SceneDiff;
-  
+
   // Visualize changes
   visualizeDiff(diff: SceneDiff): DiffVisualization;
-  
+
   // Smart merge
   mergeScenes(ours: Scene, theirs: Scene, base: Scene): MergeResult;
-  
+
   // Conflict detection
   detectConflicts(diff: SceneDiff): Conflict[];
 }
@@ -483,7 +487,7 @@ export interface DiffVisualization {
   // Preview showing before/after side-by-side
   beforePreview: Scene;
   afterPreview: Scene;
-  
+
   // Highlighted changes
   highlights: DiffHighlight[];
 }
@@ -504,10 +508,10 @@ export class HoloScriptGitHooks {
   "contributes": {
     "menus": {
       "scm/resourceState/context": [
-        { "command": "holoscript.diffScene", "when": "resourceExtname == .holo" }
-      ]
-    }
-  }
+        { "command": "holoscript.diffScene", "when": "resourceExtname == .holo" },
+      ],
+    },
+  },
 }
 ```
 
@@ -563,15 +567,15 @@ export interface IMarketplaceAPI {
   // Publishing
   publish(trait: TraitPackage): Promise<PublishResult>;
   unpublish(traitId: string, version: string): Promise<void>;
-  
+
   // Discovery
   search(query: SearchQuery): Promise<SearchResult>;
   getTrait(traitId: string, version?: string): Promise<TraitPackage>;
   getVersions(traitId: string): Promise<VersionInfo[]>;
-  
+
   // Dependencies
   resolveDependencies(traits: TraitRef[]): Promise<DependencyTree>;
-  
+
   // Stats
   getDownloadStats(traitId: string): Promise<DownloadStats>;
   getPopular(category?: string, limit?: number): Promise<TraitSummary[]>;
@@ -589,13 +593,13 @@ export interface TraitPackage {
   peerDependencies: Record<string, string>;
   repository?: string;
   homepage?: string;
-  
+
   // Content
   source: string;
   types?: string;
   readme?: string;
   examples?: Example[];
-  
+
   // Metadata
   platforms: Platform[];
   category: TraitCategory;
@@ -604,7 +608,7 @@ export interface TraitPackage {
   rating: number;
 }
 
-export type TraitCategory = 
+export type TraitCategory =
   | 'rendering'
   | 'physics'
   | 'networking'
@@ -645,17 +649,17 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/TraitPackage' }
-  
+
   /traits/{id}:
     get:
       summary: Get trait by ID
     delete:
       summary: Unpublish trait
-  
+
   /traits/{id}/versions:
     get:
       summary: List all versions
-  
+
   /traits/{id}/download:
     get:
       summary: Download trait package
@@ -697,12 +701,14 @@ paths:
 The Trait Marketplace UI is fully implemented with:
 
 #### Web Application (`packages/marketplace-web/`)
+
 - **Next.js 14** with App Router and TypeScript
 - **TailwindCSS** with custom HoloScript theme and category colors
 - **React Query** for API data fetching and caching
 - **Zustand** for client state management (filters, search, install, trait detail)
 
 #### Pages and Components
+
 - **MarketplacePage** (`src/app/page.tsx`)
   - Hero section with search
   - Category sidebar with filters (category, platform, verified, sort)
@@ -728,6 +734,7 @@ The Trait Marketplace UI is fully implemented with:
   - `PopularTraits` - Compact horizontal trait cards
 
 #### VS Code Extension Integration (`packages/vscode-extension/`)
+
 - **MarketplaceWebview** (`src/webview/MarketplaceWebview.ts`)
   - Full-featured webview panel with search, categories, trait list
   - Trait detail panel with install button
@@ -777,11 +784,11 @@ export class TelemetryCollector extends EventEmitter {
   startSpan(name: string, attributes?: Record<string, unknown>): Span;
   endSpan(spanId: string): void;
   recordEvent(name: string, attributes?: Record<string, unknown>): void;
-  
+
   // Buffering & Export
   async flush(): Promise<void>;
   setEnabled(enabled: boolean): void;
-  
+
   // Auto-flush timer
   private startFlushTimer(): void;
 }
@@ -833,18 +840,18 @@ export interface ErrorEvent extends AnalyticsEvent {
 export class TelemetryService {
   private enabled: boolean;
   private queue: AnalyticsEvent[];
-  
+
   constructor(options: TelemetryOptions);
-  
+
   // Core
   track(event: AnalyticsEvent): void;
   flush(): Promise<void>;
-  
+
   // Convenience methods
   trackCompile(result: CompileResult): void;
   trackExport(format: string, size: number): void;
   trackError(error: Error, context?: Record<string, unknown>): void;
-  
+
   // Privacy
   enable(): void;
   disable(): void;
@@ -855,7 +862,7 @@ export class TelemetryService {
 // Backend aggregation
 export interface IAnalyticsAPI {
   ingest(events: AnalyticsEvent[]): Promise<void>;
-  
+
   // Queries
   getDailyActiveUsers(range: DateRange): Promise<number[]>;
   getErrorRate(range: DateRange): Promise<number[]>;
@@ -869,11 +876,11 @@ export interface IAnalyticsAPI {
 ```typescript
 // Opt-in configuration
 export interface TelemetryOptions {
-  enabled: boolean;           // Default: false
-  anonymize: boolean;         // Hash user IDs
-  excludeFilePaths: boolean;  // Don't send file names
-  errorReporting: boolean;    // Report crashes
-  usageMetrics: boolean;      // Report feature usage
+  enabled: boolean; // Default: false
+  anonymize: boolean; // Hash user IDs
+  excludeFilePaths: boolean; // Don't send file names
+  errorReporting: boolean; // Report crashes
+  usageMetrics: boolean; // Report feature usage
 }
 
 // Data anonymization
@@ -916,14 +923,17 @@ export class DataAnonymizer {
 The performance dashboard is fully implemented with:
 
 #### Core Profiling (`packages/core/src/profiling/`)
+
 - **Profiler.ts**: Runtime profiling with Chrome DevTools trace export
 - **Analyzer.ts**: Performance analysis and recommendation engine
 
 #### VS Code Dashboard (`packages/vscode-extension/src/performance/`)
+
 - **PerformancePanel.ts**: WebviewViewProvider for real-time dashboard
 - **webview/performance/**: Dashboard UI with charts and recommendations
 
 #### Existing Performance Tracking (`packages/core/src/performance/`)
+
 - **PerformanceTracker.ts**: Runtime performance measurement
 - **PerformanceReportGenerator.ts**: Report generation and export
 
@@ -958,15 +968,15 @@ export interface PerformanceMetrics {
 // Dashboard components
 export class PerformanceDashboard {
   constructor(container: HTMLElement);
-  
+
   // Metrics
   updateMetrics(metrics: PerformanceMetrics): void;
-  
+
   // Visualization
   renderFPSGraph(data: number[]): void;
   renderMemoryGraph(data: number[]): void;
   renderLatencyGraph(data: number[]): void;
-  
+
   // Recommendations
   analyzePerformance(metrics: PerformanceMetrics): Recommendation[];
 }
@@ -982,11 +992,11 @@ export interface Recommendation {
 // VS Code panel
 export class PerformancePanel implements WebviewViewProvider {
   resolveWebviewView(view: WebviewView): void;
-  
+
   // Profiling
   startProfiling(): void;
   stopProfiling(): ProfileResult;
-  
+
   // Export
   exportProfile(format: 'json' | 'chrome'): void;
 }
@@ -1033,23 +1043,23 @@ scene#benchmark {
 
 ### New Packages
 
-| Package | Purpose | Framework |
-|---------|---------|-----------|
-| `packages/vscode-extension/` | VS Code extension | TypeScript, vscode API |
-| `packages/collaboration-server/` | WebSocket collaboration | Node.js, Y.js |
-| `packages/marketplace-api/` | Trait registry API | Fastify, PostgreSQL |
-| `packages/marketplace-web/` | Marketplace website | Next.js, React |
-| `packages/analytics-api/` | Telemetry ingestion | ClickHouse, Kafka |
+| Package                          | Purpose                 | Framework              |
+| -------------------------------- | ----------------------- | ---------------------- |
+| `packages/vscode-extension/`     | VS Code extension       | TypeScript, vscode API |
+| `packages/collaboration-server/` | WebSocket collaboration | Node.js, Y.js          |
+| `packages/marketplace-api/`      | Trait registry API      | Fastify, PostgreSQL    |
+| `packages/marketplace-web/`      | Marketplace website     | Next.js, React         |
+| `packages/analytics-api/`        | Telemetry ingestion     | ClickHouse, Kafka      |
 
 ### External Dependencies
 
-| Dependency | Version | Purpose |
-|------------|---------|---------|
-| `vscode-languageserver` | ^9.0.0 | LSP implementation |
-| `vscode-languageclient` | ^9.0.0 | LSP client |
-| `yjs` | ^13.6.0 | CRDT for collaboration |
-| `y-websocket` | ^2.0.0 | WebSocket sync |
-| `three` | ^0.160.0 | 3D preview rendering |
+| Dependency              | Version  | Purpose                |
+| ----------------------- | -------- | ---------------------- |
+| `vscode-languageserver` | ^9.0.0   | LSP implementation     |
+| `vscode-languageclient` | ^9.0.0   | LSP client             |
+| `yjs`                   | ^13.6.0  | CRDT for collaboration |
+| `y-websocket`           | ^2.0.0   | WebSocket sync         |
+| `three`                 | ^0.160.0 | 3D preview rendering   |
 
 ---
 
@@ -1078,16 +1088,19 @@ scene#benchmark {
 ## Rollout Plan
 
 ### Phase 1: Alpha (Week 1-4)
+
 - VS Code extension (internal)
 - Live preview (internal)
 - Basic collaboration (internal)
 
 ### Phase 2: Beta (Week 5-6)
+
 - Public VS Code marketplace
 - Trait marketplace beta
 - Opt-in telemetry
 
 ### Phase 3: GA (Week 7-8)
+
 - Full feature release
 - Performance dashboard
 - Documentation
@@ -1096,24 +1109,24 @@ scene#benchmark {
 
 ## Success Metrics
 
-| Metric | Target |
-|--------|--------|
+| Metric                     | Target |
+| -------------------------- | ------ |
 | VS Code extension installs | 1,000+ |
-| Published traits | 50+ |
-| Daily active users | 500+ |
-| Collaboration sessions/day | 100+ |
-| Error rate | < 0.1% |
+| Published traits           | 50+    |
+| Daily active users         | 500+   |
+| Collaboration sessions/day | 100+   |
+| Error rate                 | < 0.1% |
 
 ---
 
 ## Risk Assessment
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| WebGPU not supported in VS Code webview | High | Three.js WebGL fallback |
-| CRDT conflicts in large scenes | Medium | Hierarchical document splitting |
-| Marketplace abuse | Medium | Verification, rate limiting, reporting |
-| Privacy concerns | High | Opt-in only, clear policy, GDPR compliance |
+| Risk                                    | Impact | Mitigation                                 |
+| --------------------------------------- | ------ | ------------------------------------------ |
+| WebGPU not supported in VS Code webview | High   | Three.js WebGL fallback                    |
+| CRDT conflicts in large scenes          | Medium | Hierarchical document splitting            |
+| Marketplace abuse                       | Medium | Verification, rate limiting, reporting     |
+| Privacy concerns                        | High   | Opt-in only, clear policy, GDPR compliance |
 
 ---
 

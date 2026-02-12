@@ -1,6 +1,6 @@
 /**
  * Voting Round
- * 
+ *
  * Manages voting on contributions in collective intelligence sessions.
  */
 
@@ -73,15 +73,15 @@ export class VotingRound {
     if (this.closed) {
       throw new Error('Voting round is closed');
     }
-    
+
     if (!this.contributions.has(contributionId)) {
       throw new Error(`Contribution ${contributionId} not registered`);
     }
 
     const existingVotes = this.votes.get(contributionId) ?? [];
-    
+
     // Check for duplicate vote
-    if (existingVotes.some(v => v.voterId === voterId)) {
+    if (existingVotes.some((v) => v.voterId === voterId)) {
       throw new Error(`${voterId} has already voted on ${contributionId}`);
     }
 
@@ -98,7 +98,7 @@ export class VotingRound {
       weight,
       timestamp: Date.now(),
     });
-    
+
     this.votes.set(contributionId, existingVotes);
   }
 
@@ -132,7 +132,7 @@ export class VotingRound {
       opposeVotes,
       netScore: supportVotes - opposeVotes,
       weightedScore: weightedSupport - weightedOppose,
-      voterIds: votes.map(v => v.voterId),
+      voterIds: votes.map((v) => v.voterId),
     };
   }
 
@@ -141,7 +141,7 @@ export class VotingRound {
    */
   getAllResults(): VotingResult[] {
     const results: VotingResult[] = [];
-    
+
     for (const contributionId of this.contributions.keys()) {
       const result = this.getResult(contributionId);
       if (result) {
@@ -181,7 +181,7 @@ export class VotingRound {
    */
   getApprovedContributions(): IHiveContribution[] {
     const approved: IHiveContribution[] = [];
-    
+
     for (const [contributionId, contribution] of this.contributions) {
       if (this.hasSuperMajority(contributionId)) {
         approved.push(contribution);
@@ -245,9 +245,10 @@ export class VotingRound {
     return {
       totalContributions: this.contributions.size,
       totalVotes,
-      participationRate: this.contributions.size > 0 
-        ? totalVotes / (this.contributions.size * voterSet.size || 1) 
-        : 0,
+      participationRate:
+        this.contributions.size > 0
+          ? totalVotes / (this.contributions.size * voterSet.size || 1)
+          : 0,
       hasConsensus,
     };
   }

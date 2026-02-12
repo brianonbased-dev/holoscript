@@ -80,6 +80,9 @@ import type {
   HoloShape,
   HoloShapeProperty,
   HoloOnErrorStatement,
+  HoloSubOrb,
+  HoloWhileStatement,
+  HoloVariableDeclaration,
 } from './HoloCompositionTypes';
 import { TypoDetector } from './TypoDetector';
 
@@ -123,6 +126,8 @@ type TokenType =
   | 'ARROW'
   | 'AT'
   | 'HASH'
+  | 'SEMICOLON'
+  | 'QUESTION'
   | 'NEWLINE'
   | 'EOF'
   // Keywords
@@ -147,6 +152,12 @@ type TokenType =
   | 'IMPORT'
   | 'ON_ERROR'
   | 'FROM'
+  | 'WHILE'
+  | 'LET'
+  | 'VAR'
+  | 'CONST'
+  | 'INC'
+  | 'DEC'
   | 'PARTICLE_SYSTEM'
   | 'LIGHT'
   | 'EFFECTS'
@@ -181,7 +192,11 @@ type TokenType =
   | 'ACHIEVEMENT'
   | 'TALENT_TREE'
   | 'SHAPE'
-  | 'SUB_ORB';
+  | 'SUB_ORB'
+  | 'MIGRATE'
+  // Comment tokens (skipped by lexer but used in parser guards)
+  | 'COMMENT'
+  | 'LINE_COMMENT';
 
 interface Token {
   type: TokenType;
@@ -213,6 +228,10 @@ const KEYWORDS: Record<string, TokenType> = {
   emit: 'EMIT',
   animate: 'ANIMATE',
   on_error: 'ON_ERROR',
+  while: 'WHILE',
+  let: 'LET',
+  var: 'VAR',
+  const: 'CONST',
   node: 'SPATIAL_GROUP',
   orb: 'OBJECT',
   using: 'USING',
@@ -253,6 +272,7 @@ const KEYWORDS: Record<string, TokenType> = {
   talent_tree: 'TALENT_TREE',
   shape: 'SHAPE',
   sub_orb: 'SUB_ORB',
+  migrate: 'MIGRATE',
   true: 'BOOLEAN',
   false: 'BOOLEAN',
   null: 'NULL',
@@ -371,6 +391,32 @@ class HoloLexer {
     const char = this.current();
     const next = this.peek(1);
 
+    // Triple-character operators
+    if (char === '=' && next === '=' && this.peek(2) === '=') {
+      this.tokens.push({
+        type: 'EQUALS_EQUALS',
+        value: '===',
+        line: this.line,
+        column: this.column,
+      });
+      this.advance();
+      this.advance();
+      this.advance();
+      return true;
+    }
+    if (char === '!' && next === '=' && this.peek(2) === '=') {
+      this.tokens.push({
+        type: 'BANG_EQUALS',
+        value: '!==',
+        line: this.line,
+        column: this.column,
+      });
+      this.advance();
+      this.advance();
+      this.advance();
+      return true;
+    }
+
     // Two-character operators
     if (char === '=' && next === '=') {
       this.addToken('EQUALS_EQUALS', '==');
@@ -426,6 +472,18 @@ class HoloLexer {
       this.advance();
       return true;
     }
+    if (char === '+' && next === '+') {
+      this.addToken('INC', '++');
+      this.advance();
+      this.advance();
+      return true;
+    }
+    if (char === '-' && next === '-') {
+      this.addToken('DEC', '--');
+      this.advance();
+      this.advance();
+      return true;
+    }
     if (char === '&' && next === '&') {
       this.addToken('AND', '&&');
       this.advance();
@@ -460,6 +518,8 @@ class HoloLexer {
       '!': 'BANG',
       '@': 'AT',
       '#': 'HASH',
+      ';': 'SEMICOLON',
+      '?': 'QUESTION',
     };
 
     if (singleChar[char]) {
@@ -639,13 +699,12 @@ export class HoloCompositionParser {
   parse(source: string): HoloParseResult {
     this.errors = [];
     this.warnings = [];
+    const lexer = new HoloLexer(source);
+    this.tokens = lexer.tokenize();
     this.pos = 0;
+    this.skipNewlines();
 
     try {
-      const lexer = new HoloLexer(source);
-      this.tokens = lexer.tokenize();
-      this.skipNewlines();
-
       // Support files that don't start with 'composition' keyword
       // These use root-level @world, orb, object, or primitives
       let ast: HoloComposition;
@@ -712,7 +771,7 @@ export class HoloCompositionParser {
         if (this.isAtEnd()) break;
 
         // Handle @world, @environment, etc. (root-level decorators)
-        if (this.check('AT' as any)) {
+        if (this.check('AT')) {
           this.advance(); // consume @
           const decoratorName = this.current().value.toLowerCase();
           this.advance(); // consume decorator name
@@ -750,7 +809,7 @@ export class HoloCompositionParser {
           composition.achievements.push(this.parseAchievement());
         } else if (this.check('TALENT_TREE')) {
           composition.talentTrees.push(this.parseTalentTree());
-        } else if (this.check('COMMENT' as any) || this.check('LINE_COMMENT' as any)) {
+        } else if (this.check('COMMENT') || this.check('LINE_COMMENT')) {
           this.advance(); // skip comments
         } else {
           // Skip unknown tokens at root level
@@ -805,7 +864,7 @@ export class HoloCompositionParser {
     const properties: HoloObjectProperty[] = [];
 
     // Parse traits after name: @grabbable @glowing etc.
-    while (this.check('AT' as any)) {
+    while (this.check('AT')) {
       this.advance(); // consume @
       const traitName = this.expectIdentifier();
       let config: Record<string, HoloValue> = {};
@@ -824,7 +883,7 @@ export class HoloCompositionParser {
         this.skipNewlines();
         if (this.check('RBRACE')) break;
 
-        if (this.check('AT' as any)) {
+        if (this.check('AT')) {
           this.advance();
           const traitName = this.expectIdentifier();
           let config: Record<string, HoloValue> = {};
@@ -970,7 +1029,7 @@ export class HoloCompositionParser {
           composition.achievements.push(this.parseAchievement());
         } else if (this.check('TALENT_TREE')) {
           composition.talentTrees.push(this.parseTalentTree());
-        } else if (this.check('AT' as any)) {
+        } else if (this.check('AT')) {
           // Handle @state, @world, and other decorators at composition level
           this.advance(); // consume @
           const decoratorName = this.current().value.toLowerCase();
@@ -1047,18 +1106,18 @@ export class HoloCompositionParser {
 
   private parseUsingStatement(): HoloImport | null {
     this.expect('USING');
-    
+
     // using "path/to/module" syntax
     if (this.check('STRING')) {
       const source = this.expectString();
       return { type: 'Import', specifiers: [], source };
     }
-    
+
     // using { Name } from "path" syntax (similar to import)
     if (this.check('LBRACE')) {
       this.expect('LBRACE');
       this.skipNewlines();
-      
+
       const specifiers: HoloImportSpecifier[] = [];
       while (!this.check('RBRACE') && !this.isAtEnd()) {
         const imported = this.expectIdentifier();
@@ -1074,10 +1133,10 @@ export class HoloCompositionParser {
       this.expect('RBRACE');
       this.expect('FROM');
       const source = this.expectString();
-      
+
       return { type: 'Import', specifiers, source };
     }
-    
+
     // Fallback: just skip unknown using syntax
     this.skipBlock();
     return null;
@@ -1677,6 +1736,7 @@ export class HoloCompositionParser {
       properties: [],
       actions: [],
       traits: [],
+      directives: [], // Initialize directives
     };
 
     while (!this.check('RBRACE') && !this.isAtEnd()) {
@@ -1686,16 +1746,86 @@ export class HoloCompositionParser {
       if (this.check('STATE')) {
         template.state = this.parseState();
       } else if (this.check('ACTION') || this.check('ASYNC')) {
-        template.actions.push(this.parseAction());
-      } else if (this.check('AT' as any)) {
+        const action = this.parseAction();
+        template.actions.push(action);
+        (template as any).directives.push({
+          type: 'method',
+          name: action.name,
+          parameters: action.parameters || [],
+          body: action.body,
+          async: action.async,
+        });
+      } else if (this.check('AT')) {
         // @trait support in templates
         this.advance(); // consume @
         const traitName = this.expectIdentifier();
-        let config: Record<string, HoloValue> = {};
-        if (this.check('LPAREN')) {
-          config = this.parseTraitConfig();
+
+        if (traitName === 'version') {
+          // @version(N) — set template schema version for hot-reload
+          this.expect('LPAREN');
+          const versionToken = this.advance();
+          if (versionToken.type !== 'NUMBER') {
+            this.error(`Expected version number, got ${versionToken.type}`);
+          }
+          template.version = Number(versionToken.value);
+          this.expect('RPAREN');
+        } else {
+          let config: Record<string, HoloValue> = {};
+          if (this.check('LPAREN')) {
+            config = this.parseTraitConfig();
+          }
+          template.traits.push({ type: 'ObjectTrait', name: traitName, config } as HoloObjectTrait);
+          // Also add traits as directives for compatibility
+          (template as any).directives!.push({ type: 'trait', name: traitName, config });
         }
-        template.traits.push({ type: 'ObjectTrait', name: traitName, config } as HoloObjectTrait);
+      } else if (this.check('MIGRATE')) {
+        // migrate from(N) { ... } — schema migration block for hot-reload
+        this.advance(); // consume 'migrate'
+        this.expect('FROM');
+        this.expect('LPAREN');
+        const fromToken = this.advance();
+        if (fromToken.type !== 'NUMBER') {
+          this.error(`Expected version number in migrate from(), got ${fromToken.type}`);
+        }
+        const fromVersion = Number(fromToken.value);
+        this.expect('RPAREN');
+        this.expect('LBRACE');
+        const migrationBody = this.parseStatementBlock();
+        this.expect('RBRACE');
+
+        if (!template.migrations) template.migrations = [];
+        template.migrations.push({
+          type: 'Migration',
+          fromVersion,
+          body: migrationBody,
+        });
+      } else if (
+        this.check('IDENTIFIER') &&
+        this.current().value === 'on' &&
+        this.peek(1).type === 'IDENTIFIER'
+      ) {
+        const eventName = this.peek(1).value;
+
+        // Handle on event(...) { } syntax
+        this.advance(); // consume 'on'
+        this.advance(); // consume event name
+
+        let parameters: any[] = [];
+        if (this.check('LPAREN')) {
+          parameters = this.parseParameterList();
+        }
+
+        this.expect('LBRACE');
+        const body = this.parseStatementBlock();
+        this.expect('RBRACE');
+
+        // Add as lifecycle directive
+        (template as any).directives!.push({
+          type: 'lifecycle',
+          hook: eventName,
+          parameters,
+          body,
+        });
       } else {
         const key = this.expectIdentifier();
         this.expect('COLON');
@@ -1739,7 +1869,7 @@ export class HoloCompositionParser {
 
     // Parse traits BEFORE the brace: object "name" @trait1 @trait2 { ... }
     const traits: HoloObjectTrait[] = [];
-    while (this.check('AT' as any)) {
+    while (this.check('AT')) {
       this.advance(); // consume @
       const traitName = this.expectIdentifier();
       let config: Record<string, HoloValue> = {};
@@ -1755,6 +1885,7 @@ export class HoloCompositionParser {
     const properties: HoloObjectProperty[] = [];
     const children: HoloObjectDecl[] = [];
     const subOrbs: HoloSubOrb[] = [];
+    const directives: any[] = [];
     let state: HoloState | undefined;
 
     while (!this.check('RBRACE') && !this.check('EOF')) {
@@ -1772,14 +1903,49 @@ export class HoloCompositionParser {
         children.push(this.parseObject(nestedType));
       } else if (this.check('SUB_ORB')) {
         subOrbs.push(this.parseSubOrb());
-      } else if (this.check('AT' as any)) {
+      } else if (this.check('ACTION') || this.check('ASYNC')) {
+        const action = this.parseAction();
+        directives.push({
+          type: 'method',
+          name: action.name,
+          parameters: action.parameters || [],
+          body: action.body,
+          async: action.async,
+        });
+      } else if (
+        this.check('IDENTIFIER') &&
+        this.current().value === 'on' &&
+        this.peek(1).type === 'IDENTIFIER'
+      ) {
+        const eventName = this.peek(1).value;
+        this.advance(); // consume 'on'
+        this.advance(); // consume event name
+
+        let parameters: any[] = [];
+        if (this.check('LPAREN')) {
+          parameters = this.parseParameterList();
+        }
+
+        this.expect('LBRACE');
+        const body = this.parseStatementBlock();
+        this.expect('RBRACE');
+
+        directives.push({
+          type: 'lifecycle',
+          hook: eventName,
+          parameters,
+          body,
+        });
+      } else if (this.check('AT')) {
         this.advance(); // consume @
-        const name = this.expectIdentifier();
+        const traitName = this.expectIdentifier();
         let config: Record<string, HoloValue> = {};
         if (this.check('LPAREN')) {
           config = this.parseTraitConfig();
         }
-        traits.push({ type: 'ObjectTrait', name, config } as any);
+        const trait = { type: 'ObjectTrait', name: traitName, config } as any;
+        traits.push(trait);
+        directives.push({ type: 'trait', name: traitName, config });
       } else if (this.check('STATE')) {
         // Handle state block in object
         state = this.parseState();
@@ -1841,6 +2007,7 @@ export class HoloCompositionParser {
       properties,
       state,
       traits, // Added traits property
+      directives, // Added directives
       children: children.length > 0 ? children : undefined,
       subOrbs: subOrbs.length > 0 ? subOrbs : undefined,
     };
@@ -2042,11 +2209,13 @@ export class HoloCompositionParser {
   private parseStatement(): HoloStatement | null {
     if (this.check('IF')) return this.parseIfStatement();
     if (this.check('FOR')) return this.parseForStatement();
+    if (this.check('WHILE')) return this.parseWhileStatement();
     if (this.check('AWAIT')) return this.parseAwaitStatement();
     if (this.check('RETURN')) return this.parseReturnStatement();
     if (this.check('EMIT')) return this.parseEmitStatement();
     if (this.check('ANIMATE')) return this.parseAnimateStatement();
     if (this.check('ON_ERROR')) return this.parseOnErrorStatement();
+    if (this.check(['LET', 'VAR', 'CONST'])) return this.parseVariableDeclaration();
 
     // Assignment or expression
     return this.parseAssignmentOrExpression();
@@ -2063,17 +2232,37 @@ export class HoloCompositionParser {
     let alternate: HoloStatement[] | undefined;
     this.skipNewlines();
     if (this.match('ELSE')) {
-      this.expect('LBRACE');
-      this.skipNewlines();
-      alternate = this.parseStatementBlock();
-      this.expect('RBRACE');
+      if (this.check('IF')) {
+        alternate = [this.parseIfStatement()];
+      } else {
+        this.expect('LBRACE');
+        this.skipNewlines();
+        alternate = this.parseStatementBlock();
+        this.expect('RBRACE');
+      }
     }
 
     return { type: 'IfStatement', condition, consequent, alternate };
   }
 
+  private parseWhileStatement(): HoloWhileStatement {
+    this.expect('WHILE');
+    const condition = this.parseExpression();
+    this.expect('LBRACE');
+    this.skipNewlines();
+    const body = this.parseStatementBlock();
+    this.expect('RBRACE');
+    return { type: 'WhileStatement', condition, body };
+  }
+
   private parseForStatement(): HoloStatement {
     this.expect('FOR');
+
+    // Check for classic for (init; test; update)
+    if (this.match('LPAREN')) {
+      return this.parseClassicForStatement();
+    }
+
     const variable = this.expectIdentifier();
     this.expect('IN');
     const iterable = this.parseExpression();
@@ -2083,6 +2272,46 @@ export class HoloCompositionParser {
     this.expect('RBRACE');
 
     return { type: 'ForStatement', variable, iterable, body };
+  }
+
+  private parseClassicForStatement(): HoloStatement {
+    // Already consumed 'FOR' and '('
+    let init: HoloStatement | undefined;
+    if (this.check(['LET', 'VAR', 'CONST'])) {
+      init = this.parseVariableDeclaration();
+    } else if (!this.check('SEMICOLON')) {
+      init = this.parseAssignmentOrExpression();
+    }
+    this.expect('SEMICOLON');
+
+    let test: HoloExpression | undefined;
+    if (!this.check('SEMICOLON')) {
+      test = this.parseExpression();
+    }
+    this.expect('SEMICOLON');
+
+    let update: HoloStatement | undefined;
+    if (!this.check('RPAREN')) {
+      update = this.parseAssignmentOrExpression();
+    }
+    this.expect('RPAREN');
+
+    this.expect('LBRACE');
+    this.skipNewlines();
+    const body = this.parseStatementBlock();
+    this.expect('RBRACE');
+
+    return { type: 'ClassicForStatement', init, test, update, body };
+  }
+
+  private parseVariableDeclaration(): HoloVariableDeclaration {
+    const kind = this.advance().value as 'let' | 'var' | 'const';
+    const name = this.expectIdentifier();
+    let value: HoloExpression | undefined;
+    if (this.match('EQUALS')) {
+      value = this.parseExpression();
+    }
+    return { type: 'VariableDeclaration', kind, name, value };
   }
 
   private parseAwaitStatement(): HoloStatement {
@@ -2140,7 +2369,7 @@ export class HoloCompositionParser {
     return { type: 'OnErrorStatement', body };
   }
 
-  private parseAssignmentOrExpression(): HoloStatement | null {
+  private parseAssignmentOrExpression(): HoloStatement {
     const expr = this.parseExpression();
 
     // Check for assignment operators
@@ -2205,7 +2434,20 @@ export class HoloCompositionParser {
   // ===========================================================================
 
   private parseExpression(): HoloExpression {
-    return this.parseOr();
+    return this.parseConditional();
+  }
+
+  private parseConditional(): HoloExpression {
+    const expr = this.parseOr();
+
+    if (this.match('QUESTION')) {
+      const consequent = this.parseExpression();
+      this.expect('COLON');
+      const alternate = this.parseConditional();
+      return { type: 'ConditionalExpression', test: expr, consequent, alternate };
+    }
+
+    return expr;
   }
 
   private parseOr(): HoloExpression {
@@ -2295,6 +2537,10 @@ export class HoloCompositionParser {
       } else if (this.match('LPAREN')) {
         const args = this.parseArgumentList();
         expr = { type: 'CallExpression', callee: expr, arguments: args };
+      } else if (this.match('INC')) {
+        expr = { type: 'UpdateExpression', operator: '++', argument: expr, prefix: false } as any;
+      } else if (this.match('DEC')) {
+        expr = { type: 'UpdateExpression', operator: '--', argument: expr, prefix: false } as any;
       } else {
         break;
       }
@@ -2334,12 +2580,17 @@ export class HoloCompositionParser {
     if (this.match('NULL')) {
       return { type: 'Literal', value: null };
     }
-    // Allow keywords to be used as identifiers in expressions
-    // (e.g., state.visitors, object.position)
-    if (this.match('IDENTIFIER') || this.isKeywordAsIdentifier()) {
-      const name = this.previous().value;
-      return { type: 'Identifier', name };
+
+    // Explicitly handle Identifier
+    if (this.match('IDENTIFIER')) {
+      return { type: 'Identifier', name: this.previous().value };
     }
+
+    // Handle Keywords as Identifiers
+    if (this.isKeywordAsIdentifier()) {
+      return { type: 'Identifier', name: this.previous().value };
+    }
+
     if (this.match('LBRACKET')) {
       return this.parseArrayExpression();
     }
@@ -2534,6 +2785,10 @@ export class HoloCompositionParser {
     return this.tokens[this.pos] || { type: 'EOF', value: '', line: 0, column: 0 };
   }
 
+  private peek(offset: number): Token {
+    return this.tokens[this.pos + offset] || { type: 'EOF', value: '', line: 0, column: 0 };
+  }
+
   private previous(): Token {
     return this.tokens[this.pos - 1] || this.current();
   }
@@ -2543,10 +2798,9 @@ export class HoloCompositionParser {
   }
 
   private check(type: TokenType | TokenType[]): boolean {
-    if (Array.isArray(type)) {
-      return type.includes(this.current().type);
-    }
-    return this.current().type === type;
+    const cur = this.current().type;
+    const res = Array.isArray(type) ? type.includes(cur) : cur === type;
+    return res;
   }
 
   private match(type: TokenType | TokenType[]): boolean {
@@ -2562,11 +2816,15 @@ export class HoloCompositionParser {
     return (
       type === 'IF' ||
       type === 'FOR' ||
+      type === 'WHILE' ||
       type === 'AWAIT' ||
       type === 'RETURN' ||
       type === 'EMIT' ||
       type === 'ANIMATE' ||
-      type === 'ON_ERROR'
+      type === 'ON_ERROR' ||
+      type === 'LET' ||
+      type === 'VAR' ||
+      type === 'CONST'
     );
   }
 
@@ -2605,7 +2863,7 @@ export class HoloCompositionParser {
       'TEMPLATE',
       'STATE',
       'OBJECT',
-      'ON_ERROR'
+      'ON_ERROR',
     ];
     return validPropertyKeywords.includes(type);
   }
@@ -2663,7 +2921,7 @@ export class HoloCompositionParser {
         if (this.check('RBRACE')) break;
 
         // Parse object body members (similar to parseObject)
-        if (this.check('AT' as any)) {
+        if (this.check('AT')) {
           this.advance(); // consume @
           const name = this.expectIdentifier();
           let config: Record<string, HoloValue> = {};

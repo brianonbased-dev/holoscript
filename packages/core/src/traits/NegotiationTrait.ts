@@ -184,9 +184,7 @@ async function autoVoteInternal(
     }
 
     case 'highest_priority': {
-      const sorted = [...session.proposals].sort(
-        (a, b) => (b.priority || 0) - (a.priority || 0)
-      );
+      const sorted = [...session.proposals].sort((a, b) => (b.priority || 0) - (a.priority || 0));
       ranking = sorted.map((p) => p.id);
       break;
     }
@@ -295,7 +293,12 @@ export const negotiationHandler: TraitHandler<NegotiationTraitConfig> = {
     (node as NodeWithNegotiation).__negotiation_state = undefined;
   },
 
-  onUpdate(_node: HSPlusNode, _config: NegotiationTraitConfig, _context: TraitContext, _delta: number) {
+  onUpdate(
+    _node: HSPlusNode,
+    _config: NegotiationTraitConfig,
+    _context: TraitContext,
+    _delta: number
+  ) {
     // No per-frame updates needed
   },
 };
@@ -455,9 +458,7 @@ export async function autoVote(node: HSPlusNode, sessionId: string): Promise<Vot
     }
 
     case 'highest_priority': {
-      const sorted = [...session.proposals].sort(
-        (a, b) => (b.priority || 0) - (a.priority || 0)
-      );
+      const sorted = [...session.proposals].sort((a, b) => (b.priority || 0) - (a.priority || 0));
       ranking = sorted.map((p) => p.id);
       break;
     }
@@ -574,11 +575,7 @@ export function withNegotiation(
   config?: Partial<NegotiationTraitConfig>
 ): HSPlusNode {
   const fullConfig = { ...DEFAULT_NEGOTIATION_CONFIG, ...config };
-  negotiationHandler.onAttach?.(
-    node,
-    fullConfig,
-    {} as TraitContext
-  );
+  negotiationHandler.onAttach?.(node, fullConfig, {} as TraitContext);
   return node;
 }
 
@@ -589,12 +586,15 @@ export function getNegotiationMethods(node: HSPlusNode) {
   return {
     initiate: (topic: string, participants: string[], options?: Partial<InitiateOptions>) =>
       initiate(node, topic, participants, options),
-    propose: (sessionId: string, title: string, content: unknown, options?: Partial<ProposalInput>) =>
-      propose(node, sessionId, title, content, options),
+    propose: (
+      sessionId: string,
+      title: string,
+      content: unknown,
+      options?: Partial<ProposalInput>
+    ) => propose(node, sessionId, title, content, options),
     vote: (sessionId: string, ranking: string[], options?: Partial<VoteInput>) =>
       vote(node, sessionId, ranking, options),
-    abstain: (sessionId: string, justification?: string) =>
-      abstain(node, sessionId, justification),
+    abstain: (sessionId: string, justification?: string) => abstain(node, sessionId, justification),
     approve: (sessionId: string, proposalIds: string[], justification?: string) =>
       approve(node, sessionId, proposalIds, justification),
     getActiveSessions: () => getActiveSessions(node),

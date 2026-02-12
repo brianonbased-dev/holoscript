@@ -264,10 +264,7 @@ export class NetworkedTrait {
   /**
    * Connect to the network (using SyncProtocol)
    */
-  public async connect(
-    transport: TransportType = 'local',
-    serverUrl?: string
-  ): Promise<void> {
+  public async connect(transport: TransportType = 'local', serverUrl?: string): Promise<void> {
     const roomId = this.config.room || 'default-room';
 
     this.syncProtocol = getOrCreateSyncProtocol(roomId, transport, serverUrl);
@@ -318,7 +315,11 @@ export class NetworkedTrait {
     });
 
     this.syncProtocol.on('rpc', (event) => {
-      const { method, args, from } = event.data as { method: string; args: unknown[]; from: string };
+      const { method, args, from } = event.data as {
+        method: string;
+        args: unknown[];
+        from: string;
+      };
       this.emit('rpcReceived', {
         type: 'rpcReceived' as any,
         property: method,
@@ -418,11 +419,7 @@ export class NetworkedTrait {
     b: [number, number, number],
     t: number
   ): [number, number, number] {
-    return [
-      a[0] + (b[0] - a[0]) * t,
-      a[1] + (b[1] - a[1]) * t,
-      a[2] + (b[2] - a[2]) * t,
-    ];
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
   }
 
   private slerpQuat(
@@ -431,8 +428,7 @@ export class NetworkedTrait {
     t: number
   ): [number, number, number, number] {
     let dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
-    const bNorm: [number, number, number, number] =
-      dot < 0 ? [-b[0], -b[1], -b[2], -b[3]] : [...b];
+    const bNorm: [number, number, number, number] = dot < 0 ? [-b[0], -b[1], -b[2], -b[3]] : [...b];
     dot = Math.abs(dot);
 
     if (dot > 0.9995) {
@@ -442,9 +438,7 @@ export class NetworkedTrait {
         a[2] + (bNorm[2] - a[2]) * t,
         a[3] + (bNorm[3] - a[3]) * t,
       ];
-      const len = Math.sqrt(
-        result[0] ** 2 + result[1] ** 2 + result[2] ** 2 + result[3] ** 2
-      );
+      const len = Math.sqrt(result[0] ** 2 + result[1] ** 2 + result[2] ** 2 + result[3] ** 2);
       return [result[0] / len, result[1] / len, result[2] / len, result[3] / len];
     }
 

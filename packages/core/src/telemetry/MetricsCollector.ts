@@ -207,14 +207,18 @@ export class MetricsCollector {
 
       // Write TYPE line once per metric name
       if (!processed.has(name)) {
-        const promType = type === 'counter' ? 'counter' : type === 'histogram' ? 'histogram' : 'gauge';
+        const promType =
+          type === 'counter' ? 'counter' : type === 'histogram' ? 'histogram' : 'gauge';
         lines.push(`# TYPE ${name} ${promType}`);
         processed.add(name);
       }
 
-      const labelStr = Object.keys(labels).length > 0
-        ? `{${Object.entries(labels).map(([k, v]) => `${k}="${v}"`).join(',')}}`
-        : '';
+      const labelStr =
+        Object.keys(labels).length > 0
+          ? `{${Object.entries(labels)
+              .map(([k, v]) => `${k}="${v}"`)
+              .join(',')}}`
+          : '';
 
       if (state.type === 'counter') {
         lines.push(`${name}${labelStr} ${state.value}`);
@@ -225,17 +229,39 @@ export class MetricsCollector {
         if (stats) {
           lines.push(`${name}_count${labelStr} ${stats.count}`);
           lines.push(`${name}_sum${labelStr} ${stats.sum}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="0.005"}')} ${state.values.filter((v) => v <= 0.005).length}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="0.01"}')} ${state.values.filter((v) => v <= 0.01).length}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="0.025"}')} ${state.values.filter((v) => v <= 0.025).length}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="0.05"}')} ${state.values.filter((v) => v <= 0.05).length}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="0.1"}')} ${state.values.filter((v) => v <= 0.1).length}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="0.25"}')} ${state.values.filter((v) => v <= 0.25).length}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="0.5"}')} ${state.values.filter((v) => v <= 0.5).length}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="1"}')} ${state.values.filter((v) => v <= 1).length}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="2.5"}')} ${state.values.filter((v) => v <= 2.5).length}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="5"}')} ${state.values.filter((v) => v <= 5).length}`);
-          lines.push(`${name}_bucket${labelStr.replace('}', ',le="10"}')} ${state.values.filter((v) => v <= 10).length}`);
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="0.005"}')} ${state.values.filter((v) => v <= 0.005).length}`
+          );
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="0.01"}')} ${state.values.filter((v) => v <= 0.01).length}`
+          );
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="0.025"}')} ${state.values.filter((v) => v <= 0.025).length}`
+          );
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="0.05"}')} ${state.values.filter((v) => v <= 0.05).length}`
+          );
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="0.1"}')} ${state.values.filter((v) => v <= 0.1).length}`
+          );
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="0.25"}')} ${state.values.filter((v) => v <= 0.25).length}`
+          );
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="0.5"}')} ${state.values.filter((v) => v <= 0.5).length}`
+          );
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="1"}')} ${state.values.filter((v) => v <= 1).length}`
+          );
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="2.5"}')} ${state.values.filter((v) => v <= 2.5).length}`
+          );
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="5"}')} ${state.values.filter((v) => v <= 5).length}`
+          );
+          lines.push(
+            `${name}_bucket${labelStr.replace('}', ',le="10"}')} ${state.values.filter((v) => v <= 10).length}`
+          );
           lines.push(`${name}_bucket${labelStr.replace('}', ',le="+Inf"}')} ${stats.count}`);
         }
       }
@@ -291,9 +317,7 @@ export class MetricsCollector {
         const sorted = [...state.values].sort((a, b) => a - b);
         const sum = sorted.reduce((s, v) => s + v, 0);
         const boundaries = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10];
-        const bucketCounts = boundaries.map(
-          (b) => sorted.filter((v) => v <= b).length,
-        );
+        const bucketCounts = boundaries.map((b) => sorted.filter((v) => v <= b).length);
         bucketCounts.push(sorted.length); // +Inf bucket
 
         scopeMetrics.push({
@@ -317,9 +341,7 @@ export class MetricsCollector {
 
     resourceMetrics.push({
       resource: {
-        attributes: [
-          { key: 'service.name', value: { stringValue: serviceName } },
-        ],
+        attributes: [{ key: 'service.name', value: { stringValue: serviceName } }],
       },
       scopeMetrics: [
         {

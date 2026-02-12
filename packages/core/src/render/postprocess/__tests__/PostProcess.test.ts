@@ -59,25 +59,41 @@ describe('PostProcessTypes', () => {
   describe('Effect Type Constants', () => {
     it('should define all effect types', () => {
       const types: PostProcessEffectType[] = [
-        'bloom', 'tonemap', 'dof', 'motionBlur', 'ssao',
-        'fxaa', 'sharpen', 'vignette', 'colorGrade',
-        'filmGrain', 'chromaticAberration', 'fog', 'custom',
+        'bloom',
+        'tonemap',
+        'dof',
+        'motionBlur',
+        'ssao',
+        'fxaa',
+        'sharpen',
+        'vignette',
+        'colorGrade',
+        'filmGrain',
+        'chromaticAberration',
+        'fog',
+        'custom',
       ];
       expect(types).toHaveLength(13);
     });
 
     it('should define tone map operators', () => {
       const operators: ToneMapOperator[] = [
-        'none', 'reinhard', 'reinhardLum', 'aces', 'acesApprox',
-        'filmic', 'uncharted2', 'uchimura', 'lottes', 'khronos',
+        'none',
+        'reinhard',
+        'reinhardLum',
+        'aces',
+        'acesApprox',
+        'filmic',
+        'uncharted2',
+        'uchimura',
+        'lottes',
+        'khronos',
       ];
       expect(operators).toHaveLength(10);
     });
 
     it('should define blend modes', () => {
-      const modes: BlendMode[] = [
-        'normal', 'add', 'multiply', 'screen', 'overlay',
-      ];
+      const modes: BlendMode[] = ['normal', 'add', 'multiply', 'screen', 'overlay'];
       expect(modes).toHaveLength(5);
     });
 
@@ -443,8 +459,15 @@ describe('PostProcessShaders', () => {
 
   describe('Tone Mapping Operators', () => {
     const operators = [
-      'reinhard', 'reinhardLum', 'aces', 'acesApprox',
-      'filmic', 'uncharted2', 'uchimura', 'lottes', 'khronos',
+      'reinhard',
+      'reinhardLum',
+      'aces',
+      'acesApprox',
+      'filmic',
+      'uncharted2',
+      'uchimura',
+      'lottes',
+      'khronos',
     ];
 
     for (const op of operators) {
@@ -510,7 +533,7 @@ describe('PostProcessPipeline', () => {
     it('should create cinematic preset', () => {
       const config = PostProcessPipeline.createPreset('cinematic');
       expect(config.effects!.length).toBeGreaterThanOrEqual(4);
-      const types = config.effects!.map(e => e.type);
+      const types = config.effects!.map((e) => e.type);
       expect(types).toContain('bloom');
       expect(types).toContain('vignette');
       expect(types).toContain('filmGrain');
@@ -640,8 +663,7 @@ describe('Edge Cases', () => {
     });
 
     it('should handle unknown effect type gracefully', () => {
-      expect(() => createEffect('unknown' as PostProcessEffectType))
-        .toThrowError();
+      expect(() => createEffect('unknown' as PostProcessEffectType)).toThrowError();
     });
   });
 

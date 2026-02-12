@@ -4,6 +4,7 @@
  * Generates and validates certification badges for packages.
  */
 
+import { createHmac } from 'crypto';
 import type { CertificationResult } from './CertificationChecker';
 
 /**
@@ -44,6 +45,8 @@ export interface Certificate {
 /**
  * Badge generator for certified packages
  */
+const SIGNING_KEY = process.env.HOLOSCRIPT_CERT_KEY || 'holoscript-registry-default-signing-key';
+
 export class BadgeGenerator {
   private readonly baseUrl = 'https://registry.holoscript.dev';
 
@@ -100,12 +103,30 @@ export class BadgeGenerator {
       return { valid: false, reason: 'Invalid grade for certification' };
     }
 
-    // In production, verify cryptographic signature
-    // if (!this.verifySignature(certificate)) {
-    //   return { valid: false, reason: 'Invalid signature' };
-    // }
+    // Verify HMAC-SHA256 signature
+    if (certificate.signature) {
+      if (!this.verifySignature(certificate)) {
+        return { valid: false, reason: 'Invalid signature' };
+      }
+    }
 
     return { valid: true };
+  }
+
+  /**
+   * Compute HMAC-SHA256 signature for a certificate.
+   */
+  signCertificate(certificate: Certificate): string {
+    const data = `${certificate.id}:${certificate.packageName}:${certificate.packageVersion}:${certificate.issuedAt}:${certificate.expiresAt}:${certificate.grade}:${certificate.score}`;
+    return createHmac('sha256', SIGNING_KEY).update(data).digest('hex');
+  }
+
+  /**
+   * Verify a certificate's HMAC-SHA256 signature.
+   */
+  private verifySignature(certificate: Certificate): boolean {
+    const expected = this.signCertificate(certificate);
+    return certificate.signature === expected;
   }
 
   /**

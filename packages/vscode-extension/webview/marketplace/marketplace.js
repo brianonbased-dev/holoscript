@@ -1,6 +1,6 @@
 // HoloScript Marketplace Webview Script
 
-(function() {
+(function () {
   'use strict';
 
   // VS Code API
@@ -49,10 +49,10 @@
     });
 
     // Category filters
-    categoryBtns.forEach(btn => {
+    categoryBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         currentCategory = btn.dataset.category;
-        categoryBtns.forEach(b => b.classList.remove('active'));
+        categoryBtns.forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
         vscode.postMessage({
           command: 'filterByCategory',
@@ -127,13 +127,15 @@
   function closeDetails() {
     selectedTraitId = null;
     traitDetails.style.display = 'none';
-    document.querySelectorAll('.trait-card.selected').forEach(c => c.classList.remove('selected'));
+    document
+      .querySelectorAll('.trait-card.selected')
+      .forEach((c) => c.classList.remove('selected'));
     saveState();
   }
 
   function selectTrait(traitId) {
     selectedTraitId = traitId;
-    document.querySelectorAll('.trait-card').forEach(c => {
+    document.querySelectorAll('.trait-card').forEach((c) => {
       c.classList.toggle('selected', c.dataset.traitId === traitId);
     });
     traitDetails.style.display = 'block';
@@ -185,7 +187,7 @@
 
   function renderTraits() {
     // Remove existing cards
-    traitList.querySelectorAll('.trait-card').forEach(c => c.remove());
+    traitList.querySelectorAll('.trait-card').forEach((c) => c.remove());
 
     if (traits.length === 0 && !isLoading) {
       emptyState.style.display = 'flex';
@@ -194,7 +196,7 @@
 
     emptyState.style.display = 'none';
 
-    traits.forEach(trait => {
+    traits.forEach((trait) => {
       const card = createTraitCard(trait);
       traitList.appendChild(card);
     });
@@ -231,12 +233,16 @@
           v${escapeHtml(trait.version)}
         </span>
       </div>
-      ${trait.verified || trait.official ? `
+      ${
+        trait.verified || trait.official
+          ? `
         <div class="trait-badges">
           ${trait.verified ? '<span class="badge verified">Verified</span>' : ''}
           ${trait.official ? '<span class="badge official">Official</span>' : ''}
         </div>
-      ` : ''}
+      `
+          : ''
+      }
     `;
 
     card.addEventListener('click', () => selectTrait(trait.id));
@@ -312,27 +318,41 @@
         </div>
       </div>
 
-      ${dependencies.length > 0 ? `
+      ${
+        dependencies.length > 0
+          ? `
         <div class="details-section">
           <h3>Dependencies (${dependencies.length})</h3>
           <div class="dependency-list">
-            ${dependencies.map(([name, version]) => `
+            ${dependencies
+              .map(
+                ([name, version]) => `
               <span class="dependency-tag">${escapeHtml(name)}@${escapeHtml(version)}</span>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
 
-      ${keywords.length > 0 ? `
+      ${
+        keywords.length > 0
+          ? `
         <div class="details-section">
           <h3>Keywords</h3>
           <div class="keyword-list">
-            ${keywords.map(k => `<span class="keyword-tag">${escapeHtml(k)}</span>`).join('')}
+            ${keywords.map((k) => `<span class="keyword-tag">${escapeHtml(k)}</span>`).join('')}
           </div>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
 
-      ${trait.repository ? `
+      ${
+        trait.repository
+          ? `
         <div class="details-section">
           <h3>Repository</h3>
           <a 
@@ -343,7 +363,9 @@
             ${escapeHtml(trait.repository)}
           </a>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
     `;
   }
 
@@ -364,7 +386,7 @@
   // Utility functions
   function debounce(fn, delay) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
       clearTimeout(timeout);
       timeout = setTimeout(() => fn.apply(this, args), delay);
     };

@@ -123,9 +123,9 @@ export interface ASTNode {
 }
 
 export type NodeType =
-  | { type: "Object"; name: string; traits: string[] }
-  | { type: "Property"; key: string; value: Value }
-  | { type: "Scene"; name: string; objects: string[] };
+  | { type: 'Object'; name: string; traits: string[] }
+  | { type: 'Property'; key: string; value: Value }
+  | { type: 'Scene'; name: string; objects: string[] };
 
 export interface Position {
   line: number;
@@ -133,12 +133,7 @@ export interface Position {
   offset: number;
 }
 
-export type Value =
-  | string
-  | number
-  | boolean
-  | Value[]
-  | { [key: string]: Value };
+export type Value = string | number | boolean | Value[] | { [key: string]: Value };
 ```
 
 ### Step 4: Use Generated Types in TypeScript
@@ -172,6 +167,7 @@ export class Parser {
 **Use Case**: Rust compiler exposes API to TypeScript
 
 **Implementation**:
+
 ```rust
 // packages/compiler-wasm/src/lib.rs
 use wasm_bindgen::prelude::*;
@@ -203,6 +199,7 @@ export async function compile(source: string): Promise<ASTNode> {
 **Use Case**: Rust WASM calls TypeScript host functions
 
 **Implementation**:
+
 ```rust
 // packages/compiler-wasm/src/lib.rs
 #[wasm_bindgen]
@@ -386,7 +383,7 @@ describe('Parser', () => {
     expect(ast.children).toHaveLength(1);
     expect(ast.children[0].node_type).toMatchObject({
       type: 'Object',
-      name: 'TestCube'
+      name: 'TestCube',
     });
   });
 });
@@ -403,6 +400,7 @@ describe('Parser', () => {
 **Cause**: Forgot to regenerate types
 
 **Fix**:
+
 ```bash
 pnpm run generate-types
 pnpm build
@@ -415,6 +413,7 @@ pnpm build
 **Cause**: Rust package not built or not linked
 
 **Fix**:
+
 ```bash
 cd packages/compiler-wasm
 wasm-pack build --target bundler
@@ -429,6 +428,7 @@ pnpm link ../compiler-wasm/pkg
 **Cause**: TypeScript packages wait for full Rust rebuild
 
 **Fix**: Use Moon's cache:
+
 ```bash
 moon run :build --cache
 ```
@@ -486,6 +486,7 @@ jobs:
 ## Future Enhancements
 
 1. **Automatic Type Generation in Watch Mode**
+
    ```bash
    pnpm run dev:types # Watches Rust files, regenerates on change
    ```

@@ -97,7 +97,8 @@ export class NginxDeployer extends BaseDeployer {
     };
 
     this.sshExecutor = (command: string) => this.executeSSH(command);
-    this.scpUploader = (localDir: string, remoteDir: string) => this.executeScpUpload(localDir, remoteDir);
+    this.scpUploader = (localDir: string, remoteDir: string) =>
+      this.executeScpUpload(localDir, remoteDir);
   }
 
   /**
@@ -156,9 +157,7 @@ export class NginxDeployer extends BaseDeployer {
       await this.uploadNginxConfig(config.projectName, nginxConfig);
 
       // Step 4: Zero-downtime symlink swap
-      await this.sshExecutor(
-        `ln -sfn ${releaseDir} ${currentLink}`
-      );
+      await this.sshExecutor(`ln -sfn ${releaseDir} ${currentLink}`);
 
       // Step 5: Set edge headers in Nginx config if provided
       if (config.edgeConfig) {
@@ -171,9 +170,7 @@ export class NginxDeployer extends BaseDeployer {
       // Step 7: Clean up old releases (keep last 5)
       await this.cleanupOldReleases();
 
-      const url = config.customDomain
-        ? `https://${config.customDomain}`
-        : `http://${this.host}`;
+      const url = config.customDomain ? `https://${config.customDomain}` : `http://${this.host}`;
 
       const duration = Date.now() - startTime;
 
@@ -231,7 +228,7 @@ export class NginxDeployer extends BaseDeployer {
   async rollback(deploymentId: string): Promise<DeployResult> {
     const startTime = Date.now();
 
-    const deployment = this.deploymentHistory.find(d => d.id === deploymentId);
+    const deployment = this.deploymentHistory.find((d) => d.id === deploymentId);
     if (!deployment) {
       return {
         success: false,
@@ -341,7 +338,9 @@ export class NginxDeployer extends BaseDeployer {
     // Gzip compression
     if (this.siteConfig.gzip) {
       lines.push('    gzip on;');
-      lines.push('    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/wasm;');
+      lines.push(
+        '    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/wasm;'
+      );
       lines.push('    gzip_min_length 1000;');
       lines.push('');
     }
@@ -480,9 +479,7 @@ export class NginxDeployer extends BaseDeployer {
 
     // Write config to a temp file on remote, then move into place
     const escapedContent = configContent.replace(/"/g, '\\"');
-    await this.sshExecutor(
-      `echo "${escapedContent}" | sudo tee ${remotePath} > /dev/null`
-    );
+    await this.sshExecutor(`echo "${escapedContent}" | sudo tee ${remotePath} > /dev/null`);
   }
 
   /**

@@ -103,10 +103,7 @@ export function createSandbox(policy: SecurityPolicy): Sandbox {
  * @param sandbox - The sandbox environment to use
  * @returns Execution result with timing and memory data
  */
-export async function execute(
-  code: string,
-  sandbox: Sandbox
-): Promise<SandboxExecutionResult> {
+export async function execute(code: string, sandbox: Sandbox): Promise<SandboxExecutionResult> {
   if (sandbox.state === 'destroyed') {
     return {
       success: false,
@@ -258,9 +255,22 @@ async function executeRestricted(code: string, sandbox: Sandbox): Promise<unknow
     // Use Function constructor with blocked dangerous globals
     // This is intentional - we are creating a sandboxed Function, not arbitrary eval
     const blockedGlobals = [
-      'process', 'require', 'module', 'exports', '__dirname', '__filename',
-      'globalThis', 'global', 'window', 'document', 'XMLHttpRequest',
-      'fetch', 'WebSocket', 'Worker', 'SharedWorker', 'importScripts',
+      'process',
+      'require',
+      'module',
+      'exports',
+      '__dirname',
+      '__filename',
+      'globalThis',
+      'global',
+      'window',
+      'document',
+      'XMLHttpRequest',
+      'fetch',
+      'WebSocket',
+      'Worker',
+      'SharedWorker',
+      'importScripts',
     ];
 
     const argNames = [...Object.keys(safeGlobals), ...blockedGlobals];
@@ -280,9 +290,7 @@ async function executeRestricted(code: string, sandbox: Sandbox): Promise<unknow
     }
     return result;
   } catch (err) {
-    throw new Error(
-      `Sandbox execution error: ${err instanceof Error ? err.message : String(err)}`
-    );
+    throw new Error(`Sandbox execution error: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
 

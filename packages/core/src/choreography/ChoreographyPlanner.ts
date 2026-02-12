@@ -257,9 +257,10 @@ export class ChoreographyPlanner {
       warnings.push('No timeout constraint specified');
     }
 
-    if (plan.steps.some((s) => s.hitlGate) && !plan.participants.some((a) => 
-      a.capabilities?.some((c) => c.type === 'approve')
-    )) {
+    if (
+      plan.steps.some((s) => s.hitlGate) &&
+      !plan.participants.some((a) => a.capabilities?.some((c) => c.type === 'approve'))
+    ) {
       warnings.push('HITL gate present but no approval agent in participants');
     }
 
@@ -355,10 +356,7 @@ export class ChoreographyPlanner {
   /**
    * Resolve agent from ID or capability query
    */
-  private resolveAgent(
-    agentRef: string | CapabilityQuery,
-    agents: AgentManifest[]
-  ): string | null {
+  private resolveAgent(agentRef: string | CapabilityQuery, agents: AgentManifest[]): string | null {
     if (typeof agentRef === 'string') {
       // Direct agent ID
       const agent = agents.find((a) => a.id === agentRef || a.name === agentRef);

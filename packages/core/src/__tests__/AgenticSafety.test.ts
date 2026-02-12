@@ -8,9 +8,9 @@ describe('Agentic Safety (v3.4)', () => {
       const action = {
         name: 'delete_all',
         category: 'delete',
-        description: 'Trying to delete all world anchors'
+        description: 'Trying to delete all world anchors',
       };
-      
+
       const result = ConstitutionalValidator.validate(action);
       expect(result.allowed).toBe(false);
       expect(result.violations[0].id).toBe('NO_GLOBAL_DELETE');
@@ -21,9 +21,9 @@ describe('Agentic Safety (v3.4)', () => {
       const action = {
         name: 'move_object',
         category: 'execute',
-        description: 'Moving a small cube'
+        description: 'Moving a small cube',
       };
-      
+
       const result = ConstitutionalValidator.validate(action);
       expect(result.allowed).toBe(true);
     });
@@ -33,15 +33,15 @@ describe('Agentic Safety (v3.4)', () => {
         id: 'NO_RED_CUBES',
         description: 'No creating red cubes',
         severity: 'soft' as const,
-        pattern: /red cube/i
+        pattern: /red cube/i,
       };
-      
+
       const action = {
         name: 'create',
         category: 'write',
-        description: 'Creating a Red Cube'
+        description: 'Creating a Red Cube',
       };
-      
+
       const result = ConstitutionalValidator.validate(action, [customRule]);
       expect(result.allowed).toBe(false);
       expect(result.violations[0].id).toBe('NO_RED_CUBES');
@@ -65,7 +65,7 @@ describe('Agentic Safety (v3.4)', () => {
       };
 
       hitlHandler.onAttach!(mockNode as any, config, mockContext as any);
-      
+
       const violationEvent = {
         type: 'agent_action_request',
         payload: {
@@ -74,8 +74,8 @@ describe('Agentic Safety (v3.4)', () => {
           confidence: 0.9,
           riskScore: 0.1,
           description: 'Nuclear option',
-          metadata: {}
-        }
+          metadata: {},
+        },
       };
 
       hitlHandler.onEvent!(mockNode as any, config, mockContext as any, violationEvent as any);
@@ -107,16 +107,19 @@ describe('Agentic Safety (v3.4)', () => {
           confidence: 0.77, // Below 0.8 base, but 0.77 + 0.05 = 0.82
           riskScore: 0.1,
           description: 'Painting stuff',
-          metadata: {}
-        }
+          metadata: {},
+        },
       };
 
       hitlHandler.onEvent!(mockNode as any, config, mockContext as any, actionEvent as any);
 
       // Should be auto-approved due to bonus
-      expect(mockContext.emit).toHaveBeenCalledWith('hitl_action_approved', expect.objectContaining({
-        autonomous: true
-      }));
+      expect(mockContext.emit).toHaveBeenCalledWith(
+        'hitl_action_approved',
+        expect.objectContaining({
+          autonomous: true,
+        })
+      );
     });
   });
 });

@@ -20,10 +20,7 @@ import {
   HoloScriptSemanticTokensRangeProvider,
   SEMANTIC_TOKENS_LEGEND,
 } from './semanticTokensProvider';
-import { 
-  registerCollaborationCommands, 
-  disposeCollaborationCommands 
-} from './collaboration';
+import { registerCollaborationCommands, disposeCollaborationCommands } from './collaboration';
 import {
   SemanticGit,
   DiffVisualizationProvider,
@@ -525,10 +522,7 @@ export function activate(context: ExtensionContext) {
 
     // Register webview provider for diff visualization
     context.subscriptions.push(
-      vscode.window.registerWebviewViewProvider(
-        DiffVisualizationProvider.viewType,
-        diffProvider
-      )
+      vscode.window.registerWebviewViewProvider(DiffVisualizationProvider.viewType, diffProvider)
     );
 
     // Register git commands

@@ -16,6 +16,7 @@ In this final lesson of the HoloHub track, we'll explore how to create truly int
 Instead of choosing scenes from a 2D menu, users in Hololand discover content by interacting with physical objects in the world.
 
 ### 1. The `@hologram` Trait
+
 A hologram is a non-physical, visual-only representation of an asset. It allows users to "peek" at a scene without leaving their current world.
 
 ```hsplus
@@ -27,14 +28,15 @@ object "CityPreview" {
 ```
 
 ### 2. The `@portal` Trait
+
 A portal is an interaction point that triggers a composition swap or a sub-orb load.
 
 ```hsplus
 object "GateToCity" {
     @portal(sceneId: "smart-city-nexus")
-    @interaction 
+    @interaction
     geometry: "models/gate.glb"
-    
+
     onInteraction: {
         self.transition_to_composition("smart-city-nexus")
     }
@@ -52,7 +54,7 @@ composition "MainWorld" {
     object "WorkshopRoom" {
         geometry: "box"
         scale: [10, 5, 10]
-        
+
         // Loads another scene inside this room
         sub_orb "DisplayScene" {
             source: "holohub://neon-combat-arena"
@@ -77,7 +79,7 @@ composition "Voyager Terminal" {
     object "PortalArch" {
         @hologram
         geometry: "models/arch.glb"
-        
+
         logic {
             on_state_change(state.activePreview) {
                 // Instantiates the hub scene into the arch center
@@ -89,7 +91,7 @@ composition "Voyager Terminal" {
     object "DiscoveryDashboard" {
         @interaction
         geometry: "models/console.glb"
-        
+
         onInteraction: {
             // Call the spatial registry bridge
             state.activePreview = holohub.getRandomFeaturedScene().id
@@ -102,6 +104,7 @@ composition "Voyager Terminal" {
 ---
 
 ## ⚡ Pro Tip: Proxy State
+
 When using sub-orbs, the children cannot access the parent's `state` block directly. Instead, use the `@networked` trait on shared variables to synchronize state across orb boundaries.
 
 ---
@@ -109,6 +112,7 @@ When using sub-orbs, the children cannot access the parent's `state` block direc
 ## Summary
 
 In this lesson, you learned:
+
 - How to spatialize asset discovery via `@hologram`.
 - The mechanics of `@portal` transitions.
 - How to nest compositions using the `sub_orb` pattern.

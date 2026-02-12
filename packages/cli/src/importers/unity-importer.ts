@@ -184,9 +184,12 @@ function parseSimpleYAML(content: string): Record<string, unknown> {
   const lines = content.split('\n');
 
   // Track the current context: each entry has an indent level, a target object, and its key in the parent
-  const stack: Array<{ indent: number; obj: Record<string, unknown>; key?: string; parentObj?: Record<string, unknown> }> = [
-    { indent: -1, obj: result },
-  ];
+  const stack: Array<{
+    indent: number;
+    obj: Record<string, unknown>;
+    key?: string;
+    parentObj?: Record<string, unknown>;
+  }> = [{ indent: -1, obj: result }];
 
   // Track the current array being built from consecutive list items
   let currentArray: unknown[] | null = null;
@@ -226,7 +229,12 @@ function parseSimpleYAML(content: string): Record<string, unknown> {
           for (let k = parentKeys.length - 1; k >= 0; k--) {
             const key = parentKeys[k];
             const val = stackTop.obj[key];
-            if (val && typeof val === 'object' && !Array.isArray(val) && Object.keys(val as Record<string, unknown>).length === 0) {
+            if (
+              val &&
+              typeof val === 'object' &&
+              !Array.isArray(val) &&
+              Object.keys(val as Record<string, unknown>).length === 0
+            ) {
               currentArray = [];
               currentArrayIndent = indent;
               stackTop.obj[key] = currentArray;
@@ -507,7 +515,10 @@ function buildSceneTree(
 /**
  * Generate .holo code from Unity scene.
  */
-function generateHoloCode(scene: ParsedUnityScene): { code: string; stats: UnityImportResult['stats'] } {
+function generateHoloCode(scene: ParsedUnityScene): {
+  code: string;
+  stats: UnityImportResult['stats'];
+} {
   const stats = {
     gameObjectsImported: 0,
     componentsProcessed: 0,
@@ -607,7 +618,9 @@ function generateNode(
     lines.push(`${indent}  geometry: "${geometry}"`);
     lines.push(`${indent}  position: [${pos.x}, ${pos.y}, ${pos.z}]`);
     if (euler.x !== 0 || euler.y !== 0 || euler.z !== 0) {
-      lines.push(`${indent}  rotation: [${euler.x.toFixed(2)}, ${euler.y.toFixed(2)}, ${euler.z.toFixed(2)}]`);
+      lines.push(
+        `${indent}  rotation: [${euler.x.toFixed(2)}, ${euler.y.toFixed(2)}, ${euler.z.toFixed(2)}]`
+      );
     }
     if (scale.x !== 1 || scale.y !== 1 || scale.z !== 1) {
       lines.push(`${indent}  scale: [${scale.x}, ${scale.y}, ${scale.z}]`);
@@ -701,8 +714,12 @@ function mapComponentToTraits(comp: ResolvedComponent): string[] {
     case 'CapsuleCollider':
     case 'MeshCollider':
       {
-        const colData = comp.data as unknown as { BoxCollider?: UnityCollider; SphereCollider?: UnityCollider };
-        const col = colData.BoxCollider || colData.SphereCollider || (comp.data as unknown as UnityCollider);
+        const colData = comp.data as unknown as {
+          BoxCollider?: UnityCollider;
+          SphereCollider?: UnityCollider;
+        };
+        const col =
+          colData.BoxCollider || colData.SphereCollider || (comp.data as unknown as UnityCollider);
         if (col.m_IsTrigger === 1) {
           traits.push('trigger');
         } else {
@@ -741,7 +758,11 @@ function sanitizeName(name: string): string {
   return name.replace(/[^a-zA-Z0-9_-]/g, '_').replace(/^_+|_+$/g, '');
 }
 
-function quaternionToEuler(q: { x: number; y: number; z: number; w: number }): { x: number; y: number; z: number } {
+function quaternionToEuler(q: { x: number; y: number; z: number; w: number }): {
+  x: number;
+  y: number;
+  z: number;
+} {
   // Simplified quaternion to euler conversion
   const sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
   const cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
@@ -835,8 +856,7 @@ export async function importUnity(options: UnityImportOptions): Promise<UnityImp
 
     // Determine scene name
     const sceneName =
-      options.sceneName ||
-      path.basename(options.inputPath, path.extname(options.inputPath));
+      options.sceneName || path.basename(options.inputPath, path.extname(options.inputPath));
 
     // Build scene tree
     const scene = buildSceneTree(documents, sceneName);

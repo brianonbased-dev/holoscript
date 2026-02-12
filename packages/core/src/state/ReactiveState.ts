@@ -12,6 +12,8 @@
 
 import type { StateDeclaration, ReactiveState as IReactiveState } from '../types/HoloScriptPlus';
 import { eventBus } from '../runtime/EventBus';
+import { CRDTStateManager, type CRDTOperation } from './CRDTStateManager';
+import { UndoManager } from './UndoManager';
 
 // =============================================================================
 // TYPES
@@ -165,8 +167,13 @@ export class ReactiveState<T extends StateDeclaration> implements IReactiveState
 
   private syncId?: string;
   private isApplyingSync: boolean = false;
+  private crdt: CRDTStateManager;
+  private undoManager: UndoManager = new UndoManager();
+  private clientId: string;
 
   constructor(initialState: T, syncId?: string) {
+    this.clientId = `client_${Math.random().toString(36).substr(2, 9)}`;
+    this.crdt = new CRDTStateManager(this.clientId);
     this.state = { ...initialState };
     this.proxy = createReactiveProxy(this.state);
     this.syncId = syncId;
@@ -176,45 +183,32 @@ export class ReactiveState<T extends StateDeclaration> implements IReactiveState
     }
   }
 
-  private setupSync(): void {
-    // Listen for remote updates
-    eventBus.on(`state_sync:${this.syncId}`, (data: any) => {
-      if (data.source === 'local') return; // Ignore own events (if loopback)
-
-      this.isApplyingSync = true;
-      try {
-        this.update(data.updates);
-      } finally {
-        this.isApplyingSync = false;
-      }
-    });
-
-    // Determine if we need to broadcast initial state
-    // (In a real networked app, we'd fetch authority state here)
-  }
-
-  private broadcastUpdate(key: string, value: any): void {
-    if (this.syncId && !this.isApplyingSync) {
-      eventBus.emit(`state_sync:${this.syncId}`, {
-        source: 'local',
-        timestamp: Date.now(),
-        updates: { [key]: value },
-      });
-    }
-  }
-
   get<K extends keyof T>(key: K): T[K] {
-    return this.proxy[key];
+    const val = this.proxy[key];
+    return val;
   }
 
   set<K extends keyof T>(key: K, value: T[K]): void {
     const oldValue = this.state[key];
-    this.proxy[key] = value;
+    if (oldValue === value) return;
 
-    if (oldValue !== value) {
-      this.notifySubscribers(key);
-      this.broadcastUpdate(key as string, value);
+    // Create operations for undo
+    const redoOp = this.crdt.createOperation(key as string, value);
+    const undoOp = this.crdt.createOperation(key as string, oldValue);
+
+    this.proxy[key] = value;
+    this.crdt.reconcile(redoOp);
+
+    if (!this.isApplyingSync) {
+      this.undoManager.push(undoOp, redoOp);
     }
+
+    this.notifySubscribers(key);
+    this.broadcastOperation(redoOp);
+  }
+
+  has(key: string): boolean {
+    return this.state[key as keyof T] !== undefined;
   }
 
   update(updates: Partial<T>): void {
@@ -222,20 +216,60 @@ export class ReactiveState<T extends StateDeclaration> implements IReactiveState
 
     for (const key in updates) {
       if (Object.prototype.hasOwnProperty.call(updates, key)) {
-        const oldValue = this.state[key];
-        const newValue = updates[key];
-
-        if (oldValue !== newValue) {
-          this.proxy[key] = newValue as T[typeof key];
-          changedKeys.push(key);
-        }
+        this.set(key as any, updates[key] as any);
+        changedKeys.push(key as any);
       }
     }
+  }
 
-    if (changedKeys.length > 0) {
-      // Batch notify for all changes
-      this.subscribers.forEach((callback) => {
-        callback(this.state);
+  undo(): void {
+    const step = this.undoManager.undo();
+    if (step) {
+      this.isApplyingSync = true;
+      try {
+        this.set(step.undo.key as any, step.undo.value);
+      } finally {
+        this.isApplyingSync = false;
+      }
+    }
+  }
+
+  redo(): void {
+    const step = this.undoManager.redo();
+    if (step) {
+      this.isApplyingSync = true;
+      try {
+        this.set(step.redo.key as any, step.redo.value);
+      } finally {
+        this.isApplyingSync = false;
+      }
+    }
+  }
+
+  private setupSync(): void {
+    // Listen for remote updates
+    eventBus.on(`state_sync:${this.syncId}`, (data: any) => {
+      const op = data.op as CRDTOperation;
+      if (op.clientId === this.clientId) return;
+
+      this.isApplyingSync = true;
+      try {
+        const changed = this.crdt.reconcile(op);
+        if (changed) {
+          this.proxy[op.key as keyof T] = op.value;
+          this.notifySubscribers(op.key as keyof T);
+        }
+      } finally {
+        this.isApplyingSync = false;
+      }
+    });
+  }
+
+  private broadcastOperation(op: CRDTOperation): void {
+    if (this.syncId && !this.isApplyingSync) {
+      eventBus.emit(`state_sync:${this.syncId}`, {
+        source: 'local',
+        op,
       });
     }
   }

@@ -1,6 +1,6 @@
 /**
  * Ant Colony Optimization Engine
- * 
+ *
  * Implements ACO algorithm for path-finding and task sequencing.
  * Uses pheromone trails to find optimal ordering of choreography steps.
  */
@@ -10,9 +10,9 @@ export interface ACOConfig {
   maxIterations: number;
   convergenceThreshold: number;
   alpha: number; // Pheromone importance
-  beta: number;  // Heuristic importance
+  beta: number; // Heuristic importance
   evaporationRate: number;
-  q: number;     // Pheromone deposit factor
+  q: number; // Pheromone deposit factor
   elitistWeight: number;
 }
 
@@ -47,15 +47,12 @@ export class ACOEngine {
 
   /**
    * Find optimal path through nodes (e.g., task execution order)
-   * 
+   *
    * @param nodes Number of nodes to visit
    * @param distanceMatrix Distance/cost between nodes [i][j]
    * @returns Optimization result with best path
    */
-  async optimize(
-    nodes: number,
-    distanceMatrix: number[][]
-  ): Promise<ACOResult> {
+  async optimize(nodes: number, distanceMatrix: number[][]): Promise<ACOResult> {
     const { antCount, maxIterations, convergenceThreshold } = this.config;
 
     // Initialize pheromone trails
@@ -77,7 +74,7 @@ export class ACOEngine {
       for (let ant = 0; ant < antCount; ant++) {
         const path = this.constructSolution(nodes, pheromones, heuristics);
         const cost = this.calculatePathCost(path, distanceMatrix);
-        
+
         paths.push(path);
         costs.push(cost);
 
@@ -122,9 +119,7 @@ export class ACOEngine {
    */
   private initializePheromones(nodes: number): number[][] {
     const initial = 1.0 / nodes;
-    return Array.from({ length: nodes }, () =>
-      Array.from({ length: nodes }, () => initial)
-    );
+    return Array.from({ length: nodes }, () => Array.from({ length: nodes }, () => initial));
   }
 
   /**
@@ -178,8 +173,7 @@ export class ACOEngine {
       // Normalize and select next node
       if (sum === 0) {
         // Fallback: choose random unvisited
-        const unvisited = Array.from({ length: nodes }, (_, i) => i)
-          .filter(n => !visited.has(n));
+        const unvisited = Array.from({ length: nodes }, (_, i) => i).filter((n) => !visited.has(n));
         current = unvisited[Math.floor(Math.random() * unvisited.length)];
       } else {
         // Roulette wheel selection
@@ -221,7 +215,7 @@ export class ACOEngine {
 
     for (let i = 0; i < pheromones.length; i++) {
       for (let j = 0; j < pheromones[i].length; j++) {
-        pheromones[i][j] *= (1 - evaporationRate);
+        pheromones[i][j] *= 1 - evaporationRate;
         pheromones[i][j] = Math.max(minPheromone, pheromones[i][j]);
       }
     }
@@ -230,11 +224,7 @@ export class ACOEngine {
   /**
    * Deposit pheromones based on solution quality
    */
-  private depositPheromones(
-    pheromones: number[][],
-    paths: number[][],
-    costs: number[]
-  ): void {
+  private depositPheromones(pheromones: number[][], paths: number[][], costs: number[]): void {
     const { q } = this.config;
 
     for (let ant = 0; ant < paths.length; ant++) {
@@ -251,11 +241,7 @@ export class ACOEngine {
   /**
    * Elitist reinforcement of best path
    */
-  private reinforceBestPath(
-    pheromones: number[][],
-    bestPath: number[],
-    bestCost: number
-  ): void {
+  private reinforceBestPath(pheromones: number[][], bestPath: number[], bestCost: number): void {
     const { q, elitistWeight } = this.config;
     const deposit = (q / bestCost) * elitistWeight;
 

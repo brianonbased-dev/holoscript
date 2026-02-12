@@ -3,7 +3,14 @@
  */
 
 :root {
-  --vscode-font-family: var(--vscode-editor-font-family, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+  --vscode-font-family: var(
+    --vscode-editor-font-family,
+    'Segoe UI',
+    Tahoma,
+    Geneva,
+    Verdana,
+    sans-serif
+  );
   --status-good: #3fb950;
   --status-warning: #d29922;
   --status-critical: #f85149;
@@ -448,7 +455,7 @@ canvas {
   color: var(--vscode-descriptionForeground);
 }
 
-.input-group input[type="number"] {
+.input-group input[type='number'] {
   width: 70px;
   padding: 4px 8px;
   background-color: var(--vscode-input-background);
@@ -458,12 +465,12 @@ canvas {
   font-size: 12px;
 }
 
-.input-group input[type="number"]:focus {
+.input-group input[type='number']:focus {
   outline: none;
   border-color: var(--vscode-focusBorder);
 }
 
-.input-group input[type="checkbox"] {
+.input-group input[type='checkbox'] {
   width: 14px;
   height: 14px;
   margin-right: 6px;

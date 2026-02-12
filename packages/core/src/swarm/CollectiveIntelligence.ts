@@ -1,11 +1,15 @@
 /**
  * Collective Intelligence Service
- * 
+ *
  * Implements ICollectiveIntelligenceService for collaborative
  * problem-solving through hive sessions.
  */
 
-import type { ICollectiveIntelligenceService, IHiveContribution, IHiveSession } from '../extensions';
+import type {
+  ICollectiveIntelligenceService,
+  IHiveContribution,
+  IHiveSession,
+} from '../extensions';
 import { VotingRound, type VotingResult } from './VotingRound';
 import { ContributionSynthesizer, type SynthesisResult } from './ContributionSynthesizer';
 
@@ -27,7 +31,7 @@ const DEFAULT_CONFIG: CollectiveIntelligenceConfig = {
 
 /**
  * Collective Intelligence Service
- * 
+ *
  * Enables groups of agents to collaborate on complex problems through
  * structured sessions with contributions, voting, and synthesis.
  */
@@ -48,7 +52,7 @@ export class CollectiveIntelligence implements ICollectiveIntelligenceService {
    */
   createSession(topic: string, goal: string, initiator: string): IHiveSession {
     const id = this.generateSessionId();
-    
+
     const session: IHiveSession = {
       id,
       topic,
@@ -60,9 +64,12 @@ export class CollectiveIntelligence implements ICollectiveIntelligenceService {
     };
 
     this.sessions.set(id, session);
-    this.votingRounds.set(id, new VotingRound({
-      superMajorityThreshold: this.config.votingThreshold,
-    }));
+    this.votingRounds.set(
+      id,
+      new VotingRound({
+        superMajorityThreshold: this.config.votingThreshold,
+      })
+    );
 
     return session;
   }
@@ -169,7 +176,7 @@ export class CollectiveIntelligence implements ICollectiveIntelligenceService {
     }
 
     // Get voter's contribution confidence for weighting
-    const voterContribution = session.contributions.find(c => c.agentId === voterId);
+    const voterContribution = session.contributions.find((c) => c.agentId === voterId);
     const voterConfidence = voterContribution?.confidence ?? 0.5;
 
     votingRound.castVote(contributionId, voterId, vote, voterConfidence);
@@ -232,7 +239,7 @@ export class CollectiveIntelligence implements ICollectiveIntelligenceService {
    * Get all active sessions
    */
   getActiveSessions(): IHiveSession[] {
-    return [...this.sessions.values()].filter(s => s.status === 'active');
+    return [...this.sessions.values()].filter((s) => s.status === 'active');
   }
 
   /**
@@ -245,7 +252,7 @@ export class CollectiveIntelligence implements ICollectiveIntelligenceService {
     }
 
     session.status = 'closed';
-    
+
     const votingRound = this.votingRounds.get(sessionId);
     votingRound?.close();
   }
@@ -272,20 +279,22 @@ export class CollectiveIntelligence implements ICollectiveIntelligenceService {
   /**
    * Get session statistics
    */
-  getSessionStats(sessionId: string): {
-    participantCount: number;
-    contributionCount: number;
-    votingStats: ReturnType<VotingRound['getStatistics']>;
-    contributionsByType: Record<IHiveContribution['type'], number>;
-    averageConfidence: number;
-  } | undefined {
+  getSessionStats(sessionId: string):
+    | {
+        participantCount: number;
+        contributionCount: number;
+        votingStats: ReturnType<VotingRound['getStatistics']>;
+        contributionsByType: Record<IHiveContribution['type'], number>;
+        averageConfidence: number;
+      }
+    | undefined {
     const session = this.sessions.get(sessionId);
     if (!session) {
       return undefined;
     }
 
     const votingRound = this.votingRounds.get(sessionId);
-    
+
     const byType: Record<IHiveContribution['type'], number> = {
       idea: 0,
       critique: 0,
@@ -309,9 +318,8 @@ export class CollectiveIntelligence implements ICollectiveIntelligenceService {
         hasConsensus: false,
       },
       contributionsByType: byType,
-      averageConfidence: session.contributions.length > 0 
-        ? totalConfidence / session.contributions.length 
-        : 0,
+      averageConfidence:
+        session.contributions.length > 0 ? totalConfidence / session.contributions.length : 0,
     };
   }
 
@@ -344,22 +352,19 @@ export class CollectiveIntelligence implements ICollectiveIntelligenceService {
     if (!session) {
       return [];
     }
-    return session.contributions.filter(c => c.agentId === agentId);
+    return session.contributions.filter((c) => c.agentId === agentId);
   }
 
   /**
    * Find similar contributions in a session
    */
-  findSimilarContributions(
-    sessionId: string,
-    contributionId: string
-  ): IHiveContribution[] {
+  findSimilarContributions(sessionId: string, contributionId: string): IHiveContribution[] {
     const session = this.sessions.get(sessionId);
     if (!session) {
       return [];
     }
 
-    const target = session.contributions.find(c => c.id === contributionId);
+    const target = session.contributions.find((c) => c.id === contributionId);
     if (!target) {
       return [];
     }

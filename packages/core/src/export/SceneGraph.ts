@@ -166,14 +166,7 @@ export interface IScriptComponent extends IComponent {
 /**
  * Node types in the scene graph
  */
-export type SceneNodeType =
-  | 'object'
-  | 'group'
-  | 'light'
-  | 'camera'
-  | 'empty'
-  | 'agent'
-  | 'prefab';
+export type SceneNodeType = 'object' | 'group' | 'light' | 'camera' | 'empty' | 'agent' | 'prefab';
 
 /**
  * Scene node representing an entity in the hierarchy
@@ -438,11 +431,7 @@ export type AnimationInterpolation = 'linear' | 'step' | 'cubicspline';
 /**
  * Animation target path
  */
-export type AnimationPath =
-  | 'translation'
-  | 'rotation'
-  | 'scale'
-  | 'weights';
+export type AnimationPath = 'translation' | 'rotation' | 'scale' | 'weights';
 
 /**
  * Animation channel
@@ -773,44 +762,34 @@ export function createEmptySceneGraph(name: string): ISceneGraph {
 /**
  * Check if component is a mesh component
  */
-export function isMeshComponent(
-  component: IComponent
-): component is IMeshComponent {
+export function isMeshComponent(component: IComponent): component is IMeshComponent {
   return component.type === 'mesh';
 }
 
 /**
  * Check if component is a light component
  */
-export function isLightComponent(
-  component: IComponent
-): component is ILightComponent {
+export function isLightComponent(component: IComponent): component is ILightComponent {
   return component.type === 'light';
 }
 
 /**
  * Check if component is a camera component
  */
-export function isCameraComponent(
-  component: IComponent
-): component is ICameraComponent {
+export function isCameraComponent(component: IComponent): component is ICameraComponent {
   return component.type === 'camera';
 }
 
 /**
  * Check if component is a collider component
  */
-export function isColliderComponent(
-  component: IComponent
-): component is IColliderComponent {
+export function isColliderComponent(component: IComponent): component is IColliderComponent {
   return component.type === 'collider';
 }
 
 /**
  * Check if component is a rigidbody component
  */
-export function isRigidbodyComponent(
-  component: IComponent
-): component is IRigidbodyComponent {
+export function isRigidbodyComponent(component: IComponent): component is IRigidbodyComponent {
   return component.type === 'rigidbody';
 }

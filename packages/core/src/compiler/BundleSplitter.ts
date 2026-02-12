@@ -161,7 +161,10 @@ export class BundleSplitter {
       if (typeof firstArg.raw === 'string') {
         // Strip surrounding quotes if present
         const raw = firstArg.raw;
-        if ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'"))) {
+        if (
+          (raw.startsWith('"') && raw.endsWith('"')) ||
+          (raw.startsWith("'") && raw.endsWith("'"))
+        ) {
           return raw.slice(1, -1);
         }
         return raw;

@@ -2160,7 +2160,9 @@ async function main(): Promise<void> {
     case 'screenshot': {
       if (!options.input) {
         console.error('\x1b[31mError: No input file specified.\x1b[0m');
-        console.log('Usage: holoscript screenshot <file.holo> [--output out.png] [--width 1920] [--height 1080]');
+        console.log(
+          'Usage: holoscript screenshot <file.holo> [--output out.png] [--width 1920] [--height 1080]'
+        );
         process.exit(1);
       }
 
@@ -2225,7 +2227,9 @@ async function main(): Promise<void> {
     case 'pdf': {
       if (!options.input) {
         console.error('\x1b[31mError: No input file specified.\x1b[0m');
-        console.log('Usage: holoscript pdf <file.holo> [--output out.pdf] [--page-format A4] [--landscape]');
+        console.log(
+          'Usage: holoscript pdf <file.holo> [--output out.pdf] [--page-format A4] [--landscape]'
+        );
         process.exit(1);
       }
 

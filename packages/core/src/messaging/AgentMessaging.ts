@@ -6,6 +6,7 @@
  */
 
 import { EventEmitter } from 'events';
+import { createCipheriv, createDecipheriv, randomBytes, createECDH } from 'crypto';
 import {
   Message,
   MessageAck,
@@ -20,41 +21,59 @@ import {
 import { ChannelManager } from './ChannelManager';
 
 // =============================================================================
-// ENCRYPTION UTILITIES (Simulated for now)
+// ENCRYPTION UTILITIES (AES-256-GCM + ECDH)
 // =============================================================================
 
-/**
- * Simulated encryption - in production, use proper crypto libraries
- */
 class EncryptionService {
   /**
-   * Encrypt a message payload
+   * Encrypt a message payload using AES-256-GCM.
+   * Format: base64(iv[12] + authTag[16] + ciphertext)
    */
-  static encrypt(payload: unknown, _mode: 'aes-256' | 'e2e', _key?: string): string {
-    // Simulated encryption - just base64 encode for now
+  static encrypt(payload: unknown, _mode: 'aes-256' | 'e2e', key?: string): string {
     const json = JSON.stringify(payload);
-    return Buffer.from(json).toString('base64');
+    const iv = randomBytes(12);
+    const encKey = key ? Buffer.from(key, 'hex').subarray(0, 32) : randomBytes(32);
+    const cipher = createCipheriv('aes-256-gcm', encKey, iv);
+    const encrypted = Buffer.concat([cipher.update(json, 'utf-8'), cipher.final()]);
+    const tag = cipher.getAuthTag();
+    return Buffer.concat([iv, tag, encrypted]).toString('base64');
   }
 
   /**
-   * Decrypt a message payload
+   * Decrypt a message payload using AES-256-GCM.
    */
-  static decrypt<T>(encrypted: string, _mode: 'aes-256' | 'e2e', _key?: string): T {
-    // Simulated decryption - just base64 decode
-    const json = Buffer.from(encrypted, 'base64').toString('utf-8');
-    return JSON.parse(json) as T;
+  static decrypt<T>(encrypted: string, _mode: 'aes-256' | 'e2e', key?: string): T {
+    const packed = Buffer.from(encrypted, 'base64');
+    const iv = packed.subarray(0, 12);
+    const tag = packed.subarray(12, 28);
+    const ciphertext = packed.subarray(28);
+    const decKey = key ? Buffer.from(key, 'hex').subarray(0, 32) : Buffer.alloc(32);
+    const decipher = createDecipheriv('aes-256-gcm', decKey, iv);
+    decipher.setAuthTag(tag);
+    const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+    return JSON.parse(decrypted.toString('utf-8')) as T;
   }
 
   /**
-   * Generate encryption key pair
+   * Generate ECDH key pair (P-256). Public keys are exchanged between agents;
+   * the shared secret derives the AES-256 key via ECDH.
    */
   static generateKeyPair(): { publicKey: string; privateKey: string } {
-    // Simulated key generation
-    const id = Math.random().toString(36).substring(2, 10);
+    const ecdh = createECDH('prime256v1');
+    ecdh.generateKeys();
     return {
-      publicKey: `pub_${id}`,
-      privateKey: `priv_${id}`,
+      publicKey: ecdh.getPublicKey('hex'),
+      privateKey: ecdh.getPrivateKey('hex'),
     };
+  }
+
+  /**
+   * Derive a shared AES-256 key from ECDH key exchange.
+   */
+  static deriveSharedKey(privateKey: string, peerPublicKey: string): string {
+    const ecdh = createECDH('prime256v1');
+    ecdh.setPrivateKey(privateKey, 'hex');
+    return ecdh.computeSecret(peerPublicKey, 'hex', 'hex').substring(0, 64);
   }
 }
 
@@ -144,23 +163,12 @@ export class AgentMessaging extends EventEmitter {
   /**
    * Create a new channel
    */
-  createChannel(
-    participants: string[],
-    config: Partial<ChannelConfig> = {}
-  ): AgentChannel {
-    const channel = this.channelManager.createChannel(
-      this.agentId,
-      participants,
-      config
-    );
+  createChannel(participants: string[], config: Partial<ChannelConfig> = {}): AgentChannel {
+    const channel = this.channelManager.createChannel(this.agentId, participants, config);
 
     // Register public key if encryption enabled
     if (channel.encryption !== 'none' && this.keyPair) {
-      this.channelManager.setPublicKey(
-        channel.id,
-        this.agentId,
-        this.keyPair.publicKey
-      );
+      this.channelManager.setPublicKey(channel.id, this.agentId, this.keyPair.publicKey);
     }
 
     return channel;
@@ -170,11 +178,7 @@ export class AgentMessaging extends EventEmitter {
    * Join an existing channel
    */
   joinChannel(channelId: string): boolean {
-    return this.channelManager.joinChannel(
-      channelId,
-      this.agentId,
-      this.keyPair?.publicKey
-    );
+    return this.channelManager.joinChannel(channelId, this.agentId, this.keyPair?.publicKey);
   }
 
   /**
@@ -333,11 +337,7 @@ export class AgentMessaging extends EventEmitter {
   /**
    * Reply to a message
    */
-  reply<T>(
-    originalMessage: Message<unknown>,
-    type: string,
-    payload: T
-  ): Message<T> | null {
+  reply<T>(originalMessage: Message<unknown>, type: string, payload: T): Message<T> | null {
     return this.send(
       originalMessage.channelId,
       originalMessage.senderId,
@@ -354,10 +354,7 @@ export class AgentMessaging extends EventEmitter {
   /**
    * Subscribe to all messages on a channel
    */
-  subscribe<T = unknown>(
-    channelId: string,
-    handler: MessageHandler<T>
-  ): () => void {
+  subscribe<T = unknown>(channelId: string, handler: MessageHandler<T>): () => void {
     let handlers = this.handlers.get(channelId);
     if (!handlers) {
       handlers = new Set();
@@ -378,10 +375,7 @@ export class AgentMessaging extends EventEmitter {
   /**
    * Subscribe to messages of a specific type
    */
-  subscribeToType<T = unknown>(
-    type: string,
-    handler: MessageHandler<T>
-  ): () => void {
+  subscribeToType<T = unknown>(type: string, handler: MessageHandler<T>): () => void {
     let handlers = this.typeHandlers.get(type);
     if (!handlers) {
       handlers = new Set();

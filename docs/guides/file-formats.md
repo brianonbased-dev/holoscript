@@ -268,16 +268,16 @@ composition "My Game Level" {
 
 ## Format Comparison
 
-| Feature        | .hs                  | .hsplus              | .holo                |
-| -------------- | -------------------- | -------------------- | -------------------- |
-| Objects        | `composition name {}`        | `composition name {}`        | `object "name" {}`   |
-| Functions      | `function name() {}` | `function name() {}` | `action name() {}`   |
-| VR Traits      | ❌                   | `@grabbable`         | `@grabbable`         |
-| Reactive State | ❌                   | `@state {}`          | `state {}`           |
-| Templates      | ❌                   | ❌                   | `template "Name" {}` |
-| Environment    | ❌                   | ❌                   | `environment {}`     |
-| Spatial Groups | ❌                   | ❌                   | `spatial_group {}`   |
-| Logic Block    | ❌                   | ❌                   | `logic {}`           |
+| Feature        | .hs                   | .hsplus               | .holo                |
+| -------------- | --------------------- | --------------------- | -------------------- |
+| Objects        | `composition name {}` | `composition name {}` | `object "name" {}`   |
+| Functions      | `function name() {}`  | `function name() {}`  | `action name() {}`   |
+| VR Traits      | ❌                    | `@grabbable`          | `@grabbable`         |
+| Reactive State | ❌                    | `@state {}`           | `state {}`           |
+| Templates      | ❌                    | ❌                    | `template "Name" {}` |
+| Environment    | ❌                    | ❌                    | `environment {}`     |
+| Spatial Groups | ❌                    | ❌                    | `spatial_group {}`   |
+| Logic Block    | ❌                    | ❌                    | `logic {}`           |
 
 ---
 

@@ -10,16 +10,26 @@ npm install @holoscript/fs
 
 ## Entry Points
 
-| Import | Description |
-|--------|-------------|
-| `@holoscript/fs` | All utilities |
-| `@holoscript/fs/path` | Path manipulation |
-| `@holoscript/fs/watch` | File watching |
+| Import                 | Description       |
+| ---------------------- | ----------------- |
+| `@holoscript/fs`       | All utilities     |
+| `@holoscript/fs/path`  | Path manipulation |
+| `@holoscript/fs/watch` | File watching     |
 
 ## File Operations
 
 ```typescript
-import { readText, writeText, readJson, writeJson, exists, mkdir, copy, move, remove } from '@holoscript/fs';
+import {
+  readText,
+  writeText,
+  readJson,
+  writeJson,
+  exists,
+  mkdir,
+  copy,
+  move,
+  remove,
+} from '@holoscript/fs';
 
 // Read & write
 const code = await readText('scene.holo');
@@ -84,11 +94,19 @@ console.log(formatSize(total)); // "1.5 MB"
 ## Path Utilities
 
 ```typescript
-import { join, resolve, relative, dirname, basename, extname, normalize } from '@holoscript/fs/path';
+import {
+  join,
+  resolve,
+  relative,
+  dirname,
+  basename,
+  extname,
+  normalize,
+} from '@holoscript/fs/path';
 
 join('src', 'scenes', 'lobby.holo');
-dirname('/project/src/scene.holo');  // '/project/src'
-extname('scene.holo');               // '.holo'
+dirname('/project/src/scene.holo'); // '/project/src'
+extname('scene.holo'); // '.holo'
 ```
 
 ### PathBuilder
@@ -98,10 +116,7 @@ Fluent API for path construction:
 ```typescript
 import { path } from '@holoscript/fs/path';
 
-const out = path('src')
-  .join('scenes', 'lobby.holo')
-  .withExtension('.js')
-  .toString();
+const out = path('src').join('scenes', 'lobby.holo').withExtension('.js').toString();
 // 'src/scenes/lobby.js'
 
 path.cwd().join('dist').sibling('build').value;
@@ -110,14 +125,24 @@ path.cwd().join('dist').sibling('build').value;
 ### Additional Path Functions
 
 ```typescript
-import { toPosix, toWindows, hasExtension, changeExtension, segments, isChildOf, commonBase, expandHome, sanitize } from '@holoscript/fs/path';
+import {
+  toPosix,
+  toWindows,
+  hasExtension,
+  changeExtension,
+  segments,
+  isChildOf,
+  commonBase,
+  expandHome,
+  sanitize,
+} from '@holoscript/fs/path';
 
-toPosix('src\\scenes\\file.holo');  // 'src/scenes/file.holo'
+toPosix('src\\scenes\\file.holo'); // 'src/scenes/file.holo'
 hasExtension('scene.holo', '.holo'); // true
 changeExtension('scene.holo', '.js'); // 'scene.js'
-segments('src/scenes/lobby.holo');   // ['src', 'scenes', 'lobby.holo']
+segments('src/scenes/lobby.holo'); // ['src', 'scenes', 'lobby.holo']
 commonBase('src/a.holo', 'src/b.holo'); // 'src'
-sanitize('my:file?.holo');           // 'myfile.holo'
+sanitize('my:file?.holo'); // 'myfile.holo'
 ```
 
 ## File Watching
@@ -125,7 +150,13 @@ sanitize('my:file?.holo');           // 'myfile.holo'
 Built on [chokidar](https://github.com/paulmillr/chokidar):
 
 ```typescript
-import { watch, watchCallback, watchFile, watchFileTypes, watchDebounced } from '@holoscript/fs/watch';
+import {
+  watch,
+  watchCallback,
+  watchFile,
+  watchFileTypes,
+  watchDebounced,
+} from '@holoscript/fs/watch';
 
 // Basic watcher
 const watcher = watch('src/', { ignored: ['**/node_modules/**'] });

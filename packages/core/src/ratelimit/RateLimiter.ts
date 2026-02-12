@@ -140,7 +140,7 @@ export class TokenBucketRateLimiter {
     this.refillBucket(bucket);
 
     const hasTokens = bucket.tokens >= count;
-    const withinMinuteLimit = (bucket.minuteTokens + count) <= this.config.tokensPerMinute;
+    const withinMinuteLimit = bucket.minuteTokens + count <= this.config.tokensPerMinute;
     const allowed = hasTokens && withinMinuteLimit;
 
     if (allowed) {

@@ -1,13 +1,18 @@
 /**
  * Fallback Cache Strategy
- * 
+ *
  * Returns cached/stale data when primary source fails.
  */
 
-import type { IRecoveryStrategy, IAgentFailure, IRecoveryResult, FailureType } from '../../extensions';
+import type {
+  IRecoveryStrategy,
+  IAgentFailure,
+  IRecoveryResult,
+  FailureType,
+} from '../../extensions';
 
 export interface FallbackCacheConfig {
-  maxAge: number;  // Max age of cached data (ms)
+  maxAge: number; // Max age of cached data (ms)
   staleWhileRevalidate: boolean;
 }
 

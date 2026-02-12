@@ -66,47 +66,27 @@ describe('RenderNetworkTrait', () => {
 
   describe('render quality presets', () => {
     it('should support preview quality', () => {
-      attachTrait(
-        renderNetworkHandler,
-        node,
-        { default_quality: 'preview' },
-        ctx
-      );
+      attachTrait(renderNetworkHandler, node, { default_quality: 'preview' }, ctx);
 
       expect(renderNetworkHandler.defaultConfig.default_quality).toBeDefined();
     });
 
     it('should support draft quality', () => {
-      attachTrait(
-        renderNetworkHandler,
-        node,
-        { default_quality: 'draft' },
-        ctx
-      );
+      attachTrait(renderNetworkHandler, node, { default_quality: 'draft' }, ctx);
 
       const state = (node as any).__renderNetworkState;
       expect(state).toBeDefined();
     });
 
     it('should support production quality', () => {
-      attachTrait(
-        renderNetworkHandler,
-        node,
-        { default_quality: 'production' },
-        ctx
-      );
+      attachTrait(renderNetworkHandler, node, { default_quality: 'production' }, ctx);
 
       const state = (node as any).__renderNetworkState;
       expect(state).toBeDefined();
     });
 
     it('should support film quality', () => {
-      attachTrait(
-        renderNetworkHandler,
-        node,
-        { default_quality: 'film' },
-        ctx
-      );
+      attachTrait(renderNetworkHandler, node, { default_quality: 'film' }, ctx);
 
       const state = (node as any).__renderNetworkState;
       expect(state).toBeDefined();
@@ -118,12 +98,7 @@ describe('RenderNetworkTrait', () => {
 
     engines.forEach((engine) => {
       it(`should support ${engine} engine`, () => {
-        attachTrait(
-          renderNetworkHandler,
-          node,
-          { default_engine: engine as any },
-          ctx
-        );
+        attachTrait(renderNetworkHandler, node, { default_engine: engine as any }, ctx);
 
         const state = (node as any).__renderNetworkState;
         expect(state).toBeDefined();
@@ -359,12 +334,7 @@ describe('RenderNetworkTrait', () => {
 
   describe('job management', () => {
     beforeEach(() => {
-      attachTrait(
-        renderNetworkHandler,
-        node,
-        { api_key: 'test-key' },
-        ctx
-      );
+      attachTrait(renderNetworkHandler, node, { api_key: 'test-key' }, ctx);
       const state = (node as any).__renderNetworkState;
       state.isConnected = true;
       state.activeJobs = [
@@ -414,32 +384,20 @@ describe('RenderNetworkTrait', () => {
     });
 
     it('should handle render_cancel event', () => {
-      sendEvent(
-        renderNetworkHandler,
-        node,
-        { api_key: 'test-key' },
-        ctx,
-        {
-          type: 'render_cancel',
-          payload: { jobId: 'job-1' },
-        }
-      );
+      sendEvent(renderNetworkHandler, node, { api_key: 'test-key' }, ctx, {
+        type: 'render_cancel',
+        payload: { jobId: 'job-1' },
+      });
 
       // Cancel should be processed
       expect(ctx.emittedEvents.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should handle render_download event', () => {
-      sendEvent(
-        renderNetworkHandler,
-        node,
-        { api_key: 'test-key' },
-        ctx,
-        {
-          type: 'render_download',
-          payload: { jobId: 'job-complete', outputIndex: 0 },
-        }
-      );
+      sendEvent(renderNetworkHandler, node, { api_key: 'test-key' }, ctx, {
+        type: 'render_download',
+        payload: { jobId: 'job-complete', outputIndex: 0 },
+      });
 
       expect(getEventCount(ctx, 'render_download_ready')).toBe(1);
       const event = getLastEvent(ctx, 'render_download_ready');
@@ -447,16 +405,10 @@ describe('RenderNetworkTrait', () => {
     });
 
     it('should handle credits_refresh event', () => {
-      sendEvent(
-        renderNetworkHandler,
-        node,
-        { api_key: 'test-key' },
-        ctx,
-        {
-          type: 'credits_refresh',
-          payload: {},
-        }
-      );
+      sendEvent(renderNetworkHandler, node, { api_key: 'test-key' }, ctx, {
+        type: 'credits_refresh',
+        payload: {},
+      });
 
       // Credits refresh initiated
       expect(ctx.emittedEvents.length).toBeGreaterThanOrEqual(0);
@@ -465,12 +417,7 @@ describe('RenderNetworkTrait', () => {
 
   describe('job polling', () => {
     it('should poll active jobs during update', () => {
-      attachTrait(
-        renderNetworkHandler,
-        node,
-        { api_key: 'test-key' },
-        ctx
-      );
+      attachTrait(renderNetworkHandler, node, { api_key: 'test-key' }, ctx);
 
       const state = (node as any).__renderNetworkState;
       state.isConnected = true;
@@ -514,33 +461,20 @@ describe('RenderNetworkTrait', () => {
 
   describe('detach', () => {
     it('should emit disconnect event when connected', () => {
-      attachTrait(
-        renderNetworkHandler,
-        node,
-        { api_key: 'test-key' },
-        ctx
-      );
+      attachTrait(renderNetworkHandler, node, { api_key: 'test-key' }, ctx);
 
       const state = (node as any).__renderNetworkState;
       state.isConnected = true;
 
       ctx.clearEvents();
-      renderNetworkHandler.onDetach?.(
-        node as any,
-        renderNetworkHandler.defaultConfig,
-        ctx as any
-      );
+      renderNetworkHandler.onDetach?.(node as any, renderNetworkHandler.defaultConfig, ctx as any);
 
       expect(getEventCount(ctx, 'render_network_disconnect')).toBe(1);
     });
 
     it('should clean up state on detach', () => {
       attachTrait(renderNetworkHandler, node, {}, ctx);
-      renderNetworkHandler.onDetach?.(
-        node as any,
-        renderNetworkHandler.defaultConfig,
-        ctx as any
-      );
+      renderNetworkHandler.onDetach?.(node as any, renderNetworkHandler.defaultConfig, ctx as any);
 
       expect((node as any).__renderNetworkState).toBeUndefined();
     });
@@ -551,12 +485,7 @@ describe('RenderNetworkTrait', () => {
 
     formats.forEach((format) => {
       it(`should support ${format} output format`, () => {
-        attachTrait(
-          renderNetworkHandler,
-          node,
-          { output_format: format as any },
-          ctx
-        );
+        attachTrait(renderNetworkHandler, node, { output_format: format as any }, ctx);
 
         const state = (node as any).__renderNetworkState;
         expect(state).toBeDefined();
@@ -569,12 +498,7 @@ describe('RenderNetworkTrait', () => {
 
     priorities.forEach((priority) => {
       it(`should support ${priority} priority`, () => {
-        attachTrait(
-          renderNetworkHandler,
-          node,
-          { default_priority: priority as any },
-          ctx
-        );
+        attachTrait(renderNetworkHandler, node, { default_priority: priority as any }, ctx);
 
         const state = (node as any).__renderNetworkState;
         expect(state).toBeDefined();

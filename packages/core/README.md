@@ -42,33 +42,33 @@ const output = compiler.compile(ast);
 
 ## Parsers
 
-| Parser | File Types | Use Case |
-|--------|-----------|----------|
-| `HoloScriptPlusParser` | `.hsplus` | Extended syntax with TypeScript modules |
-| `HoloCompositionParser` | `.holo` | Scene-centric composition files |
-| `HoloScript2DParser` | `.hs` | Basic logic and protocols |
-| `HoloScriptParser` | `.hs` | Legacy parser |
+| Parser                  | File Types | Use Case                                |
+| ----------------------- | ---------- | --------------------------------------- |
+| `HoloScriptPlusParser`  | `.hsplus`  | Extended syntax with TypeScript modules |
+| `HoloCompositionParser` | `.holo`    | Scene-centric composition files         |
+| `HoloScript2DParser`    | `.hs`      | Basic logic and protocols               |
+| `HoloScriptParser`      | `.hs`      | Legacy parser                           |
 
 ## Compilers
 
-| Compiler | Target | Status |
-|----------|--------|--------|
-| `R3FCompiler` | React Three Fiber (Web) | Production |
-| `BabylonCompiler` | Babylon.js (Web) | Production |
-| `UnityCompiler` | Unity Engine | Production |
-| `UnrealCompiler` | Unreal Engine 5 | Production |
-| `GodotCompiler` | Godot 4 | Production |
-| `IOSCompiler` | iOS / ARKit | Production |
-| `AndroidCompiler` | Android / ARCore | Production |
-| `VisionOSCompiler` | Apple Vision Pro | Production |
-| `WebGPUCompiler` | WebGPU Compute | Production |
-| `WASMCompiler` | WebAssembly | Production |
-| `VRChatCompiler` | VRChat | Alpha |
-| `OpenXRCompiler` | OpenXR Standard | Production |
-| `AndroidXRCompiler` | Android XR | Production |
-| `URDFCompiler` | Robotics (URDF) | Production |
-| `DTDLCompiler` | Digital Twins (DTDL) | Production |
-| `SDFCompiler` | SDF Robotics | Production |
+| Compiler            | Target                  | Status     |
+| ------------------- | ----------------------- | ---------- |
+| `R3FCompiler`       | React Three Fiber (Web) | Production |
+| `BabylonCompiler`   | Babylon.js (Web)        | Production |
+| `UnityCompiler`     | Unity Engine            | Production |
+| `UnrealCompiler`    | Unreal Engine 5         | Production |
+| `GodotCompiler`     | Godot 4                 | Production |
+| `IOSCompiler`       | iOS / ARKit             | Production |
+| `AndroidCompiler`   | Android / ARCore        | Production |
+| `VisionOSCompiler`  | Apple Vision Pro        | Production |
+| `WebGPUCompiler`    | WebGPU Compute          | Production |
+| `WASMCompiler`      | WebAssembly             | Production |
+| `VRChatCompiler`    | VRChat                  | Alpha      |
+| `OpenXRCompiler`    | OpenXR Standard         | Production |
+| `AndroidXRCompiler` | Android XR              | Production |
+| `URDFCompiler`      | Robotics (URDF)         | Production |
+| `DTDLCompiler`      | Digital Twins (DTDL)    | Production |
+| `SDFCompiler`       | SDF Robotics            | Production |
 
 ## Trait System
 
@@ -86,8 +86,8 @@ VR traits are modularized into 61 category files under `src/traits/constants/`:
 Import individual categories or the combined set:
 
 ```typescript
-import { VR_TRAITS } from '@holoscript/core';           // All 1,525+ traits
-import { AUDIO_TRAITS } from '@holoscript/core';         // Just audio traits
+import { VR_TRAITS } from '@holoscript/core'; // All 1,525+ traits
+import { AUDIO_TRAITS } from '@holoscript/core'; // Just audio traits
 import { MAGIC_FANTASY_TRAITS } from '@holoscript/core'; // Just magic/fantasy
 ```
 

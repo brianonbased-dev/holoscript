@@ -52,6 +52,9 @@ export {
   IFilmGrainParams,
   IChromaticAberrationParams,
   IFogParams,
+  ICausticsParams,
+  ISSRParams,
+  ISSGIParams,
   ICustomEffectParams,
   EffectParams,
   IRenderTarget,
@@ -77,6 +80,10 @@ export {
   FilmGrainEffect,
   SharpenEffect,
   ChromaticAberrationEffect,
+  CausticsEffect,
+  SSREffect,
+  SSAOEffect,
+  SSGIEffect,
   createEffect,
 } from './PostProcessEffect';
 
@@ -96,6 +103,9 @@ export {
   FOG_SHADER,
   MOTION_BLUR_SHADER,
   COLOR_GRADE_SHADER,
+  CAUSTICS_SHADER,
+  SSR_SHADER,
+  SSGI_SHADER,
   BLIT_SHADER,
   buildEffectShader,
 } from './PostProcessShaders';

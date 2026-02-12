@@ -10,13 +10,13 @@ npm install @holoscript/std
 
 ## Entry Points
 
-| Import | Description |
-|--------|-------------|
-| `@holoscript/std` | All utilities |
-| `@holoscript/std/math` | Math & vector operations |
-| `@holoscript/std/collections` | Immutable collections |
-| `@holoscript/std/string` | String manipulation |
-| `@holoscript/std/time` | Timers & scheduling |
+| Import                        | Description              |
+| ----------------------------- | ------------------------ |
+| `@holoscript/std`             | All utilities            |
+| `@holoscript/std/math`        | Math & vector operations |
+| `@holoscript/std/collections` | Immutable collections    |
+| `@holoscript/std/string`      | String manipulation      |
+| `@holoscript/std/time`        | Timers & scheduling      |
 
 ## Core Types
 
@@ -39,15 +39,24 @@ const bounds = aabb(vec3(-1, -1, -1), vec3(1, 1, 1));
 ## Math
 
 ```typescript
-import { lerp, clamp, remap, smoothstep, vec3Math, quatMath, noise, random } from '@holoscript/std/math';
+import {
+  lerp,
+  clamp,
+  remap,
+  smoothstep,
+  vec3Math,
+  quatMath,
+  noise,
+  random,
+} from '@holoscript/std/math';
 
 // Interpolation
-lerp(0, 100, 0.5);          // 50
-remap(0.5, 0, 1, -10, 10);  // 0
+lerp(0, 100, 0.5); // 50
+remap(0.5, 0, 1, -10, 10); // 0
 smoothstep(0, 1, 0.3);
 
 // Vector math
-const forward = vec3Math.forward();     // { x: 0, y: 0, z: 1 }
+const forward = vec3Math.forward(); // { x: 0, y: 0, z: 1 }
 const dir = vec3Math.normalize(vec3Math.sub(target, origin));
 const d = vec3Math.distance(a, b);
 
@@ -79,8 +88,12 @@ import { List, HoloMap, HoloSet, SpatialGrid, PriorityQueue } from '@holoscript/
 
 // List - immutable array with rich API
 const items = List.of(3, 1, 4, 1, 5);
-items.sort().unique().map(x => x * 2).filter(x => x > 4);
-items.groupBy(x => x % 2 === 0 ? 'even' : 'odd');
+items
+  .sort()
+  .unique()
+  .map((x) => x * 2)
+  .filter((x) => x > 4);
+items.groupBy((x) => (x % 2 === 0 ? 'even' : 'odd'));
 List.range(0, 100, 5); // [0, 5, 10, ..., 95]
 
 // HoloMap - immutable key-value store
@@ -90,7 +103,7 @@ scores.set('carol', 92).filter((k, v) => v > 90);
 // HoloSet - immutable set with set operations
 const a = HoloSet.of(1, 2, 3);
 const b = HoloSet.of(2, 3, 4);
-a.union(b);        // {1, 2, 3, 4}
+a.union(b); // {1, 2, 3, 4}
 a.intersection(b); // {2, 3}
 
 // SpatialGrid - spatial partitioning
@@ -112,9 +125,9 @@ pq.dequeue(); // 'urgent'
 ```typescript
 import { camelCase, slugify, truncate, levenshtein, format, uuid } from '@holoscript/std/string';
 
-camelCase('hello-world');      // 'helloWorld'
-slugify('Hello World!');       // 'hello-world'
-truncate('long text...', 8);   // 'long ...'
+camelCase('hello-world'); // 'helloWorld'
+slugify('Hello World!'); // 'hello-world'
+truncate('long text...', 8); // 'long ...'
 levenshtein('kitten', 'sitting'); // 3
 format('{name} has {n} items', { name: 'Alice', n: 5 });
 uuid(); // 'a1b2c3d4-...'
@@ -127,10 +140,22 @@ uuid(); // 'a1b2c3d4-...'
 Timers, scheduling, and async control:
 
 ```typescript
-import { sleep, debounce, throttle, measure, retry, Stopwatch, CountdownTimer, FrameTimer, dateTime } from '@holoscript/std/time';
+import {
+  sleep,
+  debounce,
+  throttle,
+  measure,
+  retry,
+  Stopwatch,
+  CountdownTimer,
+  FrameTimer,
+  dateTime,
+} from '@holoscript/std/time';
 
 await sleep(1000);
-const elapsed = await measure(async () => { /* work */ });
+const elapsed = await measure(async () => {
+  /* work */
+});
 
 const sw = new Stopwatch();
 sw.start();

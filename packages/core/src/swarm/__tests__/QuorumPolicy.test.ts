@@ -117,7 +117,7 @@ describe('QuorumPolicy', () => {
     it('should return full state object', () => {
       policy.setMemberCount(3);
       const state = policy.getState();
-      
+
       expect(state.currentSize).toBe(3);
       expect(state.status).toBe('quorum');
       expect(state.hasQuorum).toBe(true);

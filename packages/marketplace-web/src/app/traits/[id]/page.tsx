@@ -39,7 +39,7 @@ type TabId = 'readme' | 'versions' | 'dependencies' | 'examples';
 export default function TraitDetailPage() {
   const params = useParams();
   const traitId = decodeURIComponent(params.id as string);
-  
+
   const [activeTab, setActiveTab] = useState<TabId>('readme');
   const [copied, setCopied] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
@@ -49,7 +49,11 @@ export default function TraitDetailPage() {
   const installed = isInstalled(traitId);
 
   // Fetch trait data
-  const { data: trait, isLoading, error } = useQuery({
+  const {
+    data: trait,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['trait', traitId, selectedVersion],
     queryFn: () => marketplaceApi.traits.getTrait(traitId, selectedVersion || undefined),
   });
@@ -116,9 +120,7 @@ export default function TraitDetailPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center py-16">
           <Package className="h-16 w-16 mx-auto text-zinc-300 dark:text-zinc-600 mb-4" />
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">
-            Trait Not Found
-          </h1>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Trait Not Found</h1>
           <p className="text-zinc-600 dark:text-zinc-400 mb-6">
             The trait &quot;{traitId}&quot; does not exist or has been removed.
           </p>
@@ -159,9 +161,7 @@ export default function TraitDetailPage() {
             {/* Left: Title & Meta */}
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
-                  {trait.name}
-                </h1>
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">{trait.name}</h1>
                 {trait.verified && (
                   <span className="flex items-center gap-1 px-2 py-1 bg-holoscript-100 dark:bg-holoscript-900/30 text-holoscript-600 dark:text-holoscript-400 text-xs font-medium rounded-full">
                     <CheckCircle className="h-3 w-3" />
@@ -176,9 +176,7 @@ export default function TraitDetailPage() {
                 )}
               </div>
 
-              <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-4">
-                {trait.description}
-              </p>
+              <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-4">{trait.description}</p>
 
               {/* Author & Links */}
               <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
@@ -198,9 +196,7 @@ export default function TraitDetailPage() {
                     </div>
                   )}
                   {trait.author.name}
-                  {trait.author.verified && (
-                    <CheckCircle className="h-3 w-3 text-holoscript-500" />
-                  )}
+                  {trait.author.verified && <CheckCircle className="h-3 w-3 text-holoscript-500" />}
                 </Link>
 
                 {trait.repository && (
@@ -273,9 +269,7 @@ export default function TraitDetailPage() {
                       <option key={v.version} value={v.version}>
                         {v.version} {v.deprecated && '(deprecated)'}
                       </option>
-                    )) || (
-                      <option value={trait.version}>{trait.version}</option>
-                    )}
+                    )) || <option value={trait.version}>{trait.version}</option>}
                   </select>
                 </div>
 
@@ -312,8 +306,8 @@ export default function TraitDetailPage() {
                       installed
                         ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                         : installing
-                        ? 'bg-holoscript-100 dark:bg-holoscript-900/30 text-holoscript-600 dark:text-holoscript-400'
-                        : 'bg-holoscript-500 hover:bg-holoscript-600 text-white'
+                          ? 'bg-holoscript-100 dark:bg-holoscript-900/30 text-holoscript-600 dark:text-holoscript-400'
+                          : 'bg-holoscript-500 hover:bg-holoscript-600 text-white'
                     }
                   `}
                 >

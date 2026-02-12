@@ -139,7 +139,7 @@ jobs:
       - name: Publish holoscript-wasm to crates.io
         run: cargo publish --token ${{ secrets.CARGO_TOKEN }} --allow-dirty
         working-directory: packages/compiler-wasm
-        continue-on-error: true  # May already be published
+        continue-on-error: true # May already be published
 
       - name: Wait for crates.io indexing
         run: sleep 30

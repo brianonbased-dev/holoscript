@@ -32,9 +32,11 @@ export function PopularTraits({ traits }: PopularTraitsProps) {
             hover:shadow-md transition-all"
         >
           {/* Rank / Avatar */}
-          <div className="flex-shrink-0 w-12 h-12 bg-holoscript-100 dark:bg-holoscript-900/30 
+          <div
+            className="flex-shrink-0 w-12 h-12 bg-holoscript-100 dark:bg-holoscript-900/30 
             rounded-lg flex items-center justify-center 
-            text-holoscript-600 dark:text-holoscript-400 font-bold text-lg">
+            text-holoscript-600 dark:text-holoscript-400 font-bold text-lg"
+          >
             {trait.author.avatar ? (
               <img
                 src={trait.author.avatar}
@@ -49,9 +51,7 @@ export function PopularTraits({ traits }: PopularTraitsProps) {
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-zinc-900 dark:text-white truncate">
-                {trait.name}
-              </h3>
+              <h3 className="font-medium text-zinc-900 dark:text-white truncate">{trait.name}</h3>
               {trait.verified && (
                 <CheckCircle className="h-3.5 w-3.5 text-holoscript-500 flex-shrink-0" />
               )}
@@ -72,8 +72,10 @@ export function PopularTraits({ traits }: PopularTraitsProps) {
           </div>
 
           {/* Arrow */}
-          <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-holoscript-500 
-            group-hover:translate-x-1 transition-all flex-shrink-0" />
+          <ArrowRight
+            className="h-4 w-4 text-zinc-400 group-hover:text-holoscript-500 
+            group-hover:translate-x-1 transition-all flex-shrink-0"
+          />
         </Link>
       ))}
     </div>

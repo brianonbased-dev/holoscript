@@ -183,7 +183,7 @@ describe('SceneSerializer', () => {
       const result = serializer.validate(scene);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.path === 'root')).toBe(true);
+      expect(result.errors.some((e) => e.path === 'root')).toBe(true);
     });
 
     it('should detect empty metadata name as valid (no validation on name)', () => {
@@ -205,7 +205,7 @@ describe('SceneSerializer', () => {
       const result = serializer.validate(scene);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.path === 'version')).toBe(true);
+      expect(result.errors.some((e) => e.path === 'version')).toBe(true);
     });
   });
 
@@ -353,8 +353,8 @@ describe('Utility Functions', () => {
 
       const enemies = findNodesByTag(scene.root, 'enemy');
       expect(enemies).toHaveLength(2);
-      expect(enemies.map(n => n.name)).toContain('Node1');
-      expect(enemies.map(n => n.name)).toContain('Node2');
+      expect(enemies.map((n) => n.name)).toContain('Node1');
+      expect(enemies.map((n) => n.name)).toContain('Node2');
     });
 
     it('should return empty array for non-existent tag', () => {

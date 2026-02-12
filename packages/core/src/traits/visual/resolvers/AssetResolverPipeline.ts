@@ -30,10 +30,7 @@ export class AssetResolverPipeline {
    *
    * @returns Resolved asset, or null if no resolver could handle it.
    */
-  async resolve(
-    trait: string,
-    config: TraitVisualConfig,
-  ): Promise<ResolvedAsset | null> {
+  async resolve(trait: string, config: TraitVisualConfig): Promise<ResolvedAsset | null> {
     // 1. Cache hit
     const cached = this.cache.get(trait);
     if (cached) return cached;

@@ -389,7 +389,12 @@ export interface INetworkClient {
   setPeerMetadata(metadata: Record<string, unknown>): void;
 
   // Messaging
-  send<T>(type: string, payload: T, target?: MessageTarget, options?: Partial<INetworkMessage>): void;
+  send<T>(
+    type: string,
+    payload: T,
+    target?: MessageTarget,
+    options?: Partial<INetworkMessage>
+  ): void;
   broadcast<T>(type: string, payload: T, options?: Partial<INetworkMessage>): void;
   on<T>(type: string, handler: MessageHandler<T>): void;
   off<T>(type: string, handler: MessageHandler<T>): void;
@@ -501,7 +506,7 @@ export interface IClockSynchronizer {
   sync(): Promise<IClockSync>;
   toServerTime(localTime: number): number;
   toLocalTime(serverTime: number): number;
-  
+
   onSync(callback: (sync: IClockSync) => void): void;
   offSync(callback: (sync: IClockSync) => void): void;
 }
@@ -594,7 +599,7 @@ export function createMessage<T>(
   payload: T,
   senderId: string,
   target: MessageTarget = 'all',
-  options: Partial<INetworkMessage<T>> = {},
+  options: Partial<INetworkMessage<T>> = {}
 ): INetworkMessage<T> {
   return {
     id: generateMessageId(),
@@ -615,7 +620,7 @@ export function createPeerInfo(
   id: string,
   name?: string,
   isHost: boolean = false,
-  isLocal: boolean = false,
+  isLocal: boolean = false
 ): IPeerInfo {
   return {
     id,
@@ -633,7 +638,7 @@ export function createPeerInfo(
  */
 export function createSpawnRequest(
   prefabId: string,
-  options: Partial<ISpawnRequest> = {},
+  options: Partial<ISpawnRequest> = {}
 ): ISpawnRequest {
   return {
     prefabId,
@@ -650,7 +655,7 @@ export function createSpawnRequest(
 export function createReplicatedEntity(
   id: string,
   ownerId: string,
-  options: Partial<IReplicatedEntity> = {},
+  options: Partial<IReplicatedEntity> = {}
 ): IReplicatedEntity {
   const now = Date.now();
   return {
@@ -672,7 +677,7 @@ export function createReplicatedEntity(
 export function createEntityDelta(
   entityId: string,
   tick: number,
-  updates: Partial<IEntityDelta> = {},
+  updates: Partial<IEntityDelta> = {}
 ): IEntityDelta {
   return {
     entityId,
@@ -688,7 +693,7 @@ export function createRPCInvocation(
   name: string,
   args: unknown[],
   senderId: string,
-  targetId: string = 'server',
+  targetId: string = 'server'
 ): IRPCInvocation {
   return {
     id: generateMessageId(),
@@ -706,7 +711,7 @@ export function createRPCInvocation(
 export function createInputCommand(
   tick: number,
   inputs: Record<string, unknown>,
-  sequenceNumber: number,
+  sequenceNumber: number
 ): IInputCommand {
   return {
     tick,
@@ -799,15 +804,19 @@ export function distanceVector3(a: IVector3, b: IVector3): number {
 /**
  * Check if message is targeted at peer
  */
-export function isMessageForPeer(message: INetworkMessage, peerId: string, isHost: boolean): boolean {
+export function isMessageForPeer(
+  message: INetworkMessage,
+  peerId: string,
+  isHost: boolean
+): boolean {
   const { targetId } = message;
-  
+
   if (targetId === 'all') return true;
   if (targetId === 'host') return isHost;
   if (targetId === 'others') return message.senderId !== peerId;
   if (typeof targetId === 'string') return targetId === peerId;
   if (Array.isArray(targetId)) return targetId.includes(peerId);
-  
+
   return false;
 }
 
@@ -816,7 +825,7 @@ export function isMessageForPeer(message: INetworkMessage, peerId: string, isHos
  */
 export function serializeState(state: Map<string, ISyncStateEntry>): Record<string, unknown>[] {
   const entries: Record<string, unknown>[] = [];
-  
+
   state.forEach((entry, key) => {
     entries.push({
       key,
@@ -826,7 +835,7 @@ export function serializeState(state: Map<string, ISyncStateEntry>): Record<stri
       timestamp: entry.timestamp,
     });
   });
-  
+
   return entries;
 }
 
@@ -835,7 +844,7 @@ export function serializeState(state: Map<string, ISyncStateEntry>): Record<stri
  */
 export function deserializeState(entries: Record<string, unknown>[]): Map<string, ISyncStateEntry> {
   const state = new Map<string, ISyncStateEntry>();
-  
+
   for (const entry of entries) {
     state.set(entry.key as string, {
       key: entry.key as string,
@@ -846,7 +855,7 @@ export function deserializeState(entries: Record<string, unknown>[]): Map<string
       origin: 'remote',
     });
   }
-  
+
   return state;
 }
 

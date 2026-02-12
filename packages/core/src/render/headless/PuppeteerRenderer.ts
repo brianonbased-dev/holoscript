@@ -24,7 +24,11 @@ type PuppeteerBrowser = {
 };
 
 type PuppeteerPage = {
-  setViewport: (viewport: { width: number; height: number; deviceScaleFactor?: number }) => Promise<void>;
+  setViewport: (viewport: {
+    width: number;
+    height: number;
+    deviceScaleFactor?: number;
+  }) => Promise<void>;
   setContent: (html: string, options?: { waitUntil?: string; timeout?: number }) => Promise<void>;
   setDefaultTimeout: (timeout: number) => void;
   screenshot: (options?: Record<string, unknown>) => Promise<Buffer>;
@@ -231,7 +235,9 @@ export class PuppeteerRenderer {
       this.log('Browser initialized');
     } catch (error) {
       const err = error as Error;
-      throw new Error(`Failed to initialize Puppeteer: ${err.message}. Make sure puppeteer is installed: npm install puppeteer`);
+      throw new Error(
+        `Failed to initialize Puppeteer: ${err.message}. Make sure puppeteer is installed: npm install puppeteer`
+      );
     }
   }
 
@@ -275,10 +281,7 @@ export class PuppeteerRenderer {
   /**
    * Take a screenshot of a HoloScript scene
    */
-  async screenshot(
-    holoCode: string,
-    options: ScreenshotOptions = {}
-  ): Promise<RenderResult> {
+  async screenshot(holoCode: string, options: ScreenshotOptions = {}): Promise<RenderResult> {
     const startTime = Date.now();
     const page = await this.getPage();
 
@@ -339,7 +342,10 @@ export class PuppeteerRenderer {
       }
 
       // Wait for scene to stabilize
-      await page.evaluate((ms: number) => new Promise(resolve => setTimeout(resolve, ms)), waitForStable);
+      await page.evaluate(
+        (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
+        waitForStable
+      );
 
       const renderMs = Date.now() - renderStart;
       const captureStart = Date.now();
@@ -390,10 +396,7 @@ export class PuppeteerRenderer {
   /**
    * Generate a PDF of a HoloScript scene
    */
-  async generatePDF(
-    holoCode: string,
-    options: PDFOptions = {}
-  ): Promise<RenderResult> {
+  async generatePDF(holoCode: string, options: PDFOptions = {}): Promise<RenderResult> {
     const startTime = Date.now();
     const page = await this.getPage();
 
@@ -418,7 +421,7 @@ export class PuppeteerRenderer {
       });
 
       // Wait for scene to load
-      await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 2000)));
+      await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 2000)));
 
       const navigationMs = Date.now() - navigationStart;
       const captureStart = Date.now();
@@ -476,10 +479,7 @@ export class PuppeteerRenderer {
    * Pre-render HoloScript for SEO/social sharing
    * Returns fully rendered HTML with all JavaScript executed
    */
-  async prerender(
-    holoCode: string,
-    options: PrerenderOptions = {}
-  ): Promise<RenderResult> {
+  async prerender(holoCode: string, options: PrerenderOptions = {}): Promise<RenderResult> {
     const startTime = Date.now();
     const page = await this.getPage();
 
@@ -502,7 +502,7 @@ export class PuppeteerRenderer {
       });
 
       // Wait for scene to fully render
-      await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 3000)));
+      await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 3000)));
 
       const navigationMs = Date.now() - navigationStart;
       const captureStart = Date.now();
@@ -512,7 +512,10 @@ export class PuppeteerRenderer {
 
       // Post-process HTML
       if (removeScripts) {
-        renderedHtml = renderedHtml.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+        renderedHtml = renderedHtml.replace(
+          /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+          ''
+        );
       }
 
       if (inlineStyles) {
@@ -589,7 +592,7 @@ export class PuppeteerRenderer {
       });
 
       // Wait for initial render
-      await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)));
+      await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 1000)));
 
       const frames: Buffer[] = [];
 
@@ -599,7 +602,10 @@ export class PuppeteerRenderer {
         frames.push(buffer);
 
         if (i < frameCount - 1) {
-          await page.evaluate((ms: number) => new Promise(resolve => setTimeout(resolve, ms)), frameInterval);
+          await page.evaluate(
+            (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
+            frameInterval
+          );
         }
       }
 
@@ -657,7 +663,8 @@ export class PuppeteerRenderer {
 
       // Simple size comparison as a basic check
       if (currentBuffer.length !== baselineBuffer.length) {
-        const sizeDiff = Math.abs(currentBuffer.length - baselineBuffer.length) / baselineBuffer.length;
+        const sizeDiff =
+          Math.abs(currentBuffer.length - baselineBuffer.length) / baselineBuffer.length;
         return {
           match: sizeDiff < threshold,
           diffPercentage: sizeDiff * 100,
@@ -907,10 +914,7 @@ export async function renderScreenshot(
 /**
  * Convenience function to generate PDF
  */
-export async function renderPDF(
-  holoCode: string,
-  options: PDFOptions = {}
-): Promise<RenderResult> {
+export async function renderPDF(holoCode: string, options: PDFOptions = {}): Promise<RenderResult> {
   const renderer = new PuppeteerRenderer();
   try {
     await renderer.initialize();

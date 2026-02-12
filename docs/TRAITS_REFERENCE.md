@@ -1252,12 +1252,12 @@ object IndustrialArm @twin_sync(topic: "factory/cell_01/arm", interval: 100) {
 }
 ```
 
-| Config     | Type   | Default | Description                          |
-| ---------- | ------ | ------- | ------------------------------------ |
-| `topic`    | string | null    | MQTT/REST endpoint or topic name     |
-| `interval` | number | 100     | Sync frequency in milliseconds       |
+| Config     | Type   | Default | Description                             |
+| ---------- | ------ | ------- | --------------------------------------- |
+| `topic`    | string | null    | MQTT/REST endpoint or topic name        |
+| `interval` | number | 100     | Sync frequency in milliseconds          |
 | `mode`     | string | 'push'  | 'push' (real → virtual), 'pull', 'both' |
-| `protocol` | string | 'mqtt'  | 'mqtt', 'opc-ua', 'rest'             |
+| `protocol` | string | 'mqtt'  | 'mqtt', 'opc-ua', 'rest'                |
 
 **State:**
 
@@ -1288,10 +1288,10 @@ object FactorySwitch @twin_actuator(actuator_id: "arm_01_reset") {
 }
 ```
 
-| Config        | Type   | Default | Description                          |
-| ------------- | ------ | ------- | ------------------------------------ |
-| `actuator_id` | string | null    | Unique ID of the physical hardware   |
-| `protocol`    | string | 'mqtt'  | 'mqtt', 'rest'                       |
+| Config        | Type   | Default | Description                        |
+| ------------- | ------ | ------- | ---------------------------------- |
+| `actuator_id` | string | null    | Unique ID of the physical hardware |
+| `protocol`    | string | 'mqtt'  | 'mqtt', 'rest'                     |
 
 **Events:**
 
@@ -1319,10 +1319,10 @@ object MasterBuilder @mitosis(strategy: "collaborative") {
 }
 ```
 
-| Config     | Type   | Default         | Description                          |
-| ---------- | ------ | --------------- | ------------------------------------ |
+| Config     | Type   | Default         | Description                            |
+| ---------- | ------ | --------------- | -------------------------------------- |
 | `strategy` | string | 'collaborative' | 'collaborative', 'autonomous', 'gated' |
-| `max_subs` | number | 5               | Maximum allowable sub-compositions   |
+| `max_subs` | number | 5               | Maximum allowable sub-compositions     |
 
 **Events:**
 

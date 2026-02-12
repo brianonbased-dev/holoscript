@@ -123,7 +123,9 @@ export class SignalingClient {
           this.stopPing();
 
           if (!this.intentionalClose) {
-            this.emit('disconnected', { error: { code: 'CLOSED', message: event.reason || 'Connection closed' } });
+            this.emit('disconnected', {
+              error: { code: 'CLOSED', message: event.reason || 'Connection closed' },
+            });
             this.attemptReconnect();
           }
         };
@@ -193,10 +195,15 @@ export class SignalingClient {
    */
   sendIceCandidate(targetPeerId: string, candidate: RTCIceCandidateInit | null): void {
     this.send(
-      createSignalingMessage<IceCandidateMessage>('ice-candidate', this.config.roomId, this.config.peerId, {
-        targetPeerId,
-        candidate,
-      })
+      createSignalingMessage<IceCandidateMessage>(
+        'ice-candidate',
+        this.config.roomId,
+        this.config.peerId,
+        {
+          targetPeerId,
+          candidate,
+        }
+      )
     );
   }
 
@@ -283,7 +290,12 @@ export class SignalingClient {
       }
 
       case 'error': {
-        this.emit('error', { error: { code: (message as unknown as { code: string }).code, message: (message as unknown as { message: string }).message } });
+        this.emit('error', {
+          error: {
+            code: (message as unknown as { code: string }).code,
+            message: (message as unknown as { message: string }).message,
+          },
+        });
         break;
       }
 

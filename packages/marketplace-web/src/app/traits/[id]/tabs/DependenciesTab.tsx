@@ -27,8 +27,7 @@ export function DependenciesTab({ trait }: DependenciesTabProps) {
   // Fetch resolved dependency tree
   const { data: depTree, isLoading } = useQuery({
     queryKey: ['dependency-tree', trait.id, trait.version],
-    queryFn: () =>
-      marketplaceApi.dependencies.resolve([{ id: trait.id, version: trait.version }]),
+    queryFn: () => marketplaceApi.dependencies.resolve([{ id: trait.id, version: trait.version }]),
     enabled: hasDependencies,
   });
 
@@ -99,7 +98,7 @@ export function DependenciesTab({ trait }: DependenciesTabProps) {
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
             Dependency Tree
           </h2>
-          
+
           {/* Conflicts Warning */}
           {depTree.conflicts.length > 0 && (
             <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg">
@@ -113,7 +112,9 @@ export function DependenciesTab({ trait }: DependenciesTabProps) {
                     {depTree.conflicts.map((conflict, i) => (
                       <li key={i}>
                         <strong>{conflict.traitId}</strong>: Requested versions{' '}
-                        {conflict.requestedVersions.map((v) => `${v.version} (by ${v.by})`).join(', ')}
+                        {conflict.requestedVersions
+                          .map((v) => `${v.version} (by ${v.by})`)
+                          .join(', ')}
                         {' → '}resolved to {conflict.resolvedVersion}
                       </li>
                     ))}
@@ -220,7 +221,9 @@ function DependencyTreeNode({ nodes, level }: DependencyTreeNodeProps) {
   }
 
   return (
-    <ul className={`space-y-1 ${level > 0 ? 'ml-4 pl-4 border-l border-zinc-200 dark:border-zinc-700' : ''}`}>
+    <ul
+      className={`space-y-1 ${level > 0 ? 'ml-4 pl-4 border-l border-zinc-200 dark:border-zinc-700' : ''}`}
+    >
       {nodes.map((node) => {
         const hasChildren = node.dependencies.length > 0;
         const isExpanded = expandedNodes.has(node.id);
@@ -248,9 +251,7 @@ function DependencyTreeNode({ nodes, level }: DependencyTreeNodeProps) {
               >
                 {node.id}
               </Link>
-              <span className="font-mono text-xs text-zinc-400">
-                @{node.resolvedVersion}
-              </span>
+              <span className="font-mono text-xs text-zinc-400">@{node.resolvedVersion}</span>
               {node.isOptional && (
                 <span className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-700 text-zinc-500 text-xs rounded">
                   optional

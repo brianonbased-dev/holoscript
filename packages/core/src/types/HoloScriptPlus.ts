@@ -82,6 +82,7 @@ export interface HSPlusNode extends ASTNode {
   args?: any;
   body?: any;
   version?: string | number;
+  migrations?: any[];
   migrationBlocks?: Record<number, string>;
   loc?: {
     start: { line: number; column: number };
@@ -115,6 +116,8 @@ export interface ReactiveState<T = any> {
   subscribe(callback: (state: T, changedKey?: keyof T) => void): () => void;
   update(updates: Partial<T>): void;
   getSnapshot(): T;
+  undo?(): void;
+  redo?(): void;
 }
 
 export interface ThrowVelocity {

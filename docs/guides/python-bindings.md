@@ -9,6 +9,7 @@ pip install holoscript
 ```
 
 **Requirements:**
+
 - Python 3.8+
 - Works on Windows, macOS, and Linux
 
@@ -45,10 +46,12 @@ if validation.valid:
 Parse HoloScript source code into an AST.
 
 **Parameters:**
+
 - `code`: Source code string
 - `format`: Format hint - `"hs"`, `"hsplus"`, `"holo"`, or `"auto"` (default)
 
 **Returns:** `ParseResult` with:
+
 - `success: bool` - Whether parsing succeeded
 - `ast: dict` - Abstract syntax tree
 - `errors: list[ParseError]` - Parse errors
@@ -84,6 +87,7 @@ Parse `.hs` or `.hsplus` code specifically.
 Validate HoloScript code for syntax errors and issues.
 
 **Returns:** `ValidationResult` with:
+
 - `valid: bool` - Whether code is valid
 - `errors: list[ValidationError]` - Validation errors
 - `warnings: list[ValidationError]` - Warnings
@@ -108,9 +112,11 @@ if not result.valid:
 List available VR traits.
 
 **Parameters:**
+
 - `category`: Filter by category or `"all"` for all traits
 
 **Categories:**
+
 - `interaction` - @grabbable, @throwable, @clickable, etc.
 - `physics` - @collidable, @physics, @rigid, etc.
 - `visual` - @glowing, @emissive, @transparent, etc.
@@ -135,6 +141,7 @@ interaction = list_traits("interaction")
 Get detailed documentation for a trait.
 
 **Returns:** Dictionary with:
+
 - `name`: Trait name
 - `category`: Category
 - `description`: What the trait does
@@ -153,6 +160,7 @@ print(info["example"])
 Get AI-powered trait suggestions based on a description.
 
 **Returns:** List of suggestions with:
+
 - `trait`: Trait name
 - `confidence`: 0.0-1.0 confidence score
 - `reason`: Why this trait is suggested
@@ -223,21 +231,21 @@ except Exception as e:
 
 For AI agents (Grok, Claude, ChatGPT), use this pattern:
 
-```python
+````python
 from holoscript import parse, validate, generate_scene
 
 def handle_vr_request(user_prompt: str) -> str:
     """Generate VR scene from natural language."""
-    
+
     # Generate scene
     scene = generate_scene(
         name="Generated Scene",
         description=user_prompt
     )
-    
+
     # Validate
     result = validate(scene.code)
-    
+
     if result.valid:
         return f"""Here's your VR scene:
 
@@ -251,7 +259,7 @@ Traits: {', '.join(scene.traits)}
     else:
         errors = '\n'.join(e.message for e in result.errors)
         return f"Generated code has issues:\n{errors}"
-```
+````
 
 ## Type Stubs
 

@@ -49,6 +49,25 @@ const ChunkType = {
   COMPONENTS: 0x0b,
 } as const;
 
+/** Pre-computed CRC32 lookup table (IEEE 802.3 polynomial) */
+const CRC32_TABLE = new Uint32Array(256);
+for (let i = 0; i < 256; i++) {
+  let crc = i;
+  for (let j = 0; j < 8; j++) {
+    crc = crc & 1 ? (crc >>> 1) ^ 0xedb88320 : crc >>> 1;
+  }
+  CRC32_TABLE[i] = crc >>> 0;
+}
+
+function computeCRC32(data: Uint8Array, start: number, length: number): number {
+  let crc = 0xffffffff;
+  const end = start + length;
+  for (let i = start; i < end; i++) {
+    crc = (crc >>> 8) ^ CRC32_TABLE[(crc ^ data[i]) & 0xff];
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -336,6 +355,13 @@ export class BinaryWriter {
   }
 
   /**
+   * Get a Uint8Array view of the current buffer contents
+   */
+  getUint8View(): Uint8Array {
+    return new Uint8Array(this.buffer);
+  }
+
+  /**
    * Get the final buffer (trimmed to actual size)
    */
   getBuffer(): ArrayBuffer {
@@ -612,7 +638,7 @@ export class BinarySerializer {
   /**
    * Decode a scene graph from binary
    */
-  decode(buffer: ArrayBuffer, _options: IBinaryDecoderOptions = {}): ISceneGraph {
+  decode(buffer: ArrayBuffer, options: IBinaryDecoderOptions = {}): ISceneGraph {
     const reader = new BinaryReader(buffer, this.options.littleEndian);
 
     // Read file header
@@ -634,7 +660,7 @@ export class BinarySerializer {
 
     // Read chunks
     for (let i = 0; i < chunkCount; i++) {
-      this.readChunk(reader, sceneGraph);
+      this.readChunk(reader, sceneGraph, buffer, options);
     }
 
     return sceneGraph;
@@ -702,11 +728,7 @@ export class BinarySerializer {
   // Private: Chunk Writers
   // ============================================================================
 
-  private writeChunkHeader(
-    writer: BinaryWriter,
-    type: number,
-    flags = 0
-  ): number {
+  private writeChunkHeader(writer: BinaryWriter, type: number, flags = 0): number {
     const headerOffset = writer.getOffset();
     writer.writeUint32(type);
     writer.writeUint32(0); // Placeholder for size
@@ -719,9 +741,10 @@ export class BinarySerializer {
     const endOffset = writer.getOffset();
     const size = endOffset - headerOffset - 16; // Exclude header
     writer.patchUint32(headerOffset + 4, size);
-    // Simple checksum (sum of all bytes)
-    // In production, use CRC32 or similar
-    writer.patchUint32(headerOffset + 12, size); // Placeholder checksum
+    // CRC32 over chunk data (after 16-byte header)
+    const dataStart = headerOffset + 16;
+    const checksum = computeCRC32(writer.getUint8View(), dataStart, size);
+    writer.patchUint32(headerOffset + 12, checksum);
     writer.align(this.options.chunkAlignment!);
   }
 
@@ -737,10 +760,7 @@ export class BinarySerializer {
     this.finalizeChunk(writer, headerOffset);
   }
 
-  private writeMetadataChunk(
-    writer: BinaryWriter,
-    sceneGraph: ISceneGraph
-  ): void {
+  private writeMetadataChunk(writer: BinaryWriter, sceneGraph: ISceneGraph): void {
     const headerOffset = this.writeChunkHeader(writer, ChunkType.METADATA);
 
     const meta = sceneGraph.metadata;
@@ -791,11 +811,7 @@ export class BinarySerializer {
     }
   }
 
-  private writeNode(
-    writer: BinaryWriter,
-    node: ISceneNode,
-    parentIndex: number
-  ): void {
+  private writeNode(writer: BinaryWriter, node: ISceneNode, parentIndex: number): void {
     writer.writeStringIndex(this.stringTable.add(node.id));
     writer.writeStringIndex(this.stringTable.add(node.name));
     writer.writeStringIndex(this.stringTable.add(node.type));
@@ -821,26 +837,17 @@ export class BinarySerializer {
     }
   }
 
-  private writeMaterialsChunk(
-    writer: BinaryWriter,
-    materials: IMaterial[]
-  ): void {
+  private writeMaterialsChunk(writer: BinaryWriter, materials: IMaterial[]): void {
     const headerOffset = this.writeChunkHeader(writer, ChunkType.MATERIALS);
 
     writer.writeUint32(materials.length);
     for (const material of materials) {
       writer.writeStringIndex(this.stringTable.add(material.id));
       writer.writeStringIndex(this.stringTable.add(material.name));
-      writer.writeUint8(
-        material.type === 'pbr' ? 0 : material.type === 'unlit' ? 1 : 2
-      );
+      writer.writeUint8(material.type === 'pbr' ? 0 : material.type === 'unlit' ? 1 : 2);
       writer.writeBoolean(material.doubleSided);
       writer.writeUint8(
-        material.alphaMode === 'opaque'
-          ? 0
-          : material.alphaMode === 'mask'
-          ? 1
-          : 2
+        material.alphaMode === 'opaque' ? 0 : material.alphaMode === 'mask' ? 1 : 2
       );
       writer.writeFloat32(material.alphaCutoff);
 
@@ -873,10 +880,7 @@ export class BinarySerializer {
     this.finalizeChunk(writer, headerOffset);
   }
 
-  private writeTexturesChunk(
-    writer: BinaryWriter,
-    textures: ITexture[]
-  ): void {
+  private writeTexturesChunk(writer: BinaryWriter, textures: ITexture[]): void {
     const headerOffset = this.writeChunkHeader(writer, ChunkType.TEXTURES);
 
     writer.writeUint32(textures.length);
@@ -908,18 +912,10 @@ export class BinarySerializer {
       // Primitives
       writer.writeUint16(mesh.primitives.length);
       for (const primitive of mesh.primitives) {
-        writer.writeUint8(
-          primitive.mode === 'triangles'
-            ? 4
-            : primitive.mode === 'lines'
-            ? 1
-            : 0
-        );
+        writer.writeUint8(primitive.mode === 'triangles' ? 4 : primitive.mode === 'lines' ? 1 : 0);
         writer.writeBoolean(!!primitive.materialRef);
         if (primitive.materialRef) {
-          writer.writeStringIndex(
-            this.stringTable.add(primitive.materialRef)
-          );
+          writer.writeStringIndex(this.stringTable.add(primitive.materialRef));
         }
       }
     }
@@ -927,10 +923,7 @@ export class BinarySerializer {
     this.finalizeChunk(writer, headerOffset);
   }
 
-  private writeAnimationsChunk(
-    writer: BinaryWriter,
-    animations: IAnimation[]
-  ): void {
+  private writeAnimationsChunk(writer: BinaryWriter, animations: IAnimation[]): void {
     const headerOffset = this.writeChunkHeader(writer, ChunkType.ANIMATIONS);
 
     writer.writeUint32(animations.length);
@@ -969,11 +962,28 @@ export class BinarySerializer {
   // Private: Chunk Readers
   // ============================================================================
 
-  private readChunk(reader: BinaryReader, sceneGraph: ISceneGraph): void {
+  private readChunk(
+    reader: BinaryReader,
+    sceneGraph: ISceneGraph,
+    buffer?: ArrayBuffer,
+    decodeOptions?: IBinaryDecoderOptions
+  ): void {
+    const headerOffset = reader.getOffset();
     const type = reader.readUint32();
     const size = reader.readUint32();
     const _flags = reader.readUint32();
-    const _checksum = reader.readUint32();
+    const checksum = reader.readUint32();
+
+    // Validate CRC32 checksum if requested
+    if (decodeOptions?.validateChecksums && buffer) {
+      const dataStart = headerOffset + 16;
+      const expected = computeCRC32(new Uint8Array(buffer), dataStart, size);
+      if (checksum !== expected) {
+        throw new Error(
+          `Chunk checksum mismatch at offset ${headerOffset}: expected 0x${expected.toString(16)}, got 0x${checksum.toString(16)}`
+        );
+      }
+    }
 
     const startOffset = reader.getOffset();
 
@@ -1020,10 +1030,7 @@ export class BinarySerializer {
     this.stringTable.load(strings);
   }
 
-  private readMetadataChunk(
-    reader: BinaryReader,
-    sceneGraph: ISceneGraph
-  ): void {
+  private readMetadataChunk(reader: BinaryReader, sceneGraph: ISceneGraph): void {
     sceneGraph.metadata.name = this.stringTable.get(reader.readStringIndex());
     sceneGraph.metadata.description = reader.readString() || undefined;
     sceneGraph.metadata.author = reader.readString() || undefined;
@@ -1034,16 +1041,11 @@ export class BinarySerializer {
     const tagCount = reader.readUint16();
     sceneGraph.metadata.tags = [];
     for (let i = 0; i < tagCount; i++) {
-      sceneGraph.metadata.tags.push(
-        this.stringTable.get(reader.readStringIndex())
-      );
+      sceneGraph.metadata.tags.push(this.stringTable.get(reader.readStringIndex()));
     }
   }
 
-  private readNodesChunk(
-    reader: BinaryReader,
-    sceneGraph: ISceneGraph
-  ): void {
+  private readNodesChunk(reader: BinaryReader, sceneGraph: ISceneGraph): void {
     const count = reader.readUint32();
     const nodes: ISceneNode[] = [];
     const parentIndices: number[] = [];
@@ -1085,9 +1087,7 @@ export class BinarySerializer {
     // Skip component data for now
 
     const hasPrefabRef = reader.readBoolean();
-    const prefabRef = hasPrefabRef
-      ? this.stringTable.get(reader.readStringIndex())
-      : undefined;
+    const prefabRef = hasPrefabRef ? this.stringTable.get(reader.readStringIndex()) : undefined;
 
     return {
       node: {
@@ -1107,10 +1107,7 @@ export class BinarySerializer {
     };
   }
 
-  private readMaterialsChunk(
-    reader: BinaryReader,
-    sceneGraph: ISceneGraph
-  ): void {
+  private readMaterialsChunk(reader: BinaryReader, sceneGraph: ISceneGraph): void {
     const count = reader.readUint32();
     for (let i = 0; i < count; i++) {
       const id = this.stringTable.get(reader.readStringIndex());
@@ -1119,12 +1116,7 @@ export class BinarySerializer {
       const type = typeCode === 0 ? 'pbr' : typeCode === 1 ? 'unlit' : 'custom';
       const doubleSided = reader.readBoolean();
       const alphaModeCode = reader.readUint8();
-      const alphaMode =
-        alphaModeCode === 0
-          ? 'opaque'
-          : alphaModeCode === 1
-          ? 'mask'
-          : 'blend';
+      const alphaMode = alphaModeCode === 0 ? 'opaque' : alphaModeCode === 1 ? 'mask' : 'blend';
       const alphaCutoff = reader.readFloat32();
 
       const baseColor: [number, number, number, number] = [
@@ -1171,10 +1163,7 @@ export class BinarySerializer {
     }
   }
 
-  private readTexturesChunk(
-    reader: BinaryReader,
-    sceneGraph: ISceneGraph
-  ): void {
+  private readTexturesChunk(reader: BinaryReader, sceneGraph: ISceneGraph): void {
     const count = reader.readUint32();
     for (let i = 0; i < count; i++) {
       const id = this.stringTable.get(reader.readStringIndex());
@@ -1203,10 +1192,7 @@ export class BinarySerializer {
     }
   }
 
-  private readMeshesChunk(
-    reader: BinaryReader,
-    sceneGraph: ISceneGraph
-  ): void {
+  private readMeshesChunk(reader: BinaryReader, sceneGraph: ISceneGraph): void {
     const count = reader.readUint32();
     for (let i = 0; i < count; i++) {
       const id = this.stringTable.get(reader.readStringIndex());
@@ -1219,11 +1205,7 @@ export class BinarySerializer {
       for (let j = 0; j < primitiveCount; j++) {
         const modeCode = reader.readUint8();
         const mode: PrimitiveMode =
-          modeCode === 4
-            ? 'triangles'
-            : modeCode === 1
-            ? 'lines'
-            : 'points';
+          modeCode === 4 ? 'triangles' : modeCode === 1 ? 'lines' : 'points';
         const hasMaterialRef = reader.readBoolean();
         const materialRef = hasMaterialRef
           ? this.stringTable.get(reader.readStringIndex())
@@ -1245,10 +1227,7 @@ export class BinarySerializer {
     }
   }
 
-  private readAnimationsChunk(
-    reader: BinaryReader,
-    sceneGraph: ISceneGraph
-  ): void {
+  private readAnimationsChunk(reader: BinaryReader, sceneGraph: ISceneGraph): void {
     const count = reader.readUint32();
     for (let i = 0; i < count; i++) {
       const id = this.stringTable.get(reader.readStringIndex());
@@ -1267,10 +1246,7 @@ export class BinarySerializer {
     }
   }
 
-  private readBuffersChunk(
-    reader: BinaryReader,
-    sceneGraph: ISceneGraph
-  ): void {
+  private readBuffersChunk(reader: BinaryReader, sceneGraph: ISceneGraph): void {
     const count = reader.readUint32();
     for (let i = 0; i < count; i++) {
       const id = this.stringTable.get(reader.readStringIndex());

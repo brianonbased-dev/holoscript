@@ -208,9 +208,7 @@ export class TenantManager {
       metadata: updates.metadata
         ? { ...existing.metadata, ...updates.metadata }
         : existing.metadata,
-      quotas: updates.quotas
-        ? { ...existing.quotas, ...updates.quotas }
-        : existing.quotas,
+      quotas: updates.quotas ? { ...existing.quotas, ...updates.quotas } : existing.quotas,
       settings: updates.settings
         ? { ...existing.settings, ...updates.settings }
         : existing.settings,

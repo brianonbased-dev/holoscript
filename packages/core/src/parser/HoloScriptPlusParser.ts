@@ -72,6 +72,12 @@ type TokenType =
   | 'UNDERSCORE'
   | 'ON_ERROR'
   | 'ASSERT'
+  | 'PLUS'
+  | 'MINUS'
+  | 'ASTERISK'
+  | 'SLASH'
+  | 'PERCENT'
+  | 'EXCLAMATION'
   | 'EOF';
 
 interface Token {
@@ -234,8 +240,50 @@ class Lexer {
         this.tokens.push(this.createToken('DOT', '.'));
         continue;
       }
-      if (char === '/' && this.peek(1) === '*') {
-        this.skipBlockComment();
+      if (char === '+') {
+        this.advance();
+        this.tokens.push(this.createToken('PLUS', '+'));
+        continue;
+      }
+      if (char === '-') {
+        if (this.peek(1) === '>') {
+          const startCol = this.column;
+          this.advance(); // -
+          this.advance(); // >
+          this.tokens.push(this.createToken('ARROW', '->'));
+          this.tokens[this.tokens.length - 1].column = startCol;
+          continue;
+        }
+        this.advance();
+        this.tokens.push(this.createToken('MINUS', '-'));
+        continue;
+      }
+      if (char === '*') {
+        this.advance();
+        this.tokens.push(this.createToken('ASTERISK', '*'));
+        continue;
+      }
+      if (char === '/') {
+        if (this.peek(1) === '*') {
+          this.skipBlockComment();
+          continue;
+        }
+        if (this.peek(1) === '/') {
+          this.skipLineComment();
+          continue;
+        }
+        this.advance();
+        this.tokens.push(this.createToken('SLASH', '/'));
+        continue;
+      }
+      if (char === '%') {
+        this.advance();
+        this.tokens.push(this.createToken('PERCENT', '%'));
+        continue;
+      }
+      if (char === '!') {
+        this.advance();
+        this.tokens.push(this.createToken('EXCLAMATION', '!'));
         continue;
       }
       if (char === '=') {
@@ -789,24 +837,45 @@ export class HoloScriptPlusParser {
   }
 
   private buildResult(root: HSPlusNode): HSPlusCompileResult {
-    const isFragment = root.type === 'fragment';
+    const isFragment = (root as any).type === 'fragment';
+    const directives = root.directives || [];
+
+    // Extract version and migrations from directives
+    let version: string | number | undefined;
+    const migrations: any[] = [];
+
+    for (const d of directives) {
+      if ((d as any).type === 'version') {
+        version = (d as any).version;
+      } else if ((d as any).type === 'migrate') {
+        migrations.push({
+          type: 'Migration',
+          fromVersion: (d as any).fromVersion,
+          body: (d as any).body,
+        });
+      }
+    }
+
+    // Default to '1.0' if not specified
+    if (version === undefined) version = '1.0';
 
     const ast: ASTProgram = {
       type: 'Program',
       id: 'root',
       properties: isFragment ? root.properties || {} : {},
-      directives: isFragment ? root.directives || [] : [],
+      directives: directives,
       children: isFragment ? root.children || [] : [root],
       traits: isFragment ? root.traits || new Map() : new Map(),
       loc: root.loc,
       body: (isFragment ? root.children || [] : [root]) as any,
-      version: '1.0',
+      version: version,
+      migrations: migrations.length > 0 ? migrations : undefined,
       root,
       imports: this.imports,
       hasState: this.hasState,
       hasVRTraits: this.hasVRTraits,
       hasControlFlow: this.hasControlFlow,
-    };
+    } as any;
 
     return {
       success: this.errors.length === 0,
@@ -852,7 +921,12 @@ export class HoloScriptPlusParser {
         while (this.check('AT')) {
           const directive = this.parseDirective();
           if (directive) {
-            currentDirectives.push(directive);
+            const type = (directive as any).type;
+            if (type === 'version' || type === 'migrate' || type === 'import') {
+              globalDirectives.push(directive);
+            } else {
+              currentDirectives.push(directive);
+            }
           }
           this.skipNewlines();
         }
@@ -868,7 +942,25 @@ export class HoloScriptPlusParser {
         if (isNodeStart) {
           const node = this.parseNode();
           // Attach preceding directives to this node
-          node.directives = [...currentDirectives, ...(node.directives || [])] as any;
+          const existingDirectives = node.directives || [];
+          node.directives = [...currentDirectives, ...existingDirectives] as any;
+
+          // Extract @version and @migrate directives into template properties
+          if ((node as any).type === 'template') {
+            for (const d of currentDirectives) {
+              if ((d as any).type === 'version') {
+                (node as any).version = (d as any).version;
+              } else if ((d as any).type === 'migrate') {
+                if (!(node as any).migrations) (node as any).migrations = [];
+                (node as any).migrations.push({
+                  type: 'Migration',
+                  fromVersion: (d as any).fromVersion,
+                  body: (d as any).body,
+                });
+              }
+            }
+          }
+
           topLevelNodes.push(node);
         } else {
           // If directives with no node, handle as global or fragment
@@ -969,10 +1061,42 @@ export class HoloScriptPlusParser {
     if (type === 'template') {
       const templateName = this.expect('STRING', 'Expected template name').value;
       const templateBody = this.parseBlockContent();
+
+      let version: number | undefined;
+      const migrations: any[] = [];
+      const directives: any[] = [];
+      const children: any[] = [];
+
+      // Extract from directives and children inside the template block
+      for (const [key, value] of Object.entries(templateBody)) {
+        if (key === '@version') {
+          version = (value as any).version;
+          delete templateBody[key];
+        } else if (key === '@migrate') {
+          migrations.push({
+            type: 'Migration',
+            fromVersion: (value as any).fromVersion,
+            body: (value as any).body,
+          });
+          delete templateBody[key];
+        } else if (key.startsWith('@')) {
+          directives.push(value);
+          delete templateBody[key];
+        } else if (typeof value === 'object' && value && (value as any).type) {
+          children.push(value);
+          delete templateBody[key];
+        }
+      }
+
       return {
         type: 'template' as any,
         name: templateName,
-        body: templateBody,
+        properties: templateBody, // Now contains only true properties
+        version,
+        migrations,
+        directives,
+        children,
+        traits: new Map(),
         loc: {
           start: { line: startToken.line, column: startToken.column },
           end: { line: this.current().line, column: this.current().column },
@@ -1742,6 +1866,31 @@ export class HoloScriptPlusParser {
     }
 
     // =========================================================================
+    // Hot-Reload: @version(N) and @migrate from(N) { ... }
+    // =========================================================================
+    if (name === 'version') {
+      this.expect('LPAREN', 'Expected ( after @version');
+      const versionToken = this.expect('NUMBER', 'Expected version number');
+      const version = Number(versionToken.value);
+      this.expect('RPAREN', 'Expected ) after version number');
+      return { type: 'version' as const, version } as any;
+    }
+
+    if (name === 'migrate') {
+      // @migrate from(N) { ... }
+      const fromToken = this.expect('IDENTIFIER', 'Expected "from" after @migrate');
+      if (fromToken.value !== 'from') {
+        this.error('Expected "from" after @migrate');
+      }
+      this.expect('LPAREN', 'Expected ( after from');
+      const fromVersionToken = this.expect('NUMBER', 'Expected version number');
+      const fromVersion = Number(fromVersionToken.value);
+      this.expect('RPAREN', 'Expected ) after version number');
+      const body = this.check('LBRACE') ? this.parseCodeBlock() : '';
+      return { type: 'migrate' as const, fromVersion, body } as any;
+    }
+
+    // =========================================================================
     // Fallback: Unknown directive - treat as generic trait with config
     // =========================================================================
     // Check if it might be a structural directive we haven't explicitly handled
@@ -2064,7 +2213,10 @@ export class HoloScriptPlusParser {
         // Only for non-child-node identifiers followed by a value token
         else if (
           !childNodeKeywords.includes(token.value) &&
-          (next.type === 'STRING' || next.type === 'NUMBER' || next.type === 'BOOLEAN' || next.type === 'NULL')
+          (next.type === 'STRING' ||
+            next.type === 'NUMBER' ||
+            next.type === 'BOOLEAN' ||
+            next.type === 'NULL')
         ) {
           const key = this.advance().value;
           result.properties[key] = this.parseValue();

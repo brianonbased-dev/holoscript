@@ -16,16 +16,16 @@ The core insight: HoloScript's reactive state system and trait composition natur
 
 ## Sprint 4 Priorities
 
-| Priority | Focus                           | Effort | Dependencies         | Status       |
-| -------- | ------------------------------- | ------ | -------------------- | ------------ |
-| **1**    | AgentRegistry & Discovery       | Medium | HITL complete        | ✅ Complete  |
-| **2**    | Multi-Agent Choreography Core   | High   | Priority 1           | ✅ Complete  |
-| **3**    | Agent Negotiation Protocol      | High   | Priority 2           | ✅ Complete  |
-| **4**    | Spatial Context Awareness       | Medium | Priority 2           | ✅ Complete  |
-| **5**    | Consensus Mechanisms            | Medium | Priority 3           | ✅ Complete  |
-| **6**    | Agent Communication Channels    | Medium | NetworkedTrait       | ✅ Complete  |
-| **7**    | Hierarchical Agent Orchestration| High   | Priority 2           | ✅ Complete  |
-| **8**    | Agent Debugging & Telemetry     | Medium | All priorities       | ✅ Complete  |
+| Priority | Focus                            | Effort | Dependencies   | Status      |
+| -------- | -------------------------------- | ------ | -------------- | ----------- |
+| **1**    | AgentRegistry & Discovery        | Medium | HITL complete  | ✅ Complete |
+| **2**    | Multi-Agent Choreography Core    | High   | Priority 1     | ✅ Complete |
+| **3**    | Agent Negotiation Protocol       | High   | Priority 2     | ✅ Complete |
+| **4**    | Spatial Context Awareness        | Medium | Priority 2     | ✅ Complete |
+| **5**    | Consensus Mechanisms             | Medium | Priority 3     | ✅ Complete |
+| **6**    | Agent Communication Channels     | Medium | NetworkedTrait | ✅ Complete |
+| **7**    | Hierarchical Agent Orchestration | High   | Priority 2     | ✅ Complete |
+| **8**    | Agent Debugging & Telemetry      | Medium | All priorities | ✅ Complete |
 
 ---
 
@@ -76,7 +76,7 @@ agent#vision_analyzer {
     { type: "analyze", domain: "vision", latency: "fast" },
     { type: "detect", domain: "spatial", latency: "medium" }
   ]
-  
+
   @on_discovered(peer) {
     log("Discovered peer agent: " + peer.name)
   }
@@ -140,20 +140,20 @@ export class ChoreographyEngine {
 ```holoscript
 choreography#build_3d_scene {
   @goal "Generate and review a 3D environment"
-  
+
   @participants [
     agent#design_generator,
     agent#qa_reviewer,
     agent#human_approver
   ]
-  
+
   step#generate {
     agent: design_generator
     action: "generate_scene"
     inputs: { prompt: state.userPrompt }
     outputs: { scene: "generated_scene" }
   }
-  
+
   step#review {
     agent: qa_reviewer
     action: "quality_check"
@@ -161,7 +161,7 @@ choreography#build_3d_scene {
     dependencies: [step#generate]
     outputs: { approved: "qa_passed" }
   }
-  
+
   step#human_review {
     @hitl_gate // Uses HITLTrait integration
     agent: human_approver
@@ -226,17 +226,17 @@ export class NegotiationProtocol {
 negotiation#resource_allocation {
   @topic "Allocate GPU rendering time"
   @mechanism "weighted" // voting weight by trust level
-  
+
   @participants [
     agent#render_job_1,
     agent#render_job_2,
     agent#scheduler
   ]
-  
+
   @on_resolved(winner) {
     winner.allocate_resource("gpu", 60s)
   }
-  
+
   @on_deadlock {
     escalate_to(agent#admin)
   }
@@ -295,13 +295,13 @@ agent#patrol_bot {
     updateRate: 30hz,
     perceptionRadius: 10m
   )
-  
+
   @on_entity_entered(entity) {
     if (entity.type == "visitor") {
       initiate_greeting(entity)
     }
   }
-  
+
   @on_region_changed(from, to) {
     update_patrol_route(to)
   }
@@ -386,7 +386,7 @@ export class AgentMessaging {
 channel#team_alpha {
   @participants [agent#leader, agent#worker_1, agent#worker_2]
   @encryption "aes-256"
-  
+
   @schema {
     type: "task_update" | "status_report" | "command"
     payload: any
@@ -445,19 +445,19 @@ export interface DelegationRule {
 ```holoscript
 hierarchy#content_team {
   supervisor: agent#content_director
-  
+
   subordinates: [
     agent#writer_1,
     agent#writer_2,
     agent#editor
   ]
-  
+
   @delegation_rules {
     "write_article" -> capability("nlp.generate")
     "review_article" -> capability("nlp.analyze")
     "publish" -> requires_approval(supervisor)
   }
-  
+
   @escalation_path [
     agent#content_director,
     agent#human_manager
@@ -496,8 +496,13 @@ export interface AgentTelemetry {
 }
 
 export interface TelemetryEvent {
-  type: 'message_sent' | 'message_received' | 'task_started' | 
-        'task_completed' | 'negotiation_vote' | 'consensus_propose';
+  type:
+    | 'message_sent'
+    | 'message_received'
+    | 'task_started'
+    | 'task_completed'
+    | 'negotiation_vote'
+    | 'consensus_propose';
   data: any;
   latency?: number;
 }
@@ -558,7 +563,7 @@ Agent messaging uses NetworkedTrait's SyncProtocol for reliable delivery:
 ```typescript
 class AgentMessaging {
   constructor(private sync: SyncProtocol) {}
-  
+
   async send(channelId: string, message: AgentMessage) {
     await this.sync.publish(`agent.${channelId}`, message);
   }
@@ -573,7 +578,7 @@ Distributed rendering agents use RenderNetworkTrait for GPU job management:
 agent#render_farm {
   @capabilities [{ type: "render", domain: "gpu" }]
   @render_network(provider: "rndr")
-  
+
   @on_task(job) {
     submit_render_job(job)
   }
@@ -588,25 +593,26 @@ To address the 80% coverage target (currently at ~39%):
 
 ### Phase 1: Zero-Coverage Traits (Weeks 1-2)
 
-| File | Current | Target | Tests Needed |
-|------|---------|--------|--------------|
-| HITLTrait.ts | 0% | 70% | Approval flows, escalation, rollback |
-| RenderNetworkTrait.ts | 0% | 70% | Job states, polling, GPU dispatch |
-| ZoraCoinsTrait.ts | 0% | 70% | Minting, rewards, Base L2 integration |
-| OpenXRHALTrait.ts | 0% | 50% | Session, haptics, device detection |
+| File                  | Current | Target | Tests Needed                          |
+| --------------------- | ------- | ------ | ------------------------------------- |
+| HITLTrait.ts          | 0%      | 70%    | Approval flows, escalation, rollback  |
+| RenderNetworkTrait.ts | 0%      | 70%    | Job states, polling, GPU dispatch     |
+| ZoraCoinsTrait.ts     | 0%      | 70%    | Minting, rewards, Base L2 integration |
+| OpenXRHALTrait.ts     | 0%      | 50%    | Session, haptics, device detection    |
 
 ### Phase 2: High-Impact Files (Weeks 3-4)
 
-| File | Current | Target |
-|------|---------|--------|
-| HoloScriptCodeParser.ts | 37% | 60% |
-| HoloScriptParser.ts | 50% | 70% |
-| TreeShaker.ts | 0% | 50% |
-| adapters.ts | 0% | 40% |
+| File                    | Current | Target |
+| ----------------------- | ------- | ------ |
+| HoloScriptCodeParser.ts | 37%     | 60%    |
+| HoloScriptParser.ts     | 50%     | 70%    |
+| TreeShaker.ts           | 0%      | 50%    |
+| adapters.ts             | 0%      | 40%    |
 
 ### Phase 3: New Agent Features (Ongoing)
 
 Every new Priority file must ship with:
+
 - Unit tests (80% coverage for new code)
 - Integration tests for cross-agent scenarios
 - Snapshot tests for message schemas
@@ -615,32 +621,32 @@ Every new Priority file must ship with:
 
 ## Timeline
 
-| Week | Focus | Deliverables |
-|------|-------|--------------|
-| 1 | Priority 1 | AgentRegistry, discovery tests |
-| 2 | Priority 2 | ChoreographyEngine core |
-| 3 | Priority 2 (cont) | Step execution, HITL integration |
-| 4 | Priority 3 | Negotiation protocol |
-| 5 | Priority 4 | Spatial context provider |
-| 6 | Priority 5 | Consensus mechanisms |
-| 7 | Priority 6 | Agent channels |
-| 8 | Priority 7 | Hierarchical orchestration |
-| 9-10 | Priority 8 | Debugging, telemetry |
-| 11-12 | Polish | Docs, examples, coverage push |
+| Week  | Focus             | Deliverables                     |
+| ----- | ----------------- | -------------------------------- |
+| 1     | Priority 1        | AgentRegistry, discovery tests   |
+| 2     | Priority 2        | ChoreographyEngine core          |
+| 3     | Priority 2 (cont) | Step execution, HITL integration |
+| 4     | Priority 3        | Negotiation protocol             |
+| 5     | Priority 4        | Spatial context provider         |
+| 6     | Priority 5        | Consensus mechanisms             |
+| 7     | Priority 6        | Agent channels                   |
+| 8     | Priority 7        | Hierarchical orchestration       |
+| 9-10  | Priority 8        | Debugging, telemetry             |
+| 11-12 | Polish            | Docs, examples, coverage push    |
 
 ---
 
 ## Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| Agent discovery latency | < 100ms |
-| Choreography step execution | < 1s per step |
-| Consensus time (3 agents) | < 2s |
-| Message delivery | 99.9% reliability |
-| Test coverage (new code) | 80% |
-| Overall test coverage | 60% (stretch: 80%) |
-| Documentation | 100% public APIs |
+| Metric                      | Target             |
+| --------------------------- | ------------------ |
+| Agent discovery latency     | < 100ms            |
+| Choreography step execution | < 1s per step      |
+| Consensus time (3 agents)   | < 2s               |
+| Message delivery            | 99.9% reliability  |
+| Test coverage (new code)    | 80%                |
+| Overall test coverage       | 60% (stretch: 80%) |
+| Documentation               | 100% public APIs   |
 
 ---
 
@@ -657,6 +663,7 @@ Every new Priority file must ship with:
 - [x] Migration guide from v3.3.0 ✅ (docs/MIGRATION_v3.3_to_v3.4.md)
 
 ### Extensibility Interfaces Added
+
 - [x] IAgentRef, IAgentMailbox (Actor Model)
 - [x] ISelfHealingService, IRecoveryStrategy (Self-Healing)
 - [x] IMarketplaceService, IHandoffRequest, IHandoffBid (Marketplace)

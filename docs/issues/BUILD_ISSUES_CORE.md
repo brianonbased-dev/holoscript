@@ -12,43 +12,50 @@ The `@holoscript/core` package **bundling works** (ESM + CJS via tsup), but tsc 
 
 ## Current Status
 
-| Component | Status |
-|-----------|--------|
-| ESM Bundle | ✅ Builds successfully |
-| CJS Bundle | ✅ Builds successfully |
-| Unit Tests | ✅ 4,746 passing, 5 skipped |
-| Type Declarations | ⚠️ ~30 errors remain |
+| Component         | Status                      |
+| ----------------- | --------------------------- |
+| ESM Bundle        | ✅ Builds successfully      |
+| CJS Bundle        | ✅ Builds successfully      |
+| Unit Tests        | ✅ 4,746 passing, 5 skipped |
+| Type Declarations | ⚠️ ~30 errors remain        |
 
 ## Recent Fixes Applied
 
 ### ✅ WebGPU Types (Fixed)
-- **Issue:** 184 errors for missing GPU* types (GPUDevice, GPUBuffer, GPUTexture, etc.)
+
+- **Issue:** 184 errors for missing GPU\* types (GPUDevice, GPUBuffer, GPUTexture, etc.)
 - **Fix:** Added `@webgpu/types@^0.1.40` to devDependencies and `"types": ["@webgpu/types"]` to tsconfig.json
 - **Result:** Reduced errors from 324 → 140
 
 ### ✅ Audio Module Types (Fixed)
+
 - Added `SpatialModel`, `RolloffType`, `LoopMode`, `SequencerState` types
 - Added `IEqualizerBand`, `IEqualizerEffect`, `ISpatialEffect`, `IAudioBus`, `ISequencerConfig`, `IPatternRef` interfaces
 - Extended `EffectType` and `AudioEventType` unions
 - Fixed `createPattern`, `createNote` helper functions
 
 ### ✅ WebGPU Buffer Types (Fixed)
+
 - Added type assertions for `writeBuffer` calls in WebGPURenderer.ts
 
 ### ✅ ShaderGraph Serialization (Fixed)
+
 - Created `ISerializedShaderGraph` interface
 - Updated `toJSON` return type and `fromJSON` parameter type
 
 ### ✅ Swarm Module (Fixed)
+
 - Updated `ICollectiveIntelligenceService` interface to match implementation
 - Fixed `IHiveContribution.content` type from `unknown` to `string`
 - Added `converged` and `iterations` to `refineWithACO` return type
 
 ### ✅ Messaging Types (Fixed)
+
 - Added `MessageAckStatus` type and updated `MessageAck` interface
 - Extended `MessagePriority` to include string aliases
 
 ### ✅ TraitBehavior (Added)
+
 - Created `TraitBehavior` interface in `types/index.ts`
 
 ---
@@ -56,7 +63,9 @@ The `@holoscript/core` package **bundling works** (ESM + CJS via tsup), but tsc 
 ## Remaining Issues (~30 Errors)
 
 ### Export Conflicts in index.ts
+
 Multiple modules export the same symbols:
+
 - `HeartbeatMessage` (hololand, negotiation)
 - `Vote`, `VotingResult` (negotiation)
 - `IVector3`, `IQuaternion`, `zeroVector` (physics)
@@ -66,12 +75,15 @@ Multiple modules export the same symbols:
 **Fix:** Use explicit named exports instead of `export *`
 
 ### AgentManifest/AgentCapability Export
+
 `AgentTypes.ts` uses `export default` but files try to import as named export.
 
 ### Message Interface Properties
+
 `AgentMessaging.ts` uses `recipientId` and `channelId` not in interface
 
 ### BinarySerializer Types
+
 - `ArrayBuffer | SharedArrayBuffer` assignment issue
 - `IMeshPrimitive` attributes type mismatch
 
@@ -83,10 +95,12 @@ Multiple modules export the same symbols:
 2. [ ] Fix `AgentTypes.ts` export pattern
 3. [ ] Extend `Message` interface with missing properties
 4. [ ] Fix `BinarySerializer` type assertions
+
 - `ISequencerConfig` - interface not exported
 - `IPatternRef` - interface not defined
 
 **Property Mismatches:**
+
 - `IDelayEffect` missing `time` property
 - `INote` missing `start` property
 - `IPattern` missing `length`, `loop` properties
@@ -94,6 +108,7 @@ Multiple modules export the same symbols:
 - `ISequence` missing `patternOrder`, `timeSignature`, `loop` properties
 
 **Suggested Fix:**
+
 1. Audit `AudioTypes.ts` interface definitions
 2. Add missing exports to `index.ts`
 3. Align interface properties with usage
@@ -105,10 +120,12 @@ Multiple modules export the same symbols:
 **File:** `src/shader/graph/ShaderGraph.ts`
 
 **Issues:**
+
 - Line 454: `'id' is specified more than once` - spread operator overwrites property
 - Lines 465-468: Type assertion on `json` object missing `name`, `id`, `description`, `version`, `metadata`, `connections` properties
 
 **Suggested Fix:**
+
 ```typescript
 // Line 454-455: Remove duplicate id
 const nodeWithId = {
@@ -134,11 +151,13 @@ const graph = new ShaderGraph((json as ShaderGraphJSON).name, (json as ShaderGra
 ### Swarm Module (~12 errors)
 
 **Files:**
+
 - `src/swarm/CollectiveIntelligence.ts`
 - `src/swarm/ContributionSynthesizer.ts`
 - `src/swarm/SwarmCoordinator.ts`
 
 **Issues:**
+
 - Method signatures don't match `ICollectiveIntelligenceService` interface
 - Methods return sync values but interface expects `Promise<T>`
 
@@ -161,6 +180,7 @@ Either update interface to match implementation or wrap returns in `Promise.reso
 ### Other Modules (~46 errors)
 
 **Files with type issues:**
+
 - `src/consensus/RaftConsensus.ts` - 1 error
 - `src/debug/AgentDebugger.ts` - 1 error
 - `src/debug/AgentInspector.ts` - 2 errors
@@ -205,13 +225,13 @@ To achieve a clean build:
 
 ## Test Status
 
-| Suite | Status | Notes |
-|-------|--------|-------|
-| Unit Tests (vitest) | ✅ 4700+ passing | Works without dist |
-| Puppeteer Tests | ✅ 34/34 passing | New feature complete |
-| MCP Server E2E | ✅ Passing | No core dependency |
-| Live Integration | ❌ Blocked | Requires dist build |
-| tree-sitter | ❌ Skipped | CLI not installed |
+| Suite               | Status           | Notes                |
+| ------------------- | ---------------- | -------------------- |
+| Unit Tests (vitest) | ✅ 4700+ passing | Works without dist   |
+| Puppeteer Tests     | ✅ 34/34 passing | New feature complete |
+| MCP Server E2E      | ✅ Passing       | No core dependency   |
+| Live Integration    | ❌ Blocked       | Requires dist build  |
+| tree-sitter         | ❌ Skipped       | CLI not installed    |
 
 ---
 

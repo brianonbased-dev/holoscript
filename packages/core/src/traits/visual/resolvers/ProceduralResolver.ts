@@ -57,19 +57,15 @@ export class ProceduralResolver implements AssetResolverPlugin {
   }
 
   /** Generate RGBA texture data from noise parameters. */
-  private generateTexture(
-    type: string,
-    params: Record<string, number>,
-    size: number,
-  ): ArrayBuffer {
+  private generateTexture(type: string, params: Record<string, number>, size: number): ArrayBuffer {
     const pixels = new Uint8Array(size * size * 4);
     const scale = params.scale ?? 4;
 
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         const idx = (y * size + x) * 4;
-        const nx = x / size * scale;
-        const ny = y / size * scale;
+        const nx = (x / size) * scale;
+        const ny = (y / size) * scale;
 
         let value: number;
         switch (type) {

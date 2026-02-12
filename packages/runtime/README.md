@@ -14,17 +14,17 @@ The runtime is the execution engine that brings HoloScript code to life in the b
 
 ## Entry Points
 
-| Import | Description |
-|--------|-------------|
-| `@holoscript/runtime` | All APIs |
-| `@holoscript/runtime/events` | Event bus |
-| `@holoscript/runtime/storage` | Storage adapters |
-| `@holoscript/runtime/device` | Device detection |
-| `@holoscript/runtime/timing` | Timing utilities |
-| `@holoscript/runtime/math` | Math helpers |
-| `@holoscript/runtime/navigation` | Client-side routing |
-| `@holoscript/runtime/browser` | Scene loader + Three.js runtime |
-| `@holoscript/runtime/global` | IIFE bundle for `<script>` tags |
+| Import                           | Description                     |
+| -------------------------------- | ------------------------------- |
+| `@holoscript/runtime`            | All APIs                        |
+| `@holoscript/runtime/events`     | Event bus                       |
+| `@holoscript/runtime/storage`    | Storage adapters                |
+| `@holoscript/runtime/device`     | Device detection                |
+| `@holoscript/runtime/timing`     | Timing utilities                |
+| `@holoscript/runtime/math`       | Math helpers                    |
+| `@holoscript/runtime/navigation` | Client-side routing             |
+| `@holoscript/runtime/browser`    | Scene loader + Three.js runtime |
+| `@holoscript/runtime/global`     | IIFE bundle for `<script>` tags |
 
 ## Usage
 
@@ -45,11 +45,13 @@ await runtime.storage.set('score', 100);
 const score = await runtime.storage.get('score');
 
 // Device
-if (runtime.device.isVRCapable) { /* enter VR */ }
+if (runtime.device.isVRCapable) {
+  /* enter VR */
+}
 
 // Timing
 runtime.after(1000, () => console.log('delayed'));
-runtime.tween(0, 1, 500, (v) => mesh.opacity = v, runtime.easing.easeOut);
+runtime.tween(0, 1, 500, (v) => (mesh.opacity = v), runtime.easing.easeOut);
 
 // Math
 const pos = runtime.vec3.lerp(start, end, 0.5);
@@ -76,7 +78,9 @@ await rt.loadScene('scene.holo');
 ```typescript
 import { on, once, emit, off } from '@holoscript/runtime/events';
 
-const unsub = on('collision', (data) => { /* handle */ });
+const unsub = on('collision', (data) => {
+  /* handle */
+});
 emit('collision', { objectA: 'ball', objectB: 'wall' });
 unsub(); // unsubscribe
 ```
@@ -100,20 +104,33 @@ await db.set('scene1', largeSceneData);
 ```typescript
 import { device, isMobile, isVRCapable } from '@holoscript/runtime/device';
 
-if (await device.supportsVR()) { /* enable VR button */ }
-if (device.prefersReducedMotion) { /* disable animations */ }
+if (await device.supportsVR()) {
+  /* enable VR button */
+}
+if (device.prefersReducedMotion) {
+  /* disable animations */
+}
 console.log(device.getMaxTextureSize()); // e.g. 4096
 ```
 
 ### Timing
 
 ```typescript
-import { after, every, debounce, throttle, wait, createLoop, tween, easing } from '@holoscript/runtime/timing';
+import {
+  after,
+  every,
+  debounce,
+  throttle,
+  wait,
+  createLoop,
+  tween,
+  easing,
+} from '@holoscript/runtime/timing';
 
 const cancel = every(16, () => update());
 const loop = createLoop((delta) => animate(delta));
 await wait(1000);
-tween(0, 100, 2000, (v) => el.style.left = v + 'px', easing.easeOutElastic);
+tween(0, 100, 2000, (v) => (el.style.left = v + 'px'), easing.easeOutElastic);
 ```
 
 ### Math
@@ -131,18 +148,23 @@ const n = fbm(x * 0.1, 4, 2.0, 0.5); // fractal noise
 The runtime includes 50+ trait implementations organized by category:
 
 ### Interaction (18 traits)
+
 `GrabbableTrait`, `ThrowableTrait`, `PointableTrait`, `HoverableTrait`, `ClickableTrait`, `DraggableTrait`, `ScalableTrait`, `CollidableTrait`, `PhysicsTrait`, `GravityTrait`, `TriggerTrait`, `GlowingTrait`, `TransparentTrait`, `SpinningTrait`, `FloatingTrait`, `PulseTrait`, `OutlineTrait`, `AnimatedTrait`
 
 ### Physics (10 traits)
+
 `ClothTrait`, `SoftBodyTrait`, `FluidTrait`, `BuoyancyTrait`, `RopeTrait`, `WindTrait`, `JointTrait`, `RigidbodyTrait`, `DestructionTrait`, `LookAtTrait`
 
 ### AI/Behavior (5 traits)
+
 `BehaviorTreeTrait`, `EmotionTrait`, `GoalOrientedTrait`, `PerceptionTrait`, `MemoryTrait`
 
 ### Extended (11 traits)
+
 `RotatableTrait`, `StackableTrait`, `SnappableTrait`, `BreakableTrait`, `CharacterTrait`, `PatrolTrait`, `NetworkedTrait`, `AnchorTrait`, `SpatialAudioTrait`, `ReverbZoneTrait`, `VoiceProximityTrait`
 
 ### Advanced (10 traits)
+
 `TeleportTrait`, `HandTrackingTrait`, `HapticTrait`, `UIPanelTrait`, `ParticleSystemTrait`, `WeatherTrait`, `DayNightTrait`, `LODTrait`, `PortalTrait`, `MirrorTrait`
 
 ## Physics Engine

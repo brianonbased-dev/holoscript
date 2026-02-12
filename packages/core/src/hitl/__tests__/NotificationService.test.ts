@@ -145,11 +145,23 @@ describe('HITLNotificationService', () => {
     });
 
     it('should handle partial failures gracefully', async () => {
-      // First call succeeds, second fails  
+      // First call succeeds, second fails
       mockFetch
-        .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK', headers: { get: () => null }, json: () => Promise.resolve({}) })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          headers: { get: () => null },
+          json: () => Promise.resolve({}),
+        })
         .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK', headers: { get: () => null }, json: () => Promise.resolve({}) });
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          headers: { get: () => null },
+          json: () => Promise.resolve({}),
+        });
 
       const results = await service.notify(mockApproval);
 
@@ -163,7 +175,7 @@ describe('HITLNotificationService', () => {
         status: 200,
         statusText: 'OK',
         json: () => Promise.resolve({ id: 'msg_abc123' }),
-        headers: { get: (name: string) => name === 'x-message-id' ? 'msg_abc123' : null },
+        headers: { get: (name: string) => (name === 'x-message-id' ? 'msg_abc123' : null) },
       });
 
       const results = await service.notify(mockApproval);
@@ -503,9 +515,7 @@ describe('HITLNotificationService', () => {
     });
 
     it('should handle timeout', async () => {
-      mockFetch.mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 10000))
-      );
+      mockFetch.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 10000)));
 
       // Should not hang indefinitely
       const resultsPromise = service.notify(mockApproval);

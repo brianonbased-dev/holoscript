@@ -7,11 +7,7 @@
 export { Vector3 } from './Vector3';
 
 // Boid-based flocking
-export {
-  FlockingBehavior,
-  type IBoid,
-  type IFlockingConfig,
-} from './FlockingBehavior';
+export { FlockingBehavior, type IBoid, type IFlockingConfig } from './FlockingBehavior';
 
 // Geometric formations
 export {

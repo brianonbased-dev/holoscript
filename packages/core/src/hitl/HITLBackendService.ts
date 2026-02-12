@@ -15,7 +15,14 @@ import { logger } from '../logger';
 // =============================================================================
 
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'expired' | 'auto_approved';
-export type ActionCategory = 'read' | 'write' | 'execute' | 'delete' | 'transfer' | 'financial' | 'admin';
+export type ActionCategory =
+  | 'read'
+  | 'write'
+  | 'execute'
+  | 'delete'
+  | 'transfer'
+  | 'financial'
+  | 'admin';
 export type NotificationChannel = 'email' | 'slack' | 'webhook' | 'sms' | 'push';
 
 export interface ApprovalRequest {
@@ -393,7 +400,14 @@ export class HITLBackendService {
   private config: HITLBackendConfig;
   private storage: StorageBackend;
   private ws: WebSocket | null = null;
-  private pendingRequests: Map<string, { resolve: (r: ApprovalResponse) => void; reject: (e: Error) => void; timeout: ReturnType<typeof setTimeout> }> = new Map();
+  private pendingRequests: Map<
+    string,
+    {
+      resolve: (r: ApprovalResponse) => void;
+      reject: (e: Error) => void;
+      timeout: ReturnType<typeof setTimeout>;
+    }
+  > = new Map();
   private eventListeners: Map<string, Set<(data: unknown) => void>> = new Map();
 
   constructor(config: Partial<HITLBackendConfig> = {}) {

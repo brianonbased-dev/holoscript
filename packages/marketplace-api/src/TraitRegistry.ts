@@ -157,9 +157,7 @@ export class InMemoryTraitDatabase implements ITraitDatabase {
     }
 
     if (query.keywords?.length) {
-      results = results.filter((t) =>
-        query.keywords!.some((k) => t.keywords.includes(k))
-      );
+      results = results.filter((t) => query.keywords!.some((k) => t.keywords.includes(k)));
     }
 
     if (query.verified !== undefined) {
@@ -370,7 +368,10 @@ export class TraitRegistry {
   /**
    * Publish a new trait or version
    */
-  async publish(request: PublishRequest, author: { name: string; email?: string; verified: boolean }): Promise<PublishResult> {
+  async publish(
+    request: PublishRequest,
+    author: { name: string; email?: string; verified: boolean }
+  ): Promise<PublishResult> {
     const warnings: string[] = [];
     const _errors: string[] = [];
 
@@ -401,7 +402,9 @@ export class TraitRegistry {
           version: request.version,
           tarballUrl: '',
           shasum: '',
-          errors: [`Version ${request.version} already exists. Bump the version number to publish.`],
+          errors: [
+            `Version ${request.version} already exists. Bump the version number to publish.`,
+          ],
         };
       }
 
@@ -491,7 +494,9 @@ export class TraitRegistry {
     }
 
     if (!/^[a-zA-Z][a-zA-Z0-9-_]*$/.test(request.name)) {
-      errors.push('Trait name must start with a letter and contain only letters, numbers, hyphens, and underscores');
+      errors.push(
+        'Trait name must start with a letter and contain only letters, numbers, hyphens, and underscores'
+      );
     }
 
     if (!request.version || !/^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?$/.test(request.version)) {
@@ -541,7 +546,12 @@ export class TraitRegistry {
   /**
    * Deprecate a trait or version
    */
-  async deprecate(traitId: string, message: string, version?: string, replacement?: string): Promise<void> {
+  async deprecate(
+    traitId: string,
+    message: string,
+    version?: string,
+    replacement?: string
+  ): Promise<void> {
     const trait = await this.db.getTraitById(traitId);
     if (!trait) {
       throw new Error(`Trait ${traitId} not found`);

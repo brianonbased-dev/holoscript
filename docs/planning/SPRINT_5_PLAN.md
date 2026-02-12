@@ -21,31 +21,34 @@ Sprint 5 implements the **Autonomous Agent Swarms** capability, building on Spri
 
 ## Sprint Priorities
 
-| Priority | Focus | Tests | Status |
-|----------|-------|-------|--------|
-| 1 | SwarmCoordinator (PSO/ACO) | 39 | ✅ Complete |
-| 2 | Leader Election | 23 | ✅ Complete |
-| 3 | Self-Healing Service | - | ✅ Complete |
-| 4 | Collective Intelligence | 64 | ✅ Complete |
-| 5 | Swarm Lifecycle | 74 | ✅ Complete |
-| 6 | Spatial Behaviors | 124 | ✅ Complete |
-| 7 | Messaging & Events | 78 | ✅ Complete |
-| 8 | Analytics & Monitoring | 57 | ✅ Complete |
+| Priority | Focus                      | Tests | Status      |
+| -------- | -------------------------- | ----- | ----------- |
+| 1        | SwarmCoordinator (PSO/ACO) | 39    | ✅ Complete |
+| 2        | Leader Election            | 23    | ✅ Complete |
+| 3        | Self-Healing Service       | -     | ✅ Complete |
+| 4        | Collective Intelligence    | 64    | ✅ Complete |
+| 5        | Swarm Lifecycle            | 74    | ✅ Complete |
+| 6        | Spatial Behaviors          | 124   | ✅ Complete |
+| 7        | Messaging & Events         | 78    | ✅ Complete |
+| 8        | Analytics & Monitoring     | 57    | ✅ Complete |
 
 **Total: 459 tests across 19 test files**
 
 ### Priority 1: SwarmCoordinator Implementation
+
 **Effort**: 3 weeks | **Risk**: Medium
 
 Implement the `ISwarmCoordinator` interface with real PSO/ACO optimization.
 
 **Deliverables**:
+
 - `packages/core/src/swarm/SwarmCoordinator.ts` - Core optimizer
 - `packages/core/src/swarm/PSOEngine.ts` - Particle Swarm Optimization
 - `packages/core/src/swarm/ACOEngine.ts` - Ant Colony Optimization
 - `packages/core/src/swarm/HybridOptimizer.ts` - Combined approach
 
 **Acceptance Criteria**:
+
 - [ ] PSO optimizes agent-task assignment with measured fitness improvement
 - [ ] ACO finds shortest choreography execution paths
 - [ ] Hybrid mode selects best algorithm per problem type
@@ -58,7 +61,7 @@ const coordinator = new SwarmCoordinator();
 const result = await coordinator.optimize(agents, tasks, {
   algorithm: 'hybrid',
   maxIterations: 100,
-  convergenceThreshold: 0.001
+  convergenceThreshold: 0.001,
 });
 // result.bestSolution: [0, 2, 1, 0, 2] - agent index per task
 // result.bestFitness: 0.92 - solution quality
@@ -67,16 +70,19 @@ const result = await coordinator.optimize(agents, tasks, {
 ---
 
 ### Priority 2: Leader Election System
+
 **Effort**: 2 weeks | **Risk**: Medium
 
 Implement Raft-inspired leader election for agent clusters.
 
 **Deliverables**:
+
 - `packages/core/src/swarm/LeaderElection.ts` - Election protocol
 - `packages/core/src/swarm/RaftNode.ts` - Raft state machine
 - `packages/core/src/swarm/HeartbeatMonitor.ts` - Leader health checks
 
 **Acceptance Criteria**:
+
 - [ ] Election completes within 500ms for clusters up to 10 agents
 - [ ] Leader failure triggers new election within 2 heartbeat intervals
 - [ ] Split-brain prevention via quorum requirements
@@ -96,11 +102,13 @@ election.onLeaderChange((newLeader) => {
 ---
 
 ### Priority 3: Self-Healing Service
+
 **Effort**: 2 weeks | **Risk**: Low
 
 Implement the `ISelfHealingService` interface with pattern learning.
 
 **Deliverables**:
+
 - `packages/core/src/recovery/SelfHealingService.ts` - Core service
 - `packages/core/src/recovery/strategies/` - Recovery strategy implementations
   - `NetworkRetryStrategy.ts`
@@ -110,6 +118,7 @@ Implement the `ISelfHealingService` interface with pattern learning.
 - `packages/core/src/recovery/PatternLearner.ts` - Failure pattern detection
 
 **Acceptance Criteria**:
+
 - [ ] Automatic retry with exponential backoff for transient failures
 - [ ] Circuit breaker trips after 5 consecutive failures
 - [ ] Pattern learner identifies recurring failure signatures
@@ -126,7 +135,7 @@ const failureId = await healing.reportFailure({
   agentId: 'agent-1',
   errorType: 'network-timeout',
   message: 'API call failed',
-  severity: 'medium'
+  severity: 'medium',
 });
 
 const result = await healing.attemptRecovery(failureId);
@@ -136,16 +145,19 @@ const result = await healing.attemptRecovery(failureId);
 ---
 
 ### Priority 4: Collective Intelligence Sessions
+
 **Effort**: 2 weeks | **Risk**: Medium
 
 Enable agents to collaborate on complex decisions through structured brainstorming.
 
 **Deliverables**:
+
 - `packages/core/src/swarm/CollectiveIntelligence.ts` - Session manager
 - `packages/core/src/swarm/ContributionSynthesizer.ts` - Merge contributions
 - `packages/core/src/swarm/VotingRound.ts` - Contribution ranking
 
 **Acceptance Criteria**:
+
 - [ ] Sessions support hypothesis, evidence, and solution contribution types
 - [ ] Voting mechanism ranks contributions by collective support
 - [ ] Synthesizer merges compatible solutions
@@ -166,7 +178,7 @@ await collective.join(session.id, 'agent-reviewer-2');
 await collective.contribute(session.id, 'agent-reviewer-1', {
   type: 'evidence',
   content: 'Line 45 has potential null reference',
-  confidence: 0.9
+  confidence: 0.9,
 });
 
 const synthesis = await collective.synthesize(session.id);
@@ -175,16 +187,19 @@ const synthesis = await collective.synthesize(session.id);
 ---
 
 ### Priority 5: Swarm Formation & Disbandment
+
 **Effort**: 1 week | **Risk**: Low
 
 Lifecycle management for agent swarms.
 
 **Deliverables**:
+
 - `packages/core/src/swarm/SwarmManager.ts` - Formation/disbandment
 - `packages/core/src/swarm/SwarmMembership.ts` - Join/leave protocol
 - `packages/core/src/swarm/QuorumPolicy.ts` - Minimum size enforcement
 
 **Acceptance Criteria**:
+
 - [ ] Agents can form swarms around shared objectives
 - [ ] Minimum quorum prevents under-sized swarms
 - [ ] Graceful disbandment redistributes pending tasks
@@ -194,16 +209,19 @@ Lifecycle management for agent swarms.
 ---
 
 ### Priority 6: Spatial Swarm Behaviors
+
 **Effort**: 2 weeks | **Risk**: High
 
 Emergent behaviors in spatial environments (flocking, formations, zones).
 
 **Deliverables**:
+
 - `packages/core/src/swarm/spatial/FlockingBehavior.ts` - Boid algorithm
 - `packages/core/src/swarm/spatial/FormationController.ts` - Geometric patterns
 - `packages/core/src/swarm/spatial/ZoneClaiming.ts` - Territory control
 
 **Acceptance Criteria**:
+
 - [ ] Flocking: separation, alignment, cohesion at 30hz update rate
 - [ ] Formations: line, circle, wedge, custom patterns
 - [ ] Zone claiming with conflict resolution
@@ -222,16 +240,19 @@ await formation.activate();
 ---
 
 ### Priority 7: Swarm Messaging & Event Bus
+
 **Effort**: 1.5 weeks | **Risk**: Low
 
 Efficient broadcast and multicast within swarms.
 
 **Deliverables**:
+
 - `packages/core/src/swarm/SwarmEventBus.ts` - Pub/sub within swarm
 - `packages/core/src/swarm/BroadcastChannel.ts` - Swarm-wide messages
 - `packages/core/src/swarm/GossipProtocol.ts` - Probabilistic propagation
 
 **Acceptance Criteria**:
+
 - [ ] Leader broadcast reaches all followers within 100ms
 - [ ] Gossip protocol for eventually-consistent state
 - [ ] Topic-based subscriptions for selective listening
@@ -241,16 +262,19 @@ Efficient broadcast and multicast within swarms.
 ---
 
 ### Priority 8: Swarm Analytics & Monitoring
+
 **Effort**: 1 week | **Risk**: Low
 
 Observability into swarm health and performance.
 
 **Deliverables**:
+
 - `packages/core/src/swarm/SwarmMetrics.ts` - Aggregate statistics
 - `packages/core/src/debug/SwarmInspector.ts` - Live swarm dashboard
 - Integration with TelemetryCollector from Sprint 4
 
 **Acceptance Criteria**:
+
 - [ ] Track: member count, task throughput, failure rate per swarm
 - [ ] Leader tenure tracking (average, current)
 - [ ] Optimization convergence history
@@ -292,6 +316,7 @@ Observability into swarm health and performance.
 ## Dependencies
 
 ### Internal (from Sprint 4)
+
 - `AgentRegistry` - Agent discovery
 - `AgentMessaging` - Inter-agent communication
 - `SpatialContextProvider` - Position/proximity tracking
@@ -299,6 +324,7 @@ Observability into swarm health and performance.
 - Extension interfaces: `ISwarmCoordinator`, `ILeaderElection`, etc.
 
 ### External
+
 - None required (pure TypeScript implementation)
 
 ---
@@ -306,18 +332,21 @@ Observability into swarm health and performance.
 ## Test Strategy
 
 ### Unit Tests
+
 - PSO convergence on known optimization problems (Rastrigin, Rosenbrock)
 - Leader election edge cases (split-brain, network partition)
 - Recovery strategy selection based on failure type
 - Formation geometry calculations
 
 ### Integration Tests
+
 - 10-agent swarm formation and task distribution
 - Leader failover under network partition
 - Collective intelligence session with 5 agents
 - Self-healing recovery chain (retry → circuit breaker → escalate)
 
 ### Performance Benchmarks
+
 - PSO optimization: 1000 iterations in < 500ms
 - Leader election: < 500ms for 10-node cluster
 - Message broadcast: < 100ms to 100 agents
@@ -327,14 +356,14 @@ Observability into swarm health and performance.
 
 ## Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| PSO fitness improvement | ≥ 50% over random assignment |
-| Leader election latency | < 500ms |
-| Self-healing success rate | ≥ 80% for known failure types |
+| Metric                    | Target                                  |
+| ------------------------- | --------------------------------------- |
+| PSO fitness improvement   | ≥ 50% over random assignment            |
+| Leader election latency   | < 500ms                                 |
+| Self-healing success rate | ≥ 80% for known failure types           |
 | Collective wisdom quality | Subjective: "useful" in 70% of sessions |
-| Test coverage (new code) | 80% |
-| Overall test coverage | 60% (addressing Sprint 4 gap) |
+| Test coverage (new code)  | 80%                                     |
+| Overall test coverage     | 60% (addressing Sprint 4 gap)           |
 
 ---
 
@@ -357,12 +386,12 @@ Observability into swarm health and performance.
 
 ## Risk Register
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| PSO convergence issues | High | Medium | Multiple algorithm options (ACO, bees) |
-| Leader election race conditions | High | Medium | Formal Raft implementation with proven semantics |
-| Spatial behaviors cause performance issues | Medium | High | Adaptive update rates, spatial hashing |
-| Collective intelligence produces noise | Low | Medium | Confidence thresholds, voting filters |
+| Risk                                       | Impact | Probability | Mitigation                                       |
+| ------------------------------------------ | ------ | ----------- | ------------------------------------------------ |
+| PSO convergence issues                     | High   | Medium      | Multiple algorithm options (ACO, bees)           |
+| Leader election race conditions            | High   | Medium      | Formal Raft implementation with proven semantics |
+| Spatial behaviors cause performance issues | Medium | High        | Adaptive update rates, spatial hashing           |
+| Collective intelligence produces noise     | Low    | Medium      | Confidence thresholds, voting filters            |
 
 ---
 

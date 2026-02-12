@@ -1,6 +1,6 @@
 /**
  * Agent Extension Types
- * 
+ *
  * Core extensibility interfaces for HoloScript agent system.
  * Consumers (like uaa2-service) can implement these to add
  * application-specific features.
@@ -16,22 +16,22 @@
  */
 export interface IAgentRef<T = unknown> {
   readonly agentId: string;
-  
+
   /**
    * Send message without waiting for response (fire-and-forget)
    */
   tell(message: T): Promise<void>;
-  
+
   /**
    * Send message and wait for response (request-response)
    */
   ask<R = unknown>(message: T, timeoutMs?: number): Promise<R>;
-  
+
   /**
    * Get current agent state (may wake agent if dormant)
    */
   getState(): Promise<unknown>;
-  
+
   /**
    * Check if agent is currently active
    */
@@ -46,12 +46,12 @@ export interface IAgentRefFactory {
    * Get reference to an agent (does not wake it)
    */
   getRef<T = unknown>(agentId: string): IAgentRef<T>;
-  
+
   /**
    * Spawn a new agent and return reference
    */
   spawn<T = unknown>(agentType: string, config?: Record<string, unknown>): Promise<IAgentRef<T>>;
-  
+
   /**
    * Stop an agent
    */
@@ -66,22 +66,22 @@ export interface IAgentMailbox<T = unknown> {
    * Enqueue a message
    */
   enqueue(message: T, priority?: 'low' | 'normal' | 'high'): void;
-  
+
   /**
    * Dequeue next message
    */
   dequeue(): T | undefined;
-  
+
   /**
    * Peek at next message without removing
    */
   peek(): T | undefined;
-  
+
   /**
    * Get queue depth
    */
   size(): number;
-  
+
   /**
    * Check if empty
    */
@@ -96,17 +96,17 @@ export interface IWakeOnDemandController {
    * Ensure agent is active (wake if dormant)
    */
   ensureActive(agentId: string): Promise<boolean>;
-  
+
   /**
    * Put agent to sleep (persist state, reduce resources)
    */
   sleep(agentId: string): Promise<void>;
-  
+
   /**
    * Check if agent is dormant
    */
   isDormant(agentId: string): boolean;
-  
+
   /**
    * Get dormancy duration
    */
@@ -165,27 +165,27 @@ export interface IRecoveryStrategy {
    * Unique strategy identifier
    */
   id: string;
-  
+
   /**
    * Failure types this strategy handles
    */
   handles: FailureType[];
-  
+
   /**
    * Maximum recovery attempts
    */
   maxAttempts: number;
-  
+
   /**
    * Backoff between attempts (ms)
    */
   backoffMs: number;
-  
+
   /**
    * Execute recovery
    */
   execute(failure: IAgentFailure): Promise<IRecoveryResult>;
-  
+
   /**
    * Check if strategy applies to failure
    */
@@ -200,22 +200,22 @@ export interface ISelfHealingService {
    * Register a recovery strategy
    */
   registerStrategy(strategy: IRecoveryStrategy): void;
-  
+
   /**
    * Report a failure
    */
   reportFailure(failure: IAgentFailure): Promise<string>;
-  
+
   /**
    * Attempt automatic recovery
    */
   attemptRecovery(failureId: string): Promise<IRecoveryResult>;
-  
+
   /**
    * Get failure patterns (for learning)
    */
   getFailurePatterns(agentId?: string): FailurePattern[];
-  
+
   /**
    * Escalate failure to human/supervisor
    */
@@ -285,29 +285,26 @@ export interface IMarketplaceService {
    * Broadcast a handoff request
    */
   requestHandoff(request: IHandoffRequest): Promise<IHandoffContract | null>;
-  
+
   /**
    * Submit a bid for a task
    */
   submitBid(bid: IHandoffBid): void;
-  
+
   /**
    * Get active auctions
    */
   getActiveAuctions(): IHandoffRequest[];
-  
+
   /**
    * Select winning bid
    */
   selectBid(taskId: string, bidId: string): Promise<IHandoffContract>;
-  
+
   /**
    * Auto-select best bid based on criteria
    */
-  autoSelect(
-    taskId: string,
-    criteria: BidSelectionCriteria
-  ): Promise<IHandoffContract | null>;
+  autoSelect(taskId: string, criteria: BidSelectionCriteria): Promise<IHandoffContract | null>;
 }
 
 export interface BidSelectionCriteria {
@@ -358,17 +355,17 @@ export interface ICollectiveIntelligenceService {
    * Create a new session
    */
   createSession(topic: string, goal: string, initiator: string): IHiveSession | Promise<string>;
-  
+
   /**
    * Join a session
    */
   join(sessionId: string, agentId: string): void | Promise<void>;
-  
+
   /**
    * Leave a session
    */
   leave(sessionId: string, agentId: string): void | Promise<void>;
-  
+
   /**
    * Contribute to session
    */
@@ -376,22 +373,22 @@ export interface ICollectiveIntelligenceService {
     sessionId: string,
     contribution: Omit<IHiveContribution, 'id' | 'timestamp'>
   ): IHiveContribution | Promise<void>;
-  
+
   /**
    * Vote on contributions
    */
   vote(
-    sessionId: string, 
-    contributionId: string, 
+    sessionId: string,
+    contributionId: string,
     voterId: string,
     vote: 'support' | 'oppose'
   ): void | Promise<void>;
-  
+
   /**
    * Synthesize collective wisdom
    */
   synthesize(sessionId: string): unknown;
-  
+
   /**
    * Resolve and close session
    */
@@ -436,7 +433,7 @@ export interface ISwarmCoordinator {
     tasks: { id: string; complexity: number; priority: number }[],
     config?: Partial<ISwarmConfig>
   ): Promise<ISwarmResult>;
-  
+
   /**
    * Get recommended population size based on problem
    */
@@ -451,17 +448,17 @@ export interface ILeaderElection {
    * Start an election
    */
   startElection(): Promise<string>;
-  
+
   /**
    * Get current leader
    */
   getLeader(): string | null;
-  
+
   /**
    * Get own role
    */
   getRole(): 'leader' | 'follower' | 'candidate';
-  
+
   /**
    * Subscribe to leader changes
    */

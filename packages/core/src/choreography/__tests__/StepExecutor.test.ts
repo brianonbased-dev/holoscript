@@ -191,7 +191,9 @@ describe('StepExecutor', () => {
         }
         return { result: 'success' };
       });
-      executor = new StepExecutor({ defaultRetry: { strategy: 'fixed', maxRetries: 3, delay: 10 } });
+      executor = new StepExecutor({
+        defaultRetry: { strategy: 'fixed', maxRetries: 3, delay: 10 },
+      });
       executor.setActionHandler(mockHandler);
 
       const step = createMockStep();
@@ -205,7 +207,9 @@ describe('StepExecutor', () => {
 
     it('should fail after exhausting retries', async () => {
       mockHandler = vi.fn().mockRejectedValue(new Error('Persistent failure'));
-      executor = new StepExecutor({ defaultRetry: { strategy: 'fixed', maxRetries: 2, delay: 10 } });
+      executor = new StepExecutor({
+        defaultRetry: { strategy: 'fixed', maxRetries: 2, delay: 10 },
+      });
       executor.setActionHandler(mockHandler);
 
       const step = createMockStep();
@@ -324,9 +328,9 @@ describe('StepExecutor', () => {
       const executingPromise = new Promise<void>((resolve) => {
         executor.once('step:executing', () => resolve());
       });
-      
+
       const executePromise = executor.execute(step, context);
-      
+
       // Wait for step to actually start executing
       await executingPromise;
       executor.cancel(step.id);

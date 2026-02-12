@@ -402,8 +402,7 @@ export class HierarchyManager extends EventEmitter {
     stats.successRate = stats.totalTasks > 0 ? stats.completedTasks / stats.totalTasks : 0;
 
     // Update per-subordinate count
-    stats.tasksPerSubordinate[subordinateId] =
-      (stats.tasksPerSubordinate[subordinateId] || 0) + 1;
+    stats.tasksPerSubordinate[subordinateId] = (stats.tasksPerSubordinate[subordinateId] || 0) + 1;
 
     stats.updatedAt = Date.now();
   }

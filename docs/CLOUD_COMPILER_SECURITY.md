@@ -113,10 +113,7 @@ export function checkRateLimit(userId: string, tier: string): boolean {
   // Refill tokens based on time elapsed
   const now = Date.now();
   const elapsed = (now - bucket.lastRefill) / 1000; // seconds
-  bucket.tokens = Math.min(
-    bucket.maxTokens,
-    bucket.tokens + elapsed * bucket.refillRate
-  );
+  bucket.tokens = Math.min(bucket.maxTokens, bucket.tokens + elapsed * bucket.refillRate);
   bucket.lastRefill = now;
 
   // Consume token
@@ -175,6 +172,7 @@ export async function compileInSandbox(
 ```
 
 **WASM Security Benefits**:
+
 - ✅ No file system access
 - ✅ No network access
 - ✅ No system calls
@@ -301,11 +299,7 @@ app.post('/compile', requireApiKey, async (req, res) => {
 
     // Layer 3: Sandboxed Compilation
     const { source, target = 'unity' } = req.body;
-    const result = await compileInSandbox(
-      source,
-      target,
-      RESOURCE_LIMITS.compilationTimeout
-    );
+    const result = await compileInSandbox(source, target, RESOURCE_LIMITS.compilationTimeout);
 
     // Layer 5: Abuse Detection
     const compilationTime = Date.now() - startTime;
@@ -435,11 +429,11 @@ compilationDuration.observe(compilationTime / 1000);
 
 ## Cost Optimization
 
-| Tier | Requests/Month | Cost (Railway) | Revenue Target |
-|------|----------------|----------------|----------------|
-| Free | 300 (10/day) | $0 | $0 (marketing) |
-| Pro | 3,000 (100/day) | $5/month | $10/month |
-| Enterprise | Unlimited | Custom | Custom pricing |
+| Tier       | Requests/Month  | Cost (Railway) | Revenue Target |
+| ---------- | --------------- | -------------- | -------------- |
+| Free       | 300 (10/day)    | $0             | $0 (marketing) |
+| Pro        | 3,000 (100/day) | $5/month       | $10/month      |
+| Enterprise | Unlimited       | Custom         | Custom pricing |
 
 **Break-even**: ~500 Pro users
 

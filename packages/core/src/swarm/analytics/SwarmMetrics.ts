@@ -1,7 +1,7 @@
 /**
  * SwarmMetrics - Real-time swarm performance metrics
  * HoloScript v3.2 - Autonomous Agent Swarms
- * 
+ *
  * Collects and aggregates metrics for swarm monitoring
  */
 
@@ -208,7 +208,7 @@ export class SwarmMetrics {
   getGaugeHistory(name: string, since?: number): IMetricValue[] {
     const values = this.gauges.get(name) ?? [];
     if (since) {
-      return values.filter(v => v.timestamp >= since);
+      return values.filter((v) => v.timestamp >= since);
     }
     return [...values];
   }

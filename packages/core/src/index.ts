@@ -1775,11 +1775,7 @@ export type {
   IZoneClaimingConfig,
 } from './swarm/spatial';
 
-export {
-  SwarmEventBus,
-  BroadcastChannel,
-  GossipProtocol,
-} from './swarm/messaging';
+export { SwarmEventBus, BroadcastChannel, GossipProtocol } from './swarm/messaging';
 
 export type {
   EventPriority,
@@ -1911,7 +1907,11 @@ export {
 // SceneGraph IR + GLTFExporter (for advanced pipelines)
 export { GLTFExporter } from './export/gltf/GLTFExporter';
 export type { IGLTFExportOptions, IGLTFExportResult } from './export/gltf/GLTFTypes';
-export type { ISceneGraph, ISceneNode, IMaterial as ISceneGraphMaterial } from './export/SceneGraph';
+export type {
+  ISceneGraph,
+  ISceneNode,
+  IMaterial as ISceneGraphMaterial,
+} from './export/SceneGraph';
 export { createEmptySceneGraph, createEmptyNode, createDefaultMaterial } from './export/SceneGraph';
 
 // USDZ Pipeline
@@ -1973,6 +1973,46 @@ export {
   type MetricEntry as TelemetryMetricEntry,
   type HistogramStats,
 } from './telemetry';
+
+// =============================================================================
+// Messaging & Agent Protocol Bridges (v3.3 Sprint 4: Integration)
+// =============================================================================
+
+export {
+  type EncryptionMode,
+  type MessagePriority as MessagingMessagePriority,
+  type JSONSchema,
+  type ChannelConfig,
+  DEFAULT_CHANNEL_CONFIG,
+  type AgentChannel,
+  type ChannelMember,
+  type MessageStatus,
+  type Message,
+  type MessageAckStatus,
+  type MessageAck,
+  type BroadcastMessage,
+  type MessageHandler,
+  type BroadcastHandler,
+  type ChannelEventHandler,
+  type ChannelEventType,
+  type ChannelEventBase,
+  type ChannelLifecycleEvent,
+  type ChannelMembershipEvent,
+  type MessageEvent,
+  type ChannelEvent,
+  type ChannelSubscription,
+  type BroadcastSubscription,
+  generateMessageId,
+  generateChannelId,
+  isMessageExpired,
+  validateMessageSchema,
+} from './messaging/MessagingTypes';
+export { AgentMessaging } from './messaging/AgentMessaging';
+export {
+  ProtocolBridgeRegistry,
+  type IAgentProtocolBridge,
+  type GenericAgentMessage,
+} from './messaging/AgentProtocolBridge';
 
 // =============================================================================
 // Audit Logging & Compliance (Sprint 9 - Priority 6)

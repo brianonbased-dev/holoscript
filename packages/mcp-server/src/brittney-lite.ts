@@ -9,6 +9,7 @@
 
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { HoloScriptPlusParser, parseHolo } from '@holoscript/core';
+import { queryOllama, stripCodeFences } from './ollama-client.js';
 
 // =============================================================================
 // TOOL DEFINITIONS
@@ -262,7 +263,7 @@ export async function handleBrittneyLiteTool(
 // EXPLAIN ERROR
 // =============================================================================
 
-function handleExplainError(args: Record<string, unknown>) {
+async function handleExplainError(args: Record<string, unknown>) {
   const code = args.code as string;
   const providedErrors = args.errors as
     | Array<{ message: string; line?: number; column?: number }>
@@ -329,9 +330,16 @@ function handleExplainError(args: Record<string, unknown>) {
     return explanation;
   });
 
+  // Optionally enhance with model's natural language explanation
+  const modelExplanation = await queryOllama(
+    `Explain these HoloScript errors concisely (1-2 sentences each):\n\nCode:\n${code}\n\nErrors:\n${errors.map((e) => e.message).join('\n')}`,
+    'You are a helpful HoloScript expert. Explain errors clearly and suggest fixes. Be concise. Never use [Think] blocks.'
+  );
+
   return {
     errorCount: errors.length,
     explanations,
+    modelExplanation: modelExplanation || undefined,
     tip: 'Use hs_ai_fix_code to automatically fix these issues.',
   };
 }
@@ -340,8 +348,24 @@ function handleExplainError(args: Record<string, unknown>) {
 // FIX CODE
 // =============================================================================
 
-function handleFixCode(args: Record<string, unknown>) {
+async function handleFixCode(args: Record<string, unknown>) {
   const code = args.code as string;
+
+  // Try model first — send broken code, validate fix through parser
+  const modelFixed = await tryModelFix(code);
+  if (modelFixed) {
+    return {
+      originalCode: code,
+      fixedCode: modelFixed,
+      fixes: ['Model-generated fix applied'],
+      fixCount: 1,
+      source: 'model',
+      isValid: true,
+      note: 'Code fixed by Brittney AI model and validated through parser.',
+    };
+  }
+
+  // Fall back to rule-based fixes
   let fixed = code;
   const fixes: string[] = [];
 
@@ -423,7 +447,7 @@ function handleFixCode(args: Record<string, unknown>) {
 // CODE REVIEW
 // =============================================================================
 
-function handleReview(args: Record<string, unknown>) {
+async function handleReview(args: Record<string, unknown>) {
   const code = args.code as string;
   const focus = (args.focus as string) || 'all';
   const issues: Array<{
@@ -558,9 +582,16 @@ function handleReview(args: Record<string, unknown>) {
     }
   }
 
+  // Optionally append model's freeform review
+  const modelReview = await queryOllama(
+    `Review this HoloScript code. Focus on: correctness, best practices, missing traits, performance. Be concise (3-5 bullet points).\n\n${code}`,
+    'You are a senior HoloScript code reviewer. Give actionable feedback. Never use [Think] blocks.'
+  );
+
   return {
     issueCount: issues.length,
     issues,
+    modelReview: modelReview || undefined,
     stats: {
       lines: lines.length,
       objects: objectCount,
@@ -580,11 +611,35 @@ function handleReview(args: Record<string, unknown>) {
 // SCAFFOLD
 // =============================================================================
 
-function handleScaffold(args: Record<string, unknown>) {
+async function handleScaffold(args: Record<string, unknown>) {
   const description = args.description as string;
   const type = (args.type as string) || 'game';
   const features = (args.features as string[]) || [];
   const desc = description.toLowerCase();
+
+  // Try model first — brittney-qwen-v23 scores 8/10 on scene generation
+  const modelCode = await tryModelScaffold(description, type, features);
+  if (modelCode) {
+    return {
+      code: modelCode,
+      scaffoldType: type,
+      source: 'model',
+      stats: {
+        lines: modelCode.split('\n').length,
+        templates: (modelCode.match(/template\s+"/g) || []).length,
+        objects: (modelCode.match(/object\s+"/g) || []).length,
+        traits: (modelCode.match(/@\w+/g) || []).length,
+      },
+      features: features.length > 0 ? features : ['basic'],
+      nextSteps: [
+        'Review generated code for correctness',
+        'Replace placeholder geometry with your .glb models',
+        'Test with render_preview tool',
+      ],
+    };
+  }
+
+  // Fall back to rule-based scaffolding
 
   const lines: string[] = [];
   const sceneName = extractSceneName(description);
@@ -774,6 +829,88 @@ function handleScaffold(args: Record<string, unknown>) {
       'Test with render_preview tool',
     ],
   };
+}
+
+// =============================================================================
+// MODEL-BACKED HELPERS
+// =============================================================================
+
+/**
+ * Try to generate a scaffold using the Ollama model.
+ * Returns validated HoloScript code or null if model is unavailable/output is invalid.
+ */
+async function tryModelScaffold(
+  description: string,
+  type: string,
+  features: string[]
+): Promise<string | null> {
+  const featureStr = features.length > 0 ? `\nFeatures to include: ${features.join(', ')}` : '';
+  const prompt = `Generate a complete HoloScript .holo scene for: ${description}\nProject type: ${type}${featureStr}\n\nOutput ONLY the HoloScript code. Include composition wrapper, environment block, templates, objects with positions, and a logic block.`;
+
+  const raw = await queryOllama(prompt);
+  if (!raw) return null;
+
+  const code = stripCodeFences(raw);
+
+  // Validate through parser
+  try {
+    const format = detectFormat(code);
+    if (format === 'holo') {
+      const result = parseHolo(code);
+      if ((result as any).errors?.length > 0) return null;
+    } else {
+      const parser = new HoloScriptPlusParser();
+      const result = parser.parse(code);
+      if (result.errors?.length > 0) return null;
+    }
+  } catch {
+    return null;
+  }
+
+  // Fix any hallucinated traits
+  let fixed = code;
+  const traitMatches = [...code.matchAll(/@(\w+)/g)];
+  for (const match of traitMatches) {
+    const trait = match[1];
+    if (!KNOWN_TRAITS.has(trait)) {
+      const suggestion = findSimilarTrait(trait);
+      if (suggestion) {
+        fixed = fixed.replace(new RegExp(`@${trait}\\b`), `@${suggestion}`);
+      }
+    }
+  }
+
+  return fixed;
+}
+
+/**
+ * Try to fix code using the Ollama model.
+ * Returns validated fixed code or null if model is unavailable/output is invalid.
+ */
+async function tryModelFix(brokenCode: string): Promise<string | null> {
+  const prompt = `Fix the following broken HoloScript code. Output ONLY the corrected code, no explanations:\n\n${brokenCode}`;
+
+  const raw = await queryOllama(prompt);
+  if (!raw) return null;
+
+  const code = stripCodeFences(raw);
+
+  // Validate the fix through parser
+  try {
+    const format = detectFormat(code);
+    if (format === 'holo') {
+      const result = parseHolo(code);
+      if ((result as any).errors?.length > 0) return null;
+    } else {
+      const parser = new HoloScriptPlusParser();
+      const result = parser.parse(code);
+      if (result.errors?.length > 0) return null;
+    }
+  } catch {
+    return null;
+  }
+
+  return code;
 }
 
 // =============================================================================

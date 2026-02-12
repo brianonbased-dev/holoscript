@@ -53,12 +53,7 @@ describe('ZoraCoinsTrait', () => {
     });
 
     it('should attempt connection when wallet provided', () => {
-      attachTrait(
-        zoraCoinsHandler,
-        node,
-        { creator_wallet: '0x1234567890abcdef' },
-        ctx
-      );
+      attachTrait(zoraCoinsHandler, node, { creator_wallet: '0x1234567890abcdef' }, ctx);
 
       const state = (node as any).__zoraCoinsState;
       expect(state.walletAddress).toBe('0x1234567890abcdef');
@@ -70,12 +65,7 @@ describe('ZoraCoinsTrait', () => {
 
     chains.forEach((chain) => {
       it(`should support ${chain} chain`, () => {
-        attachTrait(
-          zoraCoinsHandler,
-          node,
-          { default_chain: chain as any },
-          ctx
-        );
+        attachTrait(zoraCoinsHandler, node, { default_chain: chain as any }, ctx);
 
         const state = (node as any).__zoraCoinsState;
         expect(state).toBeDefined();
@@ -88,12 +78,7 @@ describe('ZoraCoinsTrait', () => {
 
     models.forEach((model) => {
       it(`should support ${model} distribution`, () => {
-        attachTrait(
-          zoraCoinsHandler,
-          node,
-          { default_distribution: model as any },
-          ctx
-        );
+        attachTrait(zoraCoinsHandler, node, { default_distribution: model as any }, ctx);
 
         const state = (node as any).__zoraCoinsState;
         expect(state).toBeDefined();
@@ -106,12 +91,7 @@ describe('ZoraCoinsTrait', () => {
 
     licenses.forEach((license) => {
       it(`should support ${license} license`, () => {
-        attachTrait(
-          zoraCoinsHandler,
-          node,
-          { default_license: license as any },
-          ctx
-        );
+        attachTrait(zoraCoinsHandler, node, { default_license: license as any }, ctx);
 
         const state = (node as any).__zoraCoinsState;
         expect(state).toBeDefined();
@@ -198,56 +178,39 @@ describe('ZoraCoinsTrait', () => {
 
   describe('manual minting', () => {
     beforeEach(() => {
-      attachTrait(
-        zoraCoinsHandler,
-        node,
-        { creator_wallet: '0x1234' },
-        ctx
-      );
+      attachTrait(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx);
       const state = (node as any).__zoraCoinsState;
       state.isConnected = true;
       ctx.clearEvents();
     });
 
     it('should handle zora_mint event', () => {
-      sendEvent(
-        zoraCoinsHandler,
-        node,
-        { creator_wallet: '0x1234' },
-        ctx,
-        {
-          type: 'zora_mint',
-          payload: {
-            name: 'Epic Scene',
-            symbol: 'EPIC',
-            description: 'An epic HoloScript scene',
-            holoFileHash: '0xdef456',
-            scenePreviewUrl: 'https://example.com/epic.png',
-            traits: ['vr', 'immersive'],
-            category: 'experience',
-          },
-        }
-      );
+      sendEvent(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx, {
+        type: 'zora_mint',
+        payload: {
+          name: 'Epic Scene',
+          symbol: 'EPIC',
+          description: 'An epic HoloScript scene',
+          holoFileHash: '0xdef456',
+          scenePreviewUrl: 'https://example.com/epic.png',
+          traits: ['vr', 'immersive'],
+          category: 'experience',
+        },
+      });
 
       const state = (node as any).__zoraCoinsState;
       expect(state.pendingMints.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should generate symbol from name if not provided', () => {
-      sendEvent(
-        zoraCoinsHandler,
-        node,
-        { creator_wallet: '0x1234' },
-        ctx,
-        {
-          type: 'zora_mint',
-          payload: {
-            name: 'My Amazing Scene',
-            holoFileHash: '0x789abc',
-            scenePreviewUrl: 'https://example.com/amazing.png',
-          },
-        }
-      );
+      sendEvent(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx, {
+        type: 'zora_mint',
+        payload: {
+          name: 'My Amazing Scene',
+          holoFileHash: '0x789abc',
+          scenePreviewUrl: 'https://example.com/amazing.png',
+        },
+      });
 
       // Minting should proceed with auto-generated symbol
       expect(ctx.emittedEvents.length).toBeGreaterThanOrEqual(0);
@@ -256,12 +219,7 @@ describe('ZoraCoinsTrait', () => {
 
   describe('collection management', () => {
     beforeEach(() => {
-      attachTrait(
-        zoraCoinsHandler,
-        node,
-        { creator_wallet: '0x1234' },
-        ctx
-      );
+      attachTrait(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx);
       const state = (node as any).__zoraCoinsState;
       state.isConnected = true;
       state.coins = [
@@ -299,20 +257,14 @@ describe('ZoraCoinsTrait', () => {
     });
 
     it('should handle zora_create_collection event', () => {
-      sendEvent(
-        zoraCoinsHandler,
-        node,
-        { creator_wallet: '0x1234' },
-        ctx,
-        {
-          type: 'zora_create_collection',
-          payload: {
-            name: 'My Collection',
-            description: 'A collection of my best scenes',
-            coinIds: ['coin-1'],
-          },
-        }
-      );
+      sendEvent(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx, {
+        type: 'zora_create_collection',
+        payload: {
+          name: 'My Collection',
+          description: 'A collection of my best scenes',
+          coinIds: ['coin-1'],
+        },
+      });
 
       // Collection creation initiated
       expect(ctx.emittedEvents.length).toBeGreaterThanOrEqual(0);
@@ -321,12 +273,7 @@ describe('ZoraCoinsTrait', () => {
 
   describe('rewards and royalties', () => {
     beforeEach(() => {
-      attachTrait(
-        zoraCoinsHandler,
-        node,
-        { creator_wallet: '0x1234' },
-        ctx
-      );
+      attachTrait(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx);
       const state = (node as any).__zoraCoinsState;
       state.isConnected = true;
       state.rewardsBalance = '1.5';
@@ -334,16 +281,10 @@ describe('ZoraCoinsTrait', () => {
     });
 
     it('should handle zora_claim_rewards event', () => {
-      sendEvent(
-        zoraCoinsHandler,
-        node,
-        { creator_wallet: '0x1234' },
-        ctx,
-        {
-          type: 'zora_claim_rewards',
-          payload: {},
-        }
-      );
+      sendEvent(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx, {
+        type: 'zora_claim_rewards',
+        payload: {},
+      });
 
       // Rewards claim initiated
       expect(ctx.emittedEvents.length).toBeGreaterThanOrEqual(0);
@@ -548,12 +489,7 @@ describe('ZoraCoinsTrait', () => {
 
   describe('pending mint status checking', () => {
     it('should check pending mints during update', () => {
-      attachTrait(
-        zoraCoinsHandler,
-        node,
-        { creator_wallet: '0x1234' },
-        ctx
-      );
+      attachTrait(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx);
 
       const state = (node as any).__zoraCoinsState;
       state.isConnected = true;
@@ -618,33 +554,20 @@ describe('ZoraCoinsTrait', () => {
 
   describe('detach', () => {
     it('should emit disconnect event when connected', () => {
-      attachTrait(
-        zoraCoinsHandler,
-        node,
-        { creator_wallet: '0x1234' },
-        ctx
-      );
+      attachTrait(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx);
 
       const state = (node as any).__zoraCoinsState;
       state.isConnected = true;
 
       ctx.clearEvents();
-      zoraCoinsHandler.onDetach?.(
-        node as any,
-        zoraCoinsHandler.defaultConfig,
-        ctx as any
-      );
+      zoraCoinsHandler.onDetach?.(node as any, zoraCoinsHandler.defaultConfig, ctx as any);
 
       expect(getEventCount(ctx, 'zora_disconnect')).toBe(1);
     });
 
     it('should clean up state on detach', () => {
       attachTrait(zoraCoinsHandler, node, {}, ctx);
-      zoraCoinsHandler.onDetach?.(
-        node as any,
-        zoraCoinsHandler.defaultConfig,
-        ctx as any
-      );
+      zoraCoinsHandler.onDetach?.(node as any, zoraCoinsHandler.defaultConfig, ctx as any);
 
       expect((node as any).__zoraCoinsState).toBeUndefined();
     });
@@ -655,31 +578,20 @@ describe('ZoraCoinsTrait', () => {
 
     categories.forEach((category) => {
       it(`should support ${category} category`, () => {
-        attachTrait(
-          zoraCoinsHandler,
-          node,
-          { creator_wallet: '0x1234' },
-          ctx
-        );
+        attachTrait(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx);
         const state = (node as any).__zoraCoinsState;
         state.isConnected = true;
         ctx.clearEvents();
 
-        sendEvent(
-          zoraCoinsHandler,
-          node,
-          { creator_wallet: '0x1234' },
-          ctx,
-          {
-            type: 'zora_mint',
-            payload: {
-              name: `${category} Item`,
-              holoFileHash: '0xcat',
-              scenePreviewUrl: 'https://example.com/cat.png',
-              category,
-            },
-          }
-        );
+        sendEvent(zoraCoinsHandler, node, { creator_wallet: '0x1234' }, ctx, {
+          type: 'zora_mint',
+          payload: {
+            name: `${category} Item`,
+            holoFileHash: '0xcat',
+            scenePreviewUrl: 'https://example.com/cat.png',
+            category,
+          },
+        });
 
         // Should accept all category types
         expect(ctx.emittedEvents.length).toBeGreaterThanOrEqual(0);

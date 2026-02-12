@@ -42,13 +42,13 @@ describe('PSOEngine', () => {
     it('should converge on known optimization problem', async () => {
       // Fitness: all tasks to agent 0 is optimal
       const fitnessFunction = (assignment: number[]) => {
-        return assignment.filter(a => a === 0).length * 10;
+        return assignment.filter((a) => a === 0).length * 10;
       };
 
       const result = await engine.optimize(3, 10, fitnessFunction);
 
       // Should find many assignments to agent 0
-      const agent0Count = result.bestSolution.filter(a => a === 0).length;
+      const agent0Count = result.bestSolution.filter((a) => a === 0).length;
       expect(agent0Count).toBeGreaterThan(5);
     });
 
@@ -56,13 +56,13 @@ describe('PSOEngine', () => {
       const agentCount = 5;
       const result = await engine.optimize(agentCount, 20, () => 1);
 
-      expect(result.bestSolution.every(a => a >= 0 && a < agentCount)).toBe(true);
+      expect(result.bestSolution.every((a) => a >= 0 && a < agentCount)).toBe(true);
     });
 
     it('should return discrete integer assignments', async () => {
       const result = await engine.optimize(4, 10, () => Math.random());
 
-      expect(result.bestSolution.every(a => Number.isInteger(a))).toBe(true);
+      expect(result.bestSolution.every((a) => Number.isInteger(a))).toBe(true);
     });
 
     it('should track fitness history', async () => {

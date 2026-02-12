@@ -12,7 +12,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 describe('Types', () => {
   it('should export RATE_LIMITS', async () => {
     const { RATE_LIMITS } = await import('../types.js');
-    
+
     expect(RATE_LIMITS.anonymous).toBe(100);
     expect(RATE_LIMITS.authenticated).toBe(1000);
     expect(RATE_LIMITS.verified).toBe(5000);
@@ -22,8 +22,18 @@ describe('Types', () => {
   it('should define TraitCategory type', async () => {
     const types = await import('../types.js');
     const categories: (typeof types)['TraitCategory'][] = [
-      'rendering', 'physics', 'networking', 'audio', 'ui',
-      'ai', 'blockchain', 'utility', 'animation', 'input', 'data', 'debug'
+      'rendering',
+      'physics',
+      'networking',
+      'audio',
+      'ui',
+      'ai',
+      'blockchain',
+      'utility',
+      'animation',
+      'input',
+      'data',
+      'debug',
     ];
     expect(categories.length).toBe(12);
   });
@@ -31,7 +41,14 @@ describe('Types', () => {
   it('should define Platform type', async () => {
     const types = await import('../types.js');
     const platforms: (typeof types)['Platform'][] = [
-      'web', 'nodejs', 'unity', 'unreal', 'godot', 'native', 'wasm', 'all'
+      'web',
+      'nodejs',
+      'unity',
+      'unreal',
+      'godot',
+      'native',
+      'wasm',
+      'all',
     ];
     expect(platforms.length).toBe(8);
   });
@@ -169,7 +186,7 @@ describe('TraitRegistry', () => {
 
     it('should get trait by ID', async () => {
       const trait = await registry.getTrait('fetchtest');
-      
+
       expect(trait).toBeDefined();
       expect(trait?.name).toBe('FetchTest');
       expect(trait?.version).toBe('1.0.0');
@@ -229,35 +246,35 @@ describe('TraitRegistry', () => {
 
     it('should search by query string', async () => {
       const result = await registry.search({ q: 'physics' });
-      
+
       expect(result.results.length).toBeGreaterThan(0);
       expect(result.results[0].name).toBe('PhysicsEngine');
     });
 
     it('should search by category', async () => {
       const result = await registry.search({ category: 'ui' });
-      
+
       expect(result.results.length).toBe(1);
       expect(result.results[0].name).toBe('UIComponents');
     });
 
     it('should search by platform', async () => {
       const result = await registry.search({ platform: 'unity' });
-      
+
       expect(result.results.length).toBe(1);
       expect(result.results[0].name).toBe('PhysicsEngine');
     });
 
     it('should filter by verified', async () => {
       const result = await registry.search({ verified: true });
-      
+
       expect(result.results.length).toBe(2); // PhysicsEngine and UIComponents
       expect(result.results.every((r: any) => r.verified)).toBe(true);
     });
 
     it('should paginate results', async () => {
       const result = await registry.search({ limit: 2, page: 1 });
-      
+
       expect(result.results.length).toBeLessThanOrEqual(2);
       expect(result.page).toBe(1);
       expect(result.limit).toBe(2);
@@ -265,7 +282,7 @@ describe('TraitRegistry', () => {
 
     it('should sort by downloads', async () => {
       const result = await registry.search({ sortBy: 'downloads', sortOrder: 'desc' });
-      
+
       expect(result.results).toBeDefined();
     });
   });
@@ -289,15 +306,15 @@ describe('TraitRegistry', () => {
 
     it('should unpublish trait', async () => {
       await registry.unpublish('tounpublish', undefined, 'owner');
-      
+
       const trait = await registry.getTrait('tounpublish');
       expect(trait).toBeNull();
     });
 
     it('should throw for wrong author', async () => {
-      await expect(
-        registry.unpublish('tounpublish', undefined, 'notowner')
-      ).rejects.toThrow("don't have permission");
+      await expect(registry.unpublish('tounpublish', undefined, 'notowner')).rejects.toThrow(
+        "don't have permission"
+      );
     });
   });
 
@@ -320,7 +337,7 @@ describe('TraitRegistry', () => {
 
     it('should deprecate trait', async () => {
       await registry.deprecate('todeprecate', 'No longer maintained', undefined, 'BetterTrait');
-      
+
       const trait = await registry.getTrait('todeprecate');
       expect(trait?.deprecated).toBe(true);
       expect(trait?.deprecationMessage).toContain('No longer maintained');
@@ -340,7 +357,7 @@ describe('DependencyResolver', () => {
   beforeEach(async () => {
     const { TraitRegistry } = await import('../TraitRegistry.js');
     const { DependencyResolver } = await import('../DependencyResolver.js');
-    
+
     registry = new TraitRegistry();
     resolver = new DependencyResolver(registry);
 
@@ -370,7 +387,7 @@ describe('DependencyResolver', () => {
         platforms: ['web'],
         category: 'ui',
         source: 'trait UIBase {}',
-        dependencies: { 'CoreLib': '^1.0.0' },
+        dependencies: { CoreLib: '^1.0.0' },
       },
       { name: 'author', verified: true }
     );
@@ -385,7 +402,7 @@ describe('DependencyResolver', () => {
         platforms: ['web'],
         category: 'ui',
         source: 'trait WidgetLib {}',
-        dependencies: { 'UIBase': '^2.0.0' },
+        dependencies: { UIBase: '^2.0.0' },
       },
       { name: 'author', verified: true }
     );
@@ -394,7 +411,7 @@ describe('DependencyResolver', () => {
   describe('resolve', () => {
     it('should resolve single dependency', async () => {
       const result = await resolver.resolve([{ name: 'CoreLib', version: '*' }]);
-      
+
       expect(result.resolved.length).toBe(1);
       expect(result.resolved[0].name).toBe('CoreLib');
       expect(result.conflicts.length).toBe(0);
@@ -402,10 +419,10 @@ describe('DependencyResolver', () => {
 
     it('should resolve transitive dependencies', async () => {
       const result = await resolver.resolve([{ name: 'WidgetLib', version: '*' }]);
-      
+
       // Should have WidgetLib, UIBase, CoreLib
       expect(result.resolved.length).toBe(3);
-      
+
       const names = result.resolved.map((d: any) => d.name);
       expect(names).toContain('WidgetLib');
       expect(names).toContain('UIBase');
@@ -414,7 +431,7 @@ describe('DependencyResolver', () => {
 
     it('should handle missing dependency', async () => {
       const result = await resolver.resolve([{ name: 'NonExistent', version: '1.0.0' }]);
-      
+
       expect(result.warnings).toBeDefined();
       expect(result.warnings.some((w: string) => w.includes('NonExistent'))).toBe(true);
     });
@@ -422,10 +439,8 @@ describe('DependencyResolver', () => {
 
   describe('checkCompatibility', () => {
     it('should report compatible traits', async () => {
-      const result = await resolver.checkCompatibility([
-        { name: 'CoreLib', version: '1.0.0' }
-      ]);
-      
+      const result = await resolver.checkCompatibility([{ name: 'CoreLib', version: '1.0.0' }]);
+
       expect(result.compatible).toBe(true);
       expect(result.issues.filter((i: any) => i.severity === 'error').length).toBe(0);
     });
@@ -434,7 +449,7 @@ describe('DependencyResolver', () => {
   describe('utility functions', () => {
     it('should parse version requirements', async () => {
       const { parseVersionRequirement } = await import('../DependencyResolver.js');
-      
+
       expect(parseVersionRequirement('1.0.0')).toEqual({ type: 'exact', value: '1.0.0' });
       expect(parseVersionRequirement('^1.0.0')).toEqual({ type: 'range', value: '^1.0.0' });
       expect(parseVersionRequirement('latest')).toEqual({ type: 'tag', value: 'latest' });
@@ -442,7 +457,7 @@ describe('DependencyResolver', () => {
 
     it('should check version satisfaction', async () => {
       const { satisfies } = await import('../DependencyResolver.js');
-      
+
       expect(satisfies('1.2.3', '^1.0.0')).toBe(true);
       expect(satisfies('2.0.0', '^1.0.0')).toBe(false);
       expect(satisfies('1.0.0', '*')).toBe(true);
@@ -450,7 +465,7 @@ describe('DependencyResolver', () => {
 
     it('should compare versions', async () => {
       const { compareVersions } = await import('../DependencyResolver.js');
-      
+
       expect(compareVersions('1.0.0', '2.0.0')).toBeLessThan(0);
       expect(compareVersions('2.0.0', '1.0.0')).toBeGreaterThan(0);
       expect(compareVersions('1.0.0', '1.0.0')).toBe(0);
@@ -458,7 +473,7 @@ describe('DependencyResolver', () => {
 
     it('should get latest version', async () => {
       const { getLatestVersion } = await import('../DependencyResolver.js');
-      
+
       expect(getLatestVersion(['1.0.0', '2.0.0', '1.5.0'])).toBe('2.0.0');
       expect(getLatestVersion([])).toBeNull();
     });
@@ -480,7 +495,7 @@ describe('VerificationService', () => {
   describe('email verification', () => {
     it('should start email verification', async () => {
       const result = await verificationService.startEmailVerification('user1', 'test@example.com');
-      
+
       expect(result.sent).toBe(true);
       expect(result.expiresIn).toBe(30 * 60);
     });
@@ -488,7 +503,7 @@ describe('VerificationService', () => {
     it('should verify email with correct code', async () => {
       // Start verification to store code
       await verificationService.startEmailVerification('user2', 'test2@example.com');
-      
+
       // Get the stored code (in real scenario, user receives via email)
       // For testing, we can access internal state or mock
       // Since we can't access private emailCodes, this would need adjustment in real tests
@@ -498,7 +513,7 @@ describe('VerificationService', () => {
   describe('verification status', () => {
     it('should return unverified for new users', async () => {
       const status = await verificationService.getVerificationStatus('newuser');
-      
+
       expect(status.verified).toBe(false);
       expect(status.level).toBe('none');
     });
@@ -513,7 +528,7 @@ describe('VerificationService', () => {
           }
         }
       `);
-      
+
       expect(result.safe).toBe(true);
       expect(result.issues.length).toBe(0);
     });
@@ -526,7 +541,7 @@ describe('VerificationService', () => {
           }
         }
       `);
-      
+
       expect(result.safe).toBe(false);
       expect(result.issues.some((i: string) => i.includes('eval'))).toBe(true);
     });
@@ -539,7 +554,7 @@ describe('VerificationService', () => {
           }
         }
       `);
-      
+
       expect(result.warnings.some((w: string) => w.includes('Network'))).toBe(true);
     });
   });
@@ -567,14 +582,14 @@ describe('RateLimiter', () => {
     for (let i = 0; i < 5; i++) {
       limiter.isAllowed('blocked');
     }
-    
+
     expect(limiter.isAllowed('blocked')).toBe(false);
   });
 
   it('should track remaining requests', () => {
     limiter.isAllowed('remaining');
     limiter.isAllowed('remaining');
-    
+
     expect(limiter.getRemaining('remaining')).toBe(3);
   });
 
@@ -583,7 +598,7 @@ describe('RateLimiter', () => {
       limiter.isAllowed('reset');
     }
     expect(limiter.isAllowed('reset')).toBe(false);
-    
+
     limiter.reset('reset');
     expect(limiter.isAllowed('reset')).toBe(true);
   });
@@ -609,21 +624,21 @@ describe('SpamDetector', () => {
   it('should detect duplicate content', () => {
     detector.isSpam('user2', 'Duplicate content test message here');
     const result = detector.isSpam('user2', 'Duplicate content test message here');
-    
+
     expect(result.isSpam).toBe(true);
     expect(result.reason).toContain('Duplicate');
   });
 
   it('should detect too short content', () => {
     const result = detector.isSpam('user3', 'Hi');
-    
+
     expect(result.isSpam).toBe(true);
     expect(result.reason).toContain('short');
   });
 
   it('should detect spam patterns', () => {
     const result = detector.isSpam('user4', 'Click here to buy now and make $1000!');
-    
+
     expect(result.isSpam).toBe(true);
     expect(result.reason).toContain('pattern');
   });
@@ -639,7 +654,7 @@ describe('MarketplaceService', () => {
   beforeEach(async () => {
     const { MarketplaceService } = await import('../MarketplaceService.js');
     marketplace = new MarketplaceService();
-    
+
     // Register test session
     marketplace.registerSession('test-token', 'testuser', 'authenticated');
   });
@@ -702,7 +717,7 @@ describe('MarketplaceService', () => {
 
     it('should search traits', async () => {
       const result = await marketplace.search({ q: 'searchable' });
-      
+
       expect(result.results.length).toBeGreaterThan(0);
     });
   });
@@ -710,7 +725,7 @@ describe('MarketplaceService', () => {
   describe('health', () => {
     it('should return health status', async () => {
       const health = await marketplace.getHealth();
-      
+
       expect(health.status).toBe('ok');
       expect(health.components.registry).toBe('ok');
     });
@@ -719,7 +734,7 @@ describe('MarketplaceService', () => {
   describe('metrics', () => {
     it('should return metrics', async () => {
       const metrics = await marketplace.getMetrics();
-      
+
       expect(metrics.totalTraits).toBeDefined();
       expect(metrics.activeSessions).toBeDefined();
     });
@@ -728,7 +743,7 @@ describe('MarketplaceService', () => {
   describe('rate limiting', () => {
     it('should check rate limit', () => {
       const info = marketplace.checkRateLimit('test-token');
-      
+
       expect(info.limit).toBe(1000); // authenticated tier
       expect(info.remaining).toBeLessThan(info.limit);
     });
@@ -750,14 +765,14 @@ describe('DownloadStatsTracker', () => {
   it('should record downloads', () => {
     tracker.record('trait1', '1.0.0');
     tracker.record('trait1', '1.0.0');
-    
+
     const stats = tracker.getStats('trait1');
     expect(stats.total).toBe(2);
   });
 
   it('should track daily stats', () => {
     tracker.record('trait2', '1.0.0');
-    
+
     const stats = tracker.getStats('trait2');
     expect(stats.lastDay).toBe(1);
     expect(stats.lastWeek).toBe(1);
@@ -796,7 +811,7 @@ describe('RatingService', () => {
   it('should get average rating', async () => {
     await ratingService.rate('trait2', 'user1', 5);
     await ratingService.rate('trait2', 'user2', 3);
-    
+
     const avg = ratingService.getAverageRating('trait2');
     expect(avg.average).toBe(4);
     expect(avg.count).toBe(2);
@@ -805,7 +820,7 @@ describe('RatingService', () => {
   it('should update existing rating', async () => {
     await ratingService.rate('trait3', 'user1', 3);
     await ratingService.rate('trait3', 'user1', 5);
-    
+
     const avg = ratingService.getAverageRating('trait3');
     expect(avg.average).toBe(5);
     expect(avg.count).toBe(1);
@@ -819,22 +834,22 @@ describe('RatingService', () => {
 describe('Module Exports', () => {
   it('should export all required modules', async () => {
     const marketplace = await import('../index.js');
-    
+
     // Types
     expect(marketplace.RATE_LIMITS).toBeDefined();
-    
+
     // Core services
     expect(marketplace.TraitRegistry).toBeDefined();
     expect(marketplace.MarketplaceService).toBeDefined();
     expect(marketplace.DependencyResolver).toBeDefined();
     expect(marketplace.VerificationService).toBeDefined();
-    
+
     // Utilities
     expect(marketplace.RateLimiter).toBeDefined();
     expect(marketplace.SpamDetector).toBeDefined();
     expect(marketplace.parseVersionRequirement).toBeDefined();
     expect(marketplace.satisfies).toBeDefined();
-    
+
     // API
     expect(marketplace.createMarketplaceRoutes).toBeDefined();
     expect(marketplace.createApp).toBeDefined();

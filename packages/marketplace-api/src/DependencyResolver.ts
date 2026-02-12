@@ -55,15 +55,7 @@ export class DependencyResolver {
 
     // Process each root requirement
     for (const req of requirements) {
-      await this.resolveRecursive(
-        req,
-        'root',
-        0,
-        resolved,
-        versionRequests,
-        visited,
-        warnings
-      );
+      await this.resolveRecursive(req, 'root', 0, resolved, versionRequests, visited, warnings);
     }
 
     // Detect and resolve conflicts
@@ -193,9 +185,7 @@ export class DependencyResolver {
       deprecated: false,
     });
 
-    const versions = result.results
-      .filter((t) => t.name === name)
-      .map((t) => t.version);
+    const versions = result.results.filter((t) => t.name === name).map((t) => t.version);
 
     return versions;
   }
@@ -233,9 +223,7 @@ export class DependencyResolver {
 
     // Find a version that satisfies all constraints
     const constraints = requests.map((r) => r.version);
-    const compatible = versions.filter((v) =>
-      constraints.every((c) => semver.satisfies(v, c))
-    );
+    const compatible = versions.filter((v) => constraints.every((c) => semver.satisfies(v, c)));
 
     if (compatible.length > 0) {
       // Found compatible version
@@ -365,9 +353,16 @@ export class DependencyResolver {
   /**
    * Generate a lockfile-style output
    */
-  async generateLockfile(traits: TraitRef[]): Promise<Record<string, { version: string; resolved: string; dependencies: Record<string, string> }>> {
+  async generateLockfile(
+    traits: TraitRef[]
+  ): Promise<
+    Record<string, { version: string; resolved: string; dependencies: Record<string, string> }>
+  > {
     const tree = await this.resolve(traits);
-    const lockfile: Record<string, { version: string; resolved: string; dependencies: Record<string, string> }> = {};
+    const lockfile: Record<
+      string,
+      { version: string; resolved: string; dependencies: Record<string, string> }
+    > = {};
 
     for (const dep of tree.resolved) {
       const trait = await this.registry.getTrait(dep.name, dep.version);

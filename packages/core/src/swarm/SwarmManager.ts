@@ -1,10 +1,14 @@
 /**
  * Swarm Manager
- * 
+ *
  * Orchestrates swarm formation, disbandment, and lifecycle.
  */
 
-import { SwarmMembership, type SwarmMembershipConfig, type MembershipEvent } from './SwarmMembership';
+import {
+  SwarmMembership,
+  type SwarmMembershipConfig,
+  type MembershipEvent,
+} from './SwarmMembership';
 import type { QuorumState } from './QuorumPolicy';
 
 export interface SwarmInfo {
@@ -147,7 +151,7 @@ export class SwarmManager {
 
     if (success) {
       this.trackAgentSwarm(agentId, swarmId);
-      
+
       // Cancel disband timeout if was scheduled
       const timeout = this.disbandTimeouts.get(swarmId);
       if (timeout) {
@@ -247,7 +251,7 @@ export class SwarmManager {
    * Get active swarms
    */
   getActiveSwarms(): SwarmInfo[] {
-    return this.getAllSwarms().filter(s => s.status === 'active' || s.status === 'forming');
+    return this.getAllSwarms().filter((s) => s.status === 'active' || s.status === 'forming');
   }
 
   /**
@@ -259,7 +263,7 @@ export class SwarmManager {
       return [];
     }
     return [...swarmIds]
-      .map(id => this.swarms.get(id))
+      .map((id) => this.swarms.get(id))
       .filter((s): s is SwarmInfo => s !== undefined);
   }
 
@@ -268,28 +272,30 @@ export class SwarmManager {
    */
   findSwarmsByObjective(query: string): SwarmInfo[] {
     const lowerQuery = query.toLowerCase();
-    return this.getActiveSwarms().filter(s => 
-      s.objective.toLowerCase().includes(lowerQuery) ||
-      s.name.toLowerCase().includes(lowerQuery)
+    return this.getActiveSwarms().filter(
+      (s) =>
+        s.objective.toLowerCase().includes(lowerQuery) || s.name.toLowerCase().includes(lowerQuery)
     );
   }
 
   /**
    * Get swarm statistics
    */
-  getSwarmStats(swarmId: string): {
-    memberCount: number;
-    quorumState: QuorumState;
-    ageMs: number;
-    healthScore: number;
-  } | undefined {
+  getSwarmStats(swarmId: string):
+    | {
+        memberCount: number;
+        quorumState: QuorumState;
+        ageMs: number;
+        healthScore: number;
+      }
+    | undefined {
     const swarm = this.swarms.get(swarmId);
     if (!swarm) {
       return undefined;
     }
 
     const quorumState = swarm.membership.getQuorumState();
-    
+
     return {
       memberCount: swarm.membership.getMemberCount(),
       quorumState,
@@ -427,7 +433,10 @@ export class SwarmManager {
   }
 
   private generateSwarmId(name: string): string {
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 20);
+    const slug = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .substring(0, 20);
     return `swarm-${slug}-${Date.now().toString(36)}`;
   }
 }

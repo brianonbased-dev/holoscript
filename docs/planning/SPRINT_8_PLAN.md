@@ -13,6 +13,7 @@ Sprint 8 delivers **Language Interoperability Expansion**, extending HoloScript'
 ### Research Context
 
 HoloScript currently compiles to 15+ targets spanning:
+
 - **VR/Gaming**: Unity, Unreal, Godot, VRChat
 - **Web**: Babylon.js, WebGPU, Three.js runtime
 - **Mobile XR**: visionOS, Android XR
@@ -26,14 +27,14 @@ Sprint 8 addresses identified gaps to complete the vision of HoloScript as the u
 
 ## Sprint Priorities
 
-| Priority | Focus | Effort | Dependencies | Status |
-|----------|-------|--------|--------------|--------|
-| **1** | glTF/GLB Export Pipeline | High | Core complete | ✅ COMPLETE |
-| **2** | Python Bindings | Medium | WASM parser | ✅ COMPLETE |
-| **3** | Tree-sitter Grammar | Medium | LSP complete | ✅ COMPLETE |
-| **4** | Bidirectional Import | High | All compilers | ✅ COMPLETE |
-| **5** | WASM Component Model | High | WASI Preview 3 | ✅ COMPLETE |
-| **6** | Performance Dashboard Completion | Low | Sprint 7 | ✅ COMPLETE |
+| Priority | Focus                            | Effort | Dependencies   | Status      |
+| -------- | -------------------------------- | ------ | -------------- | ----------- |
+| **1**    | glTF/GLB Export Pipeline         | High   | Core complete  | ✅ COMPLETE |
+| **2**    | Python Bindings                  | Medium | WASM parser    | ✅ COMPLETE |
+| **3**    | Tree-sitter Grammar              | Medium | LSP complete   | ✅ COMPLETE |
+| **4**    | Bidirectional Import             | High   | All compilers  | ✅ COMPLETE |
+| **5**    | WASM Component Model             | High   | WASI Preview 3 | ✅ COMPLETE |
+| **6**    | Performance Dashboard Completion | Low    | Sprint 7       | ✅ COMPLETE |
 
 ---
 
@@ -57,43 +58,43 @@ import { dedup, prune, quantize } from '@gltf-transform/functions';
 export class GLTFPipeline {
   async compile(composition: HoloComposition): Promise<Uint8Array> {
     const document = new Document();
-    
+
     // Create scene structure
     const scene = document.createScene('main');
-    
+
     // Convert HoloScript objects to glTF nodes
     for (const object of composition.objects) {
       const node = this.createNode(document, object);
       scene.addChild(node);
     }
-    
+
     // Apply optimizations
     await document.transform(dedup(), prune(), quantize());
-    
+
     // Export as GLB (binary)
     const io = new NodeIO();
     return io.writeBinary(document);
   }
-  
+
   private createNode(document: Document, object: HoloObject): Node {
     const node = document.createNode(object.name);
-    
+
     // Transform
     node.setTranslation(object.position);
     node.setRotation(object.rotation);
     node.setScale(object.scale);
-    
+
     // Mesh (primitives)
     if (object.geometry) {
       const mesh = this.createMesh(document, object.geometry);
       node.setMesh(mesh);
     }
-    
+
     // Material (PBR)
     if (object.material) {
       this.applyMaterial(document, node, object.material);
     }
-    
+
     return node;
   }
 }
@@ -132,6 +133,7 @@ Python dominates robotics (ROS 2), machine learning (PyTorch, TensorFlow), and d
 ### Design Options
 
 #### Option A: WASM via wasmtime-py
+
 ```python
 # packages/holoscript-py/holoscript/__init__.py
 from wasmtime import Engine, Store, Module, Instance
@@ -142,7 +144,7 @@ def parse(source: str) -> dict:
     store = Store(engine)
     module = Module.from_file(engine, "holoscript_wasm.wasm")
     instance = Instance(store, module, [])
-    
+
     # Call parse function
     result = instance.exports["parse"](source)
     return json.loads(result)
@@ -153,6 +155,7 @@ def validate(source: str) -> list:
 ```
 
 #### Option B: Native Rust bindings via PyO3
+
 ```rust
 // packages/holoscript-py/src/lib.rs
 use pyo3::prelude::*;
@@ -199,6 +202,7 @@ fn holoscript(_py: Python, m: &PyModule) -> PyResult<()> {
 ### Context
 
 Currently, HoloScript IDE support relies on the LSP package (`@holoscript/lsp`), which works great for VS Code and Neovim but doesn't cover:
+
 - Zed editor (tree-sitter native)
 - Helix editor (tree-sitter native)
 - Emacs tree-sitter mode
@@ -213,58 +217,41 @@ A tree-sitter grammar provides universal syntax highlighting and navigation.
 // packages/tree-sitter-holoscript/grammar.js
 module.exports = grammar({
   name: 'holoscript',
-  
+
   rules: {
-    source_file: $ => repeat($._definition),
-    
-    _definition: $ => choice(
-      $.composition,
-      $.world,
-      $.entity,
-      $.template,
-      $.trait_definition,
-    ),
-    
-    composition: $ => seq(
-      'composition',
-      field('name', $.identifier),
-      '{',
-      repeat($._statement),
-      '}',
-    ),
-    
-    world: $ => seq(
-      'world',
-      field('name', $.identifier),
-      optional($.trait_list),
-      '{',
-      repeat($._world_content),
-      '}',
-    ),
-    
-    entity: $ => seq(
-      'entity',
-      field('name', $.identifier),
-      optional($.trait_list),
-      '{',
-      repeat($._entity_content),
-      '}',
-    ),
-    
-    trait_list: $ => seq(
-      '@',
-      '[',
-      sepBy(',', $.trait),
-      ']',
-    ),
-    
-    trait: $ => seq(
-      field('name', $.identifier),
-      optional($.trait_arguments),
-    ),
-    
+    source_file: ($) => repeat($._definition),
+
+    _definition: ($) => choice($.composition, $.world, $.entity, $.template, $.trait_definition),
+
+    composition: ($) =>
+      seq('composition', field('name', $.identifier), '{', repeat($._statement), '}'),
+
+    world: ($) =>
+      seq(
+        'world',
+        field('name', $.identifier),
+        optional($.trait_list),
+        '{',
+        repeat($._world_content),
+        '}'
+      ),
+
+    entity: ($) =>
+      seq(
+        'entity',
+        field('name', $.identifier),
+        optional($.trait_list),
+        '{',
+        repeat($._entity_content),
+        '}'
+      ),
+
+    trait_list: ($) => seq('@', '[', sepBy(',', $.trait), ']'),
+
+    trait: ($) => seq(field('name', $.identifier), optional($.trait_arguments)),
+
     // ... additional rules
-  }
+  },
 });
 ```
 
@@ -297,11 +284,13 @@ module.exports = grammar({
 ### Context
 
 All current HoloScript compilation is one-way: HoloScript → target. This is limiting because:
+
 1. Teams with existing Unity/Godot projects can't migrate to HoloScript
 2. Designers using Blender/Maya can't import their work
 3. No round-trip engineering is possible
 
 Bidirectional import enables:
+
 - Migration paths from existing projects
 - Import of artist-created assets
 - Round-trip editing workflows
@@ -314,31 +303,31 @@ export class UnityImporter {
   async import(scenePath: string): Promise<HoloComposition> {
     const yaml = await fs.readFile(scenePath, 'utf-8');
     const scene = parseUnityYAML(yaml);
-    
+
     const composition = new HoloComposition(scene.name);
-    
+
     for (const gameObject of scene.gameObjects) {
       const object = this.convertGameObject(gameObject);
       composition.addObject(object);
     }
-    
+
     return composition;
   }
-  
+
   private convertGameObject(go: UnityGameObject): HoloObject {
     const object = new HoloObject(go.name);
-    
+
     // Transform
     object.position = go.transform.position;
     object.rotation = go.transform.rotation;
     object.scale = go.transform.scale;
-    
+
     // Components → Traits
     for (const component of go.components) {
       const trait = this.mapComponentToTrait(component);
       if (trait) object.addTrait(trait);
     }
-    
+
     return object;
   }
 }
@@ -393,6 +382,7 @@ export class GLTFImporter {
 ### Context
 
 The current WASM compiler (`@holoscript/compiler-wasm`) emits WAT text format and provides `parse()`/`validate()` functions. This is useful but limited. The WASM Component Model (WASI Preview 3, released Feb 2026) enables:
+
 - Language-neutral interfaces via WIT (WebAssembly Interface Types)
 - Components calling other components regardless of source language
 - True polyglot composition: Rust + Python + Go + Swift all interoperating
@@ -408,25 +398,25 @@ interface parser {
         line: u32,
         column: u32,
     }
-    
+
     record span {
         start: position,
         end: position,
     }
-    
+
     variant node {
         composition(composition-node),
         world(world-node),
         entity(entity-node),
         object(object-node),
     }
-    
+
     record composition-node {
         name: string,
         span: span,
         children: list<node>,
     }
-    
+
     parse: func(source: string) -> result<node, list<diagnostic>>;
     validate: func(source: string) -> list<diagnostic>;
 }
@@ -467,6 +457,7 @@ The WASM Component Model implementation is complete:
 **Package**: `packages/holoscript-component/`
 
 **Files Created**:
+
 - `Cargo.toml` - Rust package with wit-bindgen 0.36
 - `wit/holoscript.wit` - Full WIT interface (~230 lines)
 - `wit/world.wit` - World definitions
@@ -480,6 +471,7 @@ The WASM Component Model implementation is complete:
 - `README.md` - Multi-language usage documentation
 
 **Interfaces Exposed**:
+
 1. **parser**: parse(), parse-header()
 2. **validator**: validate(), trait-exists(), get-trait(), list-traits(), list-traits-by-category()
 3. **compiler**: compile(), compile-ast(), list-targets()
@@ -510,46 +502,50 @@ Sprint 7 Priority 8 (Performance Dashboard) was marked as partial. This priority
 
 ## Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| glTF exports validated | 100% glTF 2.0 spec compliance |
-| Python package downloads | 500+ first month |
-| Tree-sitter editors supported | 5+ (Zed, Helix, Emacs, etc.) |
-| Import conversion accuracy | 90%+ fidelity |
-| WASM component size | < 2MB |
+| Metric                        | Target                        |
+| ----------------------------- | ----------------------------- |
+| glTF exports validated        | 100% glTF 2.0 spec compliance |
+| Python package downloads      | 500+ first month              |
+| Tree-sitter editors supported | 5+ (Zed, Helix, Emacs, etc.)  |
+| Import conversion accuracy    | 90%+ fidelity                 |
+| WASM component size           | < 2MB                         |
 
 ---
 
 ## Risk Assessment
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| glTF-transform API changes | Medium | Pin version, comprehensive tests |
-| Python WASM performance | Low | Native PyO3 fallback |
-| Tree-sitter grammar complexity | Medium | Incremental grammar building |
-| Unity YAML format changes | High | Version-specific importers |
-| WASI Preview 3 not stable | Medium | Fall back to WASI Preview 2 |
+| Risk                           | Impact | Mitigation                       |
+| ------------------------------ | ------ | -------------------------------- |
+| glTF-transform API changes     | Medium | Pin version, comprehensive tests |
+| Python WASM performance        | Low    | Native PyO3 fallback             |
+| Tree-sitter grammar complexity | Medium | Incremental grammar building     |
+| Unity YAML format changes      | High   | Version-specific importers       |
+| WASI Preview 3 not stable      | Medium | Fall back to WASI Preview 2      |
 
 ---
 
 ## Timeline
 
 ### Phase 1: Foundation (Week 1-3)
+
 - glTF Pipeline core implementation
 - Tree-sitter grammar v1
 - Python package structure
 
 ### Phase 2: Integration (Week 4-6)
+
 - glTF CLI integration
 - Python WASM bindings
 - Tree-sitter GitHub PR
 
 ### Phase 3: Advanced (Week 7-10)
+
 - Bidirectional importers
 - WASM Component Model
 - Performance Dashboard
 
 ### Phase 4: Polish (Week 11-12)
+
 - Documentation
 - Example projects
 - Performance optimization

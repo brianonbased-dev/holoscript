@@ -68,7 +68,11 @@ export async function hmacSha256(data: string, secret: string): Promise<string> 
 /**
  * Verify HMAC-SHA256 signature
  */
-export async function verifyHmacSha256(data: string, signature: string, secret: string): Promise<boolean> {
+export async function verifyHmacSha256(
+  data: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
   const expected = await hmacSha256(data, secret);
   return timingSafeEqual(expected, signature);
 }
@@ -80,7 +84,10 @@ export async function verifyHmacSha256(data: string, signature: string, secret: 
 /**
  * Encrypt data using AES-GCM
  */
-export async function encrypt(data: string, key: CryptoKey): Promise<{ ciphertext: string; iv: string }> {
+export async function encrypt(
+  data: string,
+  key: CryptoKey
+): Promise<{ ciphertext: string; iv: string }> {
   const encoder = new TextEncoder();
   const iv = crypto.getRandomValues(new Uint8Array(12));
 
@@ -131,7 +138,10 @@ export async function exportKey(key: CryptoKey): Promise<string> {
  */
 export async function importKey(base64Key: string): Promise<CryptoKey> {
   const keyBuffer = base64ToBuffer(base64Key);
-  return crypto.subtle.importKey('raw', keyBuffer, { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+  return crypto.subtle.importKey('raw', keyBuffer, { name: 'AES-GCM', length: 256 }, true, [
+    'encrypt',
+    'decrypt',
+  ]);
 }
 
 // =============================================================================
@@ -184,7 +194,13 @@ export async function deriveKey(
   iterations: number = 100000
 ): Promise<CryptoKey> {
   const encoder = new TextEncoder();
-  const passwordKey = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits', 'deriveKey']);
+  const passwordKey = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits', 'deriveKey']
+  );
 
   const saltBytes = typeof salt === 'string' ? encoder.encode(salt) : salt;
   // Create a new ArrayBuffer copy to ensure compatibility
@@ -213,7 +229,10 @@ export async function deriveKey(
  * @param address - The wallet address to validate
  * @param chain - The blockchain type ('ethereum' or 'solana')
  */
-export function validateWalletAddress(address: string, chain: 'ethereum' | 'solana' = 'ethereum'): boolean {
+export function validateWalletAddress(
+  address: string,
+  chain: 'ethereum' | 'solana' = 'ethereum'
+): boolean {
   switch (chain) {
     case 'ethereum':
       return /^0x[a-fA-F0-9]{40}$/.test(address);
@@ -241,11 +260,11 @@ export function sanitizeInput(input: string): string {
   let sanitized = input
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, '')  // Remove all HTML tags
+    .replace(/<[^>]+>/g, '') // Remove all HTML tags
     .replace(/javascript:/gi, '')
-    .replace(/on\w+\s*=/gi, '')  // Remove event handlers
+    .replace(/on\w+\s*=/gi, '') // Remove event handlers
     .replace(/data:/gi, '');
-  
+
   // Remove SQL injection patterns
   sanitized = sanitized
     .replace(/;\s*DROP\s+TABLE/gi, '')
@@ -253,7 +272,7 @@ export function sanitizeInput(input: string): string {
     .replace(/;\s*INSERT\s+INTO/gi, '')
     .replace(/;\s*UPDATE\s+/gi, '')
     .replace(/--/g, '');
-  
+
   return sanitized.trim();
 }
 

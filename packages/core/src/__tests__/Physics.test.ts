@@ -150,7 +150,7 @@ describe('Physics Types', () => {
       const result = validateBodyConfig(config);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('id'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('id'))).toBe(true);
     });
 
     it('should reject dynamic body without positive mass', () => {
@@ -161,7 +161,7 @@ describe('Physics Types', () => {
       const result = validateBodyConfig(config);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('mass'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('mass'))).toBe(true);
     });
 
     it('should reject negative mass', () => {
@@ -172,7 +172,7 @@ describe('Physics Types', () => {
       const result = validateBodyConfig(config);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('negative'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('negative'))).toBe(true);
     });
   });
 });
@@ -560,7 +560,7 @@ describe('PhysicsWorldImpl', () => {
       world.step(1 / 60);
       const contacts = world.getContacts();
 
-      const beginEvents = contacts.filter(e => e.type === 'begin');
+      const beginEvents = contacts.filter((e) => e.type === 'begin');
       expect(beginEvents.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -614,7 +614,7 @@ describe('PhysicsWorldImpl', () => {
           bodyA: 'a',
           bodyB: 'b',
           distance: 2,
-        }),
+        })
       ).toThrow();
     });
 
@@ -628,7 +628,7 @@ describe('PhysicsWorldImpl', () => {
           bodyA: 'a',
           bodyB: 'missing',
           distance: 2,
-        }),
+        })
       ).toThrow();
     });
 
@@ -739,7 +739,7 @@ describe('PhysicsWorldImpl', () => {
 
         const hits = world.raycast(
           { origin: { x: 0, y: 0, z: 0 }, direction: { x: 1, y: 0, z: 0 } },
-          { closestOnly: true },
+          { closestOnly: true }
         );
 
         expect(hits).toHaveLength(1);
@@ -749,10 +749,10 @@ describe('PhysicsWorldImpl', () => {
       it('should exclude specified bodies', () => {
         const hits = world.raycast(
           { origin: { x: 0, y: 0, z: 0 }, direction: { x: 1, y: 0, z: 0 } },
-          { excludeBodies: ['target'] },
+          { excludeBodies: ['target'] }
         );
 
-        const targetHit = hits.find(h => h.bodyId === 'target');
+        const targetHit = hits.find((h) => h.bodyId === 'target');
         expect(targetHit).toBeUndefined();
       });
     });
@@ -891,7 +891,9 @@ describe('Physics Integration', () => {
     const world = createPhysicsWorld();
 
     world.createBody(dynamicBody('ball', sphereShape(1), 1, { x: 0, y: 10, z: 0 }));
-    world.createBody(staticBody('ground', boxShape({ x: 10, y: 0.5, z: 10 }), { x: 0, y: -0.5, z: 0 }));
+    world.createBody(
+      staticBody('ground', boxShape({ x: 10, y: 0.5, z: 10 }), { x: 0, y: -0.5, z: 0 })
+    );
 
     // Run simulation for 2 seconds
     for (let i = 0; i < 120; i++) {
@@ -927,7 +929,9 @@ describe('Physics Integration', () => {
   it('should support kinematic platforms', () => {
     const world = createPhysicsWorld();
 
-    world.createBody(kinematicBody('platform', boxShape({ x: 2, y: 0.25, z: 2 }), { x: 0, y: 0, z: 0 }));
+    world.createBody(
+      kinematicBody('platform', boxShape({ x: 2, y: 0.25, z: 2 }), { x: 0, y: 0, z: 0 })
+    );
 
     // Move platform up
     for (let i = 0; i < 60; i++) {

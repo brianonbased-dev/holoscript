@@ -25,16 +25,10 @@ export {
 } from './MessagingTypes';
 
 // Channel Manager
-export {
-  ChannelManager,
-  ChannelManagerEvents,
-} from './ChannelManager';
+export { ChannelManager, ChannelManagerEvents } from './ChannelManager';
 
 // Agent Messaging
-export {
-  AgentMessaging,
-  AgentMessagingConfig,
-} from './AgentMessaging';
+export { AgentMessaging, AgentMessagingConfig } from './AgentMessaging';
 
 // Trait
 export {

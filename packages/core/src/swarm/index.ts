@@ -1,6 +1,6 @@
 /**
  * Swarm Module
- * 
+ *
  * Autonomous agent swarm coordination, optimization, and leader election.
  */
 
@@ -39,10 +39,22 @@ export type { SynthesisResult, SynthesizerConfig } from './ContributionSynthesiz
 
 // Swarm lifecycle
 export { SwarmManager } from './SwarmManager';
-export type { SwarmInfo, CreateSwarmRequest, DisbandOptions, SwarmManagerConfig, SwarmEvent } from './SwarmManager';
+export type {
+  SwarmInfo,
+  CreateSwarmRequest,
+  DisbandOptions,
+  SwarmManagerConfig,
+  SwarmEvent,
+} from './SwarmManager';
 
 export { SwarmMembership } from './SwarmMembership';
-export type { MemberInfo, JoinRequest, LeaveRequest, MembershipEvent, SwarmMembershipConfig } from './SwarmMembership';
+export type {
+  MemberInfo,
+  JoinRequest,
+  LeaveRequest,
+  MembershipEvent,
+  SwarmMembershipConfig,
+} from './SwarmMembership';
 
 export { QuorumPolicy } from './QuorumPolicy';
 export type { QuorumConfig, QuorumStatus, QuorumState } from './QuorumPolicy';

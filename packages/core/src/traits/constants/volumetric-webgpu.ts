@@ -11,4 +11,8 @@ export const VOLUMETRIC_WEBGPU_TRAITS = [
   'gpu_particle',
   'gpu_physics',
   'gpu_buffer',
+  'photogrammetry_scan',
+  'lidar_scan',
+  'print_twin',
+  'scan_to_sculpt',
 ] as const;

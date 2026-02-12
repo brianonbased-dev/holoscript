@@ -15,7 +15,13 @@ import {
   generateQRCodeUrl,
   socialTraitHandlers,
 } from '../SocialTraits';
-import { createMockContext, createMockNode, getLastEvent, sendEvent, attachTrait } from './traitTestHelpers';
+import {
+  createMockContext,
+  createMockNode,
+  getLastEvent,
+  sendEvent,
+  attachTrait,
+} from './traitTestHelpers';
 
 describe('shareableHandler', () => {
   it('should have correct name', () => {

@@ -8,6 +8,7 @@
  */
 
 import type { TraitHandler } from './TraitTypes';
+import type { IotGateway } from '../services/GatewayAdapter';
 
 // =============================================================================
 // TYPES
@@ -119,7 +120,14 @@ export const digitalTwinHandler: TraitHandler<DigitalTwinConfig> = {
       const updates = [...state.pendingUpdates];
       state.pendingUpdates = [];
 
+      const handler = digitalTwinHandler as any;
+      const gateway = handler.gateway as IotGateway;
+
       for (const update of updates) {
+        if (gateway) {
+          gateway.sendUpdate(config.physical_id, update.property, update.value);
+        }
+
         context.emit?.('twin_send_update', {
           node,
           physicalId: config.physical_id,
@@ -247,6 +255,31 @@ function connectToPhysical(
   config: DigitalTwinConfig,
   context: { emit?: (event: string, data: unknown) => void }
 ): void {
+  const handler = digitalTwinHandler as any;
+  if (!handler.gateway) {
+    console.warn('[DigitalTwinTrait] No Gateway configured. Call setGateway() first.');
+    return;
+  }
+
+  const gateway = handler.gateway as IotGateway;
+
+  // Listen for connection
+  gateway.on('connected', (data: any) => {
+    if (data.deviceId === config.physical_id) {
+      context.emit?.('twin_connected', { handle: gateway, ...data });
+    }
+  });
+
+  // Listen for telemetry
+  gateway.on('telemetry', (data: any) => {
+    if (data.deviceId === config.physical_id) {
+      context.emit?.('twin_state_update', { state: data });
+    }
+  });
+
+  // Connect
+  gateway.connect(config.physical_id, config.connection_string);
+
   context.emit?.('twin_connect', {
     node,
     physicalId: config.physical_id,

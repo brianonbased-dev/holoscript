@@ -38,13 +38,8 @@ import type {
   HSPlusDirective,
   ZoneNode,
   HologramShape,
+  CompositionNode,
 } from './types';
-type CompositionNode = any;
-type TransformationNode = any;
-// @ts-ignore
-const _c: CompositionNode = {} as any;
-// @ts-ignore
-const _t: TransformationNode = {} as any;
 
 // =============================================================================
 // OBJECT POOL - Reduces GC pressure by reusing objects
@@ -345,6 +340,7 @@ export class HoloScriptCodeParser {
       'on_collision',
       'on_enter',
       'on_exit',
+      'using',
     ]);
   }
 
@@ -1227,6 +1223,12 @@ export class HoloScriptCodeParser {
       name = this.expectName() || `orb_${Date.now()}`;
     }
 
+    let template: string | undefined;
+    if (this.check('keyword', 'using')) {
+      this.advance();
+      template = this.expectIdentifier() || undefined;
+    }
+
     const properties: Record<string, HoloScriptValue> = {};
     const directives: HSPlusDirective[] = [];
     let position: SpatialPosition | undefined;
@@ -1293,6 +1295,7 @@ export class HoloScriptCodeParser {
       },
       properties,
       directives: directives as any,
+      template,
       methods: [],
       children: [],
       line: startToken?.line || 0,
@@ -1675,6 +1678,12 @@ export class HoloScriptCodeParser {
       name = this.expectName() || `${primitiveType}_${Date.now()}`;
     }
 
+    let template: string | undefined;
+    if (this.check('keyword', 'using')) {
+      this.advance();
+      template = this.expectIdentifier() || undefined;
+    }
+
     const properties: Record<string, HoloScriptValue> = {};
     const directives: HSPlusDirective[] = [];
     let position: SpatialPosition | undefined;
@@ -1734,6 +1743,7 @@ export class HoloScriptCodeParser {
       },
       properties,
       directives: directives as any,
+      template,
       methods: [],
       children: [],
       line: startToken?.line || 0,
@@ -1850,18 +1860,24 @@ export class HoloScriptCodeParser {
 
     const children: ASTNode[] = [];
     const migrations: MigrationNode[] = [];
+    const directives: HSPlusDirective[] = [];
+    const properties: Record<string, HoloScriptValue> = {};
 
     if (this.check('punctuation', '{')) {
       this.advance();
       while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
         this.skipNewlines();
 
-        // Check for @version(n)
+        // Check for directives
         const token = this.currentToken();
         if (token?.type === 'punctuation' && token.value === '@') {
+          // Special handling for @version to assign it to the node
+          // But also keep it as a directive if needed
+          const startPos = this.position;
           this.advance(); // @
-          const dir = this.expectIdentifier();
-          if (dir === 'version') {
+          const dirName = this.expectIdentifier();
+
+          if (dirName === 'version') {
             this.expect('punctuation', '(');
             const vStr = this.currentToken();
             if (vStr?.type === 'number') {
@@ -1869,14 +1885,21 @@ export class HoloScriptCodeParser {
               this.advance();
             }
             this.expect('punctuation', ')');
+            // Also add as a directive for completeness
+            directives.push({ type: 'version' as any, version } as any);
             this.skipNewlines();
             continue;
           } else {
-            // Handle other directives (if any)
-            this.position--; // Backtrack @
+            // Backtrack and parse as standard directive
+            this.position = startPos;
+            const dir = this.parseDirective();
+            if (dir) directives.push(dir);
+            this.skipNewlines();
+            continue;
           }
         }
 
+        // Try parsing as a declaration (nested nodes)
         const node = this.parseDeclaration();
         if (node) {
           if (node.type === 'migration') {
@@ -1884,11 +1907,20 @@ export class HoloScriptCodeParser {
           } else {
             children.push(node);
           }
+          this.skipNewlines();
+          continue;
         }
-        this.skipNewlines();
-        console.log(
-          `[Parser] Template "${name}" item parsed, current position: ${this.position}/${this.tokens.length}`
-        );
+
+        // Try parsing as a property
+        const prop = this.parseProperty();
+        if (prop) {
+          properties[prop.key] = prop.value;
+          this.skipNewlines();
+          continue;
+        }
+
+        // If we get here, valid token but unknown structure
+        this.advance();
       }
       this.expect('punctuation', '}');
     }
@@ -1898,6 +1930,8 @@ export class HoloScriptCodeParser {
       name,
       parameters: params,
       children,
+      properties,
+      directives: directives as any,
       version,
       migrations,
     };

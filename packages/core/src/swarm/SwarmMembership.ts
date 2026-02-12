@@ -1,6 +1,6 @@
 /**
  * Swarm Membership
- * 
+ *
  * Manages agent membership in swarms with join/leave protocol.
  */
 
@@ -114,7 +114,7 @@ export class SwarmMembership {
     }
 
     this.pendingJoins.delete(agentId);
-    
+
     if (!this.quorumPolicy.canJoin()) {
       return false;
     }
@@ -209,7 +209,7 @@ export class SwarmMembership {
 
     for (const [agentId, member] of this.members) {
       if (member.role === 'observer') continue;
-      
+
       if (now - member.lastHeartbeat > this.config.heartbeatTimeoutMs) {
         if (member.status === 'active') {
           member.status = 'inactive';
@@ -283,7 +283,7 @@ export class SwarmMembership {
    * Get active members (non-observers)
    */
   getActiveMembers(): MemberInfo[] {
-    return this.getMembers().filter(m => m.role !== 'observer' && m.status === 'active');
+    return this.getMembers().filter((m) => m.role !== 'observer' && m.status === 'active');
   }
 
   /**
@@ -304,7 +304,7 @@ export class SwarmMembership {
    * Get member count
    */
   getMemberCount(): number {
-    return [...this.members.values()].filter(m => m.role !== 'observer').length;
+    return [...this.members.values()].filter((m) => m.role !== 'observer').length;
   }
 
   /**
@@ -327,7 +327,11 @@ export class SwarmMembership {
     return [...this.pendingJoins.values()];
   }
 
-  private addMember(agentId: string, role: MemberInfo['role'], metadata?: Record<string, unknown>): void {
+  private addMember(
+    agentId: string,
+    role: MemberInfo['role'],
+    metadata?: Record<string, unknown>
+  ): void {
     const now = Date.now();
     const hadQuorum = this.quorumPolicy.hasQuorum();
 
@@ -371,7 +375,7 @@ export class SwarmMembership {
       return false;
     }
 
-    const observerCount = [...this.members.values()].filter(m => m.role === 'observer').length;
+    const observerCount = [...this.members.values()].filter((m) => m.role === 'observer').length;
     if (observerCount >= this.config.maxObservers) {
       return false;
     }
@@ -398,7 +402,7 @@ export class SwarmMembership {
 
   private removeMember(agentId: string, type: 'left'): void {
     const hadQuorum = this.quorumPolicy.hasQuorum();
-    
+
     this.members.delete(agentId);
     this.quorumPolicy.setMemberCount(this.getMemberCount());
 
@@ -423,7 +427,7 @@ export class SwarmMembership {
   }
 
   private electNewLeader(): void {
-    const candidates = this.getActiveMembers().filter(m => m.agentId !== this.leaderId);
+    const candidates = this.getActiveMembers().filter((m) => m.agentId !== this.leaderId);
     if (candidates.length === 0) {
       this.leaderId = null;
       return;
@@ -436,9 +440,8 @@ export class SwarmMembership {
   }
 
   private getActiveMemberCount(): number {
-    return [...this.members.values()].filter(
-      m => m.role !== 'observer' && m.status === 'active'
-    ).length;
+    return [...this.members.values()].filter((m) => m.role !== 'observer' && m.status === 'active')
+      .length;
   }
 
   private emit(event: MembershipEvent): void {

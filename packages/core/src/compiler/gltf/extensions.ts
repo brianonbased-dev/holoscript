@@ -18,6 +18,10 @@ export const SUPPORTED_EXTENSIONS = [
   'KHR_materials_transmission',
   'KHR_materials_ior',
   'KHR_materials_specular',
+  'KHR_materials_sheen',
+  'KHR_materials_anisotropy',
+  'KHR_materials_volume',
+  'KHR_materials_iridescence',
   'KHR_draco_mesh_compression',
   'KHR_mesh_quantization',
   'KHR_texture_basisu',
@@ -55,9 +59,9 @@ export interface KHRMaterialsEmissiveStrength {
   emissiveStrength: number;
 }
 
-export function createEmissiveStrengthExtension(
-  strength: number
-): { KHR_materials_emissive_strength: KHRMaterialsEmissiveStrength } {
+export function createEmissiveStrengthExtension(strength: number): {
+  KHR_materials_emissive_strength: KHRMaterialsEmissiveStrength;
+} {
   return {
     KHR_materials_emissive_strength: {
       emissiveStrength: Math.max(0, strength),
@@ -80,10 +84,9 @@ export interface KHRMaterialsClearcoat {
   clearcoatNormalTexture?: { index: number; scale?: number };
 }
 
-export function createClearcoatExtension(options: {
-  factor?: number;
-  roughness?: number;
-}): { KHR_materials_clearcoat: KHRMaterialsClearcoat } {
+export function createClearcoatExtension(options: { factor?: number; roughness?: number }): {
+  KHR_materials_clearcoat: KHRMaterialsClearcoat;
+} {
   return {
     KHR_materials_clearcoat: {
       clearcoatFactor: options.factor ?? 1,
@@ -104,9 +107,9 @@ export interface KHRMaterialsTransmission {
   transmissionTexture?: { index: number };
 }
 
-export function createTransmissionExtension(
-  factor: number
-): { KHR_materials_transmission: KHRMaterialsTransmission } {
+export function createTransmissionExtension(factor: number): {
+  KHR_materials_transmission: KHRMaterialsTransmission;
+} {
   return {
     KHR_materials_transmission: {
       transmissionFactor: Math.max(0, Math.min(1, factor)),
@@ -243,6 +246,115 @@ export function createSpotLight(
     innerConeAngle,
     outerConeAngle,
   });
+}
+
+// =============================================================================
+// KHR_materials_sheen
+// =============================================================================
+
+/**
+ * Sheen extension — soft fuzzy reflection layer for fabrics and textiles
+ */
+export interface KHRMaterialsSheen {
+  sheenColorFactor?: [number, number, number];
+  sheenColorTexture?: { index: number };
+  sheenRoughnessFactor?: number;
+  sheenRoughnessTexture?: { index: number };
+}
+
+export function createSheenExtension(options: {
+  color?: [number, number, number];
+  roughness?: number;
+}): { KHR_materials_sheen: KHRMaterialsSheen } {
+  return {
+    KHR_materials_sheen: {
+      sheenColorFactor: options.color ?? [1, 1, 1],
+      sheenRoughnessFactor: options.roughness ?? 0.5,
+    },
+  };
+}
+
+// =============================================================================
+// KHR_materials_anisotropy
+// =============================================================================
+
+/**
+ * Anisotropy extension — directional roughness for brushed metal, hair, silk
+ */
+export interface KHRMaterialsAnisotropy {
+  anisotropyStrength?: number;
+  anisotropyRotation?: number;
+  anisotropyTexture?: { index: number };
+}
+
+export function createAnisotropyExtension(options: { strength?: number; rotation?: number }): {
+  KHR_materials_anisotropy: KHRMaterialsAnisotropy;
+} {
+  return {
+    KHR_materials_anisotropy: {
+      anisotropyStrength: Math.max(0, Math.min(1, options.strength ?? 0.5)),
+      anisotropyRotation: options.rotation ?? 0,
+    },
+  };
+}
+
+// =============================================================================
+// KHR_materials_volume
+// =============================================================================
+
+/**
+ * Volume extension — subsurface scattering / light attenuation through materials
+ */
+export interface KHRMaterialsVolume {
+  thicknessFactor?: number;
+  thicknessTexture?: { index: number };
+  attenuationDistance?: number;
+  attenuationColor?: [number, number, number];
+}
+
+export function createVolumeExtension(options: {
+  thickness?: number;
+  attenuationDistance?: number;
+  attenuationColor?: [number, number, number];
+}): { KHR_materials_volume: KHRMaterialsVolume } {
+  return {
+    KHR_materials_volume: {
+      thicknessFactor: options.thickness ?? 1,
+      attenuationDistance: options.attenuationDistance ?? 1,
+      attenuationColor: options.attenuationColor ?? [1, 1, 1],
+    },
+  };
+}
+
+// =============================================================================
+// KHR_materials_iridescence
+// =============================================================================
+
+/**
+ * Iridescence extension — thin-film interference (soap bubbles, oil slicks, beetles)
+ */
+export interface KHRMaterialsIridescence {
+  iridescenceFactor?: number;
+  iridescenceIor?: number;
+  iridescenceThicknessMinimum?: number;
+  iridescenceThicknessMaximum?: number;
+  iridescenceTexture?: { index: number };
+  iridescenceThicknessTexture?: { index: number };
+}
+
+export function createIridescenceExtension(options: {
+  factor?: number;
+  ior?: number;
+  thicknessRange?: [number, number];
+}): { KHR_materials_iridescence: KHRMaterialsIridescence } {
+  return {
+    KHR_materials_iridescence: {
+      iridescenceFactor: options.factor ?? 1,
+      iridescenceIor: options.ior ?? 1.3,
+      iridescenceThicknessMinimum: options.thicknessRange?.[0] ?? 100,
+      iridescenceThicknessMaximum: options.thicknessRange?.[1] ?? 400,
+    },
+  };
 }
 
 // =============================================================================

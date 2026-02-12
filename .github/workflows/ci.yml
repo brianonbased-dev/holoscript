@@ -78,7 +78,7 @@ jobs:
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: "holoscript-v1"
+          shared-key: 'holoscript-v1'
           cache-all-crates: true
 
       # ✨ OPTIMIZATION: Pre-built wasm-pack (5-7 min savings vs cargo install)
@@ -179,7 +179,7 @@ jobs:
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: "holoscript-v1"
+          shared-key: 'holoscript-v1'
           cache-all-crates: true
 
       # ✨ OPTIMIZATION: Pre-built wasm-pack (5-7 min savings vs cargo install)
@@ -287,7 +287,7 @@ jobs:
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: "holoscript-v1"
+          shared-key: 'holoscript-v1'
           cache-all-crates: true
 
       # ✨ OPTIMIZATION: Pre-built wasm-pack (5-7 min savings vs cargo install)

@@ -14,47 +14,98 @@ import type { SearchQuery, TraitCategory } from './types.js';
 
 const searchQuerySchema = z.object({
   q: z.string().optional(),
-  category: z.enum([
-    'rendering', 'physics', 'networking', 'audio', 'ui',
-    'ai', 'blockchain', 'utility', 'animation', 'input', 'data', 'debug'
-  ] as const).optional(),
-  platform: z.enum([
-    'web', 'nodejs', 'unity', 'unreal', 'godot', 'native', 'wasm', 'all'
-  ] as const).optional(),
+  category: z
+    .enum([
+      'rendering',
+      'physics',
+      'networking',
+      'audio',
+      'ui',
+      'ai',
+      'blockchain',
+      'utility',
+      'animation',
+      'input',
+      'data',
+      'debug',
+    ] as const)
+    .optional(),
+  platform: z
+    .enum(['web', 'nodejs', 'unity', 'unreal', 'godot', 'native', 'wasm', 'all'] as const)
+    .optional(),
   author: z.string().optional(),
-  keywords: z.string().optional().transform(v => v?.split(',').filter(Boolean)),
-  verified: z.string().optional().transform(v => v === 'true' ? true : v === 'false' ? false : undefined),
-  deprecated: z.string().optional().transform(v => v === 'true' ? true : v === 'false' ? false : undefined),
-  minRating: z.string().optional().transform(v => v ? parseFloat(v) : undefined),
-  minDownloads: z.string().optional().transform(v => v ? parseInt(v, 10) : undefined),
+  keywords: z
+    .string()
+    .optional()
+    .transform((v) => v?.split(',').filter(Boolean)),
+  verified: z
+    .string()
+    .optional()
+    .transform((v) => (v === 'true' ? true : v === 'false' ? false : undefined)),
+  deprecated: z
+    .string()
+    .optional()
+    .transform((v) => (v === 'true' ? true : v === 'false' ? false : undefined)),
+  minRating: z
+    .string()
+    .optional()
+    .transform((v) => (v ? parseFloat(v) : undefined)),
+  minDownloads: z
+    .string()
+    .optional()
+    .transform((v) => (v ? parseInt(v, 10) : undefined)),
   sortBy: z.enum(['relevance', 'downloads', 'rating', 'updated', 'created'] as const).optional(),
   sortOrder: z.enum(['asc', 'desc'] as const).optional(),
-  page: z.string().optional().transform(v => v ? parseInt(v, 10) : 1),
-  limit: z.string().optional().transform(v => Math.min(v ? parseInt(v, 10) : 20, 100)),
+  page: z
+    .string()
+    .optional()
+    .transform((v) => (v ? parseInt(v, 10) : 1)),
+  limit: z
+    .string()
+    .optional()
+    .transform((v) => Math.min(v ? parseInt(v, 10) : 20, 100)),
 });
 
 const publishRequestSchema = z.object({
-  name: z.string().min(2).max(100).regex(/^[a-zA-Z][a-zA-Z0-9-_]*$/),
+  name: z
+    .string()
+    .min(2)
+    .max(100)
+    .regex(/^[a-zA-Z][a-zA-Z0-9-_]*$/),
   version: z.string().regex(/^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?$/),
   description: z.string().min(10).max(1000),
   license: z.string(),
   keywords: z.array(z.string()).min(1).max(20),
-  platforms: z.array(z.enum([
-    'web', 'nodejs', 'unity', 'unreal', 'godot', 'native', 'wasm', 'all'
-  ] as const)).min(1),
+  platforms: z
+    .array(z.enum(['web', 'nodejs', 'unity', 'unreal', 'godot', 'native', 'wasm', 'all'] as const))
+    .min(1),
   category: z.enum([
-    'rendering', 'physics', 'networking', 'audio', 'ui',
-    'ai', 'blockchain', 'utility', 'animation', 'input', 'data', 'debug'
+    'rendering',
+    'physics',
+    'networking',
+    'audio',
+    'ui',
+    'ai',
+    'blockchain',
+    'utility',
+    'animation',
+    'input',
+    'data',
+    'debug',
   ] as const),
   source: z.string().min(1).max(1_000_000),
   types: z.string().optional(),
   readme: z.string().optional(),
-  examples: z.array(z.object({
-    name: z.string(),
-    description: z.string().optional(),
-    code: z.string(),
-    screenshot: z.string().optional(),
-  })).optional(),
+  examples: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string().optional(),
+        code: z.string(),
+        screenshot: z.string().optional(),
+      })
+    )
+    .optional(),
   dependencies: z.record(z.string()).optional(),
   peerDependencies: z.record(z.string()).optional(),
   repository: z.string().url().optional(),
@@ -67,10 +118,14 @@ const ratingSchema = z.object({
 });
 
 const dependencyResolveSchema = z.object({
-  traits: z.array(z.object({
-    name: z.string(),
-    version: z.string(),
-  })).min(1),
+  traits: z
+    .array(
+      z.object({
+        name: z.string(),
+        version: z.string(),
+      })
+    )
+    .min(1),
 });
 
 // =============================================================================
@@ -198,7 +253,8 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
   /**
    * GET /traits - Search traits
    */
-  router.get('/traits',
+  router.get(
+    '/traits',
     validateQuery(searchQuerySchema),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -218,7 +274,8 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
   /**
    * POST /traits - Publish a new trait
    */
-  router.post('/traits',
+  router.post(
+    '/traits',
     requireAuth(marketplace),
     validate(publishRequestSchema),
     async (req: Request, res: Response, next: NextFunction) => {
@@ -314,7 +371,8 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
   /**
    * DELETE /traits/:id - Unpublish trait
    */
-  router.delete('/traits/:id',
+  router.delete(
+    '/traits/:id',
     requireAuth(marketplace),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -323,7 +381,11 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
         const { version, reason } = req.query;
 
         await marketplace.unpublish(
-          { traitId: id, version: version as string | undefined, reason: reason as string | undefined },
+          {
+            traitId: id,
+            version: version as string | undefined,
+            reason: reason as string | undefined,
+          },
           token
         );
 
@@ -366,7 +428,10 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
 
       // Return source (in production, would return tarball)
       res.setHeader('Content-Type', 'text/plain');
-      res.setHeader('Content-Disposition', `attachment; filename="${trait.name}-${trait.version}.holo"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${trait.name}-${trait.version}.holo"`
+      );
       res.send(trait.source);
     } catch (err) {
       if ((err as Error).message.includes('not found')) {
@@ -400,7 +465,8 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
   /**
    * POST /traits/:id/deprecate - Deprecate trait
    */
-  router.post('/traits/:id/deprecate',
+  router.post(
+    '/traits/:id/deprecate',
     requireAuth(marketplace),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -408,10 +474,7 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
         const { id } = req.params;
         const { message, version, replacement } = req.body;
 
-        await marketplace.deprecate(
-          { traitId: id, message, version, replacement },
-          token
-        );
+        await marketplace.deprecate({ traitId: id, message, version, replacement }, token);
 
         res.json({
           success: true,
@@ -449,7 +512,8 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
   /**
    * POST /traits/:id/ratings - Rate a trait
    */
-  router.post('/traits/:id/ratings',
+  router.post(
+    '/traits/:id/ratings',
     requireAuth(marketplace),
     validate(ratingSchema),
     async (req: Request, res: Response, next: NextFunction) => {
@@ -477,7 +541,8 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
   /**
    * POST /resolve - Resolve dependencies
    */
-  router.post('/resolve',
+  router.post(
+    '/resolve',
     validate(dependencyResolveSchema),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -497,7 +562,8 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
   /**
    * POST /compatibility - Check compatibility
    */
-  router.post('/compatibility',
+  router.post(
+    '/compatibility',
     validate(dependencyResolveSchema),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -538,7 +604,8 @@ export function createMarketplaceRoutes(marketplace: MarketplaceService): Router
   /**
    * POST /verification - Request verification
    */
-  router.post('/verification',
+  router.post(
+    '/verification',
     requireAuth(marketplace),
     async (req: Request, res: Response, next: NextFunction) => {
       try {

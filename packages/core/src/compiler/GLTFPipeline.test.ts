@@ -10,10 +10,7 @@ registerAllPresets();
 // Test helpers — minimal HoloComposition stubs
 // ---------------------------------------------------------------------------
 
-function makeObject(
-  name: string,
-  overrides: Partial<HoloObjectDecl> = {},
-): HoloObjectDecl {
+function makeObject(name: string, overrides: Partial<HoloObjectDecl> = {}): HoloObjectDecl {
   return {
     type: 'Object',
     name,
@@ -24,10 +21,7 @@ function makeObject(
   } as HoloObjectDecl;
 }
 
-function makeComposition(
-  name: string,
-  objects: HoloObjectDecl[] = [],
-): HoloComposition {
+function makeComposition(name: string, objects: HoloObjectDecl[] = []): HoloComposition {
   return {
     type: 'Composition',
     name,
@@ -107,9 +101,7 @@ describe('GLTFPipeline', () => {
 
   it('compiles sphere geometry', () => {
     const obj = makeObject('Ball', {
-      properties: [
-        { type: 'ObjectProperty', key: 'geometry', value: 'sphere' },
-      ],
+      properties: [{ type: 'ObjectProperty', key: 'geometry', value: 'sphere' }],
     });
     const comp = makeComposition('SphereScene', [obj]);
     const result = pipeline.compile(comp);
@@ -120,9 +112,7 @@ describe('GLTFPipeline', () => {
 
   it('compiles cylinder geometry', () => {
     const obj = makeObject('Pipe', {
-      properties: [
-        { type: 'ObjectProperty', key: 'geometry', value: 'cylinder' },
-      ],
+      properties: [{ type: 'ObjectProperty', key: 'geometry', value: 'cylinder' }],
     });
     const comp = makeComposition('CylinderScene', [obj]);
     const result = pipeline.compile(comp);
@@ -133,9 +123,7 @@ describe('GLTFPipeline', () => {
 
   it('compiles plane geometry', () => {
     const obj = makeObject('Floor', {
-      properties: [
-        { type: 'ObjectProperty', key: 'geometry', value: 'plane' },
-      ],
+      properties: [{ type: 'ObjectProperty', key: 'geometry', value: 'plane' }],
     });
     const comp = makeComposition('PlaneScene', [obj]);
     const result = pipeline.compile(comp);
@@ -149,9 +137,7 @@ describe('GLTFPipeline', () => {
 
   it('GLB starts with magic bytes 0x46546C67', () => {
     const obj = makeObject('Cube', {
-      properties: [
-        { type: 'ObjectProperty', key: 'geometry', value: 'box' },
-      ],
+      properties: [{ type: 'ObjectProperty', key: 'geometry', value: 'box' }],
     });
     const result = pipeline.compile(makeComposition('GLBTest', [obj]));
     const view = new DataView(result.binary!.buffer);
@@ -169,9 +155,7 @@ describe('GLTFPipeline', () => {
   it('compiles to JSON format when format = gltf', () => {
     const p = new GLTFPipeline({ format: 'gltf' });
     const obj = makeObject('Cube', {
-      properties: [
-        { type: 'ObjectProperty', key: 'geometry', value: 'box' },
-      ],
+      properties: [{ type: 'ObjectProperty', key: 'geometry', value: 'box' }],
     });
     const result = p.compile(makeComposition('JSONTest', [obj]));
 
@@ -252,14 +236,10 @@ describe('GLTFPipeline', () => {
       {
         type: 'SpatialGroup',
         name: 'Room',
-        properties: [
-          { type: 'GroupProperty', key: 'position', value: [0, 0, -5] },
-        ],
+        properties: [{ type: 'GroupProperty', key: 'position', value: [0, 0, -5] }],
         objects: [
           makeObject('Table', {
-            properties: [
-              { type: 'ObjectProperty', key: 'geometry', value: 'box' },
-            ],
+            properties: [{ type: 'ObjectProperty', key: 'geometry', value: 'box' }],
           }),
         ],
       } as any,
@@ -274,9 +254,7 @@ describe('GLTFPipeline', () => {
 
   it('composes material from VR traits', () => {
     const obj = makeObject('MetalCube', {
-      properties: [
-        { type: 'ObjectProperty', key: 'geometry', value: 'box' },
-      ],
+      properties: [{ type: 'ObjectProperty', key: 'geometry', value: 'box' }],
       traits: [
         { type: 'ObjectTrait', name: 'iron_material', config: {} },
         { type: 'ObjectTrait', name: 'polished', config: {} },
@@ -323,9 +301,7 @@ describe('GLTFPipeline', () => {
         { type: 'ObjectProperty', key: 'geometry', value: 'box' },
         { type: 'ObjectProperty', key: 'color', value: '#00ff00' },
       ],
-      traits: [
-        { type: 'ObjectTrait', name: 'rusty', config: {} },
-      ],
+      traits: [{ type: 'ObjectTrait', name: 'rusty', config: {} }],
     });
 
     const p = new GLTFPipeline({ format: 'gltf' });
@@ -386,7 +362,7 @@ describe('GLTFPipeline', () => {
     const doc = result.json as Record<string, unknown>;
     const nodes = doc.nodes as Array<{ name?: string; extras?: Record<string, unknown> }>;
 
-    const lightNode = nodes.find(n => n.name === 'Sun');
+    const lightNode = nodes.find((n) => n.name === 'Sun');
     expect(lightNode).toBeDefined();
     expect(lightNode!.extras?.type).toBe('light');
     expect(lightNode!.extras?.lightType).toBe('directional');
@@ -409,9 +385,13 @@ describe('GLTFPipeline', () => {
     const p = new GLTFPipeline({ format: 'gltf' });
     const result = p.compile(comp);
     const doc = result.json as Record<string, unknown>;
-    const nodes = doc.nodes as Array<{ name?: string; extras?: Record<string, unknown>; translation?: number[] }>;
+    const nodes = doc.nodes as Array<{
+      name?: string;
+      extras?: Record<string, unknown>;
+      translation?: number[];
+    }>;
 
-    const camNode = nodes.find(n => n.extras?.type === 'camera');
+    const camNode = nodes.find((n) => n.extras?.type === 'camera');
     expect(camNode).toBeDefined();
     expect(camNode!.extras!.fov).toBe(60);
     expect(camNode!.translation).toEqual([0, 5, 10]);
@@ -421,9 +401,7 @@ describe('GLTFPipeline', () => {
 
   it('defaults to box when no geometry specified', () => {
     const obj = makeObject('NoGeom', {
-      properties: [
-        { type: 'ObjectProperty', key: 'position', value: [0, 0, 0] },
-      ],
+      properties: [{ type: 'ObjectProperty', key: 'position', value: [0, 0, 0] }],
     });
 
     const result = pipeline.compile(makeComposition('DefaultGeom', [obj]));
@@ -435,9 +413,7 @@ describe('GLTFPipeline', () => {
 
   it('reports accurate file size in stats', () => {
     const obj = makeObject('Cube', {
-      properties: [
-        { type: 'ObjectProperty', key: 'geometry', value: 'box' },
-      ],
+      properties: [{ type: 'ObjectProperty', key: 'geometry', value: 'box' }],
     });
     const result = pipeline.compile(makeComposition('StatsTest', [obj]));
 

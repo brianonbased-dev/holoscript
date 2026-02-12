@@ -91,10 +91,7 @@ describe('HierarchyManager', () => {
   describe('Hierarchy CRUD', () => {
     it('should create a hierarchy', () => {
       const supervisor = createTestManifest('supervisor-1');
-      const subordinates = [
-        createTestManifest('worker-1'),
-        createTestManifest('worker-2'),
-      ];
+      const subordinates = [createTestManifest('worker-1'), createTestManifest('worker-2')];
 
       const hierarchy = manager.createHierarchy({
         name: 'test-team',
@@ -124,9 +121,9 @@ describe('HierarchyManager', () => {
 
       manager.createHierarchy({ name: 'team-1', supervisor });
 
-      expect(() =>
-        manager.createHierarchy({ name: 'team-2', supervisor })
-      ).toThrow('already in a hierarchy');
+      expect(() => manager.createHierarchy({ name: 'team-2', supervisor })).toThrow(
+        'already in a hierarchy'
+      );
     });
 
     it('should get hierarchy by ID', () => {

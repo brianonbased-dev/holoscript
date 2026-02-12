@@ -238,7 +238,9 @@ function parseInlineProps(line: string): Record<string, unknown> {
  */
 function parseGodotValue(valueStr: string): unknown {
   // Vector3(x, y, z)
-  const vec3Match = valueStr.match(/Vector3\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)/);
+  const vec3Match = valueStr.match(
+    /Vector3\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)/
+  );
   if (vec3Match) {
     return {
       x: parseFloat(vec3Match[1]),
@@ -248,7 +250,9 @@ function parseGodotValue(valueStr: string): unknown {
   }
 
   // Quaternion(x, y, z, w)
-  const quatMatch = valueStr.match(/Quaternion\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)/);
+  const quatMatch = valueStr.match(
+    /Quaternion\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)/
+  );
   if (quatMatch) {
     return {
       x: parseFloat(quatMatch[1]),
@@ -275,7 +279,9 @@ function parseGodotValue(valueStr: string): unknown {
   }
 
   // Color(r, g, b, a)
-  const colorMatch = valueStr.match(/Color\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)(?:\s*,\s*(-?[\d.]+))?\s*\)/);
+  const colorMatch = valueStr.match(
+    /Color\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)(?:\s*,\s*(-?[\d.]+))?\s*\)/
+  );
   if (colorMatch) {
     return {
       r: parseFloat(colorMatch[1]),
@@ -301,8 +307,10 @@ function parseGodotValue(valueStr: string): unknown {
   }
 
   // Quoted string
-  if ((valueStr.startsWith('"') && valueStr.endsWith('"')) ||
-      (valueStr.startsWith("'") && valueStr.endsWith("'"))) {
+  if (
+    (valueStr.startsWith('"') && valueStr.endsWith('"')) ||
+    (valueStr.startsWith("'") && valueStr.endsWith("'"))
+  ) {
     return valueStr.slice(1, -1);
   }
 
@@ -335,7 +343,8 @@ function buildNodeTree(nodes: GodotNode[]): GodotNodeTree[] {
       roots.push(treeNode);
     } else {
       // Find parent path
-      const parentPath = node.parent === '.' ? nodes[0]?.name : resolveParentPath(node.parent, nodes[0]?.name || '');
+      const parentPath =
+        node.parent === '.' ? nodes[0]?.name : resolveParentPath(node.parent, nodes[0]?.name || '');
       const parent = nodeMap.get(parentPath);
       if (parent) {
         parent.children.push(treeNode);
@@ -506,7 +515,9 @@ function generateNodeCode(
   lines.push(`${indent}  geometry: "${geometry}"`);
 
   // Transform
-  const transform = node.properties.transform as { origin: { x: number; y: number; z: number } } | undefined;
+  const transform = node.properties.transform as
+    | { origin: { x: number; y: number; z: number } }
+    | undefined;
   if (transform?.origin) {
     const pos = transform.origin;
     lines.push(`${indent}  position: [${pos.x}, ${pos.y}, ${pos.z}]`);
@@ -515,7 +526,9 @@ function generateNodeCode(
   // Rotation (from transform basis)
   const rotation = extractRotation(node.properties.transform);
   if (rotation) {
-    lines.push(`${indent}  rotation: [${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)}]`);
+    lines.push(
+      `${indent}  rotation: [${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)}]`
+    );
   }
 
   // Scale from CSG or mesh
@@ -672,16 +685,16 @@ function shouldSkipNode(type: string): boolean {
 }
 
 function getTransformPosition(node: GodotNode): { x: number; y: number; z: number } {
-  const transform = node.properties.transform as { origin: { x: number; y: number; z: number } } | undefined;
+  const transform = node.properties.transform as
+    | { origin: { x: number; y: number; z: number } }
+    | undefined;
   if (transform?.origin) {
     return transform.origin;
   }
   return { x: 0, y: 0, z: 0 };
 }
 
-function extractRotation(
-  transform: unknown
-): { x: number; y: number; z: number } | null {
+function extractRotation(transform: unknown): { x: number; y: number; z: number } | null {
   if (!transform || typeof transform !== 'object') return null;
   const t = transform as { basis?: number[][] };
   if (!t.basis || !Array.isArray(t.basis)) return null;
@@ -746,7 +759,9 @@ function extractColor(node: GodotNode, scene: ParsedGodotScene): string | null {
   if (matRef?.resourceRef) {
     const subRes = scene.subResources.get(matRef.resourceRef);
     if (subRes) {
-      const albedo = subRes.properties.albedo_color as { r: number; g: number; b: number } | undefined;
+      const albedo = subRes.properties.albedo_color as
+        | { r: number; g: number; b: number }
+        | undefined;
       if (albedo) {
         return rgbToHex(albedo.r, albedo.g, albedo.b);
       }
@@ -841,8 +856,7 @@ export async function importGodot(options: GodotImportOptions): Promise<GodotImp
 
     // Determine scene name
     const sceneName =
-      options.sceneName ||
-      path.basename(options.inputPath, path.extname(options.inputPath));
+      options.sceneName || path.basename(options.inputPath, path.extname(options.inputPath));
 
     // Generate .holo code
     const { code, stats } = generateHoloCode(scene, sceneName);

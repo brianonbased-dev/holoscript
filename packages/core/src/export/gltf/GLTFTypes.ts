@@ -173,14 +173,7 @@ export enum GLTFComponentType {
 /**
  * Accessor types
  */
-export type GLTFAccessorType =
-  | 'SCALAR'
-  | 'VEC2'
-  | 'VEC3'
-  | 'VEC4'
-  | 'MAT2'
-  | 'MAT3'
-  | 'MAT4';
+export type GLTFAccessorType = 'SCALAR' | 'VEC2' | 'VEC3' | 'VEC4' | 'MAT2' | 'MAT3' | 'MAT4';
 
 /**
  * Buffer view
@@ -598,9 +591,7 @@ export function getAccessorByteLength(accessor: IGLTFAccessor): number {
 /**
  * Create empty GLTF document
  */
-export function createEmptyGLTFDocument(
-  generator = 'HoloScript'
-): IGLTFDocument {
+export function createEmptyGLTFDocument(generator = 'HoloScript'): IGLTFDocument {
   return {
     asset: {
       version: '2.0',
@@ -677,10 +668,7 @@ export function validateGLTFDocument(doc: IGLTFDocument): string[] {
       for (let j = 0; j < mesh.primitives.length; j++) {
         const primitive = mesh.primitives[j];
         if (primitive.material !== undefined) {
-          if (
-            primitive.material < 0 ||
-            primitive.material >= doc.materials.length
-          ) {
+          if (primitive.material < 0 || primitive.material >= doc.materials.length) {
             errors.push(
               `Mesh ${i} primitive ${j} references invalid material: ${primitive.material}`
             );
@@ -705,13 +693,8 @@ export function validateGLTFDocument(doc: IGLTFDocument): string[] {
     for (let i = 0; i < doc.accessors.length; i++) {
       const accessor = doc.accessors[i];
       if (accessor.bufferView !== undefined) {
-        if (
-          accessor.bufferView < 0 ||
-          accessor.bufferView >= doc.bufferViews.length
-        ) {
-          errors.push(
-            `Accessor ${i} references invalid bufferView: ${accessor.bufferView}`
-          );
+        if (accessor.bufferView < 0 || accessor.bufferView >= doc.bufferViews.length) {
+          errors.push(`Accessor ${i} references invalid bufferView: ${accessor.bufferView}`);
         }
       }
     }

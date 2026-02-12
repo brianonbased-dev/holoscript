@@ -90,7 +90,7 @@ describe('ZoneClaiming', () => {
     it('should reinforce existing claim', () => {
       zoning.claimZone('agent-1', 'zone-1');
       zoning.claimZone('agent-1', 'zone-1');
-      
+
       const strength = zoning.getClaimStrength('agent-1', 'zone-1');
       expect(strength).toBe(0.2);
     });
@@ -99,7 +99,7 @@ describe('ZoneClaiming', () => {
       for (let i = 0; i < 20; i++) {
         zoning.claimZone('agent-1', 'zone-1');
       }
-      
+
       const strength = zoning.getClaimStrength('agent-1', 'zone-1');
       expect(strength).toBe(1);
     });
@@ -140,7 +140,7 @@ describe('ZoneClaiming', () => {
     it('should become defended when owner has clear lead', () => {
       // First claim establishes ownership as 'claimed'
       zoning.claimZone('agent-1', 'zone-1', { strength: 0.8 });
-      
+
       const zone = zoning.getZone('zone-1')!;
       // Initial claim is 'claimed', becomes 'defended' after reinforcement when already owner
       expect(['claimed', 'defended']).toContain(zone.state);
@@ -161,11 +161,11 @@ describe('ZoneClaiming', () => {
 
     it('should emit abandoned event when owner releases', () => {
       const events: IZoneEvent[] = [];
-      zoning.onEvent(e => events.push(e));
+      zoning.onEvent((e) => events.push(e));
 
       zoning.releaseClaim('agent-1', 'zone-1');
 
-      const abandoned = events.find(e => e.type === 'abandoned');
+      const abandoned = events.find((e) => e.type === 'abandoned');
       expect(abandoned).toBeDefined();
     });
 
@@ -253,8 +253,8 @@ describe('ZoneClaiming', () => {
 
     it('should get zones by state', () => {
       // zone-2 has single strong claim - either 'claimed' or 'defended'
-      const claimedOrDefended = zoning.getZonesByState('claimed').length + 
-                                 zoning.getZonesByState('defended').length;
+      const claimedOrDefended =
+        zoning.getZonesByState('claimed').length + zoning.getZonesByState('defended').length;
       expect(claimedOrDefended).toBeGreaterThanOrEqual(1);
     });
   });
@@ -263,7 +263,7 @@ describe('ZoneClaiming', () => {
     beforeEach(() => {
       zoning.createZone('zone-1', new Vector3(0, 0, 0), 50, { value: 10 });
       zoning.createZone('zone-2', new Vector3(100, 0, 0), 50, { value: 20 });
-      
+
       zoning.claimZone('agent-1', 'zone-1', { strength: 0.8 });
       zoning.claimZone('agent-1', 'zone-2', { strength: 0.8 });
     });
@@ -291,11 +291,11 @@ describe('ZoneClaiming', () => {
 
     it('should emit claimed event', () => {
       const events: IZoneEvent[] = [];
-      zoning.onEvent(e => events.push(e));
+      zoning.onEvent((e) => events.push(e));
 
       zoning.claimZone('agent-1', 'zone-1', { strength: 0.5 });
 
-      const claimed = events.find(e => e.type === 'claimed');
+      const claimed = events.find((e) => e.type === 'claimed');
       expect(claimed).toBeDefined();
       expect(claimed!.agentId).toBe('agent-1');
     });
@@ -304,16 +304,16 @@ describe('ZoneClaiming', () => {
       zoning.claimZone('agent-1', 'zone-1', { strength: 0.8 });
 
       const events: IZoneEvent[] = [];
-      zoning.onEvent(e => events.push(e));
+      zoning.onEvent((e) => events.push(e));
 
       // Need to significantly overpower existing claim to capture
       zoning.claimZone('agent-2', 'zone-1', { strength: 1.0 });
 
       // Either captured or zone is now contested
       const zone = zoning.getZone('zone-1')!;
-      const captured = events.find(e => e.type === 'captured');
+      const captured = events.find((e) => e.type === 'captured');
       const isContested = zone.state === 'contested';
-      
+
       // Either there was a capture event OR the zone became contested
       expect(captured || isContested).toBeTruthy();
     });
@@ -323,17 +323,17 @@ describe('ZoneClaiming', () => {
       zoning.claimZone('agent-2', 'zone-1', { strength: 0.4 }); // Makes it contested
 
       const events: IZoneEvent[] = [];
-      zoning.onEvent(e => events.push(e));
+      zoning.onEvent((e) => events.push(e));
 
       zoning.claimZone('agent-1', 'zone-1', { strength: 0.5 }); // Reinforce to defend
 
-      const defended = events.find(e => e.type === 'defended');
+      const defended = events.find((e) => e.type === 'defended');
       expect(defended).toBeDefined();
     });
 
     it('should unsubscribe from events', () => {
       const events: IZoneEvent[] = [];
-      const unsubscribe = zoning.onEvent(e => events.push(e));
+      const unsubscribe = zoning.onEvent((e) => events.push(e));
 
       unsubscribe();
       zoning.claimZone('agent-1', 'zone-1', { strength: 0.5 });
@@ -347,7 +347,7 @@ describe('ZoneClaiming', () => {
       zoning.createZone('zone-1', new Vector3(0, 0, 0), 50, { value: 10 });
       zoning.createZone('zone-2', new Vector3(100, 0, 0), 50, { value: 20 });
       zoning.createZone('zone-3', new Vector3(200, 0, 0), 50, { value: 30 });
-      
+
       zoning.claimZone('agent-1', 'zone-2', { strength: 0.8 });
     });
 

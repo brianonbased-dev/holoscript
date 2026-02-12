@@ -49,7 +49,7 @@ console.log(unityCode.text);
 
 // List available traits
 const traits = holoscript.validator.listTraits();
-console.log('Available traits:', traits.map(t => t.name).join(', '));
+console.log('Available traits:', traits.map((t) => t.name).join(', '));
 ```
 
 ### Python (with wasmtime)
@@ -93,24 +93,24 @@ use wasmtime_wasi::preview2::*;
 fn main() -> anyhow::Result<()> {
     let engine = Engine::default();
     let component = Component::from_file(&engine, "holoscript.component.wasm")?;
-    
+
     let linker = Linker::new(&engine);
     let mut store = Store::new(&engine, WasiCtx::builder().build());
-    
+
     let instance = linker.instantiate(&mut store, &component)?;
-    
+
     // Call parser
     let parser = instance.get_typed_func::<(String,), (ParseResult,)>(&mut store, "holoscript:core/parser#parse")?;
-    
+
     let source = r#"
         composition "RustScene" {
             object "Cube" { geometry: "cube" }
         }
     "#;
-    
+
     let (result,) = parser.call(&mut store, (source.to_string(),))?;
     println!("Parsed scene: {}", result.ok.name);
-    
+
     Ok(())
 }
 ```
@@ -139,6 +139,7 @@ The component exposes four interfaces defined in WIT:
 - `list-targets() -> list<compile-target>` - List available targets
 
 Supported targets:
+
 - `unity-csharp` - Unity C# scripts
 - `godot-gdscript` - Godot GDScript
 - `aframe-html` - A-Frame VR HTML

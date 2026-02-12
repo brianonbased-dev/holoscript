@@ -282,7 +282,7 @@ export class AudioContextImpl implements IAudioContext {
   }
 
   public getAllSources(): IAudioSourceState[] {
-    return Array.from(this.sources.values()).map(source => ({
+    return Array.from(this.sources.values()).map((source) => ({
       id: source.id,
       type: source.config.type,
       state: source.state,

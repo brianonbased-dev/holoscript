@@ -1,6 +1,6 @@
 /**
  * Constitutional Validator for HoloScript
- * 
+ *
  * Validates agentic actions against a defined set of natural language and rule-based
  * constraints (The Constitution).
  */
@@ -30,14 +30,14 @@ export class ConstitutionalValidator {
       description: 'Agents cannot perform bulk deletion of world-locked anchors.',
       severity: 'critical',
       category: 'delete',
-      action: 'delete_all'
+      action: 'delete_all',
     },
     {
       id: 'NO_UNAUTHORIZED_MINT',
       description: 'Agents cannot initiate minting without explicit financial category clearance.',
       severity: 'hard',
-      category: 'financial'
-    }
+      category: 'financial',
+    },
   ];
 
   /**
@@ -61,7 +61,10 @@ export class ConstitutionalValidator {
       }
 
       // Check pattern match in description or name
-      if (rule.pattern && (rule.pattern.test(action.name) || rule.pattern.test(action.description))) {
+      if (
+        rule.pattern &&
+        (rule.pattern.test(action.name) || rule.pattern.test(action.description))
+      ) {
         isViolation = true;
       }
 
@@ -75,7 +78,7 @@ export class ConstitutionalValidator {
     }
 
     // Determine highest escalation level
-    const severities = violations.map(v => v.severity);
+    const severities = violations.map((v) => v.severity);
     let escalationLevel: ValidationResult['escalationLevel'] = 'notify';
 
     if (severities.includes('critical')) {
@@ -89,7 +92,7 @@ export class ConstitutionalValidator {
     return {
       allowed: false,
       violations,
-      escalationLevel
+      escalationLevel,
     };
   }
 }

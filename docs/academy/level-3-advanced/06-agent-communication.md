@@ -46,7 +46,7 @@ import { AgentMessenger, Message } from '@holoscript/core';
 // Create messenger for an agent
 const messenger = new AgentMessenger(agentId, {
   encryption: 'aes-256-gcm',
-  signing: true
+  signing: true,
 });
 
 // Send a direct message
@@ -55,10 +55,10 @@ const message: Message = {
   type: 'task-request',
   payload: {
     action: 'analyze',
-    data: { file: 'main.ts' }
+    data: { file: 'main.ts' },
   },
   priority: 'normal',
-  requiresAck: true
+  requiresAck: true,
 };
 
 const response = await messenger.send(message);
@@ -67,7 +67,7 @@ console.log(`Response: ${response.payload}`);
 // Handle incoming messages
 messenger.on('message', async (msg) => {
   console.log(`From ${msg.from}: ${msg.type}`);
-  
+
   // Process and respond
   const result = await processMessage(msg);
   await messenger.reply(msg, result);
@@ -84,19 +84,19 @@ import { PubSub, Topic } from '@holoscript/core';
 // Create pub/sub system
 const pubsub = new PubSub({
   persistence: 'memory',
-  maxRetention: 3600000 // 1 hour
+  maxRetention: 3600000, // 1 hour
 });
 
 // Create a topic
 const alertTopic = pubsub.createTopic('system.alerts', {
   retention: 'until-acknowledged',
-  maxSubscribers: 100
+  maxSubscribers: 100,
 });
 
 // Subscribe to topic
 alertTopic.subscribe(agentId, async (message) => {
   console.log(`Alert: ${message.payload.level} - ${message.payload.text}`);
-  
+
   if (message.payload.level === 'critical') {
     await escalate(message);
   }
@@ -107,7 +107,7 @@ alertTopic.publish({
   level: 'warning',
   text: 'High memory usage detected',
   source: 'monitor-agent',
-  timestamp: Date.now()
+  timestamp: Date.now(),
 });
 ```
 
@@ -123,7 +123,7 @@ const channel = new Channel('code-review-team', {
   maxMembers: 10,
   accessControl: 'invite-only',
   messageHistory: 100,
-  encryption: true
+  encryption: true,
 });
 
 // Join channel
@@ -135,8 +135,8 @@ channel.broadcast({
   payload: {
     prId: 'PR-123',
     files: ['src/main.ts'],
-    urgency: 'high'
-  }
+    urgency: 'high',
+  },
 });
 
 // Listen for channel messages
@@ -166,16 +166,16 @@ const router = new MessageRouter();
 // Route by message type
 router.addRule({
   match: { type: 'code-review' },
-  route: { to: 'review-team-channel' }
+  route: { to: 'review-team-channel' },
 });
 
 // Route by priority
 router.addRule({
   match: { priority: 'critical' },
-  route: { 
+  route: {
     to: ['on-call-agent', 'backup-agent'],
-    strategy: 'first-available'
-  }
+    strategy: 'first-available',
+  },
 });
 
 // Route with transformation
@@ -184,15 +184,15 @@ router.addRule({
   transform: (msg) => ({
     ...msg,
     type: 'processed-data',
-    payload: transform(msg.payload)
+    payload: transform(msg.payload),
   }),
-  route: { to: 'data-processor' }
+  route: { to: 'data-processor' },
 });
 
 // Conditional routing
 router.addRule({
   match: (msg) => msg.payload.size > 1000000,
-  route: { to: 'bulk-processor' }
+  route: { to: 'bulk-processor' },
 });
 ```
 
@@ -207,10 +207,10 @@ const messenger = new ReliableMessenger({
   retryPolicy: {
     maxRetries: 3,
     backoff: 'exponential',
-    initialDelay: 1000
+    initialDelay: 1000,
   },
   deliveryGuarantee: 'at-least-once',
-  timeout: 30000
+  timeout: 30000,
 });
 
 // Send with confirmation
@@ -218,9 +218,9 @@ try {
   const receipt = await messenger.sendReliable({
     to: 'critical-agent',
     type: 'important-task',
-    payload: data
+    payload: data,
   });
-  
+
   console.log(`Delivered at ${receipt.deliveredAt}`);
   console.log(`Acknowledged: ${receipt.acknowledged}`);
 } catch (error) {
@@ -249,19 +249,19 @@ await registry.updateAgent(agentId, { publicKey });
 const secureChannel = new SecureChannel({
   ownPrivateKey: privateKey,
   peerPublicKey: await getPeerPublicKey('agent-002'),
-  algorithm: 'x25519-xsalsa20-poly1305'
+  algorithm: 'x25519-xsalsa20-poly1305',
 });
 
 // Send encrypted message
 const encrypted = await secureChannel.encrypt({
   type: 'sensitive-data',
-  payload: { secret: 'confidential info' }
+  payload: { secret: 'confidential info' },
 });
 
 await messenger.send({
   to: 'agent-002',
   type: 'encrypted',
-  payload: encrypted
+  payload: encrypted,
 });
 
 // Receive and decrypt
@@ -286,26 +286,26 @@ composition "TeamWorkspace" {
       max_message_size: "1MB"
     }
   }
-  
+
   // Team lead agent
   template "TeamLead" {
     @agent {
       type: "coordinator"
       capabilities: ["delegation", "monitoring"]
     }
-    
+
     @messaging {
       channels: ["team-main", "alerts"]
       direct_messaging: true
     }
-    
+
     action delegateTask(task, agentId) {
       send(agentId, {
         type: "task-assignment",
         payload: task
       })
     }
-    
+
     action broadcastUpdate(update) {
       channel("team-main").broadcast({
         type: "team-update",
@@ -313,25 +313,25 @@ composition "TeamWorkspace" {
       })
     }
   }
-  
+
   // Worker agent
   template "Worker" {
     @agent {
       type: "worker"
       capabilities: ["execution"]
     }
-    
+
     @messaging {
       channels: ["team-main"]
       direct_messaging: true
     }
-    
+
     on message(msg) {
       if (msg.type == "task-assignment") {
         executeTask(msg.payload)
       }
     }
-    
+
     action reportProgress(taskId, progress) {
       send("team-lead", {
         type: "progress-update",
@@ -339,7 +339,7 @@ composition "TeamWorkspace" {
       })
     }
   }
-  
+
   // Instantiate team
   object "Lead" using "TeamLead" {}
   object "Worker1" using "Worker" {}
@@ -358,7 +358,7 @@ const response = await messenger.request({
   to: 'service-agent',
   type: 'query',
   payload: { query: 'SELECT * FROM data' },
-  timeout: 5000
+  timeout: 5000,
 });
 
 // Responder
@@ -375,7 +375,7 @@ messenger.onRequest('query', async (request) => {
 messenger.fire({
   to: 'logger-agent',
   type: 'log',
-  payload: { level: 'info', message: 'Task started' }
+  payload: { level: 'info', message: 'Task started' },
 });
 ```
 
@@ -388,10 +388,10 @@ const responses = await messenger.scatter({
   type: 'vote',
   payload: { proposal: 'new-feature' },
   timeout: 10000,
-  minResponses: 2
+  minResponses: 2,
 });
 
-const approved = responses.filter(r => r.payload.vote === 'yes').length > responses.length / 2;
+const approved = responses.filter((r) => r.payload.vote === 'yes').length > responses.length / 2;
 ```
 
 ## Exercise: Build a Chat System

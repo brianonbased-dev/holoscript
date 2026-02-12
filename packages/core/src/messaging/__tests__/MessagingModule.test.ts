@@ -58,10 +58,7 @@ describe('Messaging Utilities', () => {
         required: ['name', 'value'],
       };
 
-      const result = validateMessageSchema(
-        { name: 'test', value: 42 },
-        schema
-      );
+      const result = validateMessageSchema({ name: 'test', value: 42 }, schema);
 
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -239,12 +236,7 @@ describe('ChannelManager', () => {
       const listener = vi.fn();
       manager.on('member:kicked', listener);
 
-      const kicked = manager.kickMember(
-        channel.id,
-        'owner-1',
-        'agent-2',
-        'Spam'
-      );
+      const kicked = manager.kickMember(channel.id, 'owner-1', 'agent-2', 'Spam');
 
       expect(kicked).toBe(true);
       expect(manager.isMember(channel.id, 'agent-2')).toBe(false);
@@ -254,12 +246,7 @@ describe('ChannelManager', () => {
     it('should prevent kicking owner', () => {
       const channel = manager.createChannel('owner-1', ['agent-2']);
 
-      const kicked = manager.kickMember(
-        channel.id,
-        'agent-2',
-        'owner-1',
-        'Test'
-      );
+      const kicked = manager.kickMember(channel.id, 'agent-2', 'owner-1', 'Test');
 
       expect(kicked).toBe(false);
     });
@@ -267,12 +254,7 @@ describe('ChannelManager', () => {
     it('should only allow owner/admin to kick', () => {
       const channel = manager.createChannel('owner-1', ['agent-2', 'agent-3']);
 
-      const kicked = manager.kickMember(
-        channel.id,
-        'agent-2',
-        'agent-3',
-        'Test'
-      );
+      const kicked = manager.kickMember(channel.id, 'agent-2', 'agent-3', 'Test');
 
       expect(kicked).toBe(false);
     });
@@ -492,10 +474,13 @@ describe('AgentMessaging', () => {
       })!;
       agent2.handleMessage(message);
 
-      expect(handler).toHaveBeenCalledWith(expect.objectContaining({
-        id: message.id,
-        type: 'test',
-      }), expect.anything());
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: message.id,
+          type: 'test',
+        }),
+        expect.anything()
+      );
     });
 
     it('should invoke type handlers', () => {

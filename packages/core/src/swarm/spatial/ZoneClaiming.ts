@@ -1,7 +1,7 @@
 /**
  * ZoneClaiming - Territory awareness for swarm agents
  * HoloScript v3.2 - Autonomous Agent Swarms
- * 
+ *
  * Manages spatial zones that agents can claim, contest, and defend
  */
 
@@ -153,9 +153,7 @@ export class ZoneClaiming {
    * Find zones containing a position
    */
   findZonesAt(position: Vector3): IZone[] {
-    return this.getAllZones().filter(zone => 
-      position.distanceTo(zone.center) <= zone.radius
-    );
+    return this.getAllZones().filter((zone) => position.distanceTo(zone.center) <= zone.radius);
   }
 
   /**
@@ -182,7 +180,7 @@ export class ZoneClaiming {
     const baseStrength = options.strength ?? this.config.reinforceRate;
 
     // Check for existing claim
-    let claim = zone.claims.find(c => c.agentId === agentId);
+    let claim = zone.claims.find((c) => c.agentId === agentId);
 
     if (claim) {
       // Reinforce existing claim
@@ -219,7 +217,7 @@ export class ZoneClaiming {
     const zone = this.zones.get(zoneId);
     if (!zone) return false;
 
-    const claimIndex = zone.claims.findIndex(c => c.agentId === agentId);
+    const claimIndex = zone.claims.findIndex((c) => c.agentId === agentId);
     if (claimIndex === -1) return false;
 
     zone.claims.splice(claimIndex, 1);
@@ -279,7 +277,7 @@ export class ZoneClaiming {
     // Apply swarm bonus
     for (const claim of zone.claims) {
       if (claim.swarmId) {
-        const swarmClaims = zone.claims.filter(c => c.swarmId === claim.swarmId);
+        const swarmClaims = zone.claims.filter((c) => c.swarmId === claim.swarmId);
         if (swarmClaims.length > 1) {
           const bonus = this.config.swarmBonus * (swarmClaims.length - 1);
           const current = strengthsByEntity.get(claim.swarmId)!;
@@ -327,9 +325,8 @@ export class ZoneClaiming {
       if (zone.owner !== highestEntity) {
         // New owner
         zone.owner = highestEntity;
-        zone.ownerSwarm = zone.claims.find(c => 
-          (c.swarmId ?? c.agentId) === highestEntity
-        )?.swarmId ?? null;
+        zone.ownerSwarm =
+          zone.claims.find((c) => (c.swarmId ?? c.agentId) === highestEntity)?.swarmId ?? null;
         zone.state = 'claimed';
 
         this.emit({
@@ -393,9 +390,7 @@ export class ZoneClaiming {
    * Get zones owned by an agent/swarm
    */
   getOwnedZones(ownerId: string): IZone[] {
-    return this.getAllZones().filter(z => 
-      z.owner === ownerId || z.ownerSwarm === ownerId
-    );
+    return this.getAllZones().filter((z) => z.owner === ownerId || z.ownerSwarm === ownerId);
   }
 
   /**
@@ -405,9 +400,7 @@ export class ZoneClaiming {
     const zoneIds = this.agentZones.get(agentId);
     if (!zoneIds) return [];
 
-    return [...zoneIds]
-      .map(id => this.zones.get(id))
-      .filter((z): z is IZone => z !== undefined);
+    return [...zoneIds].map((id) => this.zones.get(id)).filter((z): z is IZone => z !== undefined);
   }
 
   /**
@@ -417,7 +410,7 @@ export class ZoneClaiming {
     const zone = this.zones.get(zoneId);
     if (!zone) return 0;
 
-    const claim = zone.claims.find(c => c.agentId === agentId);
+    const claim = zone.claims.find((c) => c.agentId === agentId);
     return claim?.strength ?? 0;
   }
 
@@ -428,38 +421,35 @@ export class ZoneClaiming {
     const zone = this.zones.get(zoneId);
     if (!zone) return 0;
 
-    return zone.claims
-      .filter(c => c.swarmId === swarmId)
-      .reduce((sum, c) => sum + c.strength, 0);
+    return zone.claims.filter((c) => c.swarmId === swarmId).reduce((sum, c) => sum + c.strength, 0);
   }
 
   /**
    * Get contested zones
    */
   getContestedZones(): IZone[] {
-    return this.getAllZones().filter(z => z.state === 'contested');
+    return this.getAllZones().filter((z) => z.state === 'contested');
   }
 
   /**
    * Get unclaimed zones
    */
   getUnclaimedZones(): IZone[] {
-    return this.getAllZones().filter(z => z.state === 'unclaimed');
+    return this.getAllZones().filter((z) => z.state === 'unclaimed');
   }
 
   /**
    * Get zones by state
    */
   getZonesByState(state: ZoneState): IZone[] {
-    return this.getAllZones().filter(z => z.state === state);
+    return this.getAllZones().filter((z) => z.state === state);
   }
 
   /**
    * Calculate total value of owned zones
    */
   getTotalValue(ownerId: string): number {
-    return this.getOwnedZones(ownerId)
-      .reduce((sum, z) => sum + z.value, 0);
+    return this.getOwnedZones(ownerId).reduce((sum, z) => sum + z.value, 0);
   }
 
   /**
@@ -494,12 +484,12 @@ export class ZoneClaiming {
     const zones = this.getAllZones();
     return {
       total: zones.length,
-      unclaimed: zones.filter(z => z.state === 'unclaimed').length,
-      contested: zones.filter(z => z.state === 'contested').length,
-      claimed: zones.filter(z => z.state === 'claimed').length,
-      defended: zones.filter(z => z.state === 'defended').length,
+      unclaimed: zones.filter((z) => z.state === 'unclaimed').length,
+      contested: zones.filter((z) => z.state === 'contested').length,
+      claimed: zones.filter((z) => z.state === 'claimed').length,
+      defended: zones.filter((z) => z.state === 'defended').length,
       totalValue: zones.reduce((sum, z) => sum + z.value, 0),
-      claimedValue: zones.filter(z => z.owner).reduce((sum, z) => sum + z.value, 0),
+      claimedValue: zones.filter((z) => z.owner).reduce((sum, z) => sum + z.value, 0),
     };
   }
 

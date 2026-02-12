@@ -84,3 +84,50 @@ export { PhysicsWorldImpl, createPhysicsWorld } from './PhysicsWorldImpl';
 
 // Island detection
 export { IslandDetector } from './IslandDetector';
+
+// PBD Soft-Body Solver
+export {
+  PBDSolverCPU,
+  createPBDSolver,
+  colorConstraints,
+  generateTetrahedra,
+  extractEdges,
+  computeRestLengths,
+  generateSDF,
+  // WGSL compute shaders (for GPU path)
+  PBD_PREDICT_SHADER,
+  PBD_DISTANCE_SHADER,
+  PBD_VOLUME_SHADER,
+  PBD_COLLISION_SHADER,
+  PBD_VELOCITY_SHADER,
+  PBD_FINALIZE_SHADER,
+  PBD_NORMALS_SHADER,
+  PBD_NORMALIZE_SHADER,
+  PBD_BENDING_SHADER,
+  PBD_ATTACHMENT_SHADER,
+  PBD_HASH_BUILD_SHADER,
+  PBD_SELF_COLLISION_SHADER,
+  // Utilities
+  extractBendingPairs,
+} from './PBDSolver';
+
+// Soft-body grab interaction
+export { SoftBodyGrabController, type GrabConfig } from './SoftBodyGrabController';
+
+// Soft-body types
+export {
+  type SoftBodyPreset,
+  type PBDConstraintType,
+  type IPBDDistanceConstraint,
+  type IPBDVolumeConstraint,
+  type IPBDBendingConstraint,
+  type IPBDCollisionConstraint,
+  type IPBDAttachmentConstraint,
+  type PBDConstraint,
+  type ISoftBodyConfig,
+  type ISoftBodyState,
+  type ISDFCollider,
+  type IConstraintColoring,
+  type ISpatialHashGrid,
+  SOFT_BODY_PRESETS,
+} from './PhysicsTypes';

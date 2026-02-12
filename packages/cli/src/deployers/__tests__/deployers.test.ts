@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  createDeployer,
-  DeployConfig,
-  BuildOutput,
-} from '../index';
+import { createDeployer, DeployConfig, BuildOutput } from '../index';
 import { CloudflareDeployer } from '../CloudflareDeployer';
 import { VercelDeployer } from '../VercelDeployer';
 import { NginxDeployer } from '../NginxDeployer';
@@ -115,13 +111,17 @@ describe('BaseDeployer - Config Validation', () => {
   it('should reject non-boolean splitChunks', () => {
     const config = makeValidConfig();
     (config as any).buildSettings.splitChunks = 1;
-    expect(() => deployer.validateConfig(config)).toThrow('buildSettings.splitChunks must be a boolean');
+    expect(() => deployer.validateConfig(config)).toThrow(
+      'buildSettings.splitChunks must be a boolean'
+    );
   });
 
   it('should reject non-boolean prerender', () => {
     const config = makeValidConfig();
     (config as any).buildSettings.prerender = null;
-    expect(() => deployer.validateConfig(config)).toThrow('buildSettings.prerender must be a boolean');
+    expect(() => deployer.validateConfig(config)).toThrow(
+      'buildSettings.prerender must be a boolean'
+    );
   });
 
   it('should accept all valid targets', () => {
@@ -208,9 +208,7 @@ describe('CloudflareDeployer', () => {
       const deployerWithKV = new CloudflareDeployer({
         apiToken: 'cf-test-token',
         accountId: 'cf-account',
-        kvNamespaces: [
-          { binding: 'MY_KV', namespaceId: 'kv-ns-id-1' },
-        ],
+        kvNamespaces: [{ binding: 'MY_KV', namespaceId: 'kv-ns-id-1' }],
       });
 
       const config = makeValidConfig({ target: 'cloudflare' });
@@ -222,9 +220,9 @@ describe('CloudflareDeployer', () => {
     it('should validate config before deploying', async () => {
       const badConfig = makeValidConfig({ projectName: '' });
 
-      await expect(
-        deployer.deploy(badConfig, makeBuildOutput())
-      ).rejects.toThrow('Project name is required');
+      await expect(deployer.deploy(badConfig, makeBuildOutput())).rejects.toThrow(
+        'Project name is required'
+      );
     });
   });
 
@@ -339,9 +337,9 @@ describe('VercelDeployer', () => {
     it('should validate config before deploying', async () => {
       const badConfig = makeValidConfig({ regions: [] });
 
-      await expect(
-        deployer.deploy(badConfig, makeBuildOutput())
-      ).rejects.toThrow('At least one region is required');
+      await expect(deployer.deploy(badConfig, makeBuildOutput())).rejects.toThrow(
+        'At least one region is required'
+      );
     });
   });
 
@@ -482,8 +480,8 @@ describe('NginxDeployer', () => {
       const config = makeValidConfig({ target: 'custom' });
       await deployer.deploy(config, makeBuildOutput());
 
-      const mkdirCall = mockSshExecutor.mock.calls.find(
-        (call: string[]) => call[0].includes('mkdir')
+      const mkdirCall = mockSshExecutor.mock.calls.find((call: string[]) =>
+        call[0].includes('mkdir')
       );
       expect(mkdirCall).toBeTruthy();
       expect(mkdirCall![0]).toContain('/var/www/holoscript/releases/');
@@ -493,8 +491,8 @@ describe('NginxDeployer', () => {
       const config = makeValidConfig({ target: 'custom' });
       await deployer.deploy(config, makeBuildOutput());
 
-      const symlinkCall = mockSshExecutor.mock.calls.find(
-        (call: string[]) => call[0].includes('ln -sfn')
+      const symlinkCall = mockSshExecutor.mock.calls.find((call: string[]) =>
+        call[0].includes('ln -sfn')
       );
       expect(symlinkCall).toBeTruthy();
       expect(symlinkCall![0]).toContain('/var/www/holoscript/current');

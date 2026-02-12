@@ -327,7 +327,9 @@ describe('Random Functions', () => {
 
       expect(typeof uuid).toBe('string');
       expect(uuid.length).toBe(36);
-      expect(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)).toBe(true);
+      expect(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)).toBe(
+        true
+      );
     });
 
     it('should generate unique UUIDs', () => {
@@ -396,27 +398,39 @@ describe('Key Derivation', () => {
 describe('Validation Functions', () => {
   describe('validateWalletAddress', () => {
     it('should validate Ethereum addresses', () => {
-      expect(validateWalletAddress('0x742d35Cc6634C0532925a3b844Bc9e7595f8fB3d', 'ethereum')).toBe(true);
-      expect(validateWalletAddress('0x1234567890abcdef1234567890abcdef12345678', 'ethereum')).toBe(true);
+      expect(validateWalletAddress('0x742d35Cc6634C0532925a3b844Bc9e7595f8fB3d', 'ethereum')).toBe(
+        true
+      );
+      expect(validateWalletAddress('0x1234567890abcdef1234567890abcdef12345678', 'ethereum')).toBe(
+        true
+      );
     });
 
     it('should reject invalid Ethereum addresses', () => {
       expect(validateWalletAddress('0x123', 'ethereum')).toBe(false);
       expect(validateWalletAddress('invalid', 'ethereum')).toBe(false);
-      expect(validateWalletAddress('742d35Cc6634C0532925a3b844Bc9e7595f8fB3d', 'ethereum')).toBe(false);
+      expect(validateWalletAddress('742d35Cc6634C0532925a3b844Bc9e7595f8fB3d', 'ethereum')).toBe(
+        false
+      );
     });
 
     it('should validate Solana addresses', () => {
-      expect(validateWalletAddress('7EYnhQoR9YM3N7UoaKRoA44Uy8JeaZV3qyouov87awMs', 'solana')).toBe(true);
+      expect(validateWalletAddress('7EYnhQoR9YM3N7UoaKRoA44Uy8JeaZV3qyouov87awMs', 'solana')).toBe(
+        true
+      );
     });
 
     it('should reject invalid Solana addresses', () => {
       expect(validateWalletAddress('short', 'solana')).toBe(false);
-      expect(validateWalletAddress('0x1234567890abcdef1234567890abcdef12345678', 'solana')).toBe(false);
+      expect(validateWalletAddress('0x1234567890abcdef1234567890abcdef12345678', 'solana')).toBe(
+        false
+      );
     });
 
     it('should reject unknown chain types', () => {
-      expect(validateWalletAddress('0x742d35Cc6634C0532925a3b844Bc9e7595f8fB3d', 'unknown' as any)).toBe(false);
+      expect(
+        validateWalletAddress('0x742d35Cc6634C0532925a3b844Bc9e7595f8fB3d', 'unknown' as any)
+      ).toBe(false);
     });
   });
 

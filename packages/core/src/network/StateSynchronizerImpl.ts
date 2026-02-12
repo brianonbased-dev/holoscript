@@ -57,7 +57,7 @@ export class StateSynchronizerImpl implements IStateSynchronizer {
     const version = existing ? existing.version + 1 : 1;
     const ownerId =
       mergedConfig.ownership === 'creator'
-        ? existing?.ownerId ?? this.localPeerId
+        ? (existing?.ownerId ?? this.localPeerId)
         : mergedConfig.ownership === 'host'
           ? undefined
           : this.localPeerId;
@@ -383,7 +383,7 @@ export class StateSynchronizerImpl implements IStateSynchronizer {
  */
 export function createStateSynchronizer(
   localPeerId: string,
-  config?: Partial<ISyncConfig>,
+  config?: Partial<ISyncConfig>
 ): IStateSynchronizer {
   return new StateSynchronizerImpl(localPeerId, config);
 }

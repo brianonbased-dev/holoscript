@@ -1,6 +1,6 @@
 /**
  * Particle Swarm Optimization Engine
- * 
+ *
  * Implements PSO algorithm for agent-task assignment optimization.
  * Each particle represents a potential solution (task-to-agent mapping).
  */
@@ -52,7 +52,7 @@ export class PSOEngine {
 
   /**
    * Optimize task assignment using PSO
-   * 
+   *
    * @param agentCount Number of available agents
    * @param taskCount Number of tasks to assign
    * @param fitnessFunction Function to evaluate solution quality (higher is better)
@@ -67,11 +67,11 @@ export class PSOEngine {
 
     // Initialize swarm
     const particles = this.initializeSwarm(populationSize, taskCount, agentCount);
-    
+
     // Track global best
     let globalBest: number[] = [...particles[0].personalBest];
     let globalBestFitness = particles[0].personalBestFitness;
-    
+
     // Find initial global best
     for (const particle of particles) {
       if (particle.personalBestFitness > globalBestFitness) {
@@ -92,15 +92,15 @@ export class PSOEngine {
       for (const particle of particles) {
         this.updateVelocity(particle, globalBest);
         this.updatePosition(particle, agentCount);
-        
+
         // Evaluate new position
         const fitness = fitnessFunction(this.discretize(particle.position, agentCount));
-        
+
         // Update personal best
         if (fitness > particle.personalBestFitness) {
           particle.personalBestFitness = fitness;
           particle.personalBest = [...particle.position];
-          
+
           // Update global best
           if (fitness > globalBestFitness) {
             globalBestFitness = fitness;
@@ -139,14 +139,8 @@ export class PSOEngine {
     const particles: Particle[] = [];
 
     for (let i = 0; i < populationSize; i++) {
-      const position = Array.from(
-        { length: dimensions },
-        () => Math.random() * agentCount
-      );
-      const velocity = Array.from(
-        { length: dimensions },
-        () => (Math.random() - 0.5) * 2
-      );
+      const position = Array.from({ length: dimensions }, () => Math.random() * agentCount);
+      const velocity = Array.from({ length: dimensions }, () => (Math.random() - 0.5) * 2);
 
       particles.push({
         position,
@@ -172,7 +166,7 @@ export class PSOEngine {
       // PSO velocity update equation
       const cognitive = cognitiveWeight * r1 * (particle.personalBest[d] - particle.position[d]);
       const social = socialWeight * r2 * (globalBest[d] - particle.position[d]);
-      
+
       particle.velocity[d] = inertiaWeight * particle.velocity[d] + cognitive + social;
 
       // Clamp velocity
@@ -189,7 +183,7 @@ export class PSOEngine {
   private updatePosition(particle: Particle, agentCount: number): void {
     for (let d = 0; d < particle.position.length; d++) {
       particle.position[d] += particle.velocity[d];
-      
+
       // Clamp to valid range [0, agentCount)
       particle.position[d] = Math.max(0, Math.min(agentCount - 0.001, particle.position[d]));
     }
@@ -199,7 +193,7 @@ export class PSOEngine {
    * Convert continuous positions to discrete agent indices
    */
   private discretize(position: number[], agentCount: number): number[] {
-    return position.map(p => Math.floor(Math.max(0, Math.min(agentCount - 1, p))));
+    return position.map((p) => Math.floor(Math.max(0, Math.min(agentCount - 1, p))));
   }
 
   /**

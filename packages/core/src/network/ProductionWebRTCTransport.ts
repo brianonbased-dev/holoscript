@@ -153,9 +153,10 @@ export class ProductionWebRTCTransport implements Transport {
 
     for (const [, state] of this.peers) {
       // Use unreliable channel for position updates, reliable for state changes
-      const channel = message.type === 'delta' && state.unreliableChannel?.readyState === 'open'
-        ? state.unreliableChannel
-        : state.reliableChannel;
+      const channel =
+        message.type === 'delta' && state.unreliableChannel?.readyState === 'open'
+          ? state.unreliableChannel
+          : state.reliableChannel;
 
       if (channel?.readyState === 'open') {
         try {
@@ -375,7 +376,10 @@ export class ProductionWebRTCTransport implements Transport {
         state.connectedAt = Date.now();
         this.connectedPeers++;
         this.connectCallbacks.forEach((cb) => cb());
-      } else if (connection.connectionState === 'failed' || connection.connectionState === 'disconnected') {
+      } else if (
+        connection.connectionState === 'failed' ||
+        connection.connectionState === 'disconnected'
+      ) {
         if (state.connectedAt !== null) {
           this.connectedPeers = Math.max(0, this.connectedPeers - 1);
         }
@@ -406,7 +410,8 @@ export class ProductionWebRTCTransport implements Transport {
       }
 
       // Create and send offer
-      connection.createOffer()
+      connection
+        .createOffer()
         .then((offer) => connection.setLocalDescription(offer))
         .then(() => {
           this.signalingClient?.sendOffer(peerId, connection.localDescription!);

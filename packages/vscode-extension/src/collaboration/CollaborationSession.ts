@@ -80,7 +80,7 @@ export class CollaborationSession implements vscode.Disposable {
       }
 
       const initialContent = editor.document.getText();
-      
+
       // Connect to collaboration server
       await this.collaborativeDoc.connect(initialContent);
 
@@ -157,7 +157,7 @@ export class CollaborationSession implements vscode.Disposable {
         content,
         language: 'holoscript',
       });
-      
+
       await vscode.window.showTextDocument(doc);
 
       // Attach presence provider
@@ -292,7 +292,7 @@ export class CollaborationSession implements vscode.Disposable {
     }
 
     // Check for existing locks in the range
-    const hasConflict = this.state.locks.some(lock => 
+    const hasConflict = this.state.locks.some((lock) =>
       this.rangesOverlap(lock.range, {
         start: { line: range.start.line, character: range.start.character },
         end: { line: range.end.line, character: range.end.character },
@@ -327,7 +327,7 @@ export class CollaborationSession implements vscode.Disposable {
    * Release a section lock
    */
   async releaseLock(lockId: string): Promise<void> {
-    const index = this.state.locks.findIndex(lock => lock.id === lockId);
+    const index = this.state.locks.findIndex((lock) => lock.id === lockId);
     if (index !== -1) {
       this.state.locks.splice(index, 1);
       this.log(`Lock released: ${lockId}`);
@@ -339,7 +339,7 @@ export class CollaborationSession implements vscode.Disposable {
    */
   dispose(): void {
     this.cleanup();
-    
+
     for (const disposable of this.disposables) {
       disposable.dispose();
     }
@@ -355,7 +355,7 @@ export class CollaborationSession implements vscode.Disposable {
     }
 
     // Listen for local document changes
-    const changeListener = vscode.workspace.onDidChangeTextDocument(event => {
+    const changeListener = vscode.workspace.onDidChangeTextDocument((event) => {
       if (event.document.uri.toString() !== document.uri.toString()) {
         return;
       }
@@ -376,22 +376,25 @@ export class CollaborationSession implements vscode.Disposable {
     // Listen for remote changes
     this.collaborativeDoc?.on('remoteChanges', async (changes: vscode.TextEdit[]) => {
       const editor = vscode.window.visibleTextEditors.find(
-        e => e.document.uri.toString() === document.uri.toString()
+        (e) => e.document.uri.toString() === document.uri.toString()
       );
 
       if (!editor) return;
 
-      await editor.edit(editBuilder => {
-        for (const change of changes) {
-          if (change.newText === '') {
-            editBuilder.delete(change.range);
-          } else if (change.range.isEmpty) {
-            editBuilder.insert(change.range.start, change.newText);
-          } else {
-            editBuilder.replace(change.range, change.newText);
+      await editor.edit(
+        (editBuilder) => {
+          for (const change of changes) {
+            if (change.newText === '') {
+              editBuilder.delete(change.range);
+            } else if (change.range.isEmpty) {
+              editBuilder.insert(change.range.start, change.newText);
+            } else {
+              editBuilder.replace(change.range, change.newText);
+            }
           }
-        }
-      }, { undoStopBefore: false, undoStopAfter: false });
+        },
+        { undoStopBefore: false, undoStopAfter: false }
+      );
     });
 
     this.documentSyncDisposable = changeListener;
@@ -447,7 +450,10 @@ export class CollaborationSession implements vscode.Disposable {
     });
   }
 
-  private rangesOverlap(a: { start: { line: number }; end: { line: number } }, b: { start: { line: number }; end: { line: number } }): boolean {
+  private rangesOverlap(
+    a: { start: { line: number }; end: { line: number } },
+    b: { start: { line: number }; end: { line: number } }
+  ): boolean {
     return !(a.end.line < b.start.line || a.start.line > b.end.line);
   }
 

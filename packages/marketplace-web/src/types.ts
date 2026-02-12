@@ -1,6 +1,6 @@
 /**
  * HoloScript Marketplace Web Types
- * 
+ *
  * Client-side type definitions for the marketplace UI
  */
 
@@ -8,7 +8,7 @@
 // Core Types (mirroring API types for client use)
 //=============================================================================
 
-export type TraitCategory = 
+export type TraitCategory =
   | 'rendering'
   | 'physics'
   | 'networking'
@@ -18,15 +18,7 @@ export type TraitCategory =
   | 'blockchain'
   | 'utility';
 
-export type Platform = 
-  | 'web'
-  | 'unity'
-  | 'unreal'
-  | 'godot'
-  | 'native'
-  | 'mobile'
-  | 'vr'
-  | 'ar';
+export type Platform = 'web' | 'unity' | 'unreal' | 'godot' | 'native' | 'mobile' | 'vr' | 'ar';
 
 export interface Author {
   id: string;
@@ -199,11 +191,11 @@ export interface MarketplaceState {
   filters: FilterState;
   results: SearchResult | null;
   isSearching: boolean;
-  
+
   // Selected trait
   selectedTrait: TraitPackage | null;
   selectedVersion: string | null;
-  
+
   // Actions
   setQuery: (query: string) => void;
   setFilters: (filters: Partial<FilterState>) => void;
@@ -216,7 +208,7 @@ export interface InstallState {
   installing: Set<string>;
   installed: Set<string>;
   errors: Map<string, string>;
-  
+
   install: (traitId: string, version: string) => Promise<void>;
   uninstall: (traitId: string) => Promise<void>;
   isInstalling: (traitId: string) => boolean;

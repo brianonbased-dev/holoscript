@@ -182,11 +182,7 @@ export class ChannelManager extends EventEmitter {
   /**
    * Join a channel
    */
-  joinChannel(
-    channelId: string,
-    agentId: string,
-    publicKey?: string
-  ): boolean {
+  joinChannel(channelId: string, agentId: string, publicKey?: string): boolean {
     const state = this.channels.get(channelId);
     if (!state) return false;
 
@@ -363,11 +359,7 @@ export class ChannelManager extends EventEmitter {
   /**
    * Promote member to admin
    */
-  promoteToAdmin(
-    channelId: string,
-    requesterId: string,
-    targetId: string
-  ): boolean {
+  promoteToAdmin(channelId: string, requesterId: string, targetId: string): boolean {
     const state = this.channels.get(channelId);
     if (!state) return false;
 
@@ -386,11 +378,7 @@ export class ChannelManager extends EventEmitter {
   /**
    * Demote admin to member
    */
-  demoteToMember(
-    channelId: string,
-    requesterId: string,
-    targetId: string
-  ): boolean {
+  demoteToMember(channelId: string, requesterId: string, targetId: string): boolean {
     const state = this.channels.get(channelId);
     if (!state) return false;
 

@@ -56,11 +56,7 @@ class SimpleMajorityProtocol implements ConsensusProtocol {
   private eventEmitter: EventEmitter;
   private proposalTimeouts: Map<string, NodeJS.Timeout> = new Map();
 
-  constructor(
-    nodeId: string,
-    config: Required<ConsensusConfig>,
-    eventEmitter: EventEmitter
-  ) {
+  constructor(nodeId: string, config: Required<ConsensusConfig>, eventEmitter: EventEmitter) {
     this.nodeId = nodeId;
     this.config = config;
     this.eventEmitter = eventEmitter;
@@ -134,10 +130,7 @@ class SimpleMajorityProtocol implements ConsensusProtocol {
     this.eventEmitter.emit('vote:received', proposalId, voterId, approve);
   }
 
-  private checkQuorum<T>(
-    proposalId: string,
-    resolve: (result: ProposalResult<T>) => void
-  ): void {
+  private checkQuorum<T>(proposalId: string, resolve: (result: ProposalResult<T>) => void): void {
     const proposal = this.proposals.get(proposalId);
     if (!proposal || proposal.status !== 'voting') {
       return;
@@ -292,8 +285,8 @@ interface PBFTProposalState<T = unknown> {
   sequenceNumber: number;
   view: number;
   digest: string;
-  prepareMessages: Set<string>;   // nodeIds that sent prepare
-  commitMessages: Set<string>;    // nodeIds that sent commit
+  prepareMessages: Set<string>; // nodeIds that sent prepare
+  commitMessages: Set<string>; // nodeIds that sent commit
   prePrepared: boolean;
   prepared: boolean;
   committed: boolean;
@@ -329,11 +322,7 @@ class PBFTProtocol implements ConsensusProtocol {
   // Message sender callback
   private sendMessage: ((toNodeId: string, message: PBFTMessage) => void) | null = null;
 
-  constructor(
-    nodeId: string,
-    config: Required<ConsensusConfig>,
-    eventEmitter: EventEmitter
-  ) {
+  constructor(nodeId: string, config: Required<ConsensusConfig>, eventEmitter: EventEmitter) {
     this.nodeId = nodeId;
     this.config = config;
     this.eventEmitter = eventEmitter;
@@ -379,7 +368,7 @@ class PBFTProtocol implements ConsensusProtocol {
     let hash = 0;
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash |= 0; // Convert to 32-bit integer
     }
     return `pbft-${Math.abs(hash).toString(16)}`;
@@ -687,7 +676,12 @@ class PBFTProtocol implements ConsensusProtocol {
     this.clearViewChangeTimer();
 
     this.eventEmitter.emit('proposal:accepted', result);
-    this.eventEmitter.emit('state:changed', pbftState.proposal.key, pbftState.proposal.value, previousValue);
+    this.eventEmitter.emit(
+      'state:changed',
+      pbftState.proposal.key,
+      pbftState.proposal.value,
+      previousValue
+    );
 
     // Resolve the promise (only the primary's resolve is meaningful)
     pbftState.resolve(result);

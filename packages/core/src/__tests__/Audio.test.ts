@@ -240,11 +240,7 @@ describe('Audio Effect Helpers', () => {
 
   describe('equalizerEffect', () => {
     it('should create EQ with bands', () => {
-      const bands = [
-        eqBand(100, 0.7, 3),
-        eqBand(1000, 1, -2),
-        eqBand(10000, 0.7, 1),
-      ];
+      const bands = [eqBand(100, 0.7, 3), eqBand(1000, 1, -2), eqBand(10000, 0.7, 1)];
       const eq = equalizerEffect('eq1', bands);
       expect(eq.type).toBe('equalizer');
       expect(eq.bands).toHaveLength(3);
@@ -1014,7 +1010,9 @@ describe('Audio Integration', () => {
     ctx.createEffect(compressorEffect('comp', -20, 4, 10, 100));
 
     // Create sources
-    await ctx.createSource(spatialSource(bufferSource('ambient', 'forest.wav'), { x: 0, y: 0, z: 0 }));
+    await ctx.createSource(
+      spatialSource(bufferSource('ambient', 'forest.wav'), { x: 0, y: 0, z: 0 })
+    );
     await ctx.createSource(bufferSource('music', 'bgm.wav', { loop: true }));
 
     // Connect effects

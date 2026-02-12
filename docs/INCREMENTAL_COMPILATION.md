@@ -11,6 +11,7 @@
 HoloScript's monorepo builds can take **15+ minutes** on CI without caching. This guide provides strategies to reduce build time to **<3 minutes** using incremental compilation and smart caching.
 
 **Key Findings**:
+
 - **Swatinem/rust-cache**: 55% build time reduction (GitHub Actions)
 - **CARGO_INCREMENTAL=0**: Recommended for CI (ephemeral environments)
 - **Target caching**: 2-5 min savings per build
@@ -56,7 +57,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           # Cache key based on Cargo.lock + workspace
-          shared-key: "holoscript-v1"
+          shared-key: 'holoscript-v1'
 
           # Clean old artifacts automatically
           cache-all-crates: true
@@ -71,6 +72,7 @@ jobs:
 ### How It Works
 
 **Swatinem/rust-cache automatically**:
+
 1. Caches `$CARGO_HOME` (downloaded crates)
 2. Caches `target/` directory (compiled artifacts)
 3. Sets `CARGO_INCREMENTAL=0` (faster in ephemeral CI)
@@ -78,6 +80,7 @@ jobs:
 5. Generates cache keys based on `Cargo.lock` hash
 
 **Performance**:
+
 - **First run**: 8m 45s (no cache)
 - **Second run**: 1m 23s (84% faster)
 - **Cache hit rate**: ~90%
@@ -89,17 +92,19 @@ jobs:
 ### Use Pre-Built wasm-pack Action
 
 **Before** (slow):
+
 ```yaml
 - name: Install wasm-pack
-  run: cargo install wasm-pack  # 5-7 minutes to build!
+  run: cargo install wasm-pack # 5-7 minutes to build!
 ```
 
 **After** (fast):
+
 ```yaml
 - name: Install wasm-pack
   uses: jetli/wasm-pack-action@v0.4.0
   with:
-    version: 'latest'  # <10 seconds with pre-built binary
+    version: 'latest' # <10 seconds with pre-built binary
 ```
 
 **Savings**: 5-7 minutes per build
@@ -165,7 +170,7 @@ tasks:
     command: 'moon run :build'
     options:
       cache: true
-      persistent: true  # Keep outputs between builds
+      persistent: true # Keep outputs between builds
 ```
 
 ### Dependency Graph Optimization
@@ -250,11 +255,13 @@ jobs:
 ### Sccache for Local Builds
 
 **Installation**:
+
 ```bash
 cargo install sccache
 ```
 
 **Configuration**:
+
 ```bash
 # .bashrc or .zshrc
 export RUSTC_WRAPPER=sccache
@@ -263,6 +270,7 @@ export SCCACHE_CACHE_SIZE="10G"
 ```
 
 **Usage**:
+
 ```bash
 cargo build --release
 # Subsequent builds use sccache
@@ -332,14 +340,14 @@ jobs:
 
 ## Performance Metrics
 
-| Optimization | Time Saved | Complexity | Priority |
-|--------------|------------|------------|----------|
-| Swatinem/rust-cache | 6-8 min | Low | 🔥 Critical |
-| wasm-pack pre-built | 5-7 min | Low | 🔥 Critical |
-| pnpm caching | 1-2 min | Low | ⚠️ High |
-| Parallel builds | 2-4 min | Medium | ⚠️ High |
-| Conditional CI | 3-8 min | Medium | ✅ Medium |
-| Sccache (local) | N/A (local only) | Low | ✅ Nice-to-have |
+| Optimization        | Time Saved       | Complexity | Priority        |
+| ------------------- | ---------------- | ---------- | --------------- |
+| Swatinem/rust-cache | 6-8 min          | Low        | 🔥 Critical     |
+| wasm-pack pre-built | 5-7 min          | Low        | 🔥 Critical     |
+| pnpm caching        | 1-2 min          | Low        | ⚠️ High         |
+| Parallel builds     | 2-4 min          | Medium     | ⚠️ High         |
+| Conditional CI      | 3-8 min          | Medium     | ✅ Medium       |
+| Sccache (local)     | N/A (local only) | Low        | ✅ Nice-to-have |
 
 ---
 
@@ -350,15 +358,17 @@ jobs:
 **Symptom**: Every build is full rebuild
 
 **Causes**:
+
 1. `Cargo.lock` changes on every commit
 2. Cache key too specific
 3. Cache evicted (GitHub 10GB limit)
 
 **Fix**:
+
 ```yaml
 - uses: Swatinem/rust-cache@v2
   with:
-    shared-key: "stable-key" # Don't change often
+    shared-key: 'stable-key' # Don't change often
 ```
 
 ### Issue: Out-of-Memory in CI
@@ -368,6 +378,7 @@ jobs:
 **Cause**: Parallel compilation exhausts memory
 
 **Fix**:
+
 ```yaml
 - name: Build Rust
   run: cargo build --workspace -j 2 # Limit parallelism

@@ -12,10 +12,52 @@ HoloScript is an AI-native, declarative language for spatial computing. It allow
 
 ---
 
+## 📦 Installation
+
+Choose your preferred method:
+
+### macOS (Homebrew)
+
+```bash
+brew tap brianonbased-dev/holoscript
+brew install holoscript
+```
+
+### Windows (Chocolatey)
+
+```bash
+choco install holoscript
+```
+
+### npm (Cross-platform)
+
+```bash
+npm install -g @holoscript/cli
+```
+
+### Cargo (Rust)
+
+```bash
+cargo install holoscript-wasm
+```
+
+### Unity Package Manager
+
+Add to your Unity project (2022.3+ or Unity 6):
+
+```text
+https://github.com/brianonbased-dev/HoloScript.git?path=/packages/unity-sdk
+```
+
+**[📘 Full Deployment Guide →](./DEPLOYMENT.md)**
+
+---
+
 ## 🚀 Quick Start (30 Seconds)
 
-1. **Install CLI:** `npm install -g @holoscript/cli`
+1. **Install CLI** (see above)
 2. **Create `hello.holo`:**
+
 ```holo
 composition "Hello Holo" {
   object "Cube" {
@@ -26,6 +68,7 @@ composition "Hello Holo" {
   }
 }
 ```
+
 3. **Preview:** `holoscript preview hello.holo`
 
 **[View Full 5-Minute Tutorial →](./docs/getting-started/quickstart.md)**
@@ -44,13 +87,13 @@ composition "Hello Holo" {
 
 ## 🏗️ 18+ Compile Targets
 
-| Platform | Target | Support |
-| --- | --- | --- |
-| **VR Platforms** | VRChat (Udon), Quest (OpenXR), SteamVR | ✅ Stable |
-| **Game Engines** | Unreal Engine 5, Unity, Godot | ✅ Stable |
-| **Mobile AR** | iOS (ARKit), Android (ARCore), Vision Pro | ✅ Stable |
-| **Web** | React Three Fiber, WebGPU, WebAssembly | ✅ Stable |
-| **Advanced** | Robotics (URDF), Digital Twins (DTDL), Gazebo | ✅ Stable |
+| Platform         | Target                                        | Support   |
+| ---------------- | --------------------------------------------- | --------- |
+| **VR Platforms** | VRChat (Udon), Quest (OpenXR), SteamVR        | ✅ Stable |
+| **Game Engines** | Unreal Engine 5, Unity, Godot                 | ✅ Stable |
+| **Mobile AR**    | iOS (ARKit), Android (ARCore), Vision Pro     | ✅ Stable |
+| **Web**          | React Three Fiber, WebGPU, WebAssembly        | ✅ Stable |
+| **Advanced**     | Robotics (URDF), Digital Twins (DTDL), Gazebo | ✅ Stable |
 
 ---
 

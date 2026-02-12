@@ -64,22 +64,36 @@ vi.mock('vscode', () => ({
     },
   },
   Position: class {
-    constructor(public line: number, public character: number) {}
+    constructor(
+      public line: number,
+      public character: number
+    ) {}
   },
   Range: class {
-    constructor(public start: { line: number; character: number }, public end: { line: number; character: number }) {}
+    constructor(
+      public start: { line: number; character: number },
+      public end: { line: number; character: number }
+    ) {}
   },
   Selection: class {
     constructor(
       public anchor: { line: number; character: number },
       public active: { line: number; character: number }
     ) {}
-    get start() { return this.anchor; }
-    get end() { return this.active; }
-    get isReversed() { return false; }
+    get start() {
+      return this.anchor;
+    }
+    get end() {
+      return this.active;
+    }
+    get isReversed() {
+      return false;
+    }
   },
   StatusBarAlignment: { Right: 2 },
-  ThemeColor: class { constructor(public id: string) {} },
+  ThemeColor: class {
+    constructor(public id: string) {}
+  },
   EventEmitter: class {
     private handlers = new Map();
     event = (handler: Function) => {
@@ -258,7 +272,7 @@ describe('PresenceProvider', () => {
     PresenceProvider = module.PresenceProvider;
     getPresenceProvider = module.getPresenceProvider;
     disposePresenceProvider = module.disposePresenceProvider;
-    
+
     // Reset singleton
     disposePresenceProvider();
   });
@@ -302,7 +316,7 @@ describe('CollaborationSession', () => {
     CollaborationSession = module.CollaborationSession;
     getCollaborationSession = module.getCollaborationSession;
     disposeCollaborationSession = module.disposeCollaborationSession;
-    
+
     // Reset singleton
     disposeCollaborationSession();
   });

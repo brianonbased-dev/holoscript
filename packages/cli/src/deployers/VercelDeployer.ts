@@ -107,7 +107,7 @@ export class VercelDeployer extends BaseDeployer {
    */
   addEnvVar(envVar: VercelEnvironmentVariable): void {
     // Remove existing entry for same key + targets
-    this.envVars = this.envVars.filter(v => v.key !== envVar.key);
+    this.envVars = this.envVars.filter((v) => v.key !== envVar.key);
     this.envVars.push(envVar);
   }
 
@@ -123,7 +123,7 @@ export class VercelDeployer extends BaseDeployer {
    */
   removeEnvVar(key: string): boolean {
     const before = this.envVars.length;
-    this.envVars = this.envVars.filter(v => v.key !== key);
+    this.envVars = this.envVars.filter((v) => v.key !== key);
     return this.envVars.length < before;
   }
 
@@ -222,7 +222,7 @@ export class VercelDeployer extends BaseDeployer {
   async rollback(deploymentId: string): Promise<DeployResult> {
     const startTime = Date.now();
 
-    const deployment = this.deploymentHistory.find(d => d.id === deploymentId);
+    const deployment = this.deploymentHistory.find((d) => d.id === deploymentId);
     if (!deployment) {
       return {
         success: false,
@@ -238,11 +238,9 @@ export class VercelDeployer extends BaseDeployer {
     try {
       // Vercel instant rollback: re-alias the old deployment to production
       const teamQuery = this.teamId ? `?teamId=${this.teamId}` : '';
-      await this.apiRequest(
-        'POST',
-        `/v2/deployments/${deploymentId}/aliases${teamQuery}`,
-        { alias: `${this.projectName}.vercel.app` }
-      );
+      await this.apiRequest('POST', `/v2/deployments/${deploymentId}/aliases${teamQuery}`, {
+        alias: `${this.projectName}.vercel.app`,
+      });
 
       const duration = Date.now() - startTime;
 
@@ -284,7 +282,7 @@ export class VercelDeployer extends BaseDeployer {
       );
 
       if (response.deployments) {
-        return response.deployments.map(d => ({
+        return response.deployments.map((d) => ({
           id: d.uid,
           url: `https://${d.url}`,
           environment: d.meta?.environment || 'production',
@@ -443,9 +441,7 @@ export class VercelDeployer extends BaseDeployer {
   /**
    * Map Vercel deployment state to our status enum.
    */
-  private mapVercelState(
-    state: string
-  ): 'building' | 'deploying' | 'ready' | 'failed' {
+  private mapVercelState(state: string): 'building' | 'deploying' | 'ready' | 'failed' {
     switch (state) {
       case 'READY':
         return 'ready';

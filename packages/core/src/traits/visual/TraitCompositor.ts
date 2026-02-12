@@ -24,10 +24,7 @@ export class TraitCompositor {
   private registry: TraitVisualRegistry;
   private rules: CompositionRule[];
 
-  constructor(
-    registry?: TraitVisualRegistry,
-    rules?: CompositionRule[],
-  ) {
+  constructor(registry?: TraitVisualRegistry, rules?: CompositionRule[]) {
     this.registry = registry ?? TraitVisualRegistry.getInstance();
     this.rules = rules ?? COMPOSITION_RULES;
   }
@@ -121,10 +118,7 @@ export class TraitCompositor {
   }
 
   /** Check if a trait's requirement rules are satisfied by OTHER traits' tags. */
-  private meetsRequirements(
-    traitName: string,
-    tagProviders: Map<string, Set<string>>,
-  ): boolean {
+  private meetsRequirements(traitName: string, tagProviders: Map<string, Set<string>>): boolean {
     for (const rule of this.rules) {
       if (!('requires' in rule) || rule.trait !== traitName || !rule.requires) continue;
 
@@ -148,7 +142,7 @@ export class TraitCompositor {
   private applyAdditiveRules(
     traitNames: string[],
     allTags: Set<string>,
-    merged: R3FMaterialProps,
+    merged: R3FMaterialProps
   ): void {
     const nameSet = new Set(traitNames);
 

@@ -63,10 +63,10 @@ export interface VotingHandler {
     config: NegotiationConfig,
     round: number
   ): VotingResult;
-  
+
   /** Validate a vote for this mechanism */
   validateVote(vote: Vote, proposals: Proposal[]): boolean;
-  
+
   /** Get required quorum for this mechanism */
   getRequiredQuorum(config: NegotiationConfig): number;
 }
@@ -384,9 +384,7 @@ export const consensusHandler: VotingHandler = {
     // No consensus - identify dissenters
     const leader = sorted[0];
     const leaderVoters = new Set(firstChoices.get(leader.proposalId) || []);
-    const dissenters = votes
-      .filter((v) => !leaderVoters.has(v.agentId))
-      .map((v) => v.agentId);
+    const dissenters = votes.filter((v) => !leaderVoters.has(v.agentId)).map((v) => v.agentId);
 
     return {
       tallies: sorted,
@@ -428,9 +426,7 @@ export const rankedHandler: VotingHandler = {
       rounds++;
 
       // Count current first choices
-      const tallies = initializeTallies(
-        proposals.filter((p) => !eliminated.has(p.id))
-      );
+      const tallies = initializeTallies(proposals.filter((p) => !eliminated.has(p.id)));
 
       for (const vote of runoffVotes) {
         // Find first non-eliminated choice
@@ -519,7 +515,10 @@ export const approvalHandler: VotingHandler = {
       }
     }
 
-    const sorted = talliesToArray(tallies, votes.reduce((s, v) => s + v.weight, 0));
+    const sorted = talliesToArray(
+      tallies,
+      votes.reduce((s, v) => s + v.weight, 0)
+    );
     const ties = findTies(sorted);
 
     if (ties.length > 1) {

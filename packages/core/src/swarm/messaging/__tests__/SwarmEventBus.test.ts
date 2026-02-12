@@ -35,7 +35,7 @@ describe('SwarmEventBus', () => {
     it('should support multiple subscribers', async () => {
       const handler1 = vi.fn();
       const handler2 = vi.fn();
-      
+
       bus.subscribe('test.event', handler1);
       bus.subscribe('test.event', handler2);
 
@@ -101,7 +101,7 @@ describe('SwarmEventBus', () => {
   describe('priority handling', () => {
     it('should process critical events by priority order', async () => {
       const order: string[] = [];
-      
+
       bus.subscribe('event', (e) => order.push(e.priority));
 
       // Use publish with asyncProcessing: false - events are queued by priority
@@ -227,7 +227,7 @@ describe('SwarmEventBus', () => {
   describe('configuration', () => {
     it('should respect maxQueueSize', async () => {
       const smallBus = new SwarmEventBus({ maxQueueSize: 2, asyncProcessing: true });
-      
+
       smallBus.publish('a', 'x', {});
       smallBus.publish('b', 'x', {});
       smallBus.publish('c', 'x', {});

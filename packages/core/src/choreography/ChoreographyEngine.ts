@@ -130,11 +130,7 @@ export class ChoreographyEngine extends EventEmitter {
   /**
    * Create a new choreography plan
    */
-  createPlan(
-    goal: string,
-    agents: AgentManifest[],
-    steps: ChoreographyStep[]
-  ): ChoreographyPlan {
+  createPlan(goal: string, agents: AgentManifest[], steps: ChoreographyStep[]): ChoreographyPlan {
     const plan: ChoreographyPlan = {
       id: this.generateId(),
       goal,
@@ -195,7 +191,7 @@ export class ChoreographyEngine extends EventEmitter {
       // Check for fallback
       if (!result.success && plan.fallback && this.config.executeFallback) {
         this.emit('plan:failed', plan, new Error(result.error || 'Unknown error'));
-        
+
         // Execute fallback
         const fallbackResult = await this.execute(plan.fallback, variables);
         return {
@@ -211,7 +207,6 @@ export class ChoreographyEngine extends EventEmitter {
 
       this.emit('plan:completed', result);
       return result;
-
     } catch (error) {
       plan.status = 'failed';
       plan.completedAt = Date.now();
@@ -232,7 +227,6 @@ export class ChoreographyEngine extends EventEmitter {
         error: err.message,
         finalOutputs: {},
       };
-
     } finally {
       this.activePlans.delete(plan.id);
     }
@@ -456,11 +450,13 @@ export class ChoreographyEngine extends EventEmitter {
 
     // Handle step-level fallback if step failed
     if (!result.success && step.fallbackStepId && this.config.executeFallback) {
-      const fallbackStep = state.plan.steps.find((s) => s.id === step.fallbackStepId || s.name === step.fallbackStepId);
+      const fallbackStep = state.plan.steps.find(
+        (s) => s.id === step.fallbackStepId || s.name === step.fallbackStepId
+      );
       if (fallbackStep) {
         // Check if fallback already executed
         let fallbackResult = state.stepResults.get(fallbackStep.id);
-        
+
         // Wait for fallback if it's currently running
         if (!fallbackResult && fallbackStep.status === 'running') {
           while (!state.stepResults.has(fallbackStep.id) && !state.cancelled) {
@@ -468,13 +464,13 @@ export class ChoreographyEngine extends EventEmitter {
           }
           fallbackResult = state.stepResults.get(fallbackStep.id);
         }
-        
+
         // If not yet executed and still pending, execute it now
         if (!fallbackResult && fallbackStep.status === 'pending') {
           await this.executeStep(state, fallbackStep);
           fallbackResult = state.stepResults.get(fallbackStep.id);
         }
-        
+
         if (fallbackResult?.success) {
           // Mark original step as recovered via fallback
           state.stepResults.set(step.id, {
@@ -545,8 +541,7 @@ export class ChoreographyEngine extends EventEmitter {
       }
     }
 
-    const success =
-      !state.cancelled && failed === 0 && skipped === 0;
+    const success = !state.cancelled && failed === 0 && skipped === 0;
 
     return {
       planId: state.plan.id,

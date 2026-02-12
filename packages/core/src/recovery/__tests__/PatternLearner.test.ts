@@ -209,7 +209,7 @@ describe('PatternLearner', () => {
 
       const analysis = learner.analyze();
       expect(analysis.suggestedActions.length).toBeGreaterThan(0);
-      expect(analysis.suggestedActions.some(a => a.includes('network-timeout'))).toBe(true);
+      expect(analysis.suggestedActions.some((a) => a.includes('network-timeout'))).toBe(true);
     });
   });
 

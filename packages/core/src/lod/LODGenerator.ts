@@ -141,11 +141,7 @@ export class LODGenerator {
       const targetTriangles = Math.floor(originalTriCount * targetRatio);
 
       try {
-        const simplified = this.simplifyMesh(
-          currentMesh,
-          targetTriangles,
-          this.options.algorithm
-        );
+        const simplified = this.simplifyMesh(currentMesh, targetTriangles, this.options.algorithm);
 
         const actualTriCount = simplified.indices.length / 3;
         const actualVertCount = simplified.positions.length / 3;
@@ -191,28 +187,20 @@ export class LODGenerator {
   /**
    * Generate a single LOD level at a specific reduction ratio
    */
-  generateLevel(
-    mesh: MeshData,
-    targetRatio: number,
-    level: number = 1
-  ): GeneratedLODLevel {
+  generateLevel(mesh: MeshData, targetRatio: number, level: number = 1): GeneratedLODLevel {
     const validation = this.validateMesh(mesh);
     if (!validation.valid) {
       throw new Error(`Invalid mesh: ${validation.errors.join(', ')}`);
     }
 
     const targetTriangles = Math.floor(validation.triangleCount * targetRatio);
-    const simplified = this.simplifyMesh(
-      mesh,
-      targetTriangles,
-      this.options.algorithm
-    );
+    const simplified = this.simplifyMesh(mesh, targetTriangles, this.options.algorithm);
 
     return {
       level,
       triangleCount: simplified.indices.length / 3,
       vertexCount: simplified.positions.length / 3,
-      reductionRatio: (simplified.indices.length / 3) / validation.triangleCount,
+      reductionRatio: simplified.indices.length / 3 / validation.triangleCount,
       errorMetric: this.calculateError(mesh, simplified),
       positions: simplified.positions,
       normals: simplified.normals,
@@ -231,7 +219,7 @@ export class LODGenerator {
   ): LODConfig {
     const lodLevels: LODLevel[] = levels.map((level, index) => {
       const distance = index === 0 ? 0 : baseDistance * Math.pow(2, index - 1);
-      
+
       return createLODLevel(level.level, distance, level.reductionRatio, {
         triangleCount: level.triangleCount,
         textureScale: Math.max(0.25, level.reductionRatio),
@@ -298,20 +286,11 @@ export class LODGenerator {
     for (let i = 0; i < vertexCount; i++) {
       vertices.push({
         id: i,
-        position: [
-          mesh.positions[i * 3],
-          mesh.positions[i * 3 + 1],
-          mesh.positions[i * 3 + 2],
-        ],
-        normal: mesh.normals ? [
-          mesh.normals[i * 3],
-          mesh.normals[i * 3 + 1],
-          mesh.normals[i * 3 + 2],
-        ] : undefined,
-        uv: mesh.uvs ? [
-          mesh.uvs[i * 2],
-          mesh.uvs[i * 2 + 1],
-        ] : undefined,
+        position: [mesh.positions[i * 3], mesh.positions[i * 3 + 1], mesh.positions[i * 3 + 2]],
+        normal: mesh.normals
+          ? [mesh.normals[i * 3], mesh.normals[i * 3 + 1], mesh.normals[i * 3 + 2]]
+          : undefined,
+        uv: mesh.uvs ? [mesh.uvs[i * 2], mesh.uvs[i * 2 + 1]] : undefined,
         quadric: this.createZeroMatrix(4),
         edges: new Set(),
         removed: false,
@@ -330,7 +309,7 @@ export class LODGenerator {
 
       // Calculate face normal
       const normal = this.calculateNormal(v0, v1, v2);
-      
+
       triangles.push({
         id: i,
         vertices: [i0, i1, i2],
@@ -359,7 +338,7 @@ export class LODGenerator {
     }
 
     // Create priority queue (simple array sorted by error)
-    const edgeQueue = edges.filter(e => !e.removed).sort((a, b) => a.error - b.error);
+    const edgeQueue = edges.filter((e) => !e.removed).sort((a, b) => a.error - b.error);
 
     // Collapse edges until target is reached
     let currentTriangles = triangleCount;
@@ -383,15 +362,15 @@ export class LODGenerator {
       // Collapse edge: merge v2 into v1
       v1.position = minEdge.optimalPosition;
       this.addMatrices(v1.quadric, v2.quadric);
-      
+
       // Update triangles
       let removedTris = 0;
       for (const tri of triangles) {
         if (tri.removed) continue;
-        
+
         const hasV1 = tri.vertices.includes(minEdge.v1);
         const hasV2 = tri.vertices.includes(minEdge.v2);
-        
+
         if (hasV1 && hasV2) {
           // Degenerate triangle, remove it
           tri.removed = true;
@@ -404,17 +383,17 @@ export class LODGenerator {
       }
 
       currentTriangles -= removedTris;
-      
+
       // Mark v2 as removed
       v2.removed = true;
-      
+
       // Update edges connected to v2
       for (const edgeId of v2.edges) {
         const edge = edges[edgeId];
         if (edge && !edge.removed) {
           if (edge.v1 === minEdge.v2) edge.v1 = minEdge.v1;
           if (edge.v2 === minEdge.v2) edge.v2 = minEdge.v1;
-          
+
           if (edge.v1 === edge.v2) {
             edge.removed = true;
           } else {
@@ -449,26 +428,33 @@ export class LODGenerator {
   private simplifyVertexClustering(mesh: MeshData, targetTriangles: number): MeshData {
     const vertexCount = mesh.positions.length / 3;
     const triangleCount = mesh.indices.length / 3;
-    
+
     if (targetTriangles >= triangleCount) {
       return this.cloneMesh(mesh);
     }
 
     // Calculate grid size based on target reduction
     const reduction = targetTriangles / triangleCount;
-    const gridResolution = Math.ceil(Math.pow(vertexCount * reduction, 1/3));
+    const gridResolution = Math.ceil(Math.pow(vertexCount * reduction, 1 / 3));
 
     // Find bounding box
-    let minX = Infinity, minY = Infinity, minZ = Infinity;
-    let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+    let minX = Infinity,
+      minY = Infinity,
+      minZ = Infinity;
+    let maxX = -Infinity,
+      maxY = -Infinity,
+      maxZ = -Infinity;
 
     for (let i = 0; i < vertexCount; i++) {
       const x = mesh.positions[i * 3];
       const y = mesh.positions[i * 3 + 1];
       const z = mesh.positions[i * 3 + 2];
-      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
-      minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z);
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+      minZ = Math.min(minZ, z);
+      maxZ = Math.max(maxZ, z);
     }
 
     const cellSizeX = (maxX - minX) / gridResolution;
@@ -487,9 +473,9 @@ export class LODGenerator {
       const cellX = Math.floor((x - minX) / cellSizeX);
       const cellY = Math.floor((y - minY) / cellSizeY);
       const cellZ = Math.floor((z - minZ) / cellSizeZ);
-      
+
       const key = `${cellX},${cellY},${cellZ}`;
-      
+
       if (!cellVertices.has(key)) {
         cellVertices.set(key, []);
       }
@@ -504,37 +490,42 @@ export class LODGenerator {
 
     for (const [, vertices] of cellVertices) {
       // Average position
-      let avgX = 0, avgY = 0, avgZ = 0;
-      let avgNx = 0, avgNy = 0, avgNz = 0;
-      let avgU = 0, avgV = 0;
+      let avgX = 0,
+        avgY = 0,
+        avgZ = 0;
+      let avgNx = 0,
+        avgNy = 0,
+        avgNz = 0;
+      let avgU = 0,
+        avgV = 0;
 
       for (const vi of vertices) {
         avgX += mesh.positions[vi * 3];
         avgY += mesh.positions[vi * 3 + 1];
         avgZ += mesh.positions[vi * 3 + 2];
-        
+
         if (mesh.normals) {
           avgNx += mesh.normals[vi * 3];
           avgNy += mesh.normals[vi * 3 + 1];
           avgNz += mesh.normals[vi * 3 + 2];
         }
-        
+
         if (mesh.uvs) {
           avgU += mesh.uvs[vi * 2];
           avgV += mesh.uvs[vi * 2 + 1];
         }
-        
+
         vertexToCellRepresentative.set(vi, newVertexIndex);
       }
 
       const count = vertices.length;
       newPositions.push(avgX / count, avgY / count, avgZ / count);
-      
+
       if (mesh.normals) {
         const len = Math.sqrt(avgNx * avgNx + avgNy * avgNy + avgNz * avgNz);
         newNormals.push(avgNx / len, avgNy / len, avgNz / len);
       }
-      
+
       if (mesh.uvs) {
         newUVs.push(avgU / count, avgV / count);
       }
@@ -544,7 +535,7 @@ export class LODGenerator {
 
     // Rebuild triangles with new indices
     const newIndices: number[] = [];
-    
+
     for (let i = 0; i < triangleCount; i++) {
       const i0 = vertexToCellRepresentative.get(mesh.indices[i * 3])!;
       const i1 = vertexToCellRepresentative.get(mesh.indices[i * 3 + 1])!;
@@ -652,11 +643,11 @@ export class LODGenerator {
   ): [number, number, number] {
     const e1: [number, number, number] = [v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]];
     const e2: [number, number, number] = [v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]];
-    
+
     const nx = e1[1] * e2[2] - e1[2] * e2[1];
     const ny = e1[2] * e2[0] - e1[0] * e2[2];
     const nz = e1[0] * e2[1] - e1[1] * e2[0];
-    
+
     const len = Math.sqrt(nx * nx + ny * ny + nz * nz);
     return len > 0 ? [nx / len, ny / len, nz / len] : [0, 1, 0];
   }
@@ -689,7 +680,9 @@ export class LODGenerator {
    * Create zero 4x4 matrix
    */
   private createZeroMatrix(size: number): number[][] {
-    return Array(size).fill(null).map(() => Array(size).fill(0));
+    return Array(size)
+      .fill(null)
+      .map(() => Array(size).fill(0));
   }
 
   /**
@@ -714,7 +707,7 @@ export class LODGenerator {
     edgeMap: Map<string, number>
   ): void {
     const key = v1 < v2 ? `${v1}-${v2}` : `${v2}-${v1}`;
-    
+
     if (!edgeMap.has(key)) {
       const edgeId = edges.length;
       edges.push({
@@ -737,7 +730,7 @@ export class LODGenerator {
   private updateEdgeError(edge: Edge, vertices: Vertex[]): void {
     const v1 = vertices[edge.v1];
     const v2 = vertices[edge.v2];
-    
+
     if (v1.removed || v2.removed) {
       edge.removed = true;
       return;
@@ -759,41 +752,31 @@ export class LODGenerator {
     // Calculate error at optimal position
     const p = edge.optimalPosition;
     const v = [p[0], p[1], p[2], 1];
-    
+
     let error = 0;
     for (let i = 0; i < 4; i++) {
       for (let j = 0; j < 4; j++) {
         error += v[i] * Q[i][j] * v[j];
       }
     }
-    
+
     edge.error = Math.abs(error);
   }
 
   /**
    * Check if edge should be preserved
    */
-  private shouldPreserveEdge(
-    edge: Edge,
-    v1: Vertex,
-    v2: Vertex,
-    _mesh: MeshData
-  ): boolean {
+  private shouldPreserveEdge(edge: Edge, v1: Vertex, v2: Vertex, _mesh: MeshData): boolean {
     // Preserve UV seams
     if (this.options.preserveUVSeams && v1.uv && v2.uv) {
-      const uvDist = Math.sqrt(
-        Math.pow(v1.uv[0] - v2.uv[0], 2) +
-        Math.pow(v1.uv[1] - v2.uv[1], 2)
-      );
+      const uvDist = Math.sqrt(Math.pow(v1.uv[0] - v2.uv[0], 2) + Math.pow(v1.uv[1] - v2.uv[1], 2));
       if (uvDist > 0.5) return true;
     }
 
     // Preserve hard edges (normal discontinuity)
     if (this.options.preserveHardEdges && v1.normal && v2.normal) {
-      const dot = 
-        v1.normal[0] * v2.normal[0] +
-        v1.normal[1] * v2.normal[1] +
-        v1.normal[2] * v2.normal[2];
+      const dot =
+        v1.normal[0] * v2.normal[0] + v1.normal[1] * v2.normal[1] + v1.normal[2] * v2.normal[2];
       if (dot < 0.5) return true;
     }
 
@@ -803,11 +786,7 @@ export class LODGenerator {
   /**
    * Rebuild mesh from simplified data
    */
-  private rebuildMesh(
-    vertices: Vertex[],
-    triangles: Triangle[],
-    originalMesh: MeshData
-  ): MeshData {
+  private rebuildMesh(vertices: Vertex[], triangles: Triangle[], originalMesh: MeshData): MeshData {
     // Map old vertex indices to new
     const vertexMap = new Map<number, number>();
     const newPositions: number[] = [];
@@ -819,28 +798,28 @@ export class LODGenerator {
       if (!vertex.removed) {
         vertexMap.set(vertex.id, newIndex);
         newPositions.push(...vertex.position);
-        
+
         if (vertex.normal) {
           newNormals.push(...vertex.normal);
         }
-        
+
         if (vertex.uv) {
           newUVs.push(...vertex.uv);
         }
-        
+
         newIndex++;
       }
     }
 
     // Rebuild indices
     const newIndices: number[] = [];
-    
+
     for (const tri of triangles) {
       if (!tri.removed) {
         const i0 = vertexMap.get(tri.vertices[0]);
         const i1 = vertexMap.get(tri.vertices[1]);
         const i2 = vertexMap.get(tri.vertices[2]);
-        
+
         if (i0 !== undefined && i1 !== undefined && i2 !== undefined) {
           newIndices.push(i0, i1, i2);
         }
@@ -862,7 +841,7 @@ export class LODGenerator {
     // Simplified error metric: ratio of vertices removed
     const originalVerts = original.positions.length / 3;
     const simplifiedVerts = simplified.positions.length / 3;
-    return 1 - (simplifiedVerts / originalVerts);
+    return 1 - simplifiedVerts / originalVerts;
   }
 
   /**
@@ -887,19 +866,14 @@ export class LODGenerator {
 /**
  * Create LOD generator with default options
  */
-export function createLODGenerator(
-  options?: Partial<LODGenerationOptions>
-): LODGenerator {
+export function createLODGenerator(options?: Partial<LODGenerationOptions>): LODGenerator {
   return new LODGenerator(options);
 }
 
 /**
  * Generate LOD levels for a mesh with default settings
  */
-export function generateLODs(
-  mesh: MeshData,
-  levelCount: number = 3
-): LODGenerationResult {
+export function generateLODs(mesh: MeshData, levelCount: number = 3): LODGenerationResult {
   const generator = new LODGenerator({ levelCount });
   return generator.generate(mesh);
 }
@@ -911,26 +885,56 @@ export function createTestCube(): MeshData {
   // Simple cube with 8 vertices, 12 triangles
   const positions = new Float32Array([
     // Front face
-    -1, -1,  1,  1, -1,  1,  1,  1,  1, -1,  1,  1,
+    -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1,
     // Back face
-    -1, -1, -1, -1,  1, -1,  1,  1, -1,  1, -1, -1,
+    -1, -1, -1, -1, 1, -1, 1, 1, -1, 1, -1, -1,
     // Top face
-    -1,  1, -1, -1,  1,  1,  1,  1,  1,  1,  1, -1,
+    -1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1,
     // Bottom face
-    -1, -1, -1,  1, -1, -1,  1, -1,  1, -1, -1,  1,
+    -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1,
     // Right face
-     1, -1, -1,  1,  1, -1,  1,  1,  1,  1, -1,  1,
+    1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1,
     // Left face
-    -1, -1, -1, -1, -1,  1, -1,  1,  1, -1,  1, -1,
+    -1, -1, -1, -1, -1, 1, -1, 1, 1, -1, 1, -1,
   ]);
 
   const indices = new Uint32Array([
-    0,  1,  2,  0,  2,  3,   // front
-    4,  5,  6,  4,  6,  7,   // back
-    8,  9, 10,  8, 10, 11,   // top
-   12, 13, 14, 12, 14, 15,   // bottom
-   16, 17, 18, 16, 18, 19,   // right
-   20, 21, 22, 20, 22, 23,   // left
+    0,
+    1,
+    2,
+    0,
+    2,
+    3, // front
+    4,
+    5,
+    6,
+    4,
+    6,
+    7, // back
+    8,
+    9,
+    10,
+    8,
+    10,
+    11, // top
+    12,
+    13,
+    14,
+    12,
+    14,
+    15, // bottom
+    16,
+    17,
+    18,
+    16,
+    18,
+    19, // right
+    20,
+    21,
+    22,
+    20,
+    22,
+    23, // left
   ]);
 
   return { positions, indices };
@@ -945,12 +949,12 @@ export function createTestSphere(segments: number = 16): MeshData {
 
   // Generate sphere vertices
   for (let lat = 0; lat <= segments; lat++) {
-    const theta = lat * Math.PI / segments;
+    const theta = (lat * Math.PI) / segments;
     const sinTheta = Math.sin(theta);
     const cosTheta = Math.cos(theta);
 
     for (let lon = 0; lon <= segments; lon++) {
-      const phi = lon * 2 * Math.PI / segments;
+      const phi = (lon * 2 * Math.PI) / segments;
       const sinPhi = Math.sin(phi);
       const cosPhi = Math.cos(phi);
 

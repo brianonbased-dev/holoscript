@@ -29,11 +29,7 @@ const bench = new Bench({ time: 1000 });
 
 bench
   .add('quantize-position', () => {
-    quantizePosition(
-      Math.random() * 1000 - 500,
-      Math.random() * 100,
-      Math.random() * 1000 - 500
-    );
+    quantizePosition(Math.random() * 1000 - 500, Math.random() * 100, Math.random() * 1000 - 500);
   })
   .add('dequantize-position', () => {
     const quantized = quantizePosition(123.45, 67.89, -234.56);
@@ -150,7 +146,7 @@ bench.add('jitter-buffer-interpolate', () => {
 bench.add('measure-compression-ratio', () => {
   // Full state (uncompressed)
   const fullState = {
-    position: [123.456789, 67.891234, -234.567890],
+    position: [123.456789, 67.891234, -234.56789],
     rotation: [0.1, 0.2, 0.3, 0.9380832],
   };
   const fullBytes = JSON.stringify(fullState).length;

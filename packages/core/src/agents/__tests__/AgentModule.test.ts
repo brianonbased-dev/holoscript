@@ -20,16 +20,8 @@ import {
   AgentCapability,
   AgentEndpoint,
 } from '../AgentManifest';
-import {
-  CapabilityMatcher,
-  CapabilityQuery,
-  AgentMatch,
-} from '../CapabilityMatcher';
-import {
-  PHASE_ORDER,
-  DEFAULT_PHASE_TIMINGS,
-  AgentPhase,
-} from '../AgentTypes';
+import { CapabilityMatcher, CapabilityQuery, AgentMatch } from '../CapabilityMatcher';
+import { PHASE_ORDER, DEFAULT_PHASE_TIMINGS, AgentPhase } from '../AgentTypes';
 
 // Helper to create test manifests quickly
 function createTestManifest(
@@ -47,9 +39,7 @@ function createTestManifest(
       id: `${id}-cap-${i}`,
       name: `Capability ${i}`,
     })) as AgentCapability[],
-    endpoints: options.endpoints || [
-      { protocol: 'local' as const, address: 'internal' },
-    ],
+    endpoints: options.endpoints || [{ protocol: 'local' as const, address: 'internal' }],
     trustLevel: options.trustLevel || 'local',
     status: options.status || 'online',
     ...options,
@@ -422,15 +412,9 @@ describe('CapabilityMatcher', () => {
   describe('findMatches', () => {
     beforeEach(() => {
       manifests = [
-        createTestManifest('agent-1', [
-          { type: 'analyze', domain: 'general' },
-        ]),
-        createTestManifest('agent-2', [
-          { type: 'generate', domain: 'nlp' },
-        ]),
-        createTestManifest('agent-3', [
-          { type: 'analyze', domain: 'vision' },
-        ]),
+        createTestManifest('agent-1', [{ type: 'analyze', domain: 'general' }]),
+        createTestManifest('agent-2', [{ type: 'generate', domain: 'nlp' }]),
+        createTestManifest('agent-3', [{ type: 'analyze', domain: 'vision' }]),
       ];
     });
 
@@ -462,16 +446,8 @@ describe('CapabilityMatcher', () => {
   describe('findBest', () => {
     beforeEach(() => {
       manifests = [
-        createTestManifest(
-          'agent-a',
-          [{ type: 'analyze', domain: 'general' }],
-          {}
-        ),
-        createTestManifest(
-          'agent-b',
-          [{ type: 'analyze', domain: 'vision' }],
-          {}
-        ),
+        createTestManifest('agent-a', [{ type: 'analyze', domain: 'general' }], {}),
+        createTestManifest('agent-b', [{ type: 'analyze', domain: 'vision' }], {}),
       ];
     });
 
@@ -551,9 +527,7 @@ describe('AgentRegistry', () => {
 
   describe('Registration', () => {
     it('should register an agent', async () => {
-      const manifest = createTestManifest('test-agent', [
-        { type: 'analyze', domain: 'general' },
-      ]);
+      const manifest = createTestManifest('test-agent', [{ type: 'analyze', domain: 'general' }]);
 
       await registry.register(manifest);
 
@@ -564,9 +538,7 @@ describe('AgentRegistry', () => {
       const listener = vi.fn();
       registry.on('agent:registered', listener);
 
-      const manifest = createTestManifest('event-agent', [
-        { type: 'analyze', domain: 'general' },
-      ]);
+      const manifest = createTestManifest('event-agent', [{ type: 'analyze', domain: 'general' }]);
 
       await registry.register(manifest);
 
@@ -583,9 +555,7 @@ describe('AgentRegistry', () => {
     });
 
     it('should update existing agent on re-register', async () => {
-      const manifest = createTestManifest('update-agent', [
-        { type: 'analyze', domain: 'general' },
-      ]);
+      const manifest = createTestManifest('update-agent', [{ type: 'analyze', domain: 'general' }]);
 
       await registry.register(manifest);
 
@@ -629,9 +599,7 @@ describe('AgentRegistry', () => {
 
   describe('Deregistration', () => {
     it('should deregister an agent', async () => {
-      const manifest = createTestManifest('to-remove', [
-        { type: 'analyze', domain: 'general' },
-      ]);
+      const manifest = createTestManifest('to-remove', [{ type: 'analyze', domain: 'general' }]);
 
       await registry.register(manifest);
       await registry.deregister('to-remove');

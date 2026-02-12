@@ -60,7 +60,15 @@ export interface DeltaChange {
 }
 
 export interface SyncMessage {
-  type: 'full-state' | 'delta' | 'request-state' | 'ack' | 'presence' | 'rpc' | 'ownership-request' | 'ownership-response';
+  type:
+    | 'full-state'
+    | 'delta'
+    | 'request-state'
+    | 'ack'
+    | 'presence'
+    | 'rpc'
+    | 'ownership-request'
+    | 'ownership-response';
   senderId: string;
   roomId: string;
   sequence: number;
@@ -853,7 +861,12 @@ export class SyncProtocol {
         break;
       }
       case 'rpc': {
-        const payload = message.payload as { method: string; args: unknown[]; target?: string; from: string };
+        const payload = message.payload as {
+          method: string;
+          args: unknown[];
+          target?: string;
+          from: string;
+        };
         if (!payload.target || payload.target === this.clientId) {
           this.emit('rpc', payload);
         }

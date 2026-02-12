@@ -58,7 +58,8 @@ describe('RegistryClient', () => {
     const futureResetTimestamp = Math.floor(Date.now() / 1000) + 3600;
 
     globalThis.fetch = vi.fn(async (input: string | URL | Request) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
 
       const rateLimitHeaders = new Headers({
         'Content-Type': 'application/json',

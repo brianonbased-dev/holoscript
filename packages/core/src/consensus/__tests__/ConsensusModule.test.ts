@@ -370,7 +370,7 @@ describe('RaftConsensus', () => {
       }
 
       const result = await proposalPromise;
-      
+
       // Either the proposal succeeds or times out - both are valid outcomes
       // In a real system with proper networking, it would succeed
       if (result.accepted) {
@@ -402,7 +402,7 @@ describe('RaftConsensus', () => {
       }
 
       const result = await proposalPromise;
-      
+
       // Handler should be called if proposal succeeded
       if (result.accepted) {
         expect(handler).toHaveBeenCalled();

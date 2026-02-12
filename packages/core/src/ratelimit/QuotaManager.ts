@@ -135,7 +135,7 @@ export class QuotaManager {
 
     const { currentUsage, limit, period } = this.getOperationInfo(keyUsage, operation);
     const isUnlimited = limit === -1;
-    const allowed = isUnlimited || (currentUsage + count) <= limit;
+    const allowed = isUnlimited || currentUsage + count <= limit;
     const remaining = isUnlimited ? Infinity : Math.max(0, limit - currentUsage);
     const resetsAt = this.getResetTime(keyUsage, period);
 
@@ -162,7 +162,7 @@ export class QuotaManager {
 
     const { currentUsage, limit, period } = this.getOperationInfo(keyUsage, operation);
     const isUnlimited = limit === -1;
-    const allowed = isUnlimited || (currentUsage + count) <= limit;
+    const allowed = isUnlimited || currentUsage + count <= limit;
 
     if (allowed) {
       this.addUsage(keyUsage, operation, count);

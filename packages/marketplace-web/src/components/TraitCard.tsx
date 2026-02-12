@@ -5,14 +5,7 @@ import Image from 'next/image';
 import type { TraitSummary } from '@/types';
 import { CATEGORY_LABELS, PLATFORM_LABELS } from '@/types';
 import { useInstallStore } from '@/lib/store';
-import {
-  Download,
-  Star,
-  CheckCircle,
-  Loader2,
-  ArrowDownToLine,
-  AlertTriangle,
-} from 'lucide-react';
+import { Download, Star, CheckCircle, Loader2, ArrowDownToLine, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface TraitCardProps {
@@ -93,9 +86,7 @@ export function TraitCard({ trait }: TraitCardProps) {
 
       {/* Description */}
       <div className="p-4">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
-          {trait.description}
-        </p>
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">{trait.description}</p>
       </div>
 
       {/* Category & Platforms */}
@@ -150,8 +141,8 @@ export function TraitCard({ trait }: TraitCardProps) {
               installed
                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                 : installing
-                ? 'bg-holoscript-100 dark:bg-holoscript-900/30 text-holoscript-600 dark:text-holoscript-400'
-                : 'bg-holoscript-500 hover:bg-holoscript-600 text-white'
+                  ? 'bg-holoscript-100 dark:bg-holoscript-900/30 text-holoscript-600 dark:text-holoscript-400'
+                  : 'bg-holoscript-500 hover:bg-holoscript-600 text-white'
             }
           `}
         >

@@ -119,7 +119,7 @@ const Parser = require('web-tree-sitter');
   const parser = new Parser();
   const HoloScript = await Parser.Language.load('tree-sitter-holoscript.wasm');
   parser.setLanguage(HoloScript);
-  
+
   const tree = parser.parse('object "Cube" @grabbable {}');
   console.log(tree.rootNode.toString());
 })();
@@ -130,6 +130,7 @@ const Parser = require('web-tree-sitter');
 ### Syntax Highlighting
 
 The `queries/highlights.scm` file provides syntax highlighting for:
+
 - Keywords (`composition`, `template`, `object`, etc.)
 - Traits (`@grabbable`, `@networked`, etc.)
 - Properties
@@ -140,6 +141,7 @@ The `queries/highlights.scm` file provides syntax highlighting for:
 ### Indentation
 
 The `queries/indents.scm` file provides automatic indentation for:
+
 - Composition/template/object blocks
 - Control flow statements
 - Array and object literals
@@ -147,26 +149,27 @@ The `queries/indents.scm` file provides automatic indentation for:
 ### Locals
 
 The `queries/locals.scm` file provides:
+
 - Scope detection
 - Variable definitions
 - Reference resolution
 
 ## Supported Syntax
 
-| Construct | Description | Example |
-|-----------|-------------|---------|
-| `composition` | Main scene container | `composition "Scene" { }` |
-| `world` | Alternative container | `world "Game" { }` |
-| `template` | Reusable object definition | `template "Enemy" { }` |
-| `object` | Scene instance | `object "Cube" { }` |
-| `entity` | Alternative object syntax | `entity "Player" { }` |
-| `@trait` | VR traits | `@grabbable @networked` |
-| `state { }` | Object state | `state { health: 100 }` |
-| `physics: { }` | Physics properties | `physics: { mass: 1 }` |
-| `networked { }` | Network sync | `networked { position: synced }` |
-| `timeline { }` | Animations | `timeline { 0: animate... }` |
-| `action` | Custom actions | `action attack(target) { }` |
-| `onEvent:` | Event handlers | `onGrab: { }` |
+| Construct       | Description                | Example                          |
+| --------------- | -------------------------- | -------------------------------- |
+| `composition`   | Main scene container       | `composition "Scene" { }`        |
+| `world`         | Alternative container      | `world "Game" { }`               |
+| `template`      | Reusable object definition | `template "Enemy" { }`           |
+| `object`        | Scene instance             | `object "Cube" { }`              |
+| `entity`        | Alternative object syntax  | `entity "Player" { }`            |
+| `@trait`        | VR traits                  | `@grabbable @networked`          |
+| `state { }`     | Object state               | `state { health: 100 }`          |
+| `physics: { }`  | Physics properties         | `physics: { mass: 1 }`           |
+| `networked { }` | Network sync               | `networked { position: synced }` |
+| `timeline { }`  | Animations                 | `timeline { 0: animate... }`     |
+| `action`        | Custom actions             | `action attack(target) { }`      |
+| `onEvent:`      | Event handlers             | `onGrab: { }`                    |
 
 ## Development
 

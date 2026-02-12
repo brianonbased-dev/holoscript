@@ -6,7 +6,14 @@ import type { TraitVisualConfig } from '../types';
  */
 export const GEMS_MINERALS_VISUALS: Record<string, TraitVisualConfig> = {
   diamond_gem: {
-    material: { roughness: 0.0, metalness: 0.0, transmission: 0.95, ior: 2.42, iridescence: 0.3, envMapIntensity: 2.0 },
+    material: {
+      roughness: 0.0,
+      metalness: 0.0,
+      transmission: 0.95,
+      ior: 2.42,
+      iridescence: 0.3,
+      envMapIntensity: 2.0,
+    },
     tags: ['gem', 'transparent', 'reflective'],
     layer: 'base_material',
   },
@@ -36,12 +43,24 @@ export const GEMS_MINERALS_VISUALS: Record<string, TraitVisualConfig> = {
     layer: 'base_material',
   },
   opal: {
-    material: { roughness: 0.1, metalness: 0.0, color: '#FFE4E1', iridescence: 1.0, iridescenceIOR: 1.45 },
+    material: {
+      roughness: 0.1,
+      metalness: 0.0,
+      color: '#FFE4E1',
+      iridescence: 1.0,
+      iridescenceIOR: 1.45,
+    },
     tags: ['gem', 'iridescent'],
     layer: 'base_material',
   },
   pearl: {
-    material: { roughness: 0.15, metalness: 0.1, color: '#FFF5EE', iridescence: 0.6, envMapIntensity: 1.0 },
+    material: {
+      roughness: 0.15,
+      metalness: 0.1,
+      color: '#FFF5EE',
+      iridescence: 0.6,
+      envMapIntensity: 1.0,
+    },
     tags: ['organic', 'iridescent'],
     layer: 'base_material',
   },
@@ -66,7 +85,14 @@ export const GEMS_MINERALS_VISUALS: Record<string, TraitVisualConfig> = {
     layer: 'base_material',
   },
   crystal_gem: {
-    material: { roughness: 0.0, metalness: 0.1, transmission: 0.9, ior: 2.0, iridescence: 1.0, iridescenceIOR: 1.3 },
+    material: {
+      roughness: 0.0,
+      metalness: 0.1,
+      transmission: 0.9,
+      ior: 2.0,
+      iridescence: 1.0,
+      iridescenceIOR: 1.3,
+    },
     tags: ['mineral', 'transparent', 'reflective'],
     layer: 'base_material',
   },
@@ -106,7 +132,14 @@ export const GEMS_MINERALS_VISUALS: Record<string, TraitVisualConfig> = {
     layer: 'base_material',
   },
   mithril: {
-    material: { roughness: 0.1, metalness: 1.0, color: '#C0D8E8', envMapIntensity: 1.8, emissive: '#E0F0FF', emissiveIntensity: 0.2 },
+    material: {
+      roughness: 0.1,
+      metalness: 1.0,
+      color: '#C0D8E8',
+      envMapIntensity: 1.8,
+      emissive: '#E0F0FF',
+      emissiveIntensity: 0.2,
+    },
     tags: ['metallic', 'fantasy', 'magical'],
     layer: 'base_material',
   },
@@ -116,17 +149,36 @@ export const GEMS_MINERALS_VISUALS: Record<string, TraitVisualConfig> = {
     layer: 'base_material',
   },
   orichalcum: {
-    material: { roughness: 0.2, metalness: 1.0, color: '#E8A317', emissive: '#FF8C00', emissiveIntensity: 0.3, envMapIntensity: 1.5 },
+    material: {
+      roughness: 0.2,
+      metalness: 1.0,
+      color: '#E8A317',
+      emissive: '#FF8C00',
+      emissiveIntensity: 0.3,
+      envMapIntensity: 1.5,
+    },
     tags: ['metallic', 'fantasy', 'magical'],
     layer: 'base_material',
   },
   moonstone: {
-    material: { roughness: 0.15, metalness: 0.0, color: '#E8E0F0', iridescence: 0.7, transmission: 0.3 },
+    material: {
+      roughness: 0.15,
+      metalness: 0.0,
+      color: '#E8E0F0',
+      iridescence: 0.7,
+      transmission: 0.3,
+    },
     tags: ['gem', 'iridescent', 'magical'],
     layer: 'base_material',
   },
   sunstone: {
-    material: { roughness: 0.2, metalness: 0.1, color: '#FF8C00', emissive: '#FF6600', emissiveIntensity: 0.5 },
+    material: {
+      roughness: 0.2,
+      metalness: 0.1,
+      color: '#FF8C00',
+      emissive: '#FF6600',
+      emissiveIntensity: 0.5,
+    },
     tags: ['gem', 'warm', 'magical'],
     layer: 'base_material',
   },

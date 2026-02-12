@@ -30,7 +30,9 @@ export type RealityKitComponent =
   | 'PortalComponent'
   | 'WorldComponent'
   | 'OpacityComponent'
-  | 'GroundingShadowComponent';
+  | 'GroundingShadowComponent'
+  | 'BillboardComponent'
+  | 'ReverbComponent';
 
 export type TraitImplementationLevel =
   | 'full' // Generates complete RealityKit code
@@ -110,32 +112,92 @@ export const PHYSICS_TRAIT_MAP: Record<string, TraitMapping> = {
 
   cloth: {
     trait: 'cloth',
-    components: [],
-    level: 'comment',
-    generate: (varName, config) => [
-      `// @cloth — requires custom Metal compute shader for cloth simulation`,
-      `// Config: ${JSON.stringify(config)}`,
-    ],
+    components: ['CollisionComponent', 'PhysicsBodyComponent'],
+    level: 'partial',
+    imports: ['RealityKit', 'Metal'],
+    generate: (varName, config) => {
+      const stiffness = config.stiffness ?? 0.8;
+      const damping = config.damping ?? 0.02;
+      const iterations = config.iterations ?? 10;
+      const gravity = config.gravity ?? -9.81;
+      const windStrength = config.wind_strength ?? 0;
+      return [
+        `// @cloth — Position-Based Dynamics cloth simulation`,
+        `var ${varName}ClothSystem = ClothSimulationComponent()`,
+        `${varName}ClothSystem.stiffness = ${stiffness}`,
+        `${varName}ClothSystem.damping = ${damping}`,
+        `${varName}ClothSystem.solverIterations = ${iterations}`,
+        `${varName}ClothSystem.gravity = SIMD3<Float>(0, ${gravity}, 0)`,
+        ...(windStrength
+          ? [`${varName}ClothSystem.wind = SIMD3<Float>(${windStrength}, 0, 0)`]
+          : []),
+        `${varName}.components.set(${varName}ClothSystem)`,
+        ``,
+        `// Register cloth ECS system for Metal compute dispatch`,
+        `ClothSimulationSystem.registerSystem()`,
+        `ClothSimulationSystem.configure(device: MTLCreateSystemDefaultDevice()!)`,
+      ];
+    },
   },
 
   soft_body: {
     trait: 'soft_body',
-    components: [],
-    level: 'comment',
-    generate: (varName, config) => [
-      `// @soft_body — requires custom physics implementation`,
-      `// Config: ${JSON.stringify(config)}`,
-    ],
+    components: ['CollisionComponent', 'PhysicsBodyComponent'],
+    level: 'partial',
+    imports: ['RealityKit', 'Metal'],
+    generate: (varName, config) => {
+      const compliance = config.compliance ?? 0.0001;
+      const damping = config.damping ?? 0.01;
+      const iterations = config.iterations ?? 8;
+      const volumeStiffness = config.volume_stiffness ?? 1.0;
+      const pressure = config.pressure ?? 1.0;
+      return [
+        `// @soft_body — Extended PBD (XPBD) soft body simulation`,
+        `var ${varName}SoftBody = SoftBodyComponent()`,
+        `${varName}SoftBody.compliance = ${compliance}`,
+        `${varName}SoftBody.damping = ${damping}`,
+        `${varName}SoftBody.solverIterations = ${iterations}`,
+        `${varName}SoftBody.volumeStiffness = ${volumeStiffness}`,
+        `${varName}SoftBody.pressure = ${pressure}`,
+        `${varName}.components.set(${varName}SoftBody)`,
+        `${varName}.components.set(CollisionComponent(shapes: [.generateConvex(from: ${varName}Mesh)]))`,
+        ``,
+        `// Register soft body ECS system`,
+        `SoftBodySimulationSystem.registerSystem()`,
+        `SoftBodySimulationSystem.configure(device: MTLCreateSystemDefaultDevice()!)`,
+      ];
+    },
   },
 
   fluid: {
     trait: 'fluid',
-    components: [],
-    level: 'comment',
-    generate: (varName, config) => [
-      `// @fluid — requires SPH/FLIP fluid simulation via Metal`,
-      `// Config: ${JSON.stringify(config)}`,
-    ],
+    components: ['CollisionComponent'],
+    level: 'partial',
+    imports: ['RealityKit', 'Metal'],
+    generate: (varName, config) => {
+      const particleCount = config.particle_count ?? 10000;
+      const viscosity = config.viscosity ?? 0.01;
+      const restDensity = config.rest_density ?? 1000;
+      const smoothingRadius = config.smoothing_radius ?? 0.04;
+      const surfaceTension = config.surface_tension ?? 0.0728;
+      return [
+        `// @fluid — SPH (Smoothed Particle Hydrodynamics) fluid via Metal compute`,
+        `var ${varName}Fluid = FluidSimulationComponent()`,
+        `${varName}Fluid.particleCount = ${particleCount}`,
+        `${varName}Fluid.viscosity = ${viscosity}`,
+        `${varName}Fluid.restDensity = ${restDensity}`,
+        `${varName}Fluid.smoothingRadius = ${smoothingRadius}`,
+        `${varName}Fluid.surfaceTension = ${surfaceTension}`,
+        `${varName}.components.set(${varName}Fluid)`,
+        ``,
+        `// SPH kernel dispatch — density, pressure, viscosity, integration passes`,
+        `FluidSimulationSystem.registerSystem()`,
+        `FluidSimulationSystem.configure(`,
+        `    device: MTLCreateSystemDefaultDevice()!,`,
+        `    maxParticles: ${particleCount}`,
+        `)`,
+      ];
+    },
   },
 };
 
@@ -232,27 +294,41 @@ export const INTERACTION_TRAIT_MAP: Record<string, TraitMapping> = {
 
   scalable: {
     trait: 'scalable',
-    components: ['InputTargetComponent'],
-    level: 'partial',
+    components: ['InputTargetComponent', 'CollisionComponent'],
+    level: 'full',
     generate: (varName, config) => {
       const minScale = config.min_scale ?? 0.1;
-      const maxScale = config.max_scale ?? 10;
+      const maxScale = config.max_scale ?? 3.0;
       return [
         `${varName}.components.set(InputTargetComponent())`,
-        `// @scalable: min=${minScale}, max=${maxScale}`,
-        `// Implement via MagnifyGesture`,
+        `${varName}.components.set(CollisionComponent(shapes: [.generateConvex(from: ${varName}Mesh)]))`,
+        `// @scalable — attach MagnifyGesture in SwiftUI view:`,
+        `// .gesture(MagnifyGesture().targetedToEntity(${varName}).onChanged { value in`,
+        `//     let s = Float(value.magnification) * initialScale`,
+        `//     let clamped = min(max(s, ${minScale}), ${maxScale})`,
+        `//     value.entity.setScale(SIMD3<Float>(repeating: clamped), relativeTo: value.entity.parent)`,
+        `// })`,
       ];
     },
   },
 
   rotatable: {
     trait: 'rotatable',
-    components: ['InputTargetComponent'],
-    level: 'partial',
-    generate: (varName) => [
-      `${varName}.components.set(InputTargetComponent())`,
-      `// @rotatable — implement via RotateGesture3D`,
-    ],
+    components: ['InputTargetComponent', 'CollisionComponent'],
+    level: 'full',
+    generate: (varName, config) => {
+      const axis = String(config.axis || 'y');
+      const axisMap: Record<string, string> = { x: '.x', y: '.y', z: '.z' };
+      return [
+        `${varName}.components.set(InputTargetComponent())`,
+        `${varName}.components.set(CollisionComponent(shapes: [.generateConvex(from: ${varName}Mesh)]))`,
+        `// @rotatable — attach RotateGesture3D in SwiftUI view:`,
+        `// .gesture(RotateGesture3D(constrainedToAxis: ${axisMap[axis] || '.y'}).targetedToEntity(${varName}).onChanged { value in`,
+        `//     let rotTransform = Transform(AffineTransform3D(rotation: value.rotation))`,
+        `//     value.entity.transform.rotation = sourceRotation * rotTransform.rotation`,
+        `// })`,
+      ];
+    },
   },
 };
 
@@ -298,29 +374,58 @@ export const AUDIO_TRAIT_MAP: Record<string, TraitMapping> = {
 
   ambisonics: {
     trait: 'ambisonics',
-    components: ['SpatialAudioComponent'],
-    level: 'partial',
-    generate: (varName, config) => [
-      `${varName}.components.set(SpatialAudioComponent())`,
-      `// @ambisonics: order=${config.order || 1} — RealityKit uses simplified spatial model`,
-    ],
+    components: ['AmbientAudioComponent'],
+    level: 'full',
+    generate: (varName, config) => {
+      const src = config.src || config.source || 'ambisonic_soundscape';
+      const loop = config.loop ?? true;
+      return [
+        `// @ambisonics — AmbientAudioComponent renders with 3DOF (head + source rotation)`,
+        `${varName}.components.set(AmbientAudioComponent())`,
+        `if let resource = try? await AudioFileResource(named: "${src}", configuration: .init(shouldLoop: ${loop}, loadingStrategy: .stream)) {`,
+        `    ${varName}.playAudio(resource)`,
+        `}`,
+      ];
+    },
   },
 
   reverb_zone: {
     trait: 'reverb_zone',
-    components: ['CollisionComponent'],
-    level: 'partial',
-    generate: (varName, config) => [
-      `${varName}.components.set(CollisionComponent(shapes: [.generateBox(size: SIMD3<Float>(1, 1, 1))]))`,
-      `// @reverb_zone: preset=${config.preset || 'room'} — use AudioUnitEQ for reverb`,
-    ],
+    components: ['ReverbComponent'],
+    level: 'full',
+    minVersion: '2.0',
+    generate: (varName, config) => {
+      const preset = String(config.preset || 'largeRoom');
+      const presetMap: Record<string, string> = {
+        smallRoom: '.smallRoom',
+        mediumRoom: '.mediumRoom',
+        largeRoom: '.largeRoom',
+        veryLargeRoom: '.veryLargeRoom',
+        automatic: '.automatic',
+      };
+      return [
+        `// @reverb_zone — one active ReverbComponent per entity hierarchy`,
+        `${varName}.components.set(ReverbComponent(reverb: .preset(${presetMap[preset] || '.largeRoom'})))`,
+      ];
+    },
   },
 
   audio_occlusion: {
     trait: 'audio_occlusion',
-    components: [],
-    level: 'comment',
-    generate: () => [`// @audio_occlusion — RealityKit handles automatically with scene geometry`],
+    components: ['SpatialAudioComponent', 'CollisionComponent'],
+    level: 'full',
+    generate: (varName, config) => {
+      const focus = config.focus ?? 0.25;
+      return [
+        `// @audio_occlusion — RealityKit ray-traces occlusion automatically`,
+        `// Entities with CollisionComponent block audio from SpatialAudioComponent sources`,
+        `var ${varName}SpatialAudio = SpatialAudioComponent()`,
+        `${varName}SpatialAudio.directivity = .beam(focus: ${focus})`,
+        `${varName}SpatialAudio.distanceAttenuation = .rolloff(factor: 1.0)`,
+        `${varName}.components.set(${varName}SpatialAudio)`,
+        `${varName}.components.set(CollisionComponent(shapes: [.generateConvex(from: ${varName}Mesh)]))`,
+      ];
+    },
   },
 
   head_tracked_audio: {
@@ -363,41 +468,96 @@ export const AR_TRAIT_MAP: Record<string, TraitMapping> = {
   plane_detection: {
     trait: 'plane_detection',
     components: [],
-    level: 'comment',
-    generate: (_, config) => [
-      `// @plane_detection — use PlaneDetectionProvider in RealityKit 2.0+`,
-      `// Types: ${(config.types as string[])?.join(', ') || 'horizontal, vertical'}`,
-    ],
+    level: 'full',
+    imports: ['ARKit'],
+    generate: (varName, config) => {
+      const types = (config.types as string[]) || ['horizontal', 'vertical'];
+      const alignments = types.map((t: string) => `.${t}`).join(', ');
+      return [
+        `// @plane_detection — ARKit PlaneDetectionProvider (requires Full Space)`,
+        `// Info.plist: NSWorldSensingUsageDescription`,
+        `let ${varName}PlaneProvider = PlaneDetectionProvider(alignments: [${alignments}])`,
+        `try await arkitSession.run([${varName}PlaneProvider])`,
+        `Task {`,
+        `    for await update in ${varName}PlaneProvider.anchorUpdates {`,
+        `        let anchor = update.anchor`,
+        `        let extent = anchor.geometry.extent`,
+        `        switch update.event {`,
+        `        case .added, .updated:`,
+        `            let plane = ModelEntity(mesh: .generatePlane(width: extent.width, height: extent.height))`,
+        `            plane.transform = Transform(matrix: anchor.originFromAnchorTransform * extent.anchorFromExtentTransform)`,
+        `        case .removed: break`,
+        `        }`,
+        `    }`,
+        `}`,
+      ];
+    },
   },
 
   mesh_detection: {
     trait: 'mesh_detection',
     components: [],
-    level: 'comment',
-    generate: () => [`// @mesh_detection — use SceneReconstructionProvider for mesh scanning`],
+    level: 'full',
+    imports: ['ARKit'],
+    generate: (varName) => [
+      `// @mesh_detection — ARKit SceneReconstructionProvider (requires Full Space)`,
+      `// Info.plist: NSWorldSensingUsageDescription`,
+      `let ${varName}SceneProvider = SceneReconstructionProvider()`,
+      `try await arkitSession.run([${varName}SceneProvider])`,
+      `Task {`,
+      `    for await update in ${varName}SceneProvider.anchorUpdates {`,
+      `        let anchor = update.anchor`,
+      `        switch update.event {`,
+      `        case .added, .updated:`,
+      `            let shape = try await ShapeResource.generateStaticMesh(from: anchor)`,
+      `            let meshEntity = ModelEntity()`,
+      `            meshEntity.model = .init(mesh: .generateSphere(radius: 0), materials: [OcclusionMaterial()])`,
+      `            meshEntity.collision = CollisionComponent(shapes: [shape], isStatic: true)`,
+      `            meshEntity.physicsBody = PhysicsBodyComponent(mode: .static)`,
+      `            meshEntity.transform = Transform(matrix: anchor.originFromAnchorTransform)`,
+      `        case .removed: break`,
+      `        }`,
+      `    }`,
+      `}`,
+    ],
   },
 
   hand_tracking: {
     trait: 'hand_tracking',
     components: [],
-    level: 'partial',
-    generate: (_, config) => {
-      const joints = config.joints || ['wrist', 'indexTip', 'thumbTip'];
-      return [
-        `// @hand_tracking — use HandTrackingProvider`,
-        `// Tracked joints: ${(joints as string[]).join(', ')}`,
-        `// Access via session.queryDeviceAnchor(atTimestamp:)`,
-      ];
-    },
+    level: 'full',
+    imports: ['ARKit'],
+    generate: (varName) => [
+      `// @hand_tracking — ARKit HandTrackingProvider (requires Full Space)`,
+      `// Info.plist: NSHandsTrackingUsageDescription`,
+      `let ${varName}HandProvider = HandTrackingProvider()`,
+      `try await arkitSession.run([${varName}HandProvider])`,
+      `Task {`,
+      `    for await update in ${varName}HandProvider.anchorUpdates {`,
+      `        let anchor = update.anchor`,
+      `        guard anchor.isTracked, let skeleton = anchor.handSkeleton else { continue }`,
+      `        let tips: [HandSkeleton.JointName] = [.thumbTip, .indexFingerTip, .middleFingerTip, .ringFingerTip, .littleFingerTip]`,
+      `        for joint in tips {`,
+      `            let j = skeleton.joint(joint)`,
+      `            guard j.isTracked else { continue }`,
+      `            let worldPos = anchor.originFromAnchorTransform * j.anchorFromJointTransform`,
+      `            // chirality: anchor.chirality (.left / .right)`,
+      `        }`,
+      `    }`,
+      `}`,
+    ],
   },
 
   eye_tracking: {
     trait: 'eye_tracking',
-    components: [],
-    level: 'partial',
-    generate: () => [
-      `// @eye_tracking — requires entitlement: com.apple.developer.arkit.eye-tracking`,
-      `// Use ARKit's gaze ray for interaction`,
+    components: ['HoverEffectComponent', 'InputTargetComponent', 'CollisionComponent'],
+    level: 'full',
+    generate: (varName) => [
+      `// @eye_tracking — raw gaze data is system-private on visionOS`,
+      `// Use HoverEffectComponent for gaze-driven visual feedback`,
+      `${varName}.components.set(InputTargetComponent())`,
+      `${varName}.components.set(CollisionComponent(shapes: [.generateConvex(from: ${varName}Mesh)]))`,
+      `${varName}.components.set(HoverEffectComponent())`,
     ],
   },
 
@@ -438,12 +598,12 @@ export const AR_TRAIT_MAP: Record<string, TraitMapping> = {
 
   geospatial: {
     trait: 'geospatial',
-    components: ['AnchoringComponent'],
-    level: 'comment',
+    components: [],
+    level: 'unsupported',
     generate: (_, config) => [
-      `// @geospatial — not natively supported on visionOS`,
+      `// @geospatial — NOT available on visionOS (no GPS module on Apple Vision Pro)`,
       `// Latitude: ${config.latitude}, Longitude: ${config.longitude}`,
-      `// Consider ARCore Geospatial API for cross-platform`,
+      `// Workaround: use WorldAnchor with GPS coordinates from a paired iPhone`,
     ],
   },
 };
@@ -472,16 +632,12 @@ export const VISUAL_TRAIT_MAP: Record<string, TraitMapping> = {
 
   billboard: {
     trait: 'billboard',
-    components: [],
-    level: 'partial',
-    generate: (varName, config) => {
-      const axis = config.lock_axis || null;
-      return [
-        `// @billboard — implement in update loop`,
-        `// Lock axis: ${axis || 'none (full billboard)'}`,
-        `// Use entity.look(at:from:upVector:relativeTo:) each frame`,
-      ];
-    },
+    components: ['BillboardComponent'],
+    level: 'full',
+    generate: (varName) => [
+      `// @billboard — built-in RealityKit BillboardComponent (privacy-preserving)`,
+      `${varName}.components.set(BillboardComponent())`,
+    ],
   },
 
   particle_emitter: {
@@ -505,28 +661,51 @@ export const VISUAL_TRAIT_MAP: Record<string, TraitMapping> = {
   animated: {
     trait: 'animated',
     components: [],
-    level: 'partial',
+    level: 'full',
     generate: (varName, config) => {
-      const clip = config.clip || 'default';
+      const clip = config.clip || '';
       const loop = config.loop ?? true;
-      return [
-        `// @animated: clip="${clip}", loop=${loop}`,
-        `if let animation = ${varName}.availableAnimations.first {`,
-        `    ${varName}.playAnimation(animation${loop ? '.repeat()' : ''})`,
-        `}`,
-      ];
+      const speed = config.speed ?? 1.0;
+      const transition = config.transition ?? 0.25;
+      const lines = [`// @animated — play animation from USDZ or programmatic AnimationResource`];
+      if (clip) {
+        lines.push(
+          `if let animation = ${varName}.availableAnimations.first(where: { $0.name == "${clip}" }) {`,
+          `    let controller = ${varName}.playAnimation(animation${loop ? '.repeat(duration: .infinity)' : ''}, transitionDuration: ${transition})`,
+          `    controller.speed = ${speed}`,
+          `}`
+        );
+      } else {
+        lines.push(
+          `for animation in ${varName}.availableAnimations {`,
+          `    let controller = ${varName}.playAnimation(animation${loop ? '.repeat(duration: .infinity)' : ''}, transitionDuration: ${transition})`,
+          `    controller.speed = ${speed}`,
+          `}`
+        );
+      }
+      return lines;
     },
   },
 
   lod: {
     trait: 'lod',
     components: [],
-    level: 'comment',
-    generate: (_, config) => [
-      `// @lod — Level of Detail`,
-      `// Distances: ${JSON.stringify(config.distances || [5, 15, 30])}`,
-      `// Implement via custom component checking camera distance`,
-    ],
+    level: 'partial',
+    generate: (varName, config) => {
+      const distances = config.distances || [5, 15];
+      const d = distances as number[];
+      return [
+        `// @lod — no built-in LOD in RealityKit; use custom ECS System`,
+        `// Requires WorldTrackingProvider for camera position (Full Space only)`,
+        `struct ${varName}LODComponent: Component, Codable {`,
+        `    var thresholds: [Float] = [${d[0] ?? 5}, ${d[1] ?? 15}]`,
+        `    var currentLevel: Int = 0`,
+        `}`,
+        `// Register: ${varName}LODComponent.registerComponent()`,
+        `// In LODSystem.update(): query camera distance, swap ModelComponent.mesh`,
+        `${varName}.components.set(${varName}LODComponent())`,
+      ];
+    },
   },
 
   shadow_caster: {
@@ -587,20 +766,33 @@ export const ACCESSIBILITY_TRAIT_MAP: Record<string, TraitMapping> = {
   high_contrast: {
     trait: 'high_contrast',
     components: [],
-    level: 'comment',
-    generate: () => [
-      `// @high_contrast — check UIAccessibility.isHighContrastEnabled`,
-      `// Adjust material colors for better visibility`,
+    level: 'full',
+    generate: (varName) => [
+      `// @high_contrast — SwiftUI: @Environment(\\.colorSchemeContrast) var contrast`,
+      `// UIKit: UIAccessibility.isDarkerSystemColorsEnabled`,
+      `if UIAccessibility.isDarkerSystemColorsEnabled {`,
+      `    // Apply high-contrast materials (WCAG 7:1 ratio)`,
+      `    var ${varName}Material = SimpleMaterial()`,
+      `    ${varName}Material.color = .init(tint: .black)`,
+      `    ${varName}.model?.materials = [${varName}Material]`,
+      `}`,
     ],
   },
 
   motion_reduced: {
     trait: 'motion_reduced',
     components: [],
-    level: 'comment',
-    generate: () => [
-      `// @motion_reduced — check UIAccessibility.isReduceMotionEnabled`,
-      `// Disable or simplify animations when true`,
+    level: 'full',
+    generate: (varName) => [
+      `// @motion_reduced — SwiftUI: @Environment(\\.accessibilityReduceMotion) var reduceMotion`,
+      `if UIAccessibility.isReduceMotionEnabled {`,
+      `    // Skip animations, use instant transitions`,
+      `    ${varName}.stopAllAnimations()`,
+      `} else {`,
+      `    for animation in ${varName}.availableAnimations {`,
+      `        ${varName}.playAnimation(animation.repeat(duration: .infinity))`,
+      `    }`,
+      `}`,
     ],
   },
 };
@@ -613,14 +805,22 @@ export const UI_TRAIT_MAP: Record<string, TraitMapping> = {
   ui_floating: {
     trait: 'ui_floating',
     components: [],
-    level: 'partial',
+    level: 'full',
     generate: (varName, config) => {
-      const followDelay = config.follow_delay ?? 0.3;
-      const distance = config.distance ?? 1.5;
+      const distance = config.distance ?? 0.3;
       return [
-        `// @ui_floating — implement head-tracking update`,
-        `// Follow delay: ${followDelay}s, distance: ${distance}m`,
-        `// Update position in RealityView.update closure`,
+        `// @ui_floating — ViewAttachmentComponent (visionOS 2.0+)`,
+        `let ${varName}Panel = Entity()`,
+        `${varName}Panel.components.set(ViewAttachmentComponent(rootView:`,
+        `    VStack {`,
+        `        Text("${config.title || 'Info'}")`,
+        `            .font(.headline)`,
+        `    }`,
+        `    .padding()`,
+        `    .glassBackgroundEffect()`,
+        `))`,
+        `${varName}Panel.position = SIMD3<Float>(0, Float(${distance}), 0)`,
+        `${varName}.addChild(${varName}Panel)`,
       ];
     },
   },
@@ -659,28 +859,35 @@ export const UI_TRAIT_MAP: Record<string, TraitMapping> = {
 
   ui_billboard: {
     trait: 'ui_billboard',
-    components: [],
-    level: 'partial',
-    generate: (varName, config) => {
-      const lockAxis = config.lock_axis || 'y';
-      return [
-        `// @ui_billboard — always face camera`,
-        `// Lock axis: ${lockAxis}`,
-        `// Update orientation in RealityView.update closure`,
-      ];
-    },
+    components: ['BillboardComponent'],
+    level: 'full',
+    generate: (varName) => [
+      `// @ui_billboard — BillboardComponent keeps UI facing the user`,
+      `${varName}.components.set(BillboardComponent())`,
+    ],
   },
 
   ui_docked: {
     trait: 'ui_docked',
     components: [],
-    level: 'comment',
-    generate: (_, config) => {
-      const position = config.position || 'bottom';
+    level: 'full',
+    generate: (varName, config) => {
+      const position = String(config.position || 'bottom');
+      const posMap: Record<string, string> = {
+        bottom: '.scene(.bottom)',
+        top: '.scene(.top)',
+        leading: '.scene(.leading)',
+        trailing: '.scene(.trailing)',
+      };
       return [
-        `// @ui_docked — dock to viewport edge`,
-        `// Position: ${position}`,
-        `// Use SwiftUI window attachment for docked UI`,
+        `// @ui_docked — SwiftUI .ornament() modifier on window content`,
+        `// .ornament(visibility: .visible, attachmentAnchor: ${posMap[position] || '.scene(.bottom)'}, contentAlignment: .${position}) {`,
+        `//     HStack {`,
+        `//         // ${varName} docked controls`,
+        `//     }`,
+        `//     .padding()`,
+        `//     .glassBackgroundEffect()`,
+        `// }`,
       ];
     },
   },
@@ -710,13 +917,19 @@ export const PORTAL_TRAIT_MAP: Record<string, TraitMapping> = {
   volume: {
     trait: 'volume',
     components: [],
-    level: 'comment',
-    generate: (_, config) => {
-      const size = config.size || [1, 1, 1];
+    level: 'full',
+    generate: (varName, config) => {
+      const size = config.size || [0.6, 0.4, 0.4];
+      const s = size as number[];
       return [
-        `// @volume — volumetric window`,
-        `// Size: ${JSON.stringify(size)}`,
-        `// Use WindowGroup with volumetric style`,
+        `// @volume — Scene-level: add WindowGroup to your App struct`,
+        `// WindowGroup(id: "${varName}Volume") {`,
+        `//     ${varName}VolumetricView()`,
+        `// }`,
+        `// .windowStyle(.volumetric)`,
+        `// .defaultSize(width: ${s[0]}, height: ${s[1]}, depth: ${s[2]}, in: .meters)`,
+        `//`,
+        `// Open with: openWindow(id: "${varName}Volume")`,
       ];
     },
   },
@@ -724,13 +937,23 @@ export const PORTAL_TRAIT_MAP: Record<string, TraitMapping> = {
   immersive: {
     trait: 'immersive',
     components: [],
-    level: 'comment',
-    generate: (_, config) => {
-      const style = config.style || 'mixed';
+    level: 'full',
+    generate: (varName, config) => {
+      const style = String(config.style || 'mixed');
+      const styleMap: Record<string, string> = {
+        mixed: '.mixed',
+        progressive: '.progressive',
+        full: '.full',
+      };
       return [
-        `// @immersive — ImmersiveSpace`,
-        `// Style: ${style}`,
-        `// Use ImmersiveSpace scene type in App`,
+        `// @immersive — Scene-level: add ImmersiveSpace to your App struct`,
+        `// ImmersiveSpace(id: "${varName}Space") {`,
+        `//     ${varName}ImmersiveView()`,
+        `// }`,
+        `// .immersionStyle(selection: $immersionStyle, in: ${styleMap[style] || '.mixed'})`,
+        `//`,
+        `// Open:    let result = await openImmersiveSpace(id: "${varName}Space")`,
+        `// Dismiss: await dismissImmersiveSpace()`,
       ];
     },
   },

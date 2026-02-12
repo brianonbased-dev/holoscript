@@ -562,9 +562,10 @@ export class GLTFPipeline {
     const scale = this.extractVec3Prop(object, 'scale', [1, 1, 1]);
 
     // Determine geometry type from properties
-    const geometryProp = this.findProp(object, 'geometry')
-      || this.findProp(object, 'mesh')
-      || this.findProp(object, 'type');
+    const geometryProp =
+      this.findProp(object, 'geometry') ||
+      this.findProp(object, 'mesh') ||
+      this.findProp(object, 'type');
     const shapeType = (typeof geometryProp === 'string' ? geometryProp : 'box').toLowerCase();
 
     // Create mesh if geometry type is recognized
@@ -625,10 +626,15 @@ export class GLTFPipeline {
     }
 
     // Extract position from properties array
-    const posProp = (group.properties || []).find(p => p.key === 'position');
-    const position = posProp && Array.isArray(posProp.value)
-      ? [Number(posProp.value[0]) || 0, Number(posProp.value[1]) || 0, Number(posProp.value[2]) || 0] as [number, number, number]
-      : [0, 0, 0] as [number, number, number];
+    const posProp = (group.properties || []).find((p) => p.key === 'position');
+    const position =
+      posProp && Array.isArray(posProp.value)
+        ? ([
+            Number(posProp.value[0]) || 0,
+            Number(posProp.value[1]) || 0,
+            Number(posProp.value[2]) || 0,
+          ] as [number, number, number])
+        : ([0, 0, 0] as [number, number, number]);
 
     const node: GLTFNode = {
       name: group.name || `group_${this.nodes.length}`,
@@ -655,11 +661,15 @@ export class GLTFPipeline {
 
     // Group animate actions by target
     const animateEntries = timeline.entries
-      .filter(e => e.action.kind === 'animate')
-      .map(e => ({
+      .filter((e) => e.action.kind === 'animate')
+      .map((e) => ({
         time: e.time,
-        target: (e.action as { kind: 'animate'; target: string; properties: Record<string, HoloValue> }).target,
-        properties: (e.action as { kind: 'animate'; target: string; properties: Record<string, HoloValue> }).properties,
+        target: (
+          e.action as { kind: 'animate'; target: string; properties: Record<string, HoloValue> }
+        ).target,
+        properties: (
+          e.action as { kind: 'animate'; target: string; properties: Record<string, HoloValue> }
+        ).properties,
       }));
 
     if (animateEntries.length === 0) return;
@@ -670,7 +680,7 @@ export class GLTFPipeline {
     // Group by target node + property
     const grouped = new Map<string, Array<{ time: number; value: HoloValue }>>();
     for (const entry of animateEntries) {
-      const targetNodeIndex = this.nodes.findIndex(n => n.name === entry.target);
+      const targetNodeIndex = this.nodes.findIndex((n) => n.name === entry.target);
       if (targetNodeIndex === -1) continue;
 
       for (const [prop, value] of Object.entries(entry.properties)) {
@@ -688,7 +698,7 @@ export class GLTFPipeline {
       const nodeIdx = parseInt(nodeIdxStr, 10);
 
       // Input: time values in seconds
-      const times = keyframes.map(kf => kf.time / 1000);
+      const times = keyframes.map((kf) => kf.time / 1000);
       const inputAccessor = this.createAccessor(new Float32Array(times), 'SCALAR');
 
       // Output: property values
@@ -729,7 +739,7 @@ export class GLTFPipeline {
     name: string,
     shapeType: string,
     scale: [number, number, number],
-    object: HoloObjectDecl,
+    object: HoloObjectDecl
   ): number {
     const generator = PRIMITIVE_GENERATORS[shapeType];
     if (!generator) return -1;
@@ -905,7 +915,8 @@ export class GLTFPipeline {
     this.bufferViews.push(bufferView);
 
     // Calculate count
-    const componentsPerElement = type === 'SCALAR' ? 1 : type === 'VEC2' ? 2 : type === 'VEC3' ? 3 : 4;
+    const componentsPerElement =
+      type === 'SCALAR' ? 1 : type === 'VEC2' ? 2 : type === 'VEC3' ? 3 : 4;
     const count = data.length / componentsPerElement;
 
     // Create accessor
@@ -1044,14 +1055,12 @@ export class GLTFPipeline {
    */
   private processLight(light: HoloLight): number {
     const props = light.properties || [];
-    const findLightProp = (key: string) => props.find(p => p.key === key)?.value;
+    const findLightProp = (key: string) => props.find((p) => p.key === key)?.value;
 
     const position = findLightProp('position') as number[] | undefined;
     const node: GLTFNode = {
       name: light.name || `light_${this.nodes.length}`,
-      translation: position
-        ? [position[0], position[1], position[2]]
-        : [0, 0, 0],
+      translation: position ? [position[0], position[1], position[2]] : [0, 0, 0],
       extras: {
         type: 'light',
         lightType: light.lightType,
@@ -1071,14 +1080,12 @@ export class GLTFPipeline {
    */
   private processCamera(camera: HoloCamera): number {
     const props = camera.properties || [];
-    const findCamProp = (key: string) => props.find(p => p.key === key)?.value;
+    const findCamProp = (key: string) => props.find((p) => p.key === key)?.value;
 
     const position = findCamProp('position') as number[] | undefined;
     const node: GLTFNode = {
       name: 'Camera',
-      translation: position
-        ? [position[0], position[1], position[2]]
-        : [0, 0, 0],
+      translation: position ? [position[0], position[1], position[2]] : [0, 0, 0],
       extras: {
         type: 'camera',
         cameraType: camera.cameraType,
@@ -1100,14 +1107,14 @@ export class GLTFPipeline {
 
   /** Find a property by key in a HoloObjectDecl's property array. */
   private findProp(object: HoloObjectDecl, key: string): HoloValue | undefined {
-    return object.properties?.find(p => p.key === key)?.value;
+    return object.properties?.find((p) => p.key === key)?.value;
   }
 
   /** Extract a vec3 from an object's properties array. */
   private extractVec3Prop(
     object: HoloObjectDecl,
     key: string,
-    defaultValue: [number, number, number],
+    defaultValue: [number, number, number]
   ): [number, number, number] {
     const val = this.findProp(object, key);
     if (Array.isArray(val) && val.length >= 3) {
@@ -1127,9 +1134,15 @@ export class GLTFPipeline {
       }
     }
     const colors: Record<string, [number, number, number]> = {
-      red: [1, 0, 0], green: [0, 1, 0], blue: [0, 0, 1],
-      white: [1, 1, 1], black: [0, 0, 0], yellow: [1, 1, 0],
-      cyan: [0, 1, 1], magenta: [1, 0, 1], orange: [1, 0.5, 0],
+      red: [1, 0, 0],
+      green: [0, 1, 0],
+      blue: [0, 0, 1],
+      white: [1, 1, 1],
+      black: [0, 0, 0],
+      yellow: [1, 1, 0],
+      cyan: [0, 1, 1],
+      magenta: [1, 0, 1],
+      orange: [1, 0.5, 0],
       purple: [0.5, 0, 0.5],
     };
     return colors[color.toLowerCase()] || [1, 1, 1];

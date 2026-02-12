@@ -35,14 +35,14 @@ export type NegotiationStatus =
  * Voting mechanism type
  */
 export type VotingMechanism =
-  | 'majority'      // Simple majority wins
+  | 'majority' // Simple majority wins
   | 'supermajority' // 2/3 majority required
-  | 'weighted'      // Weight by trust level
-  | 'consensus'     // All must agree
-  | 'ranked'        // Ranked choice / instant runoff
-  | 'approval'      // Multiple approval voting
-  | 'borda'         // Borda count
-  | 'custom';       // Custom mechanism
+  | 'weighted' // Weight by trust level
+  | 'consensus' // All must agree
+  | 'ranked' // Ranked choice / instant runoff
+  | 'approval' // Multiple approval voting
+  | 'borda' // Borda count
+  | 'custom'; // Custom mechanism
 
 /**
  * Proposal status
@@ -265,7 +265,7 @@ export interface NegotiationConfig {
 export const DEFAULT_NEGOTIATION_CONFIG: NegotiationConfig = {
   mechanism: 'majority',
   proposalDeadline: 30000, // 30s
-  votingDeadline: 30000,   // 30s
+  votingDeadline: 30000, // 30s
   maxRounds: 3,
   tieBreaker: 'priority',
   quorum: 0.5,

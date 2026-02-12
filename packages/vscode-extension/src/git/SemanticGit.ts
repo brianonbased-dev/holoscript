@@ -55,7 +55,7 @@ interface ASTNode {
 
 /**
  * SemanticGit - Git integration with semantic diff awareness for HoloScript
- * 
+ *
  * Provides scene-aware diff, merge, and version control utilities
  * that understand HoloScript structure rather than raw text.
  */
@@ -66,17 +66,11 @@ export class SemanticGit {
   private statusBarItem: vscode.StatusBarItem;
   private diffCache: Map<string, SemanticDiffResult> = new Map();
 
-  constructor(
-    workspaceRoot: string,
-    config: Partial<GitIntegrationConfig> = {}
-  ) {
+  constructor(workspaceRoot: string, config: Partial<GitIntegrationConfig> = {}) {
     this.config = { ...DEFAULT_GIT_CONFIG, ...config };
     this.workspaceRoot = workspaceRoot;
     this.outputChannel = vscode.window.createOutputChannel('HoloScript Git');
-    this.statusBarItem = vscode.window.createStatusBarItem(
-      vscode.StatusBarAlignment.Left,
-      100
-    );
+    this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   }
 
   /**
@@ -86,10 +80,10 @@ export class SemanticGit {
     try {
       // Check if git is available
       await this.execGit('--version');
-      
+
       // Check if we're in a git repo
       await this.execGit('rev-parse', '--git-dir');
-      
+
       this.log('Git integration initialized');
     } catch (error) {
       this.log(`Git not available or not in a git repository: ${error}`);
@@ -114,7 +108,7 @@ export class SemanticGit {
     const ast2 = await this.parseHoloScript(content2);
 
     const diff = await this.diffASTs(ast1, ast2);
-    
+
     return this.convertToSceneDiff(diff, ast1, ast2);
   }
 
@@ -135,15 +129,12 @@ export class SemanticGit {
   /**
    * Get visual diff representation for preview
    */
-  async getVisualDiff(
-    filePath: string,
-    revision: string = 'HEAD'
-  ): Promise<DiffVisualization> {
+  async getVisualDiff(filePath: string, revision: string = 'HEAD'): Promise<DiffVisualization> {
     const sceneDiff = await this.getSemanticDiff(filePath, revision);
-    
+
     const beforeScene = await this.getSceneNodes(filePath, revision);
     const afterScene = await this.getSceneNodes(filePath);
-    
+
     const highlights = this.createHighlights(sceneDiff);
     const summary = this.formatSummary(sceneDiff);
     const changeList = this.createChangeList(sceneDiff);
@@ -162,11 +153,11 @@ export class SemanticGit {
    */
   async getFileStatus(filePath: string): Promise<HoloScriptGitStatus> {
     const relativePath = this.getRelativePath(filePath);
-    
+
     try {
       const statusOutput = await this.execGit('status', '--porcelain', '--', relativePath);
       const status = this.parseGitStatus(statusOutput, relativePath);
-      
+
       if (status.status === 'modified' && this.config.enableSemanticDiff) {
         const diff = await this.getUnstagedDiff(filePath);
         status.diffSummary = {
@@ -256,7 +247,7 @@ export class SemanticGit {
 
     const result = await this.execGit('commit', '-m', finalMessage);
     const sha = await this.execGit('rev-parse', 'HEAD');
-    
+
     this.log(`Committed: ${sha.trim()}`);
     return sha.trim();
   }
@@ -271,7 +262,7 @@ export class SemanticGit {
     for (const file of stagedFiles) {
       const diff = await this.getStagedDiff(file);
       const relativePath = this.getRelativePath(file);
-      
+
       const changes: string[] = [];
       if (diff.added.length > 0) {
         changes.push(`+${diff.added.length} object${diff.added.length !== 1 ? 's' : ''}`);
@@ -323,7 +314,7 @@ export class SemanticGit {
    */
   async show3DDiffPreview(filePath: string, revision: string = 'HEAD'): Promise<void> {
     const visual = await this.getVisualDiff(filePath, revision);
-    
+
     const panel = vscode.window.createWebviewPanel(
       'holoscript3DDiff',
       `3D Diff: ${this.getRelativePath(filePath)}`,
@@ -340,7 +331,10 @@ export class SemanticGit {
   /**
    * Blame a specific line
    */
-  async blameLine(filePath: string, line: number): Promise<{
+  async blameLine(
+    filePath: string,
+    line: number
+  ): Promise<{
     commit: string;
     author: string;
     date: string;
@@ -350,7 +344,8 @@ export class SemanticGit {
       const relativePath = this.getRelativePath(filePath);
       const output = await this.execGit(
         'blame',
-        '-L', `${line},${line}`,
+        '-L',
+        `${line},${line}`,
         '--line-porcelain',
         '--',
         relativePath
@@ -358,10 +353,10 @@ export class SemanticGit {
 
       const lines = output.split('\n');
       const commit = lines[0]?.split(' ')[0] || '';
-      
+
       let author = '';
       let date = '';
-      
+
       for (const line of lines) {
         if (line.startsWith('author ')) {
           author = line.slice(7);
@@ -381,12 +376,17 @@ export class SemanticGit {
   /**
    * Get file history
    */
-  async getFileHistory(filePath: string, limit: number = 50): Promise<{
-    sha: string;
-    message: string;
-    author: string;
-    date: string;
-  }[]> {
+  async getFileHistory(
+    filePath: string,
+    limit: number = 50
+  ): Promise<
+    {
+      sha: string;
+      message: string;
+      author: string;
+      date: string;
+    }[]
+  > {
     const relativePath = this.getRelativePath(filePath);
     const output = await this.execGit(
       'log',
@@ -432,13 +432,11 @@ export class SemanticGit {
   }
 
   private async getCurrentContent(filePath: string): Promise<string> {
-    const doc = vscode.workspace.textDocuments.find(
-      (d) => d.uri.fsPath === filePath
-    );
+    const doc = vscode.workspace.textDocuments.find((d) => d.uri.fsPath === filePath);
     if (doc) {
       return doc.getText();
     }
-    
+
     const uri = vscode.Uri.file(filePath);
     const bytes = await vscode.workspace.fs.readFile(uri);
     return Buffer.from(bytes).toString('utf-8');
@@ -465,14 +463,14 @@ export class SemanticGit {
     // Real implementation would use full parser
     const nodes: ASTNode[] = [];
     const objectRegex = /(\w+)\s+(\w+)\s*(?:@\s*\(([^)]*)\))?\s*{([^}]*)}/g;
-    
+
     let match;
     let line = 1;
-    
+
     while ((match = objectRegex.exec(content)) !== null) {
       const [, type, name, position, body] = match;
       line = content.slice(0, match.index).split('\n').length;
-      
+
       nodes.push({
         type,
         name,
@@ -481,7 +479,7 @@ export class SemanticGit {
         properties: this.parseProperties(body),
       });
     }
-    
+
     return nodes;
   }
 
@@ -493,13 +491,13 @@ export class SemanticGit {
   private parseProperties(body: string): Record<string, unknown> {
     const props: Record<string, unknown> = {};
     const propRegex = /(\w+)\s*[:=]\s*(.+?)(?:;|$)/g;
-    
+
     let match;
     while ((match = propRegex.exec(body)) !== null) {
       const [, key, value] = match;
       props[key] = value.trim();
     }
-    
+
     return props;
   }
 
@@ -507,13 +505,13 @@ export class SemanticGit {
     // Use core SemanticDiff engine
     // For now, implement basic diff logic
     const changes: DiffChange[] = [];
-    
+
     const nodes1 = ast1.children || [];
     const nodes2 = ast2.children || [];
-    
+
     const names1 = new Set(nodes1.map((n) => n.name));
     const names2 = new Set(nodes2.map((n) => n.name));
-    
+
     // Added
     for (const node of nodes2) {
       if (node.name && !names1.has(node.name)) {
@@ -526,7 +524,7 @@ export class SemanticGit {
         });
       }
     }
-    
+
     // Removed
     for (const node of nodes1) {
       if (node.name && !names2.has(node.name)) {
@@ -539,7 +537,7 @@ export class SemanticGit {
         });
       }
     }
-    
+
     // Modified
     for (const node1 of nodes1) {
       if (!node1.name) continue;
@@ -559,7 +557,7 @@ export class SemanticGit {
         }
       }
     }
-    
+
     return {
       equivalent: changes.length === 0,
       changeCount: changes.length,
@@ -570,15 +568,15 @@ export class SemanticGit {
 
   private compareNodeProperties(node1: ASTNode, node2: ASTNode): PropertyChange[] {
     const changes: PropertyChange[] = [];
-    const props1 = node1.properties as Record<string, unknown> || {};
-    const props2 = node2.properties as Record<string, unknown> || {};
-    
+    const props1 = (node1.properties as Record<string, unknown>) || {};
+    const props2 = (node2.properties as Record<string, unknown>) || {};
+
     const allKeys = new Set([...Object.keys(props1), ...Object.keys(props2)]);
-    
+
     for (const key of allKeys) {
       const val1 = props1[key];
       const val2 = props2[key];
-      
+
       if (JSON.stringify(val1) !== JSON.stringify(val2)) {
         changes.push({
           path: key,
@@ -588,7 +586,7 @@ export class SemanticGit {
         });
       }
     }
-    
+
     // Check position
     if (JSON.stringify(node1.position) !== JSON.stringify(node2.position)) {
       changes.push({
@@ -598,7 +596,7 @@ export class SemanticGit {
         significant: true,
       });
     }
-    
+
     return changes;
   }
 
@@ -611,19 +609,15 @@ export class SemanticGit {
       moved: 0,
       unchanged: 0,
     };
-    
+
     for (const change of changes) {
       summary[change.type]++;
     }
-    
+
     return summary;
   }
 
-  private convertToSceneDiff(
-    result: SemanticDiffResult,
-    ast1: ASTNode,
-    ast2: ASTNode
-  ): SceneDiff {
+  private convertToSceneDiff(result: SemanticDiffResult, ast1: ASTNode, ast2: ASTNode): SceneDiff {
     const added: SceneNode[] = [];
     const removed: SceneNode[] = [];
     const modified: SceneDiff['modified'] = [];
@@ -690,7 +684,11 @@ export class SemanticGit {
     };
   }
 
-  private extractTransform(ast: ASTNode): { position: [number, number, number]; rotation: [number, number, number]; scale: [number, number, number] } {
+  private extractTransform(ast: ASTNode): {
+    position: [number, number, number];
+    rotation: [number, number, number];
+    scale: [number, number, number];
+  } {
     const pos = (ast.position as [number, number, number]) || [0, 0, 0];
     return {
       position: pos,
@@ -703,7 +701,7 @@ export class SemanticGit {
     const content = revision
       ? await this.getFileAtRevision(filePath, revision)
       : await this.getCurrentContent(filePath);
-    
+
     const ast = await this.parseHoloScript(content);
     return (ast.children || []).map((n) => this.astToSceneNode(n));
   }
@@ -756,13 +754,13 @@ export class SemanticGit {
 
   private formatSummary(diff: SceneDiff): string {
     const parts: string[] = [];
-    
+
     if (diff.added.length > 0) parts.push(`+${diff.added.length} added`);
     if (diff.removed.length > 0) parts.push(`-${diff.removed.length} removed`);
     if (diff.modified.length > 0) parts.push(`~${diff.modified.length} modified`);
     if (diff.moved.length > 0) parts.push(`→${diff.moved.length} moved`);
     if (diff.renamed.length > 0) parts.push(`⟳${diff.renamed.length} renamed`);
-    
+
     return parts.join(', ') || 'No changes';
   }
 
@@ -801,7 +799,7 @@ export class SemanticGit {
 
   private parseGitStatus(output: string, relativePath: string): HoloScriptGitStatus {
     const line = output.split('\n').find((l) => l.includes(relativePath));
-    
+
     if (!line) {
       return {
         filePath: relativePath,
@@ -813,7 +811,7 @@ export class SemanticGit {
 
     const indexStatus = line[0];
     const workingStatus = line[1];
-    
+
     let status: HoloScriptGitStatus['status'] = 'untracked';
     let staged = false;
     let hasConflicts = false;

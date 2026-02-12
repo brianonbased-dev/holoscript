@@ -70,7 +70,17 @@ export function createDefaultPolicy(): SecurityPolicy {
       enabled: true,
       memoryLimit: 256,
       cpuTimeLimit: 30,
-      syscallAllowlist: ['read', 'write', 'open', 'close', 'stat', 'fstat', 'mmap', 'mprotect', 'brk'],
+      syscallAllowlist: [
+        'read',
+        'write',
+        'open',
+        'close',
+        'stat',
+        'fstat',
+        'mmap',
+        'mprotect',
+        'brk',
+      ],
       fileSystemAccess: 'workspace',
     },
     network: {
@@ -147,5 +157,5 @@ export function mergePolicy(
  * Recursive partial type for deep overrides.
  */
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+  [P in keyof T]?: T[P] extends Array<any> ? T[P] : T[P] extends object ? DeepPartial<T[P]> : T[P];
 };

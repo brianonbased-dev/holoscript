@@ -441,9 +441,7 @@ describe('GLTFExporter Texture Export', () => {
     const result = await exporter.export(sg);
 
     expect(result.document.materials![0].pbrMetallicRoughness?.baseColorTexture).toBeDefined();
-    expect(
-      result.document.materials![0].pbrMetallicRoughness?.baseColorTexture?.index
-    ).toBe(0);
+    expect(result.document.materials![0].pbrMetallicRoughness?.baseColorTexture?.index).toBe(0);
   });
 });
 
@@ -657,7 +655,9 @@ describe('GLTFExporter Animation Export', () => {
 
     // Add to existing buffers
     const existingLength = sg.buffers[0].byteLength;
-    const newBuffer = new ArrayBuffer(existingLength + timeBuffer.byteLength + valueBuffer.byteLength);
+    const newBuffer = new ArrayBuffer(
+      existingLength + timeBuffer.byteLength + valueBuffer.byteLength
+    );
     const newView = new Uint8Array(newBuffer);
     newView.set(new Uint8Array(sg.buffers[0].data!), 0);
     newView.set(new Uint8Array(timeBuffer), existingLength);
@@ -872,10 +872,7 @@ describe('GLTFExporter Statistics', () => {
   it('reports accurate material count', async () => {
     const exporter = new GLTFExporter();
     const sg = createTestSceneGraph();
-    sg.materials = [
-      createTestMaterial('m1', 'Mat1'),
-      createTestMaterial('m2', 'Mat2'),
-    ];
+    sg.materials = [createTestMaterial('m1', 'Mat1'), createTestMaterial('m2', 'Mat2')];
 
     const result = await exporter.export(sg);
 
@@ -1061,7 +1058,9 @@ describe('GLTFExporter Edge Cases', () => {
     const result = await exporter.export(sg);
 
     expect(result.document.materials![0].pbrMetallicRoughness?.baseColorTexture).toBeDefined();
-    expect(result.document.materials![0].pbrMetallicRoughness?.metallicRoughnessTexture).toBeDefined();
+    expect(
+      result.document.materials![0].pbrMetallicRoughness?.metallicRoughnessTexture
+    ).toBeDefined();
     expect(result.document.materials![0].normalTexture).toBeDefined();
     expect(result.document.materials![0].occlusionTexture).toBeDefined();
     expect(result.document.materials![0].emissiveTexture).toBeDefined();

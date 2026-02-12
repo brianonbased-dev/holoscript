@@ -8,15 +8,15 @@ This guide covers upgrading from HoloScript v3.4.x to v3.2.0 (Autonomous Agent S
 
 HoloScript v3.2.0 introduces the **Swarm Module** - a comprehensive system for coordinating autonomous agent collectives. This is an additive release with no breaking changes to existing v3.4.x APIs.
 
-| Category | v3.4.x | v3.2.0 |
-|----------|--------|--------|
-| Agent coordination | Manual | Swarm-based |
-| Optimization | N/A | PSO/ACO algorithms |
-| Leader election | N/A | Raft-inspired protocol |
-| Collective decisions | N/A | Multi-agent synthesis |
-| Spatial behaviors | N/A | Flocking, formations, zones |
-| Messaging | Basic events | Priority pub/sub, gossip |
-| Analytics | Basic logging | Prometheus-ready metrics |
+| Category             | v3.4.x        | v3.2.0                      |
+| -------------------- | ------------- | --------------------------- |
+| Agent coordination   | Manual        | Swarm-based                 |
+| Optimization         | N/A           | PSO/ACO algorithms          |
+| Leader election      | N/A           | Raft-inspired protocol      |
+| Collective decisions | N/A           | Multi-agent synthesis       |
+| Spatial behaviors    | N/A           | Flocking, formations, zones |
+| Messaging            | Basic events  | Priority pub/sub, gossip    |
+| Analytics            | Basic logging | Prometheus-ready metrics    |
 
 ---
 
@@ -51,12 +51,12 @@ const manager = new SwarmManager();
 const swarm = await manager.createSwarm({
   name: 'TaskProcessors',
   objective: 'Handle incoming tasks',
-  minMembers: 3
+  minMembers: 3,
 });
 
 // Optimize task assignment
 const result = await coordinator.optimize(agents, tasks, {
-  fitnessFunction: (assignment) => calculateEfficiency(assignment)
+  fitnessFunction: (assignment) => calculateEfficiency(assignment),
 });
 ```
 
@@ -68,7 +68,7 @@ import { LeaderElection } from '@holoscript/core/swarm';
 
 const election = new LeaderElection('agent-1', {
   heartbeatInterval: 150,
-  electionTimeout: { min: 300, max: 500 }
+  electionTimeout: { min: 300, max: 500 },
 });
 
 election.addPeer('agent-2');
@@ -98,7 +98,7 @@ const session = await collective.createSession(
 await collective.contribute(session.id, 'agent-1', {
   type: 'evidence',
   content: 'Found potential XSS vulnerability',
-  confidence: 0.9
+  confidence: 0.9,
 });
 
 const result = await collective.synthesize(session.id);
@@ -117,7 +117,7 @@ const flocking = new FlockingBehavior({
   separationWeight: 1.5,
   alignmentWeight: 1.0,
   cohesionWeight: 1.0,
-  maxSpeed: 5.0
+  maxSpeed: 5.0,
 });
 
 // Each frame
@@ -144,7 +144,7 @@ import { ZoneClaiming } from '@holoscript/core/swarm/spatial';
 const zones = new ZoneClaiming();
 await zones.claim('agent-1', {
   id: 'sector-a',
-  bounds: { min: { x: 0, y: 0, z: 0 }, max: { x: 100, y: 100, z: 100 } }
+  bounds: { min: { x: 0, y: 0, z: 0 }, max: { x: 100, y: 100, z: 100 } },
 });
 ```
 
@@ -165,7 +165,7 @@ await bus.publish({
   type: 'swarm.alert',
   source: 'monitor',
   payload: { level: 'warning' },
-  priority: 'critical'  // Processed before normal messages
+  priority: 'critical', // Processed before normal messages
 });
 ```
 
@@ -178,7 +178,7 @@ import { GossipProtocol } from '@holoscript/core/swarm/messaging';
 
 const gossip = new GossipProtocol('node-id', {
   fanout: 3,
-  maxHops: 10
+  maxHops: 10,
 });
 
 gossip.addPeer('peer-1', 'ws://peer1:8080');
@@ -283,13 +283,13 @@ npm test
 
 Look for patterns that could benefit from swarms:
 
-| v3.4.x Pattern | v3.2.0 Replacement |
-|----------------|-------------------|
-| Manual agent loops | `SwarmCoordinator.optimize()` |
-| Hardcoded leader | `LeaderElection` |
-| Sequential decisions | `CollectiveIntelligence` |
-| Individual messaging | `SwarmEventBus` |
-| Custom metrics | `SwarmMetrics` |
+| v3.4.x Pattern       | v3.2.0 Replacement            |
+| -------------------- | ----------------------------- |
+| Manual agent loops   | `SwarmCoordinator.optimize()` |
+| Hardcoded leader     | `LeaderElection`              |
+| Sequential decisions | `CollectiveIntelligence`      |
+| Individual messaging | `SwarmEventBus`               |
+| Custom metrics       | `SwarmMetrics`                |
 
 ### Step 4: Migrate Incrementally
 
@@ -300,9 +300,7 @@ Start with one subsystem:
 function assignTasks(agents, tasks) {
   const assignments = [];
   for (const task of tasks) {
-    const best = agents.reduce((a, b) => 
-      a.load < b.load ? a : b
-    );
+    const best = agents.reduce((a, b) => (a.load < b.load ? a : b));
     assignments.push({ task, agent: best });
     best.load += task.cost;
   }
@@ -314,16 +312,15 @@ async function assignTasks(agents, tasks) {
   const coordinator = new SwarmCoordinator();
   const result = await coordinator.optimize(agents, tasks, {
     fitnessFunction: (assignment) => {
-      const loads = assignment.map((_, i) => 
-        tasks.filter((_, j) => assignment[j] === i)
-          .reduce((sum, t) => sum + t.cost, 0)
+      const loads = assignment.map((_, i) =>
+        tasks.filter((_, j) => assignment[j] === i).reduce((sum, t) => sum + t.cost, 0)
       );
-      return 1 - standardDeviation(loads);  // Minimize load variance
-    }
+      return 1 - standardDeviation(loads); // Minimize load variance
+    },
   });
   return result.bestSolution.map((agentIdx, taskIdx) => ({
     task: tasks[taskIdx],
-    agent: agents[agentIdx]
+    agent: agents[agentIdx],
   }));
 }
 ```
@@ -348,7 +345,7 @@ app.get('/health', (req, res) => {
   const health = inspector.getOverallHealth();
   res.status(health === 'healthy' ? 200 : 503).json({
     status: health,
-    checks: inspector.getAllHealthChecks()
+    checks: inspector.getAllHealthChecks(),
   });
 });
 ```
@@ -388,6 +385,7 @@ app.get('/health', (req, res) => {
 ### v3.2.0 (June 2026)
 
 **Added:**
+
 - SwarmCoordinator with PSO/ACO optimization
 - LeaderElection (Raft-inspired)
 - CollectiveIntelligence with contribution synthesis
@@ -404,16 +402,21 @@ app.get('/health', (req, res) => {
 - SwarmInspector (debugging tools)
 
 **Changed:**
+
 - None
 
 **Deprecated:**
+
 - None
 
 **Removed:**
+
 - None
 
 **Fixed:**
+
 - None
 
 **Security:**
+
 - None

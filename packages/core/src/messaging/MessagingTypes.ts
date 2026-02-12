@@ -17,7 +17,23 @@ export type EncryptionMode = 'none' | 'aes-256' | 'e2e';
 /**
  * Message priority levels (numeric 0-10 or named priorities)
  */
-export type MessagePriority = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 'low' | 'normal' | 'high' | 'urgent' | 'critical';
+export type MessagePriority =
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 'low'
+  | 'normal'
+  | 'high'
+  | 'urgent'
+  | 'critical';
 
 /**
  * JSON Schema type (simplified for demonstration)
@@ -233,16 +249,12 @@ export type MessageHandler<T = unknown> = (
 /**
  * Broadcast handler function
  */
-export type BroadcastHandler<T = unknown> = (
-  message: BroadcastMessage<T>
-) => void | Promise<void>;
+export type BroadcastHandler<T = unknown> = (message: BroadcastMessage<T>) => void | Promise<void>;
 
 /**
  * Channel event handler
  */
-export type ChannelEventHandler = (
-  event: ChannelEvent
-) => void | Promise<void>;
+export type ChannelEventHandler = (event: ChannelEvent) => void | Promise<void>;
 
 // =============================================================================
 // EVENTS
@@ -308,10 +320,7 @@ export interface MessageEvent extends ChannelEventBase {
 /**
  * Union of all channel events
  */
-export type ChannelEvent =
-  | ChannelLifecycleEvent
-  | ChannelMembershipEvent
-  | MessageEvent;
+export type ChannelEvent = ChannelLifecycleEvent | ChannelMembershipEvent | MessageEvent;
 
 // =============================================================================
 // SUBSCRIPTION TYPES

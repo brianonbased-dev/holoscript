@@ -57,15 +57,15 @@ Hover over any trait to see:
 
 Quick templates for common patterns:
 
-| Prefix  | Expands To           |
-| ------- | -------------------- |
-| `orb`   | Basic composition object     |
-| `comp`  | Composition skeleton |
-| `temp`  | Template definition  |
-| `obj`   | Object with traits   |
-| `grp`   | Spatial group        |
-| `env`   | Environment block    |
-| `logic` | Logic block          |
+| Prefix  | Expands To               |
+| ------- | ------------------------ |
+| `orb`   | Basic composition object |
+| `comp`  | Composition skeleton     |
+| `temp`  | Template definition      |
+| `obj`   | Object with traits       |
+| `grp`   | Spatial group            |
+| `env`   | Environment block        |
+| `logic` | Logic block              |
 
 Type the prefix and press Tab.
 

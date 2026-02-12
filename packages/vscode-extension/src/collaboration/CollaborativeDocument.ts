@@ -126,7 +126,12 @@ export class CollaborativeDocument extends EventEmitter {
       this.setConnectionStatus('connected');
       this.emit('connected');
     } catch (error) {
-      this.handleError('CONNECTION_FAILED', 'Failed to connect to collaboration server', error as Error, false);
+      this.handleError(
+        'CONNECTION_FAILED',
+        'Failed to connect to collaboration server',
+        error as Error,
+        false
+      );
       throw error;
     }
   }
@@ -355,28 +360,31 @@ export class CollaborativeDocument extends EventEmitter {
     } as AwarenessState);
 
     // Listen for awareness changes
-    this.provider.awareness.on('change', ({ added, updated, removed }: { added: number[]; updated: number[]; removed: number[] }) => {
-      const states = this.provider?.awareness.getStates();
-      if (!states) return;
+    this.provider.awareness.on(
+      'change',
+      ({ added, updated, removed }: { added: number[]; updated: number[]; removed: number[] }) => {
+        const states = this.provider?.awareness.getStates();
+        if (!states) return;
 
-      for (const clientId of added) {
-        const state = states.get(clientId);
-        if (state?.user && clientId !== this.provider?.awareness.clientID) {
-          this.emit('participantJoined', state.user);
+        for (const clientId of added) {
+          const state = states.get(clientId);
+          if (state?.user && clientId !== this.provider?.awareness.clientID) {
+            this.emit('participantJoined', state.user);
+          }
+        }
+
+        for (const clientId of updated) {
+          const state = states.get(clientId);
+          if (state?.user && clientId !== this.provider?.awareness.clientID) {
+            this.emit('participantUpdated', state.user);
+          }
+        }
+
+        for (const clientId of removed) {
+          this.emit('participantLeft', { id: String(clientId) });
         }
       }
-
-      for (const clientId of updated) {
-        const state = states.get(clientId);
-        if (state?.user && clientId !== this.provider?.awareness.clientID) {
-          this.emit('participantUpdated', state.user);
-        }
-      }
-
-      for (const clientId of removed) {
-        this.emit('participantLeft', { id: String(clientId) });
-      }
-    });
+    );
   }
 
   private updateAwarenessField(field: string, value: unknown): void {

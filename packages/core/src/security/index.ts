@@ -40,23 +40,11 @@ export {
 } from './crypto';
 
 // Security Policy (Sprint 9)
-export {
-  createDefaultPolicy,
-  createStrictPolicy,
-  mergePolicy,
-} from './SecurityPolicy';
-export type {
-  SecurityPolicy,
-  FileSystemAccess,
-  DeepPartial,
-} from './SecurityPolicy';
+export { createDefaultPolicy, createStrictPolicy, mergePolicy } from './SecurityPolicy';
+export type { SecurityPolicy, FileSystemAccess, DeepPartial } from './SecurityPolicy';
 
 // Security Enforcer (Sprint 9)
-export {
-  validateComposition,
-  validateImports,
-  scanForVulnerabilities,
-} from './SecurityEnforcer';
+export { validateComposition, validateImports, scanForVulnerabilities } from './SecurityEnforcer';
 export type {
   SecurityViolation,
   SecurityScanResult,
@@ -74,11 +62,7 @@ export {
   createPackageManifest,
   canonicalizeManifest,
 } from './PackageSigner';
-export type {
-  Ed25519KeyPair,
-  PackageManifest,
-  SignedPackage,
-} from './PackageSigner';
+export type { Ed25519KeyPair, PackageManifest, SignedPackage } from './PackageSigner';
 
 // Sandbox Executor (Sprint 9)
 export {
@@ -86,8 +70,4 @@ export {
   execute as executeSandbox,
   destroy as destroySandbox,
 } from './SandboxExecutor';
-export type {
-  Sandbox,
-  SandboxState,
-  SandboxExecutionResult,
-} from './SandboxExecutor';
+export type { Sandbox, SandboxState, SandboxExecutionResult } from './SandboxExecutor';

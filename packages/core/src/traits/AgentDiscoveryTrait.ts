@@ -26,11 +26,7 @@ import type {
   TrustLevel,
 } from '../agents/AgentManifest';
 import type { CapabilityQuery } from '../agents/CapabilityMatcher';
-import {
-  AgentRegistry,
-  getDefaultRegistry,
-  type RegistryConfig,
-} from '../agents/AgentRegistry';
+import { AgentRegistry, getDefaultRegistry, type RegistryConfig } from '../agents/AgentRegistry';
 
 // =============================================================================
 // TYPES

@@ -18,6 +18,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 
 import { tools } from './tools';
 import { handleTool } from './handlers';
+import { PluginManager } from './PluginManager';
 
 // Create MCP server
 const server = new Server(
@@ -34,7 +35,9 @@ const server = new Server(
 
 // List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return { tools };
+  return {
+    tools: [...tools, ...PluginManager.getTools()],
+  };
 });
 
 // Handle tool calls
@@ -42,6 +45,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   try {
+    // Check plugins first (for proprietary tools like uaa2_)
+    const pluginResult = await PluginManager.handleTool(name, args || {});
+    if (pluginResult !== null) {
+      return {
+        content: [{ type: 'text', text: JSON.stringify(pluginResult, null, 2) }],
+      };
+    }
+
     const result = await handleTool(name, args || {});
     return {
       content: [

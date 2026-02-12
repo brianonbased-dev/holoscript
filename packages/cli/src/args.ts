@@ -45,6 +45,7 @@ export interface CLIOptions {
     | 'token'
     | 'export'
     | 'import'
+    | 'visualize'
     | 'screenshot'
     | 'prerender'
     | 'pdf'
@@ -204,6 +205,7 @@ export function parseArgs(args: string[]): CLIOptions {
           'token',
           'export',
           'import',
+          'visualize',
           'help',
           'version',
         ].includes(arg)

@@ -1,7 +1,7 @@
 /**
  * SwarmEventBus - Central event coordination for swarm communication
  * HoloScript v3.2 - Autonomous Agent Swarms
- * 
+ *
  * Decoupled pub/sub messaging between swarm components
  */
 
@@ -114,7 +114,7 @@ export class SwarmEventBus {
     } = {}
   ): string {
     const id = `evt-${this.nextId++}-${Date.now()}`;
-    
+
     const event: ISwarmEvent = {
       id,
       type,
@@ -263,7 +263,7 @@ export class SwarmEventBus {
         }
 
         matchingHandlers.push({ sub, handler: sub.handler });
-        
+
         if (sub.once) {
           toRemove.push(id);
         }
@@ -272,8 +272,8 @@ export class SwarmEventBus {
 
     // Sort by priority
     const priorityOrder = ['low', 'normal', 'high', 'critical'];
-    matchingHandlers.sort((a, b) => 
-      priorityOrder.indexOf(b.sub.priority) - priorityOrder.indexOf(a.sub.priority)
+    matchingHandlers.sort(
+      (a, b) => priorityOrder.indexOf(b.sub.priority) - priorityOrder.indexOf(a.sub.priority)
     );
 
     // Execute handlers
@@ -312,9 +312,7 @@ export class SwarmEventBus {
 
     // Wildcard support: "swarm.*" matches "swarm.joined", "swarm.left", etc.
     if (pattern.includes('*')) {
-      const regexPattern = pattern
-        .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
-        .replace(/\*/g, '.*');
+      const regexPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
       return new RegExp(`^${regexPattern}$`).test(type);
     }
 
@@ -352,7 +350,7 @@ export class SwarmEventBus {
         try {
           sub.handler(event);
           this.stats.eventsDelivered++;
-          
+
           if (sub.once) {
             this.subscriptions.delete(id);
           }
@@ -400,11 +398,11 @@ export class SwarmEventBus {
       this.insertByPriority(event);
     }
     this.stats.pendingEvents = this.eventQueue.length;
-    
+
     if (this.config.asyncProcessing && !this.processing) {
       this.processQueue();
     }
-    
+
     return events.length;
   }
 

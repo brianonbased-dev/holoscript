@@ -7,12 +7,7 @@
 
 import { EventEmitter } from 'events';
 import type { AgentManifest } from '../agents/AgentManifest';
-import type {
-  ChoreographyStep,
-  StepContext,
-  StepResult,
-  RetryConfig,
-} from './ChoreographyTypes';
+import type { ChoreographyStep, StepContext, StepResult, RetryConfig } from './ChoreographyTypes';
 import { DEFAULT_RETRY_CONFIG } from './ChoreographyTypes';
 
 // ============================================================================
@@ -91,10 +86,7 @@ export class StepExecutor extends EventEmitter {
   /**
    * Execute a single step
    */
-  async execute(
-    step: ChoreographyStep,
-    context: StepContext
-  ): Promise<StepResult> {
+  async execute(step: ChoreographyStep, context: StepContext): Promise<StepResult> {
     const startTime = Date.now();
 
     // Check if step should be skipped
@@ -170,7 +162,6 @@ export class StepExecutor extends EventEmitter {
 
         this.emit('step:completed', step, result);
         return result;
-
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         this.runningSteps.delete(step.id);
@@ -202,7 +193,7 @@ export class StepExecutor extends EventEmitter {
           // Calculate delay
           const delay = this.calculateDelay(retryConfig, attempt);
           this.emit('step:retrying', step, attempt + 1, delay);
-          
+
           // Wait before retry
           await this.sleep(delay);
         }
@@ -341,7 +332,7 @@ export class StepExecutor extends EventEmitter {
           const [, stepName, outputKey] = templateRef;
           // First try to get from stepOutputs using the name as id
           let outputs = context.stepOutputs.get(stepName);
-          
+
           // If no direct match and we have a plan, try to find step by name
           if (!outputs && context.plan?.steps) {
             const referencedStep = context.plan.steps.find(
@@ -351,7 +342,7 @@ export class StepExecutor extends EventEmitter {
               outputs = context.stepOutputs.get(referencedStep.id);
             }
           }
-          
+
           if (outputs) {
             resolved[key] = outputs[outputKey];
             continue;

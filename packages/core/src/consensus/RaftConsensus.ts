@@ -153,9 +153,7 @@ export class RaftConsensus extends EventEmitter implements ConsensusProtocol {
         accepted: false,
         key,
         votes: { for: 0, against: 0, total: this.nodes.size },
-        error: this.leaderId
-          ? `Not leader. Forward to ${this.leaderId}`
-          : 'No leader elected',
+        error: this.leaderId ? `Not leader. Forward to ${this.leaderId}` : 'No leader elected',
       };
     }
 
@@ -307,10 +305,7 @@ export class RaftConsensus extends EventEmitter implements ConsensusProtocol {
     this.sendAppendEntriesResponse(fromNodeId, true, this.log.length - 1);
   }
 
-  private handleAppendEntriesResponse(
-    fromNodeId: string,
-    msg: AppendEntriesResponseMessage
-  ): void {
+  private handleAppendEntriesResponse(fromNodeId: string, msg: AppendEntriesResponseMessage): void {
     if (this.state !== 'leader') return;
     if (msg.term < this.currentTerm) return;
 
@@ -355,10 +350,7 @@ export class RaftConsensus extends EventEmitter implements ConsensusProtocol {
     this.sendRequestVoteResponse(fromNodeId, voteGranted);
   }
 
-  private handleRequestVoteResponse(
-    fromNodeId: string,
-    msg: RequestVoteResponseMessage
-  ): void {
+  private handleRequestVoteResponse(fromNodeId: string, msg: RequestVoteResponseMessage): void {
     if (this.state !== 'candidate') return;
     if (msg.term < this.currentTerm) return;
 
@@ -389,11 +381,7 @@ export class RaftConsensus extends EventEmitter implements ConsensusProtocol {
   // MESSAGE SENDING
   // ===========================================================================
 
-  private sendAppendEntriesResponse(
-    toNodeId: string,
-    success: boolean,
-    matchIndex: number
-  ): void {
+  private sendAppendEntriesResponse(toNodeId: string, success: boolean, matchIndex: number): void {
     if (!this.sendMessage) return;
 
     this.sendMessage(toNodeId, {

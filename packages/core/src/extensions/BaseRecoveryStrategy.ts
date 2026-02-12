@@ -1,14 +1,14 @@
 /**
  * Base Recovery Strategy Implementation
- * 
+ *
  * Provides base class for implementing self-healing recovery strategies.
  */
 
-import type { 
-  IRecoveryStrategy, 
-  IAgentFailure, 
+import type {
+  IRecoveryStrategy,
+  IAgentFailure,
   IRecoveryResult,
-  FailureType 
+  FailureType,
 } from './AgentExtensionTypes';
 
 export abstract class BaseRecoveryStrategy implements IRecoveryStrategy {
@@ -18,20 +18,20 @@ export abstract class BaseRecoveryStrategy implements IRecoveryStrategy {
     public readonly maxAttempts: number = 3,
     public readonly backoffMs: number = 1000
   ) {}
-  
+
   /**
    * Check if this strategy can handle the failure
    */
   matches(failure: IAgentFailure): boolean {
     return this.handles.includes(failure.errorType);
   }
-  
+
   /**
    * Execute recovery with retry logic
    */
   async execute(failure: IAgentFailure): Promise<IRecoveryResult> {
     let lastError: Error | null = null;
-    
+
     for (let attempt = 1; attempt <= this.maxAttempts; attempt++) {
       try {
         const result = await this.attemptRecovery(failure, attempt);
@@ -42,32 +42,32 @@ export abstract class BaseRecoveryStrategy implements IRecoveryStrategy {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
       }
-      
+
       // Exponential backoff
       if (attempt < this.maxAttempts) {
         await this.delay(this.backoffMs * Math.pow(2, attempt - 1));
       }
     }
-    
+
     return {
       success: false,
       strategyUsed: this.id,
       message: `Recovery failed after ${this.maxAttempts} attempts: ${lastError?.message}`,
       retryRecommended: false,
-      nextAction: 'escalate'
+      nextAction: 'escalate',
     };
   }
-  
+
   /**
    * Implement this to perform actual recovery
    */
   protected abstract attemptRecovery(
-    failure: IAgentFailure, 
+    failure: IAgentFailure,
     attempt: number
   ): Promise<IRecoveryResult>;
-  
+
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -76,7 +76,7 @@ export abstract class BaseRecoveryStrategy implements IRecoveryStrategy {
  */
 export class RetryRecoveryStrategy extends BaseRecoveryStrategy {
   private retryFn: (failure: IAgentFailure) => Promise<boolean>;
-  
+
   constructor(
     id: string,
     handles: FailureType[],
@@ -86,21 +86,21 @@ export class RetryRecoveryStrategy extends BaseRecoveryStrategy {
     super(id, handles, options?.maxAttempts ?? 3, options?.backoffMs ?? 1000);
     this.retryFn = retryFn;
   }
-  
+
   protected async attemptRecovery(
     failure: IAgentFailure,
     attempt: number
   ): Promise<IRecoveryResult> {
     const success = await this.retryFn(failure);
-    
+
     return {
       success,
       strategyUsed: this.id,
-      message: success 
-        ? `Recovery succeeded on attempt ${attempt}` 
+      message: success
+        ? `Recovery succeeded on attempt ${attempt}`
         : `Retry attempt ${attempt} failed`,
       retryRecommended: !success && attempt < this.maxAttempts,
-      nextAction: success ? undefined : (attempt >= this.maxAttempts ? 'escalate' : 'retry')
+      nextAction: success ? undefined : attempt >= this.maxAttempts ? 'escalate' : 'retry',
     };
   }
 }
@@ -112,7 +112,7 @@ export class SkipRecoveryStrategy extends BaseRecoveryStrategy {
   constructor(handles: FailureType[]) {
     super('skip', handles, 1, 0);
   }
-  
+
   protected async attemptRecovery(
     _failure: IAgentFailure,
     _attempt: number
@@ -122,7 +122,7 @@ export class SkipRecoveryStrategy extends BaseRecoveryStrategy {
       strategyUsed: 'skip',
       message: 'Skipped failed operation',
       retryRecommended: false,
-      nextAction: 'skip'
+      nextAction: 'skip',
     };
   }
 }
@@ -132,12 +132,12 @@ export class SkipRecoveryStrategy extends BaseRecoveryStrategy {
  */
 export class EscalateRecoveryStrategy extends BaseRecoveryStrategy {
   private escalateTo: string;
-  
+
   constructor(handles: FailureType[], escalateTo: string) {
     super('escalate', handles, 1, 0);
     this.escalateTo = escalateTo;
   }
-  
+
   protected async attemptRecovery(
     failure: IAgentFailure,
     _attempt: number
@@ -147,7 +147,7 @@ export class EscalateRecoveryStrategy extends BaseRecoveryStrategy {
       strategyUsed: 'escalate',
       message: `Escalating ${failure.errorType} to ${this.escalateTo}`,
       retryRecommended: false,
-      nextAction: 'escalate'
+      nextAction: 'escalate',
     };
   }
 }
@@ -159,7 +159,7 @@ export class NetworkTimeoutRecovery extends BaseRecoveryStrategy {
   constructor(maxAttempts: number = 3, backoffMs: number = 2000) {
     super('network-timeout-recovery', ['network-timeout'], maxAttempts, backoffMs);
   }
-  
+
   protected async attemptRecovery(
     failure: IAgentFailure,
     attempt: number
@@ -171,7 +171,7 @@ export class NetworkTimeoutRecovery extends BaseRecoveryStrategy {
       strategyUsed: this.id,
       message: `Network retry attempt ${attempt} - implement actual retry logic`,
       retryRecommended: attempt < this.maxAttempts,
-      nextAction: 'retry'
+      nextAction: 'retry',
     };
   }
 }
@@ -184,20 +184,20 @@ export class RateLimitRecovery extends BaseRecoveryStrategy {
     // Longer backoff for rate limits
     super('rate-limit-recovery', ['api-rate-limit'], 5, 10000);
   }
-  
+
   protected async attemptRecovery(
     failure: IAgentFailure,
     attempt: number
   ): Promise<IRecoveryResult> {
     // Wait based on attempt number
     const waitTime = this.backoffMs * attempt;
-    
+
     return {
       success: false,
       strategyUsed: this.id,
       message: `Rate limit - waiting ${waitTime}ms before retry ${attempt}`,
       retryRecommended: true,
-      nextAction: 'retry'
+      nextAction: 'retry',
     };
   }
 }

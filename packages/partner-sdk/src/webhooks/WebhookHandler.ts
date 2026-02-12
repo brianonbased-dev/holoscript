@@ -255,7 +255,11 @@ export class WebhookHandler {
   /**
    * Verify webhook signature using HMAC-SHA256
    */
-  private async verifySignature(payload: string, signature: string, timestamp: string): Promise<void> {
+  private async verifySignature(
+    payload: string,
+    signature: string,
+    timestamp: string
+  ): Promise<void> {
     const expectedSignature = await this.computeSignature(payload, timestamp);
 
     // Timing-safe comparison to prevent timing attacks

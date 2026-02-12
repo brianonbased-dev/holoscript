@@ -93,10 +93,7 @@ function updateCargoToml(filePath, newVersion) {
   );
 
   // Update [package] version if exists
-  content = content.replace(
-    /(\[package\][\s\S]*?version\s*=\s*)"[^"]+"/,
-    `$1"${newVersion}"`
-  );
+  content = content.replace(/(\[package\][\s\S]*?version\s*=\s*)"[^"]+"/, `$1"${newVersion}"`);
 
   fs.writeFileSync(filePath, content);
   success(`Updated: ${filePath}`);
@@ -107,16 +104,10 @@ function updateHomebrewFormula(filePath, newVersion) {
   let content = fs.readFileSync(filePath, 'utf8');
 
   // Update version
-  content = content.replace(
-    /version\s*=\s*"[^"]+"/,
-    `version = "${newVersion}"`
-  );
+  content = content.replace(/version\s*=\s*"[^"]+"/, `version = "${newVersion}"`);
 
   // Update URL
-  content = content.replace(
-    /tags\/v[0-9.]+(-[a-z0-9.]+)?/g,
-    `tags/v${newVersion}`
-  );
+  content = content.replace(/tags\/v[0-9.]+(-[a-z0-9.]+)?/g, `tags/v${newVersion}`);
 
   fs.writeFileSync(filePath, content);
   success(`Updated: ${filePath}`);
@@ -126,15 +117,9 @@ function updateHomebrewFormula(filePath, newVersion) {
 function updateChocolateyNuspec(filePath, newVersion) {
   let content = fs.readFileSync(filePath, 'utf8');
 
-  content = content.replace(
-    /<version>[^<]+<\/version>/,
-    `<version>${newVersion}</version>`
-  );
+  content = content.replace(/<version>[^<]+<\/version>/, `<version>${newVersion}</version>`);
 
-  content = content.replace(
-    /\/v[0-9.]+(-[a-z0-9.]+)?\//g,
-    `/v${newVersion}/`
-  );
+  content = content.replace(/\/v[0-9.]+(-[a-z0-9.]+)?\//g, `/v${newVersion}/`);
 
   fs.writeFileSync(filePath, content);
   success(`Updated: ${filePath}`);
@@ -143,9 +128,10 @@ function updateChocolateyNuspec(filePath, newVersion) {
 // Update all workspace package.json files
 function updateWorkspacePackages(rootDir, newVersion) {
   const packagesDir = path.join(rootDir, 'packages');
-  const packages = fs.readdirSync(packagesDir, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name);
+  const packages = fs
+    .readdirSync(packagesDir, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name);
 
   for (const pkg of packages) {
     const pkgJsonPath = path.join(packagesDir, pkg, 'package.json');
@@ -247,7 +233,6 @@ function syncVersions(bumpType) {
       log(`  1. Review changes: git diff`, 'blue');
       log(`  2. Push to remote: git push && git push --tags`, 'blue');
       log(`  3. Publish: pnpm publish`, 'blue');
-
     } catch (err) {
       error(`Synchronization failed: ${err.message}`);
     }

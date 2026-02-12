@@ -1,6 +1,6 @@
 /**
  * Leader Election System
- * 
+ *
  * Implements Raft-inspired leader election for agent clusters.
  * Provides fault-tolerant leader selection with automatic failover.
  */
@@ -8,10 +8,10 @@
 import type { ILeaderElection } from '../extensions';
 
 export interface LeaderElectionConfig {
-  electionTimeoutMin: number;  // Min election timeout (ms)
-  electionTimeoutMax: number;  // Max election timeout (ms)
-  heartbeatInterval: number;   // Leader heartbeat interval (ms)
-  quorumSize?: number;         // Override quorum calculation
+  electionTimeoutMin: number; // Min election timeout (ms)
+  electionTimeoutMax: number; // Max election timeout (ms)
+  heartbeatInterval: number; // Leader heartbeat interval (ms)
+  quorumSize?: number; // Override quorum calculation
 }
 
 export type ElectionRole = 'leader' | 'follower' | 'candidate';
@@ -49,7 +49,7 @@ export class LeaderElection implements ILeaderElection {
     config: Partial<LeaderElectionConfig> = {}
   ) {
     this.nodeId = nodeId;
-    this.clusterMembers = clusterMembers.filter(id => id !== nodeId);
+    this.clusterMembers = clusterMembers.filter((id) => id !== nodeId);
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.state = {
       term: 0,
@@ -65,7 +65,7 @@ export class LeaderElection implements ILeaderElection {
    */
   async startElection(): Promise<string> {
     this.becomeCandidate();
-    
+
     // Wait for election to complete
     return new Promise((resolve) => {
       const checkLeader = setInterval(() => {
@@ -192,7 +192,7 @@ export class LeaderElection implements ILeaderElection {
    */
   private becomeFollower(leaderId: string, term: number): void {
     const wasLeader = this.state.role === 'leader';
-    
+
     this.state.role = 'follower';
     this.state.leaderId = leaderId;
     this.state.term = term;
@@ -240,7 +240,7 @@ export class LeaderElection implements ILeaderElection {
    */
   private checkElectionWin(): void {
     const quorum = this.getQuorumSize();
-    
+
     if (this.state.votes.size >= quorum && this.state.role === 'candidate') {
       this.becomeLeader();
     }
@@ -283,7 +283,7 @@ export class LeaderElection implements ILeaderElection {
     // Grant vote if we haven't voted in this term
     if (this.state.votedFor === null || this.state.votedFor === message.candidateId) {
       this.state.votedFor = message.candidateId;
-      
+
       const response: VoteResponseMessage = {
         type: 'vote-response',
         term: this.state.term,
@@ -330,7 +330,7 @@ export class LeaderElection implements ILeaderElection {
     }
 
     const timeout = this.getRandomElectionTimeout();
-    
+
     this.electionTimer = setTimeout(() => {
       if (this.state.role !== 'leader') {
         this.becomeCandidate();

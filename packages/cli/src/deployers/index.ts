@@ -15,11 +15,7 @@ export {
   DeployerEvents,
 } from './BaseDeployer';
 
-export {
-  CloudflareDeployer,
-  CloudflareConfig,
-  KVNamespaceBinding,
-} from './CloudflareDeployer';
+export { CloudflareDeployer, CloudflareConfig, KVNamespaceBinding } from './CloudflareDeployer';
 
 export {
   VercelDeployer,
@@ -28,12 +24,7 @@ export {
   VercelServerlessConfig,
 } from './VercelDeployer';
 
-export {
-  NginxDeployer,
-  NginxConfig,
-  NginxSiteConfig,
-  NginxLocationBlock,
-} from './NginxDeployer';
+export { NginxDeployer, NginxConfig, NginxSiteConfig, NginxLocationBlock } from './NginxDeployer';
 
 // Direct imports for factory
 import { BaseDeployer } from './BaseDeployer';
@@ -52,16 +43,14 @@ import { NginxDeployer } from './NginxDeployer';
  * @returns A BaseDeployer instance for the specified target.
  * @throws Error if the target is not recognized.
  */
-export function createDeployer(
-  target: string,
-  config?: Record<string, unknown>
-): BaseDeployer {
+export function createDeployer(target: string, config?: Record<string, unknown>): BaseDeployer {
   switch (target) {
     case 'cloudflare':
       return new CloudflareDeployer({
         apiToken: (config?.apiToken as string) || '',
         accountId: (config?.accountId as string) || '',
-        kvNamespaces: (config?.kvNamespaces as Array<{ binding: string; namespaceId: string }>) || [],
+        kvNamespaces:
+          (config?.kvNamespaces as Array<{ binding: string; namespaceId: string }>) || [],
       });
 
     case 'vercel':

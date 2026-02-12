@@ -95,7 +95,7 @@ describe('HoloScriptTelemetry', () => {
 
     it('should include custom attributes from config', () => {
       const t = new HoloScriptTelemetry(
-        createConfig({ customAttributes: { env: 'test', version: '1.0' } }),
+        createConfig({ customAttributes: { env: 'test', version: '1.0' } })
       );
       const span = t.startSpan('op');
       expect(span.attributes['env']).toBe('test');
@@ -103,9 +103,7 @@ describe('HoloScriptTelemetry', () => {
     });
 
     it('should merge span-level attributes with config custom attributes', () => {
-      const t = new HoloScriptTelemetry(
-        createConfig({ customAttributes: { env: 'test' } }),
-      );
+      const t = new HoloScriptTelemetry(createConfig({ customAttributes: { env: 'test' } }));
       const span = t.startSpan('op', { file: 'scene.hs' });
       expect(span.attributes['env']).toBe('test');
       expect(span.attributes['file']).toBe('scene.hs');
@@ -199,12 +197,8 @@ describe('HoloScriptTelemetry', () => {
       telemetry.recordTraitUsage('@grabbable');
       telemetry.recordTraitUsage('@throwable');
       const collector = telemetry.getMetricsCollector();
-      expect(
-        collector.getCounterValue('holoscript.trait.usage', { trait: '@grabbable' }),
-      ).toBe(2);
-      expect(
-        collector.getCounterValue('holoscript.trait.usage', { trait: '@throwable' }),
-      ).toBe(1);
+      expect(collector.getCounterValue('holoscript.trait.usage', { trait: '@grabbable' })).toBe(2);
+      expect(collector.getCounterValue('holoscript.trait.usage', { trait: '@throwable' })).toBe(1);
     });
 
     it('should record cache hits and misses', () => {
@@ -271,9 +265,7 @@ describe('HoloScriptTelemetry', () => {
     });
 
     it('should not instrument when parse is not in enabledInstrumentations', () => {
-      const t = new HoloScriptTelemetry(
-        createConfig({ enabledInstrumentations: ['compile'] }),
-      );
+      const t = new HoloScriptTelemetry(createConfig({ enabledInstrumentations: ['compile'] }));
       const mockParser = {
         parse: vi.fn().mockReturnValue({ ast: [] }),
       };
@@ -379,7 +371,7 @@ describe('SpanFactory', () => {
     expect(() =>
       factory.withSpan('fail.op', () => {
         throw new Error('boom');
-      }),
+      })
     ).toThrow('boom');
   });
 
@@ -387,7 +379,7 @@ describe('SpanFactory', () => {
     await expect(
       factory.withSpan('fail.async', async () => {
         throw new Error('async boom');
-      }),
+      })
     ).rejects.toThrow('async boom');
   });
 });
@@ -490,9 +482,7 @@ describe('MetricsCollector', () => {
       };
 
       expect(otlp.resourceMetrics).toHaveLength(1);
-      expect(otlp.resourceMetrics[0].resource.attributes[0].value.stringValue).toBe(
-        'test-service',
-      );
+      expect(otlp.resourceMetrics[0].resource.attributes[0].value.stringValue).toBe('test-service');
       expect(otlp.resourceMetrics[0].scopeMetrics[0].metrics.length).toBe(3);
     });
   });

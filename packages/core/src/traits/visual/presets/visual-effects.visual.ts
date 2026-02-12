@@ -50,7 +50,14 @@ export const VISUAL_EFFECTS_VISUALS: Record<string, TraitVisualConfig> = {
     layer: 'visual_effect',
   },
   holographic: {
-    material: { roughness: 0.0, metalness: 0.3, transparent: true, opacity: 0.6, emissive: '#00CCFF', emissiveIntensity: 1.0 },
+    material: {
+      roughness: 0.0,
+      metalness: 0.3,
+      transparent: true,
+      opacity: 0.6,
+      emissive: '#00CCFF',
+      emissiveIntensity: 1.0,
+    },
     shader: 'hologram',
     tags: ['transparent', 'emissive', 'scifi'],
     layer: 'visual_effect',

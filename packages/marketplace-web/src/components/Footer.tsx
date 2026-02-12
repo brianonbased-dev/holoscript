@@ -10,13 +10,11 @@ export function Footer() {
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Package className="h-6 w-6 text-holoscript-500" />
-              <span className="text-lg font-bold text-zinc-900 dark:text-white">
-                HoloScript
-              </span>
+              <span className="text-lg font-bold text-zinc-900 dark:text-white">HoloScript</span>
             </Link>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
-              The trait marketplace for HoloScript developers. Build immersive 3D
-              and XR experiences with reusable components.
+              The trait marketplace for HoloScript developers. Build immersive 3D and XR experiences
+              with reusable components.
             </p>
             <div className="flex gap-4">
               <a
@@ -51,9 +49,7 @@ export function Footer() {
 
           {/* Explore */}
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
-              Explore
-            </h3>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">Explore</h3>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -100,9 +96,7 @@ export function Footer() {
 
           {/* Resources */}
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
-              Resources
-            </h3>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">Resources</h3>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -151,9 +145,7 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">
-              Legal
-            </h3>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
                 <Link

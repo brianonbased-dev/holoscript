@@ -30,7 +30,7 @@ All 10 development sprints have been completed ahead of schedule:
 - HoloScript Academy (10 lessons, Level 1)
 - VS Code + IntelliJ IDE support
 
-See [RELEASE_NOTES_3.0.md](./docs/RELEASE_NOTES_3.0.md) for full details.
+See [RELEASE_NOTES_3.0.md](./docs/archive/RELEASE_NOTES_3.0.md) for full details.
 
 ---
 
@@ -48,6 +48,7 @@ Post-3.0 stabilization focused on quality and technical debt:
 | Critical Bugs Fixed | All    | All      |
 
 **Deliverables:**
+
 - Resolved all ESLint errors (0 remaining)
 - Coverage increased from 38% to 40%+ with new trait tests
 - Comprehensive test suites for HITLTrait, RenderNetworkTrait, ZoraCoinsTrait
@@ -62,37 +63,38 @@ See [V3_EXIT_GATE_CHECKLIST.md](./docs/V3_EXIT_GATE_CHECKLIST.md) for exit crite
 **Target Version:** 3.1.0
 **Timeline:** 12 weeks (Target: March 2026)
 **Status:** ✅ All 8 priorities implemented with tests
-**Full Plan:** [SPRINT_4_PLAN.md](./docs/SPRINT_4_PLAN.md)
+**Full Plan:** [SPRINT_4_PLAN.md](./docs/planning/SPRINT_4_PLAN.md)
 
 ### Priority Stack
 
-| #   | Priority                    | Focus                          | Coverage | Status      |
-| --- | --------------------------- | ------------------------------ | -------- | ----------- |
-| 1   | AgentRegistry & Discovery   | Core agent infrastructure      | 61.87%   | ✅ Complete |
-| 2   | ChoreographyEngine          | Task → Agent matching          | 76.26%   | ✅ Complete |
-| 3   | Multi-Agent Negotiation     | Conflict resolution            | 71.53%   | ✅ Complete |
-| 4   | Spatial Context Awareness   | Location-aware choreography    | 91.84%   | ✅ Complete |
-| 5   | Consensus Mechanisms        | Distributed agreement          | 85.08%   | ✅ Complete |
-| 6   | Agent Communication         | Secure messaging channels      | 78.35%   | ✅ Complete |
-| 7   | Hierarchy & Delegation      | Command structure              | 88.50%   | ✅ Complete |
-| 8   | Debugging & Observability   | Trace viewer, replay debugging | 70.97%   | ✅ Complete |
+| #   | Priority                  | Focus                          | Coverage | Status      |
+| --- | ------------------------- | ------------------------------ | -------- | ----------- |
+| 1   | AgentRegistry & Discovery | Core agent infrastructure      | 61.87%   | ✅ Complete |
+| 2   | ChoreographyEngine        | Task → Agent matching          | 76.26%   | ✅ Complete |
+| 3   | Multi-Agent Negotiation   | Conflict resolution            | 71.53%   | ✅ Complete |
+| 4   | Spatial Context Awareness | Location-aware choreography    | 85.89%   | ✅ Complete |
+| 5   | Consensus Mechanisms      | Distributed agreement          | 85.08%   | ✅ Complete |
+| 6   | Agent Communication       | Secure messaging channels      | 78.35%   | ✅ Complete |
+| 7   | Hierarchy & Delegation    | Command structure              | 88.50%   | ✅ Complete |
+| 8   | Debugging & Observability | Trace viewer, replay debugging | 70.97%   | ✅ Complete |
 
 **Success Metrics:**
+
 - AgentRegistry managing 100+ agents ✅
 - Choreography latency < 50ms ✅
 - Test coverage ≥60% overall (current: 41.37%), ≥80% new code (avg: ~78%)
 
 ### Remaining for v3.1.0 Release
 
-| Task | Priority | Status |
-| ---- | -------- | ------ |
-| Improve Spatial module coverage (56.71% → 80%) | High | ✅ Complete (91.84%) |
-| Add tests for 0% coverage traits | Medium | ✅ Complete (293 tests added) |
-| Create v3.1 tutorials | Medium | ✅ Complete (4 tutorials) |
-| Add v3.1 feature examples | Medium | ✅ Complete (4 examples) |
-| Final integration testing | High | ✅ Complete (4712 tests passing) |
+| Task                                           | Priority | Status                           |
+| ---------------------------------------------- | -------- | -------------------------------- |
+| Improve Spatial module coverage (56.71% → 80%) | High     | ✅ Complete (91.84%)             |
+| Add tests for 0% coverage traits               | Medium   | ✅ Complete (293 tests added)    |
+| Create v3.1 tutorials                          | Medium   | ✅ Complete (4 tutorials)        |
+| Add v3.1 feature examples                      | Medium   | ✅ Complete (4 examples)         |
+| Final integration testing                      | High     | ✅ Complete (4712 tests passing) |
 
-See [IMPLEMENTATION_AUDIT_2025.md](./IMPLEMENTATION_AUDIT_2025.md) for detailed gap analysis.
+See [IMPLEMENTATION_AUDIT_2026.md](./IMPLEMENTATION_AUDIT_2026.md) for detailed gap analysis.
 
 ---
 
@@ -105,16 +107,17 @@ See [IMPLEMENTATION_AUDIT_2025.md](./IMPLEMENTATION_AUDIT_2025.md) for detailed 
 
 ### Priority Stack
 
-| #   | Priority                    | Focus                          | Status       |
-| --- | --------------------------- | ------------------------------ | ------------ |
-| 1   | OpenTelemetry Integration   | Distributed tracing & metrics  | ✅ Complete |
-| 2   | Security Hardening          | WASM sandbox, package signing  | ✅ Complete |
-| 3   | Edge Deployment Pipeline    | CDN integration, zero-downtime | ✅ Complete |
-| 4   | Rate Limiting & Quotas      | Production API controls        | ✅ Complete |
-| 5   | Multi-Tenant Isolation      | SaaS deployment patterns       | ✅ Complete |
-| 6   | Audit Logging & Compliance  | SOC2/GDPR compliance           | ✅ Complete |
+| #   | Priority                   | Focus                          | Status      |
+| --- | -------------------------- | ------------------------------ | ----------- |
+| 1   | OpenTelemetry Integration  | Distributed tracing & metrics  | ✅ Complete |
+| 2   | Security Hardening         | WASM sandbox, package signing  | ✅ Complete |
+| 3   | Edge Deployment Pipeline   | CDN integration, zero-downtime | ✅ Complete |
+| 4   | Rate Limiting & Quotas     | Production API controls        | ✅ Complete |
+| 5   | Multi-Tenant Isolation     | SaaS deployment patterns       | ✅ Complete |
+| 6   | Audit Logging & Compliance | SOC2/GDPR compliance           | ✅ Complete |
 
 ### Key Deliverables
+
 - **OpenTelemetry**: TelemetryProvider, SpanFactory, MetricsCollector (Prometheus + OTLP)
 - **Security**: SecurityPolicy, SecurityEnforcer, PackageSigner (ed25519), SandboxExecutor
 - **Edge Deploy**: CloudflareDeployer, VercelDeployer, NginxDeployer (zero-downtime)
@@ -123,11 +126,26 @@ See [IMPLEMENTATION_AUDIT_2025.md](./IMPLEMENTATION_AUDIT_2025.md) for detailed 
 - **Audit**: AuditLogger, AuditQueryBuilder, ComplianceReporter (SOC2/GDPR)
 
 ### Success Metrics
+
 - OTEL traces: 100% of parse/compile operations ✅
 - Security scan: All compositions scanned ✅
 - Edge deploy: < 60s to all regions ✅
 - Audit durability: 99.999% ✅
 - **Tests**: 214 files, 6,085 tests, 0 failures
+
+---
+
+## ✅ Sprint 11: Ecosystem Growth due (v3.2) - Complete
+
+**Target Version:** 3.6.2
+**Timeline:** February 2026
+**Status:** ✅ **COMPLETE** (February 10, 2026)
+
+### Key Deliverables
+
+- **Extension System**: `ExtensionInterface`, `ExtensionRegistry`, Runtime Integration.
+- **Performance**: 12M ops/sec Trait instantiation, 2.6M ops/sec Extension calls.
+- **Documentation**: "Building Your First Multi-Agent Workflow" tutorial.
 
 ---
 
@@ -148,7 +166,7 @@ See [IMPLEMENTATION_AUDIT_2025.md](./IMPLEMENTATION_AUDIT_2025.md) for detailed 
 ## 🚀 Sprint 2: Core Stability & Developer Experience (February 2026)
 
 **Target Version:** 2.2.0
-**Full Plan:** [SPRINT_2_IMPLEMENTATION_PLAN.md](./docs/SPRINT_2_IMPLEMENTATION_PLAN.md)
+**Full Plan:** [SPRINT_2_IMPLEMENTATION_PLAN.md](./docs/planning/SPRINT_2_IMPLEMENTATION_PLAN.md)
 
 ### Priority Stack (Ordered by Dependencies)
 
@@ -3955,16 +3973,16 @@ Major version with visual scripting and WASM.
 
 Map every material, surface, lighting, and visual-effect trait to PBR parameters. Extends the existing `MATERIAL_PRESETS` pattern in R3FCompiler.
 
-| Category | Traits | Example Mappings |
-| --- | --- | --- |
-| Material Properties | wooden, marble, granite, bamboo, carbon_fiber, ... (33) | PBR roughness/metalness/color |
-| Surface Textures | polished, rough, cracked, mossy, rusty, ... (30) | Normal maps, roughness modifiers |
-| Gems & Minerals | ruby, emerald, diamond, obsidian, quartz, ... (30) | IOR, transmission, dispersion |
-| Fabric & Cloth | silk, leather, denim, velvet, lace, ... (30) | Sheen, roughness, subsurface |
-| Lighting | spotlight, candlelight, neon_light, moonlight, ... (28) | Light type, color temp, intensity |
-| Visual Effects | holographic, iridescent, cel_shaded, x_ray, ... (30) | Custom shaders, post-processing |
-| Age & Condition | pristine, weathered, ancient, corroded, ... (30) | Wear overlays, color shifts |
-| Size & Scale | tiny, colossal, microscopic, towering, ... (18) | Scale multipliers |
+| Category            | Traits                                                  | Example Mappings                  |
+| ------------------- | ------------------------------------------------------- | --------------------------------- |
+| Material Properties | wooden, marble, granite, bamboo, carbon_fiber, ... (33) | PBR roughness/metalness/color     |
+| Surface Textures    | polished, rough, cracked, mossy, rusty, ... (30)        | Normal maps, roughness modifiers  |
+| Gems & Minerals     | ruby, emerald, diamond, obsidian, quartz, ... (30)      | IOR, transmission, dispersion     |
+| Fabric & Cloth      | silk, leather, denim, velvet, lace, ... (30)            | Sheen, roughness, subsurface      |
+| Lighting            | spotlight, candlelight, neon_light, moonlight, ... (28) | Light type, color temp, intensity |
+| Visual Effects      | holographic, iridescent, cel_shaded, x_ray, ... (30)    | Custom shaders, post-processing   |
+| Age & Condition     | pristine, weathered, ancient, corroded, ... (30)        | Wear overlays, color shifts       |
+| Size & Scale        | tiny, colossal, microscopic, towering, ... (18)         | Scale multipliers                 |
 
 **Deliverables:**
 
@@ -3988,13 +4006,13 @@ Define how traits **compose** to modify rendering. Traits act as stackable modif
   + cursed modifier: dark color shift, faint purple particle aura
 ```
 
-| Modifier Type | Traits | Effect |
-| --- | --- | --- |
-| Era/Period | prehistoric, medieval, victorian, art_deco, cyberpunk, ... (23) | Color palette, wear level, style hints |
-| Condition | pristine, damaged, ruined, enchanted, corrupted, ... (30) | Overlay effects, emission changes |
-| Emotion/Mood | eerie, serene, chaotic, triumphant, cozy, ... (20) | Lighting tint, particle aura, ambient sound |
-| Environment | foggy, underwater, zero_gravity, volcanic, ... (33) | Scene-level post-processing, physics mods |
-| Magic/Fantasy | enchantable, cursed, blessed, elemental_fire, ... (37) | Particle systems, glow auras, shader effects |
+| Modifier Type | Traits                                                          | Effect                                       |
+| ------------- | --------------------------------------------------------------- | -------------------------------------------- |
+| Era/Period    | prehistoric, medieval, victorian, art_deco, cyberpunk, ... (23) | Color palette, wear level, style hints       |
+| Condition     | pristine, damaged, ruined, enchanted, corrupted, ... (30)       | Overlay effects, emission changes            |
+| Emotion/Mood  | eerie, serene, chaotic, triumphant, cozy, ... (20)              | Lighting tint, particle aura, ambient sound  |
+| Environment   | foggy, underwater, zero_gravity, volcanic, ... (33)             | Scene-level post-processing, physics mods    |
+| Magic/Fantasy | enchantable, cursed, blessed, elemental_fire, ... (37)          | Particle systems, glow auras, shader effects |
 
 **Deliverables:**
 
@@ -4011,12 +4029,12 @@ Define how traits **compose** to modify rendering. Traits act as stackable modif
 
 Use AI/procedural generation to create geometry and textures from semantic trait descriptions. Traits like `@dragon`, `@chair`, `@lighthouse` become actual rendered objects.
 
-| Strategy | Traits Covered | Technology |
-| --- | --- | --- |
-| Text-to-3D API | Animals, creatures, furniture, vehicles (~200) | Meshy, Tripo, Rodin, or self-hosted |
-| Text-to-Texture | Material/surface traits for custom UV maps (~100) | Stable Diffusion, SDXL |
-| Procedural Geometry | Shape traits, construction, nature (~80) | SDF functions, L-systems, Wave Function Collapse |
-| Asset Library Fallback | Common objects with pre-made models (~50) | GLB/GLTF asset bundles |
+| Strategy               | Traits Covered                                    | Technology                                       |
+| ---------------------- | ------------------------------------------------- | ------------------------------------------------ |
+| Text-to-3D API         | Animals, creatures, furniture, vehicles (~200)    | Meshy, Tripo, Rodin, or self-hosted              |
+| Text-to-Texture        | Material/surface traits for custom UV maps (~100) | Stable Diffusion, SDXL                           |
+| Procedural Geometry    | Shape traits, construction, nature (~80)          | SDF functions, L-systems, Wave Function Collapse |
+| Asset Library Fallback | Common objects with pre-made models (~50)         | GLB/GLTF asset bundles                           |
 
 **Pipeline:**
 
@@ -4044,14 +4062,14 @@ Use AI/procedural generation to create geometry and textures from semantic trait
 
 ### Trait Rendering Coverage Targets
 
-| Milestone | Traits with Visual Behavior | Coverage |
-| --- | --- | --- |
-| Pre-expansion (Feb 2026) | ~60 | 3.9% |
-| **Phase 1-3 (Feb 2026)** | **~660** | **43%** |
-| Phase 1 target | ~310 | 20% |
-| Phase 2 target | ~600 | 39% |
-| Phase 3 target | ~1,000+ | 65%+ |
-| Long-term (2027+) | 1,525+ | 100% |
+| Milestone                | Traits with Visual Behavior | Coverage |
+| ------------------------ | --------------------------- | -------- |
+| Pre-expansion (Feb 2026) | ~60                         | 3.9%     |
+| **Phase 1-3 (Feb 2026)** | **~660**                    | **43%**  |
+| Phase 1 target           | ~310                        | 20%      |
+| Phase 2 target           | ~600                        | 39%      |
+| Phase 3 target           | ~1,000+                     | 65%+     |
+| Long-term (2027+)        | 1,525+                      | 100%     |
 
 ---
 

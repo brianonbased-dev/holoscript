@@ -195,7 +195,10 @@ export class Analyzer {
     }
   }
 
-  private generateRecommendations(profile: ProfileResult, _budget: PerformanceBudget): Recommendation[] {
+  private generateRecommendations(
+    profile: ProfileResult,
+    _budget: PerformanceBudget
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
     const summary = profile.summary;
     let recommendationId = 1;
@@ -354,7 +357,8 @@ export class Analyzer {
         budget: budget.parseTime,
         actual: summary.categoryBreakdown.parse,
         unit: 'ms',
-        overagePercent: ((summary.categoryBreakdown.parse - budget.parseTime) / budget.parseTime) * 100,
+        overagePercent:
+          ((summary.categoryBreakdown.parse - budget.parseTime) / budget.parseTime) * 100,
       });
     }
 
@@ -364,7 +368,8 @@ export class Analyzer {
         budget: budget.compileTime,
         actual: summary.categoryBreakdown.compile,
         unit: 'ms',
-        overagePercent: ((summary.categoryBreakdown.compile - budget.compileTime) / budget.compileTime) * 100,
+        overagePercent:
+          ((summary.categoryBreakdown.compile - budget.compileTime) / budget.compileTime) * 100,
       });
     }
 
@@ -391,11 +396,21 @@ export class Analyzer {
     return violations;
   }
 
-  private analyzeCategoryBreakdown(summary: ProfileSummary): Record<ProfileCategory, CategoryAnalysis> {
+  private analyzeCategoryBreakdown(
+    summary: ProfileSummary
+  ): Record<ProfileCategory, CategoryAnalysis> {
     const totalTime = Object.values(summary.categoryBreakdown).reduce((a, b) => a + b, 0);
     const result: Partial<Record<ProfileCategory, CategoryAnalysis>> = {};
 
-    const categories: ProfileCategory[] = ['parse', 'compile', 'render', 'network', 'memory', 'user', 'gc'];
+    const categories: ProfileCategory[] = [
+      'parse',
+      'compile',
+      'render',
+      'network',
+      'memory',
+      'user',
+      'gc',
+    ];
 
     for (const category of categories) {
       const time = summary.categoryBreakdown[category];
@@ -406,10 +421,13 @@ export class Analyzer {
         const lowerName = h.name.toLowerCase();
         return (
           (category === 'parse' && lowerName.includes('parse')) ||
-          (category === 'compile' && (lowerName.includes('compile') || lowerName.includes('generate'))) ||
+          (category === 'compile' &&
+            (lowerName.includes('compile') || lowerName.includes('generate'))) ||
           (category === 'render' && (lowerName.includes('render') || lowerName.includes('draw'))) ||
-          (category === 'network' && (lowerName.includes('network') || lowerName.includes('fetch'))) ||
-          (category === 'memory' && (lowerName.includes('memory') || lowerName.includes('alloc'))) ||
+          (category === 'network' &&
+            (lowerName.includes('network') || lowerName.includes('fetch'))) ||
+          (category === 'memory' &&
+            (lowerName.includes('memory') || lowerName.includes('alloc'))) ||
           (category === 'gc' && (lowerName.includes('gc') || lowerName.includes('garbage')))
         );
       });

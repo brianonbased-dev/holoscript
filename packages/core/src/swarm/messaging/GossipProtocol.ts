@@ -1,7 +1,7 @@
 /**
  * GossipProtocol - Epidemic-style message propagation
  * HoloScript v3.2 - Autonomous Agent Swarms
- * 
+ *
  * Implements gossip-based message spreading for decentralized swarms
  */
 
@@ -56,10 +56,7 @@ export interface IGossipConfig {
 /**
  * Message handler for gossip
  */
-export type GossipHandler = (
-  message: IGossipMessage,
-  from: string
-) => void | Promise<void>;
+export type GossipHandler = (message: IGossipMessage, from: string) => void | Promise<void>;
 
 /**
  * Peer selector strategy
@@ -176,7 +173,7 @@ export class GossipProtocol {
    * Get all active peers
    */
   getActivePeers(): IGossipPeer[] {
-    return [...this.peers.values()].filter(p => p.isActive);
+    return [...this.peers.values()].filter((p) => p.isActive);
   }
 
   /**
@@ -273,12 +270,9 @@ export class GossipProtocol {
   /**
    * Subscribe to message types
    */
-  subscribe(
-    type: IGossipMessage['type'] | '*',
-    handler: GossipHandler
-  ): () => void {
+  subscribe(type: IGossipMessage['type'] | '*', handler: GossipHandler): () => void {
     const key = type === '*' ? '*' : type;
-    
+
     if (!this.handlers.has(key)) {
       this.handlers.set(key, []);
     }
@@ -330,9 +324,7 @@ export class GossipProtocol {
     // Gossip each message to selected peers
     for (const message of messages) {
       // Exclude peers already in the path
-      const validPeers = selectedPeers.filter(
-        p => !message.path.includes(p.id)
-      );
+      const validPeers = selectedPeers.filter((p) => !message.path.includes(p.id));
 
       for (const peer of validPeers) {
         try {
@@ -351,10 +343,7 @@ export class GossipProtocol {
   /**
    * Send a message to a peer (override for actual network)
    */
-  protected async sendToPeer(
-    _peer: IGossipPeer,
-    _message: IGossipMessage
-  ): Promise<void> {
+  protected async sendToPeer(_peer: IGossipPeer, _message: IGossipMessage): Promise<void> {
     // Override this method for actual network transport
     // Default implementation does nothing (for testing)
   }
@@ -362,10 +351,7 @@ export class GossipProtocol {
   /**
    * Emit message to handlers
    */
-  private async emitToHandlers(
-    message: IGossipMessage,
-    from: string
-  ): Promise<void> {
+  private async emitToHandlers(message: IGossipMessage, from: string): Promise<void> {
     // Emit to type-specific handlers
     const typeHandlers = this.handlers.get(message.type);
     if (typeHandlers) {
@@ -399,7 +385,7 @@ export class GossipProtocol {
     count: number,
     exclude: string[] = []
   ): IGossipPeer[] {
-    const available = peers.filter(p => !exclude.includes(p.id));
+    const available = peers.filter((p) => !exclude.includes(p.id));
     const selected: IGossipPeer[] = [];
 
     while (selected.length < count && available.length > 0) {
@@ -438,23 +424,14 @@ export class GossipProtocol {
    * Send a heartbeat
    */
   publishHeartbeat(metadata?: Record<string, unknown>): string {
-    return this.publish(
-      { type: 'heartbeat', nodeId: this.nodeId, ...metadata },
-      'heartbeat'
-    );
+    return this.publish({ type: 'heartbeat', nodeId: this.nodeId, ...metadata }, 'heartbeat');
   }
 
   /**
    * Announce membership change
    */
-  publishMembership(
-    action: 'join' | 'leave',
-    metadata?: Record<string, unknown>
-  ): string {
-    return this.publish(
-      { action, nodeId: this.nodeId, ...metadata },
-      'membership'
-    );
+  publishMembership(action: 'join' | 'leave', metadata?: Record<string, unknown>): string {
+    return this.publish({ action, nodeId: this.nodeId, ...metadata }, 'membership');
   }
 
   /**
@@ -502,7 +479,8 @@ export class GossipProtocol {
 export class AntiEntropySync {
   private nodeId: string;
   private protocol: GossipProtocol;
-  private dataStore: Map<string, { value: unknown; version: number; timestamp: number }> = new Map();
+  private dataStore: Map<string, { value: unknown; version: number; timestamp: number }> =
+    new Map();
 
   constructor(nodeId: string, protocol: GossipProtocol) {
     this.nodeId = nodeId;
@@ -548,17 +526,15 @@ export class AntiEntropySync {
   /**
    * Handle sync from gossip
    */
-  private handleSync(
-    key: string,
-    value: unknown,
-    version: number,
-    timestamp: number
-  ): void {
+  private handleSync(key: string, value: unknown, version: number, timestamp: number): void {
     const existing = this.dataStore.get(key);
 
     // LWW (Last Writer Wins) with version tiebreaker
-    if (!existing || version > existing.version ||
-        (version === existing.version && timestamp > existing.timestamp)) {
+    if (
+      !existing ||
+      version > existing.version ||
+      (version === existing.version && timestamp > existing.timestamp)
+    ) {
       this.dataStore.set(key, { value, version, timestamp });
     }
   }

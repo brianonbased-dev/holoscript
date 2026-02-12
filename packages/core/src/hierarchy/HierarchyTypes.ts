@@ -182,14 +182,14 @@ export interface DelegatedTask {
  * Status of a delegated task
  */
 export type TaskStatus =
-  | 'pending'      // Waiting to be picked up
-  | 'assigned'     // Assigned to an agent
-  | 'in_progress'  // Currently being executed
-  | 'completed'    // Successfully completed
-  | 'failed'       // Failed after all retries
-  | 'escalated'    // Escalated to supervisor
-  | 'cancelled'    // Cancelled by supervisor
-  | 'timeout';     // Timed out
+  | 'pending' // Waiting to be picked up
+  | 'assigned' // Assigned to an agent
+  | 'in_progress' // Currently being executed
+  | 'completed' // Successfully completed
+  | 'failed' // Failed after all retries
+  | 'escalated' // Escalated to supervisor
+  | 'cancelled' // Cancelled by supervisor
+  | 'timeout'; // Timed out
 
 /**
  * Result of a completed task
@@ -262,12 +262,12 @@ export interface EscalationEvent {
  * Reason for escalation
  */
 export type EscalationReason =
-  | 'timeout'           // Task timed out
-  | 'max_retries'       // Exceeded retry limit
+  | 'timeout' // Task timed out
+  | 'max_retries' // Exceeded retry limit
   | 'capability_mismatch' // Agent lacks capability
-  | 'agent_offline'     // Assigned agent went offline
-  | 'explicit'          // Explicitly requested escalation
-  | 'deadlock'          // Deadlock detected
+  | 'agent_offline' // Assigned agent went offline
+  | 'explicit' // Explicitly requested escalation
+  | 'deadlock' // Deadlock detected
   | 'resource_constraint'; // Insufficient resources
 
 // =============================================================================

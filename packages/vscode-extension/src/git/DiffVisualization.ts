@@ -4,13 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import {
-  SceneNode,
-  SceneDiff,
-  DiffHighlight,
-  DiffVisualization,
-  DIFF_COLORS,
-} from './GitTypes';
+import { SceneNode, SceneDiff, DiffHighlight, DiffVisualization, DIFF_COLORS } from './GitTypes';
 
 /**
  * Webview provider for 3D diff visualization

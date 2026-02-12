@@ -98,12 +98,8 @@ export function SearchBar({
         {/* Keyboard Shortcut Hint */}
         {!value && !isFocused && (
           <div className="hidden sm:flex items-center gap-1 pr-4 text-xs text-zinc-400">
-            <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-700 rounded font-mono">
-              ⌘
-            </kbd>
-            <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-700 rounded font-mono">
-              K
-            </kbd>
+            <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-700 rounded font-mono">⌘</kbd>
+            <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-700 rounded font-mono">K</kbd>
           </div>
         )}
 

@@ -1,6 +1,6 @@
 /**
  * Contribution Synthesizer
- * 
+ *
  * Synthesizes multiple contributions into unified insights.
  */
 
@@ -51,28 +51,28 @@ export class ContributionSynthesizer {
    */
   synthesize(session: IHiveSession): SynthesisResult {
     const contributions = session.contributions;
-    
+
     if (contributions.length === 0) {
       return this.createEmptyResult();
     }
 
     // Filter by confidence threshold
     const qualified = contributions.filter(
-      c => c.confidence >= this.config.minConfidenceThreshold
+      (c) => c.confidence >= this.config.minConfidenceThreshold
     );
 
     // Group by type
     const grouped = this.groupByType(qualified);
-    
+
     // Determine synthesis method based on contribution distribution
     const method = this.determineSynthesisMethod(grouped);
-    
+
     // Perform synthesis
     const synthesized = this.performSynthesis(grouped, method);
-    
+
     // Extract key themes
     const keyThemes = this.extractKeyThemes(qualified);
-    
+
     // Calculate average confidence
     const avgConfidence = this.calculateAverageConfidence(qualified);
 
@@ -114,14 +114,19 @@ export class ContributionSynthesizer {
    */
   merge(a: IHiveContribution, b: IHiveContribution): IHiveContribution {
     // Determine merged type: solutions > consensus > ideas > critiques
-    const typeHierarchy: IHiveContribution['type'][] = ['critique', 'idea', 'consensus', 'solution'];
+    const typeHierarchy: IHiveContribution['type'][] = [
+      'critique',
+      'idea',
+      'consensus',
+      'solution',
+    ];
     const aRank = typeHierarchy.indexOf(a.type);
     const bRank = typeHierarchy.indexOf(b.type);
     const mergedType = aRank >= bRank ? a.type : b.type;
 
     // Merge content
     const mergedContent = `[Merged]\n${a.content}\n---\n${b.content}`;
-    
+
     // Average confidence with slight boost for synthesis
     const mergedConfidence = Math.min(1, (a.confidence + b.confidence) / 2 + 0.05);
 
@@ -143,7 +148,7 @@ export class ContributionSynthesizer {
     candidates: IHiveContribution[],
     threshold = 0.5
   ): IHiveContribution[] {
-    return candidates.filter(c => {
+    return candidates.filter((c) => {
       if (c.id === target.id) return false;
       const similarity = this.calculateSimilarity(target.content, c.content);
       return similarity >= threshold;
@@ -201,7 +206,9 @@ export class ContributionSynthesizer {
     return groups;
   }
 
-  private determineSynthesisMethod(grouped: ReturnType<typeof this.groupByType>): SynthesisResult['synthesisMethod'] {
+  private determineSynthesisMethod(
+    grouped: ReturnType<typeof this.groupByType>
+  ): SynthesisResult['synthesisMethod'] {
     // If we have solutions and prefer them, use hierarchical
     if (this.config.preferSolutions && grouped.solutions.length > 0) {
       return 'hierarchical';
@@ -329,7 +336,7 @@ export class ContributionSynthesizer {
     confidence: number;
   } {
     const all = [...grouped.ideas, ...grouped.solutions, ...grouped.consensuses];
-    
+
     // Weight by confidence
     all.sort((a, b) => b.confidence - a.confidence);
 
@@ -358,8 +365,13 @@ export class ContributionSynthesizer {
     sources: string[];
     confidence: number;
   } {
-    const all = [...grouped.solutions, ...grouped.ideas, ...grouped.consensuses, ...grouped.critiques];
-    
+    const all = [
+      ...grouped.solutions,
+      ...grouped.ideas,
+      ...grouped.consensuses,
+      ...grouped.critiques,
+    ];
+
     if (all.length === 0) {
       return { content: '', sources: [], confidence: 0 };
     }
@@ -384,10 +396,47 @@ export class ContributionSynthesizer {
   private extractKeyThemes(contributions: IHiveContribution[]): string[] {
     // Simple word frequency analysis
     const wordCounts = new Map<string, number>();
-    const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'it', 'this', 'that', 'which', 'who', 'what', 'where', 'when', 'why', 'how']);
+    const stopWords = new Set([
+      'the',
+      'a',
+      'an',
+      'and',
+      'or',
+      'but',
+      'is',
+      'are',
+      'was',
+      'were',
+      'be',
+      'been',
+      'being',
+      'to',
+      'of',
+      'in',
+      'for',
+      'on',
+      'with',
+      'at',
+      'by',
+      'from',
+      'as',
+      'it',
+      'this',
+      'that',
+      'which',
+      'who',
+      'what',
+      'where',
+      'when',
+      'why',
+      'how',
+    ]);
 
     for (const c of contributions) {
-      const words = c.content.toLowerCase().split(/\W+/).filter(w => w.length > 3 && !stopWords.has(w));
+      const words = c.content
+        .toLowerCase()
+        .split(/\W+/)
+        .filter((w) => w.length > 3 && !stopWords.has(w));
       for (const word of words) {
         wordCounts.set(word, (wordCounts.get(word) ?? 0) + 1);
       }
@@ -406,8 +455,18 @@ export class ContributionSynthesizer {
 
   private calculateSimilarity(a: string, b: string): number {
     // Simple Jaccard similarity on word sets
-    const wordsA = new Set(a.toLowerCase().split(/\W+/).filter(w => w.length > 2));
-    const wordsB = new Set(b.toLowerCase().split(/\W+/).filter(w => w.length > 2));
+    const wordsA = new Set(
+      a
+        .toLowerCase()
+        .split(/\W+/)
+        .filter((w) => w.length > 2)
+    );
+    const wordsB = new Set(
+      b
+        .toLowerCase()
+        .split(/\W+/)
+        .filter((w) => w.length > 2)
+    );
 
     if (wordsA.size === 0 || wordsB.size === 0) return 0;
 

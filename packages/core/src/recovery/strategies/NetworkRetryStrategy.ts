@@ -1,10 +1,15 @@
 /**
  * Network Retry Strategy
- * 
+ *
  * Handles network-timeout failures with exponential backoff retry.
  */
 
-import type { IRecoveryStrategy, IAgentFailure, IRecoveryResult, FailureType } from '../../extensions';
+import type {
+  IRecoveryStrategy,
+  IAgentFailure,
+  IRecoveryResult,
+  FailureType,
+} from '../../extensions';
 
 export interface NetworkRetryConfig {
   maxAttempts: number;

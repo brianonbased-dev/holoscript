@@ -7,6 +7,7 @@
 
 import { ModuleResolver } from './Interoperability';
 import type { HSPlusAST } from '../types/HoloScriptPlus';
+import { Lazy } from '../runtime/RuntimeOptimization';
 
 export interface CompanionLoaderOptions {
   /** Base path for resolving relative imports */
@@ -57,19 +58,31 @@ export class CompanionLoader {
     };
 
     for (const imp of ast.imports || []) {
-      try {
-        const modulePath = (imp as any).path || imp.source;
-        const alias = (imp as any).alias || imp.source;
-        const module = await this.loadModule(modulePath);
-        result.companions[alias] = module;
-        result.loaded.push(modulePath);
-      } catch (error) {
-        const errorPath = (imp as any).path || imp.source;
-        result.errors.push({
-          path: errorPath,
-          error: error instanceof Error ? error : new Error(String(error)),
-        });
-      }
+      const modulePath = (imp as any).path || imp.source;
+      const alias = (imp as any).alias || imp.source;
+
+      // Create a lazy wrapper for the module
+      const lazyModule = new Lazy(() => this.loadModule(modulePath));
+
+      // Use Proxy to provide a synchronous-looking interface to the lazy module
+      // The runtime will await it if it's a promise, but here we provide a way
+      // to avoid triggering the load until a property is accessed.
+      const proxy = new Proxy(
+        {},
+        {
+          get: (target, prop) => {
+            const mod = lazyModule.get();
+            if (mod instanceof Promise) {
+              // If it's still loading (async), we return a promise for the property
+              return mod.then((m) => (m as any)[prop]);
+            }
+            return (mod as any)[prop];
+          },
+        }
+      );
+
+      result.companions[alias] = proxy as any;
+      result.loaded.push(modulePath);
     }
 
     return result;

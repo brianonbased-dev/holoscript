@@ -488,7 +488,9 @@ export class OpenXRCompiler {
       this.emit('');
       this.emit('VkMemoryAllocateInfo allocInfo{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};');
       this.emit('allocInfo.allocationSize = memReqs.size;');
-      this.emit('allocInfo.memoryTypeIndex = findMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);');
+      this.emit(
+        'allocInfo.memoryTypeIndex = findMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);'
+      );
       this.emit(`vkAllocateMemory(vkDevice, &allocInfo, nullptr, &${varName}_vboMemory);`);
       this.emit(`vkBindBufferMemory(vkDevice, ${varName}_vbo, ${varName}_vboMemory, 0);`);
       this.emit('');
@@ -504,7 +506,9 @@ export class OpenXRCompiler {
       this.emit(`VkDescriptorSet ${varName}_desc = VK_NULL_HANDLE;`);
       this.emit('{');
       this.indent();
-      this.emit('VkDescriptorSetAllocateInfo descAllocInfo{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};');
+      this.emit(
+        'VkDescriptorSetAllocateInfo descAllocInfo{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};'
+      );
       this.emit('descAllocInfo.descriptorPool = descriptorPool;');
       this.emit('descAllocInfo.descriptorSetCount = 1;');
       this.emit('descAllocInfo.pSetLayouts = &descriptorSetLayout;');
@@ -850,11 +854,15 @@ export class OpenXRCompiler {
     this.emit('');
     this.emit('// === Render scene objects ===');
     if (this.options.renderBackend === 'vulkan') {
-      this.emit('VkCommandBufferBeginInfo cmdBeginInfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};');
+      this.emit(
+        'VkCommandBufferBeginInfo cmdBeginInfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};'
+      );
       this.emit('cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;');
       this.emit('vkBeginCommandBuffer(commandBuffer, &cmdBeginInfo);');
       this.emit('');
-      this.emit('beginRenderPass(commandBuffer, renderPass, framebuffers[imageIndex], 1920, 1920);');
+      this.emit(
+        'beginRenderPass(commandBuffer, renderPass, framebuffers[imageIndex], 1920, 1920);'
+      );
       this.emit('');
 
       // Collect all objects (top-level + from spatial groups)
@@ -862,11 +870,19 @@ export class OpenXRCompiler {
       for (const obj of allObjects) {
         const varName = this.sanitizeName(obj.name);
         this.emit(`// Draw: ${obj.name}`);
-        this.emit(`vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);`);
+        this.emit(
+          `vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);`
+        );
         this.emit(`VkDeviceSize ${varName}_offset = 0;`);
-        this.emit(`vkCmdBindVertexBuffers(commandBuffer, 0, 1, &${varName}_vbo, &${varName}_offset);`);
-        this.emit(`vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &${varName}_desc, 0, nullptr);`);
-        this.emit(`vkCmdDraw(commandBuffer, static_cast<uint32_t>(${varName}_vertices.size() / 6), 1, 0, 0);`);
+        this.emit(
+          `vkCmdBindVertexBuffers(commandBuffer, 0, 1, &${varName}_vbo, &${varName}_offset);`
+        );
+        this.emit(
+          `vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &${varName}_desc, 0, nullptr);`
+        );
+        this.emit(
+          `vkCmdDraw(commandBuffer, static_cast<uint32_t>(${varName}_vertices.size() / 6), 1, 0, 0);`
+        );
         this.emit('');
       }
 
@@ -885,7 +901,9 @@ export class OpenXRCompiler {
         const varName = this.sanitizeName(obj.name);
         this.emit(`// Draw: ${obj.name}`);
         this.emit(`glBindVertexArray(${varName}_vao);`);
-        this.emit(`glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(${varName}_vertices.size() / 6));`);
+        this.emit(
+          `glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(${varName}_vertices.size() / 6));`
+        );
         this.emit('');
       }
     }

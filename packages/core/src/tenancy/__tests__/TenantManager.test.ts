@@ -206,9 +206,7 @@ describe('TenantManager', () => {
     });
 
     it('should throw for non-existent tenant', () => {
-      expect(() => manager.deleteTenant('nonexistent')).toThrow(
-        "Tenant 'nonexistent' not found"
-      );
+      expect(() => manager.deleteTenant('nonexistent')).toThrow("Tenant 'nonexistent' not found");
     });
   });
 
@@ -494,9 +492,7 @@ describe('IsolationEnforcer', () => {
 
     it('should reject namespace from another tenant', () => {
       const ctx = createContext('tenant-1');
-      expect(() => validateNamespace(ctx, 'tenant:tenant-2:my-ns')).toThrow(
-        TenantIsolationError
-      );
+      expect(() => validateNamespace(ctx, 'tenant:tenant-2:my-ns')).toThrow(TenantIsolationError);
     });
 
     it('should reject namespace without tenant prefix', () => {
@@ -567,9 +563,7 @@ describe('NamespaceManager', () => {
     });
 
     it('should throw for empty name', () => {
-      expect(() => nsManager.createNamespace('tenant-1', '')).toThrow(
-        'Namespace name is required'
-      );
+      expect(() => nsManager.createNamespace('tenant-1', '')).toThrow('Namespace name is required');
     });
   });
 
@@ -684,9 +678,9 @@ describe('NamespaceManager', () => {
     });
 
     it('should throw when setting data in non-existent namespace', () => {
-      expect(() =>
-        nsManager.setNamespaceData('tenant-1', 'nonexistent', 'key', 'value')
-      ).toThrow("Namespace 'nonexistent' not found");
+      expect(() => nsManager.setNamespaceData('tenant-1', 'nonexistent', 'key', 'value')).toThrow(
+        "Namespace 'nonexistent' not found"
+      );
     });
 
     it('should throw when getting data from non-existent namespace', () => {
@@ -742,10 +736,7 @@ describe('Cross-Tenant Access Prevention', () => {
 
   it('should prevent tenant beta from accessing alpha namespaces', () => {
     const betaCtx = createContext('beta', 'bob', ['admin']);
-    const alphaNamespace = getIsolatedNamespace(
-      createContext('alpha'),
-      'projects'
-    );
+    const alphaNamespace = getIsolatedNamespace(createContext('alpha'), 'projects');
 
     expect(() => validateNamespace(betaCtx, alphaNamespace)).toThrow(TenantIsolationError);
   });

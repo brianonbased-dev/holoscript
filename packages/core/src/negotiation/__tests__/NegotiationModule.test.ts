@@ -55,11 +55,7 @@ function createTestProposal(
   };
 }
 
-function createTestVote(
-  agentId: string,
-  ranking: string[],
-  weight: number = 1
-): Vote {
+function createTestVote(agentId: string, ranking: string[], weight: number = 1): Vote {
   return {
     id: `vote-${agentId}`,
     sessionId: 'test-session',
@@ -166,9 +162,7 @@ describe('VotingMechanisms', () => {
     });
 
     it('should return false when quorum is not met', () => {
-      const votes: Vote[] = [
-        createTestVote('agent-1', ['p1']),
-      ];
+      const votes: Vote[] = [createTestVote('agent-1', ['p1'])];
       const participantCount = 4; // Only 1 of 4 voted
       const config = createTestConfig('majority', { quorum: 0.5 });
 
@@ -179,10 +173,7 @@ describe('VotingMechanisms', () => {
   });
 
   describe('majorityHandler', () => {
-    const proposals = [
-      createTestProposal('p1', 'agent-1'),
-      createTestProposal('p2', 'agent-2'),
-    ];
+    const proposals = [createTestProposal('p1', 'agent-1'), createTestProposal('p2', 'agent-2')];
     const config = createTestConfig('majority');
 
     it('should declare winner with simple majority', () => {
@@ -200,12 +191,14 @@ describe('VotingMechanisms', () => {
     });
 
     it('should detect tie', () => {
-      const votes: Vote[] = [
-        createTestVote('agent-1', ['p1']),
-        createTestVote('agent-2', ['p2']),
-      ];
+      const votes: Vote[] = [createTestVote('agent-1', ['p1']), createTestVote('agent-2', ['p2'])];
 
-      const result = majorityHandler.count(votes, proposals, { ...config, tieBreaker: 'escalate' }, 1);
+      const result = majorityHandler.count(
+        votes,
+        proposals,
+        { ...config, tieBreaker: 'escalate' },
+        1
+      );
 
       expect(result.tie).toBe(true);
     });
@@ -220,10 +213,7 @@ describe('VotingMechanisms', () => {
   });
 
   describe('supermajorityHandler', () => {
-    const proposals = [
-      createTestProposal('p1', 'agent-1'),
-      createTestProposal('p2', 'agent-2'),
-    ];
+    const proposals = [createTestProposal('p1', 'agent-1'), createTestProposal('p2', 'agent-2')];
     const config = createTestConfig('supermajority');
 
     it('should require 2/3 majority', () => {
@@ -254,9 +244,7 @@ describe('VotingMechanisms', () => {
   });
 
   describe('consensusHandler', () => {
-    const proposals = [
-      createTestProposal('p1', 'agent-1'),
-    ];
+    const proposals = [createTestProposal('p1', 'agent-1')];
     const config = createTestConfig('consensus');
 
     it('should require unanimous agreement', () => {
@@ -273,10 +261,7 @@ describe('VotingMechanisms', () => {
     });
 
     it('should fail with any dissent', () => {
-      const proposals2 = [
-        createTestProposal('p1', 'agent-1'),
-        createTestProposal('p2', 'agent-2'),
-      ];
+      const proposals2 = [createTestProposal('p1', 'agent-1'), createTestProposal('p2', 'agent-2')];
       const votes: Vote[] = [
         createTestVote('agent-1', ['p1']),
         createTestVote('agent-2', ['p2']), // Different choice

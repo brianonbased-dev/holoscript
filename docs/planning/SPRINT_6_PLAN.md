@@ -21,16 +21,16 @@ Sprint 6 delivers **Spatial Export & Rendering** capabilities, enabling HoloScri
 
 ## Sprint Priorities
 
-| Priority | Focus | Effort | Dependencies | Status |
-|----------|-------|--------|--------------|--------|
-| **1** | Scene Serialization | Medium | Core complete | ✅ Complete |
-| **2** | GLB/GLTF Export | High | Priority 1 | ✅ Complete |
-| **3** | USD/USDZ Export | High | Priority 1 | ✅ Complete |
-| **4** | Asset Optimization | Medium | Priority 2, 3 | ✅ Complete |
-| **5** | Render Network Integration | High | Priority 2 | ✅ Complete |
-| **6** | Mobile AR Optimization | Medium | Priority 2, 4 | ✅ Complete |
-| **7** | Volumetric Video Support | High | Priority 1 | ✅ Complete |
-| **8** | Export CLI & API | Medium | All priorities | ✅ Complete |
+| Priority | Focus                      | Effort | Dependencies   | Status      |
+| -------- | -------------------------- | ------ | -------------- | ----------- |
+| **1**    | Scene Serialization        | Medium | Core complete  | ✅ Complete |
+| **2**    | GLB/GLTF Export            | High   | Priority 1     | ✅ Complete |
+| **3**    | USD/USDZ Export            | High   | Priority 1     | ✅ Complete |
+| **4**    | Asset Optimization         | Medium | Priority 2, 3  | ✅ Complete |
+| **5**    | Render Network Integration | High   | Priority 2     | ✅ Complete |
+| **6**    | Mobile AR Optimization     | Medium | Priority 2, 4  | ✅ Complete |
+| **7**    | Volumetric Video Support   | High   | Priority 1     | ✅ Complete |
+| **8**    | Export CLI & API           | Medium | All priorities | ✅ Complete |
 
 ---
 
@@ -123,22 +123,22 @@ scene#my_scene {
 
 ```typescript
 export interface IGLTFExportOptions {
-  binary: boolean;              // GLB vs GLTF
-  embedTextures: boolean;       // Embed or reference
+  binary: boolean; // GLB vs GLTF
+  embedTextures: boolean; // Embed or reference
   compression: 'draco' | 'meshopt' | 'none';
   animations: boolean;
-  extensions: string[];         // KHR_materials_pbrSpecularGlossiness, etc.
+  extensions: string[]; // KHR_materials_pbrSpecularGlossiness, etc.
 }
 
 export class GLTFExporter {
   constructor(options?: IGLTFExportOptions);
-  
+
   export(scene: Scene): Promise<GLTFResult>;
   exportNode(node: ISceneNode): GLTF.Node;
   exportMesh(mesh: Mesh): GLTF.Mesh;
   exportMaterial(material: Material): GLTF.Material;
   exportAnimation(animation: Animation): GLTF.Animation;
-  
+
   // Extensions
   addExtension(name: string, handler: ExtensionHandler): void;
 }
@@ -179,19 +179,19 @@ export interface GLTFResult {
 ```typescript
 export interface IUSDExportOptions {
   format: 'usda' | 'usdc' | 'usdz';
-  arKitCompatible: boolean;     // USDZ with AR Quick Look support
+  arKitCompatible: boolean; // USDZ with AR Quick Look support
   materialConversion: 'preview' | 'full';
   includeSkeleton: boolean;
 }
 
 export class USDExporter {
   constructor(options?: IUSDExportOptions);
-  
+
   export(scene: Scene): Promise<USDResult>;
   exportPrim(node: ISceneNode): USD.Prim;
   exportMesh(mesh: Mesh): USD.GeomMesh;
   exportMaterial(material: Material): USD.PreviewSurface;
-  
+
   // USDZ packaging
   package(assets: USDAsset[]): Promise<ArrayBuffer>;
 }
@@ -225,8 +225,8 @@ export class USDExporter {
 ```typescript
 export interface IOptimizationOptions {
   target: 'web' | 'mobile' | 'desktop' | 'xr';
-  textureResolution: number;    // Max texture dimension
-  meshSimplification: number;   // 0-1, ratio to keep
+  textureResolution: number; // Max texture dimension
+  meshSimplification: number; // 0-1, ratio to keep
   atlasTextures: boolean;
   generateLODs: boolean;
   lodLevels: number;
@@ -234,15 +234,15 @@ export interface IOptimizationOptions {
 
 export class AssetOptimizer {
   constructor(options?: IOptimizationOptions);
-  
+
   optimize(scene: ISceneGraph): Promise<ISceneGraph>;
-  
+
   // Individual optimizations
   simplifyMesh(mesh: Mesh, ratio: number): Mesh;
   resizeTexture(texture: Texture, maxSize: number): Texture;
   generateTextureAtlas(textures: Texture[]): TextureAtlas;
   generateLOD(mesh: Mesh, levels: number): LODMesh;
-  
+
   // Analysis
   analyzeScene(scene: ISceneGraph): OptimizationReport;
 }
@@ -301,16 +301,16 @@ export interface IRenderJob {
 
 export class RenderNetworkClient {
   constructor(config: RenderNetworkConfig);
-  
+
   // Job management
   submit(options: IRenderJobOptions): Promise<IRenderJob>;
   getStatus(jobId: string): Promise<IRenderJob>;
   cancel(jobId: string): Promise<void>;
-  
+
   // Results
   download(jobId: string): Promise<ArrayBuffer>;
   stream(jobId: string): AsyncIterable<ArrayBuffer>;
-  
+
   // Account
   getBalance(): Promise<{ credits: number }>;
   estimateCost(options: IRenderJobOptions): Promise<CostEstimate>;
@@ -371,21 +371,21 @@ export interface IMobileAROptions {
 
 export class MobileARExporter {
   constructor(options?: IMobileAROptions);
-  
+
   export(scene: Scene): Promise<MobileARBundle>;
-  
+
   // Platform-specific
   exportARCore(scene: Scene): Promise<GLTFResult>;
   exportARKit(scene: Scene): Promise<USDZResult>;
-  
+
   // Optimization
   optimizeForAR(scene: ISceneGraph): ISceneGraph;
   generateAnchors(scene: Scene): ARAnchor[];
 }
 
 export interface MobileARBundle {
-  arcore?: ArrayBuffer;  // GLB
-  arkit?: ArrayBuffer;   // USDZ
+  arcore?: ArrayBuffer; // GLB
+  arkit?: ArrayBuffer; // USDZ
   manifest: ARManifest;
 }
 ```
@@ -417,27 +417,27 @@ export interface MobileARBundle {
 
 ```typescript
 export interface IVolumetricOptions {
-  format: 'splat' | 'nvdb' | 'avv';  // Gaussian Splatting, NanoVDB, Arcturus
+  format: 'splat' | 'nvdb' | 'avv'; // Gaussian Splatting, NanoVDB, Arcturus
   quality: 'low' | 'medium' | 'high';
   streaming: boolean;
 }
 
 export interface IGaussianSplat {
-  positions: Float32Array;   // xyz per splat
-  scales: Float32Array;      // scale per splat
-  rotations: Float32Array;   // quaternion per splat
-  colors: Uint8Array;        // RGBA SH coefficients
-  opacities: Float32Array;   // opacity per splat
+  positions: Float32Array; // xyz per splat
+  scales: Float32Array; // scale per splat
+  rotations: Float32Array; // quaternion per splat
+  colors: Uint8Array; // RGBA SH coefficients
+  opacities: Float32Array; // opacity per splat
 }
 
 export class VolumetricExporter {
   constructor(options?: IVolumetricOptions);
-  
+
   // Gaussian Splatting
   exportSplat(splat: IGaussianSplat): Promise<ArrayBuffer>;
   importSplat(data: ArrayBuffer): Promise<IGaussianSplat>;
   optimizeSplat(splat: IGaussianSplat, targetCount: number): IGaussianSplat;
-  
+
   // Volumetric video
   exportVolumetric(video: VolumetricVideo): Promise<VolumetricResult>;
   streamVolumetric(url: string): AsyncIterable<VolumetricFrame>;
@@ -453,7 +453,7 @@ object#volumetric_capture {
     format: "gaussian",
     quality: "high"
   )
-  
+
   @streaming(
     enabled: true,
     bufferSize: 30 // frames
@@ -500,17 +500,17 @@ export interface IExportOptions {
 
 export class ExportPipeline {
   constructor(options?: PipelineOptions);
-  
+
   // Single export
   export(options: IExportOptions): Promise<ExportResult>;
-  
+
   // Batch export
   exportBatch(inputs: IExportOptions[]): Promise<ExportResult[]>;
-  
+
   // Pipeline stages
   addStage(stage: IPipelineStage): this;
   removeStage(name: string): this;
-  
+
   // Events
   on(event: 'progress', handler: ProgressHandler): this;
   on(event: 'complete', handler: CompleteHandler): this;
@@ -607,16 +607,16 @@ packages/cli/src/commands/
 
 ### Unit Tests (Target: 350+)
 
-| Module | Test Focus | Target |
-|--------|------------|--------|
-| SceneSerializer | Round-trip, binary, large graphs | 40 |
-| GLTFExporter | Format compliance, compression | 60 |
-| USDExporter | Apple compatibility, materials | 50 |
-| AssetOptimizer | Simplification, atlasing, LOD | 45 |
-| RenderNetworkClient | API, jobs, streaming | 35 |
-| MobileARExporter | Platform targets, anchors | 40 |
-| VolumetricExporter | Splat encoding, streaming | 50 |
-| ExportPipeline | CLI, batch, events | 35 |
+| Module              | Test Focus                       | Target |
+| ------------------- | -------------------------------- | ------ |
+| SceneSerializer     | Round-trip, binary, large graphs | 40     |
+| GLTFExporter        | Format compliance, compression   | 60     |
+| USDExporter         | Apple compatibility, materials   | 50     |
+| AssetOptimizer      | Simplification, atlasing, LOD    | 45     |
+| RenderNetworkClient | API, jobs, streaming             | 35     |
+| MobileARExporter    | Platform targets, anchors        | 40     |
+| VolumetricExporter  | Splat encoding, streaming        | 50     |
+| ExportPipeline      | CLI, batch, events               | 35     |
 
 ### Integration Tests
 
@@ -631,34 +631,34 @@ packages/cli/src/commands/
 
 ### New Dependencies
 
-| Package | Purpose | License |
-|---------|---------|---------|
-| `@gltf-transform/core` | GLTF manipulation | MIT |
-| `draco3d` | Mesh compression | Apache-2.0 |
-| `meshoptimizer` | Mesh optimization | MIT |
-| `@pixiv/three-vrm` | Avatar export (future) | MIT |
+| Package                | Purpose                | License    |
+| ---------------------- | ---------------------- | ---------- |
+| `@gltf-transform/core` | GLTF manipulation      | MIT        |
+| `draco3d`              | Mesh compression       | Apache-2.0 |
+| `meshoptimizer`        | Mesh optimization      | MIT        |
+| `@pixiv/three-vrm`     | Avatar export (future) | MIT        |
 
 ### External Services
 
-| Service | Purpose | Cost Model |
-|---------|---------|------------|
-| Render Network | Distributed rendering | Credits/GPU-hr |
-| IPFS | Asset hosting (optional) | Per GB |
+| Service        | Purpose                  | Cost Model     |
+| -------------- | ------------------------ | -------------- |
+| Render Network | Distributed rendering    | Credits/GPU-hr |
+| IPFS           | Asset hosting (optional) | Per GB         |
 
 ---
 
 ## Timeline
 
-| Week | Focus | Deliverable |
-|------|-------|-------------|
-| 1-2 | Scene Serialization | SceneSerializer, IR types |
-| 3-5 | GLB/GLTF Export | GLTFExporter, compression |
-| 6-8 | USD/USDZ Export | USDExporter, ARKit |
-| 9-10 | Asset Optimization | Optimizer pipeline |
-| 11-13 | Render Network | Client, job management |
-| 14-15 | Mobile AR | Platform-specific exports |
-| 16-18 | Volumetric | Gaussian Splatting |
-| 19-20 | CLI & API | Export pipeline, CLI |
+| Week  | Focus               | Deliverable               |
+| ----- | ------------------- | ------------------------- |
+| 1-2   | Scene Serialization | SceneSerializer, IR types |
+| 3-5   | GLB/GLTF Export     | GLTFExporter, compression |
+| 6-8   | USD/USDZ Export     | USDExporter, ARKit        |
+| 9-10  | Asset Optimization  | Optimizer pipeline        |
+| 11-13 | Render Network      | Client, job management    |
+| 14-15 | Mobile AR           | Platform-specific exports |
+| 16-18 | Volumetric          | Gaussian Splatting        |
+| 19-20 | CLI & API           | Export pipeline, CLI      |
 
 **Total Duration**: 20 weeks (Sep 2026 target)
 
@@ -682,13 +682,13 @@ packages/cli/src/commands/
 
 ## Risk Register
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Render Network API changes | High | Low | Abstract client, versioned API |
-| Draco/MeshOpt WASM issues | Medium | Medium | Native fallbacks, CI testing |
-| Apple USDZ restrictions | Medium | Medium | Strict schema validation |
-| Gaussian Splatting format evolving | Low | High | Plugin architecture |
-| Large scene memory limits | High | Medium | Streaming serialization |
+| Risk                               | Impact | Probability | Mitigation                     |
+| ---------------------------------- | ------ | ----------- | ------------------------------ |
+| Render Network API changes         | High   | Low         | Abstract client, versioned API |
+| Draco/MeshOpt WASM issues          | Medium | Medium      | Native fallbacks, CI testing   |
+| Apple USDZ restrictions            | Medium | Medium      | Strict schema validation       |
+| Gaussian Splatting format evolving | Low    | High        | Plugin architecture            |
+| Large scene memory limits          | High   | Medium      | Streaming serialization        |
 
 ---
 

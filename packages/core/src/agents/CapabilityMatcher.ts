@@ -121,7 +121,10 @@ function getLatencyScore(profile: LatencyProfile): number {
   return index >= 0 ? (LATENCY_ORDER.length - index) / LATENCY_ORDER.length : 0;
 }
 
-function meetsMaxLatency(capLatency: LatencyProfile | undefined, maxLatency: LatencyProfile): boolean {
+function meetsMaxLatency(
+  capLatency: LatencyProfile | undefined,
+  maxLatency: LatencyProfile
+): boolean {
   if (!capLatency) return true; // Unknown latency is allowed
   return LATENCY_ORDER.indexOf(capLatency) <= LATENCY_ORDER.indexOf(maxLatency);
 }
@@ -132,9 +135,12 @@ function meetsMaxLatency(capLatency: LatencyProfile | undefined, maxLatency: Lat
 
 function pointInBounds(point: Vector3, min: Vector3, max: Vector3): boolean {
   return (
-    point.x >= min.x && point.x <= max.x &&
-    point.y >= min.y && point.y <= max.y &&
-    point.z >= min.z && point.z <= max.z
+    point.x >= min.x &&
+    point.x <= max.x &&
+    point.y >= min.y &&
+    point.y <= max.y &&
+    point.z >= min.z &&
+    point.z <= max.z
   );
 }
 
@@ -143,9 +149,12 @@ function boundsOverlap(
   b: { min: Vector3; max: Vector3 }
 ): boolean {
   return (
-    a.min.x <= b.max.x && a.max.x >= b.min.x &&
-    a.min.y <= b.max.y && a.max.y >= b.min.y &&
-    a.min.z <= b.max.z && a.max.z >= b.min.z
+    a.min.x <= b.max.x &&
+    a.max.x >= b.min.x &&
+    a.min.y <= b.max.y &&
+    a.max.y >= b.min.y &&
+    a.min.z <= b.max.z &&
+    a.max.z >= b.min.z
   );
 }
 
@@ -436,6 +445,9 @@ export function findAgents(manifests: AgentManifest[], query: CapabilityQuery): 
 /**
  * Convenience function to find the best agent
  */
-export function findBestAgent(manifests: AgentManifest[], query: CapabilityQuery): AgentMatch | null {
+export function findBestAgent(
+  manifests: AgentManifest[],
+  query: CapabilityQuery
+): AgentMatch | null {
   return defaultMatcher.findBest(manifests, query);
 }

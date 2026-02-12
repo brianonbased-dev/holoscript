@@ -36,11 +36,18 @@ export class ReactiveState implements IReactiveState {
   }
 
   get(key: string): HoloScriptValue {
-    return this.proxy[key];
+    const val = this.proxy[key];
+    console.log(`[ReactiveState DEBUG] get ${key} = ${val}`);
+    return val;
   }
 
   set(key: string, value: HoloScriptValue): void {
+    console.log(`[ReactiveState DEBUG] set ${key} = ${value}`);
     this.proxy[key] = value;
+  }
+
+  has(key: string): boolean {
+    return this.proxy[key] !== undefined;
   }
 
   update(updates: Record<string, HoloScriptValue>): void {
@@ -54,6 +61,10 @@ export class ReactiveState implements IReactiveState {
 
   getSnapshot(): Record<string, HoloScriptValue> {
     return { ...this.state };
+  }
+
+  getProxy(): Record<string, HoloScriptValue> {
+    return this.proxy;
   }
 
   private notify() {

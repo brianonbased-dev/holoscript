@@ -33,12 +33,12 @@ The **1,000 node limit** is the primary constraint. Design around lazy loading a
 
 ### .hsplus Limits
 
-| Limit           | Value         |
-| --------------- | ------------- |
+| Limit           | Value                         |
+| --------------- | ----------------------------- |
 | VR Traits       | 57 implemented (119+ defined) |
-| Lifecycle Hooks | 80+ available |
-| Scale Range     | 0.1x - 10x    |
-| Inventory Stack | 10 items      |
+| Lifecycle Hooks | 80+ available                 |
+| Scale Range     | 0.1x - 10x                    |
+| Inventory Stack | 10 items                      |
 
 ### .holo Limits
 

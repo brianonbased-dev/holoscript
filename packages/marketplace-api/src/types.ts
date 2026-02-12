@@ -27,15 +27,7 @@ export type TraitCategory =
 /**
  * Supported platforms for traits
  */
-export type Platform =
-  | 'web'
-  | 'nodejs'
-  | 'unity'
-  | 'unreal'
-  | 'godot'
-  | 'native'
-  | 'wasm'
-  | 'all';
+export type Platform = 'web' | 'nodejs' | 'unity' | 'unreal' | 'godot' | 'native' | 'wasm' | 'all';
 
 /**
  * License types commonly used
@@ -297,7 +289,7 @@ export interface DependencyTree {
  */
 export interface ResolvedDependency {
   name: string;
-  version: string;  // Exact version
+  version: string; // Exact version
   requestedBy: string[];
   depth: number;
   platform?: Platform;

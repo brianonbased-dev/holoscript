@@ -44,7 +44,7 @@ composition "AgentWorkspace" {
       heartbeat_interval: 5000
     }
   }
-  
+
   // Define an AI assistant agent
   template "AssistantAgent" {
     @agent {
@@ -52,13 +52,13 @@ composition "AgentWorkspace" {
       capabilities: ["text-generation", "code-review"]
       max_concurrent_tasks: 5
     }
-    
+
     state {
       status: "idle"
       current_tasks: []
     }
   }
-  
+
   // Define a code analyzer agent
   template "AnalyzerAgent" {
     @agent {
@@ -66,13 +66,13 @@ composition "AgentWorkspace" {
       capabilities: ["static-analysis", "security-scan"]
       max_concurrent_tasks: 3
     }
-    
+
     state {
       status: "idle"
       analysis_queue: []
     }
   }
-  
+
   // Instantiate agents
   object "CodeAssistant" using "AssistantAgent" {}
   object "SecurityAnalyzer" using "AnalyzerAgent" {}
@@ -89,7 +89,7 @@ import { AgentRegistry, ChoreographyEngine } from '@holoscript/core';
 // Create the registry
 const registry = new AgentRegistry({
   maxAgents: 100,
-  enableDiscovery: true
+  enableDiscovery: true,
 });
 
 // Register an agent
@@ -99,8 +99,8 @@ const agentId = registry.register({
   capabilities: ['text-generation', 'summarization'],
   metadata: {
     model: 'gpt-4',
-    maxTokens: 8000
-  }
+    maxTokens: 8000,
+  },
 });
 
 // Listen for agent events
@@ -124,7 +124,7 @@ import { ChoreographyEngine, Task, TaskResult } from '@holoscript/core';
 const engine = new ChoreographyEngine(registry, {
   matchingStrategy: 'capability-based',
   loadBalancing: 'least-busy',
-  timeout: 30000
+  timeout: 30000,
 });
 
 // Submit a task
@@ -135,8 +135,8 @@ const task: Task = {
   payload: {
     files: ['src/main.ts', 'src/utils.ts'],
     checkStyle: true,
-    checkSecurity: true
-  }
+    checkSecurity: true,
+  },
 };
 
 // Execute with automatic agent matching
@@ -156,27 +156,23 @@ engine.setMatchingRules({
   'code-review': {
     requiredCapabilities: ['static-analysis'],
     preferredCapabilities: ['security-scan'],
-    excludeCapabilities: ['test-only']
+    excludeCapabilities: ['test-only'],
   },
   'text-generation': {
     requiredCapabilities: ['text-generation'],
-    preferredAgentTypes: ['assistant', 'writer']
-  }
+    preferredAgentTypes: ['assistant', 'writer'],
+  },
 });
 
 // Custom matching function
 engine.setCustomMatcher((task, agents) => {
   // Filter agents that can handle this task
-  const capable = agents.filter(a => 
-    task.requiredCapabilities.every(cap => 
-      a.capabilities.includes(cap)
-    )
+  const capable = agents.filter((a) =>
+    task.requiredCapabilities.every((cap) => a.capabilities.includes(cap))
   );
-  
+
   // Sort by preference (least busy first)
-  return capable.sort((a, b) => 
-    a.currentTaskCount - b.currentTaskCount
-  )[0];
+  return capable.sort((a, b) => a.currentTaskCount - b.currentTaskCount)[0];
 });
 ```
 
@@ -191,7 +187,7 @@ import { NegotiationProtocol, Bid } from '@holoscript/core';
 const negotiation = new NegotiationProtocol({
   strategy: 'auction',
   maxRounds: 3,
-  timeout: 5000
+  timeout: 5000,
 });
 
 // Agents submit bids
@@ -202,7 +198,7 @@ negotiation.on('bid:requested', async (task, agent) => {
     taskId: task.id,
     estimatedTime: calculateEstimate(task, agent),
     confidence: assessConfidence(task, agent),
-    cost: calculateCost(task, agent)
+    cost: calculateCost(task, agent),
   };
   return bid;
 });
@@ -221,15 +217,15 @@ import { ConflictResolver } from '@holoscript/core';
 
 const resolver = new ConflictResolver({
   strategy: 'priority-based',
-  fallback: 'first-come-first-served'
+  fallback: 'first-come-first-served',
 });
 
 // Define priority rules
 resolver.setPriorities({
-  'security-scan': 100,  // Highest priority
+  'security-scan': 100, // Highest priority
   'code-review': 80,
-  'documentation': 50,
-  'formatting': 20       // Lowest priority
+  documentation: 50,
+  formatting: 20, // Lowest priority
 });
 
 // Resolve conflicts
@@ -255,65 +251,65 @@ composition "CodeReviewPipeline" {
       load_balancing: "round-robin"
     }
   }
-  
+
   // Linting agent
   template "LintAgent" {
     @agent {
       type: "linter"
       capabilities: ["eslint", "prettier"]
     }
-    
+
     action lint(files) {
       return files.map(f => checkStyle(f))
     }
   }
-  
+
   // Security scanning agent
   template "SecurityAgent" {
     @agent {
       type: "security"
       capabilities: ["security-scan", "dependency-audit"]
     }
-    
+
     action scan(files) {
       return files.map(f => securityCheck(f))
     }
   }
-  
+
   // Code review agent
   template "ReviewAgent" {
     @agent {
       type: "reviewer"
       capabilities: ["code-review", "suggestion"]
     }
-    
+
     action review(files, lintResults, securityResults) {
       return generateReview(files, lintResults, securityResults)
     }
   }
-  
+
   // Pipeline coordinator
   object "Pipeline" {
     @choreographer
-    
+
     action runReview(pullRequest) {
       // Stage 1: Parallel analysis
       const [lintResults, securityResults] = await parallel([
         dispatch("lint", { files: pullRequest.files }),
         dispatch("scan", { files: pullRequest.files })
       ])
-      
+
       // Stage 2: Consolidated review
       const review = await dispatch("review", {
         files: pullRequest.files,
         lintResults,
         securityResults
       })
-      
+
       return review
     }
   }
-  
+
   // Instantiate agents
   object "Linter" using "LintAgent" {}
   object "SecurityScanner" using "SecurityAgent" {}
@@ -330,7 +326,7 @@ Track choreography performance:
 engine.setLogging({
   level: 'debug',
   includeTimings: true,
-  traceNegotiations: true
+  traceNegotiations: true,
 });
 
 // Get metrics
@@ -357,6 +353,7 @@ Create a multi-agent translation system:
 4. **FormatterAgent**: Formats output
 
 Requirements:
+
 - Parallel detection and initial translation
 - Quality validation before output
 - Retry mechanism for low-quality translations

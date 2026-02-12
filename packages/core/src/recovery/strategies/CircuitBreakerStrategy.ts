@@ -1,18 +1,23 @@
 /**
  * Circuit Breaker Strategy
- * 
+ *
  * Protects against cascading failures by temporarily blocking requests
  * to failing services after repeated failures.
  */
 
-import type { IRecoveryStrategy, IAgentFailure, IRecoveryResult, FailureType } from '../../extensions';
+import type {
+  IRecoveryStrategy,
+  IAgentFailure,
+  IRecoveryResult,
+  FailureType,
+} from '../../extensions';
 
 export type CircuitState = 'closed' | 'open' | 'half-open';
 
 export interface CircuitBreakerConfig {
-  failureThreshold: number;     // Failures before opening
-  resetTimeoutMs: number;       // Time before trying half-open
-  halfOpenMaxAttempts: number;  // Attempts in half-open before closing
+  failureThreshold: number; // Failures before opening
+  resetTimeoutMs: number; // Time before trying half-open
+  halfOpenMaxAttempts: number; // Attempts in half-open before closing
 }
 
 const DEFAULT_CONFIG: CircuitBreakerConfig = {
@@ -33,7 +38,7 @@ export class CircuitBreakerStrategy implements IRecoveryStrategy {
     'dependency-error',
   ];
   readonly maxAttempts = 1; // Circuit breaker only tries once
-  readonly backoffMs = 0;   // No initial backoff (circuit handles timing)
+  readonly backoffMs = 0; // No initial backoff (circuit handles timing)
 
   private config: CircuitBreakerConfig;
   private circuits: Map<string, CircuitInfo> = new Map();

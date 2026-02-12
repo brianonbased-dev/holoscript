@@ -734,25 +734,29 @@ export class LipSyncTrait {
    * Map IPA/ARPAbet phoneme to Oculus viseme
    */
   private mapPhonemeToViseme(phoneme: string): string {
-    const p = phoneme.toLowerCase();
+    const p = phoneme.toLowerCase().replace(/[0-9]/g, ''); // Remove stress markers
 
-    // Core vowels
-    if (['aa', 'ah', 'ax'].includes(p)) return 'aa';
-    if (['ae', 'eh', 'ey'].includes(p)) return 'E';
-    if (['ih', 'iy'].includes(p)) return 'I';
-    if (['ao', 'ow', 'oy'].includes(p)) return 'O';
-    if (['uh', 'uw'].includes(p)) return 'U';
+    // Core vowels (ARPAbet & IPA)
+    if (['aa', 'ah', 'ax', 'ɑ', 'ʌ', 'ə'].includes(p)) return 'aa';
+    if (['ae', 'eh', 'ey', 'æ', 'ɛ', 'eɪ'].includes(p)) return 'E';
+    if (['ih', 'iy', 'ɪ', 'i'].includes(p)) return 'I';
+    if (['ao', 'ow', 'oy', 'ɔ', 'oʊ', 'ɔɪ'].includes(p)) return 'O';
+    if (['uh', 'uw', 'ʊ', 'u'].includes(p)) return 'U';
+    if (['aw', 'aʊ'].includes(p)) return 'aa'; // Dipthong start
+    if (['ay', 'aɪ'].includes(p)) return 'aa'; // Dipthong start
 
-    // Consonants
-    if (['p', 'b', 'm'].includes(p)) return 'PP';
-    if (['f', 'v'].includes(p)) return 'FF';
-    if (['th', 'dh'].includes(p)) return 'TH';
-    if (['t', 'd', 'n'].includes(p)) return 'DD';
-    if (['k', 'g', 'ng', 'h'].includes(p)) return 'kk';
-    if (['ch', 'jh', 'sh', 'zh'].includes(p)) return 'CH';
-    if (['s', 'z'].includes(p)) return 'SS';
-    if (['r', 'er'].includes(p)) return 'RR';
-    if (['l', 'el'].includes(p)) return 'nn';
+    // Consonants (ARPAbet & IPA)
+    if (['p', 'b', 'm', 'p', 'b', 'm'].includes(p)) return 'PP';
+    if (['f', 'v', 'f', 'v'].includes(p)) return 'FF';
+    if (['th', 'dh', 'θ', 'ð'].includes(p)) return 'TH';
+    if (['t', 'd', 'n', 't', 'd', 'n'].includes(p)) return 'DD';
+    if (['k', 'g', 'ng', 'h', 'hh', 'k', 'ɡ', 'ŋ', 'h'].includes(p)) return 'kk';
+    if (['ch', 'jh', 'sh', 'zh', 'tʃ', 'dʒ', 'ʃ', 'ʒ'].includes(p)) return 'CH';
+    if (['s', 'z', 's', 'z'].includes(p)) return 'SS';
+    if (['r', 'er', 'ɹ', 'ɚ', 'ɝ'].includes(p)) return 'RR';
+    if (['l', 'el', 'l', 'ɫ'].includes(p)) return 'nn';
+    if (['w', 'w'].includes(p)) return 'U'; // "w" is close to "U" viseme
+    if (['y', 'j'].includes(p)) return 'I'; // "y"/"j" is close to "I" viseme
 
     return 'sil';
   }

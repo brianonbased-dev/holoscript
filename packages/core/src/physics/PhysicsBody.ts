@@ -300,7 +300,10 @@ export class RigidBody {
     this._angularVelocity.x += impulse.x * this._inverseInertia.x;
     this._angularVelocity.y += impulse.y * this._inverseInertia.y;
     this._angularVelocity.z += impulse.z * this._inverseInertia.z;
-    this._angularVelocity = this.clampVelocity(this._angularVelocity, PHYSICS_DEFAULTS.maxAngularVelocity);
+    this._angularVelocity = this.clampVelocity(
+      this._angularVelocity,
+      PHYSICS_DEFAULTS.maxAngularVelocity
+    );
     this.wakeUp();
   }
 
@@ -353,7 +356,10 @@ export class RigidBody {
 
     // Clamp velocities
     this._linearVelocity = this.clampVelocity(this._linearVelocity, PHYSICS_DEFAULTS.maxVelocity);
-    this._angularVelocity = this.clampVelocity(this._angularVelocity, PHYSICS_DEFAULTS.maxAngularVelocity);
+    this._angularVelocity = this.clampVelocity(
+      this._angularVelocity,
+      PHYSICS_DEFAULTS.maxAngularVelocity
+    );
   }
 
   /**
@@ -410,8 +416,10 @@ export class RigidBody {
     const linearSpeed = this.vectorLength(this._linearVelocity);
     const angularSpeed = this.vectorLength(this._angularVelocity);
 
-    if (linearSpeed < PHYSICS_DEFAULTS.sleepThreshold &&
-        angularSpeed < PHYSICS_DEFAULTS.sleepThreshold) {
+    if (
+      linearSpeed < PHYSICS_DEFAULTS.sleepThreshold &&
+      angularSpeed < PHYSICS_DEFAULTS.sleepThreshold
+    ) {
       this._sleepTimer += dt;
       if (this._sleepTimer >= PHYSICS_DEFAULTS.sleepTime) {
         this._isSleeping = true;

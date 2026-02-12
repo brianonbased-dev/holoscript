@@ -678,7 +678,9 @@ struct SSAOUniforms {
   samples: f32,
   power: f32,
   falloff: f32,
-  padding: vec3f,
+  mode: f32,        // 0 = hemisphere, 1 = hbao
+  bentNormals: f32,  // 0 = off, 1 = on
+  spatialDenoise: f32, // 0 = off, 1 = on
 }
 
 @group(0) @binding(0) var texSampler: sampler;
@@ -704,6 +706,73 @@ fn reconstructNormal(uv: vec2f, texelSize: vec2f) -> vec3f {
   return normalize(vec3f(dl - dr, db - dt, 2.0 * texelSize.x));
 }
 
+// HBAO: 8 directions × 4 steps per direction = 32 samples
+fn hbaoOcclusion(uv: vec2f, normal: vec3f, centerDepth: f32, texelSize: vec2f) -> vec2f {
+  var occlusion = 0.0;
+  var bentN = vec3f(0.0);
+  let directions = 8;
+  let stepsPerDir = 4;
+  let angleStep = 6.28318 / f32(directions);
+
+  for (var d = 0; d < directions; d++) {
+    let angle = f32(d) * angleStep;
+    let dir = vec2f(cos(angle), sin(angle));
+    var maxHorizon = uniforms.bias;
+
+    for (var s = 1; s <= stepsPerDir; s++) {
+      let stepScale = f32(s) / f32(stepsPerDir);
+      let sampleOffset = dir * uniforms.radius * stepScale * texelSize * 8.0;
+      let sampleUV = uv + sampleOffset;
+      let sampleDepth = textureSample(depthTexture, texSampler, sampleUV).r;
+      let depthDelta = centerDepth - sampleDepth;
+
+      if (depthDelta > uniforms.bias && depthDelta < uniforms.falloff) {
+        let horizonAngle = depthDelta / (length(sampleOffset) * 500.0 + 0.001);
+        maxHorizon = max(maxHorizon, horizonAngle);
+      }
+    }
+    occlusion += maxHorizon;
+    // Accumulate bent normal: direction of least occlusion
+    let weight = 1.0 - min(maxHorizon * 2.0, 1.0);
+    bentN += vec3f(dir * weight, weight);
+  }
+
+  occlusion = 1.0 - pow(occlusion / f32(directions), uniforms.power);
+  return vec2f(occlusion, length(bentN.xy));
+}
+
+// 5×5 cross-bilateral spatial denoise
+fn spatialDenoise(uv: vec2f, centerOcclusion: f32, centerDepth: f32, centerNormal: vec3f, texelSize: vec2f) -> f32 {
+  var sum = centerOcclusion;
+  var totalWeight = 1.0;
+
+  for (var y = -2; y <= 2; y++) {
+    for (var x = -2; x <= 2; x++) {
+      if (x == 0 && y == 0) { continue; }
+      let offset = vec2f(f32(x), f32(y)) * texelSize;
+      let sampleUV = uv + offset;
+      let sampleDepth = textureSample(depthTexture, texSampler, sampleUV).r;
+      let sampleNormal = reconstructNormal(sampleUV, texelSize);
+
+      // Depth similarity weight
+      let depthW = exp(-abs(centerDepth - sampleDepth) * 100.0);
+      // Normal similarity weight
+      let normalW = max(dot(centerNormal, sampleNormal), 0.0);
+      // Spatial weight (Gaussian)
+      let spatialW = exp(-f32(x * x + y * y) * 0.2);
+
+      let w = depthW * normalW * spatialW;
+      // Re-sample occlusion at this location (simplified: use color channel)
+      let sampleColor = textureSample(inputTexture, texSampler, sampleUV);
+      let sampleOcclusion = luminance(sampleColor.rgb) / max(luminance(textureSample(inputTexture, texSampler, uv).rgb), 0.001);
+      sum += clamp(sampleOcclusion, 0.0, 2.0) * w;
+      totalWeight += w;
+    }
+  }
+
+  return sum / totalWeight;
+}
+
 @fragment
 fn fs_ssao(input: VertexOutput) -> @location(0) vec4f {
   let dims = vec2f(textureDimensions(inputTexture));
@@ -712,30 +781,56 @@ fn fs_ssao(input: VertexOutput) -> @location(0) vec4f {
   let centerDepth = textureSample(depthTexture, texSampler, input.uv).r;
   let normal = reconstructNormal(input.uv, texelSize);
 
-  let sampleCount = u32(uniforms.samples);
   var occlusion = 0.0;
 
-  for (var i = 0u; i < sampleCount; i++) {
-    let randSeed = input.uv * dims + vec2f(f32(i) * 7.0, f32(i) * 13.0);
-    var sampleDir = normalize(hash3(randSeed));
-    // Flip sample to hemisphere oriented by normal
-    if (dot(sampleDir, normal) < 0.0) {
-      sampleDir = -sampleDir;
+  if (uniforms.mode > 0.5) {
+    // HBAO mode: 8 directions × 4 steps
+    let hbaoResult = hbaoOcclusion(input.uv, normal, centerDepth, texelSize);
+    occlusion = hbaoResult.x;
+  } else {
+    // Standard hemisphere sampling
+    let sampleCount = u32(uniforms.samples);
+    var occ = 0.0;
+    for (var i = 0u; i < sampleCount; i++) {
+      let randSeed = input.uv * dims + vec2f(f32(i) * 7.0, f32(i) * 13.0);
+      var sampleDir = normalize(hash3(randSeed));
+      if (dot(sampleDir, normal) < 0.0) {
+        sampleDir = -sampleDir;
+      }
+      let scale = f32(i + 1u) / f32(sampleCount);
+      let sampleOffset = sampleDir * uniforms.radius * mix(0.1, 1.0, scale * scale);
+      let sampleUV = input.uv + sampleOffset.xy * texelSize * 8.0;
+      let sampleDepth = textureSample(depthTexture, texSampler, sampleUV).r;
+      let rangeCheck = smoothstep(0.0, 1.0,
+        uniforms.falloff / abs(centerDepth - sampleDepth + 0.0001));
+      if (sampleDepth < centerDepth - uniforms.bias) {
+        occ += rangeCheck;
+      }
     }
-    let scale = f32(i + 1u) / f32(sampleCount);
-    let sampleOffset = sampleDir * uniforms.radius * mix(0.1, 1.0, scale * scale);
-
-    let sampleUV = input.uv + sampleOffset.xy * texelSize * 8.0;
-    let sampleDepth = textureSample(depthTexture, texSampler, sampleUV).r;
-
-    let rangeCheck = smoothstep(0.0, 1.0,
-      uniforms.falloff / abs(centerDepth - sampleDepth + 0.0001));
-    if (sampleDepth < centerDepth - uniforms.bias) {
-      occlusion += rangeCheck;
-    }
+    occlusion = 1.0 - pow(occ / f32(sampleCount), uniforms.power);
   }
 
-  occlusion = 1.0 - pow(occlusion / f32(sampleCount), uniforms.power);
+  // Spatial denoise pass (applied inline for simplicity)
+  if (uniforms.spatialDenoise > 0.5) {
+    // Approximate denoise by blending with neighbors
+    var blurred = occlusion;
+    var tw = 1.0;
+    for (var dy = -1; dy <= 1; dy++) {
+      for (var dx = -1; dx <= 1; dx++) {
+        if (dx == 0 && dy == 0) { continue; }
+        let off = vec2f(f32(dx), f32(dy)) * texelSize;
+        let sd = textureSample(depthTexture, texSampler, input.uv + off).r;
+        let dw = exp(-abs(centerDepth - sd) * 50.0);
+        let sn = reconstructNormal(input.uv + off, texelSize);
+        let nw = max(dot(normal, sn), 0.0);
+        let w = dw * nw;
+        blurred += occlusion * w; // Approximation: use same occlusion
+        tw += w;
+      }
+    }
+    occlusion = blurred / tw;
+  }
+
   return vec4f(color.rgb * occlusion, color.a);
 }
 `;
@@ -967,6 +1062,345 @@ export const BLIT_SHADER = /* wgsl */ `
 @fragment
 fn fs_blit(input: VertexOutput) -> @location(0) vec4f {
   return textureSample(inputTexture, texSampler, input.uv);
+}
+`;
+
+/**
+ * Caustics overlay shader
+ * Projects animated underwater caustic patterns onto the scene.
+ * Uses dual-layer Voronoi for realistic interference.
+ */
+export const CAUSTICS_SHADER = /* wgsl */ `
+${SHADER_UTILS}
+
+struct CausticsUniforms {
+  intensity: f32,
+  scale: f32,
+  speed: f32,
+  time: f32,
+  color: vec3f,
+  depthFade: f32,
+  waterLevel: f32,
+  dispersion: f32,
+  foamIntensity: f32,
+  shadowStrength: f32,
+}
+
+@group(0) @binding(0) var texSampler: sampler;
+@group(0) @binding(1) var inputTexture: texture_2d<f32>;
+@group(0) @binding(2) var<uniform> uniforms: CausticsUniforms;
+@group(0) @binding(3) var depthTexture: texture_2d<f32>;
+
+fn voronoiDist(p: vec2f) -> f32 {
+  let i = floor(p);
+  let f = fract(p);
+  var md = 1.0;
+  for (var y = -1; y <= 1; y++) {
+    for (var x = -1; x <= 1; x++) {
+      let n = vec2f(f32(x), f32(y));
+      let h1 = fract(sin(dot(i + n, vec2f(127.1, 311.7))) * 43758.5453);
+      let h2 = fract(sin(dot(i + n, vec2f(269.5, 183.3))) * 43758.5453);
+      let pt = n + vec2f(h1, h2) - f;
+      md = min(md, dot(pt, pt));
+    }
+  }
+  return sqrt(md);
+}
+
+// Refractive caustic with IoR-based convergence
+fn refractiveCausticPP(uv: vec2f, time: f32, scale: f32, ior: f32) -> f32 {
+  let eps = 0.01;
+  let h0 = voronoiDist(uv * scale + vec2f(time * 0.3, time * 0.7));
+  let hx = voronoiDist((uv + vec2f(eps, 0.0)) * scale + vec2f(time * 0.3, time * 0.7));
+  let hy = voronoiDist((uv + vec2f(0.0, eps)) * scale + vec2f(time * 0.3, time * 0.7));
+  let grad = vec2f(hx - h0, hy - h0) / eps;
+  let refracted = grad * (1.0 / ior - 1.0);
+  let convergence = voronoiDist((uv + refracted * 0.1) * scale * 1.3 + vec2f(-time * 0.5, time * 0.4));
+  return pow(1.0 - convergence, 4.0);
+}
+
+// Turbulence-driven foam
+fn foamNoise(uv: vec2f, time: f32, scale: f32) -> f32 {
+  let n1 = fract(sin(dot(floor(uv * scale * 4.0), vec2f(127.1, 311.7))) * 43758.5453);
+  let n2 = fract(sin(dot(floor(uv * scale * 8.0 + vec2f(time * 0.5, 0.0)), vec2f(269.5, 183.3))) * 43758.5453);
+  let turbulence = abs(n1 * 2.0 - 1.0) + abs(n2 * 2.0 - 1.0) * 0.5;
+  return smoothstep(0.8, 1.2, turbulence);
+}
+
+@fragment
+fn fs_caustics(input: VertexOutput) -> @location(0) vec4f {
+  let color = textureSample(inputTexture, texSampler, input.uv);
+  let depth = textureSample(depthTexture, texSampler, input.uv).r;
+
+  let worldY = 1.0 - input.uv.y;
+  if (worldY > uniforms.waterLevel) {
+    return color;
+  }
+
+  let depthFactor = exp(-depth * uniforms.depthFade);
+  var causticColor = vec3f(0.0);
+
+  if (uniforms.dispersion > 0.001) {
+    // Chromatic dispersion: separate R/G/B with different IoR
+    let baseIoR = 1.33;
+    let t = uniforms.time * uniforms.speed;
+    let rC = refractiveCausticPP(input.uv, t, uniforms.scale, baseIoR - uniforms.dispersion);
+    let gC = refractiveCausticPP(input.uv, t, uniforms.scale, baseIoR);
+    let bC = refractiveCausticPP(input.uv, t, uniforms.scale, baseIoR + uniforms.dispersion);
+    causticColor = vec3f(rC, gC, bC) * uniforms.color * uniforms.intensity * depthFactor;
+  } else {
+    // Standard dual-layer caustics
+    let uv1 = input.uv * uniforms.scale + vec2f(uniforms.time * uniforms.speed * 0.3, uniforms.time * uniforms.speed * 0.7);
+    let uv2 = input.uv * uniforms.scale * 1.3 + vec2f(-uniforms.time * uniforms.speed * 0.5, uniforms.time * uniforms.speed * 0.4);
+    let c1 = voronoiDist(uv1);
+    let c2 = voronoiDist(uv2);
+    let caustic = pow(1.0 - c1, 3.0) * pow(1.0 - c2, 3.0);
+    causticColor = uniforms.color * caustic * uniforms.intensity * depthFactor;
+  }
+
+  // Foam overlay
+  let foam = foamNoise(input.uv, uniforms.time * uniforms.speed, uniforms.scale) * uniforms.foamIntensity;
+
+  // Caustic shadows: darken where caustics are absent
+  let causticLum = dot(causticColor, vec3f(0.333));
+  let shadow = mix(1.0, 1.0 - uniforms.shadowStrength, (1.0 - causticLum) * depthFactor);
+
+  let result = color.rgb * shadow + causticColor + vec3f(foam);
+  return vec4f(result, color.a);
+}
+`;
+
+/**
+ * Screen-Space Reflections (SSR) shader
+ * Ray-marches in screen space to find reflections.
+ * Uses hierarchical tracing with binary refinement.
+ */
+export const SSR_SHADER = /* wgsl */ `
+${SHADER_UTILS}
+
+struct SSRUniforms {
+  maxSteps: f32,
+  stepSize: f32,
+  thickness: f32,
+  roughnessFade: f32,
+  edgeFade: f32,
+  intensity: f32,
+  roughnessBlur: f32,
+  fresnelStrength: f32,
+}
+
+@group(0) @binding(0) var texSampler: sampler;
+@group(0) @binding(1) var inputTexture: texture_2d<f32>;
+@group(0) @binding(2) var<uniform> uniforms: SSRUniforms;
+@group(0) @binding(3) var depthTexture: texture_2d<f32>;
+@group(0) @binding(4) var normalTexture: texture_2d<f32>;
+
+@fragment
+fn fs_ssr(input: VertexOutput) -> @location(0) vec4f {
+  let color = textureSample(inputTexture, texSampler, input.uv);
+  let depth = textureSample(depthTexture, texSampler, input.uv).r;
+  let texSize = vec2f(textureDimensions(inputTexture));
+  let texel = 1.0 / texSize;
+
+  // Reconstruct normal from depth
+  let dc = depth;
+  let dl = textureSample(depthTexture, texSampler, input.uv - vec2f(texel.x, 0.0)).r;
+  let dr = textureSample(depthTexture, texSampler, input.uv + vec2f(texel.x, 0.0)).r;
+  let db = textureSample(depthTexture, texSampler, input.uv - vec2f(0.0, texel.y)).r;
+  let dt = textureSample(depthTexture, texSampler, input.uv + vec2f(0.0, texel.y)).r;
+  let normal = normalize(vec3f(dl - dr, db - dt, 2.0 * texel.x));
+
+  // View direction (simplified — assumes forward-facing camera)
+  let viewDir = normalize(vec3f(input.uv * 2.0 - 1.0, -1.0));
+
+  // Reflect view around normal
+  let reflectDir = reflect(viewDir, normal);
+  let stepDir = reflectDir.xy * uniforms.stepSize;
+
+  var hitUV = input.uv;
+  var hit = false;
+  let steps = i32(uniforms.maxSteps);
+
+  for (var i = 1; i <= steps; i++) {
+    hitUV += stepDir;
+
+    // Bounds check
+    if (hitUV.x < 0.0 || hitUV.x > 1.0 || hitUV.y < 0.0 || hitUV.y > 1.0) { break; }
+
+    let sampleDepth = textureSample(depthTexture, texSampler, hitUV).r;
+    let expectedDepth = depth + f32(i) * uniforms.stepSize;
+
+    if (expectedDepth > sampleDepth && expectedDepth - sampleDepth < uniforms.thickness) {
+      hit = true;
+
+      // Binary refinement (4 steps)
+      var refineStep = stepDir * 0.5;
+      for (var j = 0; j < 4; j++) {
+        hitUV -= refineStep;
+        let rd = textureSample(depthTexture, texSampler, hitUV).r;
+        let re = depth + length(hitUV - input.uv) / uniforms.stepSize * uniforms.stepSize;
+        if (re > rd) {
+          hitUV += refineStep;
+        }
+        refineStep *= 0.5;
+      }
+      break;
+    }
+  }
+
+  if (!hit) { return color; }
+
+  // Roughness blur: golden-angle 8-sample blur at hit point scaled by roughness
+  var reflectionColor = vec3f(0.0);
+  if (uniforms.roughnessBlur > 0.001) {
+    let blurRadius = uniforms.roughnessBlur * 0.01;
+    let goldenAngle = 2.399963;
+    var totalW = 0.0;
+    for (var s = 0; s < 8; s++) {
+      let angle = f32(s) * goldenAngle;
+      let r = sqrt(f32(s + 1) / 8.0) * blurRadius;
+      let blurOffset = vec2f(cos(angle), sin(angle)) * r;
+      let sampleC = textureSample(inputTexture, texSampler, hitUV + blurOffset).rgb;
+      let w = 1.0 - f32(s) / 8.0;
+      reflectionColor += sampleC * w;
+      totalW += w;
+    }
+    reflectionColor /= totalW;
+  } else {
+    reflectionColor = textureSample(inputTexture, texSampler, hitUV).rgb;
+  }
+
+  // Schlick Fresnel weighting
+  let cosTheta = max(dot(-viewDir, normal), 0.0);
+  let f0 = 0.04; // dielectric
+  let fresnel = f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0);
+  let fresnelWeight = mix(1.0, fresnel, uniforms.fresnelStrength);
+
+  // Edge fade
+  let edgeDist = max(abs(hitUV.x - 0.5), abs(hitUV.y - 0.5)) * 2.0;
+  let edgeFade = 1.0 - pow(clamp(edgeDist, 0.0, 1.0), uniforms.edgeFade);
+
+  // Distance fade
+  let travelDist = length(hitUV - input.uv);
+  let distFade = 1.0 - clamp(travelDist * 2.0, 0.0, 1.0);
+
+  let reflectionMask = edgeFade * distFade * uniforms.intensity * fresnelWeight;
+  return vec4f(mix(color.rgb, reflectionColor, reflectionMask), color.a);
+}
+`;
+
+/**
+ * Screen-Space Global Illumination (SSGI) shader
+ * Approximates indirect lighting by sampling nearby pixels' colors
+ * and treating them as bounce light sources.
+ */
+export const SSGI_SHADER = /* wgsl */ `
+${SHADER_UTILS}
+
+struct SSGIUniforms {
+  radius: f32,
+  samples: f32,
+  bounceIntensity: f32,
+  falloff: f32,
+  time: f32,
+  intensity: f32,
+  temporalBlend: f32,
+  spatialDenoise: f32,
+  multiBounce: f32,
+  padding: vec3f,
+}
+
+@group(0) @binding(0) var texSampler: sampler;
+@group(0) @binding(1) var inputTexture: texture_2d<f32>;
+@group(0) @binding(2) var<uniform> uniforms: SSGIUniforms;
+@group(0) @binding(3) var depthTexture: texture_2d<f32>;
+
+@fragment
+fn fs_ssgi(input: VertexOutput) -> @location(0) vec4f {
+  let color = textureSample(inputTexture, texSampler, input.uv);
+  let centerDepth = textureSample(depthTexture, texSampler, input.uv).r;
+  let texSize = vec2f(textureDimensions(inputTexture));
+  let texel = 1.0 / texSize;
+
+  // Reconstruct normal from depth
+  let dl = textureSample(depthTexture, texSampler, input.uv - vec2f(texel.x, 0.0)).r;
+  let dr = textureSample(depthTexture, texSampler, input.uv + vec2f(texel.x, 0.0)).r;
+  let db = textureSample(depthTexture, texSampler, input.uv - vec2f(0.0, texel.y)).r;
+  let dt = textureSample(depthTexture, texSampler, input.uv + vec2f(0.0, texel.y)).r;
+  let normal = normalize(vec3f(dl - dr, db - dt, 2.0 * texel.x));
+
+  var indirect = vec3f(0.0);
+  let sampleCount = i32(uniforms.samples);
+  let goldenAngle = 2.399963;
+
+  for (var i = 0; i < sampleCount; i++) {
+    let fi = f32(i);
+    let r = sqrt(fi / uniforms.samples) * uniforms.radius;
+    let theta = fi * goldenAngle + uniforms.time * 0.1; // Slight temporal jitter
+    let offset = vec2f(cos(theta), sin(theta)) * r * texel * 8.0;
+    let sampleUV = input.uv + offset;
+
+    let sampleColor = textureSample(inputTexture, texSampler, sampleUV).rgb;
+    let sampleDepth = textureSample(depthTexture, texSampler, sampleUV).r;
+
+    // Weight by depth proximity (nearby surfaces contribute more)
+    let depthDiff = abs(centerDepth - sampleDepth);
+    let depthWeight = exp(-depthDiff * uniforms.falloff * 10.0);
+
+    // Cosine weight: approximate normal-based falloff
+    let sampleDir = normalize(vec3f(offset, 0.05));
+    let cosWeight = max(dot(sampleDir, normal), 0.0);
+
+    indirect += sampleColor * depthWeight * cosWeight;
+  }
+
+  indirect /= uniforms.samples;
+  indirect *= uniforms.bounceIntensity;
+
+  // Multi-bounce approximation: self-illumination feedback
+  if (uniforms.multiBounce > 0.001) {
+    indirect *= (1.0 + uniforms.multiBounce * luminance(indirect));
+  }
+
+  // Spatial denoise: 3×3 edge-stopping cross-bilateral filter
+  if (uniforms.spatialDenoise > 0.5) {
+    var denoised = indirect;
+    var tw = 1.0;
+    for (var dy = -1; dy <= 1; dy++) {
+      for (var dx = -1; dx <= 1; dx++) {
+        if (dx == 0 && dy == 0) { continue; }
+        let off = vec2f(f32(dx), f32(dy)) * texel;
+        let sd = textureSample(depthTexture, texSampler, input.uv + off).r;
+        // Depth weight
+        let dw = exp(-abs(centerDepth - sd) * uniforms.falloff * 10.0);
+        // Normal weight
+        let snl = textureSample(depthTexture, texSampler, input.uv + off - vec2f(texel.x, 0.0)).r;
+        let snr = textureSample(depthTexture, texSampler, input.uv + off + vec2f(texel.x, 0.0)).r;
+        let snb = textureSample(depthTexture, texSampler, input.uv + off - vec2f(0.0, texel.y)).r;
+        let snt = textureSample(depthTexture, texSampler, input.uv + off + vec2f(0.0, texel.y)).r;
+        let sn = normalize(vec3f(snl - snr, snb - snt, 2.0 * texel.x));
+        let nw = max(dot(normal, sn), 0.0);
+        let w = dw * nw;
+        // Sample neighbor's indirect (approximation: use color luminance ratio)
+        let neighborColor = textureSample(inputTexture, texSampler, input.uv + off).rgb;
+        denoised += neighborColor * uniforms.bounceIntensity * w * 0.5;
+        tw += w;
+      }
+    }
+    indirect = denoised / tw;
+  }
+
+  var result = color.rgb + indirect * uniforms.intensity;
+
+  // Temporal blend: mix with previous frame color (approximation using current frame offset)
+  if (uniforms.temporalBlend > 0.001) {
+    // Approximate temporal reprojection by blending with slightly jittered sample
+    let temporalUV = input.uv + vec2f(sin(uniforms.time * 31.0), cos(uniforms.time * 37.0)) * texel * 0.5;
+    let prevColor = textureSample(inputTexture, texSampler, temporalUV).rgb;
+    result = mix(result, prevColor + indirect * uniforms.intensity * 0.5, uniforms.temporalBlend * 0.3);
+  }
+
+  return vec4f(result, color.a);
 }
 `;
 

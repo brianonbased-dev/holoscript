@@ -11,16 +11,8 @@ import {
   getTelemetryCollector,
   resetTelemetryCollector,
 } from '../TelemetryCollector';
-import {
-  AgentInspector,
-  getAgentInspector,
-  resetAgentInspector,
-} from '../AgentInspector';
-import {
-  AgentDebugger,
-  getAgentDebugger,
-  resetAgentDebugger,
-} from '../AgentDebugger';
+import { AgentInspector, getAgentInspector, resetAgentInspector } from '../AgentInspector';
+import { AgentDebugger, getAgentDebugger, resetAgentDebugger } from '../AgentDebugger';
 import type { AgentManifest, AgentCapability } from '../../agents/AgentTypes';
 import type { TelemetryConfig } from '../TelemetryTypes';
 

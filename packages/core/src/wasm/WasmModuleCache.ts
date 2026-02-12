@@ -63,7 +63,9 @@ export class WasmModuleCache {
       const request = indexedDB.open(CACHE_DB_NAME, CACHE_VERSION);
 
       request.onerror = () => {
-        logger.error('[WasmModuleCache] Failed to open IndexedDB:', { error: String(request.error) });
+        logger.error('[WasmModuleCache] Failed to open IndexedDB:', {
+          error: String(request.error),
+        });
         resolve(); // Fallback to memory cache
       };
 
@@ -169,7 +171,12 @@ export class WasmModuleCache {
   /**
    * Store a compiled WASM module
    */
-  async set(key: string, version: string, module: WebAssembly.Module, bytes: Uint8Array): Promise<void> {
+  async set(
+    key: string,
+    version: string,
+    module: WebAssembly.Module,
+    bytes: Uint8Array
+  ): Promise<void> {
     await this.init();
 
     const checksum = await this.calculateChecksum(bytes);

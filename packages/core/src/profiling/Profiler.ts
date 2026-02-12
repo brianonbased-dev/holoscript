@@ -17,14 +17,7 @@ export interface ProfileSample {
   args?: Record<string, unknown>;
 }
 
-export type ProfileCategory =
-  | 'parse'
-  | 'compile'
-  | 'render'
-  | 'network'
-  | 'memory'
-  | 'user'
-  | 'gc';
+export type ProfileCategory = 'parse' | 'compile' | 'render' | 'network' | 'memory' | 'user' | 'gc';
 
 export interface ProfileResult {
   name: string;
@@ -155,7 +148,11 @@ export class Profiler {
   /**
    * Begin a profiling span
    */
-  beginSpan(name: string, _category: ProfileCategory = 'user', _args?: Record<string, unknown>): void {
+  beginSpan(
+    name: string,
+    _category: ProfileCategory = 'user',
+    _args?: Record<string, unknown>
+  ): void {
     if (!this.isRunning) return;
 
     const now = this.getHighResTime();
@@ -245,9 +242,15 @@ export class Profiler {
         heapTotal: mem.heapTotal,
         external: mem.external,
       });
-    } else if (typeof performance !== 'undefined' && (performance as unknown as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory) {
+    } else if (
+      typeof performance !== 'undefined' &&
+      (performance as unknown as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number } })
+        .memory
+    ) {
       // Chrome-specific memory info
-      const mem = (performance as unknown as { memory: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory;
+      const mem = (
+        performance as unknown as { memory: { usedJSHeapSize: number; totalJSHeapSize: number } }
+      ).memory;
       this.memorySnapshots.push({
         timestamp,
         heapUsed: mem.usedJSHeapSize,
@@ -324,7 +327,7 @@ export class Profiler {
         'cpu-family': 0,
         'highres-ticks': true,
         'network-type': 'unknown',
-        'num-cpus': typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency || 4) : 4,
+        'num-cpus': typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 4 : 4,
         'os-arch': typeof process !== 'undefined' ? process.arch : 'x64',
         'os-name': typeof process !== 'undefined' ? process.platform : 'browser',
         'os-version': '',
@@ -409,7 +412,8 @@ export class Profiler {
     if (this.memorySnapshots.length > 0) {
       memoryPeak = Math.max(...this.memorySnapshots.map((s) => s.heapUsed));
       memoryDelta =
-        this.memorySnapshots[this.memorySnapshots.length - 1].heapUsed - this.memorySnapshots[0].heapUsed;
+        this.memorySnapshots[this.memorySnapshots.length - 1].heapUsed -
+        this.memorySnapshots[0].heapUsed;
     }
 
     return {

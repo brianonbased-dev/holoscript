@@ -98,7 +98,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 10, 15)
 `;
       const result = parseGodotScene(content);
       expect(result.nodes[0].properties.transform).toBeDefined();
-      const transform = result.nodes[0].properties.transform as { origin: { x: number; y: number; z: number } };
+      const transform = result.nodes[0].properties.transform as {
+        origin: { x: number; y: number; z: number };
+      };
       expect(transform.origin.x).toBe(5);
       expect(transform.origin.y).toBe(10);
       expect(transform.origin.z).toBe(15);
@@ -186,7 +188,7 @@ far = 1000
 `;
       const scene = parseGodotScene(content);
       const tree = buildNodeTree(scene.nodes);
-      
+
       expect(tree.length).toBe(1);
       expect(tree[0].node.name).toBe('Level');
       expect(tree[0].children.length).toBe(1);
@@ -202,7 +204,7 @@ far = 1000
 `;
       const scene = parseGodotScene(content);
       const tree = buildNodeTree(scene.nodes);
-      
+
       expect(tree[0].children[0].children[0].node.name).toBe('Enemy1');
     });
   });
@@ -215,7 +217,7 @@ far = 1000
 `;
       const scene = parseGodotScene(content);
       const { code } = generateHoloCode(scene, 'TestLevel');
-      
+
       expect(code).toContain('composition "TestLevel"');
       expect(code).toContain('environment {');
     });
@@ -228,7 +230,7 @@ far = 1000
 `;
       const scene = parseGodotScene(content);
       const { code, stats } = generateHoloCode(scene, 'TestLevel');
-      
+
       expect(code).toContain('geometry: "cube"');
       expect(stats.meshesImported).toBe(1);
     });
@@ -241,7 +243,7 @@ far = 1000
 `;
       const scene = parseGodotScene(content);
       const { code } = generateHoloCode(scene, 'TestLevel');
-      
+
       expect(code).toContain('geometry: "sphere"');
     });
 
@@ -253,7 +255,7 @@ far = 1000
 `;
       const scene = parseGodotScene(content);
       const { code, stats } = generateHoloCode(scene, 'TestLevel');
-      
+
       expect(code).toContain('@physics');
       expect(stats.traitsGenerated).toBeGreaterThan(0);
     });
@@ -266,7 +268,7 @@ far = 1000
 `;
       const scene = parseGodotScene(content);
       const { code } = generateHoloCode(scene, 'TestLevel');
-      
+
       expect(code).toContain('@collidable');
     });
 
@@ -278,7 +280,7 @@ far = 1000
 `;
       const scene = parseGodotScene(content);
       const { code } = generateHoloCode(scene, 'TestLevel');
-      
+
       expect(code).toContain('@trigger');
     });
 
@@ -291,7 +293,7 @@ light_energy = 1.2
 `;
       const scene = parseGodotScene(content);
       const { code, stats } = generateHoloCode(scene, 'TestLevel');
-      
+
       expect(code).toContain('directional_light');
       expect(stats.lightsImported).toBe(1);
     });
@@ -304,7 +306,7 @@ light_energy = 1.2
 `;
       const scene = parseGodotScene(content);
       const { code } = generateHoloCode(scene, 'TestLevel');
-      
+
       expect(code).toContain('point_light');
     });
 
@@ -317,7 +319,7 @@ fov = 60
 `;
       const scene = parseGodotScene(content);
       const { code, stats } = generateHoloCode(scene, 'TestLevel');
-      
+
       expect(code).toContain('perspective_camera');
       expect(stats.camerasImported).toBe(1);
     });
@@ -331,7 +333,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 10, 15)
 `;
       const scene = parseGodotScene(content);
       const { code } = generateHoloCode(scene, 'TestLevel');
-      
+
       expect(code).toContain('position: [5, 10, 15]');
     });
   });
@@ -341,7 +343,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 10, 15)
       const result = await importGodot({
         inputPath: '/non/existent/file.tscn',
       });
-      
+
       expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
     });
@@ -355,7 +357,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 10, 15)
         const result = await importGodot({
           inputPath: tempFile,
         });
-        
+
         expect(result.success).toBe(false);
         expect(result.errors[0]).toContain('Unsupported file type');
       } finally {
@@ -379,7 +381,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 10, 15)
           inputPath: tempFile,
           sceneName: 'CustomSceneName',
         });
-        
+
         expect(result.success).toBe(true);
         expect(result.sceneName).toBe('CustomSceneName');
         expect(result.holoCode).toContain('composition "CustomSceneName"');
@@ -393,7 +395,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 10, 15)
       const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'godot-test-'));
       const inputFile = path.join(tempDir, 'test.tscn');
       const outputFile = path.join(tempDir, 'output.holo');
-      
+
       const content = `
 [gd_scene format=3]
 [node name="Level" type="Node3D"]
@@ -406,10 +408,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 10, 15)
           inputPath: inputFile,
           outputPath: outputFile,
         });
-        
+
         expect(result.success).toBe(true);
         expect(fs.existsSync(outputFile)).toBe(true);
-        
+
         const outputContent = fs.readFileSync(outputFile, 'utf-8');
         expect(outputContent).toContain('composition');
       } finally {
@@ -432,7 +434,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 10, 15)
         const result = await importGodot({
           inputPath: tempFile,
         });
-        
+
         expect(result.success).toBe(true);
         expect(result.sceneName).toBe('MyLevel');
       } finally {

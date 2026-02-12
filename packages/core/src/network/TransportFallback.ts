@@ -107,7 +107,10 @@ export class TransportFallbackManager implements Transport {
 
         try {
           const transport = this.createTransport(type);
-          const connected = await this.connectWithTimeout(transport, this.config.connectionTimeoutMs);
+          const connected = await this.connectWithTimeout(
+            transport,
+            this.config.connectionTimeoutMs
+          );
 
           if (connected) {
             this.activeTransport = {
@@ -298,7 +301,8 @@ export class TransportFallbackManager implements Transport {
         resolve(false);
       }, timeoutMs);
 
-      transport.connect()
+      transport
+        .connect()
         .then(() => {
           clearTimeout(timeout);
           resolve(true);

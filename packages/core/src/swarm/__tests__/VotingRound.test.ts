@@ -8,9 +8,9 @@ import type { IHiveContribution } from '../../extensions';
 
 describe('VotingRound', () => {
   let votingRound: VotingRound;
-  
+
   const makeContribution = (
-    id: string, 
+    id: string,
     type: IHiveContribution['type'] = 'idea',
     confidence = 0.8
   ): IHiveContribution => ({
@@ -30,7 +30,7 @@ describe('VotingRound', () => {
     it('should register a contribution for voting', () => {
       const contrib = makeContribution('c1');
       votingRound.registerContribution(contrib);
-      
+
       const result = votingRound.getResult('c1');
       expect(result).toBeDefined();
       expect(result?.supportVotes).toBe(0);
@@ -48,9 +48,9 @@ describe('VotingRound', () => {
     it('should record support votes', () => {
       const contrib = makeContribution('c1');
       votingRound.registerContribution(contrib);
-      
+
       votingRound.castVote('c1', 'voter1', 'support');
-      
+
       const result = votingRound.getResult('c1');
       expect(result?.supportVotes).toBe(1);
       expect(result?.opposeVotes).toBe(0);
@@ -59,9 +59,9 @@ describe('VotingRound', () => {
     it('should record oppose votes', () => {
       const contrib = makeContribution('c1');
       votingRound.registerContribution(contrib);
-      
+
       votingRound.castVote('c1', 'voter1', 'oppose');
-      
+
       const result = votingRound.getResult('c1');
       expect(result?.supportVotes).toBe(0);
       expect(result?.opposeVotes).toBe(1);
@@ -70,11 +70,11 @@ describe('VotingRound', () => {
     it('should track multiple voters', () => {
       const contrib = makeContribution('c1');
       votingRound.registerContribution(contrib);
-      
+
       votingRound.castVote('c1', 'voter1', 'support');
       votingRound.castVote('c1', 'voter2', 'support');
       votingRound.castVote('c1', 'voter3', 'oppose');
-      
+
       const result = votingRound.getResult('c1');
       expect(result?.supportVotes).toBe(2);
       expect(result?.opposeVotes).toBe(1);
@@ -85,7 +85,7 @@ describe('VotingRound', () => {
     it('should prevent duplicate votes from same voter', () => {
       const contrib = makeContribution('c1');
       votingRound.registerContribution(contrib);
-      
+
       votingRound.castVote('c1', 'voter1', 'support');
       expect(() => votingRound.castVote('c1', 'voter1', 'oppose')).toThrow('already voted');
     });
@@ -98,7 +98,7 @@ describe('VotingRound', () => {
       const contrib = makeContribution('c1');
       votingRound.registerContribution(contrib);
       votingRound.close();
-      
+
       expect(() => votingRound.castVote('c1', 'voter1', 'support')).toThrow('closed');
     });
 
@@ -106,10 +106,10 @@ describe('VotingRound', () => {
       votingRound = new VotingRound({ weightByConfidence: true });
       const contrib = makeContribution('c1');
       votingRound.registerContribution(contrib);
-      
+
       votingRound.castVote('c1', 'voter1', 'support', 0.9);
       votingRound.castVote('c1', 'voter2', 'oppose', 0.3);
-      
+
       const result = votingRound.getResult('c1');
       expect(result?.weightedScore).toBeCloseTo(0.6, 1); // 0.9 - 0.3
     });
@@ -120,12 +120,12 @@ describe('VotingRound', () => {
       votingRound.registerContribution(makeContribution('c1'));
       votingRound.registerContribution(makeContribution('c2'));
       votingRound.registerContribution(makeContribution('c3'));
-      
+
       votingRound.castVote('c1', 'v1', 'support');
       votingRound.castVote('c2', 'v1', 'support');
       votingRound.castVote('c2', 'v2', 'support');
       votingRound.castVote('c3', 'v1', 'oppose');
-      
+
       const results = votingRound.getAllResults();
       expect(results[0].contributionId).toBe('c2'); // 2 support
       expect(results[1].contributionId).toBe('c1'); // 1 support
@@ -135,37 +135,37 @@ describe('VotingRound', () => {
 
   describe('hasSuperMajority', () => {
     it('should detect super majority', () => {
-      votingRound = new VotingRound({ 
+      votingRound = new VotingRound({
         superMajorityThreshold: 0.67,
-        minVotesRequired: 3 
+        minVotesRequired: 3,
       });
       votingRound.registerContribution(makeContribution('c1'));
-      
+
       votingRound.castVote('c1', 'v1', 'support');
       votingRound.castVote('c1', 'v2', 'support');
       votingRound.castVote('c1', 'v3', 'support');
-      
+
       expect(votingRound.hasSuperMajority('c1')).toBe(true);
     });
 
     it('should return false without enough votes', () => {
       votingRound = new VotingRound({ minVotesRequired: 5 });
       votingRound.registerContribution(makeContribution('c1'));
-      
+
       votingRound.castVote('c1', 'v1', 'support');
       votingRound.castVote('c1', 'v2', 'support');
-      
+
       expect(votingRound.hasSuperMajority('c1')).toBe(false);
     });
 
     it('should return false without majority', () => {
       votingRound = new VotingRound({ superMajorityThreshold: 0.67 });
       votingRound.registerContribution(makeContribution('c1'));
-      
+
       votingRound.castVote('c1', 'v1', 'support');
       votingRound.castVote('c1', 'v2', 'oppose');
       votingRound.castVote('c1', 'v3', 'oppose');
-      
+
       expect(votingRound.hasSuperMajority('c1')).toBe(false);
     });
   });
@@ -173,19 +173,19 @@ describe('VotingRound', () => {
   describe('getApprovedContributions', () => {
     it('should return contributions with super majority', () => {
       votingRound = new VotingRound({ minVotesRequired: 2, superMajorityThreshold: 0.6 });
-      
+
       const c1 = makeContribution('c1');
       const c2 = makeContribution('c2');
       votingRound.registerContribution(c1);
       votingRound.registerContribution(c2);
-      
+
       // c1 gets 2 support, 0 oppose = 100% support
       votingRound.castVote('c1', 'v1', 'support');
       votingRound.castVote('c1', 'v2', 'support');
       // c2 gets 1 support, 1 oppose = 50% support (below 60% threshold)
       votingRound.castVote('c2', 'v1', 'support');
       votingRound.castVote('c2', 'v2', 'oppose');
-      
+
       const approved = votingRound.getApprovedContributions();
       expect(approved).toHaveLength(1);
       expect(approved[0].id).toBe('c1');
@@ -198,11 +198,11 @@ describe('VotingRound', () => {
       const c2 = makeContribution('c2');
       votingRound.registerContribution(c1);
       votingRound.registerContribution(c2);
-      
+
       votingRound.castVote('c1', 'v1', 'support');
       votingRound.castVote('c2', 'v1', 'support');
       votingRound.castVote('c2', 'v2', 'support');
-      
+
       const winner = votingRound.getWinner();
       expect(winner?.id).toBe('c2');
     });
@@ -217,11 +217,11 @@ describe('VotingRound', () => {
     it('should compute voting statistics', () => {
       votingRound.registerContribution(makeContribution('c1'));
       votingRound.registerContribution(makeContribution('c2'));
-      
+
       votingRound.castVote('c1', 'v1', 'support');
       votingRound.castVote('c1', 'v2', 'support');
       votingRound.castVote('c2', 'v1', 'oppose');
-      
+
       const stats = votingRound.getStatistics();
       expect(stats.totalContributions).toBe(2);
       expect(stats.totalVotes).toBe(3);

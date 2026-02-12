@@ -74,9 +74,15 @@ const NOOP_SPAN: Span = {
   events: [],
   traceId: '',
   spanId: '',
-  end() { /* noop */ },
-  setAttribute() { /* noop */ },
-  addEvent() { /* noop */ },
+  end() {
+    /* noop */
+  },
+  setAttribute() {
+    /* noop */
+  },
+  addEvent() {
+    /* noop */
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -128,7 +134,7 @@ export class HoloScriptTelemetry extends EventEmitter {
   startSpan(
     name: string,
     attributes?: Record<string, string | number | boolean>,
-    parentSpan?: Span,
+    parentSpan?: Span
   ): Span {
     if (!this.shouldSample()) return NOOP_SPAN;
 
@@ -433,7 +439,7 @@ export class HoloScriptTelemetry extends EventEmitter {
     name: string,
     type: 'counter' | 'histogram' | 'gauge',
     value: number,
-    labels: Record<string, string>,
+    labels: Record<string, string>
   ): void {
     const metric: Metric = { name, type, value, labels, timestamp: Date.now() };
     this.emit('metric:record', metric);

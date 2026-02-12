@@ -18,6 +18,10 @@ import {
   IFilmGrainParams,
   ISharpenParams,
   IChromaticAberrationParams,
+  ICausticsParams,
+  ISSRParams,
+  ISSAOParams,
+  ISSGIParams,
   UNIFORM_SIZES,
   getDefaultParams,
 } from './PostProcessTypes';
@@ -31,10 +35,13 @@ import {
   SHARPEN_SHADER,
   CHROMATIC_ABERRATION_SHADER,
   DOF_SHADER as _DOF_SHADER,
-  SSAO_SHADER as _SSAO_SHADER,
+  SSAO_SHADER,
   FOG_SHADER as _FOG_SHADER,
   MOTION_BLUR_SHADER as _MOTION_BLUR_SHADER,
   COLOR_GRADE_SHADER as _COLOR_GRADE_SHADER,
+  CAUSTICS_SHADER,
+  SSR_SHADER,
+  SSGI_SHADER,
 } from './PostProcessShaders';
 
 /**
@@ -142,7 +149,10 @@ export abstract class PostProcessEffect {
   /**
    * Update uniform buffer with current parameters
    */
-  protected abstract updateUniforms(device: GPUDevice, frameData: { time: number; deltaTime: number }): void;
+  protected abstract updateUniforms(
+    device: GPUDevice,
+    frameData: { time: number; deltaTime: number }
+  ): void;
 
   /**
    * Render the effect
@@ -212,7 +222,10 @@ export class BloomEffect extends PostProcessEffect {
     });
   }
 
-  protected updateUniforms(device: GPUDevice, frameData: { time: number; deltaTime: number }): void {
+  protected updateUniforms(
+    device: GPUDevice,
+    frameData: { time: number; deltaTime: number }
+  ): void {
     if (!this.uniformBuffer) return;
     const p = this.params as IBloomParams;
     const data = new Float32Array([
@@ -226,7 +239,8 @@ export class BloomEffect extends PostProcessEffect {
       0.0, // padding
       frameData.time,
       frameData.deltaTime,
-      0.0, 0.0, // padding
+      0.0,
+      0.0, // padding
     ]);
     device.queue.writeBuffer(this.uniformBuffer, 0, data);
   }
@@ -247,12 +261,14 @@ export class BloomEffect extends PostProcessEffect {
     });
 
     const passEncoder = context.commandEncoder.beginRenderPass({
-      colorAttachments: [{
-        view: context.output.view,
-        loadOp: 'clear',
-        storeOp: 'store',
-        clearValue: { r: 0, g: 0, b: 0, a: 1 },
-      }],
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
     });
 
     passEncoder.setPipeline(this.pipeline);
@@ -315,15 +331,25 @@ export class ToneMapEffect extends PostProcessEffect {
     });
   }
 
-  protected updateUniforms(device: GPUDevice, _frameData: { time: number; deltaTime: number }): void {
+  protected updateUniforms(
+    device: GPUDevice,
+    _frameData: { time: number; deltaTime: number }
+  ): void {
     if (!this.uniformBuffer) return;
     const p = this.params as IToneMapParams;
 
     // Map operator to integer
     const operatorMap: Record<string, number> = {
-      none: 0, reinhard: 1, reinhardLum: 2, aces: 3,
-      acesApprox: 4, filmic: 5, uncharted2: 6, uchimura: 7,
-      lottes: 8, khronos: 9,
+      none: 0,
+      reinhard: 1,
+      reinhardLum: 2,
+      aces: 3,
+      acesApprox: 4,
+      filmic: 5,
+      uncharted2: 6,
+      uchimura: 7,
+      lottes: 8,
+      khronos: 9,
     };
 
     const data = new Float32Array([
@@ -354,12 +380,14 @@ export class ToneMapEffect extends PostProcessEffect {
     });
 
     const passEncoder = context.commandEncoder.beginRenderPass({
-      colorAttachments: [{
-        view: context.output.view,
-        loadOp: 'clear',
-        storeOp: 'store',
-        clearValue: { r: 0, g: 0, b: 0, a: 1 },
-      }],
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
     });
 
     passEncoder.setPipeline(this.pipeline);
@@ -413,7 +441,10 @@ export class FXAAEffect extends PostProcessEffect {
     });
   }
 
-  protected updateUniforms(device: GPUDevice, _frameData: { time: number; deltaTime: number }): void {
+  protected updateUniforms(
+    device: GPUDevice,
+    _frameData: { time: number; deltaTime: number }
+  ): void {
     if (!this.uniformBuffer) return;
     const p = this.params as IFXAAParams;
 
@@ -443,12 +474,14 @@ export class FXAAEffect extends PostProcessEffect {
     });
 
     const passEncoder = context.commandEncoder.beginRenderPass({
-      colorAttachments: [{
-        view: context.output.view,
-        loadOp: 'clear',
-        storeOp: 'store',
-        clearValue: { r: 0, g: 0, b: 0, a: 1 },
-      }],
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
     });
 
     passEncoder.setPipeline(this.pipeline);
@@ -502,7 +535,10 @@ export class VignetteEffect extends PostProcessEffect {
     });
   }
 
-  protected updateUniforms(device: GPUDevice, _frameData: { time: number; deltaTime: number }): void {
+  protected updateUniforms(
+    device: GPUDevice,
+    _frameData: { time: number; deltaTime: number }
+  ): void {
     if (!this.uniformBuffer) return;
     const p = this.params as IVignetteParams;
 
@@ -511,7 +547,10 @@ export class VignetteEffect extends PostProcessEffect {
       p.roundness,
       p.smoothness,
       0.0, // padding
-      p.color[0], p.color[1], p.color[2], 1.0,
+      p.color[0],
+      p.color[1],
+      p.color[2],
+      1.0,
     ]);
     device.queue.writeBuffer(this.uniformBuffer, 0, data);
   }
@@ -531,12 +570,14 @@ export class VignetteEffect extends PostProcessEffect {
     });
 
     const passEncoder = context.commandEncoder.beginRenderPass({
-      colorAttachments: [{
-        view: context.output.view,
-        loadOp: 'clear',
-        storeOp: 'store',
-        clearValue: { r: 0, g: 0, b: 0, a: 1 },
-      }],
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
     });
 
     passEncoder.setPipeline(this.pipeline);
@@ -590,7 +631,10 @@ export class FilmGrainEffect extends PostProcessEffect {
     });
   }
 
-  protected updateUniforms(device: GPUDevice, frameData: { time: number; deltaTime: number }): void {
+  protected updateUniforms(
+    device: GPUDevice,
+    frameData: { time: number; deltaTime: number }
+  ): void {
     if (!this.uniformBuffer) return;
     const p = this.params as IFilmGrainParams;
 
@@ -618,12 +662,14 @@ export class FilmGrainEffect extends PostProcessEffect {
     });
 
     const passEncoder = context.commandEncoder.beginRenderPass({
-      colorAttachments: [{
-        view: context.output.view,
-        loadOp: 'clear',
-        storeOp: 'store',
-        clearValue: { r: 0, g: 0, b: 0, a: 1 },
-      }],
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
     });
 
     passEncoder.setPipeline(this.pipeline);
@@ -677,7 +723,10 @@ export class SharpenEffect extends PostProcessEffect {
     });
   }
 
-  protected updateUniforms(device: GPUDevice, _frameData: { time: number; deltaTime: number }): void {
+  protected updateUniforms(
+    device: GPUDevice,
+    _frameData: { time: number; deltaTime: number }
+  ): void {
     if (!this.uniformBuffer) return;
     const p = this.params as ISharpenParams;
 
@@ -705,12 +754,14 @@ export class SharpenEffect extends PostProcessEffect {
     });
 
     const passEncoder = context.commandEncoder.beginRenderPass({
-      colorAttachments: [{
-        view: context.output.view,
-        loadOp: 'clear',
-        storeOp: 'store',
-        clearValue: { r: 0, g: 0, b: 0, a: 1 },
-      }],
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
     });
 
     passEncoder.setPipeline(this.pipeline);
@@ -764,18 +815,26 @@ export class ChromaticAberrationEffect extends PostProcessEffect {
     });
   }
 
-  protected updateUniforms(device: GPUDevice, _frameData: { time: number; deltaTime: number }): void {
+  protected updateUniforms(
+    device: GPUDevice,
+    _frameData: { time: number; deltaTime: number }
+  ): void {
     if (!this.uniformBuffer) return;
     const p = this.params as IChromaticAberrationParams;
 
     const data = new Float32Array([
       p.intensity,
       p.radial ? 1.0 : 0.0,
-      0.0, 0.0, // padding
-      p.redOffset[0], p.redOffset[1],
-      p.greenOffset[0], p.greenOffset[1],
-      p.blueOffset[0], p.blueOffset[1],
-      0.0, 0.0, // padding
+      0.0,
+      0.0, // padding
+      p.redOffset[0],
+      p.redOffset[1],
+      p.greenOffset[0],
+      p.greenOffset[1],
+      p.blueOffset[0],
+      p.blueOffset[1],
+      0.0,
+      0.0, // padding
     ]);
     device.queue.writeBuffer(this.uniformBuffer, 0, data);
   }
@@ -795,14 +854,377 @@ export class ChromaticAberrationEffect extends PostProcessEffect {
     });
 
     const passEncoder = context.commandEncoder.beginRenderPass({
-      colorAttachments: [{
-        view: context.output.view,
-        loadOp: 'clear',
-        storeOp: 'store',
-        clearValue: { r: 0, g: 0, b: 0, a: 1 },
-      }],
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
     });
 
+    passEncoder.setPipeline(this.pipeline);
+    passEncoder.setBindGroup(0, bindGroup);
+    passEncoder.draw(3);
+    passEncoder.end();
+  }
+}
+
+/**
+ * Caustics overlay effect — underwater refracted light patterns
+ */
+export class CausticsEffect extends PostProcessEffect {
+  constructor(params?: Partial<ICausticsParams>) {
+    super('caustics', 'Caustics', params);
+  }
+
+  protected async createPipeline(device: GPUDevice): Promise<void> {
+    const bindGroupLayout = device.createBindGroupLayout({
+      label: 'caustics_bind_group_layout',
+      entries: [
+        { binding: 0, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
+        { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float' } },
+        { binding: 2, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+      ],
+    });
+    const pipelineLayout = device.createPipelineLayout({
+      label: 'caustics_pipeline_layout',
+      bindGroupLayouts: [bindGroupLayout],
+    });
+    const shaderModule = device.createShaderModule({
+      label: 'caustics_shader',
+      code: FULLSCREEN_VERTEX_SHADER + CAUSTICS_SHADER,
+    });
+    this.pipeline = device.createRenderPipeline({
+      label: 'caustics_pipeline',
+      layout: pipelineLayout,
+      vertex: { module: shaderModule, entryPoint: 'vs_main' },
+      fragment: {
+        module: shaderModule,
+        entryPoint: 'fs_caustics',
+        targets: [{ format: 'rgba16float' }],
+      },
+      primitive: { topology: 'triangle-list' },
+    });
+  }
+
+  protected updateUniforms(
+    device: GPUDevice,
+    frameData: { time: number; deltaTime: number }
+  ): void {
+    if (!this.uniformBuffer) return;
+    const p = this.params as ICausticsParams;
+    const data = new Float32Array([
+      p.intensity,
+      p.scale,
+      p.speed,
+      p.depthFade,
+      p.color[0],
+      p.color[1],
+      p.color[2],
+      p.waterLevel,
+      frameData.time,
+      p.dispersion ?? 0,
+      p.foamIntensity ?? 0,
+      p.shadowStrength ?? 0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+    ]);
+    device.queue.writeBuffer(this.uniformBuffer, 0, data);
+  }
+
+  public render(context: IEffectRenderContext): void {
+    if (!this.enabled || !this.pipeline || !this.uniformBuffer || !this.sampler) return;
+    this.updateUniforms(context.device, context.frameData);
+    const bindGroup = context.device.createBindGroup({
+      layout: this.pipeline.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: this.sampler },
+        { binding: 1, resource: context.input.view },
+        { binding: 2, resource: { buffer: this.uniformBuffer } },
+      ],
+    });
+    const passEncoder = context.commandEncoder.beginRenderPass({
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
+    });
+    passEncoder.setPipeline(this.pipeline);
+    passEncoder.setBindGroup(0, bindGroup);
+    passEncoder.draw(3);
+    passEncoder.end();
+  }
+}
+
+/**
+ * Screen-Space Reflections (SSR) effect
+ */
+export class SSREffect extends PostProcessEffect {
+  constructor(params?: Partial<ISSRParams>) {
+    super('ssr', 'SSR', params);
+  }
+
+  protected async createPipeline(device: GPUDevice): Promise<void> {
+    const bindGroupLayout = device.createBindGroupLayout({
+      label: 'ssr_bind_group_layout',
+      entries: [
+        { binding: 0, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
+        { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float' } },
+        { binding: 2, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+      ],
+    });
+    const pipelineLayout = device.createPipelineLayout({
+      label: 'ssr_pipeline_layout',
+      bindGroupLayouts: [bindGroupLayout],
+    });
+    const shaderModule = device.createShaderModule({
+      label: 'ssr_shader',
+      code: FULLSCREEN_VERTEX_SHADER + SSR_SHADER,
+    });
+    this.pipeline = device.createRenderPipeline({
+      label: 'ssr_pipeline',
+      layout: pipelineLayout,
+      vertex: { module: shaderModule, entryPoint: 'vs_main' },
+      fragment: {
+        module: shaderModule,
+        entryPoint: 'fs_ssr',
+        targets: [{ format: 'rgba16float' }],
+      },
+      primitive: { topology: 'triangle-list' },
+    });
+  }
+
+  protected updateUniforms(
+    device: GPUDevice,
+    _frameData: { time: number; deltaTime: number }
+  ): void {
+    if (!this.uniformBuffer) return;
+    const p = this.params as ISSRParams;
+    const data = new Float32Array([
+      p.intensity,
+      p.maxSteps,
+      p.stepSize,
+      p.thickness,
+      p.roughnessFade,
+      p.edgeFade,
+      p.roughnessBlur ?? 0,
+      p.fresnelStrength ?? 0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+    ]);
+    device.queue.writeBuffer(this.uniformBuffer, 0, data);
+  }
+
+  public render(context: IEffectRenderContext): void {
+    if (!this.enabled || !this.pipeline || !this.uniformBuffer || !this.sampler) return;
+    this.updateUniforms(context.device, context.frameData);
+    const bindGroup = context.device.createBindGroup({
+      layout: this.pipeline.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: this.sampler },
+        { binding: 1, resource: context.input.view },
+        { binding: 2, resource: { buffer: this.uniformBuffer } },
+      ],
+    });
+    const passEncoder = context.commandEncoder.beginRenderPass({
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
+    });
+    passEncoder.setPipeline(this.pipeline);
+    passEncoder.setBindGroup(0, bindGroup);
+    passEncoder.draw(3);
+    passEncoder.end();
+  }
+}
+
+/**
+ * Screen-Space Ambient Occlusion (SSAO) effect
+ */
+export class SSAOEffect extends PostProcessEffect {
+  constructor(params?: Partial<ISSAOParams>) {
+    super('ssao', 'SSAO', params);
+  }
+
+  protected async createPipeline(device: GPUDevice): Promise<void> {
+    const bindGroupLayout = device.createBindGroupLayout({
+      label: 'ssao_bind_group_layout',
+      entries: [
+        { binding: 0, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
+        { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float' } },
+        { binding: 2, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+      ],
+    });
+    const pipelineLayout = device.createPipelineLayout({
+      label: 'ssao_pipeline_layout',
+      bindGroupLayouts: [bindGroupLayout],
+    });
+    const shaderModule = device.createShaderModule({
+      label: 'ssao_shader',
+      code: FULLSCREEN_VERTEX_SHADER + SSAO_SHADER,
+    });
+    this.pipeline = device.createRenderPipeline({
+      label: 'ssao_pipeline',
+      layout: pipelineLayout,
+      vertex: { module: shaderModule, entryPoint: 'vs_main' },
+      fragment: {
+        module: shaderModule,
+        entryPoint: 'fs_ssao',
+        targets: [{ format: 'rgba16float' }],
+      },
+      primitive: { topology: 'triangle-list' },
+    });
+  }
+
+  protected updateUniforms(
+    device: GPUDevice,
+    _frameData: { time: number; deltaTime: number }
+  ): void {
+    if (!this.uniformBuffer) return;
+    const p = this.params as ISSAOParams;
+    const modeVal = (p.mode ?? 'hemisphere') === 'hbao' ? 1.0 : 0.0;
+    const data = new Float32Array([
+      p.intensity,
+      p.radius,
+      p.bias,
+      p.samples,
+      p.power,
+      p.falloff,
+      0.0,
+      0.0,
+      modeVal,
+      p.bentNormals ? 1.0 : 0.0,
+      p.spatialDenoise ? 1.0 : 0.0,
+      0.0,
+    ]);
+    device.queue.writeBuffer(this.uniformBuffer, 0, data);
+  }
+
+  public render(context: IEffectRenderContext): void {
+    if (!this.enabled || !this.pipeline || !this.uniformBuffer || !this.sampler) return;
+    this.updateUniforms(context.device, context.frameData);
+    const bindGroup = context.device.createBindGroup({
+      layout: this.pipeline.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: this.sampler },
+        { binding: 1, resource: context.input.view },
+        { binding: 2, resource: { buffer: this.uniformBuffer } },
+      ],
+    });
+    const passEncoder = context.commandEncoder.beginRenderPass({
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
+    });
+    passEncoder.setPipeline(this.pipeline);
+    passEncoder.setBindGroup(0, bindGroup);
+    passEncoder.draw(3);
+    passEncoder.end();
+  }
+}
+
+/**
+ * Screen-Space Global Illumination (SSGI) effect
+ */
+export class SSGIEffect extends PostProcessEffect {
+  constructor(params?: Partial<ISSGIParams>) {
+    super('ssgi', 'SSGI', params);
+  }
+
+  protected async createPipeline(device: GPUDevice): Promise<void> {
+    const bindGroupLayout = device.createBindGroupLayout({
+      label: 'ssgi_bind_group_layout',
+      entries: [
+        { binding: 0, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
+        { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float' } },
+        { binding: 2, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+      ],
+    });
+    const pipelineLayout = device.createPipelineLayout({
+      label: 'ssgi_pipeline_layout',
+      bindGroupLayouts: [bindGroupLayout],
+    });
+    const shaderModule = device.createShaderModule({
+      label: 'ssgi_shader',
+      code: FULLSCREEN_VERTEX_SHADER + SSGI_SHADER,
+    });
+    this.pipeline = device.createRenderPipeline({
+      label: 'ssgi_pipeline',
+      layout: pipelineLayout,
+      vertex: { module: shaderModule, entryPoint: 'vs_main' },
+      fragment: {
+        module: shaderModule,
+        entryPoint: 'fs_ssgi',
+        targets: [{ format: 'rgba16float' }],
+      },
+      primitive: { topology: 'triangle-list' },
+    });
+  }
+
+  protected updateUniforms(
+    device: GPUDevice,
+    _frameData: { time: number; deltaTime: number }
+  ): void {
+    if (!this.uniformBuffer) return;
+    const p = this.params as ISSGIParams;
+    const data = new Float32Array([
+      p.intensity,
+      p.radius,
+      p.samples,
+      p.bounceIntensity,
+      p.falloff,
+      p.temporalBlend ?? 0,
+      p.spatialDenoise ? 1.0 : 0.0,
+      p.multiBounce ?? 0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+    ]);
+    device.queue.writeBuffer(this.uniformBuffer, 0, data);
+  }
+
+  public render(context: IEffectRenderContext): void {
+    if (!this.enabled || !this.pipeline || !this.uniformBuffer || !this.sampler) return;
+    this.updateUniforms(context.device, context.frameData);
+    const bindGroup = context.device.createBindGroup({
+      layout: this.pipeline.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: this.sampler },
+        { binding: 1, resource: context.input.view },
+        { binding: 2, resource: { buffer: this.uniformBuffer } },
+      ],
+    });
+    const passEncoder = context.commandEncoder.beginRenderPass({
+      colorAttachments: [
+        {
+          view: context.output.view,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
+    });
     passEncoder.setPipeline(this.pipeline);
     passEncoder.setBindGroup(0, bindGroup);
     passEncoder.draw(3);
@@ -815,7 +1237,7 @@ export class ChromaticAberrationEffect extends PostProcessEffect {
  */
 export function createEffect(
   type: PostProcessEffectType,
-  params?: Partial<EffectParams>,
+  params?: Partial<EffectParams>
 ): PostProcessEffect {
   switch (type) {
     case 'bloom':
@@ -832,6 +1254,14 @@ export function createEffect(
       return new SharpenEffect(params as Partial<ISharpenParams>);
     case 'chromaticAberration':
       return new ChromaticAberrationEffect(params as Partial<IChromaticAberrationParams>);
+    case 'caustics':
+      return new CausticsEffect(params as Partial<ICausticsParams>);
+    case 'ssr':
+      return new SSREffect(params as Partial<ISSRParams>);
+    case 'ssao':
+      return new SSAOEffect(params as Partial<ISSAOParams>);
+    case 'ssgi':
+      return new SSGIEffect(params as Partial<ISSGIParams>);
     default:
       throw new Error(`Unknown effect type: ${type}`);
   }

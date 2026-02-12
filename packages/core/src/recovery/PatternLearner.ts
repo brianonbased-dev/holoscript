@@ -1,15 +1,15 @@
 /**
  * Pattern Learner
- * 
+ *
  * Analyzes failure history to detect patterns and suggest strategies.
  */
 
 import type { IAgentFailure, FailureType, FailurePattern } from '../extensions';
 
 export interface PatternLearnerConfig {
-  windowSize: number;           // Number of recent failures to analyze
-  frequencyThreshold: number;   // Min occurrences to consider a pattern
-  timeWindowMs: number;         // Time window for recent patterns
+  windowSize: number; // Number of recent failures to analyze
+  frequencyThreshold: number; // Min occurrences to consider a pattern
+  timeWindowMs: number; // Time window for recent patterns
 }
 
 const DEFAULT_CONFIG: PatternLearnerConfig = {
@@ -42,7 +42,7 @@ export class PatternLearner {
    */
   recordFailure(failure: IAgentFailure): void {
     this.failureHistory.push(failure);
-    
+
     // Trim to window size
     if (this.failureHistory.length > this.config.windowSize) {
       this.failureHistory = this.failureHistory.slice(-this.config.windowSize);
@@ -67,7 +67,7 @@ export class PatternLearner {
   detectPatterns(): FailurePattern[] {
     const now = Date.now();
     const recentFailures = this.failureHistory.filter(
-      f => now - f.timestamp < this.config.timeWindowMs
+      (f) => now - f.timestamp < this.config.timeWindowMs
     );
 
     // Group by error type
@@ -87,7 +87,7 @@ export class PatternLearner {
           pattern: `${errorType}:recurring`,
           errorType,
           frequency: failures.length,
-          lastSeen: Math.max(...failures.map(f => f.timestamp)),
+          lastSeen: Math.max(...failures.map((f) => f.timestamp)),
           suggestedStrategy: bestStrategy,
           successRate: this.getStrategySuccessRate(bestStrategy),
         });
@@ -167,17 +167,18 @@ export class PatternLearner {
       'memory-error': '',
       'type-error': '',
       'permission-error': '',
-      'unknown': '',
+      unknown: '',
     };
 
     const defaultStrategy = strategyMap[errorType] || '';
-    
+
     // Check if we have success data that suggests a different strategy
     let bestRate = this.getStrategySuccessRate(defaultStrategy);
     let bestStrategy = defaultStrategy;
 
     for (const [strategyId, stats] of this.strategySuccessRates) {
-      if (stats.total >= 3) { // Minimum sample size
+      if (stats.total >= 3) {
+        // Minimum sample size
         const rate = stats.successes / stats.total;
         if (rate > bestRate) {
           bestRate = rate;
@@ -204,12 +205,10 @@ export class PatternLearner {
     const now = Date.now();
     const halfWindow = this.config.timeWindowMs / 2;
 
-    const recentCount = this.failureHistory.filter(
-      f => now - f.timestamp < halfWindow
-    ).length;
+    const recentCount = this.failureHistory.filter((f) => now - f.timestamp < halfWindow).length;
 
     const olderCount = this.failureHistory.filter(
-      f => now - f.timestamp >= halfWindow && now - f.timestamp < this.config.timeWindowMs
+      (f) => now - f.timestamp >= halfWindow && now - f.timestamp < this.config.timeWindowMs
     ).length;
 
     if (recentCount > olderCount * 1.5) {
@@ -223,7 +222,7 @@ export class PatternLearner {
   private calculateHealthScore(): number {
     const now = Date.now();
     const recentFailures = this.failureHistory.filter(
-      f => now - f.timestamp < this.config.timeWindowMs
+      (f) => now - f.timestamp < this.config.timeWindowMs
     );
 
     if (recentFailures.length === 0) {
@@ -248,7 +247,7 @@ export class PatternLearner {
     for (const failure of recentFailures) {
       severityCounts[failure.severity]++;
     }
-    const severityPenalty = 
+    const severityPenalty =
       severityCounts.critical * 20 +
       severityCounts.high * 10 +
       severityCounts.medium * 5 +
@@ -268,10 +267,6 @@ export class PatternLearner {
     const successScore = avgSuccessRate * 100;
 
     // Weighted average
-    return Math.round(
-      frequencyScore * 0.3 +
-      severityScore * 0.3 +
-      successScore * 0.4
-    );
+    return Math.round(frequencyScore * 0.3 + severityScore * 0.3 + successScore * 0.4);
   }
 }

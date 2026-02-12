@@ -6,7 +6,7 @@ import type { TraitVisualConfig } from '../types';
  */
 export const LIGHTING_VISUALS: Record<string, TraitVisualConfig> = {
   shadow_caster: {
-    material: { },
+    material: {},
     tags: ['shadow'],
     layer: 'lighting',
   },

@@ -53,6 +53,7 @@ object "FloorPlane" {
 ### 2. Unity Auto-Import
 
 Unity will automatically:
+
 - Detect the `.hs` file
 - Compile it to a Unity prefab
 - Create GameObjects with appropriate components
@@ -63,22 +64,22 @@ Drag the generated prefab into your Unity scene. Done!
 
 ## Supported HoloScript Traits
 
-| Trait | Unity Component | Notes |
-|-------|----------------|-------|
-| `@grabbable` | XR Grab Interactable | Requires XR Interaction Toolkit |
-| `@throwable` | Rigidbody | Adds physics support |
-| `@glowing` | Material Emission | Enables glow effect |
-| `@animated` | Animator | Binds to animation controller |
-| `@teleportable` | XR Teleportation Anchor | VR teleport target |
+| Trait           | Unity Component         | Notes                           |
+| --------------- | ----------------------- | ------------------------------- |
+| `@grabbable`    | XR Grab Interactable    | Requires XR Interaction Toolkit |
+| `@throwable`    | Rigidbody               | Adds physics support            |
+| `@glowing`      | Material Emission       | Enables glow effect             |
+| `@animated`     | Animator                | Binds to animation controller   |
+| `@teleportable` | XR Teleportation Anchor | VR teleport target              |
 
 ## Unity Version Compatibility
 
-| Unity Version | HoloScript SDK | Status |
-|--------------|----------------|--------|
-| Unity 6 | 3.0.0+ | ✅ Fully Supported |
-| Unity 2022 LTS | 3.0.0+ | ✅ Fully Supported |
-| Unity 2021 LTS | 2.5.0+ | ⚠️ Legacy Support |
-| Unity 2020 | Not Supported | ❌ |
+| Unity Version  | HoloScript SDK | Status             |
+| -------------- | -------------- | ------------------ |
+| Unity 6        | 3.0.0+         | ✅ Fully Supported |
+| Unity 2022 LTS | 3.0.0+         | ✅ Fully Supported |
+| Unity 2021 LTS | 2.5.0+         | ⚠️ Legacy Support  |
+| Unity 2020     | Not Supported  | ❌                 |
 
 ## Configuration
 

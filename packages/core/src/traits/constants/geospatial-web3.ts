@@ -12,4 +12,6 @@ export const GEOSPATIAL_WEB3_TRAITS = [
   'wallet',
   'marketplace',
   'portable',
+  'bonding_curve',
+  'zora_coins',
 ] as const;

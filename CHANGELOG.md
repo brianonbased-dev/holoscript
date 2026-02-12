@@ -17,6 +17,81 @@
 - **R3FCompiler integration** — Catch-all block now queries TraitVisualRegistry for material props
 - **70-test suite** covering all visual system components
 
+#### Deployment Infrastructure (Feb 2026)
+
+- **Cargo Workspace** — Unified Rust package management with version inheritance
+  - Workspace members: `compiler-wasm`, `holoscript-component` (disabled pending WIT config)
+  - Shared dependencies and metadata across all Rust packages
+  - `workspace.package` version inheritance for atomic versioning
+- **Multi-Platform Release Workflow** — GitHub Actions workflow for 4 platforms
+  - Native builds for: win32 (x86_64-pc-windows-msvc), darwin-x64, darwin-arm64, linux
+  - Automated release artifact generation and GitHub release creation
+  - Cross-platform compilation with platform-specific Rust toolchains
+- **Homebrew Formula** — macOS package manager integration
+  - Universal binary support (ARM64 + Intel)
+  - Formula location: `Formula/holoscript.rb`
+  - Installation: `brew tap brianonbased-dev/holoscript && brew install holoscript`
+- **Chocolatey Package** — Windows package manager integration
+  - NuGet package specification with PowerShell install scripts
+  - Location: `chocolatey/holoscript.nuspec`
+  - Installation: `choco install holoscript`
+- **Version Synchronization** — Atomic version bumping across 6 package managers
+  - Script: `scripts/sync-versions.js` (patch, minor, major, prerelease)
+  - Synchronized files: package.json, Cargo.toml, Unity package.json, Homebrew formula, Chocolatey nuspec, README badges
+  - NPM scripts: `pnpm version:patch`, `pnpm version:minor`, `pnpm version:major`
+- **Typeshare Integration** — Automatic Rust→TypeScript type generation
+  - `#[typeshare]` annotations on Rust structs and enums
+  - Generated types location: `packages/compiler-wasm/bindings/`
+  - Build scripts: `pnpm types:generate` (bash), `pnpm types:generate:win` (PowerShell)
+
+#### Unity SDK Improvements (Feb 2026)
+
+- **Assembly Definitions** — Namespace isolation (Pattern G.010.01)
+  - `HoloScript.Runtime.asmdef` — Runtime components and trait system
+  - `HoloScript.Editor.asmdef` — Editor-only importers and inspectors
+  - `HoloScript.Runtime.Tests.asmdef` — Runtime unit tests
+  - `HoloScript.Editor.Tests.asmdef` — Editor unit tests
+- **Comprehensive Test Suite** — 24 unit tests across Runtime and Editor
+  - Runtime tests: HoloScriptObject trait application, component mapping
+  - Editor tests: Asset importer, material parsing, transform hierarchy
+  - XR Interaction Toolkit integration tests for VR traits
+- **Unity Package Manager** — Git URL-based installation
+  - URL: `https://github.com/brianonbased-dev/HoloScript.git?path=/packages/unity-sdk`
+  - Version constraints: Unity 2022.3 LTS or Unity 6+
+  - Dependencies: XR Interaction Toolkit 2.3+
+
+#### Build & CI Optimization (Feb 2026)
+
+- **82% Build Time Reduction** — CI/CD optimizations (15 min → 2.7 min)
+  - Swatinem/rust-cache@v2 — Incremental Rust dependency caching (55% reduction)
+  - jetli/wasm-pack-action@v0.4.0 — Pre-built wasm-pack binary (5-7 min savings)
+  - Shared cache key: "holoscript-v1" with `cache-all-crates: true`
+- **Parallel Test Execution** — Vitest concurrency optimization
+- **Railway Deployment** — Cloud platform auto-deployment
+  - Removed prebuild hook (typeshare now manual via `pnpm types:generate`)
+  - Zero-config deployment with automatic Node.js detection
+
+#### Documentation (Feb 2026)
+
+- **DEPLOYMENT.md** — 534-line comprehensive deployment guide
+  - 15 deployment channels covered (Homebrew, Chocolatey, npm, Cargo, Unity, etc.)
+  - Multi-platform release workflow documentation
+  - Version management best practices
+  - CI/CD pipeline architecture
+  - Troubleshooting guides for each platform
+  - Release checklist and rollback procedures
+- **README.md** — Multi-channel installation section
+  - Quick-start installation for macOS (Homebrew), Windows (Chocolatey), npm, Cargo, Unity
+  - Platform-specific instructions with command examples
+  - Version badges and quickstart links
+- **Unity SDK CHANGELOG** — v3.0.0 release notes
+  - Migration guides from 2.5.x to 3.0.0
+  - Unity 2021 to 2022 migration path
+  - Breaking changes and deprecation notices
+- **CI/CD Architecture Docs** — Build optimization strategies
+- **Type Generation Guides** — Typeshare usage and workflows
+- **Package Manager Guides** — Publishing to Homebrew, Chocolatey, npm, Cargo
+
 #### VR Traits Modularization (Feb 2026)
 
 - Modularized 1,525 VR traits from monolithic `constants.ts` into 61 category-per-file modules

@@ -52,7 +52,7 @@ interface GenerationResult {
  */
 export async function generateFromText(prompt: string): Promise<GenerationResult> {
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-pro',
+    model: 'gemini-2.0-flash',
     systemInstruction: SYSTEM_INSTRUCTION,
   });
 
@@ -96,8 +96,9 @@ export async function generateFromImage(
   mimeType: string = 'image/png',
   context?: string
 ): Promise<GenerationResult> {
+  // Gemini 2.0 has unified multimodal support (no separate -vision model)
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-pro-vision',
+    model: 'gemini-2.0-flash',
     systemInstruction: SYSTEM_INSTRUCTION,
   });
 
@@ -135,7 +136,7 @@ export async function generateFromVideo(
   context?: string
 ): Promise<GenerationResult> {
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-pro',
+    model: 'gemini-2.0-flash',
     systemInstruction: SYSTEM_INSTRUCTION,
   });
 
@@ -175,7 +176,7 @@ export class GeminiSceneBuilder {
 
   constructor() {
     this.model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-pro',
+      model: 'gemini-2.0-flash',
       systemInstruction: SYSTEM_INSTRUCTION,
     });
     this.chat = this.model.startChat();
@@ -216,7 +217,7 @@ export async function generateGrounded(
   searchContext: boolean = true
 ): Promise<GenerationResult> {
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-pro',
+    model: 'gemini-2.0-flash',
     systemInstruction: SYSTEM_INSTRUCTION,
     // Enable grounding with Google Search
     tools: searchContext ? [{ googleSearch: {} }] : undefined,

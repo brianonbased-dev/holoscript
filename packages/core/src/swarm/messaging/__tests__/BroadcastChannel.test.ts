@@ -42,13 +42,13 @@ describe('BroadcastChannel', () => {
       channel.subscribe('agent-2', handler, { role: 'subscriber' });
 
       const subs = channel.getSubscribers();
-      expect(subs.find(s => s.agentId === 'agent-1')?.role).toBe('publisher');
-      expect(subs.find(s => s.agentId === 'agent-2')?.role).toBe('subscriber');
+      expect(subs.find((s) => s.agentId === 'agent-1')?.role).toBe('publisher');
+      expect(subs.find((s) => s.agentId === 'agent-2')?.role).toBe('subscriber');
     });
 
     it('should enforce maxSubscribers', () => {
       const smallChannel = new BroadcastChannel('ch-1', 'small', { maxSubscribers: 2 });
-      
+
       smallChannel.subscribe('a1', vi.fn());
       smallChannel.subscribe('a2', vi.fn());
 
@@ -60,7 +60,7 @@ describe('BroadcastChannel', () => {
     it('should deliver to all subscribers', async () => {
       const handler1 = vi.fn();
       const handler2 = vi.fn();
-      
+
       channel.subscribe('agent-1', handler1);
       channel.subscribe('agent-2', handler2);
 
@@ -73,7 +73,7 @@ describe('BroadcastChannel', () => {
     it('should not deliver to publisher-only subscribers', async () => {
       const pubHandler = vi.fn();
       const subHandler = vi.fn();
-      
+
       channel.subscribe('publisher', pubHandler, { role: 'publisher' });
       channel.subscribe('subscriber', subHandler, { role: 'subscriber' });
 
@@ -104,7 +104,7 @@ describe('BroadcastChannel', () => {
     it('should send to specific agent', async () => {
       const handler1 = vi.fn();
       const handler2 = vi.fn();
-      
+
       channel.subscribe('agent-1', handler1);
       channel.subscribe('agent-2', handler2);
 
@@ -116,7 +116,7 @@ describe('BroadcastChannel', () => {
 
     it('should return null if target not found', async () => {
       channel.subscribe('agent-1', vi.fn());
-      
+
       const result = await channel.sendDirect('sender', 'unknown', { data: 'x' });
 
       expect(result).toBeNull();
@@ -126,7 +126,7 @@ describe('BroadcastChannel', () => {
   describe('acknowledgments', () => {
     it('should track pending acks', async () => {
       const ackChannel = new BroadcastChannel('ack-ch', 'ack-test', { requireAck: true });
-      
+
       ackChannel.subscribe('agent-1', vi.fn());
       ackChannel.subscribe('agent-2', vi.fn());
 
@@ -139,7 +139,7 @@ describe('BroadcastChannel', () => {
 
     it('should remove ack when acknowledged', async () => {
       const ackChannel = new BroadcastChannel('ack-ch', 'ack-test', { requireAck: true });
-      
+
       ackChannel.subscribe('agent-1', vi.fn());
 
       const msgId = await ackChannel.broadcast('sender', { data: 'x' });
@@ -152,7 +152,7 @@ describe('BroadcastChannel', () => {
   describe('history', () => {
     it('should maintain message history', async () => {
       channel.subscribe('a1', vi.fn());
-      
+
       await channel.broadcast('s', { msg: 1 });
       await channel.broadcast('s', { msg: 2 });
 
@@ -174,7 +174,7 @@ describe('BroadcastChannel', () => {
 
     it('should filter history by senderId', async () => {
       channel.subscribe('a1', vi.fn());
-      
+
       await channel.broadcast('s1', { data: 1 });
       await channel.broadcast('s2', { data: 2 });
 
@@ -186,7 +186,7 @@ describe('BroadcastChannel', () => {
     it('should replay history to subscriber', async () => {
       const handler1 = vi.fn();
       channel.subscribe('a1', handler1);
-      
+
       await channel.broadcast('s', { msg: 1 });
       await channel.broadcast('s', { msg: 2 });
 
@@ -228,7 +228,7 @@ describe('BroadcastChannel', () => {
       await channel.broadcast('s', { msg: 1 });
 
       const stats = channel.getStats();
-      
+
       expect(stats.subscriberCount).toBe(1);
       expect(stats.historySize).toBe(1);
     });
@@ -252,7 +252,7 @@ describe('ChannelManager', () => {
 
     it('should get channel by ID', () => {
       const channel = manager.createChannel('test');
-      
+
       const found = manager.getChannel(channel.id);
 
       expect(found).toBe(channel);
@@ -260,7 +260,7 @@ describe('ChannelManager', () => {
 
     it('should get channel by name', () => {
       manager.createChannel('my-channel');
-      
+
       const found = manager.getChannelByName('my-channel');
 
       expect(found?.name).toBe('my-channel');
@@ -268,7 +268,7 @@ describe('ChannelManager', () => {
 
     it('should delete a channel', () => {
       const channel = manager.createChannel('test');
-      
+
       const deleted = manager.deleteChannel(channel.id);
 
       expect(deleted).toBe(true);
@@ -288,7 +288,7 @@ describe('ChannelManager', () => {
   describe('agent subscription', () => {
     it('should subscribe agent to channel', () => {
       const channel = manager.createChannel('test');
-      
+
       const subId = manager.subscribeAgent('agent-1', channel.id, vi.fn());
 
       expect(subId).toBeDefined();
@@ -308,8 +308,7 @@ describe('ChannelManager', () => {
     });
 
     it('should throw if channel not found', () => {
-      expect(() => manager.subscribeAgent('a', 'unknown', vi.fn()))
-        .toThrow(/not found/);
+      expect(() => manager.subscribeAgent('a', 'unknown', vi.fn())).toThrow(/not found/);
     });
   });
 

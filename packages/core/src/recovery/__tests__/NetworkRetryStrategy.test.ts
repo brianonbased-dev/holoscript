@@ -79,7 +79,7 @@ describe('NetworkRetryStrategy', () => {
       };
 
       const result = await strategy.execute(failure);
-      
+
       expect(result.strategyUsed).toBe('network-retry');
       expect(result.retryRecommended).toBe(true);
       expect(result.nextAction).toBe('retry');
@@ -100,7 +100,7 @@ describe('NetworkRetryStrategy', () => {
       };
 
       const result = await strategy.execute(failure);
-      
+
       expect(mockCallback).toHaveBeenCalledWith(failure);
       expect(result.success).toBe(true);
       expect(result.strategyUsed).toBe('network-retry');
@@ -121,7 +121,7 @@ describe('NetworkRetryStrategy', () => {
       };
 
       const result = await strategy.execute(failure);
-      
+
       expect(result.success).toBe(false);
       expect(result.retryRecommended).toBe(true);
       expect(result.message).toContain('Network error');

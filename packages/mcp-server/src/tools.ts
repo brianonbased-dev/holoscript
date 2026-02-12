@@ -9,6 +9,7 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { graphTools } from './graph-tools';
 import { ideTools } from './ide-tools';
 import { brittneyLiteTools } from './brittney-lite';
+import { PluginManager } from './PluginManager';
 
 /**
  * All MCP tools for HoloScript
@@ -446,6 +447,7 @@ export const tools: Tool[] = [
   ...ideTools,
   ...brittneyLiteTools,
   ...textTo3DTools,
+  ...PluginManager.getTools(),
 ];
 
 // Tool name type for type safety

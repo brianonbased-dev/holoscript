@@ -1,7 +1,7 @@
 /**
  * BroadcastChannel - Named messaging channels for swarm groups
  * HoloScript v3.2 - Autonomous Agent Swarms
- * 
+ *
  * Provides named channels for targeted group communication
  */
 
@@ -57,7 +57,7 @@ export class BroadcastChannel {
   readonly id: string;
   readonly name: string;
   readonly createdAt: number;
-  
+
   private subscribers: Map<string, IChannelSubscriber> = new Map();
   private handlers: Map<string, MessageHandler> = new Map();
   private history: IChannelMessage[] = [];
@@ -65,11 +65,7 @@ export class BroadcastChannel {
   private nextMsgId = 1;
   private pendingAcks: Map<string, Set<string>> = new Map();
 
-  constructor(
-    id: string,
-    name: string,
-    config?: Partial<IChannelConfig>
-  ) {
+  constructor(id: string, name: string, config?: Partial<IChannelConfig>) {
     this.id = id;
     this.name = name;
     this.createdAt = Date.now();
@@ -96,7 +92,7 @@ export class BroadcastChannel {
     }
 
     const subscriberId = `sub-${agentId}-${Date.now()}`;
-    
+
     const subscriber: IChannelSubscriber = {
       id: subscriberId,
       agentId,
@@ -162,7 +158,7 @@ export class BroadcastChannel {
 
     for (const [subId, sub] of this.subscribers) {
       if (sub.role === 'publisher') continue; // Publishers don't receive
-      
+
       const handler = this.handlers.get(subId);
       if (handler) {
         sub.lastActivity = Date.now();
@@ -227,7 +223,7 @@ export class BroadcastChannel {
     if (!pending) return false;
 
     pending.delete(agentId);
-    
+
     if (pending.size === 0) {
       this.pendingAcks.delete(messageId);
     }
@@ -263,19 +259,19 @@ export class BroadcastChannel {
 
     // Remove expired messages
     const now = Date.now();
-    this.history = this.history.filter(
-      msg => now - msg.timestamp < this.config.messageTTL
-    );
+    this.history = this.history.filter((msg) => now - msg.timestamp < this.config.messageTTL);
   }
 
   /**
    * Get message history
    */
-  getHistory(options: {
-    limit?: number;
-    since?: number;
-    senderId?: string;
-  } = {}): IChannelMessage[] {
+  getHistory(
+    options: {
+      limit?: number;
+      since?: number;
+      senderId?: string;
+    } = {}
+  ): IChannelMessage[] {
     if (!this.config.allowReplay) {
       return [];
     }
@@ -283,11 +279,11 @@ export class BroadcastChannel {
     let result = [...this.history];
 
     if (options.since) {
-      result = result.filter(m => m.timestamp > options.since!);
+      result = result.filter((m) => m.timestamp > options.since!);
     }
 
     if (options.senderId) {
-      result = result.filter(m => m.senderId === options.senderId);
+      result = result.filter((m) => m.senderId === options.senderId);
     }
 
     if (options.limit) {
@@ -365,9 +361,8 @@ export class BroadcastChannel {
       historySize: this.history.length,
       pendingAckCount: this.pendingAcks.size,
       oldestMessage: this.history.length > 0 ? this.history[0].timestamp : null,
-      newestMessage: this.history.length > 0 
-        ? this.history[this.history.length - 1].timestamp 
-        : null,
+      newestMessage:
+        this.history.length > 0 ? this.history[this.history.length - 1].timestamp : null,
     };
   }
 
@@ -397,10 +392,7 @@ export class ChannelManager {
   /**
    * Create a new channel
    */
-  createChannel(
-    name: string,
-    config?: Partial<IChannelConfig>
-  ): BroadcastChannel {
+  createChannel(name: string, config?: Partial<IChannelConfig>): BroadcastChannel {
     const id = `ch-${this.nextId++}-${Date.now()}`;
     const channel = new BroadcastChannel(id, name, config);
     this.channels.set(id, channel);
@@ -482,7 +474,7 @@ export class ChannelManager {
     if (!channelIds) return [];
 
     return [...channelIds]
-      .map(id => this.channels.get(id))
+      .map((id) => this.channels.get(id))
       .filter((c): c is BroadcastChannel => c !== undefined);
   }
 

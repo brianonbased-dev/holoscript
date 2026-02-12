@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SelfHealingService, SelfHealingConfig } from '../SelfHealingService';
-import type { IRecoveryStrategy, IAgentFailure, IRecoveryResult, FailureType } from '../../extensions';
+import type {
+  IRecoveryStrategy,
+  IAgentFailure,
+  IRecoveryResult,
+  FailureType,
+} from '../../extensions';
 
 // Mock strategy implementation
 class MockStrategy implements IRecoveryStrategy {
@@ -46,13 +51,13 @@ describe('SelfHealingService', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     escalationCallback = vi.fn();
-    
+
     const config: SelfHealingConfig = {
       maxHistorySize: 1000,
       patternThreshold: 3,
       escalationCallback: escalationCallback,
     };
-    
+
     service = new SelfHealingService(config);
     networkStrategy = new MockStrategy('network-retry', ['network-timeout', 'api-error']);
     resourceStrategy = new MockStrategy('resource-cleanup', ['memory-error', 'resource-error']);
@@ -65,26 +70,26 @@ describe('SelfHealingService', () => {
   describe('registerStrategy', () => {
     it('should register strategy successfully', () => {
       service.registerStrategy(networkStrategy);
-      
+
       const strategies = service.getStrategies();
-      expect(strategies.map(s => s.id)).toContain('network-retry');
+      expect(strategies.map((s) => s.id)).toContain('network-retry');
     });
 
     it('should register multiple strategies', () => {
       service.registerStrategy(networkStrategy);
       service.registerStrategy(resourceStrategy);
-      
+
       const strategies = service.getStrategies();
       expect(strategies).toHaveLength(2);
-      expect(strategies.map(s => s.id)).toContain('network-retry');
-      expect(strategies.map(s => s.id)).toContain('resource-cleanup');
+      expect(strategies.map((s) => s.id)).toContain('network-retry');
+      expect(strategies.map((s) => s.id)).toContain('resource-cleanup');
     });
 
     it('should replace strategy with same id', () => {
       service.registerStrategy(networkStrategy);
       const newStrategy = new MockStrategy('network-retry', ['api-error']);
       service.registerStrategy(newStrategy);
-      
+
       const strategies = service.getStrategies();
       expect(strategies).toHaveLength(1);
       expect(strategies[0].handles).toEqual(['api-error']);
@@ -159,7 +164,7 @@ describe('SelfHealingService', () => {
       });
 
       const result = await service.attemptRecovery(failureId);
-      
+
       expect(result.success).toBe(true);
       expect(result.strategyUsed).toBe('network-retry');
       expect(networkStrategy.executeCalls).toHaveLength(1);
@@ -167,7 +172,7 @@ describe('SelfHealingService', () => {
 
     it('should return failure when failure ID not found', async () => {
       const result = await service.attemptRecovery('non-existent');
-      
+
       expect(result.success).toBe(false);
       expect(result.message).toContain('not found');
     });
@@ -183,7 +188,7 @@ describe('SelfHealingService', () => {
       });
 
       const result = await service.attemptRecovery(failureId);
-      
+
       expect(result.success).toBe(true);
       expect(result.strategyUsed).toBe('resource-cleanup');
     });
@@ -262,7 +267,7 @@ describe('SelfHealingService', () => {
       });
 
       await service.escalate(failureId, 'Manual escalation for testing');
-      
+
       expect(escalationCallback).toHaveBeenCalledWith('f1', 'Manual escalation for testing');
     });
 
@@ -290,7 +295,7 @@ describe('SelfHealingService', () => {
     it('should remove registered strategy', () => {
       service.registerStrategy(networkStrategy);
       expect(service.getStrategies()).toHaveLength(1);
-      
+
       const removed = service.unregisterStrategy('network-retry');
       expect(removed).toBe(true);
       expect(service.getStrategies()).toHaveLength(0);
@@ -344,8 +349,8 @@ describe('SelfHealingService', () => {
       }
 
       const patterns = service.getFailurePatterns();
-      const networkPattern = patterns.find(p => p.errorType === 'network-timeout');
-      
+      const networkPattern = patterns.find((p) => p.errorType === 'network-timeout');
+
       expect(networkPattern).toBeDefined();
       expect(networkPattern!.frequency).toBeGreaterThan(0);
     });

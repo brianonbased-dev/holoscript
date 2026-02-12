@@ -332,9 +332,7 @@ export class NegotiationProtocol {
    * Get sessions for a specific agent
    */
   getAgentSessions(agentId: string): NegotiationSession[] {
-    return Array.from(this.sessions.values()).filter((s) =>
-      s.participants.includes(agentId)
-    );
+    return Array.from(this.sessions.values()).filter((s) => s.participants.includes(agentId));
   }
 
   /**
@@ -509,9 +507,7 @@ export class NegotiationProtocol {
 
   private validateSessionOpen(session: NegotiationSession): void {
     if (session.status !== 'open' && session.status !== 'voting') {
-      throw new Error(
-        `Session ${session.id} is ${session.status}, not accepting input`
-      );
+      throw new Error(`Session ${session.id} is ${session.status}, not accepting input`);
     }
   }
 
@@ -522,13 +518,9 @@ export class NegotiationProtocol {
   }
 
   private validateNotDuplicate(session: NegotiationSession, agentId: string): void {
-    const roundVotes = session.votes.filter(
-      (v) => v.agentId === agentId && !v.supersededBy
-    );
+    const roundVotes = session.votes.filter((v) => v.agentId === agentId && !v.supersededBy);
     if (roundVotes.length > 0) {
-      throw new Error(
-        `Agent ${agentId} has already voted in this round of session ${session.id}`
-      );
+      throw new Error(`Agent ${agentId} has already voted in this round of session ${session.id}`);
     }
   }
 
@@ -552,10 +544,7 @@ export class NegotiationProtocol {
     }
   }
 
-  private buildResolution(
-    session: NegotiationSession,
-    result: VotingResult
-  ): Resolution {
+  private buildResolution(session: NegotiationSession, result: VotingResult): Resolution {
     const winningProposal = result.winnerId
       ? session.proposals.find((p) => p.id === result.winnerId)
       : undefined;

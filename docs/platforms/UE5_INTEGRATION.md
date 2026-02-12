@@ -8,19 +8,20 @@ HoloScript v3.4 introduced a high-performance Unreal Engine 5 (UE5) compiler tar
 
 The UE5 target compiles HoloScript compositions into **AActor**-derived C++ classes. Each HoloScript `object` is mapped to an appropriate **UActorComponent**.
 
-| HoloScript Construct | UE5 Equivalent |
-| :--- | :--- |
-| `object` | `AActor` or `USceneComponent` |
-| `geometry: "cube"` | `UStaticMeshComponent` (Cube mesh) |
-| `light` | `ULightComponent` (Point, Spot, or Directional) |
-| `@physics` | `SetSimulatePhysics(true)` on root component |
-| `@networked` | `AActor::SetReplicates(true)` + `UPROPERTY(Replicated)` |
+| HoloScript Construct | UE5 Equivalent                                          |
+| :------------------- | :------------------------------------------------------ |
+| `object`             | `AActor` or `USceneComponent`                           |
+| `geometry: "cube"`   | `UStaticMeshComponent` (Cube mesh)                      |
+| `light`              | `ULightComponent` (Point, Spot, or Directional)         |
+| `@physics`           | `SetSimulatePhysics(true)` on root component            |
+| `@networked`         | `AActor::SetReplicates(true)` + `UPROPERTY(Replicated)` |
 
 ---
 
 ## 🛠️ Integration Steps
 
 ### 1. Compile the Script
+
 Run the HoloScript CLI to generate the C++ source files.
 
 ```bash
@@ -28,12 +29,15 @@ holoscript compile my-scene.holo --target unreal --output ./Source/MyProject/Gen
 ```
 
 ### 2. Add to Unreal Project
+
 1. Copy the generated `.h` and `.cpp` files to your project's `Source` directory.
 2. In Unreal Editor, select **Tools > Refresh Visual Studio Project**.
 3. Compile the project in your IDE or via Unreal's Live Coding.
 
 ### 3. Usage in Blueprint
+
 Once compiled, your HoloScript scene appears as a standard C++ Actor class. You can:
+
 - Drag and drop it into the level.
 - Spawn it via `SpawnActorFromClass`.
 - Build Child Blueprints from it to add visual assets or Niagara effects.
@@ -69,6 +73,7 @@ void AMyInteractiveActor::BeginPlay() {
 ## ⚡ Optimization & Best Practices
 
 ### Nanite & Lumen
+
 The HoloScript compiler automatically flags generated meshes for Nanite if the vertex count exceeds 10,000. To force Nanite for specific objects:
 
 ```holo
@@ -82,6 +87,7 @@ object HighPolyModel {
 ```
 
 ### Niagara Particles
+
 You can trigger Niagara systems from HoloScript events:
 
 ```hsplus
@@ -95,5 +101,6 @@ object Torch {
 ---
 
 ## 🚩 Security & Constraints
+
 - **Private Variables**: Variables in HoloScript are mapped to `private` C++ members with `public` Getters/Setters.
 - **Multithreading**: Script-driven transforms are executed on the Game Thread during `Tick`. Heavy logic should be moved to specialized C++ `Async` tasks if possible.

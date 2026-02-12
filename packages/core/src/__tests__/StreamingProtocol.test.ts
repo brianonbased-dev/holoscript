@@ -53,7 +53,7 @@ class MockWebSocket {
   url: string;
   readyState: number = MockWebSocket.CONNECTING;
   binaryType: string = 'blob';
-  
+
   onopen: ((event: any) => void) | null = null;
   onmessage: ((event: any) => void) | null = null;
   onerror: ((event: any) => void) | null = null;
@@ -337,11 +337,15 @@ describe('StreamingProtocol Factory Functions', () => {
     });
 
     it('should apply custom options', () => {
-      const message = createMessage('chat_message', { content: 'Hello' }, {
-        reliable: true,
-        priority: 200,
-        channel: 'team',
-      });
+      const message = createMessage(
+        'chat_message',
+        { content: 'Hello' },
+        {
+          reliable: true,
+          priority: 200,
+          channel: 'team',
+        }
+      );
 
       expect(message.reliable).toBe(true);
       expect(message.priority).toBe(200);
@@ -469,14 +473,16 @@ describe('StreamProtocol Class', () => {
       });
 
       await new Promise((r) => setTimeout(r, 20));
-      mockWs?.simulateMessage(JSON.stringify({
-        type: 'handshake_ack',
-        seq: 0,
-        timestamp: Date.now(),
-        reliable: true,
-        priority: 255,
-        payload: { success: true },
-      }));
+      mockWs?.simulateMessage(
+        JSON.stringify({
+          type: 'handshake_ack',
+          seq: 0,
+          timestamp: Date.now(),
+          reliable: true,
+          priority: 255,
+          payload: { success: true },
+        })
+      );
 
       await connectPromise;
 
@@ -518,26 +524,30 @@ describe('StreamProtocol Class', () => {
       });
 
       await new Promise((r) => setTimeout(r, 20));
-      mockWs?.simulateMessage(JSON.stringify({
-        type: 'handshake_ack',
-        seq: 0,
-        timestamp: Date.now(),
-        reliable: true,
-        priority: 255,
-        payload: { success: true },
-      }));
+      mockWs?.simulateMessage(
+        JSON.stringify({
+          type: 'handshake_ack',
+          seq: 0,
+          timestamp: Date.now(),
+          reliable: true,
+          priority: 255,
+          payload: { success: true },
+        })
+      );
 
       await connectPromise;
 
       // Simulate entity update
-      mockWs?.simulateMessage(JSON.stringify({
-        type: 'entity_update',
-        seq: 1,
-        timestamp: Date.now(),
-        reliable: false,
-        priority: 128,
-        payload: { id: 'entity_1', changes: { position: [0, 0, 0] } },
-      }));
+      mockWs?.simulateMessage(
+        JSON.stringify({
+          type: 'entity_update',
+          seq: 1,
+          timestamp: Date.now(),
+          reliable: false,
+          priority: 128,
+          payload: { id: 'entity_1', changes: { position: [0, 0, 0] } },
+        })
+      );
 
       expect(handler).toHaveBeenCalled();
     });
@@ -568,14 +578,16 @@ describe('StreamProtocol Message Sending', () => {
     });
 
     await new Promise((r) => setTimeout(r, 20));
-    mockWs?.simulateMessage(JSON.stringify({
-      type: 'handshake_ack',
-      seq: 0,
-      timestamp: Date.now(),
-      reliable: true,
-      priority: 255,
-      payload: { success: true },
-    }));
+    mockWs?.simulateMessage(
+      JSON.stringify({
+        type: 'handshake_ack',
+        seq: 0,
+        timestamp: Date.now(),
+        reliable: true,
+        priority: 255,
+        payload: { success: true },
+      })
+    );
 
     await connectPromise;
   });
@@ -642,14 +654,16 @@ describe('StreamProtocol Reliable Messages', () => {
     });
 
     await new Promise((r) => setTimeout(r, 20));
-    mockWs?.simulateMessage(JSON.stringify({
-      type: 'handshake_ack',
-      seq: 0,
-      timestamp: Date.now(),
-      reliable: true,
-      priority: 255,
-      payload: { success: true },
-    }));
+    mockWs?.simulateMessage(
+      JSON.stringify({
+        type: 'handshake_ack',
+        seq: 0,
+        timestamp: Date.now(),
+        reliable: true,
+        priority: 255,
+        payload: { success: true },
+      })
+    );
 
     await connectPromise;
   });
@@ -663,16 +677,18 @@ describe('StreamProtocol Reliable Messages', () => {
 
   // Helper to simulate ack for any pending message
   const simulateAck = (seqNum: number) => {
-    mockWs?.simulateMessage(JSON.stringify({
-      type: 'heartbeat_ack',
-      seq: seqNum,
-      ack: true,
-      ackSeq: seqNum,
-      timestamp: Date.now(),
-      reliable: false,
-      priority: 128,
-      payload: {},
-    }));
+    mockWs?.simulateMessage(
+      JSON.stringify({
+        type: 'heartbeat_ack',
+        seq: seqNum,
+        ack: true,
+        ackSeq: seqNum,
+        timestamp: Date.now(),
+        reliable: false,
+        priority: 128,
+        payload: {},
+      })
+    );
   };
 
   it('should join world (reliable)', async () => {
@@ -787,14 +803,16 @@ describe('StreamProtocol Statistics', () => {
     });
 
     await new Promise((r) => setTimeout(r, 20));
-    mockWs?.simulateMessage(JSON.stringify({
-      type: 'handshake_ack',
-      seq: 0,
-      timestamp: Date.now(),
-      reliable: true,
-      priority: 255,
-      payload: { success: true },
-    }));
+    mockWs?.simulateMessage(
+      JSON.stringify({
+        type: 'handshake_ack',
+        seq: 0,
+        timestamp: Date.now(),
+        reliable: true,
+        priority: 255,
+        payload: { success: true },
+      })
+    );
 
     await connectPromise;
 
@@ -852,14 +870,16 @@ describe('StreamProtocol Error Handling', () => {
     });
 
     await new Promise((r) => setTimeout(r, 20));
-    mockWs?.simulateMessage(JSON.stringify({
-      type: 'handshake_ack',
-      seq: 0,
-      timestamp: Date.now(),
-      reliable: true,
-      priority: 255,
-      payload: { success: true },
-    }));
+    mockWs?.simulateMessage(
+      JSON.stringify({
+        type: 'handshake_ack',
+        seq: 0,
+        timestamp: Date.now(),
+        reliable: true,
+        priority: 255,
+        payload: { success: true },
+      })
+    );
 
     await connectPromise;
 
@@ -880,14 +900,16 @@ describe('StreamProtocol Error Handling', () => {
     });
 
     await new Promise((r) => setTimeout(r, 20));
-    mockWs?.simulateMessage(JSON.stringify({
-      type: 'handshake_ack',
-      seq: 0,
-      timestamp: Date.now(),
-      reliable: true,
-      priority: 255,
-      payload: { success: true },
-    }));
+    mockWs?.simulateMessage(
+      JSON.stringify({
+        type: 'handshake_ack',
+        seq: 0,
+        timestamp: Date.now(),
+        reliable: true,
+        priority: 255,
+        payload: { success: true },
+      })
+    );
 
     await connectPromise;
 
@@ -942,27 +964,31 @@ describe('StreamProtocol Integration', () => {
     });
 
     await new Promise((r) => setTimeout(r, 20));
-    mockWs?.simulateMessage(JSON.stringify({
-      type: 'handshake_ack',
-      seq: 0,
-      timestamp: Date.now(),
-      reliable: true,
-      priority: 255,
-      payload: { success: true, sessionId: 'sess_123' },
-    }));
+    mockWs?.simulateMessage(
+      JSON.stringify({
+        type: 'handshake_ack',
+        seq: 0,
+        timestamp: Date.now(),
+        reliable: true,
+        priority: 255,
+        payload: { success: true, sessionId: 'sess_123' },
+      })
+    );
 
     await connectPromise;
     expect(protocol.isConnected()).toBe(true);
 
     // 2. Receive entity updates
-    mockWs?.simulateMessage(JSON.stringify({
-      type: 'entity_update',
-      seq: 1,
-      timestamp: Date.now(),
-      reliable: false,
-      priority: 128,
-      payload: { id: 'npc_1', changes: { position: [5, 0, 10] } },
-    }));
+    mockWs?.simulateMessage(
+      JSON.stringify({
+        type: 'entity_update',
+        seq: 1,
+        timestamp: Date.now(),
+        reliable: false,
+        priority: 128,
+        payload: { id: 'npc_1', changes: { position: [5, 0, 10] } },
+      })
+    );
 
     expect(entityHandler).toHaveBeenCalledTimes(1);
 
@@ -989,22 +1015,28 @@ describe('StreamProtocol Integration', () => {
     });
 
     await new Promise((r) => setTimeout(r, 20));
-    mockWs?.simulateMessage(JSON.stringify({
-      type: 'handshake_ack',
-      seq: 0,
-      timestamp: Date.now(),
-      reliable: true,
-      priority: 255,
-      payload: { success: true },
-    }));
+    mockWs?.simulateMessage(
+      JSON.stringify({
+        type: 'handshake_ack',
+        seq: 0,
+        timestamp: Date.now(),
+        reliable: true,
+        priority: 255,
+        payload: { success: true },
+      })
+    );
 
     await connectPromise;
 
     // Create message using factory
-    const message = createMessage('entity_update', {
-      id: 'entity_1',
-      changes: { health: 100 },
-    }, { priority: 192 });
+    const message = createMessage(
+      'entity_update',
+      {
+        id: 'entity_1',
+        changes: { health: 100 },
+      },
+      { priority: 192 }
+    );
 
     // Should be sendable (matches expected interface)
     expect(message.type).toBe('entity_update');

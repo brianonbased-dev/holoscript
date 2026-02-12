@@ -1,6 +1,6 @@
 /**
  * JavaScript tests for HoloScript WASM Component
- * 
+ *
  * These tests verify the jco-generated bindings work correctly.
  * Run with: node --experimental-wasm-component-model test/test.mjs
  */
@@ -30,10 +30,10 @@ describe('HoloScript WASM Component', () => {
           position: [0, 1, 0]
         }
       }`;
-      
+
       const result = holoscript.parser.parse(source);
       assert.ok(result.ok, 'Parse should succeed');
-      
+
       const ast = result.ok;
       assert.strictEqual(ast.name, 'Test');
       assert.strictEqual(ast.objects.length, 1);
@@ -52,10 +52,10 @@ describe('HoloScript WASM Component', () => {
           position: [0, 2, 0]
         }
       }`;
-      
+
       const result = holoscript.parser.parse(source);
       assert.ok(result.ok, 'Parse should succeed');
-      
+
       const ast = result.ok;
       assert.strictEqual(ast.templates.length, 1);
       assert.strictEqual(ast.templates[0].name, 'Ball');
@@ -69,10 +69,10 @@ describe('HoloScript WASM Component', () => {
           ambient_light: 0.5
         }
       }`;
-      
+
       const result = holoscript.parser.parse(source);
       assert.ok(result.ok, 'Parse should succeed');
-      
+
       const ast = result.ok;
       assert.ok(ast.environment, 'Environment should exist');
       assert.strictEqual(ast.environment.skybox, 'gradient');
@@ -80,8 +80,8 @@ describe('HoloScript WASM Component', () => {
     });
 
     it('should return errors for invalid syntax', async () => {
-      const source = `composition { }`;  // Missing name
-      
+      const source = `composition { }`; // Missing name
+
       const result = holoscript.parser.parse(source);
       assert.ok(result.err, 'Parse should fail');
       assert.ok(Array.isArray(result.err), 'Errors should be array');
@@ -90,7 +90,7 @@ describe('HoloScript WASM Component', () => {
 
     it('should parse header only', async () => {
       const source = `composition "MyScene" { }`;
-      
+
       const result = holoscript.parser.parseHeader(source);
       assert.ok(result.ok, 'Header parse should succeed');
       assert.strictEqual(result.ok, 'MyScene');
@@ -104,15 +104,15 @@ describe('HoloScript WASM Component', () => {
           geometry: "sphere"
         }
       }`;
-      
+
       const result = holoscript.validator.validate(source);
       assert.strictEqual(result.valid, true);
       assert.strictEqual(result.diagnostics.length, 0);
     });
 
     it('should return diagnostics for invalid code', async () => {
-      const source = `composition { }`;  // Missing name
-      
+      const source = `composition { }`; // Missing name
+
       const result = holoscript.validator.validate(source);
       assert.strictEqual(result.valid, false);
       assert.ok(result.diagnostics.length > 0);
@@ -127,10 +127,10 @@ describe('HoloScript WASM Component', () => {
     it('should list all traits', async () => {
       const traits = holoscript.validator.listTraits();
       assert.ok(Array.isArray(traits));
-      assert.strictEqual(traits.length, 49);  // All 49 VR traits
-      
+      assert.strictEqual(traits.length, 49); // All 49 VR traits
+
       // Check structure
-      const grabbable = traits.find(t => t.name === 'grabbable');
+      const grabbable = traits.find((t) => t.name === 'grabbable');
       assert.ok(grabbable);
       assert.strictEqual(grabbable.category, 'interaction');
     });
@@ -138,7 +138,7 @@ describe('HoloScript WASM Component', () => {
     it('should list traits by category', async () => {
       const interactionTraits = holoscript.validator.listTraitsByCategory('interaction');
       assert.ok(interactionTraits.length >= 8);
-      assert.ok(interactionTraits.every(t => t.category === 'interaction'));
+      assert.ok(interactionTraits.every((t) => t.category === 'interaction'));
     });
 
     it('should get trait info', async () => {
@@ -196,7 +196,7 @@ describe('HoloScript WASM Component', () => {
     it('should compile to glTF JSON', async () => {
       const result = holoscript.compiler.compile(testSource, 'gltf-json');
       assert.ok(!result.error, 'Compile should succeed');
-      
+
       const gltf = JSON.parse(result.text);
       assert.strictEqual(gltf.asset.version, '2.0');
       assert.strictEqual(gltf.scenes[0].name, 'TestScene');
@@ -206,7 +206,7 @@ describe('HoloScript WASM Component', () => {
       const result = holoscript.compiler.compile(testSource, 'glb-binary');
       assert.ok(!result.error, 'Compile should succeed');
       assert.ok(result.binary instanceof Uint8Array);
-      
+
       // Check GLB magic bytes
       const magic = new TextDecoder().decode(result.binary.slice(0, 4));
       assert.strictEqual(magic, 'glTF');
@@ -229,7 +229,7 @@ describe('HoloScript WASM Component', () => {
     it('should generate object from description', async () => {
       const result = holoscript.generator.generateObject('a ball that can be grabbed and thrown');
       assert.ok(result.ok, 'Generation should succeed');
-      
+
       const code = result.ok;
       assert.ok(code.includes('object'));
       assert.ok(code.includes('@grabbable') || code.includes('@throwable'));
@@ -239,7 +239,7 @@ describe('HoloScript WASM Component', () => {
     it('should generate scene from description', async () => {
       const result = holoscript.generator.generateScene('a space with a player and ground');
       assert.ok(result.ok, 'Generation should succeed');
-      
+
       const code = result.ok;
       assert.ok(code.includes('composition'));
       assert.ok(code.includes('environment'));
@@ -248,7 +248,7 @@ describe('HoloScript WASM Component', () => {
     it('should suggest traits for description', async () => {
       const traits = holoscript.generator.suggestTraits('an object that glows and can be grabbed');
       assert.ok(Array.isArray(traits));
-      assert.ok(traits.some(t => t.name === 'grabbable' || t.name === 'glowing'));
+      assert.ok(traits.some((t) => t.name === 'grabbable' || t.name === 'glowing'));
     });
   });
 
@@ -267,7 +267,7 @@ describe('HoloScript WASM Component', () => {
 describe('Integration Tests', () => {
   it('should parse, validate, and compile in sequence', async () => {
     if (!holoscript) return;
-    
+
     const source = `composition "IntegrationTest" {
       environment {
         skybox: "nebula"
@@ -293,22 +293,22 @@ describe('Integration Tests', () => {
         }
       }
     }`;
-    
+
     // Parse
     const parseResult = holoscript.parser.parse(source);
     assert.ok(parseResult.ok, 'Parse should succeed');
-    
+
     const ast = parseResult.ok;
     assert.strictEqual(ast.name, 'IntegrationTest');
     assert.strictEqual(ast.templates.length, 1);
     assert.strictEqual(ast.objects.length, 1);
     assert.strictEqual(ast.groups.length, 1);
     assert.strictEqual(ast.groups[0].children.length, 2);
-    
+
     // Validate
     const validResult = holoscript.validator.validate(source);
     assert.strictEqual(validResult.valid, true);
-    
+
     // Compile to multiple targets
     for (const target of ['unity-csharp', 'godot-gdscript', 'aframe-html']) {
       const compileResult = holoscript.compiler.compile(source, target);

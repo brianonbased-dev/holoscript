@@ -92,11 +92,11 @@ When asked to build features:
 
 ## Three File Formats
 
-| Extension | Purpose                 | Syntax Style                     | Status     |
-| --------- | ----------------------- | -------------------------------- | ---------- |
-| `.hs`     | Classic HoloScript      | Object-centric (`composition {}`)        | ✅ Working |
-| `.hsplus` | HoloScript Plus         | Object + VR traits               | ✅ Working |
-| `.holo`   | Declarative Composition | Scene-centric (`composition {}`) | ✅ Working |
+| Extension | Purpose                 | Syntax Style                      | Status     |
+| --------- | ----------------------- | --------------------------------- | ---------- |
+| `.hs`     | Classic HoloScript      | Object-centric (`composition {}`) | ✅ Working |
+| `.hsplus` | HoloScript Plus         | Object + VR traits                | ✅ Working |
+| `.holo`   | Declarative Composition | Scene-centric (`composition {}`)  | ✅ Working |
 
 ---
 

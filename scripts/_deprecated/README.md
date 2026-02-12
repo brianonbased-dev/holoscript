@@ -6,12 +6,12 @@ These scripts have been consolidated into a single unified tool.
 
 Use `generate_synthetic_data_unified.py` instead:
 
-| Old Script | New Command |
-|------------|-------------|
-| `generate_synthetic_data.py` | `python generate_synthetic_data_unified.py --mode standard --validate --eager-attn` |
-| `generate_synthetic_data_v2.py` | `python generate_synthetic_data_unified.py --mode standard --no-cache` |
-| `generate_synthetic_data_v3.py` | `python generate_synthetic_data_unified.py --mode standard` |
-| `generate_synthetic_data_v4.py` | `python generate_synthetic_data_unified.py --mode one-shot` |
+| Old Script                      | New Command                                                                         |
+| ------------------------------- | ----------------------------------------------------------------------------------- |
+| `generate_synthetic_data.py`    | `python generate_synthetic_data_unified.py --mode standard --validate --eager-attn` |
+| `generate_synthetic_data_v2.py` | `python generate_synthetic_data_unified.py --mode standard --no-cache`              |
+| `generate_synthetic_data_v3.py` | `python generate_synthetic_data_unified.py --mode standard`                         |
+| `generate_synthetic_data_v4.py` | `python generate_synthetic_data_unified.py --mode one-shot`                         |
 
 ## Why Consolidated?
 

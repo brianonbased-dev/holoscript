@@ -11,25 +11,25 @@
 
 /** LOD selection strategy */
 export type LODStrategy =
-  | 'distance'      // Select based on camera distance
-  | 'screenSize'    // Select based on screen coverage
-  | 'performance'   // Adaptive based on frame rate
-  | 'manual'        // Explicit level selection
-  | 'hybrid';       // Combination of strategies
+  | 'distance' // Select based on camera distance
+  | 'screenSize' // Select based on screen coverage
+  | 'performance' // Adaptive based on frame rate
+  | 'manual' // Explicit level selection
+  | 'hybrid'; // Combination of strategies
 
 /** LOD transition mode */
 export type LODTransition =
-  | 'instant'       // Immediate swap
-  | 'crossfade'     // Alpha blend between levels
-  | 'dither'        // Dithered transition
-  | 'morph';        // Geometry morphing
+  | 'instant' // Immediate swap
+  | 'crossfade' // Alpha blend between levels
+  | 'dither' // Dithered transition
+  | 'morph'; // Geometry morphing
 
 /** Mesh simplification algorithm */
 export type SimplificationAlgorithm =
-  | 'quadricError'  // Quadric Error Metrics (default)
-  | 'edgeCollapse'  // Edge collapse decimation
-  | 'vertexClustering'  // Vertex clustering
-  | 'voxel';        // Voxelization-based
+  | 'quadricError' // Quadric Error Metrics (default)
+  | 'edgeCollapse' // Edge collapse decimation
+  | 'vertexClustering' // Vertex clustering
+  | 'voxel'; // Voxelization-based
 
 /** Features that can be disabled at lower LODs */
 export type LODFeature =
@@ -410,16 +410,16 @@ export function createStandardLODConfig(
   options?: Partial<LODConfig>
 ): LODConfig {
   const levels: LODLevel[] = [];
-  
+
   for (let i = 0; i < levelCount; i++) {
     const distance = i === 0 ? 0 : baseDistance * Math.pow(2, i - 1);
     const polygonRatio = 1 / Math.pow(2, i);
     const disabledFeatures: LODFeature[] = [];
-    
+
     if (i >= 1) disabledFeatures.push('reflections', 'particles');
     if (i >= 2) disabledFeatures.push('specular', 'normals');
     if (i >= 3) disabledFeatures.push('shadows', 'animation');
-    
+
     levels.push(createLODLevel(i, distance, polygonRatio, { disabledFeatures }));
   }
 
@@ -497,50 +497,48 @@ export function selectLODLevelByDistance(
   currentLevel: number = 0
 ): number {
   if (levels.length === 0) return 0;
-  
+
   // Sort levels by distance (ascending)
   const sorted = [...levels].sort((a, b) => a.distance - b.distance);
-  
+
   // Apply hysteresis to prevent flickering
   const hysteresisDistance = hysteresis * distance;
-  
+
   for (let i = sorted.length - 1; i >= 0; i--) {
     const level = sorted[i];
     const threshold = level.distance;
-    
+
     // Apply hysteresis based on direction of change
-    const adjustedThreshold = i > currentLevel
-      ? threshold + hysteresisDistance  // Going to lower detail
-      : threshold - hysteresisDistance; // Going to higher detail
-    
+    const adjustedThreshold =
+      i > currentLevel
+        ? threshold + hysteresisDistance // Going to lower detail
+        : threshold - hysteresisDistance; // Going to higher detail
+
     if (distance >= adjustedThreshold) {
       return level.level;
     }
   }
-  
+
   return sorted[0].level;
 }
 
 /**
  * Calculate LOD level from screen coverage
  */
-export function selectLODLevelByScreenCoverage(
-  screenCoverage: number,
-  levels: LODLevel[]
-): number {
+export function selectLODLevelByScreenCoverage(screenCoverage: number, levels: LODLevel[]): number {
   if (levels.length === 0) return 0;
-  
+
   // Sort by screen coverage (descending)
   const sorted = [...levels]
-    .filter(l => l.screenCoverage !== undefined)
+    .filter((l) => l.screenCoverage !== undefined)
     .sort((a, b) => (b.screenCoverage ?? 0) - (a.screenCoverage ?? 0));
-  
+
   for (const level of sorted) {
     if (screenCoverage <= (level.screenCoverage ?? 1)) {
       return level.level;
     }
   }
-  
+
   return sorted[sorted.length - 1]?.level ?? 0;
 }
 
@@ -554,13 +552,13 @@ export function calculateScreenCoverage(
   _screenHeight: number = 1080
 ): number {
   if (distance <= 0) return 1;
-  
+
   // Angular size of object
   const angularSize = 2 * Math.atan(objectRadius / distance);
-  
+
   // Field of view in radians
   const fovRad = (fov * Math.PI) / 180;
-  
+
   // Screen coverage
   return angularSize / fovRad;
 }
@@ -573,12 +571,12 @@ export function getTrianglesSaved(
   currentLevel: number,
   originalTriangles: number
 ): number {
-  const level = levels.find(l => l.level === currentLevel);
+  const level = levels.find((l) => l.level === currentLevel);
   if (!level) return 0;
-  
+
   const baseTriangles = levels[0]?.triangleCount ?? originalTriangles;
   const currentTriangles = level.triangleCount ?? Math.floor(baseTriangles * level.polygonRatio);
-  
+
   return baseTriangles - currentTriangles;
 }
 
@@ -587,43 +585,43 @@ export function getTrianglesSaved(
  */
 export function validateLODConfig(config: LODConfig): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
-  
+
   if (!config.id) {
     errors.push('LOD config must have an id');
   }
-  
+
   if (config.levels.length === 0) {
     errors.push('LOD config must have at least one level');
   }
-  
+
   // Check for duplicate levels
-  const levelNumbers = config.levels.map(l => l.level);
+  const levelNumbers = config.levels.map((l) => l.level);
   const uniqueLevels = new Set(levelNumbers);
   if (uniqueLevels.size !== levelNumbers.length) {
     errors.push('LOD levels must have unique level numbers');
   }
-  
+
   // Check level ordering
   const sortedByLevel = [...config.levels].sort((a, b) => a.level - b.level);
   const sortedByDistance = [...config.levels].sort((a, b) => a.distance - b.distance);
-  
+
   for (let i = 0; i < sortedByLevel.length; i++) {
     if (sortedByLevel[i].level !== sortedByDistance[i].level) {
       errors.push('Higher LOD levels should have greater distances');
       break;
     }
   }
-  
+
   // Validate hysteresis
   if (config.hysteresis < 0 || config.hysteresis > 1) {
     errors.push('Hysteresis must be between 0 and 1');
   }
-  
+
   // Validate bias
   if (config.bias < -1 || config.bias > 1) {
     errors.push('Bias must be between -1 and 1');
   }
-  
+
   // Validate each level
   for (const level of config.levels) {
     if (level.polygonRatio < 0 || level.polygonRatio > 1) {
@@ -636,7 +634,7 @@ export function validateLODConfig(config: LODConfig): { valid: boolean; errors: 
       errors.push(`Level ${level.level}: distance must be non-negative`);
     }
   }
-  
+
   return { valid: errors.length === 0, errors };
 }
 
@@ -654,10 +652,7 @@ export function mergeLODConfigs(base: LODConfig, override: Partial<LODConfig>): 
 /**
  * Get recommended LOD count based on object size and complexity
  */
-export function getRecommendedLODCount(
-  triangleCount: number,
-  _boundingRadius: number
-): number {
+export function getRecommendedLODCount(triangleCount: number, _boundingRadius: number): number {
   // Small objects need fewer LODs
   if (triangleCount < 1000) return 2;
   if (triangleCount < 10000) return 3;
@@ -674,13 +669,13 @@ export function calculateOptimalDistances(
   maxViewDistance: number = 1000
 ): number[] {
   const distances: number[] = [0];
-  
+
   // Use logarithmic distribution for distances
   for (let i = 1; i < levelCount; i++) {
     const t = i / (levelCount - 1);
     const distance = boundingRadius * Math.pow(maxViewDistance / boundingRadius, t);
     distances.push(Math.round(distance));
   }
-  
+
   return distances;
 }

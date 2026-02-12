@@ -14,6 +14,7 @@ By the end of this lesson, you will:
 ## What is Spatial Context?
 
 Spatial context awareness allows agents to understand:
+
 - **Where** they are in a virtual environment
 - **What** entities are nearby
 - **How** proximity affects their behavior
@@ -45,7 +46,7 @@ composition "SpatialAgent" {
       type: "explorer"
       capabilities: ["navigation", "scanning"]
     }
-    
+
     @spatialAwareness {
       update_frequency: 60          // Hz
       detection_radius: 10          // meters
@@ -53,26 +54,26 @@ composition "SpatialAgent" {
       track_agents: true
       zones: ["safe", "danger", "objective"]
     }
-    
+
     state {
       position: [0, 0, 0]
       nearby_entities: []
       current_zone: null
     }
-    
+
     on zoneEnter(zone) {
       if (zone.type == "danger") {
         activateDefenses()
       }
     }
-    
+
     on entityNearby(entity) {
       if (entity.type == "target") {
         focusOn(entity)
       }
     }
   }
-  
+
   object "Explorer" using "AwareAgent" {
     position: [0, 1, 0]
   }
@@ -90,7 +91,7 @@ import { SpatialContext, SpatialQuery, Entity } from '@holoscript/core';
 const spatial = new SpatialContext({
   worldBounds: { min: [-100, 0, -100], max: [100, 50, 100] },
   gridSize: 5, // 5m grid cells for efficient queries
-  updateRate: 60
+  updateRate: 60,
 });
 
 // Register an entity
@@ -99,14 +100,14 @@ spatial.register({
   position: [10, 1, 5],
   rotation: [0, 45, 0],
   bounds: { type: 'sphere', radius: 0.5 },
-  metadata: { type: 'agent', team: 'blue' }
+  metadata: { type: 'agent', team: 'blue' },
 });
 
 // Query nearby entities
 const nearby = spatial.queryRadius({
   center: [10, 1, 5],
   radius: 15,
-  filter: { type: 'agent' }
+  filter: { type: 'agent' },
 });
 
 console.log(`Found ${nearby.length} agents within 15m`);
@@ -126,12 +127,12 @@ const dangerZone = spatial.createZone({
   shape: 'box',
   bounds: {
     min: [20, 0, 20],
-    max: [40, 5, 40]
+    max: [40, 5, 40],
   },
   properties: {
     damagePerSecond: 10,
-    warningMessage: 'Entering hazardous area!'
-  }
+    warningMessage: 'Entering hazardous area!',
+  },
 });
 
 // Zone events
@@ -164,8 +165,8 @@ const proximity = new ProximityDetector({
   layers: [
     { name: 'immediate', radius: 2, priority: 'high' },
     { name: 'nearby', radius: 10, priority: 'medium' },
-    { name: 'distant', radius: 50, priority: 'low' }
-  ]
+    { name: 'distant', radius: 50, priority: 'low' },
+  ],
 });
 
 // Register with spatial context
@@ -174,7 +175,7 @@ spatial.addDetector(proximity);
 // Handle proximity events
 proximity.on('enter', (event: ProximityEvent) => {
   console.log(`${event.entityId} entered ${event.layer} range`);
-  
+
   if (event.layer === 'immediate' && event.entity.hostile) {
     activateCombatMode();
   }
@@ -185,8 +186,7 @@ proximity.on('exit', (event: ProximityEvent) => {
 });
 
 // Query current proximities
-const immediateThreats = proximity.getEntities('immediate')
-  .filter(e => e.metadata.hostile);
+const immediateThreats = proximity.getEntities('immediate').filter((e) => e.metadata.hostile);
 ```
 
 ## Location-Based Choreography
@@ -198,8 +198,8 @@ import { SpatialChoreographer, LocationConstraint } from '@holoscript/core';
 
 // Create spatial choreographer
 const choreographer = new SpatialChoreographer(registry, spatial, {
-  locationWeight: 0.4,  // 40% weight on location in matching
-  maxDistance: 100      // Max distance for task assignment
+  locationWeight: 0.4, // 40% weight on location in matching
+  maxDistance: 100, // Max distance for task assignment
 });
 
 // Submit location-aware task
@@ -210,19 +210,19 @@ const task = await choreographer.submit({
   constraints: {
     preferNearby: true,
     maxDistance: 50,
-    excludeZones: ['danger']
+    excludeZones: ['danger'],
   },
   payload: {
     targetId: 'suspicious-object',
-    action: 'scan'
-  }
+    action: 'scan',
+  },
 });
 
 // Get nearest capable agent
 const agent = await choreographer.findNearest({
   location: [30, 1, 25],
   capabilities: ['scanning'],
-  available: true
+  available: true,
 });
 
 console.log(`Nearest scanner: ${agent.id} at distance ${agent.distance}m`);
@@ -238,14 +238,14 @@ const hits = spatial.rayCast({
   origin: [0, 1.6, 0],
   direction: [0, 0, 1],
   maxDistance: 100,
-  filter: { type: 'interactable' }
+  filter: { type: 'interactable' },
 });
 
 // Box query
 const inBox = spatial.queryBox({
   min: [10, 0, 10],
   max: [20, 5, 20],
-  includePartial: true
+  includePartial: true,
 });
 
 // Frustum query (what's visible)
@@ -254,7 +254,7 @@ const visible = spatial.queryFrustum({
   forward: [0, 0, 1],
   fov: 90,
   nearPlane: 0.1,
-  farPlane: 50
+  farPlane: 50,
 });
 
 // Path query
@@ -262,7 +262,7 @@ const path = spatial.findPath({
   from: [0, 0, 0],
   to: [50, 0, 50],
   avoidZones: ['danger', 'restricted'],
-  maxSlope: 30 // degrees
+  maxSlope: 30, // degrees
 });
 ```
 
@@ -276,7 +276,7 @@ composition "SecuritySystem" {
       grid_size: 5
     }
   }
-  
+
   // Define patrol zones
   zone "Perimeter" {
     shape: "polygon"
@@ -284,67 +284,67 @@ composition "SecuritySystem" {
     height: 3
     type: "patrol"
   }
-  
+
   zone "VaultArea" {
     shape: "box"
     bounds: [[0, 0, 0], [10, 3, 10]]
     type: "high-security"
     access_level: "admin"
   }
-  
+
   zone "Entrance" {
     shape: "sphere"
     center: [-45, 1, 0]
     radius: 5
     type: "checkpoint"
   }
-  
+
   // Guard agent template
   template "GuardAgent" {
     @agent {
       type: "security"
       capabilities: ["patrol", "investigate", "apprehend"]
     }
-    
+
     @spatialAwareness {
       detection_radius: 20
       track_entities: true
       alert_on: ["intruder", "suspicious"]
     }
-    
+
     @patrol {
       route: "perimeter"
       speed: 2
       pause_duration: 5
     }
-    
+
     state {
       mode: "patrol"
       alert_level: 0
       current_waypoint: 0
     }
-    
+
     on entityNearby(entity) {
       if (entity.tags.includes("suspicious")) {
         this.state.mode = "investigate"
         investigateTarget(entity)
       }
     }
-    
+
     on zoneEnter(zone) {
       if (zone.type == "high-security") {
         this.state.alert_level = 2
         scanForThreats()
       }
     }
-    
+
     action investigateTarget(target) {
       // Move to target
       moveTo(target.position)
-      
+
       // Scan and assess
       const assessment = await scan(target)
-      
+
       if (assessment.threat_level > 0.7) {
         broadcast("alerts", {
           type: "threat-detected",
@@ -354,7 +354,7 @@ composition "SecuritySystem" {
       }
     }
   }
-  
+
   // Patrol waypoints
   waypoints "perimeter" [
     [-45, 1, -45],
@@ -362,13 +362,13 @@ composition "SecuritySystem" {
     [45, 1, 45],
     [-45, 1, 45]
   ]
-  
+
   // Instantiate guards
   object "Guard1" using "GuardAgent" {
     position: [-45, 1, 0]
     patrol_start: 0
   }
-  
+
   object "Guard2" using "GuardAgent" {
     position: [45, 1, 0]
     patrol_start: 2
@@ -406,21 +406,21 @@ const spatial = new SpatialContext({
   // Use spatial partitioning
   partitioning: 'octree',
   maxDepth: 8,
-  
+
   // Batch updates
   batchUpdates: true,
   updateBatchSize: 100,
-  
+
   // Level of detail
   lod: {
     immediate: { radius: 10, updateRate: 60 },
     nearby: { radius: 50, updateRate: 30 },
-    distant: { radius: 200, updateRate: 10 }
+    distant: { radius: 200, updateRate: 10 },
   },
-  
+
   // Culling
   enableCulling: true,
-  cullingMethod: 'frustum'
+  cullingMethod: 'frustum',
 });
 ```
 

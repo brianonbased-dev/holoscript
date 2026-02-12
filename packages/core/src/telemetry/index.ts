@@ -17,16 +17,7 @@ export {
 } from './TelemetryProvider';
 
 // Span factory for creating nested spans
-export {
-  SpanFactory,
-  createSpanObject,
-  generateTraceId,
-  generateSpanId,
-} from './SpanFactory';
+export { SpanFactory, createSpanObject, generateTraceId, generateSpanId } from './SpanFactory';
 
 // Metrics collector with Prometheus and OTLP export
-export {
-  MetricsCollector,
-  type MetricEntry,
-  type HistogramStats,
-} from './MetricsCollector';
+export { MetricsCollector, type MetricEntry, type HistogramStats } from './MetricsCollector';

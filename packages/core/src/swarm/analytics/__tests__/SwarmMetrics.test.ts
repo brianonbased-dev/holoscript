@@ -54,10 +54,10 @@ describe('SwarmMetrics', () => {
 
     it('should allow negative increments', () => {
       metrics.register({ name: 'count', type: 'counter', description: 'Count' });
-      
+
       metrics.increment('count', 10);
       metrics.increment('count', -5);
-      
+
       expect(metrics.getCounter('count')).toBe(5);
     });
   });
@@ -124,9 +124,9 @@ describe('SwarmMetrics', () => {
       });
       metrics.setHistogramBoundaries('latency', [10, 50, 100, 500]);
 
-      metrics.observeHistogram('latency', 5);   // <=10
-      metrics.observeHistogram('latency', 25);  // <=50
-      metrics.observeHistogram('latency', 75);  // <=100
+      metrics.observeHistogram('latency', 5); // <=10
+      metrics.observeHistogram('latency', 25); // <=50
+      metrics.observeHistogram('latency', 75); // <=100
       metrics.observeHistogram('latency', 200); // <=500
       metrics.observeHistogram('latency', 600); // >500 (Inf bucket)
 

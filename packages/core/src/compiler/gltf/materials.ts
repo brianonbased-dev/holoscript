@@ -365,7 +365,8 @@ export function applyPreset(
   const preset = MATERIAL_PRESETS[presetName] || MATERIAL_PRESETS.default;
 
   return {
-    baseColor: overrides.baseColor ?? (preset.baseColor as [number, number, number, number]) ?? [1, 1, 1, 1],
+    baseColor: overrides.baseColor ??
+      (preset.baseColor as [number, number, number, number]) ?? [1, 1, 1, 1],
     metallic: overrides.metallic ?? preset.metallic ?? 0,
     roughness: overrides.roughness ?? preset.roughness ?? 0.5,
     emissive: overrides.emissive ?? (preset.emissive as [number, number, number]) ?? [0, 0, 0],

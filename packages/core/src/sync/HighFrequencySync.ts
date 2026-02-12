@@ -98,7 +98,12 @@ export function dequantizePosition(q: QuantizedPosition): [number, number, numbe
  * Compress a quaternion using smallest-three encoding
  * Stores the 3 smallest components, reconstructs the 4th
  */
-export function compressQuaternion(qx: number, qy: number, qz: number, qw: number): CompressedQuaternion {
+export function compressQuaternion(
+  qx: number,
+  qy: number,
+  qz: number,
+  qw: number
+): CompressedQuaternion {
   const components = [qx, qy, qz, qw];
   let maxIndex = 0;
   let maxValue = Math.abs(components[0]);
@@ -138,7 +143,7 @@ export function compressQuaternion(qx: number, qy: number, qz: number, qw: numbe
  */
 export function decompressQuaternion(c: CompressedQuaternion): [number, number, number, number] {
   // Dequantize from 11 bits
-  const from11Bit = (v: number) => (v / 1023.5) - 1;
+  const from11Bit = (v: number) => v / 1023.5 - 1;
 
   const a = from11Bit(c.a);
   const b = from11Bit(c.b);
@@ -423,8 +428,7 @@ export class JitterBuffer {
     const sizes = Array.from(this.samples.values()).map((b) => b.length);
     return {
       entityCount: this.samples.size,
-      averageBufferSize:
-        sizes.length > 0 ? sizes.reduce((a, b) => a + b, 0) / sizes.length : 0,
+      averageBufferSize: sizes.length > 0 ? sizes.reduce((a, b) => a + b, 0) / sizes.length : 0,
     };
   }
 

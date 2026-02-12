@@ -516,7 +516,11 @@ describe('HITLTrait', () => {
       });
 
       ctx.clearEvents();
-      hitlHandler.onDetach?.(node as any, { ...hitlHandler.defaultConfig, enable_audit_log: true }, ctx as any);
+      hitlHandler.onDetach?.(
+        node as any,
+        { ...hitlHandler.defaultConfig, enable_audit_log: true },
+        ctx as any
+      );
 
       expect(getEventCount(ctx, 'hitl_audit_persist')).toBe(1);
     });

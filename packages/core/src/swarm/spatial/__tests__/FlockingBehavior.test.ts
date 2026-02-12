@@ -139,7 +139,7 @@ describe('FlockingBehavior', () => {
       // Use high maxForce to avoid clamping
       const arrivalFlock = new FlockingBehavior({ maxSpeed: 4, maxForce: 10 });
       const boid = arrivalFlock.addBoid('boid-1', new Vector3(0, 0, 0), new Vector3(0, 0, 0));
-      const nearTarget = new Vector3(2, 0, 0);  // Very close, within slowingRadius
+      const nearTarget = new Vector3(2, 0, 0); // Very close, within slowingRadius
       const farTarget = new Vector3(100, 0, 0);
 
       const nearSteer = arrivalFlock.arrive(boid, nearTarget, 20);

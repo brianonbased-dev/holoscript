@@ -64,10 +64,16 @@ vi.mock('vscode', () => ({
     ) {}
   },
   Position: class {
-    constructor(public line: number, public column: number) {}
+    constructor(
+      public line: number,
+      public column: number
+    ) {}
   },
   Selection: class {
-    constructor(public anchor: any, public active: any) {}
+    constructor(
+      public anchor: any,
+      public active: any
+    ) {}
   },
   StatusBarAlignment: { Left: 1, Right: 2 },
   OverviewRulerLane: { Left: 1, Center: 2, Right: 4 },
@@ -96,7 +102,7 @@ vi.mock('util', async () => {
 
 describe('GitTypes', () => {
   it('should define SceneNode interface correctly', async () => {
-    const { SceneNode } = await import('../git/GitTypes') as any;
+    const { SceneNode } = (await import('../git/GitTypes')) as any;
     // Type definitions don't have runtime values, but we can test the constants
     const node = {
       type: 'Box',
@@ -159,7 +165,7 @@ describe('SemanticGit', () => {
 
   describe('config', () => {
     it('should use default config when none provided', async () => {
-      const { SemanticGit, DEFAULT_GIT_CONFIG } = await import('../git/SemanticGit') as any;
+      const { SemanticGit, DEFAULT_GIT_CONFIG } = (await import('../git/SemanticGit')) as any;
       const git = new SemanticGit('/test');
       // Config is private, but we can test behavior
       expect(git).toBeDefined();
@@ -374,9 +380,7 @@ describe('DiffVisualizationProvider', () => {
   });
 
   it('should update highlights', () => {
-    const highlights = [
-      { type: 'added' as const, nodeId: 'box1', color: '#4CAF50' },
-    ];
+    const highlights = [{ type: 'added' as const, nodeId: 'box1', color: '#4CAF50' }];
     provider.updateHighlights(highlights);
   });
 
@@ -450,7 +454,8 @@ describe('Git Commands', () => {
       vi.clearAllMocks();
       const { registerGitCommands } = await import('../git/GitCommands');
       const { SemanticGit } = await import('../git/SemanticGit');
-      const { DiffVisualizationProvider, DiffDecorationProvider } = await import('../git/DiffVisualization');
+      const { DiffVisualizationProvider, DiffDecorationProvider } =
+        await import('../git/DiffVisualization');
       const { MergeDriver, HoloScriptGitHooks } = await import('../git/MergeDriver');
 
       const context = { extensionUri: { fsPath: '/test' } } as any;
@@ -529,7 +534,7 @@ describe('MergeConflictResolver', () => {
 describe('Git Integration', () => {
   it('should export all required modules', async () => {
     const gitModule = await import('../git');
-    
+
     expect(gitModule.SemanticGit).toBeDefined();
     expect(gitModule.DiffVisualizationProvider).toBeDefined();
     expect(gitModule.DiffDecorationProvider).toBeDefined();

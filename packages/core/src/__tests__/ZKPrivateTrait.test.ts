@@ -20,9 +20,12 @@ describe('ZKPrivateTrait (v3.4 Stub)', () => {
 
     expect((mockNode as any).__zkPrivateState).toBeDefined();
     expect((mockNode as any).__zkPrivateState.isVerified).toBe(false);
-    expect(mockContext.emit).toHaveBeenCalledWith('zk_privacy_initialized', expect.objectContaining({
-      predicate: config.predicate
-    }));
+    expect(mockContext.emit).toHaveBeenCalledWith(
+      'zk_privacy_initialized',
+      expect.objectContaining({
+        predicate: config.predicate,
+      })
+    );
   });
 
   it('should cleanup state onDetach', () => {
@@ -38,19 +41,22 @@ describe('ZKPrivateTrait (v3.4 Stub)', () => {
     const event = { type: 'zk_verify_proximity' };
     zkPrivateHandler.onEvent!(mockNode, config, mockContext, event as any);
 
-    expect(mockContext.emit).toHaveBeenCalledWith('zk_proof_request', expect.objectContaining({
-      predicate: 'proximity',
-      params: { radius: 10 }
-    }));
+    expect(mockContext.emit).toHaveBeenCalledWith(
+      'zk_proof_request',
+      expect.objectContaining({
+        predicate: 'proximity',
+        params: { radius: 10 },
+      })
+    );
   });
 
   it('should unlock privacy on valid proof submission', () => {
     const config = zkPrivateHandler.defaultConfig;
     zkPrivateHandler.onAttach!(mockNode, config, mockContext);
 
-    const event = { 
-      type: 'zk_proof_submitted', 
-      payload: { proofValid: true } 
+    const event = {
+      type: 'zk_proof_submitted',
+      payload: { proofValid: true },
     };
     zkPrivateHandler.onEvent!(mockNode, config, mockContext, event as any);
 
@@ -62,15 +68,18 @@ describe('ZKPrivateTrait (v3.4 Stub)', () => {
     const config = zkPrivateHandler.defaultConfig;
     zkPrivateHandler.onAttach!(mockNode, config, mockContext);
 
-    const event = { 
-      type: 'zk_proof_submitted', 
-      payload: { proofValid: false } 
+    const event = {
+      type: 'zk_proof_submitted',
+      payload: { proofValid: false },
     };
     zkPrivateHandler.onEvent!(mockNode, config, mockContext, event as any);
 
     expect((mockNode as any).__zkPrivateState.isVerified).toBe(false);
-    expect(mockContext.emit).toHaveBeenCalledWith('zk_privacy_failed', expect.objectContaining({
-      reason: 'invalid_proof'
-    }));
+    expect(mockContext.emit).toHaveBeenCalledWith(
+      'zk_privacy_failed',
+      expect.objectContaining({
+        reason: 'invalid_proof',
+      })
+    );
   });
 });

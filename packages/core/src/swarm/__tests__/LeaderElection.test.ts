@@ -159,7 +159,7 @@ describe('LeaderElection', () => {
       election.startElection(); // Don't await - become candidate
 
       // Wait a tick for state to update
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       election.handleMessage('node-2', {
         type: 'vote-response',
@@ -193,7 +193,7 @@ describe('LeaderElection', () => {
   describe('stop', () => {
     it('should stop timers', async () => {
       await election.startElection();
-      
+
       // Should not throw
       expect(() => election.stop()).not.toThrow();
     });
@@ -211,7 +211,7 @@ describe('LeaderElection', () => {
   describe('quorum calculation', () => {
     it('should require majority for 3-node cluster', async () => {
       const smallElection = new LeaderElection('a', ['b', 'c']);
-      
+
       // Need 2 votes (majority of 3)
       smallElection.receiveVote('b'); // Now has 2 votes (self + b)
       await smallElection.startElection();
@@ -222,7 +222,7 @@ describe('LeaderElection', () => {
 
     it('should require majority for 5-node cluster', async () => {
       const largeElection = new LeaderElection('a', ['b', 'c', 'd', 'e']);
-      
+
       // Need 3 votes (majority of 5)
       largeElection.receiveVote('b');
       largeElection.receiveVote('c');

@@ -7,11 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  ChoreographyPlanner,
-  plan,
-  PlanBuilder,
-} from '../ChoreographyPlanner';
+import { ChoreographyPlanner, plan, PlanBuilder } from '../ChoreographyPlanner';
 import type { AgentManifest } from '../../agents/AgentManifest';
 
 // =============================================================================
@@ -125,7 +121,7 @@ describe('ChoreographyPlanner', () => {
 
     it('should detect missing agent references', () => {
       const agent = createMockAgent('agent-1', ['action']);
-      
+
       // This should throw because 'non-existent' agent isn't in the participants
       expect(() => {
         planner.createPlan({
@@ -163,8 +159,20 @@ describe('ChoreographyPlanner', () => {
         goal: 'Circular dependency',
         agents: [agent],
         steps: [
-          { id: 'step1', name: 'step1', agent: 'agent-1', action: 'action', dependencies: ['step2'] },
-          { id: 'step2', name: 'step2', agent: 'agent-1', action: 'action', dependencies: ['step1'] },
+          {
+            id: 'step1',
+            name: 'step1',
+            agent: 'agent-1',
+            action: 'action',
+            dependencies: ['step2'],
+          },
+          {
+            id: 'step2',
+            name: 'step2',
+            agent: 'agent-1',
+            action: 'action',
+            dependencies: ['step1'],
+          },
         ],
       });
 
@@ -194,7 +202,13 @@ describe('ChoreographyPlanner', () => {
         goal: 'Execution order',
         agents: [agent],
         steps: [
-          { id: 'step3', name: 'step3', agent: 'agent-1', action: 'c', dependencies: ['step1', 'step2'] },
+          {
+            id: 'step3',
+            name: 'step3',
+            agent: 'agent-1',
+            action: 'c',
+            dependencies: ['step1', 'step2'],
+          },
           { id: 'step1', name: 'step1', agent: 'agent-1', action: 'a' },
           { id: 'step2', name: 'step2', agent: 'agent-1', action: 'b', dependencies: ['step1'] },
         ],
@@ -248,7 +262,12 @@ describe('PlanBuilder', () => {
 
       const result = plan('Analyze and report')
         .agent(agent)
-        .step({ name: 'analyze', agent: 'agent-1', action: 'analyze', inputs: { data: 'test-data' } })
+        .step({
+          name: 'analyze',
+          agent: 'agent-1',
+          action: 'analyze',
+          inputs: { data: 'test-data' },
+        })
         .step({ name: 'report', agent: 'agent-1', action: 'report', dependsOn: ['analyze'] })
         .build();
 
@@ -296,7 +315,12 @@ describe('PlanBuilder', () => {
 
       const result = plan('Conditional workflow')
         .agent(agent)
-        .step({ name: 'step1', agent: 'agent-1', action: 'action', condition: 'input.enabled === true' })
+        .step({
+          name: 'step1',
+          agent: 'agent-1',
+          action: 'action',
+          condition: 'input.enabled === true',
+        })
         .build();
 
       expect(result.steps[0].condition).toBe('input.enabled === true');
@@ -320,7 +344,12 @@ describe('PlanBuilder', () => {
 
       const result = plan('Fallback workflow')
         .agent(agent)
-        .step({ name: 'step1', agent: 'agent-1', action: 'action', fallbackStepId: 'fallback-step' })
+        .step({
+          name: 'step1',
+          agent: 'agent-1',
+          action: 'action',
+          fallbackStepId: 'fallback-step',
+        })
         .step({ id: 'fallback-step', name: 'fallback-step', agent: 'agent-1', action: 'fallback' })
         .build();
 

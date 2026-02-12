@@ -226,6 +226,36 @@ export const softBodyHandler: TraitHandler<SoftBodyConfig> = {
         node,
         vertexIndex,
       });
+    } else if (event.type === 'soft_body_grab_start') {
+      // Grab interaction: find closest vertices and create compliant attachments
+      const handId = (event.handId as string) || 'default';
+      const handPosition = event.handPosition as { x: number; y: number; z: number };
+      const grabRadius = (event.grabRadius as number) || 0.15;
+
+      context.emit?.('soft_body_grab_begin', {
+        node,
+        handId,
+        handPosition,
+        grabRadius,
+      });
+    } else if (event.type === 'soft_body_grab_update') {
+      // Update grab target as hand moves
+      const handId = (event.handId as string) || 'default';
+      const handPosition = event.handPosition as { x: number; y: number; z: number };
+
+      context.emit?.('soft_body_grab_move', {
+        node,
+        handId,
+        handPosition,
+      });
+    } else if (event.type === 'soft_body_grab_end') {
+      // Release grab
+      const handId = (event.handId as string) || 'default';
+
+      context.emit?.('soft_body_grab_release', {
+        node,
+        handId,
+      });
     } else if (event.type === 'soft_body_reset') {
       // Reset to rest shape
       for (const vert of state.vertices) {

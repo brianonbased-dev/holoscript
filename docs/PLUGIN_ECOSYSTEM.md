@@ -49,13 +49,13 @@ HoloScript's marketplace infrastructure (`marketplace-api`, `marketplace-web`, `
 
 ## Decision: WASM vs Native Plugins
 
-| Aspect | WASM Plugins | Native Plugins |
-|--------|-------------|----------------|
-| Security | ✅ Sandboxed, memory-safe | ❌ Full system access |
-| Performance | ⚠️ ~95% of native | ✅ 100% native speed |
-| Distribution | ✅ Universal binary | ❌ Per-platform builds |
-| Versioning | ✅ Easy compatibility checks | ⚠️ ABI compatibility hell |
-| Developer Experience | ✅ Write in Rust/C/Go/Zig | ⚠️ Platform-specific builds |
+| Aspect               | WASM Plugins                 | Native Plugins              |
+| -------------------- | ---------------------------- | --------------------------- |
+| Security             | ✅ Sandboxed, memory-safe    | ❌ Full system access       |
+| Performance          | ⚠️ ~95% of native            | ✅ 100% native speed        |
+| Distribution         | ✅ Universal binary          | ❌ Per-platform builds      |
+| Versioning           | ✅ Easy compatibility checks | ⚠️ ABI compatibility hell   |
+| Developer Experience | ✅ Write in Rust/C/Go/Zig    | ⚠️ Platform-specific builds |
 
 **Decision**: **WASM plugins with Extism** (security + portability > 5% perf hit)
 
@@ -254,6 +254,7 @@ paths:
 ```
 
 **Generate Bindings**:
+
 ```bash
 xtp plugin init --schema holoscript-plugin.xtp.yaml --language rust
 # Generates Rust types + Extism bindings automatically
@@ -299,11 +300,7 @@ export class PluginManager {
     console.log(`[Plugin] Loaded ${manifest.name}@${manifest.version}`);
   }
 
-  async callPlugin(
-    name: string,
-    functionName: string,
-    input: any
-  ): Promise<any> {
+  async callPlugin(name: string, functionName: string, input: any): Promise<any> {
     const plugin = this.plugins.get(name);
     if (!plugin) {
       throw new Error(`Plugin ${name} not loaded`);
@@ -350,8 +347,8 @@ function checkCompatibility(compilerVersion: string, pluginRange: string): boole
 }
 
 // Example
-checkCompatibility('3.0.0', '^3.0.0') // true
-checkCompatibility('3.0.0', '^4.0.0') // false
+checkCompatibility('3.0.0', '^3.0.0'); // true
+checkCompatibility('3.0.0', '^4.0.0'); // false
 ```
 
 ---
@@ -457,11 +454,11 @@ plugins.holoscript.dev
 
 ### Revenue Sharing
 
-| Plugin Type | Revenue Split | Example |
-|------------|---------------|---------|
-| Free OSS | N/A | 0% (donation link) |
-| Paid ($5-50) | 70% author / 30% HoloScript | $10 → $7 author |
-| Enterprise (custom) | Negotiated | Custom contract |
+| Plugin Type         | Revenue Split               | Example            |
+| ------------------- | --------------------------- | ------------------ |
+| Free OSS            | N/A                         | 0% (donation link) |
+| Paid ($5-50)        | 70% author / 30% HoloScript | $10 → $7 author    |
+| Enterprise (custom) | Negotiated                  | Custom contract    |
 
 ---
 

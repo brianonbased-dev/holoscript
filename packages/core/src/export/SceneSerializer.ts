@@ -139,10 +139,7 @@ export class SceneSerializer {
   /**
    * Serialize a scene graph to JSON
    */
-  serialize(
-    sceneGraph: ISceneGraph,
-    options: ISerializeOptions = {}
-  ): ISerializeResult {
+  serialize(sceneGraph: ISceneGraph, options: ISerializeOptions = {}): ISerializeResult {
     const startTime = performance.now();
 
     // Clone to avoid modifying original
@@ -217,10 +214,7 @@ export class SceneSerializer {
   /**
    * Serialize a scene graph to binary format
    */
-  serializeBinary(
-    sceneGraph: ISceneGraph,
-    options: ISerializeOptions = {}
-  ): ISerializeResult {
+  serializeBinary(sceneGraph: ISceneGraph, options: ISerializeOptions = {}): ISerializeResult {
     const startTime = performance.now();
 
     // First serialize to JSON (without embedded buffers)
@@ -292,10 +286,7 @@ export class SceneSerializer {
   /**
    * Deserialize a scene graph from JSON
    */
-  deserialize(
-    json: string,
-    options: IDeserializeOptions = {}
-  ): ISceneGraph {
+  deserialize(json: string, options: IDeserializeOptions = {}): ISceneGraph {
     const parsed = JSON.parse(json) as ISceneGraph;
 
     if (options.validate) {
@@ -349,10 +340,7 @@ export class SceneSerializer {
       let currentOffset = bufferOffset;
       for (const buffer of sceneGraph.buffers) {
         if (buffer.byteLength > 0) {
-          buffer.data = binary.slice(
-            currentOffset,
-            currentOffset + buffer.byteLength
-          );
+          buffer.data = binary.slice(currentOffset, currentOffset + buffer.byteLength);
           currentOffset += buffer.byteLength;
         }
       }
@@ -404,10 +392,7 @@ export class SceneSerializer {
     // Validate meshes reference valid materials
     for (const mesh of sceneGraph.meshes) {
       for (const primitive of mesh.primitives) {
-        if (
-          primitive.materialRef &&
-          !materialIds.has(primitive.materialRef)
-        ) {
+        if (primitive.materialRef && !materialIds.has(primitive.materialRef)) {
           warnings.push({
             path: `meshes.${mesh.id}`,
             message: `References unknown material: ${primitive.materialRef}`,
@@ -586,19 +571,11 @@ export class SceneSerializer {
 
     // Validate children recursively
     for (let i = 0; i < node.children.length; i++) {
-      this.validateNode(
-        node.children[i],
-        `${path}.children[${i}]`,
-        errors,
-        warnings
-      );
+      this.validateNode(node.children[i], `${path}.children[${i}]`, errors, warnings);
     }
   }
 
-  private checkDuplicateIds(
-    sceneGraph: ISceneGraph,
-    errors: IValidationError[]
-  ): void {
+  private checkDuplicateIds(sceneGraph: ISceneGraph, errors: IValidationError[]): void {
     const nodeIds = new Set<string>();
     if (sceneGraph.root) {
       this.collectNodeIds(sceneGraph.root, nodeIds, errors);
@@ -617,11 +594,7 @@ export class SceneSerializer {
     }
   }
 
-  private collectNodeIds(
-    node: ISceneNode,
-    ids: Set<string>,
-    errors: IValidationError[]
-  ): void {
+  private collectNodeIds(node: ISceneNode, ids: Set<string>, errors: IValidationError[]): void {
     if (ids.has(node.id)) {
       errors.push({
         path: `nodes`,
@@ -691,10 +664,7 @@ export class SceneSerializer {
 /**
  * Find a node by ID in the scene graph
  */
-export function findNodeById(
-  root: ISceneNode,
-  id: string
-): ISceneNode | undefined {
+export function findNodeById(root: ISceneNode, id: string): ISceneNode | undefined {
   if (root.id === id) {
     return root;
   }
@@ -738,10 +708,7 @@ export function traverseNodes(
 /**
  * Calculate world transform for a node
  */
-export function getWorldTransform(
-  root: ISceneNode,
-  targetId: string
-): ITransform | undefined {
+export function getWorldTransform(root: ISceneNode, targetId: string): ITransform | undefined {
   const path = findNodePath(root, targetId);
   if (!path) {
     return undefined;
@@ -758,10 +725,7 @@ export function getWorldTransform(
 /**
  * Find path from root to target node
  */
-export function findNodePath(
-  root: ISceneNode,
-  targetId: string
-): ISceneNode[] | undefined {
+export function findNodePath(root: ISceneNode, targetId: string): ISceneNode[] | undefined {
   if (root.id === targetId) {
     return [root];
   }
@@ -798,10 +762,7 @@ export function multiplyTransforms(a: ITransform, b: ITransform): ITransform {
 /**
  * Multiply two quaternions
  */
-export function multiplyQuaternions(
-  a: IQuaternion,
-  b: IQuaternion
-): IQuaternion {
+export function multiplyQuaternions(a: IQuaternion, b: IQuaternion): IQuaternion {
   return {
     w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
     x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,

@@ -38,7 +38,7 @@ describe('FormationController', () => {
       expect(slots).toHaveLength(4);
 
       // Check positions are distributed around circle
-      const positions = slots.map(s => s.localPosition);
+      const positions = slots.map((s) => s.localPosition);
       const firstAngle = Math.atan2(positions[0].z, positions[0].x);
       const secondAngle = Math.atan2(positions[1].z, positions[1].x);
       const angleDiff = Math.abs(secondAngle - firstAngle);
@@ -51,9 +51,9 @@ describe('FormationController', () => {
       expect(slots).toHaveLength(4);
 
       // 4 agents in 2x2 grid
-      const positions = slots.map(s => s.localPosition);
-      const uniqueX = new Set(positions.map(p => Math.round(p.x * 100)));
-      const uniqueZ = new Set(positions.map(p => Math.round(p.z * 100)));
+      const positions = slots.map((s) => s.localPosition);
+      const uniqueX = new Set(positions.map((p) => Math.round(p.x * 100)));
+      const uniqueZ = new Set(positions.map((p) => Math.round(p.z * 100)));
       expect(uniqueX.size).toBe(2);
       expect(uniqueZ.size).toBe(2);
     });
@@ -62,7 +62,7 @@ describe('FormationController', () => {
       formation.setConfig({ type: 'wedge' });
       const slots = formation.generateSlots(5);
       expect(slots).toHaveLength(5);
-      
+
       // Leader at front (0,0,0)
       expect(slots[0].localPosition.x).toBe(0);
       expect(slots[0].localPosition.z).toBe(0);
@@ -80,7 +80,7 @@ describe('FormationController', () => {
       expect(slots).toHaveLength(10);
 
       // Positions should be in 3D (varying y values)
-      const yValues = slots.map(s => s.localPosition.y);
+      const yValues = slots.map((s) => s.localPosition.y);
       const minY = Math.min(...yValues);
       const maxY = Math.max(...yValues);
       expect(maxY - minY).toBeGreaterThan(0);
@@ -89,11 +89,7 @@ describe('FormationController', () => {
 
   describe('custom formation', () => {
     it('should set custom positions', () => {
-      const positions = [
-        new Vector3(0, 0, 0),
-        new Vector3(5, 0, 0),
-        new Vector3(0, 5, 0),
-      ];
+      const positions = [new Vector3(0, 0, 0), new Vector3(5, 0, 0), new Vector3(0, 5, 0)];
       formation.setCustomFormation(positions);
 
       const slots = formation.getAllSlots();
@@ -263,18 +259,18 @@ describe('FormationController', () => {
   describe('optimization', () => {
     it('should optimize assignments to minimize distance', () => {
       formation.generateSlots(3);
-      
+
       const positions = new Map([
-        ['agent-1', new Vector3(2, 0, 0)],  // Closest to slot index 2
+        ['agent-1', new Vector3(2, 0, 0)], // Closest to slot index 2
         ['agent-2', new Vector3(-2, 0, 0)], // Closest to slot index 0
-        ['agent-3', new Vector3(0, 0, 0)],  // Closest to slot index 1
+        ['agent-3', new Vector3(0, 0, 0)], // Closest to slot index 1
       ]);
 
       formation.optimizeAssignments(positions);
 
       const slot0 = formation.getAllSlots()[0];
       const slot2 = formation.getAllSlots()[2];
-      
+
       // slot 0 at x=-2 should have agent-2
       expect(slot0.agentId).toBe('agent-2');
       // slot 2 at x=2 should have agent-1

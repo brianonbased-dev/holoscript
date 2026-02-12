@@ -40,12 +40,15 @@ npc "TownGuard" {
 Behaviors are declarative rules that the NPC's "brain" evaluates constantly.
 
 ### 1. Triggers
+
 The `trigger` determines when a behavior should start.
+
 - `idle`: Runs when no other higher-priority behavior is active.
 - `on_damage`: Runs when the NPC is hit.
 - `on_vision`: Runs when a target enters the NPC's field of view (requires `@perception` trait).
 
 ### 2. Priority
+
 If multiple behaviors are triggered, the one with the **highest priority** (lower number) runs first.
 
 ---
@@ -54,13 +57,13 @@ If multiple behaviors are triggered, the one with the **highest priority** (lowe
 
 Inside a `behavior`, you define an array of `actions`. These are sequential steps the NPC will take.
 
-| Action | Example | Description |
-| :--- | :--- | :--- |
-| **move** | `{ move: { target: [x,y,z], speed: 1.5 } }` | Moves to a position. |
-| **face** | `{ face: { target: "Player" } }` | Rotates to face a target. |
-| **animate** | `{ animate: "wave" }` | Plays a named animation clip. |
-| **wait** | `{ wait: 2.0 }` | Pauses for X seconds. |
-| **call** | `{ call: "someMethod()" }` | Executes a custom method. |
+| Action      | Example                                     | Description                   |
+| :---------- | :------------------------------------------ | :---------------------------- |
+| **move**    | `{ move: { target: [x,y,z], speed: 1.5 } }` | Moves to a position.          |
+| **face**    | `{ face: { target: "Player" } }`            | Rotates to face a target.     |
+| **animate** | `{ animate: "wave" }`                       | Plays a named animation clip. |
+| **wait**    | `{ wait: 2.0 }`                             | Pauses for X seconds.         |
+| **call**    | `{ call: "someMethod()" }`                  | Executes a custom method.     |
 
 ---
 
@@ -102,6 +105,7 @@ npc "Merchant" {
 ## ⚡ Performance: Cognitive Density
 
 Every NPC has a "Cognitive Cost."
+
 - **Low Cost**: Simple patrol with `idle` triggers.
 - **High Cost**: Real-time pathfinding with `@perception` and high-priority behavior stacks.
 
@@ -112,6 +116,7 @@ Every NPC has a "Cognitive Cost."
 ## Exercise: Build a Fearful NPC
 
 Create an NPC that:
+
 1. Patrols between two points.
 2. If the player gets too close, it plays a "scared" animation and runs to a "SafetyPoint" object.
 3. After 5 seconds, it returns to patrolling.
@@ -119,6 +124,7 @@ Create an NPC that:
 ## Summary
 
 In this lesson, you learned:
+
 - How to define persistent AI characters with `npc`.
 - Using `behavior` trees to automate NPC actions.
 - The difference between `trigger`, `priority`, and `actions`.

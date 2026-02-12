@@ -221,7 +221,7 @@ export const COLLISION_GROUPS = {
   TERRAIN: 16,
   TRIGGER: 32,
   INTERACTABLE: 64,
-  ALL: 0xFFFF,
+  ALL: 0xffff,
 };
 
 /**
@@ -555,7 +555,12 @@ export interface IPhysicsWorld {
   raycast(ray: IRay, options?: IRaycastOptions): IRaycastHit[];
   raycastClosest(ray: IRay, options?: IRaycastOptions): IRaycastHit | null;
   sphereOverlap(center: IVector3, radius: number, filter?: ICollisionFilter): IOverlapResult[];
-  boxOverlap(center: IVector3, halfExtents: IVector3, rotation?: IQuaternion, filter?: ICollisionFilter): IOverlapResult[];
+  boxOverlap(
+    center: IVector3,
+    halfExtents: IVector3,
+    rotation?: IQuaternion,
+    filter?: ICollisionFilter
+  ): IOverlapResult[];
 
   // Cleanup
   dispose(): void;
@@ -612,7 +617,11 @@ export function sphereShape(radius: number): ISphereShape {
 /**
  * Create a capsule shape
  */
-export function capsuleShape(radius: number, height: number, axis: 'x' | 'y' | 'z' = 'y'): ICapsuleShape {
+export function capsuleShape(
+  radius: number,
+  height: number,
+  axis: 'x' | 'y' | 'z' = 'y'
+): ICapsuleShape {
   return { type: 'capsule', radius, height, axis };
 }
 
@@ -624,7 +633,7 @@ export function dynamicBody(
   shape: CollisionShape,
   mass: number,
   position?: IVector3,
-  rotation?: IQuaternion,
+  rotation?: IQuaternion
 ): IRigidBodyConfig {
   return {
     id,
@@ -645,7 +654,7 @@ export function staticBody(
   id: string,
   shape: CollisionShape,
   position?: IVector3,
-  rotation?: IQuaternion,
+  rotation?: IQuaternion
 ): IRigidBodyConfig {
   return {
     id,
@@ -666,7 +675,7 @@ export function kinematicBody(
   id: string,
   shape: CollisionShape,
   position?: IVector3,
-  rotation?: IQuaternion,
+  rotation?: IQuaternion
 ): IRigidBodyConfig {
   return {
     id,
@@ -688,6 +697,223 @@ export function defaultMaterial(): IPhysicsMaterial {
     friction: PHYSICS_DEFAULTS.defaultFriction,
     restitution: PHYSICS_DEFAULTS.defaultRestitution,
   };
+}
+
+// ============================================================================
+// Soft-Body / PBD Types
+// ============================================================================
+
+/**
+ * Soft-body material presets (artist-friendly)
+ */
+export type SoftBodyPreset = 'rubber' | 'cloth' | 'jelly' | 'flesh' | 'paper';
+
+/**
+ * PBD constraint types
+ */
+export type PBDConstraintType = 'distance' | 'volume' | 'collision' | 'attachment' | 'bending';
+
+/**
+ * PBD distance constraint — maintains rest length between two vertices
+ */
+export interface IPBDDistanceConstraint {
+  type: 'distance';
+  vertexA: number;
+  vertexB: number;
+  restLength: number;
+  compliance: number;
+  colorGroup: number;
+}
+
+/**
+ * PBD volume constraint — maintains rest volume of a tetrahedron
+ */
+export interface IPBDVolumeConstraint {
+  type: 'volume';
+  vertices: [number, number, number, number]; // Tetrahedron indices
+  restVolume: number;
+  compliance: number;
+}
+
+/**
+ * PBD bending constraint — resists bending between two adjacent triangles
+ */
+export interface IPBDBendingConstraint {
+  type: 'bending';
+  vertices: [number, number, number, number]; // Shared edge v0-v1, opposite v2-v3
+  restAngle: number;
+  compliance: number;
+  colorGroup: number;
+}
+
+/**
+ * PBD collision constraint — prevents vertex from penetrating SDF
+ */
+export interface IPBDCollisionConstraint {
+  type: 'collision';
+  vertexIndex: number;
+  contactNormal: IVector3;
+  contactDistance: number;
+  friction: number;
+}
+
+/**
+ * PBD attachment constraint — pins a vertex to a world position or rigid body
+ */
+export interface IPBDAttachmentConstraint {
+  type: 'attachment';
+  vertexIndex: number;
+  targetPosition: IVector3;
+  targetBodyId?: string;
+  compliance: number;
+}
+
+/**
+ * Union of all PBD constraint types
+ */
+export type PBDConstraint =
+  | IPBDDistanceConstraint
+  | IPBDVolumeConstraint
+  | IPBDBendingConstraint
+  | IPBDCollisionConstraint
+  | IPBDAttachmentConstraint;
+
+/**
+ * Soft-body configuration
+ */
+export interface ISoftBodyConfig {
+  /** Unique identifier */
+  id: string;
+  /** Vertex positions (flat xyz array) */
+  positions: Float32Array;
+  /** Vertex masses (per-vertex, 0 = pinned) */
+  masses: Float32Array;
+  /** Triangle indices for surface mesh */
+  indices: Uint32Array;
+  /** Tetrahedral indices for volume constraints (optional) */
+  tetIndices?: Uint32Array;
+  /** Edge pairs for distance constraints */
+  edges: Uint32Array;
+  /** Compliance (inverse stiffness, 0 = infinitely stiff) */
+  compliance: number;
+  /** Velocity damping 0-1 (1 = no damping) */
+  damping: number;
+  /** Collision margin for SDF testing */
+  collisionMargin: number;
+  /** Number of solver iterations per step */
+  solverIterations: number;
+  /** Enable self-collision via spatial hashing */
+  selfCollision: boolean;
+  /** Self-collision hash grid cell size */
+  selfCollisionCellSize?: number;
+  /** Artist preset (overrides compliance/damping) */
+  preset?: SoftBodyPreset;
+  /** Gravity override (defaults to world gravity) */
+  gravity?: IVector3;
+  /** External wind force */
+  wind?: IVector3;
+}
+
+/**
+ * Soft-body runtime state
+ */
+export interface ISoftBodyState {
+  id: string;
+  /** Current positions (flat xyz) */
+  positions: Float32Array;
+  /** Current velocities (flat xyz) */
+  velocities: Float32Array;
+  /** Predicted positions (used during solve) */
+  predicted: Float32Array;
+  /** Vertex normals (flat xyz, recomputed each frame) */
+  normals: Float32Array;
+  /** Current volume (for volume constraints) */
+  volume: number;
+  /** Rest volume */
+  restVolume: number;
+  /** Average deformation from rest shape */
+  deformationAmount: number;
+  /** Center of mass */
+  centerOfMass: IVector3;
+  /** Whether the simulation is active */
+  isActive: boolean;
+}
+
+/**
+ * SDF collider for soft-body collision
+ */
+export interface ISDFCollider {
+  /** Collider body ID */
+  bodyId: string;
+  /** SDF grid dimensions */
+  gridSize: [number, number, number];
+  /** SDF values (flat array, one per grid cell) */
+  sdfData: Float32Array;
+  /** World-space bounding box min */
+  boundsMin: IVector3;
+  /** World-space bounding box max */
+  boundsMax: IVector3;
+  /** Grid cell size */
+  cellSize: number;
+  /** Friction coefficient */
+  friction: number;
+}
+
+/**
+ * Soft-body preset parameters
+ */
+export const SOFT_BODY_PRESETS: Record<
+  SoftBodyPreset,
+  {
+    compliance: number;
+    damping: number;
+    solverIterations: number;
+    selfCollision: boolean;
+  }
+> = {
+  rubber: { compliance: 0.001, damping: 0.98, solverIterations: 20, selfCollision: false },
+  cloth: { compliance: 0.1, damping: 0.95, solverIterations: 15, selfCollision: true },
+  jelly: { compliance: 0.05, damping: 0.97, solverIterations: 12, selfCollision: false },
+  flesh: { compliance: 0.01, damping: 0.99, solverIterations: 20, selfCollision: false },
+  paper: { compliance: 0.5, damping: 0.9, solverIterations: 8, selfCollision: true },
+};
+
+/**
+ * Graph coloring result for parallel constraint solving
+ */
+export interface IConstraintColoring {
+  /** Number of color groups */
+  numColors: number;
+  /** Color assigned to each constraint */
+  colors: Uint32Array;
+  /** Constraint indices sorted by color group */
+  sortedIndices: Uint32Array;
+  /** Start offset per color group in sortedIndices */
+  groupOffsets: Uint32Array;
+  /** Count per color group */
+  groupCounts: Uint32Array;
+}
+
+/**
+ * Spatial hash grid for self-collision detection
+ */
+export interface ISpatialHashGrid {
+  /** Grid cell size */
+  cellSize: number;
+  /** Grid dimensions */
+  gridDimX: number;
+  gridDimY: number;
+  gridDimZ: number;
+  /** Grid origin (world-space min corner) */
+  origin: IVector3;
+  /** Vertex count per cell */
+  cellCounts: Uint32Array;
+  /** Prefix-sum offsets per cell */
+  cellOffsets: Uint32Array;
+  /** Vertex indices sorted by cell */
+  sortedVerts: Uint32Array;
+  /** Cell index per vertex */
+  vertexCells: Uint32Array;
 }
 
 /**

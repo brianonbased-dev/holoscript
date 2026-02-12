@@ -1,6 +1,6 @@
 /**
  * Performance Dashboard Webview Script (Enhanced with Chart.js)
- * 
+ *
  * Handles real-time chart rendering using Chart.js, user interactions,
  * alert thresholds configuration, and VS Code messaging.
  */
@@ -81,18 +81,20 @@
     const createChart = (canvasId, label, min, max, color = colors.line) => {
       const ctx = document.getElementById(canvasId);
       if (!ctx) return null;
-      
+
       return new Chart(ctx, {
         ...chartConfig,
         data: {
           labels: Array(state.maxDataPoints).fill(''),
-          datasets: [{
-            label,
-            data: [],
-            borderColor: color,
-            backgroundColor: color.replace('1)', '0.2)'),
-            fill: true,
-          }],
+          datasets: [
+            {
+              label,
+              data: [],
+              borderColor: color,
+              backgroundColor: color.replace('1)', '0.2)'),
+              fill: true,
+            },
+          ],
         },
         options: {
           ...chartConfig.options,
@@ -257,7 +259,13 @@
       'MB'
     );
     updateMetricWithThreshold(parseValue, parseStatus, metrics.parse.avgTime, 'parseTime', 'ms');
-    updateMetricWithThreshold(compileValue, compileStatus, metrics.compile.avgTime, 'compileTime', 'ms');
+    updateMetricWithThreshold(
+      compileValue,
+      compileStatus,
+      metrics.compile.avgTime,
+      'compileTime',
+      'ms'
+    );
 
     // Add to charts
     addDataToCharts(metrics);
@@ -279,8 +287,13 @@
   }
 
   function getThreshold(metricName) {
-    return state.thresholds.find(t => t.metric === metricName) || 
-      { warning: 50, critical: 100, higherIsBetter: false };
+    return (
+      state.thresholds.find((t) => t.metric === metricName) || {
+        warning: 50,
+        critical: 100,
+        higherIsBetter: false,
+      }
+    );
   }
 
   function updateMetricWithThreshold(element, statusElement, value, metricName, unit) {
@@ -304,8 +317,8 @@
       status === 'good'
         ? '<i class="codicon codicon-check"></i>'
         : status === 'warning'
-        ? '<i class="codicon codicon-warning"></i>'
-        : '<i class="codicon codicon-error"></i>';
+          ? '<i class="codicon codicon-warning"></i>'
+          : '<i class="codicon codicon-error"></i>';
 
     // Update chart color based on status
     updateChartColor(metricName, status);
@@ -318,7 +331,7 @@
       parseTime: 'parse',
       compileTime: 'compile',
     };
-    
+
     const chartKey = chartMap[metricName];
     if (state.charts[chartKey]) {
       const color = colors[status] || colors.line;
@@ -337,14 +350,14 @@
     addDataPoint(state.charts.compile, metrics.compile.avgTime);
 
     // Update all charts
-    Object.values(state.charts).forEach(chart => {
+    Object.values(state.charts).forEach((chart) => {
       if (chart) chart.update('none');
     });
   }
 
   function addDataPoint(chart, value) {
     if (!chart) return;
-    
+
     chart.data.datasets[0].data.push(value);
     chart.data.labels.push('');
 
@@ -356,7 +369,7 @@
   }
 
   function clearChartData() {
-    Object.values(state.charts).forEach(chart => {
+    Object.values(state.charts).forEach((chart) => {
       if (chart) {
         chart.data.datasets[0].data = [];
         chart.data.labels = [];
@@ -382,10 +395,10 @@
           rec.severity === 'critical'
             ? 'error'
             : rec.severity === 'warning'
-            ? 'warning'
-            : rec.severity === 'info'
-            ? 'info'
-            : 'lightbulb';
+              ? 'warning'
+              : rec.severity === 'info'
+                ? 'info'
+                : 'lightbulb';
 
         return `
         <div class="recommendation ${rec.severity}">
@@ -451,7 +464,7 @@
       btn.addEventListener('click', () => {
         const action = btn.dataset.action;
         const format = btn.dataset.format;
-        
+
         if (action === 'load') {
           vscode.postMessage({ command: 'loadHistory' });
         } else if (format === 'csv') {
@@ -502,7 +515,9 @@
       latency: 'Network Latency (ms)',
     };
 
-    form.innerHTML = state.thresholds.map(t => `
+    form.innerHTML = state.thresholds
+      .map(
+        (t) => `
       <div class="threshold-row" data-metric="${t.metric}">
         <label class="threshold-label">${metricLabels[t.metric] || t.metric}</label>
         <div class="threshold-inputs">
@@ -522,12 +537,14 @@
           </div>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   function saveThresholds() {
     const rows = document.querySelectorAll('.threshold-row');
-    rows.forEach(row => {
+    rows.forEach((row) => {
       const metric = row.dataset.metric;
       const warning = parseFloat(row.querySelector('.threshold-warning').value);
       const critical = parseFloat(row.querySelector('.threshold-critical').value);

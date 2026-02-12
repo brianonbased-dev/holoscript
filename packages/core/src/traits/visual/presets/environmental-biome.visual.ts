@@ -78,7 +78,13 @@ export const ENVIRONMENTAL_BIOME_VISUALS: Record<string, TraitVisualConfig> = {
   },
   haunted: {
     emissive: { color: '#4B0082', intensity: 0.2 },
-    material: { emissive: '#4B0082', emissiveIntensity: 0.2, color: '#1A1A2E', transparent: true, opacity: 0.85 },
+    material: {
+      emissive: '#4B0082',
+      emissiveIntensity: 0.2,
+      color: '#1A1A2E',
+      transparent: true,
+      opacity: 0.85,
+    },
     tags: ['dark', 'supernatural'],
     layer: 'environmental',
   },
@@ -170,7 +176,13 @@ export const ENVIRONMENTAL_BIOME_VISUALS: Record<string, TraitVisualConfig> = {
     layer: 'environmental',
   },
   dream: {
-    material: { transparent: true, opacity: 0.7, emissive: '#E6E6FA', emissiveIntensity: 0.3, roughness: 0.0 },
+    material: {
+      transparent: true,
+      opacity: 0.7,
+      emissive: '#E6E6FA',
+      emissiveIntensity: 0.3,
+      roughness: 0.0,
+    },
     tags: ['ethereal', 'surreal'],
     layer: 'environmental',
   },

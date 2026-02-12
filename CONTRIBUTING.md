@@ -56,16 +56,16 @@ packages/
 
 Every trait follows the same pattern across these files:
 
-| Step | File                                 | Action                                   |
-| ---- | ------------------------------------ | ---------------------------------------- |
-| 1    | `core/src/types/HoloScriptPlus.ts`   | Add trait interface                      |
-| 2    | `core/src/constants.ts`              | Add to `VR_TRAITS` and `LIFECYCLE_HOOKS` |
-| 3    | `core/src/types.ts`                  | Add lifecycle hook type unions           |
-| 4    | `core/src/traits/YourTrait.ts`       | Create handler with `TraitHandler<T>`    |
-| 5    | `core/src/traits/VRTraitSystem.ts`   | Import and register handler              |
-| 6    | `core/src/index.ts`                  | Export handler and types                 |
-| 7    | `core/src/lsp/HoloScriptLSP.ts`      | Add completion entry                     |
-| 8    | `core/src/compiler/*.ts`             | Add mappings to each compiler            |
+| Step | File                               | Action                                   |
+| ---- | ---------------------------------- | ---------------------------------------- |
+| 1    | `core/src/types/HoloScriptPlus.ts` | Add trait interface                      |
+| 2    | `core/src/constants.ts`            | Add to `VR_TRAITS` and `LIFECYCLE_HOOKS` |
+| 3    | `core/src/types.ts`                | Add lifecycle hook type unions           |
+| 4    | `core/src/traits/YourTrait.ts`     | Create handler with `TraitHandler<T>`    |
+| 5    | `core/src/traits/VRTraitSystem.ts` | Import and register handler              |
+| 6    | `core/src/index.ts`                | Export handler and types                 |
+| 7    | `core/src/lsp/HoloScriptLSP.ts`    | Add completion entry                     |
+| 8    | `core/src/compiler/*.ts`           | Add mappings to each compiler            |
 
 See any existing trait file in `core/src/traits/` for the template pattern.
 

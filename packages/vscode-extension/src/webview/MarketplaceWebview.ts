@@ -60,7 +60,9 @@ export class MarketplaceWebview {
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this._panel = panel;
     this._extensionUri = extensionUri;
-    this._apiBaseUrl = vscode.workspace.getConfiguration('holoscript').get('marketplaceApiUrl', 'http://localhost:3001');
+    this._apiBaseUrl = vscode.workspace
+      .getConfiguration('holoscript')
+      .get('marketplaceApiUrl', 'http://localhost:3001');
 
     // Set initial HTML
     this._update();
@@ -93,10 +95,7 @@ export class MarketplaceWebview {
         break;
 
       case 'installTrait':
-        await this._installTrait(
-          message.traitId as string,
-          message.version as string
-        );
+        await this._installTrait(message.traitId as string, message.version as string);
         break;
 
       case 'openExternal':
@@ -172,7 +171,9 @@ export class MarketplaceWebview {
     this._postMessage({ command: 'loading', loading: true });
 
     try {
-      const response = await fetch(`${this._apiBaseUrl}/api/v1/traits/${encodeURIComponent(traitId)}`);
+      const response = await fetch(
+        `${this._apiBaseUrl}/api/v1/traits/${encodeURIComponent(traitId)}`
+      );
       if (!response.ok) throw new Error(`API error: ${response.status}`);
 
       this._selectedTrait = await response.json();
@@ -199,7 +200,9 @@ export class MarketplaceWebview {
   private async _installTrait(traitId: string, version?: string) {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
-      vscode.window.showErrorMessage('No workspace folder open. Please open a HoloScript project first.');
+      vscode.window.showErrorMessage(
+        'No workspace folder open. Please open a HoloScript project first.'
+      );
       return;
     }
 

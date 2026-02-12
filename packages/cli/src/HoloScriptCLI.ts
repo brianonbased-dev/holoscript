@@ -2,12 +2,18 @@
  * HoloScript CLI main class
  */
 
-import { HoloScriptParser, HoloScriptRuntime, enableConsoleLogging } from '@holoscript/core';
+import {
+  HoloScriptParser,
+  HoloScriptRuntime,
+  enableConsoleLogging,
+  parseHolo,
+} from '@holoscript/core';
 import type { CLIOptions } from './args';
 import { formatAST, formatResult, formatError } from './formatters';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
+import { exec } from 'child_process';
 import { ConfigLoader } from './config/loader';
 import { HoloScriptConfig } from './config/schema';
 import { importUnity } from './importers/unity-importer';
@@ -55,6 +61,8 @@ export class HoloScriptCLI {
           return this.replCommand();
         case 'import':
           return this.importCommand();
+        case 'visualize':
+          return this.visualizeCommand();
         default:
           return 0;
       }
@@ -94,13 +102,27 @@ export class HoloScriptCLI {
     const content = this.readInput();
     if (!content) return 1;
 
-    const voiceCommand = {
-      command: content,
-      confidence: 1.0,
-      timestamp: Date.now(),
-    };
+    let ast: any[];
 
-    const ast = this.parser.parseVoiceCommand(voiceCommand);
+    // Use composition parser for .holo files
+    if (this.options.input?.endsWith('.holo')) {
+      const result = parseHolo(content);
+      if (result.errors.length > 0) {
+        console.error('Parse errors:');
+        for (const error of result.errors) {
+          console.error(`  ${error.message} at line ${error.line}:${error.column}`);
+        }
+        return 1;
+      }
+      ast = result.ast ? [result.ast] : [];
+    } else {
+      const voiceCommand = {
+        command: content,
+        confidence: 1.0,
+        timestamp: Date.now(),
+      };
+      ast = this.parser.parseVoiceCommand(voiceCommand);
+    }
 
     if (ast.length === 0) {
       console.log('No valid AST nodes to execute.');
@@ -271,7 +293,9 @@ export class HoloScriptCLI {
       } else if (ext === '.gltf' || ext === '.glb') {
         source = 'gltf';
       } else {
-        console.error(`Error: Cannot detect import source for ${ext}. Use --from <unity|godot|gltf>`);
+        console.error(
+          `Error: Cannot detect import source for ${ext}. Use --from <unity|godot|gltf>`
+        );
         return 1;
       }
     }
@@ -284,7 +308,13 @@ export class HoloScriptCLI {
     console.log(`Importing ${source} file: ${inputPath}`);
 
     try {
-      let result: { success: boolean; sceneName: string; objectCount: number; errors: string[]; warnings: string[] };
+      let result: {
+        success: boolean;
+        sceneName: string;
+        objectCount: number;
+        errors: string[];
+        warnings: string[];
+      };
       switch (source) {
         case 'unity':
           result = await importUnity({
@@ -303,7 +333,8 @@ export class HoloScriptCLI {
         case 'gltf':
           try {
             importGltfToFile(inputPath, outputPath);
-            const sceneName = this.options.sceneName || path.basename(inputPath, path.extname(inputPath));
+            const sceneName =
+              this.options.sceneName || path.basename(inputPath, path.extname(inputPath));
             result = {
               success: true,
               sceneName,
@@ -348,5 +379,107 @@ export class HoloScriptCLI {
       console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
       return 1;
     }
+  }
+
+  private async visualizeCommand(): Promise<number> {
+    const content = this.readInput();
+    if (!content) return 1;
+
+    console.log('🚀 HoloScript Visualizer');
+    console.log('========================');
+    console.log('');
+
+    let ast: any[];
+
+    // Use composition parser for .holo files
+    if (this.options.input?.endsWith('.holo')) {
+      const result = parseHolo(content);
+      if (result.errors.length > 0) {
+        console.error('Parse errors:');
+        for (const error of result.errors) {
+          console.error(`  ${error.message} at line ${error.line}:${error.column}`);
+        }
+        return 1;
+      }
+      ast = result.ast ? [result.ast] : [];
+    } else {
+      const voiceCommand = {
+        command: content,
+        confidence: 1.0,
+        timestamp: Date.now(),
+      };
+      ast = this.parser.parseVoiceCommand(voiceCommand);
+    }
+
+    if (ast.length === 0) {
+      console.log('No valid AST nodes to visualize.');
+      return 1;
+    }
+
+    console.log(`✓ Parsed ${ast.length} node(s)`);
+
+    // Start the WebSocket server
+    this.runtime.startVisualizationServer(8080);
+    console.log(`✓ WebSocket server started on port 8080`);
+
+    // Execute the script to populate the runtime
+    console.log(`✓ Executing script...`);
+    const results = await this.runtime.executeProgram(ast);
+    const allSuccessful = results.every((r) => r.success);
+
+    if (!allSuccessful) {
+      console.log('⚠️  Some nodes failed to execute');
+    } else {
+      console.log(`✓ Execution complete`);
+    }
+
+    // Determine visualizer client path
+    const visualizerPath = path.join(__dirname, '../../visualizer-client');
+
+    console.log('');
+    console.log('Starting visualizer client...');
+    console.log('');
+    console.log('  WebSocket: ws://localhost:8080');
+    console.log('  Visualizer: http://localhost:5173');
+    console.log('');
+    console.log('Press Ctrl+C to stop.');
+
+    // Open browser after a delay
+    setTimeout(() => {
+      const url = 'http://localhost:5173';
+      const start =
+        process.platform === 'darwin'
+          ? 'open'
+          : process.platform === 'win32'
+            ? 'start'
+            : 'xdg-open';
+      exec(`${start} ${url}`);
+    }, 2000);
+
+    // Start the Vite dev server for the visualizer client
+    return new Promise((resolve) => {
+      const server = exec('npm run dev', {
+        cwd: visualizerPath,
+      });
+
+      server.stdout?.on('data', (data) => {
+        process.stdout.write(data);
+      });
+
+      server.stderr?.on('data', (data) => {
+        process.stderr.write(data);
+      });
+
+      server.on('exit', (code) => {
+        resolve(code || 0);
+      });
+
+      // Handle Ctrl+C
+      process.on('SIGINT', () => {
+        console.log('\n\nShutting down visualizer...');
+        server.kill();
+        process.exit(0);
+      });
+    });
   }
 }

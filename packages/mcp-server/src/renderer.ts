@@ -105,11 +105,11 @@ export async function renderPreview(options: RenderOptions): Promise<RenderResul
 
   return {
     success: true,
-    url: null, // No static image available locally
+    url: undefined, // No static image available locally
     previewUrl,
     embedCode: generateEmbedCode(previewUrl, resolution),
-    localPath: null,
-    base64: null,
+    localPath: undefined,
+    base64: undefined,
   };
 }
 

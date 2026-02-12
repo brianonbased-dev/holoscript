@@ -18,12 +18,16 @@
   --input-bg: var(--vscode-input-background);
   --input-border: var(--vscode-input-border);
   --input-fg: var(--vscode-input-foreground);
-  
+
   /* Custom HoloScript colors */
   --holoscript-primary: #00d9ff;
   --holoscript-secondary: #9945ff;
-  --holoscript-gradient: linear-gradient(135deg, var(--holoscript-primary) 0%, var(--holoscript-secondary) 100%);
-  
+  --holoscript-gradient: linear-gradient(
+    135deg,
+    var(--holoscript-primary) 0%,
+    var(--holoscript-secondary) 100%
+  );
+
   /* Category colors */
   --category-core: #3b82f6;
   --category-physics: #f97316;
@@ -265,13 +269,27 @@ body {
   flex-shrink: 0;
 }
 
-.trait-icon.core { background: var(--category-core); }
-.trait-icon.physics { background: var(--category-physics); }
-.trait-icon.rendering { background: var(--category-rendering); }
-.trait-icon.audio { background: var(--category-audio); }
-.trait-icon.networking { background: var(--category-networking); }
-.trait-icon.ai { background: var(--category-ai); }
-.trait-icon.utility { background: var(--category-utility); }
+.trait-icon.core {
+  background: var(--category-core);
+}
+.trait-icon.physics {
+  background: var(--category-physics);
+}
+.trait-icon.rendering {
+  background: var(--category-rendering);
+}
+.trait-icon.audio {
+  background: var(--category-audio);
+}
+.trait-icon.networking {
+  background: var(--category-networking);
+}
+.trait-icon.ai {
+  background: var(--category-ai);
+}
+.trait-icon.utility {
+  background: var(--category-utility);
+}
 
 .trait-info {
   flex: 1;
@@ -564,8 +582,12 @@ body {
 
 /* Animations */
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .codicon-modifier-spin {

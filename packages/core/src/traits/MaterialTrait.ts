@@ -5,7 +5,7 @@
  * Supports PBR (Physically Based Rendering) workflows
  */
 
-export type MaterialType = 'pbr' | 'standard' | 'unlit' | 'transparent' | 'custom';
+export type MaterialType = 'pbr' | 'standard' | 'unlit' | 'transparent' | 'volumetric' | 'custom';
 export type TextureChannel =
   | 'baseColor'
   | 'normalMap'
@@ -13,7 +13,16 @@ export type TextureChannel =
   | 'metallicMap'
   | 'ambientOcclusionMap'
   | 'emissionMap'
-  | 'heightMap';
+  | 'heightMap'
+  | 'coatNormalMap'
+  | 'specularColorMap'
+  | 'detailNormalMap'
+  | 'displacementMap'
+  | 'glintMap'
+  | 'sheenColorMap'
+  | 'anisotropyDirectionMap'
+  | 'subsurfaceThicknessMap'
+  | 'weatheringMaskMap';
 
 /**
  * Texture map configuration
@@ -71,6 +80,226 @@ export interface PBRMaterial {
 
   /** Transmission amount for transparent materials */
   transmission?: number;
+
+  // =========================================================================
+  // ADVANCED PBR — SSS, Sheen, Anisotropy
+  // =========================================================================
+
+  /** Subsurface scattering — light penetrating and scattering inside the surface */
+  subsurface?: {
+    /** Thickness for light attenuation (0 = infinitely thin) */
+    thickness: number;
+    /** Color of light after passing through the material */
+    attenuationColor: { r: number; g: number; b: number };
+    /** Distance light travels before full attenuation (world units) */
+    attenuationDistance: number;
+  };
+
+  /** Sheen — soft fuzzy reflection for fabrics and textiles */
+  sheen?: {
+    /** Sheen intensity 0-1 */
+    intensity: number;
+    /** Sheen tint color */
+    color: { r: number; g: number; b: number };
+    /** Sheen roughness 0-1 (low = silk shimmer, high = cotton diffuse glow) */
+    roughness: number;
+  };
+
+  /** Anisotropy — directional roughness for brushed metal, hair, silk fibers */
+  anisotropy?: {
+    /** Anisotropy strength 0-1 (0 = isotropic, 1 = fully directional) */
+    strength: number;
+    /** Rotation angle in radians (0 = horizontal, PI/2 = vertical) */
+    rotation: number;
+  };
+
+  /** Clearcoat — protective top layer (car paint, lacquer, varnished wood) */
+  clearcoat?: {
+    /** Clearcoat intensity 0-1 */
+    intensity: number;
+    /** Clearcoat roughness 0-1 */
+    roughness: number;
+  };
+
+  /** Iridescence — thin-film interference (oil slicks, soap bubbles, beetle shells) */
+  iridescence?: {
+    /** Iridescence intensity 0-1 */
+    intensity: number;
+    /** IOR of the thin film layer */
+    ior: number;
+    /** Thickness range of the thin film in nanometers [min, max] */
+    thicknessRange?: [number, number];
+  };
+
+  // =========================================================================
+  // EXOTIC OPTICS — sparkle, fluorescence, blackbody, retroreflection
+  // =========================================================================
+
+  /** Sparkle/glitter — stochastic micro-facet flashing (glitter, metallic paint flake, mica) */
+  sparkle?: {
+    /** Particle density per unit area 0-1 */
+    density: number;
+    /** Micro-facet size 0-1 */
+    size: number;
+    /** Flash intensity 0-1 */
+    intensity: number;
+  };
+
+  /** Fluorescence — absorb short wavelengths, emit longer ones (UV paint, deep-sea creatures) */
+  fluorescence?: {
+    /** Color that triggers the fluorescent response */
+    excitationColor: { r: number; g: number; b: number };
+    /** Color emitted by the fluorescent material */
+    emissionColor: { r: number; g: number; b: number };
+    /** Fluorescence intensity 0-1 */
+    intensity: number;
+  };
+
+  /** Blackbody temperature in Kelvin — maps to emission color via Planck's law
+   *  1000K=deep red, 3000K=orange, 5500K=white, 10000K=blue-white */
+  blackbodyTemperature?: number;
+
+  /** Retroreflection — light bounces back toward source (road signs, safety vests, cat's eyes) 0-1 */
+  retroreflection?: number;
+
+  // =========================================================================
+  // DYNAMIC MATERIALS — animated, weathering, dual-layer
+  // =========================================================================
+
+  /** Animated material — time-varying surface patterns */
+  animated?: {
+    /** Animation pattern type */
+    pattern: 'ripple' | 'flicker' | 'pulse' | 'flow' | 'breathe' | 'scroll' | 'wave' | 'noise';
+    /** Animation speed multiplier */
+    speed: number;
+    /** Effect amplitude 0-1 */
+    amplitude: number;
+    /** Optional direction for directional patterns [x, y] */
+    direction?: [number, number];
+  };
+
+  /** Weathering — progressive surface degradation over time */
+  weathering?: {
+    /** Weathering effect type */
+    type:
+      | 'rust'
+      | 'moss'
+      | 'crack'
+      | 'peel'
+      | 'patina'
+      | 'frost'
+      | 'burn'
+      | 'erosion'
+      | 'stain'
+      | 'dust';
+    /** Weathering progress 0-1 (0=pristine, 1=fully weathered) */
+    progress: number;
+    /** Randomization seed for consistent procedural patterns */
+    seed?: number;
+  };
+
+  /** Dual-layer material — composite of two materials blended together */
+  dualLayer?: {
+    /** Top layer material preset name */
+    topMaterial: string;
+    /** Blend factor 0-1 (0=base only, 1=top only) */
+    blendFactor: number;
+    /** How the layers blend */
+    blendMode: 'linear' | 'height' | 'noise' | 'fresnel';
+  };
+}
+
+/**
+ * Volumetric material — non-surface phenomena rendered via ray marching
+ * (fog, smoke, fire, clouds, dust, aurora, nebula, god rays)
+ */
+export interface VolumetricMaterial {
+  /** Volume type for preset behavior */
+  volumeType:
+    | 'fog'
+    | 'smoke'
+    | 'fire'
+    | 'clouds'
+    | 'dust'
+    | 'mist'
+    | 'steam'
+    | 'aurora'
+    | 'nebula'
+    | 'underwater'
+    | 'god_rays'
+    | 'neon_gas';
+
+  /** Base density 0-1 (how opaque the volume is) */
+  density: number;
+
+  /** Scattering coefficient — how much light scatters within the volume */
+  scattering: number;
+
+  /** Absorption coefficient — how much light is absorbed */
+  absorption: number;
+
+  /** Emission color and intensity for self-luminous volumes (fire, neon) */
+  emission?: {
+    color: { r: number; g: number; b: number };
+    intensity: number;
+  };
+
+  /** Base color / albedo of the volume */
+  color?: { r: number; g: number; b: number };
+
+  /** Noise parameters for density variation */
+  noise?: {
+    /** Noise type */
+    type: 'perlin' | 'worley' | 'fbm' | 'curl';
+    /** Scale of noise pattern */
+    scale: number;
+    /** Number of octaves for fbm */
+    octaves?: number;
+    /** Lacunarity (frequency multiplier per octave) */
+    lacunarity?: number;
+    /** Gain (amplitude multiplier per octave) */
+    gain?: number;
+  };
+
+  /** Animation parameters for temporal effects */
+  animation?: {
+    /** Wind direction and speed [x, y, z] */
+    wind?: [number, number, number];
+    /** Turbulence intensity 0-1 */
+    turbulence?: number;
+    /** Rise speed for buoyant volumes (fire, smoke) */
+    riseSpeed?: number;
+    /** Dissipation rate — how quickly the volume fades */
+    dissipation?: number;
+  };
+
+  /** Ray marching quality settings */
+  quality?: {
+    /** Number of ray march steps (higher = better quality, slower) */
+    steps?: number;
+    /** Maximum ray distance */
+    maxDistance?: number;
+    /** Light marching steps for shadow/scattering */
+    lightSteps?: number;
+  };
+
+  /** Height-based density falloff */
+  heightFalloff?: {
+    /** Ground level Y */
+    groundLevel: number;
+    /** Falloff rate (higher = sharper boundary) */
+    falloff: number;
+  };
+
+  /** Temperature field for fire/thermal volumes — drives emission color */
+  temperature?: {
+    /** Base temperature in Kelvin */
+    base: number;
+    /** Temperature variation range */
+    variation: number;
+    /** Cooling rate with height */
+    coolingRate: number;
+  };
 }
 
 /**
@@ -85,6 +314,9 @@ export interface MaterialConfig {
 
   /** PBR properties (for PBR materials) */
   pbr?: PBRMaterial;
+
+  /** Volumetric properties (for volumetric materials — fog, smoke, fire, clouds) */
+  volumetric?: VolumetricMaterial;
 
   /** Texture maps */
   textures?: TextureMap[];

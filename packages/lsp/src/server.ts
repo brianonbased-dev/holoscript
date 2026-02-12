@@ -53,6 +53,7 @@ import {
   HoloScriptTypeChecker,
   getDefaultAIAdapter,
   useGemini,
+  useOllama,
   type ASTProgram,
   type HSPlusASTNode as HSPlusNode,
   type HSPlusCompileResult,
@@ -65,6 +66,7 @@ import {
   type Severity as LintSeverity,
 } from '@holoscript/linter';
 import { SemanticCompletionProvider } from './SemanticCompletionProvider';
+import { AICompletionProvider } from './ai/AICompletionProvider';
 
 // Create connection and document manager
 const connection = createConnection(ProposedFeatures.all);
@@ -77,6 +79,7 @@ const linter = new HoloScriptLinter();
 
 // Semantic intelligence
 let semanticCompletion: SemanticCompletionProvider | null = null;
+let aiCompletion: AICompletionProvider | null = null;
 
 // LRU Cache configuration
 const MAX_CACHED_DOCUMENTS = 50;
@@ -284,15 +287,40 @@ const legend: SemanticTokensLegend = {
 };
 
 connection.onInitialize(async (_params: InitializeParams): Promise<InitializeResult> => {
-  // Initialize AI if configured
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (apiKey) {
-    useGemini({ apiKey });
-    const adapter = getDefaultAIAdapter();
-    if (adapter) {
-      semanticCompletion = new SemanticCompletionProvider(adapter);
-      await semanticCompletion.initialize();
-      console.log('[LSP] Semantic intelligence initialized with Gemini');
+  // Initialize AI: try Ollama first (free, local, HoloScript-optimized), fall back to Gemini
+  let aiInitialized = false;
+
+  // Try Ollama with brittney-qwen-v23
+  try {
+    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+    const ollamaModel = process.env.OLLAMA_MODEL || 'brittney-qwen-v23:latest';
+    const ollamaAdapter = useOllama({ baseUrl: ollamaUrl, model: ollamaModel });
+    if (await ollamaAdapter.isReady()) {
+      const adapter = getDefaultAIAdapter();
+      if (adapter) {
+        semanticCompletion = new SemanticCompletionProvider(adapter);
+        await semanticCompletion.initialize();
+        aiCompletion = new AICompletionProvider(adapter);
+        console.log(`[LSP] AI initialized with Ollama (${ollamaModel})`);
+        aiInitialized = true;
+      }
+    }
+  } catch {
+    // Ollama not available, try Gemini
+  }
+
+  // Fall back to Gemini if Ollama unavailable
+  if (!aiInitialized) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      useGemini({ apiKey });
+      const adapter = getDefaultAIAdapter();
+      if (adapter) {
+        semanticCompletion = new SemanticCompletionProvider(adapter);
+        await semanticCompletion.initialize();
+        aiCompletion = new AICompletionProvider(adapter);
+        console.log('[LSP] AI initialized with Gemini (Ollama not available)');
+      }
     }
   }
 
@@ -629,6 +657,16 @@ connection.onCompletion(async (params: TextDocumentPositionParams): Promise<Comp
       const query = linePrefix.substring(linePrefix.lastIndexOf('@') + 1);
       const aiItems = await semanticCompletion.getCompletions(query);
       items.push(...aiItems);
+    }
+  }
+
+  // AI-powered completions (code gen, properties, events)
+  if (aiCompletion) {
+    try {
+      const result = await aiCompletion.getCompletions(document, params.position);
+      items.push(...result.completions);
+    } catch {
+      // AI completions are best-effort, don't block static completions
     }
   }
 

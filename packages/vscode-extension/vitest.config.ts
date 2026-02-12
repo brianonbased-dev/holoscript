@@ -8,9 +8,7 @@ const vscodeMockPath = path.resolve(__dirname, 'src/__tests__/__mocks__/vscode.t
 
 export default defineConfig({
   resolve: {
-    alias: [
-      { find: 'vscode', replacement: vscodeMockPath },
-    ],
+    alias: [{ find: 'vscode', replacement: vscodeMockPath }],
   },
   test: {
     name: 'vscode-extension',
@@ -19,9 +17,7 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.test.ts'],
     exclude: ['**/dist/**', '**/node_modules/**'],
-    alias: [
-      { find: 'vscode', replacement: vscodeMockPath },
-    ],
+    alias: [{ find: 'vscode', replacement: vscodeMockPath }],
     server: {
       deps: {
         inline: ['vscode'],

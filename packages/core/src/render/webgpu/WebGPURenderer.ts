@@ -616,7 +616,11 @@ export class WebGPURenderer {
    *
    * Requires the texture to have been created with RENDER_ATTACHMENT usage.
    */
-  private async generateMipmaps(texture: GPUTexture, _width: number, _height: number): Promise<void> {
+  private async generateMipmaps(
+    texture: GPUTexture,
+    _width: number,
+    _height: number
+  ): Promise<void> {
     if (!this.context) return;
 
     const { device } = this.context;

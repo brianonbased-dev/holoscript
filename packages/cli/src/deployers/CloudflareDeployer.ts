@@ -173,7 +173,7 @@ export class CloudflareDeployer extends BaseDeployer {
   async rollback(deploymentId: string): Promise<DeployResult> {
     const startTime = Date.now();
 
-    const deployment = this.deploymentHistory.find(d => d.id === deploymentId);
+    const deployment = this.deploymentHistory.find((d) => d.id === deploymentId);
     if (!deployment) {
       return {
         success: false,
@@ -232,7 +232,7 @@ export class CloudflareDeployer extends BaseDeployer {
       );
 
       if (response.result?.deployments) {
-        return response.result.deployments.map(d => ({
+        return response.result.deployments.map((d) => ({
           id: d.id,
           url: d.url,
           environment: d.environment,
@@ -271,14 +271,10 @@ export class CloudflareDeployer extends BaseDeployer {
       );
     } catch {
       // Project doesn't exist; create it
-      await this.apiRequest(
-        'POST',
-        `/accounts/${this.accountId}/pages/projects`,
-        {
-          name: config.projectName,
-          production_branch: 'main',
-        }
-      );
+      await this.apiRequest('POST', `/accounts/${this.accountId}/pages/projects`, {
+        name: config.projectName,
+        production_branch: 'main',
+      });
     }
   }
 
@@ -379,9 +375,7 @@ export class CloudflareDeployer extends BaseDeployer {
   /**
    * Map Cloudflare deployment status to our status enum.
    */
-  private mapCloudflareStatus(
-    status?: string
-  ): 'building' | 'deploying' | 'ready' | 'failed' {
+  private mapCloudflareStatus(status?: string): 'building' | 'deploying' | 'ready' | 'failed' {
     switch (status) {
       case 'active':
       case 'success':

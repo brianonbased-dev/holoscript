@@ -149,14 +149,14 @@ describe('CircuitBreakerStrategy', () => {
       strategy.recordFailure(key);
       strategy.recordFailure(key);
       strategy.recordSuccess(key);
-      
+
       // Failure count should be reset
       expect(strategy.getCircuitState(key)).toBe('closed');
     });
 
     it('should close circuit after enough successes in half-open', () => {
       const key = 'test-circuit';
-      
+
       // Record failures to reach half-open threshold
       for (let i = 0; i < 3; i++) {
         strategy.recordFailure(key);
@@ -165,7 +165,7 @@ describe('CircuitBreakerStrategy', () => {
 
       // Manually simulate half-open transition (in real usage, time would pass)
       strategy.resetCircuit(key);
-      
+
       expect(strategy.getCircuitState(key)).toBe('closed');
     });
   });
@@ -173,7 +173,7 @@ describe('CircuitBreakerStrategy', () => {
   describe('resetCircuit', () => {
     it('should reset circuit to closed', () => {
       const key = 'test-circuit';
-      
+
       // Trip the circuit
       for (let i = 0; i < 3; i++) {
         strategy.recordFailure(key);

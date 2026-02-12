@@ -32,21 +32,21 @@ import { AgentRegistry } from '@holoscript/core/agents';
 const registry = new AgentRegistry({
   heartbeatInterval: 30000, // ms
   ttl: 60000, // ms before agent considered offline
-  discoveryMode: 'broadcast' | 'central'
+  discoveryMode: 'broadcast' | 'central',
 });
 ```
 
 #### Methods
 
-| Method | Description |
-|--------|-------------|
-| `register(manifest: AgentManifest): Promise<void>` | Register an agent |
-| `discover(query: CapabilityQuery, options?: DiscoverOptions): Promise<AgentManifest[]>` | Find agents by capability |
-| `discoverNearby(location: AgentLocation, radius: number): Promise<AgentManifest[]>` | Find spatially-proximate agents |
-| `heartbeat(agentId: string): Promise<void>` | Report agent is alive |
-| `deregister(agentId: string): Promise<void>` | Remove agent from registry |
-| `getAgent(agentId: string): AgentManifest \| undefined` | Get specific agent |
-| `shutdown(): void` | Stop registry |
+| Method                                                                                  | Description                     |
+| --------------------------------------------------------------------------------------- | ------------------------------- |
+| `register(manifest: AgentManifest): Promise<void>`                                      | Register an agent               |
+| `discover(query: CapabilityQuery, options?: DiscoverOptions): Promise<AgentManifest[]>` | Find agents by capability       |
+| `discoverNearby(location: AgentLocation, radius: number): Promise<AgentManifest[]>`     | Find spatially-proximate agents |
+| `heartbeat(agentId: string): Promise<void>`                                             | Report agent is alive           |
+| `deregister(agentId: string): Promise<void>`                                            | Remove agent from registry      |
+| `getAgent(agentId: string): AgentManifest \| undefined`                                 | Get specific agent              |
+| `shutdown(): void`                                                                      | Stop registry                   |
 
 #### AgentManifest
 
@@ -67,8 +67,8 @@ interface AgentManifest {
 
 ```typescript
 interface AgentCapability {
-  type: string;      // 'analyze', 'render', 'generate', etc.
-  domain: string;    // 'vision', 'nlp', 'spatial', etc.
+  type: string; // 'analyze', 'render', 'generate', etc.
+  domain: string; // 'vision', 'nlp', 'spatial', etc.
   latency?: 'fast' | 'medium' | 'slow';
   cost?: ResourceCost;
 }
@@ -83,7 +83,11 @@ interface AgentCapability {
 Executes multi-step agent workflows with HITL support.
 
 ```typescript
-import { ChoreographyEngine, ChoreographyPlanner, StepExecutor } from '@holoscript/core/choreography';
+import {
+  ChoreographyEngine,
+  ChoreographyPlanner,
+  StepExecutor,
+} from '@holoscript/core/choreography';
 
 const planner = new ChoreographyPlanner();
 const executor = new StepExecutor();
@@ -92,13 +96,13 @@ const engine = new ChoreographyEngine(planner, executor);
 
 #### Methods
 
-| Method | Description |
-|--------|-------------|
-| `execute(choreography: Choreography): Promise<ChoreographyResult>` | Run choreography |
+| Method                                                               | Description          |
+| -------------------------------------------------------------------- | -------------------- |
+| `execute(choreography: Choreography): Promise<ChoreographyResult>`   | Run choreography     |
 | `getStatus(choreographyId: string): ChoreographyStatus \| undefined` | Get execution status |
-| `pause(choreographyId: string): void` | Pause execution |
-| `resume(choreographyId: string): void` | Resume execution |
-| `cancel(choreographyId: string): void` | Cancel execution |
+| `pause(choreographyId: string): void`                                | Pause execution      |
+| `resume(choreographyId: string): void`                               | Resume execution     |
+| `cancel(choreographyId: string): void`                               | Cancel execution     |
 
 #### Choreography
 
@@ -149,18 +153,18 @@ import { NegotiationProtocol, VotingMechanisms } from '@holoscript/core/negotiat
 
 const protocol = new NegotiationProtocol({
   defaultTimeout: 30000,
-  votingMechanism: 'majority' | 'unanimous' | 'weighted'
+  votingMechanism: 'majority' | 'unanimous' | 'weighted',
 });
 ```
 
 #### Methods
 
-| Method | Description |
-|--------|-------------|
-| `createSession(topic: string, participants: NegotiationParticipant[], options?: SessionOptions): NegotiationSession` | Start negotiation |
-| `propose(sessionId: string, agentId: string, proposal: unknown): string` | Submit proposal |
-| `vote(sessionId: string, agentId: string, proposalId: string, vote: 'accept' \| 'reject' \| 'abstain'): void` | Cast vote |
-| `resolve(sessionId: string): Promise<NegotiationResult>` | Resolve negotiation |
+| Method                                                                                                               | Description         |
+| -------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `createSession(topic: string, participants: NegotiationParticipant[], options?: SessionOptions): NegotiationSession` | Start negotiation   |
+| `propose(sessionId: string, agentId: string, proposal: unknown): string`                                             | Submit proposal     |
+| `vote(sessionId: string, agentId: string, proposalId: string, vote: 'accept' \| 'reject' \| 'abstain'): void`        | Cast vote           |
+| `resolve(sessionId: string): Promise<NegotiationResult>`                                                             | Resolve negotiation |
 
 #### SessionOptions
 
@@ -189,20 +193,20 @@ const proximity = new ProximityCalculator();
 
 #### Methods
 
-| Method | Description |
-|--------|-------------|
-| `start(): void` | Start providing updates |
-| `stop(): void` | Stop updates |
-| `onUpdate(callback: (context: SpatialContext) => void): () => void` | Subscribe to updates |
-| `getContext(): SpatialContext` | Get current context |
+| Method                                                              | Description             |
+| ------------------------------------------------------------------- | ----------------------- |
+| `start(): void`                                                     | Start providing updates |
+| `stop(): void`                                                      | Stop updates            |
+| `onUpdate(callback: (context: SpatialContext) => void): () => void` | Subscribe to updates    |
+| `getContext(): SpatialContext`                                      | Get current context     |
 
 #### ProximityCalculator Methods
 
-| Method | Description |
-|--------|-------------|
-| `distance(a: AgentLocation, b: AgentLocation): number` | Calculate distance |
-| `inRange(a: AgentLocation, b: AgentLocation, range: number): boolean` | Check if in range |
-| `findNearest(from: AgentLocation, candidates: AgentLocation[]): AgentLocation` | Find nearest |
+| Method                                                                         | Description        |
+| ------------------------------------------------------------------------------ | ------------------ |
+| `distance(a: AgentLocation, b: AgentLocation): number`                         | Calculate distance |
+| `inRange(a: AgentLocation, b: AgentLocation, range: number): boolean`          | Check if in range  |
+| `findNearest(from: AgentLocation, candidates: AgentLocation[]): AgentLocation` | Find nearest       |
 
 ---
 
@@ -220,11 +224,11 @@ const consensus = new ConsensusMechanisms();
 
 #### Methods
 
-| Method | Description |
-|--------|-------------|
-| `createSession(config: ConsensusConfig): ConsensusSession` | Start consensus round |
-| `vote(sessionId: string, agentId: string, vote: ConsensusVote): void` | Cast vote |
-| `resolve(sessionId: string): Promise<ConsensusResult>` | Resolve consensus |
+| Method                                                                | Description           |
+| --------------------------------------------------------------------- | --------------------- |
+| `createSession(config: ConsensusConfig): ConsensusSession`            | Start consensus round |
+| `vote(sessionId: string, agentId: string, vote: ConsensusVote): void` | Cast vote             |
+| `resolve(sessionId: string): Promise<ConsensusResult>`                | Resolve consensus     |
 
 #### ConsensusConfig
 
@@ -233,7 +237,7 @@ interface ConsensusConfig {
   id: string;
   topic: string;
   participants: string[];
-  threshold: number;  // 0-1, e.g., 0.67 for 2/3 majority
+  threshold: number; // 0-1, e.g., 0.67 for 2/3 majority
   timeout: number;
   algorithm?: 'simple-majority' | 'pbft' | 'raft';
 }
@@ -255,14 +259,14 @@ const channels = new AgentChannelManager();
 
 #### Methods
 
-| Method | Description |
-|--------|-------------|
-| `createChannel(config: ChannelConfig): AgentChannel` | Create channel |
-| `getChannel(channelId: string): AgentChannel \| undefined` | Get channel |
-| `join(channelId: string, agentId: string): void` | Join channel |
-| `leave(channelId: string, agentId: string): void` | Leave channel |
-| `send(channelId: string, message: ChannelMessage): void` | Send message |
-| `broadcast(channelId: string, message: ChannelMessage): void` | Broadcast |
+| Method                                                        | Description    |
+| ------------------------------------------------------------- | -------------- |
+| `createChannel(config: ChannelConfig): AgentChannel`          | Create channel |
+| `getChannel(channelId: string): AgentChannel \| undefined`    | Get channel    |
+| `join(channelId: string, agentId: string): void`              | Join channel   |
+| `leave(channelId: string, agentId: string): void`             | Leave channel  |
+| `send(channelId: string, message: ChannelMessage): void`      | Send message   |
+| `broadcast(channelId: string, message: ChannelMessage): void` | Broadcast      |
 
 #### ChannelConfig
 
@@ -293,23 +297,23 @@ const delegation = new DelegationEngine();
 
 #### HierarchyManager Methods
 
-| Method | Description |
-|--------|-------------|
-| `createHierarchy(config: HierarchyConfig): AgentHierarchy` | Create hierarchy |
-| `addSubordinate(hierarchyId: string, supervisorId: string, subordinateId: string): void` | Add subordinate |
-| `removeSubordinate(hierarchyId: string, subordinateId: string): void` | Remove subordinate |
-| `addDelegationRule(hierarchyId: string, rule: DelegationRule): void` | Add delegation rule |
-| `getEscalationPath(hierarchyId: string, agentId: string): string[]` | Get escalation chain |
+| Method                                                                                   | Description          |
+| ---------------------------------------------------------------------------------------- | -------------------- |
+| `createHierarchy(config: HierarchyConfig): AgentHierarchy`                               | Create hierarchy     |
+| `addSubordinate(hierarchyId: string, supervisorId: string, subordinateId: string): void` | Add subordinate      |
+| `removeSubordinate(hierarchyId: string, subordinateId: string): void`                    | Remove subordinate   |
+| `addDelegationRule(hierarchyId: string, rule: DelegationRule): void`                     | Add delegation rule  |
+| `getEscalationPath(hierarchyId: string, agentId: string): string[]`                      | Get escalation chain |
 
 #### DelegationEngine Methods
 
-| Method | Description |
-|--------|-------------|
-| `delegate(task: DelegatedTaskInput): DelegatedTask` | Delegate task |
-| `startTask(taskId: string): void` | Start task |
-| `completeTask(taskId: string, result: unknown): void` | Complete task |
-| `failTask(taskId: string, error: string): void` | Fail task |
-| `escalateTask(taskId: string, reason: string): void` | Escalate task |
+| Method                                                                                     | Description    |
+| ------------------------------------------------------------------------------------------ | -------------- |
+| `delegate(task: DelegatedTaskInput): DelegatedTask`                                        | Delegate task  |
+| `startTask(taskId: string): void`                                                          | Start task     |
+| `completeTask(taskId: string, result: unknown): void`                                      | Complete task  |
+| `failTask(taskId: string, error: string): void`                                            | Fail task      |
+| `escalateTask(taskId: string, reason: string): void`                                       | Escalate task  |
 | `createSubtask(parentTaskId: string, subtask: Partial<DelegatedTaskInput>): DelegatedTask` | Create subtask |
 
 ---
@@ -330,25 +334,25 @@ const debugger = new AgentDebugger(telemetry, inspector);
 
 #### AgentDebugger Methods
 
-| Method | Description |
-|--------|-------------|
-| `startSession(agentId: string, options?: SessionOptions): string` | Start debug session |
-| `stopSession(sessionId: string): SessionRecording` | Stop and get recording |
-| `setBreakpoint(config: BreakpointConfig): string` | Set breakpoint |
-| `removeBreakpoint(breakpointId: string): void` | Remove breakpoint |
-| `replay(sessionId: string, callback: (event: any) => void): Promise<void>` | Replay session |
-| `getBreakpointHits(breakpointId: string): BreakpointHit[]` | Get breakpoint hits |
+| Method                                                                     | Description            |
+| -------------------------------------------------------------------------- | ---------------------- |
+| `startSession(agentId: string, options?: SessionOptions): string`          | Start debug session    |
+| `stopSession(sessionId: string): SessionRecording`                         | Stop and get recording |
+| `setBreakpoint(config: BreakpointConfig): string`                          | Set breakpoint         |
+| `removeBreakpoint(breakpointId: string): void`                             | Remove breakpoint      |
+| `replay(sessionId: string, callback: (event: any) => void): Promise<void>` | Replay session         |
+| `getBreakpointHits(breakpointId: string): BreakpointHit[]`                 | Get breakpoint hits    |
 
 #### TelemetryCollector Methods
 
-| Method | Description |
-|--------|-------------|
-| `record(event: TelemetryEvent): void` | Record event |
-| `recordError(agentId: string, error: Error): void` | Record error |
-| `startSpan(name: string, context?: TraceContext): TraceSpan` | Start trace span |
-| `endSpan(spanId: string): void` | End trace span |
-| `getEvents(filter?: EventFilter): TelemetryEvent[]` | Get recorded events |
-| `exportToOTel(): OTelExport` | Export OpenTelemetry format |
+| Method                                                       | Description                 |
+| ------------------------------------------------------------ | --------------------------- |
+| `record(event: TelemetryEvent): void`                        | Record event                |
+| `recordError(agentId: string, error: Error): void`           | Record error                |
+| `startSpan(name: string, context?: TraceContext): TraceSpan` | Start trace span            |
+| `endSpan(spanId: string): void`                              | End trace span              |
+| `getEvents(filter?: EventFilter): TelemetryEvent[]`          | Get recorded events         |
+| `exportToOTel(): OTelExport`                                 | Export OpenTelemetry format |
 
 ---
 
@@ -359,7 +363,11 @@ HoloScript provides interfaces for building advanced agent features:
 ### Actor Model
 
 ```typescript
-import type { IAgentRef, IAgentMailbox, IWakeOnDemandController } from '@holoscript/core/extensions';
+import type {
+  IAgentRef,
+  IAgentMailbox,
+  IWakeOnDemandController,
+} from '@holoscript/core/extensions';
 import { BaseAgentRef, BaseMailbox } from '@holoscript/core/extensions';
 ```
 
@@ -373,7 +381,11 @@ import { BaseRecoveryStrategy, RetryRecoveryStrategy } from '@holoscript/core/ex
 ### Marketplace
 
 ```typescript
-import type { IMarketplaceService, IHandoffRequest, IHandoffBid } from '@holoscript/core/extensions';
+import type {
+  IMarketplaceService,
+  IHandoffRequest,
+  IHandoffBid,
+} from '@holoscript/core/extensions';
 ```
 
 ### Collective Intelligence
@@ -429,7 +441,7 @@ await registry.register({
   version: '1.0.0',
   capabilities: [{ type: 'analyze', domain: 'vision' }],
   endpoints: [{ type: 'http', url: 'http://localhost:3000' }],
-  trustLevel: 'local'
+  trustLevel: 'local',
 });
 
 // Discover
@@ -439,7 +451,11 @@ const visionAgents = await registry.discover({ domain: 'vision' });
 ### Choreography with HITL
 
 ```typescript
-import { ChoreographyEngine, ChoreographyPlanner, StepExecutor } from '@holoscript/core/choreography';
+import {
+  ChoreographyEngine,
+  ChoreographyPlanner,
+  StepExecutor,
+} from '@holoscript/core/choreography';
 
 const engine = new ChoreographyEngine(new ChoreographyPlanner(), new StepExecutor());
 
@@ -448,16 +464,23 @@ const result = await engine.execute({
   name: 'Document Review',
   steps: [
     { id: 'analyze', type: 'action', agentId: 'nlp', action: 'analyze', params: {} },
-    { 
-      id: 'approve', 
-      type: 'hitl', 
+    {
+      id: 'approve',
+      type: 'hitl',
       agentId: 'human',
       action: 'review',
       params: {},
-      onApproval: async () => ({ approved: true })
+      onApproval: async () => ({ approved: true }),
     },
-    { id: 'publish', type: 'action', agentId: 'publisher', action: 'publish', params: {}, dependsOn: ['approve'] }
-  ]
+    {
+      id: 'publish',
+      type: 'action',
+      agentId: 'publisher',
+      action: 'publish',
+      params: {},
+      dependsOn: ['approve'],
+    },
+  ],
 });
 ```
 

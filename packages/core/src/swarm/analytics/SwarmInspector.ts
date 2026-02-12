@@ -1,7 +1,7 @@
 /**
  * SwarmInspector - Debugging and inspection tools for swarms
  * HoloScript v3.2 - Autonomous Agent Swarms
- * 
+ *
  * Provides introspection, debugging, and visualization data for swarms
  */
 
@@ -128,9 +128,7 @@ export class SwarmInspector {
   removeAgent(agentId: string): void {
     this.agentSnapshots.delete(agentId);
     // Remove relations involving this agent
-    this.relations = this.relations.filter(
-      r => r.sourceId !== agentId && r.targetId !== agentId
-    );
+    this.relations = this.relations.filter((r) => r.sourceId !== agentId && r.targetId !== agentId);
   }
 
   /**
@@ -151,9 +149,7 @@ export class SwarmInspector {
    * Get agents in swarm
    */
   getSwarmAgents(swarmId: string): IAgentSnapshot[] {
-    return [...this.agentSnapshots.values()].filter(
-      a => a.swarmId === swarmId
-    );
+    return [...this.agentSnapshots.values()].filter((a) => a.swarmId === swarmId);
   }
 
   // ===== Swarm Tracking =====
@@ -194,9 +190,10 @@ export class SwarmInspector {
   addRelation(relation: IAgentRelation): void {
     // Check for existing
     const existing = this.relations.find(
-      r => r.sourceId === relation.sourceId &&
-           r.targetId === relation.targetId &&
-           r.type === relation.type
+      (r) =>
+        r.sourceId === relation.sourceId &&
+        r.targetId === relation.targetId &&
+        r.type === relation.type
     );
 
     if (existing) {
@@ -211,7 +208,7 @@ export class SwarmInspector {
    * Remove relation
    */
   removeRelation(sourceId: string, targetId: string, type?: string): void {
-    this.relations = this.relations.filter(r => {
+    this.relations = this.relations.filter((r) => {
       if (r.sourceId !== sourceId || r.targetId !== targetId) return true;
       if (type && r.type !== type) return true;
       return false;
@@ -222,9 +219,7 @@ export class SwarmInspector {
    * Get relations for agent
    */
   getAgentRelations(agentId: string): IAgentRelation[] {
-    return this.relations.filter(
-      r => r.sourceId === agentId || r.targetId === agentId
-    );
+    return this.relations.filter((r) => r.sourceId === agentId || r.targetId === agentId);
   }
 
   /**
@@ -264,8 +259,8 @@ export class SwarmInspector {
     const checks = this.getAllHealthChecks();
     if (checks.length === 0) return 'healthy';
 
-    if (checks.some(c => c.status === 'unhealthy')) return 'unhealthy';
-    if (checks.some(c => c.status === 'degraded')) return 'degraded';
+    if (checks.some((c) => c.status === 'unhealthy')) return 'unhealthy';
+    if (checks.some((c) => c.status === 'degraded')) return 'degraded';
     return 'healthy';
   }
 
@@ -274,12 +269,7 @@ export class SwarmInspector {
   /**
    * Log a debug event
    */
-  log(
-    level: IDebugEvent['level'],
-    source: string,
-    message: string,
-    data?: unknown
-  ): void {
+  log(level: IDebugEvent['level'], source: string, message: string, data?: unknown): void {
     const event: IDebugEvent = {
       id: `evt-${this.nextEventId++}`,
       timestamp: Date.now(),
@@ -341,15 +331,15 @@ export class SwarmInspector {
     let result = [...this.eventLog];
 
     if (options?.level) {
-      result = result.filter(e => e.level === options.level);
+      result = result.filter((e) => e.level === options.level);
     }
 
     if (options?.source) {
-      result = result.filter(e => e.source === options.source);
+      result = result.filter((e) => e.source === options.source);
     }
 
     if (options?.since) {
-      result = result.filter(e => e.timestamp >= options.since!);
+      result = result.filter((e) => e.timestamp >= options.since!);
     }
 
     if (options?.limit) {
@@ -387,10 +377,9 @@ export class SwarmInspector {
     const swarms = this.getAllSwarms();
     const healthChecks = this.getAllHealthChecks();
 
-    const healthyAgents = agents.filter(a => a.health >= 0.5).length;
-    const averageLoad = agents.length > 0
-      ? agents.reduce((sum, a) => sum + a.load, 0) / agents.length
-      : 0;
+    const healthyAgents = agents.filter((a) => a.health >= 0.5).length;
+    const averageLoad =
+      agents.length > 0 ? agents.reduce((sum, a) => sum + a.load, 0) / agents.length : 0;
 
     const warnings: string[] = [];
 
@@ -399,18 +388,18 @@ export class SwarmInspector {
       warnings.push('System health is degraded');
     }
 
-    const unhealthyAgents = agents.filter(a => a.health < 0.3);
+    const unhealthyAgents = agents.filter((a) => a.health < 0.3);
     if (unhealthyAgents.length > 0) {
       warnings.push(`${unhealthyAgents.length} agents have low health`);
     }
 
-    const overloadedAgents = agents.filter(a => a.load > 0.9);
+    const overloadedAgents = agents.filter((a) => a.load > 0.9);
     if (overloadedAgents.length > 0) {
       warnings.push(`${overloadedAgents.length} agents are overloaded`);
     }
 
     const now = Date.now();
-    const staleAgents = agents.filter(a => now - a.lastActive > 60000);
+    const staleAgents = agents.filter((a) => now - a.lastActive > 60000);
     if (staleAgents.length > 0) {
       warnings.push(`${staleAgents.length} agents are stale`);
     }

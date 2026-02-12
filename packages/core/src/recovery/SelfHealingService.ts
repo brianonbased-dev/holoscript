@@ -1,6 +1,6 @@
 /**
  * Self-Healing Service
- * 
+ *
  * Implements ISelfHealingService for automatic failure recovery.
  * Features pattern learning, strategy dispatch, and escalation.
  */
@@ -74,10 +74,10 @@ export class SelfHealingService implements ISelfHealingService {
 
     this.failures.set(failureWithId.id, failureWithId);
     this.recoveryAttempts.set(failureWithId.id, 0);
-    
+
     // Track in history
     this.addToHistory(failureWithId);
-    
+
     // Update patterns
     this.updatePatterns(failureWithId);
 
@@ -89,7 +89,7 @@ export class SelfHealingService implements ISelfHealingService {
    */
   async attemptRecovery(failureId: string): Promise<IRecoveryResult> {
     const failure = this.failures.get(failureId);
-    
+
     if (!failure) {
       return {
         success: false,
@@ -102,7 +102,7 @@ export class SelfHealingService implements ISelfHealingService {
 
     // Find matching strategy
     const strategy = this.findMatchingStrategy(failure);
-    
+
     if (!strategy) {
       return {
         success: false,
@@ -133,19 +133,19 @@ export class SelfHealingService implements ISelfHealingService {
 
     // Execute recovery
     this.recoveryAttempts.set(failureId, attempts + 1);
-    
+
     try {
       const result = await strategy.execute(failure);
-      
+
       // Update pattern success rate
       this.updatePatternSuccessRate(failure.errorType, result.success);
-      
+
       // Clean up on success
       if (result.success) {
         this.failures.delete(failureId);
         this.recoveryAttempts.delete(failureId);
       }
-      
+
       return result;
     } catch (error) {
       return {
@@ -163,15 +163,15 @@ export class SelfHealingService implements ISelfHealingService {
    */
   getFailurePatterns(agentId?: string): FailurePattern[] {
     const allPatterns = Array.from(this.patterns.values());
-    
+
     if (!agentId) {
       return allPatterns;
     }
-    
+
     // Filter patterns that apply to specific agent
-    return allPatterns.filter(pattern => {
+    return allPatterns.filter((pattern) => {
       const relevantFailures = this.failureHistory.filter(
-        f => f.agentId === agentId && f.errorType === pattern.errorType
+        (f) => f.agentId === agentId && f.errorType === pattern.errorType
       );
       return relevantFailures.length > 0;
     });
@@ -182,11 +182,11 @@ export class SelfHealingService implements ISelfHealingService {
    */
   async escalate(failureId: string, reason: string): Promise<void> {
     const failure = this.failures.get(failureId);
-    
+
     if (this.config.escalationCallback) {
       await this.config.escalationCallback(failureId, reason);
     }
-    
+
     // Mark as escalated (don't delete, but prevent further auto-recovery)
     if (failure) {
       this.recoveryAttempts.set(failureId, Infinity);
@@ -212,18 +212,18 @@ export class SelfHealingService implements ISelfHealingService {
    */
   getSuggestedStrategy(errorType: FailureType): IRecoveryStrategy | undefined {
     const pattern = this.patterns.get(errorType);
-    
+
     if (pattern?.suggestedStrategy) {
       return this.strategies.get(pattern.suggestedStrategy);
     }
-    
+
     // Return first matching strategy
     for (const strategy of this.strategies.values()) {
       if (strategy.handles.includes(errorType)) {
         return strategy;
       }
     }
-    
+
     return undefined;
   }
 
@@ -263,12 +263,15 @@ export class SelfHealingService implements ISelfHealingService {
 
     for (const strategy of this.strategies.values()) {
       if (strategy.matches(failure)) {
-        const patternsForStrategy = Array.from(this.patterns.values())
-          .filter(p => p.suggestedStrategy === strategy.id);
-        
-        const avgSuccessRate = patternsForStrategy.length > 0
-          ? patternsForStrategy.reduce((sum, p) => sum + p.successRate, 0) / patternsForStrategy.length
-          : 0.5; // Default to 50% if no history
+        const patternsForStrategy = Array.from(this.patterns.values()).filter(
+          (p) => p.suggestedStrategy === strategy.id
+        );
+
+        const avgSuccessRate =
+          patternsForStrategy.length > 0
+            ? patternsForStrategy.reduce((sum, p) => sum + p.successRate, 0) /
+              patternsForStrategy.length
+            : 0.5; // Default to 50% if no history
 
         if (avgSuccessRate > bestSuccessRate) {
           bestSuccessRate = avgSuccessRate;
@@ -282,7 +285,7 @@ export class SelfHealingService implements ISelfHealingService {
 
   private addToHistory(failure: IAgentFailure): void {
     this.failureHistory.push(failure);
-    
+
     // Trim history if needed
     if (this.failureHistory.length > this.config.maxHistorySize) {
       this.failureHistory = this.failureHistory.slice(-this.config.maxHistorySize);
@@ -299,7 +302,7 @@ export class SelfHealingService implements ISelfHealingService {
     } else {
       // Create new pattern
       const suggestedStrategy = this.findStrategyForType(failure.errorType);
-      
+
       this.patterns.set(key, {
         pattern: `${failure.errorType}:${failure.agentId}`,
         errorType: failure.errorType,
@@ -313,7 +316,7 @@ export class SelfHealingService implements ISelfHealingService {
 
   private updatePatternSuccessRate(errorType: FailureType, success: boolean): void {
     const pattern = this.patterns.get(errorType);
-    
+
     if (pattern) {
       // Exponential moving average
       const alpha = 0.3;
@@ -335,6 +338,6 @@ export class SelfHealingService implements ISelfHealingService {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

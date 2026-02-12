@@ -6,10 +6,7 @@
  */
 
 import { EventEmitter } from 'events';
-import type {
-  AgentManifest,
-  TrustLevel,
-} from './AgentManifest';
+import type { AgentManifest, TrustLevel } from './AgentManifest';
 import { validateManifest } from './AgentManifest';
 import { CapabilityMatcher, type CapabilityQuery, type AgentMatch } from './CapabilityMatcher';
 

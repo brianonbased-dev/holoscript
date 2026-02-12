@@ -1359,15 +1359,13 @@ class BrowserRuntime implements HoloScriptRuntime {
 
     // --- Trait Visual System: compose PBR material from traits ---
     const traitNames = (obj.traits || []).map((t: ParsedTrait) => t.name);
-    const composedProps: R3FMaterialProps = traitNames.length > 0
-      ? this.traitCompositor.compose(traitNames)
-      : {};
+    const composedProps: R3FMaterialProps =
+      traitNames.length > 0 ? this.traitCompositor.compose(traitNames) : {};
 
     // Apply named material preset (e.g., material: "glass")
     const namedMaterial = obj.properties?.material as string | undefined;
-    const presetProps = namedMaterial && MATERIAL_PRESETS[namedMaterial]
-      ? MATERIAL_PRESETS[namedMaterial]
-      : {};
+    const presetProps =
+      namedMaterial && MATERIAL_PRESETS[namedMaterial] ? MATERIAL_PRESETS[namedMaterial] : {};
 
     // Merge: defaults → preset → compositor (traits override preset)
     const materialProps: Record<string, unknown> = {
@@ -1379,11 +1377,16 @@ class BrowserRuntime implements HoloScriptRuntime {
     // Emissive
     if (composedProps.emissive || presetProps.emissiveIntensity) {
       materialProps.emissive = new THREE.Color(composedProps.emissive || color);
-      materialProps.emissiveIntensity = composedProps.emissiveIntensity ?? presetProps.emissiveIntensity ?? 0.5;
+      materialProps.emissiveIntensity =
+        composedProps.emissiveIntensity ?? presetProps.emissiveIntensity ?? 0.5;
     }
 
     // Transparency
-    if (composedProps.opacity !== undefined || composedProps.transparent || presetProps.transparent) {
+    if (
+      composedProps.opacity !== undefined ||
+      composedProps.transparent ||
+      presetProps.transparent
+    ) {
       materialProps.transparent = true;
       materialProps.opacity = composedProps.opacity ?? presetProps.opacity ?? 0.7;
     }
@@ -1396,7 +1399,8 @@ class BrowserRuntime implements HoloScriptRuntime {
       materialProps.clearcoat = composedProps.clearcoat ?? presetProps.clearcoat;
     }
     if (composedProps.clearcoatRoughness ?? presetProps.clearcoatRoughness) {
-      materialProps.clearcoatRoughness = composedProps.clearcoatRoughness ?? presetProps.clearcoatRoughness;
+      materialProps.clearcoatRoughness =
+        composedProps.clearcoatRoughness ?? presetProps.clearcoatRoughness;
     }
     if (composedProps.transmission ?? presetProps.transmission) {
       materialProps.transmission = composedProps.transmission ?? presetProps.transmission;
@@ -1418,8 +1422,11 @@ class BrowserRuntime implements HoloScriptRuntime {
     }
 
     // Use MeshPhysicalMaterial for advanced PBR, MeshStandardMaterial for basic
-    const needsPhysical = materialProps.clearcoat || materialProps.transmission ||
-      materialProps.iridescence || materialProps.ior;
+    const needsPhysical =
+      materialProps.clearcoat ||
+      materialProps.transmission ||
+      materialProps.iridescence ||
+      materialProps.ior;
     const material = needsPhysical
       ? new THREE.MeshPhysicalMaterial(materialProps as any)
       : new THREE.MeshStandardMaterial(materialProps as any);

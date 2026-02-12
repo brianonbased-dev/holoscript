@@ -18,7 +18,7 @@ describe('SwarmMembership', () => {
     it('should allow first agent to join as leader', () => {
       const success = membership.join({ agentId: 'agent-1' });
       expect(success).toBe(true);
-      
+
       const member = membership.getMember('agent-1');
       expect(member?.role).toBe('leader');
     });
@@ -26,7 +26,7 @@ describe('SwarmMembership', () => {
     it('should allow subsequent agents to join as members', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
-      
+
       const member = membership.getMember('agent-2');
       expect(member?.role).toBe('member');
     });
@@ -41,21 +41,21 @@ describe('SwarmMembership', () => {
       membership = new SwarmMembership({
         quorum: { minimumSize: 1, optimalSize: 2, maximumSize: 2 },
       });
-      
+
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
       const success = membership.join({ agentId: 'agent-3' });
-      
+
       expect(success).toBe(false);
     });
 
     it('should add pending when approval required', () => {
       membership = new SwarmMembership({ requireApprovalToJoin: true });
       membership.join({ agentId: 'leader' });
-      
+
       const success = membership.join({ agentId: 'agent-2' });
       expect(success).toBe(false);
-      
+
       const pending = membership.getPendingJoins();
       expect(pending).toHaveLength(1);
       expect(pending[0].agentId).toBe('agent-2');
@@ -67,7 +67,7 @@ describe('SwarmMembership', () => {
       membership = new SwarmMembership({ requireApprovalToJoin: true });
       membership.join({ agentId: 'leader' });
       membership.join({ agentId: 'agent-2' });
-      
+
       const success = membership.approveJoin('leader', 'agent-2');
       expect(success).toBe(true);
       expect(membership.getMember('agent-2')).toBeDefined();
@@ -77,7 +77,7 @@ describe('SwarmMembership', () => {
       membership = new SwarmMembership({ requireApprovalToJoin: true });
       membership.join({ agentId: 'leader' });
       membership.join({ agentId: 'agent-2' });
-      
+
       const success = membership.approveJoin('agent-2', 'agent-2');
       expect(success).toBe(false);
     });
@@ -88,7 +88,7 @@ describe('SwarmMembership', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
       membership.join({ agentId: 'agent-3' });
-      
+
       membership.leave({ agentId: 'agent-2', graceful: true });
       expect(membership.getMember('agent-2')).toBeUndefined();
     });
@@ -97,10 +97,10 @@ describe('SwarmMembership', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
       membership.join({ agentId: 'agent-3' });
-      
+
       expect(membership.getLeader()?.agentId).toBe('agent-1');
       membership.leave({ agentId: 'agent-1', graceful: true });
-      
+
       expect(membership.getLeader()).toBeDefined();
       expect(membership.getLeader()?.agentId).not.toBe('agent-1');
     });
@@ -108,10 +108,10 @@ describe('SwarmMembership', () => {
     it('should prevent leaving below minimum', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
-      
+
       const success = membership.leave({ agentId: 'agent-2', graceful: true });
       expect(success).toBe(false);
-      
+
       const member = membership.getMember('agent-2');
       expect(member?.status).toBe('leaving');
     });
@@ -121,7 +121,7 @@ describe('SwarmMembership', () => {
     it('should allow observers to join', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'observer-1', requestedRole: 'observer' });
-      
+
       const observer = membership.getMember('observer-1');
       expect(observer?.role).toBe('observer');
     });
@@ -129,7 +129,7 @@ describe('SwarmMembership', () => {
     it('should not count observers in member count', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'observer-1', requestedRole: 'observer' });
-      
+
       expect(membership.getMemberCount()).toBe(1);
     });
 
@@ -137,7 +137,7 @@ describe('SwarmMembership', () => {
       membership = new SwarmMembership({ maxObservers: 1 });
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'observer-1', requestedRole: 'observer' });
-      
+
       const success = membership.join({ agentId: 'observer-2', requestedRole: 'observer' });
       expect(success).toBe(false);
     });
@@ -145,7 +145,7 @@ describe('SwarmMembership', () => {
     it('should allow disabling observers', () => {
       membership = new SwarmMembership({ allowObservers: false });
       membership.join({ agentId: 'agent-1' });
-      
+
       const success = membership.join({ agentId: 'observer-1', requestedRole: 'observer' });
       expect(success).toBe(false);
     });
@@ -155,11 +155,11 @@ describe('SwarmMembership', () => {
     it('should update last heartbeat', async () => {
       membership.join({ agentId: 'agent-1' });
       const before = membership.getMember('agent-1')?.lastHeartbeat;
-      
+
       // Wait a bit for timestamp to change
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       membership.heartbeat('agent-1');
-      
+
       const after = membership.getMember('agent-1')?.lastHeartbeat;
       expect(after).toBeGreaterThanOrEqual(before!);
     });
@@ -169,9 +169,9 @@ describe('SwarmMembership', () => {
     it('should change member role', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
-      
+
       membership.changeRole('agent-2', 'leader');
-      
+
       expect(membership.getMember('agent-2')?.role).toBe('leader');
       expect(membership.getMember('agent-1')?.role).toBe('member');
       expect(membership.getLeader()?.agentId).toBe('agent-2');
@@ -183,7 +183,7 @@ describe('SwarmMembership', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
       membership.join({ agentId: 'observer-1', requestedRole: 'observer' });
-      
+
       const all = membership.getMembers();
       expect(all).toHaveLength(3);
     });
@@ -194,10 +194,10 @@ describe('SwarmMembership', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
       membership.join({ agentId: 'observer-1', requestedRole: 'observer' });
-      
+
       const active = membership.getActiveMembers();
       expect(active).toHaveLength(2);
-      expect(active.find(m => m.role === 'observer')).toBeUndefined();
+      expect(active.find((m) => m.role === 'observer')).toBeUndefined();
     });
   });
 
@@ -206,7 +206,7 @@ describe('SwarmMembership', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
       membership.join({ agentId: 'agent-3' });
-      
+
       const state = membership.getQuorumState();
       expect(state.currentSize).toBe(3);
       expect(state.hasQuorum).toBe(true);
@@ -216,10 +216,10 @@ describe('SwarmMembership', () => {
   describe('events', () => {
     it('should emit join events', () => {
       const events: MembershipEvent[] = [];
-      membership.onEvent(e => events.push(e));
-      
+      membership.onEvent((e) => events.push(e));
+
       membership.join({ agentId: 'agent-1' });
-      
+
       expect(events).toHaveLength(1);
       expect(events[0].type).toBe('joined');
       expect(events[0].agentId).toBe('agent-1');
@@ -229,33 +229,33 @@ describe('SwarmMembership', () => {
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
       membership.join({ agentId: 'agent-3' });
-      
+
       const events: MembershipEvent[] = [];
-      membership.onEvent(e => events.push(e));
-      
+      membership.onEvent((e) => events.push(e));
+
       membership.leave({ agentId: 'agent-2', graceful: true });
-      
-      expect(events.some(e => e.type === 'left' && e.agentId === 'agent-2')).toBe(true);
+
+      expect(events.some((e) => e.type === 'left' && e.agentId === 'agent-2')).toBe(true);
     });
 
     it('should emit quorum events', () => {
       const events: MembershipEvent[] = [];
-      membership.onEvent(e => events.push(e));
-      
+      membership.onEvent((e) => events.push(e));
+
       membership.join({ agentId: 'agent-1' });
       membership.join({ agentId: 'agent-2' });
       membership.join({ agentId: 'agent-3' });
-      
-      expect(events.some(e => e.type === 'quorum-gained')).toBe(true);
+
+      expect(events.some((e) => e.type === 'quorum-gained')).toBe(true);
     });
 
     it('should allow unsubscribing', () => {
       const events: MembershipEvent[] = [];
-      const unsub = membership.onEvent(e => events.push(e));
-      
+      const unsub = membership.onEvent((e) => events.push(e));
+
       membership.join({ agentId: 'agent-1' });
       expect(events).toHaveLength(1);
-      
+
       unsub();
       membership.join({ agentId: 'agent-2' });
       expect(events).toHaveLength(1);

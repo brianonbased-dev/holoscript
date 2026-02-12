@@ -33,14 +33,8 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter({ onFilterChange }: CategoryFilterProps) {
-  const {
-    filters,
-    setCategory,
-    setPlatform,
-    setVerified,
-    setSortBy,
-    resetFilters,
-  } = useFilterStore();
+  const { filters, setCategory, setPlatform, setVerified, setSortBy, resetFilters } =
+    useFilterStore();
 
   const [expandedSections, setExpandedSections] = useState({
     categories: true,
@@ -81,9 +75,7 @@ export function CategoryFilter({ onFilterChange }: CategoryFilterProps) {
   };
 
   const hasActiveFilters =
-    filters.category !== null ||
-    filters.platform !== null ||
-    filters.verified !== null;
+    filters.category !== null || filters.platform !== null || filters.verified !== null;
 
   return (
     <div className="space-y-6">
@@ -136,12 +128,11 @@ export function CategoryFilter({ onFilterChange }: CategoryFilterProps) {
         </button>
         {expandedSections.categories && (
           <div className="space-y-1">
-            {(Object.keys(CATEGORY_LABELS) as TraitCategory[]).map(
-              (category) => (
-                <button
-                  key={category}
-                  onClick={() => handleCategoryClick(category)}
-                  className={`
+            {(Object.keys(CATEGORY_LABELS) as TraitCategory[]).map((category) => (
+              <button
+                key={category}
+                onClick={() => handleCategoryClick(category)}
+                className={`
                     w-full flex items-center gap-3 py-2 px-3 rounded-lg text-sm transition-colors
                     ${
                       filters.category === category
@@ -149,17 +140,12 @@ export function CategoryFilter({ onFilterChange }: CategoryFilterProps) {
                         : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                     }
                   `}
-                >
-                  {CATEGORY_ICONS[category]}
-                  <span className="flex-1 text-left">
-                    {CATEGORY_LABELS[category]}
-                  </span>
-                  {filters.category === category && (
-                    <Check className="h-4 w-4" />
-                  )}
-                </button>
-              )
-            )}
+              >
+                {CATEGORY_ICONS[category]}
+                <span className="flex-1 text-left">{CATEGORY_LABELS[category]}</span>
+                {filters.category === category && <Check className="h-4 w-4" />}
+              </button>
+            ))}
           </div>
         )}
       </div>
@@ -192,9 +178,7 @@ export function CategoryFilter({ onFilterChange }: CategoryFilterProps) {
                   }
                 `}
               >
-                <span className="flex-1 text-left">
-                  {PLATFORM_LABELS[platform]}
-                </span>
+                <span className="flex-1 text-left">{PLATFORM_LABELS[platform]}</span>
                 {filters.platform === platform && <Check className="h-4 w-4" />}
               </button>
             ))}

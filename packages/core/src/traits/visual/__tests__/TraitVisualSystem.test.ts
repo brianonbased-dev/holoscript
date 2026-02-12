@@ -949,7 +949,7 @@ describe('ProceduralResolver', () => {
 
   it('resolve() throws for unknown traits', async () => {
     await expect(resolver.resolve('unknown', dummyConfig)).rejects.toThrow(
-      'ProceduralResolver: no spec for trait "unknown"',
+      'ProceduralResolver: no spec for trait "unknown"'
     );
   });
 
@@ -1009,7 +1009,10 @@ describe('AssetResolverPipeline', () => {
     const mockPlugin: AssetResolverPlugin = {
       name: 'mock',
       priority: 1,
-      canResolve: () => { pluginCalled = true; return true; },
+      canResolve: () => {
+        pluginCalled = true;
+        return true;
+      },
       resolve: async () => ({ type: 'texture', url: 'plugin://wooden' }),
     };
     pipeline.register(mockPlugin);
@@ -1050,7 +1053,9 @@ describe('AssetResolverPipeline', () => {
       name: 'failing',
       priority: 1,
       canResolve: () => true,
-      resolve: async () => { throw new Error('intentional failure'); },
+      resolve: async () => {
+        throw new Error('intentional failure');
+      },
     };
 
     const fallbackPlugin: AssetResolverPlugin = {
@@ -1100,14 +1105,20 @@ describe('AssetResolverPipeline', () => {
     const highPriority: AssetResolverPlugin = {
       name: 'high',
       priority: 100,
-      canResolve: () => { callOrder.push('high'); return false; },
+      canResolve: () => {
+        callOrder.push('high');
+        return false;
+      },
       resolve: async () => ({ type: 'texture' }),
     };
 
     const lowPriority: AssetResolverPlugin = {
       name: 'low',
       priority: 1,
-      canResolve: () => { callOrder.push('low'); return false; },
+      canResolve: () => {
+        callOrder.push('low');
+        return false;
+      },
       resolve: async () => ({ type: 'texture' }),
     };
 
@@ -1126,7 +1137,9 @@ describe('AssetResolverPipeline', () => {
       name: 'always_fails',
       priority: 1,
       canResolve: () => true,
-      resolve: async () => { throw new Error('fail'); },
+      resolve: async () => {
+        throw new Error('fail');
+      },
     };
 
     pipeline.register(plugin);

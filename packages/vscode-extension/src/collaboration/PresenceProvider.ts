@@ -4,9 +4,9 @@
  */
 
 import * as vscode from 'vscode';
-import type { 
-  Participant, 
-  CursorPosition, 
+import type {
+  Participant,
+  CursorPosition,
   SelectionRange,
   ConnectionStatus,
 } from './CollaborationTypes';
@@ -40,16 +40,13 @@ export class PresenceProvider implements vscode.Disposable {
    */
   constructor() {
     // Create status bar item for connection status
-    this.statusBarItem = vscode.window.createStatusBarItem(
-      vscode.StatusBarAlignment.Right,
-      100
-    );
+    this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     this.statusBarItem.command = 'holoscript.collaboration.showParticipants';
     this.disposables.push(this.statusBarItem);
 
     // Listen for active editor changes
     this.disposables.push(
-      vscode.window.onDidChangeActiveTextEditor(editor => {
+      vscode.window.onDidChangeActiveTextEditor((editor) => {
         this.activeEditor = editor;
         this.refreshDecorations();
       })
@@ -57,7 +54,7 @@ export class PresenceProvider implements vscode.Disposable {
 
     // Listen for selection changes to update local awareness
     this.disposables.push(
-      vscode.window.onDidChangeTextEditorSelection(event => {
+      vscode.window.onDidChangeTextEditorSelection((event) => {
         this.onLocalSelectionChange(event);
       })
     );
@@ -129,10 +126,12 @@ export class PresenceProvider implements vscode.Disposable {
       return;
     }
 
-    const items = participants.map(p => ({
+    const items = participants.map((p) => ({
       label: `$(person) ${p.name}`,
       description: p.status,
-      detail: p.cursor ? `Line ${p.cursor.line + 1}, Column ${p.cursor.character + 1}` : 'No cursor position',
+      detail: p.cursor
+        ? `Line ${p.cursor.line + 1}, Column ${p.cursor.character + 1}`
+        : 'No cursor position',
       participant: p,
     }));
 
@@ -160,7 +159,7 @@ export class PresenceProvider implements vscode.Disposable {
    */
   dispose(): void {
     this.detachFromDocument();
-    
+
     if (this.updateDebounceTimer) {
       clearTimeout(this.updateDebounceTimer);
     }
@@ -178,14 +177,13 @@ export class PresenceProvider implements vscode.Disposable {
     this.createDecorationsForParticipant(participant);
     this.refreshDecorations();
 
-    vscode.window.showInformationMessage(
-      `${participant.name} joined the session`,
-      'Follow'
-    ).then(action => {
-      if (action === 'Follow' && participant.cursor) {
-        this.followParticipant(participant.id);
-      }
-    });
+    vscode.window
+      .showInformationMessage(`${participant.name} joined the session`, 'Follow')
+      .then((action) => {
+        if (action === 'Follow' && participant.cursor) {
+          this.followParticipant(participant.id);
+        }
+      });
   }
 
   private handleParticipantUpdated(participant: Participant): void {
@@ -200,7 +198,7 @@ export class PresenceProvider implements vscode.Disposable {
       this.participants.set(participant.id, participant);
       this.createDecorationsForParticipant(participant);
     }
-    
+
     this.scheduleDecorationsUpdate();
   }
 
@@ -273,7 +271,7 @@ export class PresenceProvider implements vscode.Disposable {
     if (this.updateDebounceTimer) {
       clearTimeout(this.updateDebounceTimer);
     }
-    
+
     this.updateDebounceTimer = setTimeout(() => {
       this.refreshDecorations();
     }, 50);
@@ -292,10 +290,7 @@ export class PresenceProvider implements vscode.Disposable {
 
       // Add cursor decoration
       if (participant.cursor) {
-        const position = new vscode.Position(
-          participant.cursor.line,
-          participant.cursor.character
-        );
+        const position = new vscode.Position(participant.cursor.line, participant.cursor.character);
         cursorRanges.push(new vscode.Range(position, position));
         labelRanges.push(new vscode.Range(position, position));
       }
@@ -303,14 +298,8 @@ export class PresenceProvider implements vscode.Disposable {
       // Add selection decorations
       if (participant.selections) {
         for (const selection of participant.selections) {
-          const startPos = new vscode.Position(
-            selection.start.line,
-            selection.start.character
-          );
-          const endPos = new vscode.Position(
-            selection.end.line,
-            selection.end.character
-          );
+          const startPos = new vscode.Position(selection.start.line, selection.start.character);
+          const endPos = new vscode.Position(selection.end.line, selection.end.character);
           selectionRanges.push(new vscode.Range(startPos, endPos));
         }
       }
@@ -335,7 +324,7 @@ export class PresenceProvider implements vscode.Disposable {
     }
 
     // Update selections
-    const selections: SelectionRange[] = event.selections.map(sel => ({
+    const selections: SelectionRange[] = event.selections.map((sel) => ({
       start: { line: sel.start.line, character: sel.start.character },
       end: { line: sel.end.line, character: sel.end.character },
       isReversed: sel.isReversed,
@@ -355,13 +344,17 @@ export class PresenceProvider implements vscode.Disposable {
 
       case 'connecting':
         this.statusBarItem.text = '$(sync~spin) Connecting...';
-        this.statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+        this.statusBarItem.backgroundColor = new vscode.ThemeColor(
+          'statusBarItem.warningBackground'
+        );
         this.statusBarItem.tooltip = 'Connecting to collaboration server';
         break;
 
       case 'reconnecting':
         this.statusBarItem.text = '$(sync~spin) Reconnecting...';
-        this.statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+        this.statusBarItem.backgroundColor = new vscode.ThemeColor(
+          'statusBarItem.warningBackground'
+        );
         this.statusBarItem.tooltip = 'Reconnecting to collaboration server';
         break;
 
@@ -377,11 +370,8 @@ export class PresenceProvider implements vscode.Disposable {
     const participant = this.participants.get(participantId);
     if (!participant?.cursor || !this.activeEditor) return;
 
-    const position = new vscode.Position(
-      participant.cursor.line,
-      participant.cursor.character
-    );
-    
+    const position = new vscode.Position(participant.cursor.line, participant.cursor.character);
+
     this.activeEditor.selection = new vscode.Selection(position, position);
     this.activeEditor.revealRange(
       new vscode.Range(position, position),

@@ -1,18 +1,12 @@
 /**
  * SpatialQuery Comprehensive Tests
  * Sprint 4 Priority 4 - Spatial Context Awareness
- * 
+ *
  * Additional tests to improve SpatialQuery.ts coverage from 35% to 80%+
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  Vector3,
-  SpatialEntity,
-  Region,
-  BoundingBox,
-  BoundingSphere,
-} from '../SpatialTypes';
+import { Vector3, SpatialEntity, Region, BoundingBox, BoundingSphere } from '../SpatialTypes';
 import {
   SpatialQueryExecutor,
   QueryResult,
@@ -134,7 +128,7 @@ describe('SpatialQueryExecutor - Visible Query', () => {
       } as VisibleQuery);
 
       expect(results.length).toBe(2);
-      expect(results.map(r => r.entity.id).sort()).toEqual(['e1', 'e2']);
+      expect(results.map((r) => r.entity.id).sort()).toEqual(['e1', 'e2']);
     });
 
     it('should exclude entities at same position', () => {
@@ -157,21 +151,21 @@ describe('SpatialQueryExecutor - Visible Query', () => {
   describe('field of view (FOV)', () => {
     it('should filter by FOV when direction specified', () => {
       const entities = [
-        createEntity('e1', { x: 10, y: 0, z: 0 }),  // Directly ahead
-        createEntity('e2', { x: 0, y: 10, z: 0 }),  // 90 degrees off
-        createEntity('e3', { x: 10, y: 5, z: 0 }),  // Slightly off center
+        createEntity('e1', { x: 10, y: 0, z: 0 }), // Directly ahead
+        createEntity('e2', { x: 0, y: 10, z: 0 }), // 90 degrees off
+        createEntity('e3', { x: 10, y: 5, z: 0 }), // Slightly off center
       ];
       executor.updateEntities(entities);
 
       const results = executor.execute({
         type: 'visible',
         from: { x: 0, y: 0, z: 0 },
-        direction: { x: 1, y: 0, z: 0 },  // Looking along X axis
-        fov: 60,  // 60 degree cone
+        direction: { x: 1, y: 0, z: 0 }, // Looking along X axis
+        fov: 60, // 60 degree cone
       } as VisibleQuery);
 
       expect(results.length).toBe(2);
-      expect(results.map(r => r.entity.id).sort()).toEqual(['e1', 'e3']);
+      expect(results.map((r) => r.entity.id).sort()).toEqual(['e1', 'e3']);
     });
 
     it('should see 360 degrees without FOV', () => {
@@ -195,8 +189,8 @@ describe('SpatialQueryExecutor - Visible Query', () => {
 
     it('should handle narrow FOV', () => {
       const entities = [
-        createEntity('e1', { x: 10, y: 0, z: 0 }),   // Directly ahead
-        createEntity('e2', { x: 10, y: 5, z: 0 }),   // More off center (outside 10 deg)
+        createEntity('e1', { x: 10, y: 0, z: 0 }), // Directly ahead
+        createEntity('e2', { x: 10, y: 5, z: 0 }), // More off center (outside 10 deg)
       ];
       executor.updateEntities(entities);
 
@@ -204,7 +198,7 @@ describe('SpatialQueryExecutor - Visible Query', () => {
         type: 'visible',
         from: { x: 0, y: 0, z: 0 },
         direction: { x: 1, y: 0, z: 0 },
-        fov: 10,  // Very narrow 10 degree cone
+        fov: 10, // Very narrow 10 degree cone
       } as VisibleQuery);
 
       expect(results.length).toBe(1);
@@ -226,14 +220,14 @@ describe('SpatialQueryExecutor - Visible Query', () => {
       } as VisibleQuery);
 
       // Target should be blocked by obstacle
-      const targetVisible = results.find(r => r.entity.id === 'target');
+      const targetVisible = results.find((r) => r.entity.id === 'target');
       expect(targetVisible).toBeUndefined();
     });
 
     it('should see around obstacles', () => {
       const entities = [
         createSphereEntity('obstacle', { x: 5, y: 0, z: 0 }, 1),
-        createEntity('target', { x: 5, y: 10, z: 0 }),  // Not in line with obstacle
+        createEntity('target', { x: 5, y: 10, z: 0 }), // Not in line with obstacle
       ];
       executor.updateEntities(entities);
 
@@ -242,7 +236,7 @@ describe('SpatialQueryExecutor - Visible Query', () => {
         from: { x: 0, y: 0, z: 0 },
       } as VisibleQuery);
 
-      const targetVisible = results.find(r => r.entity.id === 'target');
+      const targetVisible = results.find((r) => r.entity.id === 'target');
       expect(targetVisible).toBeDefined();
     });
   });
@@ -305,7 +299,7 @@ describe('SpatialQueryExecutor - Reachable Query', () => {
     } as ReachableQuery);
 
     // Target blocked by wall, clear target not blocked
-    const ids = results.map(r => r.entity.id);
+    const ids = results.map((r) => r.entity.id);
     expect(ids).toContain('clear');
     expect(ids).not.toContain('target');
   });
@@ -323,7 +317,7 @@ describe('SpatialQueryExecutor - Reachable Query', () => {
       from: { x: 0, y: 0, z: 0 },
     } as ReachableQuery);
 
-    expect(results.map(r => r.entity.id)).toEqual(['near', 'mid', 'far']);
+    expect(results.map((r) => r.entity.id)).toEqual(['near', 'mid', 'far']);
   });
 });
 
@@ -357,9 +351,7 @@ describe('SpatialQueryExecutor - In Region Query', () => {
     });
 
     it('should include entities on boundary', () => {
-      const entities = [
-        createEntity('on_edge', { x: 10, y: 5, z: 5 }),
-      ];
+      const entities = [createEntity('on_edge', { x: 10, y: 5, z: 5 })];
       executor.updateEntities(entities);
 
       const results = executor.execute({
@@ -403,7 +395,7 @@ describe('SpatialQueryExecutor - In Region Query', () => {
         region: createSphereRegion('bubble', { x: 0, y: 0, z: 0 }, 10),
       } as InRegionQuery);
 
-      expect(results.map(r => r.entity.id)).toEqual(['near', 'far']);
+      expect(results.map((r) => r.entity.id)).toEqual(['near', 'far']);
     });
   });
 });
@@ -420,9 +412,7 @@ describe('SpatialQueryExecutor - Raycast Query', () => {
   });
 
   it('should hit entities along ray direction', () => {
-    const entities = [
-      createSphereEntity('target', { x: 10, y: 0, z: 0 }, 2),
-    ];
+    const entities = [createSphereEntity('target', { x: 10, y: 0, z: 0 }, 2)];
     executor.updateEntities(entities);
 
     const results = executor.execute({
@@ -437,9 +427,7 @@ describe('SpatialQueryExecutor - Raycast Query', () => {
   });
 
   it('should miss entities not in ray path', () => {
-    const entities = [
-      createSphereEntity('off_path', { x: 10, y: 10, z: 0 }, 1),
-    ];
+    const entities = [createSphereEntity('off_path', { x: 10, y: 10, z: 0 }, 1)];
     executor.updateEntities(entities);
 
     const results = executor.execute({
@@ -453,9 +441,7 @@ describe('SpatialQueryExecutor - Raycast Query', () => {
   });
 
   it('should respect maxDistance', () => {
-    const entities = [
-      createSphereEntity('too_far', { x: 100, y: 0, z: 0 }, 2),
-    ];
+    const entities = [createSphereEntity('too_far', { x: 100, y: 0, z: 0 }, 2)];
     executor.updateEntities(entities);
 
     const results = executor.execute({
@@ -524,15 +510,13 @@ describe('SpatialQueryExecutor - Raycast Query', () => {
   });
 
   it('should handle ray behind entity', () => {
-    const entities = [
-      createSphereEntity('behind', { x: -10, y: 0, z: 0 }, 2),
-    ];
+    const entities = [createSphereEntity('behind', { x: -10, y: 0, z: 0 }, 2)];
     executor.updateEntities(entities);
 
     const results = executor.execute({
       type: 'raycast',
       from: { x: 0, y: 0, z: 0 },
-      direction: { x: 1, y: 0, z: 0 },  // Pointing away
+      direction: { x: 1, y: 0, z: 0 }, // Pointing away
       maxDistance: 100,
     } as RaycastQuery);
 
@@ -553,15 +537,13 @@ describe('SpatialQueryExecutor - Within Query (includePartial)', () => {
 
   it('should include partial overlaps when includePartial is true', () => {
     // Entity center is at 15, but has radius 3, so edge is at 12
-    const entities = [
-      createSphereEntity('partial', { x: 15, y: 0, z: 0 }, 3),
-    ];
+    const entities = [createSphereEntity('partial', { x: 15, y: 0, z: 0 }, 3)];
     executor.updateEntities(entities);
 
     const results = executor.execute({
       type: 'within',
       from: { x: 0, y: 0, z: 0 },
-      radius: 13,  // Just reaches edge of entity
+      radius: 13, // Just reaches edge of entity
       includePartial: true,
     } as WithinQuery);
 
@@ -569,15 +551,13 @@ describe('SpatialQueryExecutor - Within Query (includePartial)', () => {
   });
 
   it('should exclude partial overlaps when includePartial is false', () => {
-    const entities = [
-      createSphereEntity('partial', { x: 15, y: 0, z: 0 }, 3),
-    ];
+    const entities = [createSphereEntity('partial', { x: 15, y: 0, z: 0 }, 3)];
     executor.updateEntities(entities);
 
     const results = executor.execute({
       type: 'within',
       from: { x: 0, y: 0, z: 0 },
-      radius: 13,  // Entity center at 15 is outside
+      radius: 13, // Entity center at 15 is outside
       includePartial: false,
     } as WithinQuery);
 
@@ -586,14 +566,14 @@ describe('SpatialQueryExecutor - Within Query (includePartial)', () => {
 
   it('should handle box bounds for partial overlap', () => {
     const entities = [
-      createBoxEntity('box', { x: 12, y: 0, z: 0 }, 4),  // Edges at 10 and 14
+      createBoxEntity('box', { x: 12, y: 0, z: 0 }, 4), // Edges at 10 and 14
     ];
     executor.updateEntities(entities);
 
     const results = executor.execute({
       type: 'within',
       from: { x: 0, y: 0, z: 0 },
-      radius: 11,  // Reaches edge of box
+      radius: 11, // Reaches edge of box
       includePartial: true,
     } as WithinQuery);
 
@@ -625,15 +605,13 @@ describe('SpatialQueryExecutor - Edge Cases', () => {
   });
 
   it('should handle entity type filter with no matches', () => {
-    const entities = [
-      createEntity('e1', { x: 5, y: 0, z: 0 }, 'npc'),
-    ];
+    const entities = [createEntity('e1', { x: 5, y: 0, z: 0 }, 'npc')];
     executor.updateEntities(entities);
 
     const results = executor.execute({
       type: 'nearest',
       from: { x: 0, y: 0, z: 0 },
-      entityTypeFilter: ['item'],  // No items exist
+      entityTypeFilter: ['item'], // No items exist
     } as NearestQuery);
 
     expect(results).toEqual([]);
@@ -641,7 +619,7 @@ describe('SpatialQueryExecutor - Edge Cases', () => {
 
   it('should handle entities without bounds', () => {
     const entities = [
-      createEntity('no_bounds', { x: 10, y: 0, z: 0 }),  // No bounds
+      createEntity('no_bounds', { x: 10, y: 0, z: 0 }), // No bounds
     ];
     executor.updateEntities(entities);
 
@@ -657,9 +635,7 @@ describe('SpatialQueryExecutor - Edge Cases', () => {
   });
 
   it('should handle region update', () => {
-    executor.updateRegions([
-      createBoxRegion('r1', { x: 0, y: 0, z: 0 }, { x: 10, y: 10, z: 10 }),
-    ]);
+    executor.updateRegions([createBoxRegion('r1', { x: 0, y: 0, z: 0 }, { x: 10, y: 10, z: 10 })]);
 
     // Regions stored for in_region queries
     const entities = [createEntity('e1', { x: 5, y: 5, z: 5 })];
@@ -750,7 +726,7 @@ describe('SpatialQueryExecutor - Edge Cases', () => {
     } as ByTypeQuery);
 
     expect(results.length).toBe(2);
-    expect(results.map(r => r.entity.type).sort()).toEqual(['item', 'npc']);
+    expect(results.map((r) => r.entity.type).sort()).toEqual(['item', 'npc']);
   });
 });
 
@@ -807,7 +783,7 @@ describe('SpatialQueryExecutor - By Type Query', () => {
     } as ByTypeQuery);
 
     expect(results.length).toBe(2);
-    expect(results.every(r => r.entity.type === 'npc')).toBe(true);
+    expect(results.every((r) => r.entity.type === 'npc')).toBe(true);
   });
 
   it('should combine type filter with radius', () => {

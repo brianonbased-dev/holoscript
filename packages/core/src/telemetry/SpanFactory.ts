@@ -37,7 +37,7 @@ function createSpanObject(
   name: string,
   traceId: string,
   parentSpanId?: string,
-  attributes?: Record<string, string | number | boolean>,
+  attributes?: Record<string, string | number | boolean>
 ): Span {
   const spanId = generateSpanId();
   const events: SpanEvent[] = [];
@@ -87,7 +87,7 @@ export class SpanFactory {
   createSpan(
     name: string,
     parentSpan?: Span,
-    attributes?: Record<string, string | number | boolean>,
+    attributes?: Record<string, string | number | boolean>
   ): Span {
     const traceId = parentSpan ? parentSpan.traceId : generateTraceId();
     const parentSpanId = parentSpan ? parentSpan.spanId : undefined;
@@ -101,11 +101,7 @@ export class SpanFactory {
    * For synchronous functions, returns the result directly.
    * For async functions, returns a Promise.
    */
-  withSpan<T>(
-    name: string,
-    fn: (span: Span) => T | Promise<T>,
-    parentSpan?: Span,
-  ): T | Promise<T> {
+  withSpan<T>(name: string, fn: (span: Span) => T | Promise<T>, parentSpan?: Span): T | Promise<T> {
     const span = this.createSpan(name, parentSpan);
     try {
       const result = fn(span);
@@ -128,7 +124,10 @@ export class SpanFactory {
       span.end('ok');
       return result;
     } catch (err) {
-      span.setAttribute('error.message', err instanceof Error ? (err as Error).message : String(err));
+      span.setAttribute(
+        'error.message',
+        err instanceof Error ? (err as Error).message : String(err)
+      );
       span.end('error');
       throw err;
     }

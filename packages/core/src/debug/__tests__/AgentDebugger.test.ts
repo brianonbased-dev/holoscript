@@ -4,18 +4,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  AgentDebugger,
-  getAgentDebugger,
-  resetAgentDebugger,
-} from '../AgentDebugger';
-import {
-  resetTelemetryCollector,
-} from '../TelemetryCollector';
-import {
-  AgentInspector,
-  resetAgentInspector,
-} from '../AgentInspector';
+import { AgentDebugger, getAgentDebugger, resetAgentDebugger } from '../AgentDebugger';
+import { resetTelemetryCollector } from '../TelemetryCollector';
+import { AgentInspector, resetAgentInspector } from '../AgentInspector';
 import type { AgentManifest } from '../../agents/AgentTypes';
 import type { BreakpointContext } from '../TelemetryTypes';
 
@@ -44,11 +35,11 @@ describe('AgentDebugger - Execution Control', () => {
 
   beforeEach(() => {
     resetAgentDebugger();
-    debugger_ = new AgentDebugger({ 
-      config: { 
+    debugger_ = new AgentDebugger({
+      config: {
         autoRecord: false,
         breakpointTimeout: 5000, // 5s timeout for tests
-      } 
+      },
     });
     manifest = createTestManifest('test-agent');
     debugger_.registerAgent(manifest, { count: 0, active: true });
@@ -97,7 +88,7 @@ describe('AgentDebugger - Execution Control', () => {
 
     it('should pause execution when breakpoint condition is met', async () => {
       debugger_.breakpoint('test-agent', 'count > 5');
-      
+
       const context: BreakpointContext = {
         agentId: 'test-agent',
         state: { count: 10 },
@@ -109,10 +100,10 @@ describe('AgentDebugger - Execution Control', () => {
 
       // Start checking breakpoints - will pause
       const checkPromise = debugger_.checkBreakpoints(context);
-      
+
       // Wait a tick for the pause to register
-      await new Promise(r => setTimeout(r, 10));
-      
+      await new Promise((r) => setTimeout(r, 10));
+
       expect(debugger_.isPaused('test-agent')).toBe(true);
       expect(pauseHandler).toHaveBeenCalled();
       expect(pauseHandler.mock.calls[0][0].agentId).toBe('test-agent');
@@ -120,13 +111,13 @@ describe('AgentDebugger - Execution Control', () => {
       // Resume to complete the promise
       debugger_.resumeExecution('test-agent');
       await checkPromise;
-      
+
       expect(debugger_.isPaused('test-agent')).toBe(false);
     });
 
     it('should not pause when breakpoint condition is not met', async () => {
       debugger_.breakpoint('test-agent', 'count > 100');
-      
+
       const context: BreakpointContext = {
         agentId: 'test-agent',
         state: { count: 5 },
@@ -140,7 +131,7 @@ describe('AgentDebugger - Execution Control', () => {
     it('should skip disabled breakpoints', async () => {
       const bp = debugger_.breakpoint('test-agent', 'count > 0');
       debugger_.setBreakpointEnabled(bp.id, false);
-      
+
       const context: BreakpointContext = {
         agentId: 'test-agent',
         state: { count: 10 },
@@ -153,7 +144,7 @@ describe('AgentDebugger - Execution Control', () => {
 
     it('should evaluate breakpoint with variables and event', async () => {
       debugger_.breakpoint('test-agent', 'myVar === "trigger"');
-      
+
       const context: BreakpointContext = {
         agentId: 'test-agent',
         state: {},
@@ -165,10 +156,10 @@ describe('AgentDebugger - Execution Control', () => {
       debugger_.on('executionPaused', pauseHandler);
 
       const checkPromise = debugger_.checkBreakpoints(context);
-      await new Promise(r => setTimeout(r, 10));
-      
+      await new Promise((r) => setTimeout(r, 10));
+
       expect(debugger_.isPaused('test-agent')).toBe(true);
-      
+
       debugger_.resumeExecution('test-agent');
       await checkPromise;
     });
@@ -177,7 +168,7 @@ describe('AgentDebugger - Execution Control', () => {
   describe('resumeExecution', () => {
     it('should emit executionResumed event', async () => {
       debugger_.breakpoint('test-agent', 'true');
-      
+
       const resumeHandler = vi.fn();
       debugger_.on('executionResumed', resumeHandler);
 
@@ -186,9 +177,9 @@ describe('AgentDebugger - Execution Control', () => {
         state: {},
         variables: {},
       });
-      
-      await new Promise(r => setTimeout(r, 10));
-      
+
+      await new Promise((r) => setTimeout(r, 10));
+
       debugger_.resumeExecution('test-agent');
       await checkPromise;
 
@@ -200,21 +191,21 @@ describe('AgentDebugger - Execution Control', () => {
       debugger_.on('executionResumed', resumeHandler);
 
       debugger_.resumeExecution('test-agent');
-      
+
       expect(resumeHandler).not.toHaveBeenCalled();
     });
 
     it('should clear timeout when resuming', async () => {
       // Use a very long timeout so we can verify it gets cleared
       debugger_.destroy();
-      debugger_ = new AgentDebugger({ 
-        config: { 
+      debugger_ = new AgentDebugger({
+        config: {
           autoRecord: false,
           breakpointTimeout: 100000, // Very long timeout
-        } 
+        },
       });
       debugger_.registerAgent(manifest, {});
-      
+
       debugger_.breakpoint('test-agent', 'true');
 
       const checkPromise = debugger_.checkBreakpoints({
@@ -222,9 +213,9 @@ describe('AgentDebugger - Execution Control', () => {
         state: {},
         variables: {},
       });
-      
-      await new Promise(r => setTimeout(r, 10));
-      
+
+      await new Promise((r) => setTimeout(r, 10));
+
       // Resume manually before timeout
       debugger_.resumeExecution('test-agent');
       await checkPromise;
@@ -236,14 +227,14 @@ describe('AgentDebugger - Execution Control', () => {
   describe('breakpoint timeout', () => {
     it('should auto-resume after timeout', async () => {
       debugger_.destroy();
-      debugger_ = new AgentDebugger({ 
-        config: { 
+      debugger_ = new AgentDebugger({
+        config: {
           autoRecord: false,
           breakpointTimeout: 50, // 50ms timeout
-        } 
+        },
       });
       debugger_.registerAgent(manifest, {});
-      
+
       debugger_.breakpoint('test-agent', 'true');
 
       const resumeHandler = vi.fn();
@@ -254,7 +245,7 @@ describe('AgentDebugger - Execution Control', () => {
         state: {},
         variables: {},
       });
-      
+
       // Wait for the timeout to trigger auto-resume
       await checkPromise;
 
@@ -277,14 +268,14 @@ describe('AgentDebugger - Execution Control', () => {
         state: {},
         variables: {},
       });
-      
+
       const promise2 = debugger_.checkBreakpoints({
         agentId: 'test-agent-2',
         state: {},
         variables: {},
       });
 
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       const paused = debugger_.getPausedAgents();
       expect(paused).toContain('test-agent');
@@ -301,17 +292,17 @@ describe('AgentDebugger - Execution Control', () => {
   describe('max breakpoints limit', () => {
     it('should throw when max breakpoints reached', () => {
       debugger_.destroy();
-      debugger_ = new AgentDebugger({ 
-        config: { 
+      debugger_ = new AgentDebugger({
+        config: {
           autoRecord: false,
           maxBreakpoints: 2,
-        } 
+        },
       });
       debugger_.registerAgent(manifest, {});
 
       debugger_.breakpoint('test-agent', 'cond1');
       debugger_.breakpoint('test-agent', 'cond2');
-      
+
       expect(() => {
         debugger_.breakpoint('test-agent', 'cond3');
       }).toThrow(/Maximum breakpoints/);
@@ -341,20 +332,20 @@ describe('AgentDebugger - Event Forwarding', () => {
   it('should forward telemetry events to active recording session', () => {
     debugger_.registerAgent(manifest, {});
     const session = debugger_.startSession('test-session', true);
-    
+
     // Record events through the collector
     const span = debugger_.startSpan('test-op', { agentId: 'test-agent' });
     debugger_.endSpan(span.id);
 
     const recording = debugger_.stopSession();
-    
+
     // Spans should be captured in the recording
     expect(recording?.spans.length).toBeGreaterThanOrEqual(1);
   });
 
   it('should emit telemetryEvent when event is recorded', () => {
     debugger_.registerAgent(manifest, {});
-    
+
     const eventHandler = vi.fn();
     debugger_.on('telemetryEvent', eventHandler);
 
@@ -368,7 +359,7 @@ describe('AgentDebugger - Event Forwarding', () => {
   it('should track agent IDs in session', () => {
     // Start session before registering agents to capture registration events
     debugger_.startSession('test-session', true);
-    
+
     debugger_.registerAgent(manifest, {});
     const manifest2 = createTestManifest('test-agent-2');
     debugger_.registerAgent(manifest2, {});
@@ -415,11 +406,11 @@ describe('AgentDebugger - Replay with Events', () => {
     debugger_.stopSession();
 
     const recordings = debugger_.getRecordings();
-    
+
     // Use replayStarted event to verify state is set correctly
     const startHandler = vi.fn();
     debugger_.on('replayStarted', startHandler);
-    
+
     debugger_.replay(recordings[0].id, { speed: 10 });
 
     expect(startHandler).toHaveBeenCalled();
@@ -446,9 +437,9 @@ describe('AgentDebugger - Replay with Events', () => {
 
     // Fast replay
     debugger_.replay(recordings[0].id, { speed: 100 });
-    
+
     // Wait for replay to complete
-    await new Promise<void>(resolve => {
+    await new Promise<void>((resolve) => {
       debugger_.on('replayComplete', () => resolve());
       setTimeout(resolve, 500); // Fallback timeout
     });
@@ -459,18 +450,18 @@ describe('AgentDebugger - Replay with Events', () => {
     debugger_.stopSession();
 
     const recordings = debugger_.getRecordings();
-    
+
     // Start with a position - this verifies the option is passed
     // For empty recordings, replay completes immediately so we check via replayStarted event
     const startHandler = vi.fn();
     debugger_.on('replayStarted', startHandler);
-    
+
     debugger_.replay(recordings[0].id, { startPosition: 50 });
-    
+
     expect(startHandler).toHaveBeenCalled();
     const callArgs = startHandler.mock.calls[0][0];
     expect(callArgs.state.position).toBe(50);
-    
+
     debugger_.stopReplay();
   });
 
@@ -480,20 +471,20 @@ describe('AgentDebugger - Replay with Events', () => {
     debugger_.stopSession();
 
     const recordings = debugger_.getRecordings();
-    
+
     // Track seek events
     const seekHandler = vi.fn();
     debugger_.on('replaySeek', seekHandler);
 
     // Start replay - may complete immediately for recordings with no time separation
     debugger_.replay(recordings[0].id);
-    
+
     // Seek - if replay already completed, this is a no-op (no throw)
     debugger_.seekReplay(75);
 
     // Clean up
     debugger_.stopReplay();
-    
+
     // Test passed if no errors thrown
   });
 
@@ -511,14 +502,14 @@ describe('AgentDebugger - Replay with Events', () => {
     debugger_.stopSession();
 
     const recordings = debugger_.getRecordings();
-    
+
     // For recordings with no time separation between events, replay may complete instantly
     // So we just verify the API doesn't throw and handles the case gracefully
     debugger_.replay(recordings[0].id);
-    
+
     // If replay already completed, pauseReplay should not throw
     debugger_.pauseReplay();
-    
+
     // Clean up (may or may not be needed depending on replay completion)
     debugger_.stopReplay();
   });
@@ -540,8 +531,8 @@ describe('AgentDebugger - Replay with Events', () => {
 
     // Start replay - for empty recordings with no events, this may complete immediately
     debugger_.replay(recordings[0].id);
-    debugger_.pauseReplay();  // May not fire if already complete
-    debugger_.stopReplay();   // May not fire if already complete
+    debugger_.pauseReplay(); // May not fire if already complete
+    debugger_.stopReplay(); // May not fire if already complete
 
     // Either replayStopped or replayComplete should have been emitted
     // For empty recordings, replayComplete fires immediately
@@ -557,7 +548,7 @@ describe('AgentDebugger - Replay with Events', () => {
   it('should handle pauseReplay when not in replay mode', () => {
     const pauseHandler = vi.fn();
     debugger_.on('replayPaused', pauseHandler);
-    
+
     debugger_.pauseReplay();
     expect(pauseHandler).not.toHaveBeenCalled();
   });
@@ -590,7 +581,7 @@ describe('AgentDebugger - State History', () => {
 
   it('should get state history for agent', () => {
     debugger_.registerAgent(manifest, { count: 0 });
-    
+
     // Get the internal inspector to update state (simulating agent runtime)
     // The debugger delegates state management to the inspector
     const inspection = debugger_.inspect('test-agent');
@@ -621,11 +612,11 @@ describe('AgentDebugger - Destroy', () => {
   });
 
   it('should resume all paused agents on destroy', async () => {
-    const debugger_ = new AgentDebugger({ 
-      config: { 
+    const debugger_ = new AgentDebugger({
+      config: {
         autoRecord: false,
         breakpointTimeout: 100000, // Long timeout
-      } 
+      },
     });
     debugger_.registerAgent(manifest, {});
 
@@ -640,7 +631,7 @@ describe('AgentDebugger - Destroy', () => {
       variables: {},
     });
 
-    await new Promise(r => setTimeout(r, 10));
+    await new Promise((r) => setTimeout(r, 10));
     expect(debugger_.isPaused('test-agent')).toBe(true);
 
     // Destroy should resume all paused agents
@@ -701,7 +692,7 @@ describe('AgentDebugger - Recording Control', () => {
   it('should get specific recording by ID', () => {
     debugger_.startSession('test1', true);
     const recording1 = debugger_.stopSession();
-    
+
     debugger_.startSession('test2', true);
     debugger_.stopSession();
 

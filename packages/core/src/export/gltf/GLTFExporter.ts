@@ -92,7 +92,9 @@ export class GLTFExporter {
     this.exportMeshes(sceneGraph);
 
     const rootNodeIndex = this.exportNode(sceneGraph.root, sceneGraph);
-    this.document.scenes = [{ name: sceneGraph.metadata.name, nodes: rootNodeIndex !== undefined ? [rootNodeIndex] : [] }];
+    this.document.scenes = [
+      { name: sceneGraph.metadata.name, nodes: rootNodeIndex !== undefined ? [rootNodeIndex] : [] },
+    ];
     this.document.scene = 0;
 
     if (this.options.includeAnimations) this.exportAnimations(sceneGraph);
@@ -124,14 +126,18 @@ export class GLTFExporter {
     const gltfNode: IGLTFNode = { name: node.name };
     if (node.transform) this.applyTransform(gltfNode, node.transform);
 
-    const meshComp = (node.components || []).find((c) => isMeshComponent(c)) as IMeshComponent | undefined;
+    const meshComp = (node.components || []).find((c) => isMeshComponent(c)) as
+      | IMeshComponent
+      | undefined;
     if (meshComp && meshComp.meshRef) {
       const meshIndex = this.meshIndexMap.get(meshComp.meshRef);
       if (meshIndex !== undefined) gltfNode.mesh = meshIndex;
     }
 
     if (this.options.includeCameras) {
-      const cameraComp = (node.components || []).find((c) => isCameraComponent(c)) as ICameraComponent | undefined;
+      const cameraComp = (node.components || []).find((c) => isCameraComponent(c)) as
+        | ICameraComponent
+        | undefined;
       if (cameraComp) gltfNode.camera = this.exportCamera(cameraComp);
     }
 
@@ -164,11 +170,17 @@ export class GLTFExporter {
 
     const primitives: IGLTFMeshPrimitive[] = [];
     for (const primitive of mesh.primitives) {
-      const gltfPrimitive: IGLTFMeshPrimitive = { attributes: {}, mode: this.getPrimitiveMode(primitive.mode) };
+      const gltfPrimitive: IGLTFMeshPrimitive = {
+        attributes: {},
+        mode: this.getPrimitiveMode(primitive.mode),
+      };
 
       for (const [attrName, accessorIdx] of Object.entries(primitive.attributes)) {
         if (accessorIdx !== undefined) {
-          gltfPrimitive.attributes[attrName] = this.exportAccessor(accessorIdx as number, sceneGraph);
+          gltfPrimitive.attributes[attrName] = this.exportAccessor(
+            accessorIdx as number,
+            sceneGraph
+          );
         }
       }
 
@@ -209,21 +221,28 @@ export class GLTFExporter {
     };
 
     const pbr: IGLTFPBRMetallicRoughness = {};
-    if (material.baseColor) pbr.baseColorFactor = material.baseColor as [number, number, number, number];
+    if (material.baseColor)
+      pbr.baseColorFactor = material.baseColor as [number, number, number, number];
     if (material.metallic !== undefined) pbr.metallicFactor = material.metallic;
     if (material.roughness !== undefined) pbr.roughnessFactor = material.roughness;
 
     if (material.baseColorTexture) {
       const textureIndex = this.textureIndexMap.get(material.baseColorTexture.id);
       if (textureIndex !== undefined) {
-        pbr.baseColorTexture = { index: textureIndex, texCoord: material.baseColorTexture.uvChannel };
+        pbr.baseColorTexture = {
+          index: textureIndex,
+          texCoord: material.baseColorTexture.uvChannel,
+        };
       }
     }
 
     if (material.metallicRoughnessTexture) {
       const textureIndex = this.textureIndexMap.get(material.metallicRoughnessTexture.id);
       if (textureIndex !== undefined) {
-        pbr.metallicRoughnessTexture = { index: textureIndex, texCoord: material.metallicRoughnessTexture.uvChannel };
+        pbr.metallicRoughnessTexture = {
+          index: textureIndex,
+          texCoord: material.metallicRoughnessTexture.uvChannel,
+        };
       }
     }
 
@@ -232,25 +251,37 @@ export class GLTFExporter {
     if (material.normalTexture) {
       const textureIndex = this.textureIndexMap.get(material.normalTexture.id);
       if (textureIndex !== undefined) {
-        gltfMaterial.normalTexture = { index: textureIndex, texCoord: material.normalTexture.uvChannel, scale: material.normalScale };
+        gltfMaterial.normalTexture = {
+          index: textureIndex,
+          texCoord: material.normalTexture.uvChannel,
+          scale: material.normalScale,
+        };
       }
     }
 
     if (material.occlusionTexture) {
       const textureIndex = this.textureIndexMap.get(material.occlusionTexture.id);
       if (textureIndex !== undefined) {
-        gltfMaterial.occlusionTexture = { index: textureIndex, texCoord: material.occlusionTexture.uvChannel, strength: material.occlusionStrength };
+        gltfMaterial.occlusionTexture = {
+          index: textureIndex,
+          texCoord: material.occlusionTexture.uvChannel,
+          strength: material.occlusionStrength,
+        };
       }
     }
 
     if (material.emissiveTexture) {
       const textureIndex = this.textureIndexMap.get(material.emissiveTexture.id);
       if (textureIndex !== undefined) {
-        gltfMaterial.emissiveTexture = { index: textureIndex, texCoord: material.emissiveTexture.uvChannel };
+        gltfMaterial.emissiveTexture = {
+          index: textureIndex,
+          texCoord: material.emissiveTexture.uvChannel,
+        };
       }
     }
 
-    if (material.emissiveColor) gltfMaterial.emissiveFactor = material.emissiveColor as [number, number, number];
+    if (material.emissiveColor)
+      gltfMaterial.emissiveFactor = material.emissiveColor as [number, number, number];
 
     const materialIndex = this.document.materials!.length;
     this.document.materials!.push(gltfMaterial);
@@ -269,7 +300,11 @@ export class GLTFExporter {
     const imageIndex = this.exportImage(texture, sceneGraph);
     const samplerIndex = this.exportSampler(texture);
 
-    const gltfTexture: IGLTFTexture = { name: texture.name, source: imageIndex, sampler: samplerIndex };
+    const gltfTexture: IGLTFTexture = {
+      name: texture.name,
+      source: imageIndex,
+      sampler: samplerIndex,
+    };
     const textureIndex = this.document.textures!.length;
     this.document.textures!.push(gltfTexture);
     this.textureIndexMap.set(texture.id, textureIndex);
@@ -308,7 +343,8 @@ export class GLTFExporter {
   }
 
   private exportAnimations(sceneGraph: ISceneGraph): void {
-    for (const animation of sceneGraph.animations || []) this.exportAnimation(animation, sceneGraph);
+    for (const animation of sceneGraph.animations || [])
+      this.exportAnimation(animation, sceneGraph);
   }
 
   private exportAnimation(animation: IAnimation, sceneGraph: ISceneGraph): number {
@@ -334,7 +370,10 @@ export class GLTFExporter {
 
       channels.push({
         sampler: gltfSamplerIndex,
-        target: { node: nodeIndex, path: channel.targetPath as 'translation' | 'rotation' | 'scale' | 'weights' },
+        target: {
+          node: nodeIndex,
+          path: channel.targetPath as 'translation' | 'rotation' | 'scale' | 'weights',
+        },
       });
     }
 
@@ -371,7 +410,10 @@ export class GLTFExporter {
 
     if (inverseBindMatrices.length > 0) {
       gltfSkin.inverseBindMatrices = this.createAccessorFromData(
-        `${skin.id}_ibm`, new Float32Array(inverseBindMatrices), 'MAT4', GLTFComponentType.FLOAT
+        `${skin.id}_ibm`,
+        new Float32Array(inverseBindMatrices),
+        'MAT4',
+        GLTFComponentType.FLOAT
       );
     }
 
@@ -448,10 +490,16 @@ export class GLTFExporter {
 
     const srcBuffer = sceneGraph.buffers[srcBufView.bufferIndex];
     if (!srcBuffer || !srcBuffer.data) {
-      const bufferView: IGLTFBufferView = { buffer: 0, byteOffset: this.bufferOffset, byteLength: srcBufView.byteLength };
+      const bufferView: IGLTFBufferView = {
+        buffer: 0,
+        byteOffset: this.bufferOffset,
+        byteLength: srcBufView.byteLength,
+      };
       if (srcBufView.byteStride) bufferView.byteStride = srcBufView.byteStride;
-      if (srcBufView.target === 'elementArrayBuffer') bufferView.target = GLTFBufferViewTarget.ELEMENT_ARRAY_BUFFER;
-      else if (srcBufView.target === 'arrayBuffer') bufferView.target = GLTFBufferViewTarget.ARRAY_BUFFER;
+      if (srcBufView.target === 'elementArrayBuffer')
+        bufferView.target = GLTFBufferViewTarget.ELEMENT_ARRAY_BUFFER;
+      else if (srcBufView.target === 'arrayBuffer')
+        bufferView.target = GLTFBufferViewTarget.ARRAY_BUFFER;
 
       const bufferViewIndex = this.document.bufferViews!.length;
       this.document.bufferViews!.push(bufferView);
@@ -459,16 +507,28 @@ export class GLTFExporter {
       return bufferViewIndex;
     }
 
-    const slice = srcBuffer.data.slice(srcBufView.byteOffset, srcBufView.byteOffset + srcBufView.byteLength) as ArrayBuffer;
-    const bufferView: IGLTFBufferView = { buffer: 0, byteOffset: this.bufferOffset, byteLength: slice.byteLength };
+    const slice = srcBuffer.data.slice(
+      srcBufView.byteOffset,
+      srcBufView.byteOffset + srcBufView.byteLength
+    ) as ArrayBuffer;
+    const bufferView: IGLTFBufferView = {
+      buffer: 0,
+      byteOffset: this.bufferOffset,
+      byteLength: slice.byteLength,
+    };
     if (srcBufView.byteStride) bufferView.byteStride = srcBufView.byteStride;
-    if (srcBufView.target === 'elementArrayBuffer') bufferView.target = GLTFBufferViewTarget.ELEMENT_ARRAY_BUFFER;
-    else if (srcBufView.target === 'arrayBuffer') bufferView.target = GLTFBufferViewTarget.ARRAY_BUFFER;
+    if (srcBufView.target === 'elementArrayBuffer')
+      bufferView.target = GLTFBufferViewTarget.ELEMENT_ARRAY_BUFFER;
+    else if (srcBufView.target === 'arrayBuffer')
+      bufferView.target = GLTFBufferViewTarget.ARRAY_BUFFER;
 
     this.bufferData.push(slice);
     this.bufferOffset += slice.byteLength;
     const padding = (4 - (this.bufferOffset % 4)) % 4;
-    if (padding > 0) { this.bufferData.push(new ArrayBuffer(padding)); this.bufferOffset += padding; }
+    if (padding > 0) {
+      this.bufferData.push(new ArrayBuffer(padding));
+      this.bufferOffset += padding;
+    }
 
     const bufferViewIndex = this.document.bufferViews!.length;
     this.document.bufferViews!.push(bufferView);
@@ -476,30 +536,64 @@ export class GLTFExporter {
     return bufferViewIndex;
   }
 
-  private createAccessorFromData(name: string, data: Float32Array | Uint16Array | Uint32Array, type: GLTFAccessorType, componentType: GLTFComponentType): number {
-    const buffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer as ArrayBuffer;
-    const bufferView: IGLTFBufferView = { buffer: 0, byteOffset: this.bufferOffset, byteLength: buffer.byteLength };
+  private createAccessorFromData(
+    name: string,
+    data: Float32Array | Uint16Array | Uint32Array,
+    type: GLTFAccessorType,
+    componentType: GLTFComponentType
+  ): number {
+    const buffer = data.buffer.slice(
+      data.byteOffset,
+      data.byteOffset + data.byteLength
+    ) as ArrayBuffer as ArrayBuffer;
+    const bufferView: IGLTFBufferView = {
+      buffer: 0,
+      byteOffset: this.bufferOffset,
+      byteLength: buffer.byteLength,
+    };
     this.bufferData.push(buffer);
     this.bufferOffset += buffer.byteLength;
     const padding = (4 - (this.bufferOffset % 4)) % 4;
-    if (padding > 0) { this.bufferData.push(new ArrayBuffer(padding)); this.bufferOffset += padding; }
+    if (padding > 0) {
+      this.bufferData.push(new ArrayBuffer(padding));
+      this.bufferOffset += padding;
+    }
 
     const bufferViewIndex = this.document.bufferViews!.length;
     this.document.bufferViews!.push(bufferView);
     const count = data.length / this.getComponentCount(type);
-    const accessor: IGLTFAccessor = { name, bufferView: bufferViewIndex, byteOffset: 0, componentType, count, type };
+    const accessor: IGLTFAccessor = {
+      name,
+      bufferView: bufferViewIndex,
+      byteOffset: 0,
+      componentType,
+      count,
+      type,
+    };
     const accessorIndex = this.document.accessors!.length;
     this.document.accessors!.push(accessor);
     return accessorIndex;
   }
 
   private applyTransform(node: IGLTFNode, transform: ITransform): void {
-    const hasTranslation = transform.position.x !== 0 || transform.position.y !== 0 || transform.position.z !== 0;
-    const hasRotation = transform.rotation.x !== 0 || transform.rotation.y !== 0 || transform.rotation.z !== 0 || transform.rotation.w !== 1;
+    const hasTranslation =
+      transform.position.x !== 0 || transform.position.y !== 0 || transform.position.z !== 0;
+    const hasRotation =
+      transform.rotation.x !== 0 ||
+      transform.rotation.y !== 0 ||
+      transform.rotation.z !== 0 ||
+      transform.rotation.w !== 1;
     const hasScale = transform.scale.x !== 1 || transform.scale.y !== 1 || transform.scale.z !== 1;
 
-    if (hasTranslation) node.translation = [transform.position.x, transform.position.y, transform.position.z];
-    if (hasRotation) node.rotation = [transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w];
+    if (hasTranslation)
+      node.translation = [transform.position.x, transform.position.y, transform.position.z];
+    if (hasRotation)
+      node.rotation = [
+        transform.rotation.x,
+        transform.rotation.y,
+        transform.rotation.z,
+        transform.rotation.w,
+      ];
     if (hasScale) node.scale = [transform.scale.x, transform.scale.y, transform.scale.z];
   }
 
@@ -562,25 +656,38 @@ export class GLTFExporter {
     const headerSize = 12;
     const jsonChunkHeaderSize = 8;
     const binChunkHeaderSize = binData.byteLength > 0 ? 8 : 0;
-    const totalSize = headerSize + jsonChunkHeaderSize + jsonChunkLength + (binData.byteLength > 0 ? binChunkHeaderSize + binChunkLength : 0);
+    const totalSize =
+      headerSize +
+      jsonChunkHeaderSize +
+      jsonChunkLength +
+      (binData.byteLength > 0 ? binChunkHeaderSize + binChunkLength : 0);
 
     const glb = new ArrayBuffer(totalSize);
     const view = new DataView(glb);
     const bytes = new Uint8Array(glb);
     let offset = 0;
 
-    view.setUint32(offset, 0x46546c67, true); offset += 4;
-    view.setUint32(offset, 2, true); offset += 4;
-    view.setUint32(offset, totalSize, true); offset += 4;
-    view.setUint32(offset, jsonChunkLength, true); offset += 4;
-    view.setUint32(offset, 0x4e4f534a, true); offset += 4;
-    bytes.set(jsonBytes, offset); offset += jsonBytes.length;
+    view.setUint32(offset, 0x46546c67, true);
+    offset += 4;
+    view.setUint32(offset, 2, true);
+    offset += 4;
+    view.setUint32(offset, totalSize, true);
+    offset += 4;
+    view.setUint32(offset, jsonChunkLength, true);
+    offset += 4;
+    view.setUint32(offset, 0x4e4f534a, true);
+    offset += 4;
+    bytes.set(jsonBytes, offset);
+    offset += jsonBytes.length;
     for (let i = 0; i < jsonPadding; i++) bytes[offset++] = 0x20;
 
     if (binData.byteLength > 0) {
-      view.setUint32(offset, binChunkLength, true); offset += 4;
-      view.setUint32(offset, 0x004e4942, true); offset += 4;
-      bytes.set(new Uint8Array(binData), offset); offset += binData.byteLength;
+      view.setUint32(offset, binChunkLength, true);
+      offset += 4;
+      view.setUint32(offset, 0x004e4942, true);
+      offset += 4;
+      bytes.set(new Uint8Array(binData), offset);
+      offset += binData.byteLength;
       for (let i = 0; i < binPadding; i++) bytes[offset++] = 0x00;
     }
 
@@ -601,59 +708,92 @@ export class GLTFExporter {
 
   private mapComponentType(type: string): GLTFComponentType {
     switch (type) {
-      case 'byte': return GLTFComponentType.BYTE;
-      case 'ubyte': return GLTFComponentType.UNSIGNED_BYTE;
-      case 'short': return GLTFComponentType.SHORT;
-      case 'ushort': return GLTFComponentType.UNSIGNED_SHORT;
-      case 'uint': return GLTFComponentType.UNSIGNED_INT;
-      case 'float': default: return GLTFComponentType.FLOAT;
+      case 'byte':
+        return GLTFComponentType.BYTE;
+      case 'ubyte':
+        return GLTFComponentType.UNSIGNED_BYTE;
+      case 'short':
+        return GLTFComponentType.SHORT;
+      case 'ushort':
+        return GLTFComponentType.UNSIGNED_SHORT;
+      case 'uint':
+        return GLTFComponentType.UNSIGNED_INT;
+      case 'float':
+      default:
+        return GLTFComponentType.FLOAT;
     }
   }
 
   private getPrimitiveMode(mode?: string): GLTFPrimitiveMode {
     switch (mode) {
-      case 'points': return GLTFPrimitiveMode.POINTS;
-      case 'lines': return GLTFPrimitiveMode.LINES;
-      case 'lineLoop': return GLTFPrimitiveMode.LINE_LOOP;
-      case 'lineStrip': return GLTFPrimitiveMode.LINE_STRIP;
-      case 'triangleStrip': return GLTFPrimitiveMode.TRIANGLE_STRIP;
-      case 'triangleFan': return GLTFPrimitiveMode.TRIANGLE_FAN;
-      case 'triangles': default: return GLTFPrimitiveMode.TRIANGLES;
+      case 'points':
+        return GLTFPrimitiveMode.POINTS;
+      case 'lines':
+        return GLTFPrimitiveMode.LINES;
+      case 'lineLoop':
+        return GLTFPrimitiveMode.LINE_LOOP;
+      case 'lineStrip':
+        return GLTFPrimitiveMode.LINE_STRIP;
+      case 'triangleStrip':
+        return GLTFPrimitiveMode.TRIANGLE_STRIP;
+      case 'triangleFan':
+        return GLTFPrimitiveMode.TRIANGLE_FAN;
+      case 'triangles':
+      default:
+        return GLTFPrimitiveMode.TRIANGLES;
     }
   }
 
   private getMagFilter(filter?: string): GLTFMagFilter {
     switch (filter) {
-      case 'nearest': return GLTFMagFilter.NEAREST;
-      case 'linear': default: return GLTFMagFilter.LINEAR;
+      case 'nearest':
+        return GLTFMagFilter.NEAREST;
+      case 'linear':
+      default:
+        return GLTFMagFilter.LINEAR;
     }
   }
 
   private getMinFilter(filter?: string): GLTFMinFilter {
     switch (filter) {
-      case 'nearest': return GLTFMinFilter.NEAREST;
-      case 'linear': return GLTFMinFilter.LINEAR;
-      case 'trilinear': default: return GLTFMinFilter.LINEAR_MIPMAP_LINEAR;
+      case 'nearest':
+        return GLTFMinFilter.NEAREST;
+      case 'linear':
+        return GLTFMinFilter.LINEAR;
+      case 'trilinear':
+      default:
+        return GLTFMinFilter.LINEAR_MIPMAP_LINEAR;
     }
   }
 
   private getWrapMode(wrap?: string): GLTFWrapMode {
     switch (wrap) {
-      case 'clamp': return GLTFWrapMode.CLAMP_TO_EDGE;
-      case 'mirror': return GLTFWrapMode.MIRRORED_REPEAT;
-      case 'repeat': default: return GLTFWrapMode.REPEAT;
+      case 'clamp':
+        return GLTFWrapMode.CLAMP_TO_EDGE;
+      case 'mirror':
+        return GLTFWrapMode.MIRRORED_REPEAT;
+      case 'repeat':
+      default:
+        return GLTFWrapMode.REPEAT;
     }
   }
 
   private getComponentCount(type: GLTFAccessorType): number {
     switch (type) {
-      case 'SCALAR': return 1;
-      case 'VEC2': return 2;
-      case 'VEC3': return 3;
-      case 'VEC4': return 4;
-      case 'MAT2': return 4;
-      case 'MAT3': return 9;
-      case 'MAT4': return 16;
+      case 'SCALAR':
+        return 1;
+      case 'VEC2':
+        return 2;
+      case 'VEC3':
+        return 3;
+      case 'VEC4':
+        return 4;
+      case 'MAT2':
+        return 4;
+      case 'MAT3':
+        return 9;
+      case 'MAT4':
+        return 16;
     }
   }
 }

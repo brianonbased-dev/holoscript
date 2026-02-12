@@ -1,6 +1,6 @@
 /**
  * @holoscript/core HITL Audit Logger
- * 
+ *
  * Provides persistent storage for Human-in-the-Loop decisions and agent actions.
  * Supports file-system (for Node.js) and localStorage (for Browser) backends.
  */
@@ -45,7 +45,10 @@ export class HITLAuditLogger {
   /**
    * Retrieve audit logs
    */
-  public static async getLogs(filter?: { agentId?: string; decision?: string }): Promise<AuditEntry[]> {
+  public static async getLogs(filter?: {
+    agentId?: string;
+    decision?: string;
+  }): Promise<AuditEntry[]> {
     let logs: AuditEntry[] = [];
 
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -56,7 +59,7 @@ export class HITLAuditLogger {
     }
 
     if (filter) {
-      return logs.filter(log => {
+      return logs.filter((log) => {
         if (filter.agentId && log.agentId !== filter.agentId) return false;
         if (filter.decision && log.decision !== filter.decision) return false;
         return true;
@@ -69,14 +72,14 @@ export class HITLAuditLogger {
   private static saveToLocalStorage(entry: AuditEntry): void {
     const data = localStorage.getItem(this.STORAGE_KEY);
     let logs: AuditEntry[] = data ? JSON.parse(data) : [];
-    
+
     logs.push(entry);
-    
+
     // Cap log size
     if (logs.length > this.MAX_ENTRIES) {
       logs = logs.slice(-this.MAX_ENTRIES);
     }
-    
+
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(logs));
   }
 }

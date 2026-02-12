@@ -23,6 +23,9 @@ export type PostProcessEffectType =
   | 'filmGrain'
   | 'chromaticAberration'
   | 'fog'
+  | 'caustics'
+  | 'ssr'
+  | 'ssgi'
   | 'custom';
 
 /**
@@ -43,13 +46,7 @@ export type ToneMapOperator =
 /**
  * Blend modes for effect compositing
  */
-export type BlendMode =
-  | 'normal'
-  | 'add'
-  | 'multiply'
-  | 'screen'
-  | 'overlay'
-  | 'softLight';
+export type BlendMode = 'normal' | 'add' | 'multiply' | 'screen' | 'overlay' | 'softLight';
 
 /**
  * Base effect parameters interface
@@ -115,6 +112,12 @@ export interface ISSAOParams extends IEffectParams {
   samples: number;
   power: number;
   falloff: number;
+  /** 'hemisphere' = random hemisphere, 'hbao' = horizon-based 8-dir × 4-step */
+  mode?: 'hemisphere' | 'hbao';
+  /** Output bent normal direction (least-occluded direction) */
+  bentNormals?: boolean;
+  /** 5×5 cross-bilateral spatial denoise weighted by depth + normal */
+  spatialDenoise?: boolean;
 }
 
 /**
@@ -192,6 +195,54 @@ export interface IFogParams extends IEffectParams {
 }
 
 /**
+ * Caustics overlay parameters
+ */
+export interface ICausticsParams extends IEffectParams {
+  scale: number;
+  speed: number;
+  color: [number, number, number];
+  depthFade: number;
+  waterLevel: number;
+  /** RGB IoR separation for prismatic chromatic dispersion */
+  dispersion?: number;
+  /** Turbulence-driven foam overlay intensity */
+  foamIntensity?: number;
+  /** Darken terrain where caustics are absent */
+  shadowStrength?: number;
+}
+
+/**
+ * Screen-Space Reflections (SSR) parameters
+ */
+export interface ISSRParams extends IEffectParams {
+  maxSteps: number;
+  stepSize: number;
+  thickness: number;
+  roughnessFade: number;
+  edgeFade: number;
+  /** Golden-angle blur at hit point scaled by roughness (0 = sharp) */
+  roughnessBlur?: number;
+  /** Schlick Fresnel weighting strength (0 = uniform, 1 = physically correct) */
+  fresnelStrength?: number;
+}
+
+/**
+ * Screen-Space Global Illumination (SSGI) parameters
+ */
+export interface ISSGIParams extends IEffectParams {
+  radius: number;
+  samples: number;
+  bounceIntensity: number;
+  falloff: number;
+  /** Blend with previous frame using motion vectors (0 = off, 1 = full) */
+  temporalBlend?: number;
+  /** 3×3 edge-stopping cross-bilateral spatial denoise */
+  spatialDenoise?: boolean;
+  /** Multi-bounce approximation multiplier */
+  multiBounce?: number;
+}
+
+/**
  * Custom shader effect parameters
  */
 export interface ICustomEffectParams extends IEffectParams {
@@ -215,6 +266,9 @@ export type EffectParams =
   | IFilmGrainParams
   | IChromaticAberrationParams
   | IFogParams
+  | ICausticsParams
+  | ISSRParams
+  | ISSGIParams
   | ICustomEffectParams;
 
 /**
@@ -359,6 +413,9 @@ export const DEFAULT_PARAMS: Record<PostProcessEffectType, EffectParams> = {
     samples: 16,
     power: 2.0,
     falloff: 1.0,
+    mode: 'hemisphere',
+    bentNormals: false,
+    spatialDenoise: false,
   } as ISSAOParams,
 
   fxaa: {
@@ -427,6 +484,43 @@ export const DEFAULT_PARAMS: Record<PostProcessEffectType, EffectParams> = {
     mode: 'exponential',
   } as IFogParams,
 
+  caustics: {
+    enabled: false,
+    intensity: 0.8,
+    scale: 8.0,
+    speed: 0.5,
+    color: [0.2, 0.5, 0.8],
+    depthFade: 0.5,
+    waterLevel: 0.5,
+    dispersion: 0.0,
+    foamIntensity: 0.0,
+    shadowStrength: 0.0,
+  } as ICausticsParams,
+
+  ssr: {
+    enabled: false,
+    intensity: 0.8,
+    maxSteps: 64,
+    stepSize: 0.05,
+    thickness: 0.1,
+    roughnessFade: 0.5,
+    edgeFade: 4.0,
+    roughnessBlur: 0.0,
+    fresnelStrength: 0.0,
+  } as ISSRParams,
+
+  ssgi: {
+    enabled: false,
+    intensity: 0.5,
+    radius: 2.0,
+    samples: 16,
+    bounceIntensity: 1.0,
+    falloff: 1.0,
+    temporalBlend: 0.0,
+    spatialDenoise: false,
+    multiBounce: 0.0,
+  } as ISSGIParams,
+
   custom: {
     enabled: true,
     intensity: 1.0,
@@ -438,9 +532,7 @@ export const DEFAULT_PARAMS: Record<PostProcessEffectType, EffectParams> = {
 /**
  * Get default parameters for effect type
  */
-export function getDefaultParams<T extends EffectParams>(
-  type: PostProcessEffectType,
-): T {
+export function getDefaultParams<T extends EffectParams>(type: PostProcessEffectType): T {
   return { ...DEFAULT_PARAMS[type] } as T;
 }
 
@@ -449,7 +541,7 @@ export function getDefaultParams<T extends EffectParams>(
  */
 export function mergeParams<T extends EffectParams>(
   type: PostProcessEffectType,
-  partial: Partial<T>,
+  partial: Partial<T>
 ): T {
   return { ...DEFAULT_PARAMS[type], ...partial } as T;
 }
@@ -459,7 +551,7 @@ export function mergeParams<T extends EffectParams>(
  */
 export function validateParams(
   type: PostProcessEffectType,
-  params: EffectParams,
+  params: EffectParams
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -516,19 +608,22 @@ export function validateParams(
  * Size in bytes for uniform buffers
  */
 export const UNIFORM_SIZES: Record<PostProcessEffectType, number> = {
-  bloom: 48,     // intensity, threshold, softThreshold, radius, iterations, anamorphic
-  tonemap: 32,   // operator, exposure, gamma, whitePoint, contrast, saturation
-  dof: 48,       // focusDistance, focalLength, aperture, maxBlur, near/far
+  bloom: 48, // intensity, threshold, softThreshold, radius, iterations, anamorphic
+  tonemap: 32, // operator, exposure, gamma, whitePoint, contrast, saturation
+  dof: 48, // focusDistance, focalLength, aperture, maxBlur, near/far
   motionBlur: 16, // samples, velocityScale, maxVelocity
-  ssao: 32,      // radius, bias, samples, power, falloff
-  fxaa: 16,      // quality, edgeThreshold, edgeThresholdMin
-  sharpen: 16,   // amount, threshold
-  vignette: 32,  // intensity, roundness, smoothness, color
+  ssao: 48, // radius, bias, samples, power, falloff, mode, bentNormals, spatialDenoise
+  fxaa: 16, // quality, edgeThreshold, edgeThresholdMin
+  sharpen: 16, // amount, threshold
+  vignette: 32, // intensity, roundness, smoothness, color
   colorGrade: 96, // shadows, midtones, highlights, offsets, hue, temp, tint
   filmGrain: 16, // size, luminance, time
   chromaticAberration: 32, // offsets, radial
-  fog: 48,       // color, density, start, end, height, falloff
-  custom: 256,   // generic uniform buffer for custom effects
+  fog: 48, // color, density, start, end, height, falloff
+  caustics: 64, // intensity, scale, speed, time, color, depthFade, waterLevel, dispersion, foam, shadow
+  ssr: 48, // maxSteps, stepSize, thickness, roughnessFade, edgeFade, intensity, roughnessBlur, fresnel
+  ssgi: 48, // radius, samples, bounceIntensity, falloff, time, intensity, temporalBlend, denoise, multiBounce
+  custom: 256, // generic uniform buffer for custom effects
 };
 
 // =============================================================================

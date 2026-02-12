@@ -710,7 +710,7 @@ export function defaultOrientation(): IAudioOrientation {
 export function bufferSource(
   id: string,
   url: string,
-  options: Partial<IAudioSourceConfig> = {},
+  options: Partial<IAudioSourceConfig> = {}
 ): IAudioSourceConfig {
   return {
     id,
@@ -732,7 +732,7 @@ export function oscillatorSource(
   id: string,
   waveform: OscillatorType,
   frequency: number,
-  options: Partial<IAudioSourceConfig> = {},
+  options: Partial<IAudioSourceConfig> = {}
 ): IAudioSourceConfig {
   return {
     id,
@@ -754,7 +754,7 @@ export function oscillatorSource(
 export function streamSource(
   id: string,
   url: string,
-  options: Partial<IAudioSourceConfig> = {},
+  options: Partial<IAudioSourceConfig> = {}
 ): IAudioSourceConfig {
   return {
     id,
@@ -775,7 +775,7 @@ export function streamSource(
 export function noiseSource(
   id: string,
   noiseType: NoiseType,
-  options: Partial<IAudioSourceConfig> = {},
+  options: Partial<IAudioSourceConfig> = {}
 ): IAudioSourceConfig {
   return {
     id,
@@ -796,7 +796,7 @@ export function noiseSource(
 export function spatialSource(
   config: IAudioSourceConfig,
   position: IVector3,
-  options: Partial<IAudioSourceConfig> = {},
+  options: Partial<IAudioSourceConfig> = {}
 ): IAudioSourceConfig {
   return {
     ...config,
@@ -815,10 +815,7 @@ export function spatialSource(
 /**
  * Create a gain effect config
  */
-export function gainEffect(
-  id: string,
-  gain: number = 1.0,
-): IGainEffect {
+export function gainEffect(id: string, gain: number = 1.0): IGainEffect {
   return {
     id,
     type: 'gain',
@@ -835,7 +832,7 @@ export function reverbEffect(
   id: string,
   decay: number = 2.0,
   wet: number = 0.5,
-  options: Partial<IReverbEffect> = {},
+  options: Partial<IReverbEffect> = {}
 ): IReverbEffect {
   return {
     id,
@@ -857,7 +854,7 @@ export function delayEffect(
   id: string,
   time: number = 0.5,
   feedback: number = 0.3,
-  options: Partial<IDelayEffect> = {},
+  options: Partial<IDelayEffect> = {}
 ): IDelayEffect {
   return {
     id,
@@ -879,7 +876,7 @@ export function filterEffect(
   id: string,
   filterType: FilterType,
   frequency: number,
-  options: Partial<IFilterEffect> = {},
+  options: Partial<IFilterEffect> = {}
 ): IFilterEffect {
   return {
     id,
@@ -901,7 +898,7 @@ export function compressorEffect(
   id: string,
   threshold: number = -24,
   ratio: number = 4,
-  options: Partial<ICompressorEffect> = {},
+  options: Partial<ICompressorEffect> = {}
 ): ICompressorEffect {
   return {
     id,
@@ -1014,33 +1011,21 @@ export function validateSourceConfig(config: IAudioSourceConfig): {
 /**
  * Create a lowpass filter effect
  */
-export function lowpassFilter(
-  id: string,
-  frequency: number,
-  Q: number = 1.0,
-): IFilterEffect {
+export function lowpassFilter(id: string, frequency: number, Q: number = 1.0): IFilterEffect {
   return filterEffect(id, 'lowpass', frequency, { Q });
 }
 
 /**
  * Create a highpass filter effect
  */
-export function highpassFilter(
-  id: string,
-  frequency: number,
-  Q: number = 1.0,
-): IFilterEffect {
+export function highpassFilter(id: string, frequency: number, Q: number = 1.0): IFilterEffect {
   return filterEffect(id, 'highpass', frequency, { Q });
 }
 
 /**
  * Create a bandpass filter effect
  */
-export function bandpassFilter(
-  id: string,
-  frequency: number,
-  Q: number = 1.0,
-): IFilterEffect {
+export function bandpassFilter(id: string, frequency: number, Q: number = 1.0): IFilterEffect {
   return filterEffect(id, 'bandpass', frequency, { Q });
 }
 
@@ -1050,7 +1035,7 @@ export function bandpassFilter(
 export function distortionEffect(
   id: string,
   amount: number = 0.5,
-  options: Partial<IDistortionEffect> = {},
+  options: Partial<IDistortionEffect> = {}
 ): IDistortionEffect {
   return {
     id,
@@ -1066,10 +1051,7 @@ export function distortionEffect(
 /**
  * Create a pan effect config
  */
-export function panEffect(
-  id: string,
-  pan: number = 0,
-): IPanEffect {
+export function panEffect(id: string, pan: number = 0): IPanEffect {
   return {
     id,
     type: 'pan',
@@ -1082,11 +1064,7 @@ export function panEffect(
 /**
  * Create an EQ band config
  */
-export function eqBand(
-  frequency: number,
-  Q: number = 1.0,
-  gain: number = 0,
-): IEQBand {
+export function eqBand(frequency: number, Q: number = 1.0, gain: number = 0): IEQBand {
   return { frequency, Q, gain };
 }
 
@@ -1096,7 +1074,7 @@ export function eqBand(
 export function equalizerEffect(
   id: string,
   bands: IEQBand[],
-  options: Partial<IEqualizerEffect> = {},
+  options: Partial<IEqualizerEffect> = {}
 ): IEqualizerEffect {
   return {
     id,
@@ -1119,7 +1097,7 @@ export function createNote(
   pitch: number | string,
   start: number,
   duration: number,
-  velocity: number = 100,
+  velocity: number = 100
 ): INote {
   return {
     pitch: typeof pitch === 'string' ? noteNameToMidi(pitch) : pitch,
@@ -1136,7 +1114,7 @@ export function createNote(
 export function createPattern(
   id: string,
   notes: INote[],
-  options: Partial<IPattern> = {},
+  options: Partial<IPattern> = {}
 ): IPattern {
   const maxEnd = notes.reduce(
     (max, n) => Math.max(max, (n.start ?? n.startBeat ?? 0) + n.duration),
@@ -1157,7 +1135,7 @@ export function createPattern(
 export function createTrack(
   id: string,
   patterns: IPatternRef[],
-  options: Partial<ITrack> = {},
+  options: Partial<ITrack> = {}
 ): ITrack {
   return {
     id,
@@ -1177,7 +1155,7 @@ export function createSequence(
   id: string,
   patternOrder: string[],
   tracks: ITrack[],
-  options: Partial<ISequence> = {},
+  options: Partial<ISequence> = {}
 ): ISequence {
   return {
     id,
@@ -1189,7 +1167,3 @@ export function createSequence(
     ...options,
   };
 }
-
-
-
-

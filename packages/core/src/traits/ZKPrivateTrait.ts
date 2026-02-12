@@ -1,9 +1,9 @@
 /**
  * ZKPrivate Trait
- * 
+ *
  * Zero-Knowledge Spatial Privacy.
  * Allows agents to prove spatial properties without revealing exact coordinates.
- * 
+ *
  * @version 1.0.0 (Research Stub)
  */
 

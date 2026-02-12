@@ -54,7 +54,7 @@ describe('GossipProtocol', () => {
 
     it('should remove a peer', () => {
       protocol.addPeer('peer-1', 'localhost:3001');
-      
+
       const removed = protocol.removePeer('peer-1');
 
       expect(removed).toBe(true);
@@ -123,17 +123,20 @@ describe('GossipProtocol', () => {
       protocol.subscribe('data', handler);
       protocol.addPeer('peer-1', 'addr');
 
-      const received = await protocol.receive({
-        id: 'msg-1',
-        originId: 'peer-1',
-        content: { data: 'incoming' },
-        type: 'data',
-        version: 1,
-        createdAt: Date.now(),
-        ttl: 30000,
-        hops: 0,
-        path: ['peer-1'],
-      }, 'peer-1');
+      const received = await protocol.receive(
+        {
+          id: 'msg-1',
+          originId: 'peer-1',
+          content: { data: 'incoming' },
+          type: 'data',
+          version: 1,
+          createdAt: Date.now(),
+          ttl: 30000,
+          hops: 0,
+          path: ['peer-1'],
+        },
+        'peer-1'
+      );
 
       expect(received).toBe(true);
       expect(handler).toHaveBeenCalledOnce();
@@ -170,17 +173,20 @@ describe('GossipProtocol', () => {
       const handler = vi.fn();
       protocol.subscribe('data', handler);
 
-      const received = await protocol.receive({
-        id: 'msg-exp',
-        originId: 'peer-1',
-        content: {},
-        type: 'data',
-        version: 1,
-        createdAt: Date.now() - 60000,
-        ttl: 30000, // Already expired
-        hops: 0,
-        path: ['peer-1'],
-      }, 'peer-1');
+      const received = await protocol.receive(
+        {
+          id: 'msg-exp',
+          originId: 'peer-1',
+          content: {},
+          type: 'data',
+          version: 1,
+          createdAt: Date.now() - 60000,
+          ttl: 30000, // Already expired
+          hops: 0,
+          path: ['peer-1'],
+        },
+        'peer-1'
+      );
 
       expect(received).toBe(false);
       expect(handler).not.toHaveBeenCalled();
@@ -191,17 +197,20 @@ describe('GossipProtocol', () => {
       const handler = vi.fn();
       protocol10.subscribe('data', handler);
 
-      const received = await protocol10.receive({
-        id: 'msg-hops',
-        originId: 'origin',
-        content: {},
-        type: 'data',
-        version: 1,
-        createdAt: Date.now(),
-        ttl: 30000,
-        hops: 15, // Over limit
-        path: Array(15).fill('node'),
-      }, 'peer-1');
+      const received = await protocol10.receive(
+        {
+          id: 'msg-hops',
+          originId: 'origin',
+          content: {},
+          type: 'data',
+          version: 1,
+          createdAt: Date.now(),
+          ttl: 30000,
+          hops: 15, // Over limit
+          path: Array(15).fill('node'),
+        },
+        'peer-1'
+      );
 
       expect(received).toBe(false);
       expect(handler).not.toHaveBeenCalled();
@@ -212,19 +221,22 @@ describe('GossipProtocol', () => {
       protocol.addPeer('peer-1', 'addr');
       const before = protocol.getPeer('peer-1')!.lastSeen;
 
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
-      await protocol.receive({
-        id: 'msg-update',
-        originId: 'peer-1',
-        content: {},
-        type: 'data',
-        version: 1,
-        createdAt: Date.now(),
-        ttl: 30000,
-        hops: 0,
-        path: ['peer-1'],
-      }, 'peer-1');
+      await protocol.receive(
+        {
+          id: 'msg-update',
+          originId: 'peer-1',
+          content: {},
+          type: 'data',
+          version: 1,
+          createdAt: Date.now(),
+          ttl: 30000,
+          hops: 0,
+          path: ['peer-1'],
+        },
+        'peer-1'
+      );
 
       const after = protocol.getPeer('peer-1')!.lastSeen;
       expect(after).toBeGreaterThan(before);
@@ -401,7 +413,7 @@ describe('AntiEntropySync', () => {
       sync.set('key1', 'value');
 
       // Wait for async handlers to complete
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       // GossipProtocol.publish calls emitToHandlers which calls handler(message, from)
       expect(handler).toHaveBeenCalledOnce();

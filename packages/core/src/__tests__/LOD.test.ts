@@ -74,12 +74,7 @@ describe('LODTypes', () => {
     });
 
     it('should define LOD transitions', () => {
-      const transitions: LODTransition[] = [
-        'instant',
-        'crossfade',
-        'dither',
-        'morph',
-      ];
+      const transitions: LODTransition[] = ['instant', 'crossfade', 'dither', 'morph'];
       expect(transitions).toHaveLength(4);
     });
 
@@ -142,7 +137,7 @@ describe('LOD Helper Functions', () => {
   describe('createLODLevel', () => {
     it('should create LOD level with required fields', () => {
       const level = createLODLevel(1, 10, 0.5);
-      
+
       expect(level.level).toBe(1);
       expect(level.distance).toBe(10);
       expect(level.polygonRatio).toBe(0.5);
@@ -155,7 +150,7 @@ describe('LOD Helper Functions', () => {
         disabledFeatures: ['shadows', 'normals'],
         triangleCount: 5000,
       });
-      
+
       expect(level.level).toBe(2);
       expect(level.disabledFeatures).toEqual(['shadows', 'normals']);
       expect(level.triangleCount).toBe(5000);
@@ -170,7 +165,7 @@ describe('LOD Helper Functions', () => {
   describe('createStandardLODConfig', () => {
     it('should create config with specified levels', () => {
       const config = createStandardLODConfig('test', 3);
-      
+
       expect(config.id).toBe('test');
       expect(config.levels).toHaveLength(3);
       expect(config.strategy).toBe('distance');
@@ -178,7 +173,7 @@ describe('LOD Helper Functions', () => {
 
     it('should set appropriate distances', () => {
       const config = createStandardLODConfig('test', 3, 10);
-      
+
       expect(config.levels[0].distance).toBe(0);
       expect(config.levels[1].distance).toBe(10);
       expect(config.levels[2].distance).toBe(20);
@@ -186,7 +181,7 @@ describe('LOD Helper Functions', () => {
 
     it('should set polygon ratios', () => {
       const config = createStandardLODConfig('test', 4);
-      
+
       expect(config.levels[0].polygonRatio).toBe(1);
       expect(config.levels[1].polygonRatio).toBe(0.5);
       expect(config.levels[2].polygonRatio).toBe(0.25);
@@ -195,7 +190,7 @@ describe('LOD Helper Functions', () => {
 
     it('should add disabled features for lower LODs', () => {
       const config = createStandardLODConfig('test', 4);
-      
+
       expect(config.levels[0].disabledFeatures).toEqual([]);
       expect(config.levels[1].disabledFeatures).toContain('reflections');
       expect(config.levels[2].disabledFeatures).toContain('specular');
@@ -207,7 +202,7 @@ describe('LOD Helper Functions', () => {
         strategy: 'hybrid',
         transition: 'crossfade',
       });
-      
+
       expect(config.strategy).toBe('hybrid');
       expect(config.transition).toBe('crossfade');
     });
@@ -224,7 +219,7 @@ describe('LOD Helper Functions', () => {
         [5, 5, 5],
         10
       );
-      
+
       expect(group.id).toBe('group1');
       expect(group.name).toBe('Test Group');
       expect(group.objectIds).toHaveLength(3);
@@ -238,7 +233,7 @@ describe('LOD Helper Functions', () => {
   describe('createLODState', () => {
     it('should create initial state', () => {
       const state = createLODState('obj1');
-      
+
       expect(state.objectId).toBe('obj1');
       expect(state.currentLevel).toBe(0);
       expect(state.previousLevel).toBe(0);
@@ -252,7 +247,7 @@ describe('LOD Helper Functions', () => {
   describe('createLODMetrics', () => {
     it('should create empty metrics', () => {
       const metrics = createLODMetrics();
-      
+
       expect(metrics.totalObjects).toBe(0);
       expect(metrics.objectsPerLevel.size).toBe(0);
       expect(metrics.trianglesRendered).toBe(0);
@@ -362,7 +357,7 @@ describe('LOD Validation', () => {
     it('should validate valid config', () => {
       const config = createStandardLODConfig('test', 3);
       const result = validateLODConfig(config);
-      
+
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
@@ -370,7 +365,7 @@ describe('LOD Validation', () => {
     it('should reject config without id', () => {
       const config = { ...DEFAULT_LOD_CONFIG, id: '', levels: [createLODLevel(0, 0, 1)] };
       const result = validateLODConfig(config);
-      
+
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('LOD config must have an id');
     });
@@ -378,7 +373,7 @@ describe('LOD Validation', () => {
     it('should reject config without levels', () => {
       const config = { ...DEFAULT_LOD_CONFIG, id: 'test', levels: [] };
       const result = validateLODConfig(config);
-      
+
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('LOD config must have at least one level');
     });
@@ -393,25 +388,25 @@ describe('LOD Validation', () => {
         ],
       };
       const result = validateLODConfig(config);
-      
+
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('unique'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('unique'))).toBe(true);
     });
 
     it('should reject invalid hysteresis', () => {
       const config = { ...createStandardLODConfig('test', 3), hysteresis: 1.5 };
       const result = validateLODConfig(config);
-      
+
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('Hysteresis'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('Hysteresis'))).toBe(true);
     });
 
     it('should reject invalid bias', () => {
       const config = { ...createStandardLODConfig('test', 3), bias: -2 };
       const result = validateLODConfig(config);
-      
+
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('Bias'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('Bias'))).toBe(true);
     });
 
     it('should reject invalid polygon ratio', () => {
@@ -421,7 +416,7 @@ describe('LOD Validation', () => {
         levels: [{ ...createLODLevel(0, 0, 1.5) }], // > 1.0
       };
       const result = validateLODConfig(config);
-      
+
       expect(result.valid).toBe(false);
     });
   });
@@ -430,7 +425,7 @@ describe('LOD Validation', () => {
     it('should merge configs', () => {
       const base = createStandardLODConfig('test', 3);
       const merged = mergeLODConfigs(base, { strategy: 'screenSize', bias: 0.5 });
-      
+
       expect(merged.id).toBe('test');
       expect(merged.strategy).toBe('screenSize');
       expect(merged.bias).toBe(0.5);
@@ -441,7 +436,7 @@ describe('LOD Validation', () => {
       const base = createStandardLODConfig('test', 3);
       const newLevels = [createLODLevel(0, 0, 1)];
       const merged = mergeLODConfigs(base, { levels: newLevels });
-      
+
       expect(merged.levels).toHaveLength(1);
     });
   });
@@ -504,7 +499,7 @@ describe('LOD Utility Functions', () => {
 
     it('should increase logarithmically', () => {
       const distances = calculateOptimalDistances(1, 4, 100);
-      
+
       for (let i = 1; i < distances.length; i++) {
         expect(distances[i]).toBeGreaterThan(distances[i - 1]);
       }
@@ -541,7 +536,7 @@ describe('LODManager', () => {
     it('should register config', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
-      
+
       expect(manager.getConfig('obj1')).toBeDefined();
       expect(manager.getRegisteredObjects()).toContain('obj1');
     });
@@ -550,7 +545,7 @@ describe('LODManager', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
       manager.unregisterConfig('obj1');
-      
+
       expect(manager.getConfig('obj1')).toBeUndefined();
     });
 
@@ -558,7 +553,7 @@ describe('LODManager', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
       manager.updateConfig('obj1', { strategy: 'hybrid' });
-      
+
       expect(manager.getConfig('obj1')?.strategy).toBe('hybrid');
     });
 
@@ -566,7 +561,7 @@ describe('LODManager', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
       manager.setForcedLevel('obj1', 2);
-      
+
       expect(manager.getConfig('obj1')?.forcedLevel).toBe(2);
     });
   });
@@ -575,21 +570,21 @@ describe('LODManager', () => {
     it('should create state when registering config', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
-      
+
       expect(manager.getState('obj1')).toBeDefined();
     });
 
     it('should get current level', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
-      
+
       expect(manager.getCurrentLevel('obj1')).toBe(0);
     });
 
     it('should report not transitioning initially', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
-      
+
       expect(manager.isTransitioning('obj1')).toBe(false);
       expect(manager.getTransitionProgress('obj1')).toBe(1);
     });
@@ -599,9 +594,9 @@ describe('LODManager', () => {
     it('should create group', () => {
       const config = createStandardLODConfig('group1', 3);
       const group = createLODGroup('group1', 'Test', ['obj1', 'obj2'], config);
-      
+
       manager.createGroup(group);
-      
+
       expect(manager.getGroup('group1')).toBeDefined();
       expect(manager.getGroups()).toContain('group1');
     });
@@ -609,30 +604,30 @@ describe('LODManager', () => {
     it('should remove group', () => {
       const config = createStandardLODConfig('group1', 3);
       const group = createLODGroup('group1', 'Test', ['obj1'], config);
-      
+
       manager.createGroup(group);
       manager.removeGroup('group1');
-      
+
       expect(manager.getGroup('group1')).toBeUndefined();
     });
 
     it('should add object to group', () => {
       const config = createStandardLODConfig('group1', 3);
       const group = createLODGroup('group1', 'Test', ['obj1'], config);
-      
+
       manager.createGroup(group);
       manager.addToGroup('group1', 'obj2');
-      
+
       expect(manager.getGroup('group1')?.objectIds).toContain('obj2');
     });
 
     it('should remove object from group', () => {
       const config = createStandardLODConfig('group1', 3);
       const group = createLODGroup('group1', 'Test', ['obj1', 'obj2'], config);
-      
+
       manager.createGroup(group);
       manager.removeFromGroup('group1', 'obj1');
-      
+
       expect(manager.getGroup('group1')?.objectIds).not.toContain('obj1');
     });
   });
@@ -647,7 +642,7 @@ describe('LODManager', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
       manager.setCameraPosition([0, 0, 50]);
-      
+
       expect(() => manager.update(0.016)).not.toThrow();
     });
   });
@@ -656,19 +651,19 @@ describe('LODManager', () => {
     it('should return metrics', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
-      
+
       const metrics = manager.getMetrics();
-      
+
       expect(metrics.totalObjects).toBe(1);
     });
 
     it('should reset metrics', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
-      
+
       manager.resetMetrics();
       const metrics = manager.getMetrics();
-      
+
       expect(metrics.totalObjects).toBe(1); // Re-calculated
     });
   });
@@ -677,7 +672,7 @@ describe('LODManager', () => {
     it('should subscribe to events', () => {
       const handler = vi.fn();
       const unsubscribe = manager.on('levelChanged', handler);
-      
+
       expect(typeof unsubscribe).toBe('function');
     });
 
@@ -685,21 +680,21 @@ describe('LODManager', () => {
       const handler = vi.fn();
       const unsubscribe = manager.on('levelChanged', handler);
       unsubscribe();
-      
+
       // Handler should not be called after unsubscribe
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
-      
+
       expect(handler).not.toHaveBeenCalled();
     });
 
     it('should emit configUpdated event', () => {
       const handler = vi.fn();
       manager.on('configUpdated', handler);
-      
+
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
-      
+
       expect(handler).toHaveBeenCalled();
     });
   });
@@ -707,10 +702,10 @@ describe('LODManager', () => {
   describe('lifecycle', () => {
     it('should start and stop', () => {
       expect(manager.isRunning()).toBe(false);
-      
+
       manager.start();
       expect(manager.isRunning()).toBe(true);
-      
+
       manager.stop();
       expect(manager.isRunning()).toBe(false);
     });
@@ -718,9 +713,9 @@ describe('LODManager', () => {
     it('should clear all data', () => {
       const config = createStandardLODConfig('obj1', 3);
       manager.registerConfig('obj1', config);
-      
+
       manager.clear();
-      
+
       expect(manager.getRegisteredObjects()).toHaveLength(0);
     });
 
@@ -752,7 +747,7 @@ describe('LOD Manager Factories', () => {
     it('should create VR-optimized manager', () => {
       const manager = createVRLODManager();
       const options = manager.getOptions();
-      
+
       expect(options.targetFrameRate).toBe(90);
       expect(options.cameraFOV).toBe(100);
       expect(options.globalBias).toBe(0.2);
@@ -763,7 +758,7 @@ describe('LOD Manager Factories', () => {
     it('should create mobile-optimized manager', () => {
       const manager = createMobileLODManager();
       const options = manager.getOptions();
-      
+
       expect(options.targetFrameRate).toBe(30);
       expect(options.globalBias).toBe(0.5);
       expect(options.collectMetrics).toBe(false);
@@ -799,7 +794,7 @@ describe('LODGenerator', () => {
     it('should validate valid cube mesh', () => {
       const cube = createTestCube();
       const result = generator['validateMesh'](cube);
-      
+
       expect(result.valid).toBe(true);
       expect(result.vertexCount).toBe(24);
       expect(result.triangleCount).toBe(12);
@@ -808,7 +803,7 @@ describe('LODGenerator', () => {
     it('should validate sphere mesh', () => {
       const sphere = createTestSphere(8);
       const result = generator['validateMesh'](sphere);
-      
+
       expect(result.valid).toBe(true);
       expect(result.vertexCount).toBeGreaterThan(0);
       expect(result.triangleCount).toBeGreaterThan(0);
@@ -820,7 +815,7 @@ describe('LODGenerator', () => {
         indices: new Uint32Array([]),
       };
       const result = generator['validateMesh'](empty);
-      
+
       expect(result.valid).toBe(false);
     });
 
@@ -830,7 +825,7 @@ describe('LODGenerator', () => {
         indices: new Uint32Array([0, 1]), // Not divisible by 3
       };
       const result = generator['validateMesh'](invalid);
-      
+
       expect(result.valid).toBe(false);
     });
   });
@@ -839,7 +834,7 @@ describe('LODGenerator', () => {
     it('should generate multiple levels', () => {
       const sphere = createTestSphere(10);
       const result = generator.generate(sphere);
-      
+
       expect(result.success).toBe(true);
       expect(result.levels).toHaveLength(3);
     });
@@ -847,7 +842,7 @@ describe('LODGenerator', () => {
     it('should return original mesh as level 0', () => {
       const sphere = createTestSphere(10);
       const result = generator.generate(sphere);
-      
+
       expect(result.levels[0].level).toBe(0);
       expect(result.levels[0].reductionRatio).toBe(1.0);
       expect(result.levels[0].positions).toBe(sphere.positions);
@@ -856,7 +851,7 @@ describe('LODGenerator', () => {
     it('should reduce triangle count in higher levels', () => {
       const sphere = createTestSphere(16);
       const result = generator.generate(sphere);
-      
+
       expect(result.levels[1].triangleCount).toBeLessThan(result.levels[0].triangleCount);
       expect(result.levels[2].triangleCount).toBeLessThan(result.levels[1].triangleCount);
     });
@@ -864,7 +859,7 @@ describe('LODGenerator', () => {
     it('should track generation time', () => {
       const sphere = createTestSphere(8);
       const result = generator.generate(sphere);
-      
+
       expect(result.generationTimeMs).toBeGreaterThan(0);
     });
 
@@ -874,7 +869,7 @@ describe('LODGenerator', () => {
         indices: new Uint32Array([]),
       };
       const result = generator.generate(empty);
-      
+
       expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
     });
@@ -884,7 +879,7 @@ describe('LODGenerator', () => {
     it('should generate single level', () => {
       const sphere = createTestSphere(12);
       const level = generator.generateLevel(sphere, 0.5, 1);
-      
+
       expect(level.level).toBe(1);
       expect(level.reductionRatio).toBeLessThan(1);
     });
@@ -894,7 +889,7 @@ describe('LODGenerator', () => {
         positions: new Float32Array([]),
         indices: new Uint32Array([]),
       };
-      
+
       expect(() => generator.generateLevel(invalid, 0.5)).toThrow();
     });
   });
@@ -904,7 +899,7 @@ describe('LODGenerator', () => {
       const sphere = createTestSphere(10);
       const result = generator.generate(sphere);
       const config = generator.createConfigFromLevels('test', result.levels, 10);
-      
+
       expect(config.id).toBe('test');
       expect(config.levels).toHaveLength(3);
       expect(config.strategy).toBe('distance');
@@ -914,7 +909,7 @@ describe('LODGenerator', () => {
       const sphere = createTestSphere(10);
       const result = generator.generate(sphere);
       const config = generator.createConfigFromLevels('test', result.levels, 10);
-      
+
       expect(config.levels[0].distance).toBe(0);
       expect(config.levels[1].distance).toBe(10);
       expect(config.levels[2].distance).toBe(20);
@@ -950,7 +945,7 @@ describe('LOD Generator Factories', () => {
     it('should generate LODs with specified level count', () => {
       const sphere = createTestSphere(8);
       const result = generateLODs(sphere, 4);
-      
+
       expect(result.success).toBe(true);
       expect(result.levels).toHaveLength(4);
     });
@@ -965,7 +960,7 @@ describe('Test Mesh Factories', () => {
   describe('createTestCube', () => {
     it('should create valid cube mesh', () => {
       const cube = createTestCube();
-      
+
       expect(cube.positions).toBeInstanceOf(Float32Array);
       expect(cube.indices).toBeInstanceOf(Uint32Array);
       expect(cube.positions.length).toBe(24 * 3); // 24 vertices
@@ -976,7 +971,7 @@ describe('Test Mesh Factories', () => {
   describe('createTestSphere', () => {
     it('should create valid sphere mesh', () => {
       const sphere = createTestSphere(8);
-      
+
       expect(sphere.positions).toBeInstanceOf(Float32Array);
       expect(sphere.indices).toBeInstanceOf(Uint32Array);
       expect(sphere.positions.length).toBeGreaterThan(0);
@@ -986,7 +981,7 @@ describe('Test Mesh Factories', () => {
     it('should create higher-poly sphere with more segments', () => {
       const lowPoly = createTestSphere(8);
       const highPoly = createTestSphere(16);
-      
+
       expect(highPoly.positions.length).toBeGreaterThan(lowPoly.positions.length);
       expect(highPoly.indices.length).toBeGreaterThan(lowPoly.indices.length);
     });
@@ -1001,36 +996,32 @@ describe('LOD System Integration', () => {
   it('should work end-to-end: generate LODs, create config, manage with LODManager', () => {
     // 1. Create mesh
     const sphere = createTestSphere(12);
-    
+
     // 2. Generate LODs
     const generator = new LODGenerator({ levelCount: 3 });
     const generationResult = generator.generate(sphere);
     expect(generationResult.success).toBe(true);
-    
+
     // 3. Create config from levels
-    const config = generator.createConfigFromLevels(
-      'testObject',
-      generationResult.levels,
-      10
-    );
+    const config = generator.createConfigFromLevels('testObject', generationResult.levels, 10);
     expect(config.levels).toHaveLength(3);
-    
+
     // 4. Register with manager
     const manager = new LODManager();
     manager.registerConfig('testObject', config);
     expect(manager.getConfig('testObject')).toBeDefined();
-    
+
     // 5. Simulate camera movement and update
     manager.setCameraPosition([0, 0, 5]);
     manager.update(0.016);
     expect(manager.getCurrentLevel('testObject')).toBe(0);
-    
+
     // 6. Move camera far away
     manager.setCameraPosition([0, 0, 100]);
     manager.setForcedLevel('testObject', 2);
     manager.update(0.016);
     expect(manager.getCurrentLevel('testObject')).toBe(2);
-    
+
     // 7. Check metrics
     const metrics = manager.getMetrics();
     expect(metrics.totalObjects).toBe(1);
@@ -1039,7 +1030,7 @@ describe('LOD System Integration', () => {
   it('should handle multiple objects with group', () => {
     const manager = new LODManager();
     const config = createStandardLODConfig('group', 3);
-    
+
     // Create group with multiple objects
     const group = createLODGroup(
       'building_cluster',
@@ -1049,9 +1040,9 @@ describe('LOD System Integration', () => {
       [0, 0, 0],
       20
     );
-    
+
     manager.createGroup(group);
-    
+
     expect(manager.getGroups()).toContain('building_cluster');
     expect(manager.getGroup('building_cluster')?.objectIds).toHaveLength(3);
   });

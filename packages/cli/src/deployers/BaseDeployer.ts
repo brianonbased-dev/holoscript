@@ -65,11 +65,7 @@ export interface BuildOutput {
 // Event Types
 // ============================================================================
 
-export type DeployerEvent =
-  | 'build:start'
-  | 'build:done'
-  | 'deploy:start'
-  | 'deploy:done';
+export type DeployerEvent = 'build:start' | 'build:done' | 'deploy:start' | 'deploy:done';
 
 export interface DeployerEvents {
   'build:start': (config: DeployConfig) => void;
@@ -154,14 +150,14 @@ export abstract class BaseDeployer extends EventEmitter {
       }
     }
 
-    const entrypoint = files.find(f => f === 'index.js') || files[0] || 'index.js';
+    const entrypoint = files.find((f) => f === 'index.js') || files[0] || 'index.js';
 
     const output: BuildOutput = {
       outputDir,
       files,
       totalSize,
       entrypoint,
-      sourceMaps: files.some(f => f.endsWith('.map')),
+      sourceMaps: files.some((f) => f.endsWith('.map')),
     };
 
     this.emit('build:done', output);
@@ -178,17 +174,23 @@ export abstract class BaseDeployer extends EventEmitter {
     }
 
     if (!/^[a-zA-Z0-9_-]+$/.test(config.projectName)) {
-      throw new Error('Project name must contain only alphanumeric characters, hyphens, and underscores');
+      throw new Error(
+        'Project name must contain only alphanumeric characters, hyphens, and underscores'
+      );
     }
 
     const validTargets = ['cloudflare', 'vercel', 'netlify', 'custom'];
     if (!validTargets.includes(config.target)) {
-      throw new Error(`Invalid target: ${config.target}. Must be one of: ${validTargets.join(', ')}`);
+      throw new Error(
+        `Invalid target: ${config.target}. Must be one of: ${validTargets.join(', ')}`
+      );
     }
 
     const validEnvironments = ['staging', 'production'];
     if (!validEnvironments.includes(config.environment)) {
-      throw new Error(`Invalid environment: ${config.environment}. Must be one of: ${validEnvironments.join(', ')}`);
+      throw new Error(
+        `Invalid environment: ${config.environment}. Must be one of: ${validEnvironments.join(', ')}`
+      );
     }
 
     if (!config.regions || config.regions.length === 0) {
@@ -233,7 +235,7 @@ export abstract class BaseDeployer extends EventEmitter {
         const relativePath = entry.name;
         if (entry.isDirectory()) {
           const subFiles = await this.collectBuildFiles(path.join(dir, entry.name));
-          files.push(...subFiles.map(f => path.join(relativePath, f)));
+          files.push(...subFiles.map((f) => path.join(relativePath, f)));
         } else if (entry.isFile()) {
           files.push(relativePath);
         }
