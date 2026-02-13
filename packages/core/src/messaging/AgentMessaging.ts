@@ -250,12 +250,18 @@ export class AgentMessaging extends EventEmitter {
     let finalPayload = payload;
 
     // Apply encryption if needed
-    if (channel.encryption !== 'none') {
-      const recipientKey = this.channelManager.getPublicKey(channelId, recipientId);
+    if (channel.encryption !== 'none' && this.keyPair) {
+      const recipientPublicKey = this.channelManager.getPublicKey(channelId, recipientId);
+
+      // For E2E encryption, derive shared key using recipient's public key
+      const encryptionKey = recipientPublicKey
+        ? EncryptionService.deriveSharedKey(this.keyPair.privateKey, recipientPublicKey)
+        : undefined;
+
       finalPayload = EncryptionService.encrypt(
         payload,
         channel.encryption,
-        recipientKey || undefined
+        encryptionKey
       ) as unknown as T;
     }
 
@@ -413,10 +419,16 @@ export class AgentMessaging extends EventEmitter {
       const channel = this.channelManager.getChannel(message.channelId);
       if (channel && channel.encryption !== 'none') {
         try {
+          // For E2E encryption, derive shared key using sender's public key
+          const senderPublicKey = this.channelManager.getPublicKey(message.channelId, message.senderId);
+          const decryptionKey = senderPublicKey
+            ? EncryptionService.deriveSharedKey(this.keyPair.privateKey, senderPublicKey)
+            : this.keyPair.privateKey;
+
           payload = EncryptionService.decrypt<T>(
             message.payload as unknown as string,
             channel.encryption,
-            this.keyPair.privateKey
+            decryptionKey
           );
         } catch (_error) {
           return {
