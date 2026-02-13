@@ -86,6 +86,10 @@ export interface URDFJoint {
     effort: number;
     velocity: number;
   };
+  dynamics?: {
+    damping: number;
+    friction: number;
+  };
 }
 
 export class URDFCompiler {
@@ -115,6 +119,39 @@ export class URDFCompiler {
   // Helper to check if object has a specific trait
   private hasTrait(obj: HoloObjectDecl, traitName: string): boolean {
     return obj.traits?.some((t) => this.getTraitName(t) === traitName) ?? false;
+  }
+
+  // Helper to get trait configuration object
+  private getTraitConfig(
+    obj: HoloObjectDecl,
+    traitName: string
+  ): Record<string, unknown> | undefined {
+    const trait = obj.traits?.find((t) => this.getTraitName(t) === traitName);
+    if (!trait) return undefined;
+    if (typeof trait === 'string') return {};
+    // Return the trait object minus the name
+    const { name: _name, ...config } = trait as { name: string } & Record<string, unknown>;
+    return config;
+  }
+
+  // Map HoloScript joint types to URDF joint types
+  private mapJointType(
+    holoType: string
+  ): 'fixed' | 'revolute' | 'prismatic' | 'continuous' | 'floating' | 'planar' {
+    switch (holoType) {
+      case 'hinge':
+        return 'revolute';
+      case 'slider':
+        return 'prismatic';
+      case 'ball':
+        return 'floating'; // Closest URDF equivalent
+      case 'fixed':
+        return 'fixed';
+      case 'continuous':
+        return 'continuous';
+      default:
+        return 'fixed';
+    }
   }
 
   compile(composition: HoloComposition): string {
@@ -189,6 +226,7 @@ export class URDFCompiler {
     const linkName = this.sanitizeName(obj.name);
     const hasPhysics = this.hasTrait(obj, 'physics') || this.hasTrait(obj, 'rigid');
     const hasCollider = this.hasTrait(obj, 'collidable') || this.hasTrait(obj, 'trigger');
+    const jointConfig = this.getTraitConfig(obj, 'joint');
 
     // Get geometry
     const geometry = this.extractGeometry(obj);
@@ -220,8 +258,8 @@ export class URDFCompiler {
 
     this.links.push(link);
 
-    // Create joint to parent
-    this.joints.push({
+    // Create joint to parent - use @joint trait config if available
+    const joint: URDFJoint = {
       name: `${parentLink}_to_${linkName}_joint`,
       type: 'fixed',
       parent: parentLink,
@@ -230,7 +268,54 @@ export class URDFCompiler {
         xyz: position,
         rpy: rotation,
       },
-    });
+    };
+
+    // Apply @joint trait configuration
+    if (jointConfig) {
+      // Map joint type
+      if (jointConfig.jointType) {
+        joint.type = this.mapJointType(jointConfig.jointType as string);
+      }
+
+      // Extract axis
+      if (jointConfig.axis) {
+        const axis = jointConfig.axis as { x?: number; y?: number; z?: number };
+        joint.axis = [axis.x ?? 0, axis.y ?? 0, axis.z ?? 1];
+      }
+
+      // Extract limits (for revolute/prismatic joints)
+      if (jointConfig.limits && (joint.type === 'revolute' || joint.type === 'prismatic')) {
+        const limitsConfig = jointConfig.limits as {
+          min?: number;
+          max?: number;
+          effort?: number;
+          velocity?: number;
+        };
+        joint.limits = {
+          lower: joint.type === 'revolute' ? ((limitsConfig.min ?? -180) * Math.PI) / 180 : limitsConfig.min ?? -1,
+          upper: joint.type === 'revolute' ? ((limitsConfig.max ?? 180) * Math.PI) / 180 : limitsConfig.max ?? 1,
+          effort: limitsConfig.effort ?? 100,
+          velocity: limitsConfig.velocity ?? 1,
+        };
+      }
+
+      // Extract damping
+      if (jointConfig.damping !== undefined) {
+        joint.dynamics = {
+          damping: jointConfig.damping as number,
+          friction: (jointConfig.friction as number) ?? 0,
+        };
+      }
+
+      // Update parent if connectedBody is specified
+      if (jointConfig.connectedBody) {
+        const newParent = this.sanitizeName(jointConfig.connectedBody as string);
+        joint.parent = newParent;
+        joint.name = `${newParent}_to_${linkName}_joint`;
+      }
+    }
+
+    this.joints.push(joint);
   }
 
   private processSpatialGroup(group: HoloSpatialGroup, parentLink: string): void {
@@ -462,6 +547,10 @@ export class URDFCompiler {
       this.emit(
         `<limit lower="${joint.limits.lower}" upper="${joint.limits.upper}" effort="${joint.limits.effort}" velocity="${joint.limits.velocity}"/>`
       );
+    }
+
+    if (joint.dynamics) {
+      this.emit(`<dynamics damping="${joint.dynamics.damping}" friction="${joint.dynamics.friction}"/>`);
     }
 
     this.indentLevel--;

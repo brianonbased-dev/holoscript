@@ -265,6 +265,12 @@ export {
   type DTDLCompilerOptions,
   DTDL_TRAIT_COMPONENTS,
 } from './compiler/DTDLCompiler';
+export {
+  USDPhysicsCompiler,
+  compileToUSDPhysics,
+  compileForIsaacSim,
+  type USDPhysicsCompilerOptions,
+} from './compiler/USDPhysicsCompiler';
 
 // Native Platform Compilers (Full Platform Coverage)
 export {
