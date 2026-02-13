@@ -3,88 +3,8 @@
 exports[`Parser AST Visual Regression > AST Consistency Across Parsing > parsing same source twice produces identical AST 1`] = `
 {
   "ast": {
-    "body": [
-      {
-        "body": {
-          "children": [],
-          "configs": [],
-          "properties": {
-            "color": "red",
-            "position": {
-              "x": 0,
-              "y": 1,
-              "z": -2,
-            },
-          },
-          "systems": [],
-        },
-        "children": [],
-        "directives": [],
-        "id": "Consistency",
-        "loc": {
-          "end": {
-            "column": 2,
-            "line": 4,
-          },
-          "start": {
-            "column": 1,
-            "line": 1,
-          },
-        },
-        "name": "Consistency",
-        "properties": {
-          "color": "red",
-          "position": {
-            "x": 0,
-            "y": 1,
-            "z": -2,
-          },
-        },
-        "traits": Map {},
-        "type": "composition",
-      },
-    ],
-    "children": [
-      {
-        "body": {
-          "children": [],
-          "configs": [],
-          "properties": {
-            "color": "red",
-            "position": {
-              "x": 0,
-              "y": 1,
-              "z": -2,
-            },
-          },
-          "systems": [],
-        },
-        "children": [],
-        "directives": [],
-        "id": "Consistency",
-        "loc": {
-          "end": {
-            "column": 2,
-            "line": 4,
-          },
-          "start": {
-            "column": 1,
-            "line": 1,
-          },
-        },
-        "name": "Consistency",
-        "properties": {
-          "color": "red",
-          "position": {
-            "x": 0,
-            "y": 1,
-            "z": -2,
-          },
-        },
-        "traits": Map {},
-        "type": "composition",
-      },
-    ],
+    "body": [],
+    "children": [],
     "directives": [],
     "hasControlFlow": false,
     "hasState": false,
@@ -101,24 +21,13 @@ exports[`Parser AST Visual Regression > AST Consistency Across Parsing > parsing
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
-      "body": {
-        "children": [],
-        "configs": [],
-        "properties": {
-          "color": "red",
-          "position": {
-            "x": 0,
-            "y": 1,
-            "z": -2,
-          },
-        },
-        "systems": [],
-      },
+      "body": [],
       "children": [],
       "directives": [],
-      "id": "Consistency",
+      "id": "root",
       "loc": {
         "end": {
           "column": 2,
@@ -129,24 +38,61 @@ exports[`Parser AST Visual Regression > AST Consistency Across Parsing > parsing
           "line": 1,
         },
       },
-      "name": "Consistency",
-      "properties": {
-        "color": "red",
-        "position": {
-          "x": 0,
-          "y": 1,
-          "z": -2,
-        },
-      },
+      "properties": {},
       "traits": Map {},
-      "type": "composition",
+      "type": "fragment",
     },
     "traits": Map {},
     "type": "Program",
     "version": "1.0",
   },
   "compiledExpressions": Map {},
-  "errors": [],
+  "errors": [
+    {
+      "code": "HSP300",
+      "column": 30,
+      "context": "  1 | composition Consistency {
+  2 |   color: "red"
+> 3 |   position: { x: 0, y: 1, z: -2 }
+                                  ^
+  4 | }",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 3,
+      "message": "HSP300: Unexpected token in expression: MINUS "-". Expected value, identifier, or expression",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 33,
+      "context": "  1 | composition Consistency {
+  2 |   color: "red"
+> 3 |   position: { x: 0, y: 1, z: -2 }
+                                     ^
+  4 | }",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 3,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 1,
+      "context": "  2 |   color: "red"
+  3 |   position: { x: 0, y: 1, z: -2 }
+> 4 | }
+     ^",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 4,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+  ],
   "features": {
     "conditionals": false,
     "lifecycleHooks": false,
@@ -155,7 +101,7 @@ exports[`Parser AST Visual Regression > AST Consistency Across Parsing > parsing
     "vrTraits": false,
   },
   "requiredCompanions": [],
-  "success": true,
+  "success": false,
   "warnings": [],
 }
 `;
@@ -245,6 +191,7 @@ exports[`Parser AST Visual Regression > AST Node Properties > AST nodes should h
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -381,6 +328,7 @@ exports[`Parser AST Visual Regression > AST Node Properties > AST should preserv
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -557,6 +505,7 @@ exports[`Parser AST Visual Regression > Basic AST Structures > array literal AST
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -753,6 +702,7 @@ exports[`Parser AST Visual Regression > Basic AST Structures > nested object AST
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -901,6 +851,7 @@ exports[`Parser AST Visual Regression > Basic AST Structures > object literal AS
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "children": [],
@@ -951,92 +902,8 @@ exports[`Parser AST Visual Regression > Basic AST Structures > object literal AS
 exports[`Parser AST Visual Regression > Basic AST Structures > simple composition AST 1`] = `
 {
   "ast": {
-    "body": [
-      {
-        "body": {
-          "children": [],
-          "configs": [],
-          "properties": {
-            "color": "cyan",
-            "geometry": "sphere",
-            "position": {
-              "x": 0,
-              "y": 1.5,
-              "z": -2,
-            },
-          },
-          "systems": [],
-        },
-        "children": [],
-        "directives": [],
-        "id": "SimpleOrb",
-        "loc": {
-          "end": {
-            "column": 2,
-            "line": 5,
-          },
-          "start": {
-            "column": 1,
-            "line": 1,
-          },
-        },
-        "name": "SimpleOrb",
-        "properties": {
-          "color": "cyan",
-          "geometry": "sphere",
-          "position": {
-            "x": 0,
-            "y": 1.5,
-            "z": -2,
-          },
-        },
-        "traits": Map {},
-        "type": "composition",
-      },
-    ],
-    "children": [
-      {
-        "body": {
-          "children": [],
-          "configs": [],
-          "properties": {
-            "color": "cyan",
-            "geometry": "sphere",
-            "position": {
-              "x": 0,
-              "y": 1.5,
-              "z": -2,
-            },
-          },
-          "systems": [],
-        },
-        "children": [],
-        "directives": [],
-        "id": "SimpleOrb",
-        "loc": {
-          "end": {
-            "column": 2,
-            "line": 5,
-          },
-          "start": {
-            "column": 1,
-            "line": 1,
-          },
-        },
-        "name": "SimpleOrb",
-        "properties": {
-          "color": "cyan",
-          "geometry": "sphere",
-          "position": {
-            "x": 0,
-            "y": 1.5,
-            "z": -2,
-          },
-        },
-        "traits": Map {},
-        "type": "composition",
-      },
-    ],
+    "body": [],
+    "children": [],
     "directives": [],
     "hasControlFlow": false,
     "hasState": false,
@@ -1053,25 +920,13 @@ exports[`Parser AST Visual Regression > Basic AST Structures > simple compositio
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
-      "body": {
-        "children": [],
-        "configs": [],
-        "properties": {
-          "color": "cyan",
-          "geometry": "sphere",
-          "position": {
-            "x": 0,
-            "y": 1.5,
-            "z": -2,
-          },
-        },
-        "systems": [],
-      },
+      "body": [],
       "children": [],
       "directives": [],
-      "id": "SimpleOrb",
+      "id": "root",
       "loc": {
         "end": {
           "column": 2,
@@ -1082,25 +937,61 @@ exports[`Parser AST Visual Regression > Basic AST Structures > simple compositio
           "line": 1,
         },
       },
-      "name": "SimpleOrb",
-      "properties": {
-        "color": "cyan",
-        "geometry": "sphere",
-        "position": {
-          "x": 0,
-          "y": 1.5,
-          "z": -2,
-        },
-      },
+      "properties": {},
       "traits": Map {},
-      "type": "composition",
+      "type": "fragment",
     },
     "traits": Map {},
     "type": "Program",
     "version": "1.0",
   },
   "compiledExpressions": Map {},
-  "errors": [],
+  "errors": [
+    {
+      "code": "HSP300",
+      "column": 32,
+      "context": "  2 |   geometry: "sphere"
+  3 |   color: "cyan"
+> 4 |   position: { x: 0, y: 1.5, z: -2 }
+                                    ^
+  5 | }",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 4,
+      "message": "HSP300: Unexpected token in expression: MINUS "-". Expected value, identifier, or expression",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 35,
+      "context": "  2 |   geometry: "sphere"
+  3 |   color: "cyan"
+> 4 |   position: { x: 0, y: 1.5, z: -2 }
+                                       ^
+  5 | }",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 4,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 1,
+      "context": "  3 |   color: "cyan"
+  4 |   position: { x: 0, y: 1.5, z: -2 }
+> 5 | }
+     ^",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 5,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+  ],
   "features": {
     "conditionals": false,
     "lifecycleHooks": false,
@@ -1109,7 +1000,7 @@ exports[`Parser AST Visual Regression > Basic AST Structures > simple compositio
     "vrTraits": false,
   },
   "requiredCompanions": [],
-  "success": true,
+  "success": false,
   "warnings": [],
 }
 `;
@@ -1397,6 +1288,7 @@ exports[`Parser AST Visual Regression > Complex Real-World AST Examples > dashbo
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": [
@@ -1701,589 +1593,30 @@ exports[`Parser AST Visual Regression > Complex Real-World AST Examples > dashbo
 exports[`Parser AST Visual Regression > Complex Real-World AST Examples > interactive scene AST 1`] = `
 {
   "ast": {
-    "body": [
+    "body": [],
+    "children": [],
+    "directives": [
       {
-        "body": {
-          "children": [
-            {
-              "children": [
-                {
-                  "children": [],
-                  "directives": [],
-                  "id": "idle",
-                  "loc": {
-                    "end": {
-                      "column": 6,
-                      "line": 25,
-                    },
-                    "start": {
-                      "column": 5,
-                      "line": 23,
-                    },
-                  },
-                  "name": "idle",
-                  "properties": {
-                    "grabbed": true,
-                    "on": "grab",
-                  },
-                  "traits": Map {},
-                  "type": "state",
-                },
-                {
-                  "children": [],
-                  "directives": [],
-                  "id": "grabbed",
-                  "loc": {
-                    "end": {
-                      "column": 6,
-                      "line": 28,
-                    },
-                    "start": {
-                      "column": 5,
-                      "line": 26,
-                    },
-                  },
-                  "name": "grabbed",
-                  "properties": {
-                    "flying": true,
-                    "on": "throw",
-                  },
-                  "traits": Map {},
-                  "type": "state",
-                },
-                {
-                  "children": [],
-                  "directives": [],
-                  "id": "flying",
-                  "loc": {
-                    "end": {
-                      "column": 6,
-                      "line": 31,
-                    },
-                    "start": {
-                      "column": 5,
-                      "line": 29,
-                    },
-                  },
-                  "name": "flying",
-                  "properties": {
-                    "idle": true,
-                    "on": "land",
-                  },
-                  "traits": Map {},
-                  "type": "state",
-                },
-              ],
-              "directives": [],
-              "id": "OrbController",
-              "loc": {
-                "end": {
-                  "column": 4,
-                  "line": 32,
-                },
-                "start": {
-                  "column": 3,
-                  "line": 21,
-                },
-              },
-              "name": "OrbController",
-              "properties": {
-                "initial": "idle",
-              },
-              "traits": Map {},
-              "type": "state-machine",
-            },
-          ],
-          "configs": [],
-          "properties": {
-            "orbs": [
-              {
-                "@grabbable": {
-                  "config": {},
-                  "name": "grabbable",
-                  "type": "trait",
-                },
-                "@throwable": {
-                  "config": {},
-                  "name": "throwable",
-                  "type": "trait",
-                },
-                "color": "red",
-                "geometry": "sphere",
-                "id": "orb1",
-                "position": {
-                  "x": -1,
-                  "y": 1,
-                  "z": -2,
-                },
-              },
-              {
-                "@grabbable": {
-                  "config": {},
-                  "name": "grabbable",
-                  "type": "trait",
-                },
-                "@throwable": {
-                  "config": {},
-                  "name": "throwable",
-                  "type": "trait",
-                },
-                "color": "blue",
-                "geometry": "sphere",
-                "id": "orb2",
-                "position": {
-                  "x": 1,
-                  "y": 1,
-                  "z": -2,
-                },
-              },
-            ],
-          },
-          "systems": [],
-        },
-        "children": [
-          {
-            "children": [
-              {
-                "children": [],
-                "directives": [],
-                "id": "idle",
-                "loc": {
-                  "end": {
-                    "column": 6,
-                    "line": 25,
-                  },
-                  "start": {
-                    "column": 5,
-                    "line": 23,
-                  },
-                },
-                "name": "idle",
-                "properties": {
-                  "grabbed": true,
-                  "on": "grab",
-                },
-                "traits": Map {},
-                "type": "state",
-              },
-              {
-                "children": [],
-                "directives": [],
-                "id": "grabbed",
-                "loc": {
-                  "end": {
-                    "column": 6,
-                    "line": 28,
-                  },
-                  "start": {
-                    "column": 5,
-                    "line": 26,
-                  },
-                },
-                "name": "grabbed",
-                "properties": {
-                  "flying": true,
-                  "on": "throw",
-                },
-                "traits": Map {},
-                "type": "state",
-              },
-              {
-                "children": [],
-                "directives": [],
-                "id": "flying",
-                "loc": {
-                  "end": {
-                    "column": 6,
-                    "line": 31,
-                  },
-                  "start": {
-                    "column": 5,
-                    "line": 29,
-                  },
-                },
-                "name": "flying",
-                "properties": {
-                  "idle": true,
-                  "on": "land",
-                },
-                "traits": Map {},
-                "type": "state",
-              },
-            ],
-            "directives": [],
-            "id": "OrbController",
-            "loc": {
-              "end": {
-                "column": 4,
-                "line": 32,
-              },
-              "start": {
-                "column": 3,
-                "line": 21,
-              },
-            },
-            "name": "OrbController",
-            "properties": {
-              "initial": "idle",
-            },
-            "traits": Map {},
-            "type": "state-machine",
-          },
-        ],
-        "directives": [],
-        "id": "InteractiveScene",
-        "loc": {
-          "end": {
-            "column": 2,
-            "line": 33,
-          },
-          "start": {
-            "column": 1,
-            "line": 1,
-          },
-        },
-        "name": "InteractiveScene",
-        "properties": {
-          "orbs": [
-            {
-              "@grabbable": {
-                "config": {},
-                "name": "grabbable",
-                "type": "trait",
-              },
-              "@throwable": {
-                "config": {},
-                "name": "throwable",
-                "type": "trait",
-              },
-              "color": "red",
-              "geometry": "sphere",
-              "id": "orb1",
-              "position": {
-                "x": -1,
-                "y": 1,
-                "z": -2,
-              },
-            },
-            {
-              "@grabbable": {
-                "config": {},
-                "name": "grabbable",
-                "type": "trait",
-              },
-              "@throwable": {
-                "config": {},
-                "name": "throwable",
-                "type": "trait",
-              },
-              "color": "blue",
-              "geometry": "sphere",
-              "id": "orb2",
-              "position": {
-                "x": 1,
-                "y": 1,
-                "z": -2,
-              },
-            },
-          ],
-        },
-        "traits": Map {},
-        "type": "composition",
+        "config": {},
+        "name": "grabbable",
+        "type": "trait",
+      },
+      {
+        "config": {},
+        "name": "throwable",
+        "type": "trait",
+      },
+      {
+        "config": {},
+        "name": "grabbable",
+        "type": "trait",
+      },
+      {
+        "config": {},
+        "name": "throwable",
+        "type": "trait",
       },
     ],
-    "children": [
-      {
-        "body": {
-          "children": [
-            {
-              "children": [
-                {
-                  "children": [],
-                  "directives": [],
-                  "id": "idle",
-                  "loc": {
-                    "end": {
-                      "column": 6,
-                      "line": 25,
-                    },
-                    "start": {
-                      "column": 5,
-                      "line": 23,
-                    },
-                  },
-                  "name": "idle",
-                  "properties": {
-                    "grabbed": true,
-                    "on": "grab",
-                  },
-                  "traits": Map {},
-                  "type": "state",
-                },
-                {
-                  "children": [],
-                  "directives": [],
-                  "id": "grabbed",
-                  "loc": {
-                    "end": {
-                      "column": 6,
-                      "line": 28,
-                    },
-                    "start": {
-                      "column": 5,
-                      "line": 26,
-                    },
-                  },
-                  "name": "grabbed",
-                  "properties": {
-                    "flying": true,
-                    "on": "throw",
-                  },
-                  "traits": Map {},
-                  "type": "state",
-                },
-                {
-                  "children": [],
-                  "directives": [],
-                  "id": "flying",
-                  "loc": {
-                    "end": {
-                      "column": 6,
-                      "line": 31,
-                    },
-                    "start": {
-                      "column": 5,
-                      "line": 29,
-                    },
-                  },
-                  "name": "flying",
-                  "properties": {
-                    "idle": true,
-                    "on": "land",
-                  },
-                  "traits": Map {},
-                  "type": "state",
-                },
-              ],
-              "directives": [],
-              "id": "OrbController",
-              "loc": {
-                "end": {
-                  "column": 4,
-                  "line": 32,
-                },
-                "start": {
-                  "column": 3,
-                  "line": 21,
-                },
-              },
-              "name": "OrbController",
-              "properties": {
-                "initial": "idle",
-              },
-              "traits": Map {},
-              "type": "state-machine",
-            },
-          ],
-          "configs": [],
-          "properties": {
-            "orbs": [
-              {
-                "@grabbable": {
-                  "config": {},
-                  "name": "grabbable",
-                  "type": "trait",
-                },
-                "@throwable": {
-                  "config": {},
-                  "name": "throwable",
-                  "type": "trait",
-                },
-                "color": "red",
-                "geometry": "sphere",
-                "id": "orb1",
-                "position": {
-                  "x": -1,
-                  "y": 1,
-                  "z": -2,
-                },
-              },
-              {
-                "@grabbable": {
-                  "config": {},
-                  "name": "grabbable",
-                  "type": "trait",
-                },
-                "@throwable": {
-                  "config": {},
-                  "name": "throwable",
-                  "type": "trait",
-                },
-                "color": "blue",
-                "geometry": "sphere",
-                "id": "orb2",
-                "position": {
-                  "x": 1,
-                  "y": 1,
-                  "z": -2,
-                },
-              },
-            ],
-          },
-          "systems": [],
-        },
-        "children": [
-          {
-            "children": [
-              {
-                "children": [],
-                "directives": [],
-                "id": "idle",
-                "loc": {
-                  "end": {
-                    "column": 6,
-                    "line": 25,
-                  },
-                  "start": {
-                    "column": 5,
-                    "line": 23,
-                  },
-                },
-                "name": "idle",
-                "properties": {
-                  "grabbed": true,
-                  "on": "grab",
-                },
-                "traits": Map {},
-                "type": "state",
-              },
-              {
-                "children": [],
-                "directives": [],
-                "id": "grabbed",
-                "loc": {
-                  "end": {
-                    "column": 6,
-                    "line": 28,
-                  },
-                  "start": {
-                    "column": 5,
-                    "line": 26,
-                  },
-                },
-                "name": "grabbed",
-                "properties": {
-                  "flying": true,
-                  "on": "throw",
-                },
-                "traits": Map {},
-                "type": "state",
-              },
-              {
-                "children": [],
-                "directives": [],
-                "id": "flying",
-                "loc": {
-                  "end": {
-                    "column": 6,
-                    "line": 31,
-                  },
-                  "start": {
-                    "column": 5,
-                    "line": 29,
-                  },
-                },
-                "name": "flying",
-                "properties": {
-                  "idle": true,
-                  "on": "land",
-                },
-                "traits": Map {},
-                "type": "state",
-              },
-            ],
-            "directives": [],
-            "id": "OrbController",
-            "loc": {
-              "end": {
-                "column": 4,
-                "line": 32,
-              },
-              "start": {
-                "column": 3,
-                "line": 21,
-              },
-            },
-            "name": "OrbController",
-            "properties": {
-              "initial": "idle",
-            },
-            "traits": Map {},
-            "type": "state-machine",
-          },
-        ],
-        "directives": [],
-        "id": "InteractiveScene",
-        "loc": {
-          "end": {
-            "column": 2,
-            "line": 33,
-          },
-          "start": {
-            "column": 1,
-            "line": 1,
-          },
-        },
-        "name": "InteractiveScene",
-        "properties": {
-          "orbs": [
-            {
-              "@grabbable": {
-                "config": {},
-                "name": "grabbable",
-                "type": "trait",
-              },
-              "@throwable": {
-                "config": {},
-                "name": "throwable",
-                "type": "trait",
-              },
-              "color": "red",
-              "geometry": "sphere",
-              "id": "orb1",
-              "position": {
-                "x": -1,
-                "y": 1,
-                "z": -2,
-              },
-            },
-            {
-              "@grabbable": {
-                "config": {},
-                "name": "grabbable",
-                "type": "trait",
-              },
-              "@throwable": {
-                "config": {},
-                "name": "throwable",
-                "type": "trait",
-              },
-              "color": "blue",
-              "geometry": "sphere",
-              "id": "orb2",
-              "position": {
-                "x": 1,
-                "y": 1,
-                "z": -2,
-              },
-            },
-          ],
-        },
-        "traits": Map {},
-        "type": "composition",
-      },
-    ],
-    "directives": [],
     "hasControlFlow": false,
     "hasState": false,
     "hasVRTraits": false,
@@ -2299,238 +1632,34 @@ exports[`Parser AST Visual Regression > Complex Real-World AST Examples > intera
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
-      "body": {
-        "children": [
-          {
-            "children": [
-              {
-                "children": [],
-                "directives": [],
-                "id": "idle",
-                "loc": {
-                  "end": {
-                    "column": 6,
-                    "line": 25,
-                  },
-                  "start": {
-                    "column": 5,
-                    "line": 23,
-                  },
-                },
-                "name": "idle",
-                "properties": {
-                  "grabbed": true,
-                  "on": "grab",
-                },
-                "traits": Map {},
-                "type": "state",
-              },
-              {
-                "children": [],
-                "directives": [],
-                "id": "grabbed",
-                "loc": {
-                  "end": {
-                    "column": 6,
-                    "line": 28,
-                  },
-                  "start": {
-                    "column": 5,
-                    "line": 26,
-                  },
-                },
-                "name": "grabbed",
-                "properties": {
-                  "flying": true,
-                  "on": "throw",
-                },
-                "traits": Map {},
-                "type": "state",
-              },
-              {
-                "children": [],
-                "directives": [],
-                "id": "flying",
-                "loc": {
-                  "end": {
-                    "column": 6,
-                    "line": 31,
-                  },
-                  "start": {
-                    "column": 5,
-                    "line": 29,
-                  },
-                },
-                "name": "flying",
-                "properties": {
-                  "idle": true,
-                  "on": "land",
-                },
-                "traits": Map {},
-                "type": "state",
-              },
-            ],
-            "directives": [],
-            "id": "OrbController",
-            "loc": {
-              "end": {
-                "column": 4,
-                "line": 32,
-              },
-              "start": {
-                "column": 3,
-                "line": 21,
-              },
-            },
-            "name": "OrbController",
-            "properties": {
-              "initial": "idle",
-            },
-            "traits": Map {},
-            "type": "state-machine",
-          },
-        ],
-        "configs": [],
-        "properties": {
-          "orbs": [
-            {
-              "@grabbable": {
-                "config": {},
-                "name": "grabbable",
-                "type": "trait",
-              },
-              "@throwable": {
-                "config": {},
-                "name": "throwable",
-                "type": "trait",
-              },
-              "color": "red",
-              "geometry": "sphere",
-              "id": "orb1",
-              "position": {
-                "x": -1,
-                "y": 1,
-                "z": -2,
-              },
-            },
-            {
-              "@grabbable": {
-                "config": {},
-                "name": "grabbable",
-                "type": "trait",
-              },
-              "@throwable": {
-                "config": {},
-                "name": "throwable",
-                "type": "trait",
-              },
-              "color": "blue",
-              "geometry": "sphere",
-              "id": "orb2",
-              "position": {
-                "x": 1,
-                "y": 1,
-                "z": -2,
-              },
-            },
-          ],
-        },
-        "systems": [],
-      },
-      "children": [
+      "body": [],
+      "children": [],
+      "directives": [
         {
-          "children": [
-            {
-              "children": [],
-              "directives": [],
-              "id": "idle",
-              "loc": {
-                "end": {
-                  "column": 6,
-                  "line": 25,
-                },
-                "start": {
-                  "column": 5,
-                  "line": 23,
-                },
-              },
-              "name": "idle",
-              "properties": {
-                "grabbed": true,
-                "on": "grab",
-              },
-              "traits": Map {},
-              "type": "state",
-            },
-            {
-              "children": [],
-              "directives": [],
-              "id": "grabbed",
-              "loc": {
-                "end": {
-                  "column": 6,
-                  "line": 28,
-                },
-                "start": {
-                  "column": 5,
-                  "line": 26,
-                },
-              },
-              "name": "grabbed",
-              "properties": {
-                "flying": true,
-                "on": "throw",
-              },
-              "traits": Map {},
-              "type": "state",
-            },
-            {
-              "children": [],
-              "directives": [],
-              "id": "flying",
-              "loc": {
-                "end": {
-                  "column": 6,
-                  "line": 31,
-                },
-                "start": {
-                  "column": 5,
-                  "line": 29,
-                },
-              },
-              "name": "flying",
-              "properties": {
-                "idle": true,
-                "on": "land",
-              },
-              "traits": Map {},
-              "type": "state",
-            },
-          ],
-          "directives": [],
-          "id": "OrbController",
-          "loc": {
-            "end": {
-              "column": 4,
-              "line": 32,
-            },
-            "start": {
-              "column": 3,
-              "line": 21,
-            },
-          },
-          "name": "OrbController",
-          "properties": {
-            "initial": "idle",
-          },
-          "traits": Map {},
-          "type": "state-machine",
+          "config": {},
+          "name": "grabbable",
+          "type": "trait",
+        },
+        {
+          "config": {},
+          "name": "throwable",
+          "type": "trait",
+        },
+        {
+          "config": {},
+          "name": "grabbable",
+          "type": "trait",
+        },
+        {
+          "config": {},
+          "name": "throwable",
+          "type": "trait",
         },
       ],
-      "directives": [],
-      "id": "InteractiveScene",
+      "id": "root",
       "loc": {
         "end": {
           "column": 2,
@@ -2541,53 +1670,9 @@ exports[`Parser AST Visual Regression > Complex Real-World AST Examples > intera
           "line": 1,
         },
       },
-      "name": "InteractiveScene",
-      "properties": {
-        "orbs": [
-          {
-            "@grabbable": {
-              "config": {},
-              "name": "grabbable",
-              "type": "trait",
-            },
-            "@throwable": {
-              "config": {},
-              "name": "throwable",
-              "type": "trait",
-            },
-            "color": "red",
-            "geometry": "sphere",
-            "id": "orb1",
-            "position": {
-              "x": -1,
-              "y": 1,
-              "z": -2,
-            },
-          },
-          {
-            "@grabbable": {
-              "config": {},
-              "name": "grabbable",
-              "type": "trait",
-            },
-            "@throwable": {
-              "config": {},
-              "name": "throwable",
-              "type": "trait",
-            },
-            "color": "blue",
-            "geometry": "sphere",
-            "id": "orb2",
-            "position": {
-              "x": 1,
-              "y": 1,
-              "z": -2,
-            },
-          },
-        ],
-      },
+      "properties": {},
       "traits": Map {},
-      "type": "composition",
+      "type": "fragment",
     },
     "traits": Map {},
     "type": "Program",
@@ -2596,50 +1681,255 @@ exports[`Parser AST Visual Regression > Complex Real-World AST Examples > intera
   "compiledExpressions": Map {},
   "errors": [
     {
-      "code": "HSP001",
-      "column": 18,
-      "context": "  22 |     initial: "idle"
-  23 |     state idle {
-> 24 |       on: "grab" -> "grabbed"
-                       ^
-  25 |     }
-  26 |     state grabbed {",
+      "code": "HSP300",
+      "column": 22,
+      "context": "  5 |       geometry: "sphere",
+  6 |       color: "red",
+> 7 |       position: { x: -1, y: 1, z: -2 },
+                          ^
+  8 |       @grabbable,
+  9 |       @throwable",
       "endColumn": undefined,
       "endLine": undefined,
-      "line": 24,
-      "message": "HSP001: Unexpected token ARROW "->" in node body",
+      "line": 7,
+      "message": "HSP300: Unexpected token in expression: MINUS "-". Expected value, identifier, or expression",
       "severity": "error",
       "suggestion": undefined,
     },
     {
       "code": "HSP001",
-      "column": 19,
-      "context": "  25 |     }
+      "column": 38,
+      "context": "  5 |       geometry: "sphere",
+  6 |       color: "red",
+> 7 |       position: { x: -1, y: 1, z: -2 },
+                                          ^
+  8 |       @grabbable,
+  9 |       @throwable",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 7,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP003",
+      "column": 17,
+      "context": "   6 |       color: "red",
+   7 |       position: { x: -1, y: 1, z: -2 },
+>  8 |       @grabbable,
+                      ^
+   9 |       @throwable
+  10 |     },",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 8,
+      "message": "HSP003: Expected node after directives, got COMMA. Valid nodes: orb, template, logic, object, composition, scene, group",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 17,
+      "context": "   6 |       color: "red",
+   7 |       position: { x: -1, y: 1, z: -2 },
+>  8 |       @grabbable,
+                      ^
+   9 |       @throwable
+  10 |     },",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 8,
+      "message": "HSP001: Unexpected token COMMA "," at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP003",
+      "column": 5,
+      "context": "   8 |       @grabbable,
+   9 |       @throwable
+> 10 |     },
+          ^
+  11 |     {
+  12 |       id: "orb2",",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 10,
+      "message": "HSP003: Expected node after directives, got RBRACE. Valid nodes: orb, template, logic, object, composition, scene, group",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 5,
+      "context": "   8 |       @grabbable,
+   9 |       @throwable
+> 10 |     },
+          ^
+  11 |     {
+  12 |       id: "orb2",",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 10,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 37,
+      "context": "  13 |       geometry: "sphere",
+  14 |       color: "blue",
+> 15 |       position: { x: 1, y: 1, z: -2 },
+                                          ^
+  16 |       @grabbable,
+  17 |       @throwable",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 15,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP003",
+      "column": 17,
+      "context": "  14 |       color: "blue",
+  15 |       position: { x: 1, y: 1, z: -2 },
+> 16 |       @grabbable,
+                      ^
+  17 |       @throwable
+  18 |     }",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 16,
+      "message": "HSP003: Expected node after directives, got COMMA. Valid nodes: orb, template, logic, object, composition, scene, group",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 17,
+      "context": "  14 |       color: "blue",
+  15 |       position: { x: 1, y: 1, z: -2 },
+> 16 |       @grabbable,
+                      ^
+  17 |       @throwable
+  18 |     }",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 16,
+      "message": "HSP001: Unexpected token COMMA "," at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP003",
+      "column": 5,
+      "context": "  16 |       @grabbable,
+  17 |       @throwable
+> 18 |     }
+          ^
+  19 |   ]
+  20 |   ",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 18,
+      "message": "HSP003: Expected node after directives, got RBRACE. Valid nodes: orb, template, logic, object, composition, scene, group",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 5,
+      "context": "  16 |       @grabbable,
+  17 |       @throwable
+> 18 |     }
+          ^
+  19 |   ]
+  20 |   ",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 18,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 5,
+      "context": "  23 |     state idle {
+  24 |       on: "grab" -> "grabbed"
+> 25 |     }
+          ^
   26 |     state grabbed {
-> 27 |       on: "throw" -> "flying"
-                        ^
-  28 |     }
-  29 |     state flying {",
+  27 |       on: "throw" -> "flying"",
       "endColumn": undefined,
       "endLine": undefined,
-      "line": 27,
-      "message": "HSP001: Unexpected token ARROW "->" in node body",
+      "line": 25,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
       "severity": "error",
       "suggestion": undefined,
     },
     {
       "code": "HSP001",
-      "column": 18,
-      "context": "  28 |     }
+      "column": 5,
+      "context": "  26 |     state grabbed {
+  27 |       on: "throw" -> "flying"
+> 28 |     }
+          ^
   29 |     state flying {
-> 30 |       on: "land" -> "idle"
-                       ^
-  31 |     }
-  32 |   }",
+  30 |       on: "land" -> "idle"",
       "endColumn": undefined,
       "endLine": undefined,
-      "line": 30,
-      "message": "HSP001: Unexpected token ARROW "->" in node body",
+      "line": 28,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 5,
+      "context": "  29 |     state flying {
+  30 |       on: "land" -> "idle"
+> 31 |     }
+          ^
+  32 |   }
+  33 | }",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 31,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 3,
+      "context": "  30 |       on: "land" -> "idle"
+  31 |     }
+> 32 |   }
+        ^
+  33 | }",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 32,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
+      "severity": "error",
+      "suggestion": undefined,
+    },
+    {
+      "code": "HSP001",
+      "column": 1,
+      "context": "  31 |     }
+  32 |   }
+> 33 | }
+      ^",
+      "endColumn": undefined,
+      "endLine": undefined,
+      "line": 33,
+      "message": "HSP001: Unexpected token RBRACE "}" at top level. Expected: composition, object, template, logic, or @directive",
       "severity": "error",
       "suggestion": undefined,
     },
@@ -2778,6 +2068,7 @@ exports[`Parser AST Visual Regression > Control Flow AST Nodes > conditional log
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": [
@@ -3180,6 +2471,7 @@ exports[`Parser AST Visual Regression > Control Flow AST Nodes > state machine A
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "children": [
@@ -3394,6 +2686,7 @@ exports[`Parser AST Visual Regression > Control Flow AST Nodes > timeline AST 1`
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "children": [],
@@ -3555,7 +2848,27 @@ exports[`Parser AST Visual Regression > Directive AST Nodes > accessibility trai
         "type": "ui_button",
       },
     ],
-    "directives": [],
+    "directives": [
+      {
+        "config": {},
+        "name": "accessible",
+        "type": "trait",
+      },
+      {
+        "config": {
+          "default": "Submit button",
+        },
+        "name": "alt_text",
+        "type": "trait",
+      },
+      {
+        "config": {
+          "default": "Press to submit form",
+        },
+        "name": "screen_reader",
+        "type": "trait",
+      },
+    ],
     "hasControlFlow": false,
     "hasState": false,
     "hasVRTraits": true,
@@ -3571,6 +2884,7 @@ exports[`Parser AST Visual Regression > Directive AST Nodes > accessibility trai
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "children": [],
@@ -3817,6 +3131,7 @@ exports[`Parser AST Visual Regression > Directive AST Nodes > multiple trait dir
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -4051,6 +3366,7 @@ exports[`Parser AST Visual Regression > Directive AST Nodes > single trait direc
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -4277,6 +3593,7 @@ exports[`Parser AST Visual Regression > Directive AST Nodes > trait with configu
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -4465,6 +3782,7 @@ exports[`Parser AST Visual Regression > Edge Cases and Errors > deeply nested st
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -4599,6 +3917,7 @@ exports[`Parser AST Visual Regression > Edge Cases and Errors > empty compositio
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -4725,6 +4044,7 @@ exports[`Parser AST Visual Regression > Edge Cases and Errors > minimal single p
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -5023,6 +4343,7 @@ exports[`Parser AST Visual Regression > Expression AST Nodes > complex expressio
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -5313,6 +4634,7 @@ exports[`Parser AST Visual Regression > Expression AST Nodes > null coalescing a
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": [
@@ -5677,6 +4999,7 @@ exports[`Parser AST Visual Regression > Expression AST Nodes > null coalescing o
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -5869,6 +5192,7 @@ exports[`Parser AST Visual Regression > Expression AST Nodes > spread expression
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -6019,6 +5343,7 @@ exports[`Parser AST Visual Regression > Expression AST Nodes > spread expression
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -6227,6 +5552,7 @@ exports[`Parser AST Visual Regression > Expression AST Nodes > ternary operator 
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -6409,6 +5735,7 @@ exports[`Parser AST Visual Regression > Import and Module System > import statem
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": [
@@ -6721,6 +6048,7 @@ exports[`Parser AST Visual Regression > Import and Module System > multiple impo
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": [
@@ -6995,6 +6323,7 @@ exports[`Parser AST Visual Regression > Import and Module System > using stateme
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "children": [],
@@ -7146,6 +6475,7 @@ exports[`Parser AST Visual Regression > Snapshot Stability Tests > AST snapshot 
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -7292,6 +6622,7 @@ exports[`Parser AST Visual Regression > Template and Composition Inheritance > s
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": {
@@ -7366,7 +6697,7 @@ exports[`Parser AST Visual Regression > Template and Composition Inheritance > t
   "ast": {
     "body": [
       {
-        "body": {},
+        "children": [],
         "directives": [],
         "loc": {
           "end": {
@@ -7378,8 +6709,12 @@ exports[`Parser AST Visual Regression > Template and Composition Inheritance > t
             "line": 1,
           },
         },
+        "migrations": [],
         "name": "ButtonTemplate",
+        "properties": {},
+        "traits": Map {},
         "type": "template",
+        "version": undefined,
       },
       {
         "children": [],
@@ -7418,7 +6753,7 @@ exports[`Parser AST Visual Regression > Template and Composition Inheritance > t
     ],
     "children": [
       {
-        "body": {},
+        "children": [],
         "directives": [],
         "loc": {
           "end": {
@@ -7430,8 +6765,12 @@ exports[`Parser AST Visual Regression > Template and Composition Inheritance > t
             "line": 1,
           },
         },
+        "migrations": [],
         "name": "ButtonTemplate",
+        "properties": {},
+        "traits": Map {},
         "type": "template",
+        "version": undefined,
       },
       {
         "children": [],
@@ -7484,11 +6823,12 @@ exports[`Parser AST Visual Regression > Template and Composition Inheritance > t
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": [
         {
-          "body": {},
+          "children": [],
           "directives": [],
           "loc": {
             "end": {
@@ -7500,8 +6840,12 @@ exports[`Parser AST Visual Regression > Template and Composition Inheritance > t
               "line": 1,
             },
           },
+          "migrations": [],
           "name": "ButtonTemplate",
+          "properties": {},
+          "traits": Map {},
           "type": "template",
+          "version": undefined,
         },
         {
           "children": [],
@@ -7540,7 +6884,7 @@ exports[`Parser AST Visual Regression > Template and Composition Inheritance > t
       ],
       "children": [
         {
-          "body": {},
+          "children": [],
           "directives": [],
           "loc": {
             "end": {
@@ -7552,8 +6896,12 @@ exports[`Parser AST Visual Regression > Template and Composition Inheritance > t
               "line": 1,
             },
           },
+          "migrations": [],
           "name": "ButtonTemplate",
+          "properties": {},
+          "traits": Map {},
           "type": "template",
+          "version": undefined,
         },
         {
           "children": [],
@@ -7755,6 +7103,7 @@ exports[`Parser AST Visual Regression > Template and Composition Inheritance > t
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": [
@@ -7991,6 +7340,7 @@ exports[`Parser AST Visual Regression > UI Components AST > ui component hierarc
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "children": [],
@@ -8120,7 +7470,13 @@ exports[`Parser AST Visual Regression > UI Components AST > ui_button AST 1`] = 
         "type": "ui_button",
       },
     ],
-    "directives": [],
+    "directives": [
+      {
+        "config": {},
+        "name": "clickable",
+        "type": "trait",
+      },
+    ],
     "hasControlFlow": false,
     "hasState": false,
     "hasVRTraits": true,
@@ -8136,6 +7492,7 @@ exports[`Parser AST Visual Regression > UI Components AST > ui_button AST 1`] = 
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "children": [],
@@ -8254,7 +7611,13 @@ exports[`Parser AST Visual Regression > UI Components AST > ui_panel AST 1`] = `
         "type": "ui_panel",
       },
     ],
-    "directives": [],
+    "directives": [
+      {
+        "config": {},
+        "name": "ui_floating",
+        "type": "trait",
+      },
+    ],
     "hasControlFlow": false,
     "hasState": false,
     "hasVRTraits": true,
@@ -8270,6 +7633,7 @@ exports[`Parser AST Visual Regression > UI Components AST > ui_panel AST 1`] = `
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "children": [],
@@ -8423,6 +7787,7 @@ exports[`Parser AST Visual Regression > Zone and Environment AST > environment s
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "body": [
@@ -8631,7 +7996,13 @@ exports[`Parser AST Visual Regression > Zone and Environment AST > zone definiti
         "type": "zone",
       },
     ],
-    "directives": [],
+    "directives": [
+      {
+        "config": {},
+        "name": "plane_detection",
+        "type": "trait",
+      },
+    ],
     "hasControlFlow": false,
     "hasState": false,
     "hasVRTraits": true,
@@ -8647,6 +8018,7 @@ exports[`Parser AST Visual Regression > Zone and Environment AST > zone definiti
         "line": 1,
       },
     },
+    "migrations": undefined,
     "properties": {},
     "root": {
       "children": [],
