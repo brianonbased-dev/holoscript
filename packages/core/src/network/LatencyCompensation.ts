@@ -19,7 +19,7 @@
  * @module network
  */
 
-import type { IVector3, IQuaternion, IInputCommand, IPredictionState } from './NetworkTypes';
+import type { IVector3, IQuaternion, IInputCommand, IPredictionState as _IPredictionState } from './NetworkTypes';
 import { lerpVector3, slerpQuaternion, distanceVector3 } from './NetworkTypes';
 
 // =============================================================================

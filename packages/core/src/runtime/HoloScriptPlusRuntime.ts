@@ -30,8 +30,8 @@ import {
 } from '../traits/VRTraitSystem';
 import { eventBus } from './EventBus';
 import { ChunkLoader } from './loader';
-import { HotReloader, type TemplateInstance } from './HotReloader';
-import { HSPlusStatement, HSPlusExpression } from '../types/HoloScriptPlus';
+import { HotReloader, type TemplateInstance as _TemplateInstance } from './HotReloader';
+import { HSPlusStatement, HSPlusExpression as _HSPlusExpression } from '../types/HoloScriptPlus';
 
 // MOCK: StateSync (to resolve cross-repo dependency for visualization)
 class StateSync {

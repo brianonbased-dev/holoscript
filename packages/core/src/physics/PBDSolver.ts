@@ -32,7 +32,7 @@ import type {
   IPBDAttachmentConstraint,
   IConstraintColoring,
   SoftBodyPreset,
-  SOFT_BODY_PRESETS,
+  SOFT_BODY_PRESETS as _SOFT_BODY_PRESETS,
 } from './PhysicsTypes';
 
 // =============================================================================
@@ -992,7 +992,7 @@ export function generateTetrahedra(
  */
 export function extractEdges(
   indices: Uint32Array,
-  numVertices: number
+  _numVertices: number
 ):
   | { edges: Uint32Array; restLengths: Float32Array; positions: Float32Array }
   | { edges: Uint32Array } {
@@ -2283,9 +2283,9 @@ export class PBDSolverGPU {
    * Initialize GPU resources (buffers, pipelines, bind groups).
    */
   public async initialize(): Promise<void> {
-    const { positions, masses, indices, edges, tetIndices } = this.config;
+    const { positions, masses, indices, edges, tetIndices: _tetIndices } = this.config;
     const numVerts = positions.length / 3;
-    const numTris = indices.length / 3;
+    const _numTris = indices.length / 3;
 
     // 1. Create Buffers
     this.buffers = {

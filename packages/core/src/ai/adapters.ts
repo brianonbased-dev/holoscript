@@ -14,6 +14,8 @@ import type {
   GenerateOptions,
 } from './AIAdapter';
 
+export type { AIAdapter, GenerateResult, ExplainResult, OptimizeResult, FixResult, GenerateOptions };
+
 // ============================================================================
 // System Prompt for HoloScript Generation
 // ============================================================================
@@ -184,7 +186,7 @@ export class OpenAIAdapter implements AIAdapter {
 
   private async callAPI(
     messages: Array<{ role: string; content: string }>,
-    history?: Array<{ role: 'user' | 'assistant'; content: string }>
+    _history?: Array<{ role: 'user' | 'assistant'; content: string }>
   ): Promise<string> {
     const baseUrl = this.config.baseUrl || 'https://api.openai.com/v1';
 
@@ -866,7 +868,7 @@ export class XAIAdapter implements AIAdapter {
     return !!this.config.apiKey;
   }
 
-  async generateHoloScript(prompt: string, options?: GenerateOptions): Promise<GenerateResult> {
+  async generateHoloScript(prompt: string, _options?: GenerateOptions): Promise<GenerateResult> {
     const messages: Array<{ role: string; content: string }> = [
       { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
       { role: 'user', content: 'Create a HoloScript scene: ' + prompt },
@@ -1041,7 +1043,7 @@ export class TogetherAdapter implements AIAdapter {
     return !!this.config.apiKey;
   }
 
-  async generateHoloScript(prompt: string, options?: GenerateOptions): Promise<GenerateResult> {
+  async generateHoloScript(prompt: string, _options?: GenerateOptions): Promise<GenerateResult> {
     const messages: Array<{ role: string; content: string }> = [
       { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
       { role: 'user', content: 'Create a HoloScript scene: ' + prompt },
@@ -1189,8 +1191,12 @@ export class FireworksAdapter implements AIAdapter {
     return !!this.config.apiKey;
   }
 
-  async generateHoloScript(prompt: string, options?: GenerateOptions): Promise<GenerateResult> {
-    const response = await this.callAPI('Create a HoloScript scene: ' + prompt, options);
+  async generateHoloScript(prompt: string, _options?: GenerateOptions): Promise<GenerateResult> {
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      { role: 'user', content: 'Create a HoloScript scene: ' + prompt },
+    ];
+    const response = await this.callAPI(messages);
 
     return {
       holoScript: this.extractCode(response),
@@ -1199,7 +1205,11 @@ export class FireworksAdapter implements AIAdapter {
   }
 
   async explainHoloScript(holoScript: string): Promise<ExplainResult> {
-    const response = await this.callAPI('Explain this HoloScript code clearly:\n\n' + holoScript);
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      { role: 'user', content: 'Explain this HoloScript code clearly:\n\n' + holoScript },
+    ];
+    const response = await this.callAPI(messages);
     return { explanation: response };
   }
 
@@ -1207,12 +1217,18 @@ export class FireworksAdapter implements AIAdapter {
     holoScript: string,
     target: 'mobile' | 'desktop' | 'vr' | 'ar'
   ): Promise<OptimizeResult> {
-    const response = await this.callAPI(
-      'Optimize this HoloScript for ' +
-        target +
-        '. Return only the optimized code:\n\n' +
-        holoScript
-    );
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content:
+          'Optimize this HoloScript for ' +
+          target +
+          '. Return only the optimized code:\n\n' +
+          holoScript,
+      },
+    ];
+    const response = await this.callAPI(messages);
     return {
       holoScript: this.extractCode(response),
       improvements: ['Optimized for ' + target],
@@ -1220,12 +1236,18 @@ export class FireworksAdapter implements AIAdapter {
   }
 
   async fixHoloScript(holoScript: string, errors: string[]): Promise<FixResult> {
-    const response = await this.callAPI(
-      'Fix these errors in the HoloScript:\nErrors: ' +
-        errors.join(', ') +
-        '\n\nCode:\n' +
-        holoScript
-    );
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content:
+          'Fix these errors in the HoloScript:\nErrors: ' +
+          errors.join(', ') +
+          '\n\nCode:\n' +
+          holoScript,
+      },
+    ];
+    const response = await this.callAPI(messages);
     return {
       holoScript: this.extractCode(response),
       fixes: errors.map((e) => ({ line: 0, issue: e, fix: 'auto-fixed' })),
@@ -1348,8 +1370,12 @@ export class NVIDIAAdapter implements AIAdapter {
     return !!this.config.apiKey;
   }
 
-  async generateHoloScript(prompt: string, options?: GenerateOptions): Promise<GenerateResult> {
-    const response = await this.callAPI('Create a HoloScript scene: ' + prompt, options);
+  async generateHoloScript(prompt: string, _options?: GenerateOptions): Promise<GenerateResult> {
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      { role: 'user', content: 'Create a HoloScript scene: ' + prompt },
+    ];
+    const response = await this.callAPI(messages);
 
     return {
       holoScript: this.extractCode(response),
@@ -1358,7 +1384,11 @@ export class NVIDIAAdapter implements AIAdapter {
   }
 
   async explainHoloScript(holoScript: string): Promise<ExplainResult> {
-    const response = await this.callAPI('Explain this HoloScript code clearly:\n\n' + holoScript);
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      { role: 'user', content: 'Explain this HoloScript code clearly:\n\n' + holoScript },
+    ];
+    const response = await this.callAPI(messages);
     return { explanation: response };
   }
 
@@ -1366,12 +1396,18 @@ export class NVIDIAAdapter implements AIAdapter {
     holoScript: string,
     target: 'mobile' | 'desktop' | 'vr' | 'ar'
   ): Promise<OptimizeResult> {
-    const response = await this.callAPI(
-      'Optimize this HoloScript for ' +
-        target +
-        '. Return only the optimized code:\n\n' +
-        holoScript
-    );
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content:
+          'Optimize this HoloScript for ' +
+          target +
+          '. Return only the optimized code:\n\n' +
+          holoScript,
+      },
+    ];
+    const response = await this.callAPI(messages);
     return {
       holoScript: this.extractCode(response),
       improvements: ['Optimized for ' + target],
@@ -1379,12 +1415,18 @@ export class NVIDIAAdapter implements AIAdapter {
   }
 
   async fixHoloScript(holoScript: string, errors: string[]): Promise<FixResult> {
-    const response = await this.callAPI(
-      'Fix these errors in the HoloScript:\nErrors: ' +
-        errors.join(', ') +
-        '\n\nCode:\n' +
-        holoScript
-    );
+    const messages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: HOLOSCRIPT_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content:
+          'Fix these errors in the HoloScript:\nErrors: ' +
+          errors.join(', ') +
+          '\n\nCode:\n' +
+          holoScript,
+      },
+    ];
+    const response = await this.callAPI(messages);
     return {
       holoScript: this.extractCode(response),
       fixes: errors.map((e) => ({ line: 0, issue: e, fix: 'auto-fixed' })),
