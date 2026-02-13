@@ -38,6 +38,7 @@ module.exports = grammar({
   conflicts: ($) => [
     [$.property_access, $.identifier],
     [$.return_statement],
+    [$.expression_statement],
   ],
 
   // External scanner for handling string interpolation (future)

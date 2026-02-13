@@ -366,7 +366,7 @@ class HoloScriptPlusRuntimeImpl implements HSPlusRuntime {
       // Bridge state for HotReloader
       const stateBridge = this.createStateMapProxy();
 
-      const self = this;
+      const _self = this;
       this.hotReloader.registerInstance({
         __holo_id: instance.__holo_id,
         templateName: instance.templateName!,
