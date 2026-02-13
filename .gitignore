@@ -51,3 +51,30 @@ __pycache__/
 *.pyc
 
 .performance-reports/
+
+# Mutation Testing
+.stryker-tmp/
+stryker.config.json
+
+# Benchmarks
+bench/
+
+# Rust Build Artifacts
+target/
+
+# Debug & Test Output
+test_*.txt
+debug_*.txt
+*_output.txt
+ci-log.txt
+
+# AI-Generated Session Reports
+*SUMMARY*.md
+*REPORT*.md
+PHASE_*.md
+RELEASE_v3.0.md
+INFRASTRUCTURE_*.md
+QUICK_REFERENCE_v*.md
+SESSION_*.md
+TEST_EXECUTION_*.md
+VISUAL_*.md
