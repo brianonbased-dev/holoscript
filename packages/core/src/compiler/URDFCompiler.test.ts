@@ -682,4 +682,196 @@ describe('URDFCompiler', () => {
       expect(urdf).toContain('<!-- Environment skybox: day -->');
     });
   });
+
+  describe('Joint Trait Support', () => {
+    it('should generate revolute joint from @joint trait with hinge type', () => {
+      const composition = createComposition({
+        objects: [
+          createObject({
+            name: 'ShoulderJoint',
+            properties: [
+              { key: 'geometry', value: 'cylinder' },
+              { key: 'position', value: [0, 0, 0.1] },
+            ],
+            traits: [
+              {
+                name: 'joint',
+                jointType: 'hinge',
+                axis: { x: 0, y: 0, z: 1 },
+                limits: { min: -180, max: 180 },
+              },
+            ],
+          }),
+        ],
+      });
+      const urdf = compiler.compile(composition);
+
+      expect(urdf).toContain('type="revolute"');
+      expect(urdf).toContain('<axis xyz="0 0 1"/>');
+      expect(urdf).toContain('<limit lower="-3.14159');
+      expect(urdf).toContain('upper="3.14159');
+    });
+
+    it('should generate prismatic joint from @joint trait with slider type', () => {
+      const composition = createComposition({
+        objects: [
+          createObject({
+            name: 'LinearActuator',
+            properties: [
+              { key: 'geometry', value: 'cylinder' },
+              { key: 'position', value: [0, 0, 0] },
+            ],
+            traits: [
+              {
+                name: 'joint',
+                jointType: 'slider',
+                axis: { x: 1, y: 0, z: 0 },
+                limits: { min: 0, max: 0.5 },
+              },
+            ],
+          }),
+        ],
+      });
+      const urdf = compiler.compile(composition);
+
+      expect(urdf).toContain('type="prismatic"');
+      expect(urdf).toContain('<axis xyz="1 0 0"/>');
+      expect(urdf).toContain('lower="0"');
+      expect(urdf).toContain('upper="0.5"');
+    });
+
+    it('should include dynamics from @joint trait', () => {
+      const composition = createComposition({
+        objects: [
+          createObject({
+            name: 'DampedJoint',
+            properties: [{ key: 'geometry', value: 'cylinder' }],
+            traits: [
+              {
+                name: 'joint',
+                jointType: 'hinge',
+                damping: 0.5,
+                friction: 0.1,
+              },
+            ],
+          }),
+        ],
+      });
+      const urdf = compiler.compile(composition);
+
+      expect(urdf).toContain('<dynamics damping="0.5" friction="0.1"/>');
+    });
+
+    it('should use connectedBody as parent link', () => {
+      const composition = createComposition({
+        objects: [
+          createObject({
+            name: 'Base',
+            properties: [{ key: 'geometry', value: 'cylinder' }],
+          }),
+          createObject({
+            name: 'ElbowJoint',
+            properties: [{ key: 'geometry', value: 'cylinder' }],
+            traits: [
+              {
+                name: 'joint',
+                jointType: 'hinge',
+                connectedBody: 'Base',
+              },
+            ],
+          }),
+        ],
+      });
+      const urdf = compiler.compile(composition);
+
+      expect(urdf).toContain('<joint name="base_to_elbowjoint_joint"');
+    });
+
+    it('should generate complete 2-DOF robot arm with articulated joints', () => {
+      const composition = createComposition({
+        name: 'TwoDoFArm',
+        objects: [
+          createObject({
+            name: 'Base',
+            properties: [
+              { key: 'geometry', value: 'cylinder' },
+              { key: 'physics', value: { mass: 10 } },
+            ],
+            traits: ['physics'],
+          }),
+          createObject({
+            name: 'ShoulderJoint',
+            properties: [
+              { key: 'geometry', value: 'cylinder' },
+              { key: 'physics', value: { mass: 0.5 } },
+            ],
+            traits: [
+              'physics',
+              {
+                name: 'joint',
+                jointType: 'hinge',
+                connectedBody: 'Base',
+                axis: { x: 0, y: 0, z: 1 },
+                limits: { min: -180, max: 180 },
+                damping: 0.1,
+              },
+            ],
+          }),
+          createObject({
+            name: 'UpperArm',
+            properties: [
+              { key: 'geometry', value: 'cube' },
+              { key: 'physics', value: { mass: 2 } },
+            ],
+            traits: ['physics'],
+          }),
+          createObject({
+            name: 'ElbowJoint',
+            properties: [
+              { key: 'geometry', value: 'cylinder' },
+              { key: 'physics', value: { mass: 0.3 } },
+            ],
+            traits: [
+              'physics',
+              {
+                name: 'joint',
+                jointType: 'hinge',
+                connectedBody: 'UpperArm',
+                axis: { x: 0, y: 1, z: 0 },
+                limits: { min: -135, max: 135 },
+                damping: 0.1,
+              },
+            ],
+          }),
+        ],
+      });
+
+      const customCompiler = new URDFCompiler({ robotName: 'RobotArm2DOF' });
+      const urdf = customCompiler.compile(composition);
+
+      // Verify robot structure
+      expect(urdf).toContain('<robot name="RobotArm2DOF">');
+
+      // Verify all links exist
+      expect(urdf).toContain('<link name="base">');
+      expect(urdf).toContain('<link name="shoulderjoint">');
+      expect(urdf).toContain('<link name="upperarm">');
+      expect(urdf).toContain('<link name="elbowjoint">');
+
+      // Verify articulated joints (revolute)
+      expect(urdf).toMatch(/joint.*shoulderjoint.*type="revolute"/s);
+      expect(urdf).toMatch(/joint.*elbowjoint.*type="revolute"/s);
+
+      // Verify joint parents are correctly set from connectedBody
+      expect(urdf).toContain('base_to_shoulderjoint_joint');
+      expect(urdf).toContain('upperarm_to_elbowjoint_joint');
+
+      // Verify joint axes
+      expect(urdf).toContain('<axis xyz="0 0 1"/>'); // Shoulder rotates around Z
+      expect(urdf).toContain('<axis xyz="0 1 0"/>'); // Elbow rotates around Y
+
+      // Verify dynamics
+      expect(urdf).toContain('<dynamics damping="0.1" friction="0"/>');
+    });
+  });
 });
