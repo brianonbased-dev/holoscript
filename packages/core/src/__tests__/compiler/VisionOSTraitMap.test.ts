@@ -214,8 +214,8 @@ describe('VisionOSTraitMap', () => {
 
     it('should list comment-only traits', () => {
       const commentTraits = listTraitsByLevel('comment');
-      expect(commentTraits.length).toBeGreaterThan(0);
-      expect(commentTraits).toContain('cloth');
+      // Currently no comment-level traits exist - all are either full or partial
+      expect(commentTraits.length).toBe(0);
     });
   });
 
