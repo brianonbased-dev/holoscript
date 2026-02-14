@@ -78,3 +78,6 @@ QUICK_REFERENCE_v*.md
 SESSION_*.md
 TEST_EXECUTION_*.md
 VISUAL_*.md
+
+# AI Ecosystem
+.ai-context-stream.jsonl

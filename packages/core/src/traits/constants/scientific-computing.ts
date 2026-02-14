@@ -24,9 +24,10 @@ export const SCIENTIFIC_COMPUTING_TRAITS = [
   'hydrophobic_surface',   // Render hydrophobic surface
   'electrostatic_surface', // Render electrostatic potential surface
 
-  // Data & Analysis (5 traits)
+  // Data & Analysis (6 traits)
   'pdb_loader',          // Load PDB (Protein Data Bank) files
   'mol_loader',          // Load MOL molecule files
+  'database_query',      // Fetch structures from PDB/AlphaFold databases
   'trajectory_analysis', // Analyze MD trajectory data
   'trajectory_playback', // Play back simulation trajectory
   'binding_affinity',    // Calculate binding affinity metrics
@@ -49,7 +50,8 @@ export const SCIENTIFIC_COMPUTING_TRAITS = [
 export type ScientificComputingTraitName = typeof SCIENTIFIC_COMPUTING_TRAITS[number];
 
 /**
- * Total count: 22 traits
- * Integration: @holoscript/narupa-plugin v1.0.0
+ * Total count: 23 traits
+ * Integration: @holoscript/narupa-plugin v1.0.0+
  * Phase: 1 of 5 (scientific traits expansion)
+ * v1.1.0: Added database_query trait for PDB/AlphaFold fetching
  */
