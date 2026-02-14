@@ -10,11 +10,12 @@
  */
 
 export const SCIENTIFIC_COMPUTING_TRAITS = [
-  // Integration & Simulation (4 traits)
+  // Integration & Simulation (5 traits)
   'narupa_integration',  // Connect to Narupa MD server
   'molecular_dynamics',  // Run molecular dynamics simulation
   'energy_minimization', // Minimize molecular energy
   'force_field',        // Apply force field to simulation
+  'auto_dock',          // Automated molecular docking (AutoDock Vina)
 
   // Visualization (6 traits)
   'protein_visualization', // Render protein structure
@@ -50,8 +51,9 @@ export const SCIENTIFIC_COMPUTING_TRAITS = [
 export type ScientificComputingTraitName = typeof SCIENTIFIC_COMPUTING_TRAITS[number];
 
 /**
- * Total count: 23 traits
+ * Total count: 24 traits
  * Integration: @holoscript/narupa-plugin v1.0.0+
  * Phase: 1 of 5 (scientific traits expansion)
  * v1.1.0: Added database_query trait for PDB/AlphaFold fetching
+ * v1.2.0: Added auto_dock trait for AutoDock Vina integration
  */
