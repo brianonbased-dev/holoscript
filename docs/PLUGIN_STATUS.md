@@ -26,8 +26,8 @@ Four domain plugins are built and tested, adding specialized traits and code gen
 |--------|---------|-----|-------|--------|------------|
 | @holoscript/narupa-plugin | 1.2.0 | ✅ Published | ✅ 47 | MDAnalysis | [holoscript-scientific-plugin](https://github.com/brianonbased-dev/holoscript-scientific-plugin) |
 | @holoscript/alphafold-plugin | 1.0.0 | ✅ Published | ✅ | JAX/AlphaFold | [holoscript-alphafold-plugin](https://github.com/brianonbased-dev/holoscript-alphafold-plugin) |
-| @holoscript/medical-plugin | 1.0.0 | 📦 Ready | ✅ 26 | pydicom | [holoscript-medical-plugin](https://github.com/brianonbased-dev/holoscript-medical-plugin) |
-| @holoscript/robotics-plugin | 1.0.0 | 📦 Ready | ✅ 34 | roslibpy | [holoscript-robotics-plugin](https://github.com/brianonbased-dev/holoscript-robotics-plugin) |
+| @holoscript/medical-plugin | 1.0.0 | ✅ Published | ✅ 26 | pydicom | [holoscript-medical-plugin](https://github.com/brianonbased-dev/holoscript-medical-plugin) |
+| @holoscript/robotics-plugin | 1.0.0 | ✅ Published | ✅ 34 | roslibpy | [holoscript-robotics-plugin](https://github.com/brianonbased-dev/holoscript-robotics-plugin) |
 
 **Total**: 107+ integration tests across 4 plugins.
 
