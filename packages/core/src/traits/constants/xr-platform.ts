@@ -27,4 +27,7 @@ export const XR_PLATFORM_TRAITS = [
   'mixed_reality',
   'diminished_reality',
   'augmented_virtuality',
+  // V43 Tier 1: Spatial Systems
+  'spatial_awareness',
+  'shared_world',
 ] as const;

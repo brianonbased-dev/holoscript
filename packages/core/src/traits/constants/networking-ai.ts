@@ -14,6 +14,8 @@ export const NETWORKING_AI_TRAITS = [
   'fabrication_queue',
   'print_vote',
   'design_fork',
-  // V43 Tier 1: LLM Agent
+  // V43 Tier 1: LLM Agent & Neural Systems
   'llm_agent',
+  'neural_link',
+  'neural_forge',
 ] as const;
