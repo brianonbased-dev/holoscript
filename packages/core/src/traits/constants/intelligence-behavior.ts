@@ -40,4 +40,7 @@ export const INTELLIGENCE_BEHAVIOR_TRAITS = [
   'shapeshifter',
   'invisible_agent',
   'omniscient',
+  // V43 Tier 1: Planning & Behavior
+  'behavior_tree',
+  'goal_oriented',
 ] as const;
