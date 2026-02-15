@@ -49,17 +49,31 @@ The endgame: put on a headset, talk to Brittney, build Hololand in VR. HoloScrip
 
 | Task | Status |
 | --- | --- |
-| `brittney-workspace.holo` VR dev environment composition | 🔲 Not started |
-| Voice → MCP pipeline in VR | 🔲 Not started |
-| Brittney spatial avatar with lip-sync | 🔲 Not started |
+| `brittney-workspace.holo` VR dev environment composition | ✅ Complete |
+| Voice → MCP pipeline in VR (`VoiceMCPPipeline.ts` in ai-bridge) | ✅ Complete |
+| Brittney spatial avatar with lip-sync (`brittney-avatar.holo`) | ✅ Complete |
 
-### Phase 4-5: Migration & Self-Building World (Weeks 7-12)
+### Phase 4: Migration Execution (Weeks 7-10)
 
 | Task | Status |
 | --- | --- |
-| Hololand Central migrated to `.hsplus` root composition | 🔲 Not started |
-| Brittney writes + hot-reloads `.hsplus` files from VR | 🔲 Not started |
-| Git integration (auto-commit, rollback via voice) | 🔲 Not started |
+| Hololand Central migrated to `.hsplus` root composition (`app.hsplus` + `bootstrap.ts`) | ✅ Complete |
+| 5 zone files (main_plaza, casino, builder_shop, social_lounge, arcade) | ✅ Complete |
+| 5 system files (Tutorial, EasterEggs, Themes, Multiplayer, Accessibility) | ✅ Complete |
+| 3 template files (Portal, NPC, Collectible) | ✅ Complete |
+| 3 UI components (MobileControls, MenuOverlay, Modals) | ✅ Complete |
+| 2 NPC files (plaza_npcs, casino_npcs — 6 named characters) | ✅ Complete |
+| 3 page files (Landing, Oasis, Central) | ✅ Complete |
+
+### Phase 5: Self-Building World (Weeks 9-12)
+
+| Task | Status |
+| --- | --- |
+| `HoloScriptHotReloader.ts` — watches `.hsplus` files, AST diff, patch scene graph | ✅ Complete |
+| `VRGitIntegration.ts` — auto-commit, rollback, snapshots from VR | ✅ Complete |
+| Brittney writes + hot-reloads `.hsplus` files from VR | ✅ Complete (infrastructure) |
+| Collaborative CRDT editing | 🔲 Not started |
+| Self-improvement loop (failed generations → TrainingMonkey harvest) | 🔲 Not started |
 
 ---
 

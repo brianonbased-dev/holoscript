@@ -1,0 +1,277 @@
+// Brittney Avatar — Spatial AI agent with lip-sync, animations, and spatial audio
+// Phase 3: Defines Brittney's physical presence in VR
+// Used by brittney-workspace.holo and any scene that includes Brittney
+
+composition "Brittney Avatar" {
+
+  template "BrittneyAvatar" {
+    @animated
+    @spatial_audio
+    @tracked
+    @billboard
+
+    geometry: "avatar"
+    model: "/models/brittney/brittney_v2.glb"
+    scale: [1, 1, 1]
+
+    state {
+      speaking: false
+      thinking: false
+      idle: true
+      mood: "friendly"
+      lipSyncLevel: 0
+      blinkTimer: 0
+      gestureQueue: []
+    }
+
+    // ─── Idle Animations ───
+
+    animation idle_float {
+      property: "position.y"
+      from: 0
+      to: 0.05
+      duration: 3000
+      loop: infinite
+      easing: "easeInOut"
+    }
+
+    animation idle_sway {
+      property: "rotation.y"
+      from: -2
+      to: 2
+      duration: 5000
+      loop: infinite
+      easing: "easeInOut"
+    }
+
+    animation blink {
+      property: "morph.blink"
+      keyframes: [
+        { time: 0, value: 0 },
+        { time: 50, value: 1 },
+        { time: 150, value: 0 }
+      ]
+      loop: false
+    }
+
+    // ─── Speaking Animations ───
+
+    animation talk_gesture_left {
+      property: "bone.leftArm.rotation.x"
+      keyframes: [
+        { time: 0, value: 0 },
+        { time: 300, value: -25 },
+        { time: 600, value: -15 },
+        { time: 900, value: 0 }
+      ]
+      easing: "easeInOut"
+    }
+
+    animation talk_gesture_right {
+      property: "bone.rightArm.rotation.x"
+      keyframes: [
+        { time: 0, value: 0 },
+        { time: 400, value: -20 },
+        { time: 700, value: -30 },
+        { time: 1000, value: 0 }
+      ]
+      easing: "easeInOut"
+    }
+
+    animation nod {
+      property: "bone.head.rotation.x"
+      keyframes: [
+        { time: 0, value: 0 },
+        { time: 200, value: 8 },
+        { time: 400, value: 0 }
+      ]
+      easing: "easeOut"
+    }
+
+    // ─── Thinking Animation ───
+
+    animation think_tilt {
+      property: "bone.head.rotation.z"
+      keyframes: [
+        { time: 0, value: 0 },
+        { time: 500, value: 8 },
+        { time: 2000, value: 8 },
+        { time: 2500, value: 0 }
+      ]
+      easing: "easeInOut"
+    }
+
+    animation think_hand_chin {
+      property: "bone.rightArm.rotation.x"
+      keyframes: [
+        { time: 0, value: 0 },
+        { time: 400, value: -60 },
+        { time: 2000, value: -60 },
+        { time: 2500, value: 0 }
+      ]
+      easing: "easeInOut"
+    }
+
+    // ─── Mood-based Emissive ───
+
+    moods: {
+      friendly: { emissive: "#00ffff", emissiveIntensity: 0.2 },
+      thinking: { emissive: "#ffaa00", emissiveIntensity: 0.3 },
+      excited: { emissive: "#ff6ec7", emissiveIntensity: 0.4 },
+      focused: { emissive: "#6e40c9", emissiveIntensity: 0.25 },
+      error: { emissive: "#ff4444", emissiveIntensity: 0.35 }
+    }
+
+    // ─── Spatial Audio Profile ───
+
+    audio {
+      voice: {
+        provider: "elevenlabs"
+        voiceId: "nova"
+        rate: 1.0
+        pitch: 1.0
+      }
+      spatial: {
+        refDistance: 1.5
+        maxDistance: 15
+        rolloffFactor: 1.2
+        coneInnerAngle: 120
+        coneOuterAngle: 240
+        coneOuterGain: 0.3
+      }
+    }
+
+    // ─── Lip Sync System ───
+
+    on_update(delta) {
+      // Blink randomly every 3-6 seconds
+      state.blinkTimer += delta
+      if (state.blinkTimer > 3000 + Math.random() * 3000) {
+        play("blink")
+        state.blinkTimer = 0
+      }
+
+      // Lip sync when speaking
+      if (state.speaking) {
+        morph.jawOpen = state.lipSyncLevel * 0.4
+        morph.mouthOpen = state.lipSyncLevel * 0.6
+        morph.lipSync_aa = state.lipSyncLevel * 0.3
+      } else {
+        morph.jawOpen = 0
+        morph.mouthOpen = 0
+        morph.lipSync_aa = 0
+      }
+    }
+
+    // ─── Actions ───
+
+    action startSpeaking(text) {
+      state.speaking = true
+      state.idle = false
+      state.mood = "friendly"
+
+      // Start spatial audio TTS
+      speech.speak(text, audio.voice)
+
+      // Random gestures while talking
+      if (text.length > 50) {
+        play("talk_gesture_left")
+        schedule(500, () -> play("talk_gesture_right"))
+      }
+      if (text.includes("!")) {
+        state.mood = "excited"
+      }
+    }
+
+    action stopSpeaking() {
+      state.speaking = false
+      state.idle = true
+      state.lipSyncLevel = 0
+      play("nod")
+    }
+
+    action startThinking() {
+      state.thinking = true
+      state.idle = false
+      state.mood = "thinking"
+      play("think_tilt")
+      play("think_hand_chin")
+    }
+
+    action stopThinking() {
+      state.thinking = false
+      state.idle = true
+      state.mood = "friendly"
+    }
+
+    action react(emotion) {
+      state.mood = emotion
+      if (emotion == "excited") {
+        play("nod")
+        play("talk_gesture_left")
+        play("talk_gesture_right")
+      }
+    }
+
+    action lookAt(target) {
+      bone.head.lookAt(target.position)
+      bone.eyes.lookAt(target.position)
+    }
+
+    // ─── Event Handlers ───
+
+    on_speech_audio_level(level) {
+      state.lipSyncLevel = level
+    }
+
+    on_speech_end() {
+      stopSpeaking()
+    }
+
+    onHoverEnter() {
+      if (state.idle) {
+        state.mood = "friendly"
+        play("nod")
+      }
+    }
+  }
+
+  // ─── Brittney's Thought Bubble (appears when thinking) ───
+
+  template "ThoughtBubble" {
+    @billboard
+    @glowing
+    geometry: "plane"
+    material: "glass"
+    color: "#1a1a3a"
+    opacity: 0.85
+    scale: [0.6, 0.2, 0.01]
+    visible: false
+
+    state {
+      text: "..."
+    }
+
+    animation dots {
+      property: "state.text"
+      keyframes: [
+        { time: 0, value: "." },
+        { time: 300, value: ".." },
+        { time: 600, value: "..." }
+      ]
+      loop: infinite
+    }
+  }
+
+  // ─── Brittney's Name Tag ───
+
+  template "NameTag" {
+    @billboard
+    geometry: "plane"
+    text: "Brittney"
+    fontSize: 0.06
+    color: "#00ffff"
+    opacity: 0.8
+    scale: [0.3, 0.08, 0.01]
+  }
+}
