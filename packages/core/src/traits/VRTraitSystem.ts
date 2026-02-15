@@ -1249,6 +1249,11 @@ export class VRTraitRegistry {
     // v3.1 Agentic Choreography
     this.register(choreographyHandler as TraitHandler);
     this.register(negotiationHandler as TraitHandler);
+
+    // v3.2 UI Traits
+    this.register(handMenuHandler as TraitHandler);
+    this.register(scrollableHandler as TraitHandler);
+    this.register(gestureHandler as TraitHandler);
   }
 
   register<T>(handler: TraitHandler<T>): void {
@@ -1477,3 +1482,8 @@ export {
   emotionalVoiceHandler,
   flowFieldHandler,
 };
+
+import { handMenuHandler } from './HandMenuTrait';
+import { scrollableHandler } from './ScrollableTrait';
+import { gestureHandler } from './GestureTrait';
+export { handMenuHandler, scrollableHandler, gestureHandler };

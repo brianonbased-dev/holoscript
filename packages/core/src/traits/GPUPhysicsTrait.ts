@@ -1,14 +1,7 @@
-/**
- * GPUPhysics Trait
- *
- * GPU-side physics simulation
- *
- * @version 1.0.0
- */
-
 import type { TraitHandler } from './TraitTypes';
 import { getPhysicsEngine } from '../runtime/PhysicsEngine';
 import { IslandDetector } from '../physics/IslandDetector';
+import { SoftBodyAdapter } from '../physics/SoftBodyAdapter';
 
 function extractPosition(node: any): [number, number, number] {
   const pos = node?.properties?.position ?? node?.position;
@@ -46,6 +39,7 @@ interface InternalState {
   isSimulating: boolean;
   lastPosition: [number, number, number];
   islandDetector: IslandDetector;
+  softBody?: SoftBodyAdapter;
 }
 
 export const gpuPhysicsHandler: TraitHandler<GPUPhysicsConfig> = {
@@ -65,6 +59,20 @@ export const gpuPhysicsHandler: TraitHandler<GPUPhysicsConfig> = {
   },
 
   onAttach(node, config, _context) {
+    // 1. Check for Soft Body
+    if (config.sim_type === 'soft_body') {
+       const softBody = new SoftBodyAdapter(node, config);
+       (node as any).__gpuPhysicsState = {
+         engineId: 'soft_body_solver',
+         isSimulating: true,
+         lastPosition: extractPosition(node),
+         islandDetector: new IslandDetector(),
+         softBody
+       };
+       return;
+    }
+
+    // 2. Default Rigid Body Logic
     const engine = getPhysicsEngine('webgpu') || getPhysicsEngine('default');
     if (!engine) {
       console.warn('No GPU PhysicsEngine found. Physics will be disabled for', node.name);
@@ -95,8 +103,12 @@ export const gpuPhysicsHandler: TraitHandler<GPUPhysicsConfig> = {
   onDetach(node) {
     const state = (node as any).__gpuPhysicsState as InternalState;
     if (state) {
-      const engine = getPhysicsEngine(state.engineId);
-      engine?.removeBody(node.name || '');
+      if (state.softBody) {
+          // Dispose soft body resources if any
+      } else {
+          const engine = getPhysicsEngine(state.engineId);
+          engine?.removeBody(node.name || '');
+      }
       delete (node as any).__gpuPhysicsState;
     }
   },
@@ -105,6 +117,13 @@ export const gpuPhysicsHandler: TraitHandler<GPUPhysicsConfig> = {
     const state = (node as any).__gpuPhysicsState as InternalState;
     if (!state || !state.isSimulating) return;
 
+    // 1. Soft Body Update
+    if (state.softBody) {
+        state.softBody.update(_delta);
+        return;
+    }
+
+    // 2. Rigid Body Sync
     const engine = getPhysicsEngine(state.engineId);
     if (!engine) return;
 
@@ -127,8 +146,12 @@ export const gpuPhysicsHandler: TraitHandler<GPUPhysicsConfig> = {
 
     const eventType = typeof event === 'string' ? event : event.type;
     if (eventType === 'apply-force') {
-      const engine = getPhysicsEngine(state.engineId || 'webgpu');
-      engine?.applyForce(node.name || '', (event as any).data.force, (event as any).data.point);
+      if (state.softBody) {
+          // Forward force to soft body (Implementation pending in adapter)
+      } else {
+          const engine = getPhysicsEngine(state.engineId || 'webgpu');
+          engine?.applyForce(node.name || '', (event as any).data.force, (event as any).data.point);
+      }
     }
   },
 };

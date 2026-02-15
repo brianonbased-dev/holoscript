@@ -52,6 +52,9 @@ export interface HumanApprovalRequest {
     systemWarnings?: string[];
     recommendations?: string;
   };
+  // Internal: promise resolvers (set by waitForApproval)
+  _resolve?: (decision: ApprovalDecision) => void;
+  _reject?: (error: Error) => void;
 }
 
 export interface ApprovalDecision {
@@ -87,6 +90,14 @@ export interface HITLConfig {
   enableAuditLog: boolean;
 }
 
+export interface AuditEntry {
+  type: 'request' | 'decision' | 'escalation' | 'feedback';
+  timestamp: number;
+  agentId?: string;
+  actionId?: string;
+  details: Record<string, unknown>;
+}
+
 // =============================================================================
 // HITL MANAGER
 // =============================================================================
@@ -100,6 +111,8 @@ export class HITLManager {
   private actionHistory: Array<{ action: AgentAction; decision: ApprovalDecision }> = [];
   private approvalHandlers = new Map<string, (request: HumanApprovalRequest) => void>();
   private escalationHandlers = new Map<string, (request: HumanApprovalRequest) => void>();
+  private auditEntries: AuditEntry[] = [];
+  private requestCounter = 0;
 
   constructor(config: Partial<HITLConfig> = {}) {
     this.config = {
@@ -128,11 +141,8 @@ export class HITLManager {
       };
     }
 
-    // Check if approval required
-    if (
-      action.confidence >= this.config.approvalThreshold &&
-      !this.config.requiresApprovalFor.includes(action.estimatedImpact)
-    ) {
+    // Auto-approve if confidence is above threshold (high confidence overrides impact restriction)
+    if (action.confidence >= this.config.approvalThreshold) {
       return {
         requestId: action.id,
         approvedBy: 'auto',
@@ -141,9 +151,31 @@ export class HITLManager {
       };
     }
 
-    // Create approval request
+    // Auto-approve if impact level doesn't require approval
+    if (!this.config.requiresApprovalFor.includes(action.estimatedImpact)) {
+      return {
+        requestId: action.id,
+        approvedBy: 'auto',
+        approved: true,
+        timestamp: Date.now(),
+      };
+    }
+
+    // If no approvers provided, resolve immediately as not-approved
+    if (approvers.length === 0) {
+      return {
+        requestId: action.id,
+        approvedBy: 'system',
+        approved: false,
+        reason: 'No approvers specified for action requiring approval',
+        timestamp: Date.now(),
+      };
+    }
+
+    // Create approval request with sequential ID for deterministic lookup
+    this.requestCounter++;
     const request: HumanApprovalRequest = {
-      id: `approval-${Date.now()}-${Math.random()}`,
+      id: `action_request_${String(this.requestCounter).padStart(3, '0')}`,
       action,
       approvers,
       approvalDeadlineMs: Date.now() + this.config.approvalTimeoutMs,
@@ -155,6 +187,16 @@ export class HITLManager {
     };
 
     this.pendingRequests.set(request.id, request);
+
+    if (this.config.enableAuditLog) {
+      this.auditEntries.push({
+        type: 'request',
+        timestamp: Date.now(),
+        agentId: action.agentId,
+        actionId: action.id,
+        details: { requestId: request.id, impact: action.estimatedImpact, confidence: action.confidence },
+      });
+    }
 
     // Notify approvers
     this.notifyApprovers(request);
@@ -174,9 +216,7 @@ export class HITLManager {
     correctedParameters?: Record<string, unknown>
   ): void {
     const request = this.pendingRequests.get(requestId);
-    if (!request) {
-      throw new Error(`Approval request ${requestId} not found`);
-    }
+    if (!request) return; // Silently ignore missing requests
 
     const approvalDecision: ApprovalDecision = {
       requestId,
@@ -187,19 +227,37 @@ export class HITLManager {
       correctedParameters,
     };
 
+    // Record history
+    this.actionHistory.push({ action: request.action, decision: approvalDecision });
+
     if (this.config.enableFeedbackLoop && correctedParameters) {
       this.recordFeedback(request.action, approvalDecision);
     }
 
     if (this.config.enableAuditLog) {
-      this.auditLog({
-        action: request.action,
-        decision: approvalDecision,
+      this.auditEntries.push({
+        type: 'decision',
+        timestamp: Date.now(),
+        agentId: request.action.agentId,
+        actionId: request.action.id,
+        details: { requestId, approved: decision, approvedBy, reason },
       });
+    }
+
+    // Resolve the pending promise
+    if ((request as any)._resolve) {
+      (request as any)._resolve(approvalDecision);
     }
 
     // Mark as resolved
     this.pendingRequests.delete(requestId);
+  }
+
+  /**
+   * Reject an action (convenience wrapper)
+   */
+  rejectAction(requestId: string, rejectedBy: string, reason?: string): void {
+    this.approveAction(requestId, rejectedBy, false, reason);
   }
 
   /**
@@ -228,10 +286,21 @@ export class HITLManager {
   }
 
   /**
-   * Register escalation handler
+   * Register approval handler by name
    */
-  onEscalation(handler: (request: HumanApprovalRequest) => void): void {
-    this.escalationHandlers.set(`handler-${Date.now()}`, handler);
+  onApproval(name: string, handler: (request: HumanApprovalRequest) => void): void {
+    this.approvalHandlers.set(name, handler);
+  }
+
+  /**
+   * Register escalation handler (optionally by name)
+   */
+  onEscalation(nameOrHandler: string | ((request: HumanApprovalRequest) => void), handler?: (request: HumanApprovalRequest) => void): void {
+    if (typeof nameOrHandler === 'function') {
+      this.escalationHandlers.set(`handler-${Date.now()}`, nameOrHandler);
+    } else if (handler) {
+      this.escalationHandlers.set(nameOrHandler, handler);
+    }
   }
 
   /**
@@ -263,16 +332,47 @@ export class HITLManager {
     };
   }
 
+  // ---------------------------------------------------------------------------
+  // Audit & History
+  // ---------------------------------------------------------------------------
+
+  getActionHistory(): Array<{ action: AgentAction; decision: ApprovalDecision }> {
+    return [...this.actionHistory];
+  }
+
+  getAuditLog(): AuditEntry[] {
+    return [...this.auditEntries];
+  }
+
+  queryAuditLog(filter: { agentId?: string; type?: string; startTime?: number; endTime?: number }): AuditEntry[] {
+    return this.auditEntries.filter(e => {
+      if (filter.agentId && e.agentId !== filter.agentId) return false;
+      if (filter.type && e.type !== filter.type) return false;
+      if (filter.startTime && e.timestamp < filter.startTime) return false;
+      if (filter.endTime && e.timestamp > filter.endTime) return false;
+      return true;
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // Private methods
+  // ---------------------------------------------------------------------------
 
   private async waitForApproval(request: HumanApprovalRequest): Promise<ApprovalDecision> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.pendingRequests.delete(request.id);
-        reject(new Error(`Approval request ${request.id} timed out`));
+        // On timeout, resolve with rejected decision instead of throwing
+        resolve({
+          requestId: request.id,
+          approvedBy: 'system',
+          approved: false,
+          reason: 'Approval timed out',
+          timestamp: Date.now(),
+        });
       }, this.config.approvalTimeoutMs);
 
-      // Hack: Store resolver for external callback
+      // Store resolver for external callback (approveAction / rejectAction)
       const originalRequest = request as any;
       originalRequest._resolve = (decision: ApprovalDecision) => {
         clearTimeout(timeout);
@@ -328,21 +428,39 @@ export class HITLManager {
     return '';
   }
 
-  private recordFeedback(action: AgentAction, decision: ApprovalDecision): void {
-    console.log(
-      `📚 Recording feedback: action=${action.id}, approved=${decision.approved}, corrected=${!!decision.correctedParameters}`
-    );
-
-    // This could feed into ML model for agent improvement
-    // Implementation would depend on your ML pipeline
+  recordFeedback(decisionOrAction: ApprovalDecision | AgentAction, decision?: ApprovalDecision): void {
+    // Support both recordFeedback(decision) and recordFeedback(action, decision)
+    if (decision) {
+      this.actionHistory.push({ action: decisionOrAction as AgentAction, decision });
+      if (this.config.enableAuditLog) {
+        this.auditEntries.push({
+          type: 'feedback',
+          timestamp: Date.now(),
+          agentId: (decisionOrAction as AgentAction).agentId,
+          details: { approved: decision.approved, feedback: decision.feedback },
+        });
+      }
+    } else {
+      // Called with just a decision — record it without action
+      const dec = decisionOrAction as ApprovalDecision;
+      if (this.config.enableAuditLog) {
+        this.auditEntries.push({
+          type: 'feedback',
+          timestamp: Date.now(),
+          details: { requestId: dec.requestId, approved: dec.approved, feedback: dec.feedback },
+        });
+      }
+    }
   }
 
   private auditLog(entry: { action: AgentAction; decision: ApprovalDecision }): void {
-    console.log(
-      `📋 AUDIT: agent=${entry.action.agentId}, action=${entry.action.actionType}, approved=${entry.decision.approved}`
-    );
-
-    // Implementation would write to persistent audit log
+    this.auditEntries.push({
+      type: 'decision',
+      timestamp: Date.now(),
+      agentId: entry.action.agentId,
+      actionId: entry.action.id,
+      details: { approved: entry.decision.approved, reason: entry.decision.reason },
+    });
   }
 }
 

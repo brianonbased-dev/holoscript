@@ -23,7 +23,7 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
       enabled: true,
       approvalThreshold: 0.8,
       requiresApprovalFor: ['medium', 'high', 'critical'],
-      approvalTimeoutMs: 30000,
+      approvalTimeoutMs: 2000, // Short timeout for tests
       escalationFailureThreshold: 3,
       enableFeedbackLoop: true,
       enableAuditLog: true,
@@ -65,25 +65,22 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
         confidence: 0.6,
       };
 
-      const decision = await manager.requestApproval(lowConfidenceAction, ['user_001']);
+      const promise = manager.requestApproval(lowConfidenceAction, ['user_001']);
+      // Reject so promise resolves
+      manager.rejectAction('action_request_001', 'user_001', 'Denied');
+      const decision = await promise;
       expect(decision.approved).toBe(false);
     });
 
     it('should timeout approval requests after deadline', async () => {
       manager = new HITLManager({
-        ...{
-          enabled: true,
-          approvalThreshold: 0.5,
-          approvalTimeoutMs: 1000, // Short but reasonable timeout
-        },
+        enabled: true,
+        approvalThreshold: 0.9,
+        requiresApprovalFor: ['high', 'critical'],
+        approvalTimeoutMs: 100, // Very short timeout
       });
 
-      const promise = manager.requestApproval(testAction, ['user_001']);
-      
-      // Wait longer than timeout
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      const decision = await promise;
+      const decision = await manager.requestApproval(testAction, ['user_001']);
       expect(decision.approved).toBe(false);
     });
 
@@ -92,15 +89,16 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
       const promise = manager.requestApproval(testAction, approvers);
 
       // Simulate approval from one user
-      await manager.approveAction('action_request_001', 'user_001', true, 'Looks good');
+      manager.approveAction('action_request_001', 'user_001', true, 'Looks good');
 
       const decision = await promise;
       expect(decision).toBeDefined();
     });
 
     it('should track approval decision reasons', async () => {
-      await manager.requestApproval(testAction, ['user_001']);
-      await manager.approveAction('action_request_001', 'user_001', false, 'Safety concerns detected');
+      const promise = manager.requestApproval(testAction, ['user_001']);
+      manager.approveAction('action_request_001', 'user_001', false, 'Safety concerns detected');
+      await promise;
 
       const history = manager.getActionHistory();
       expect(history.length).toBeGreaterThan(0);
@@ -128,8 +126,14 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
         confidence: 0.7,
       };
 
-      const result = await manager.requestApproval(lowConfidenceAction, ['user_001']);
-      expect(result.approved).toBe(false); // Until approved
+      // Low confidence + high impact → requires approval → resolves via timeout
+      const timeoutManager = new HITLManager({
+        approvalThreshold: 0.8,
+        requiresApprovalFor: ['high'],
+        approvalTimeoutMs: 100,
+      });
+      const result = await timeoutManager.requestApproval(lowConfidenceAction, ['user_001']);
+      expect(result.approved).toBe(false);
     });
 
     it('should support custom confidence thresholds', async () => {
@@ -153,7 +157,9 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
         confidence: 0.3,
       };
 
-      const decision = await manager.requestApproval(criticalLowConfaction, ['user_001']);
+      const promise = manager.requestApproval(criticalLowConfaction, ['user_001']);
+      manager.rejectAction('action_request_001', 'user_001', 'Too risky');
+      const decision = await promise;
       expect(decision.approved).toBe(false);
     });
   });
@@ -164,8 +170,10 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
 
   describe('Impact Level Handling', () => {
     it('should require approval for high-impact actions', async () => {
-      const result = await manager.requestApproval(testAction, ['user_001']);
-      expect(result.approved).toBe(false); // Needs approval
+      const promise = manager.requestApproval(testAction, ['user_001']);
+      manager.rejectAction('action_request_001', 'user_001', 'Needs review');
+      const result = await promise;
+      expect(result.approved).toBe(false);
     });
 
     it('should auto-approve low-impact actions above threshold', async () => {
@@ -175,14 +183,9 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
         confidence: 0.9,
       };
 
-      const result = await lowImpactAction.confidence >= 0.8
-        ? (
-            await manager.requestApproval(lowImpactAction, [])
-          ) 
-        : null;
-      
-      // Low impact + high confidence = no approval required
-      expect(lowImpactAction.estimatedImpact).toBe('low');
+      const result = await manager.requestApproval(lowImpactAction, []);
+      // Low impact + high confidence = auto-approved
+      expect(result.approved).toBe(true);
     });
 
     it('should escalate critical-impact actions', async () => {
@@ -192,7 +195,9 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
         confidence: 0.5,
       };
 
-      const result = await manager.requestApproval(criticalAction, ['admin_001', 'admin_002']);
+      const promise = manager.requestApproval(criticalAction, ['admin_001', 'admin_002']);
+      manager.rejectAction('action_request_001', 'admin_001', 'Escalated');
+      const result = await promise;
       expect(result).toBeDefined();
     });
 
@@ -205,7 +210,8 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
           estimatedImpact: impact,
         };
 
-        const result = await manager.requestApproval(action, ['user_001']);
+        const m = new HITLManager({ approvalTimeoutMs: 50 });
+        const result = await m.requestApproval(action, ['user_001']);
         expect(result).toBeDefined();
       }
     });
@@ -220,15 +226,18 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
       const action: AgentAction = { ...testAction, id: 'fail_action_001' };
 
       for (let i = 0; i < 3; i++) {
-        await manager.requestApproval(action, ['user_001']);
-        await manager.rejectAction(`action_request_00${i + 1}`, 'user_001', 'Try again');
+        const promise = manager.requestApproval(action, ['user_001']);
+        manager.rejectAction(`action_request_${String(i + 1).padStart(3, '0')}`, 'user_001', 'Try again');
+        await promise;
       }
 
       // Fourth attempt should escalate
-      const escalatedResult = await manager.requestApproval(
+      const escalatedPromise = manager.requestApproval(
         { ...action, id: 'fail_action_004' },
         ['escalation_user_001']
       );
+      manager.rejectAction('action_request_004', 'escalation_user_001', 'Escalated');
+      const escalatedResult = await escalatedPromise;
 
       expect(escalatedResult).toBeDefined();
     });
@@ -243,9 +252,11 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
         confidence: 0.2,
       };
 
-      await manager.requestApproval(criticalAction, ['user_001']);
+      const promise = manager.requestApproval(criticalAction, ['user_001']);
+      manager.rejectAction('action_request_001', 'user_001', 'Denied');
+      await promise;
 
-      // Handler should be called for critical actions
+      // Handler should be registered
       expect(handler).toBeDefined();
     });
 
@@ -255,7 +266,9 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
         estimatedImpact: 'critical',
       };
 
-      const decision = await manager.requestApproval(action, ['escalation_user']);
+      const promise = manager.requestApproval(action, ['escalation_user']);
+      manager.rejectAction('action_request_001', 'escalation_user', 'Denied');
+      const decision = await promise;
       expect(decision.requestId).toBeDefined();
     });
   });
@@ -290,15 +303,16 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
 
       // Simulate multiple rejections for similar actions
       for (let i = 0; i < 3; i++) {
-        await manager.requestApproval(
+        const promise = manager.requestApproval(
           { ...action, id: `learn_action_00${i + 1}` },
           ['user_001']
         );
-        await manager.rejectAction(
-          `action_request_00${i + 1}`,
+        manager.rejectAction(
+          `action_request_${String(i + 1).padStart(3, '0')}`,
           'user_001',
           'Too risky'
         );
+        await promise;
       }
 
       // System should remember pattern
@@ -307,11 +321,6 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
     });
 
     it('should suggest corrections based on feedback', async () => {
-      const action: AgentAction = {
-        ...testAction,
-        parameters: { version: '1.0.0', environment: 'staging' },
-      };
-
       const decision: ApprovalDecision = {
         requestId: 'req_002',
         approvedBy: 'user_001',
@@ -333,15 +342,21 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
 
   describe('Audit Logging', () => {
     it('should log all approval requests', async () => {
-      await manager.requestApproval(testAction, ['user_001']);
+      // Auto-approve path (confidence >= threshold)
+      const highConfAction: AgentAction = { ...testAction, confidence: 0.95 };
+      await manager.requestApproval(highConfAction, ['user_001']);
+      // Auto-approve doesn't go through audit, so test the pending path
+      const promise = manager.requestApproval(testAction, ['user_001']);
+      manager.rejectAction('action_request_001', 'user_001', 'test');
+      await promise;
       const logs = manager.getAuditLog();
-
       expect(logs.length).toBeGreaterThan(0);
     });
 
     it('should log approval decisions', async () => {
-      await manager.requestApproval(testAction, ['user_001']);
-      await manager.approveAction('action_request_001', 'user_001', true, 'Safe to proceed');
+      const promise = manager.requestApproval(testAction, ['user_001']);
+      manager.approveAction('action_request_001', 'user_001', true, 'Safe to proceed');
+      await promise;
 
       const logs = manager.getAuditLog();
       const decisionLogs = logs.filter(log => log.type === 'decision');
@@ -351,7 +366,9 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
 
     it('should include timestamp in audit logs', async () => {
       const before = Date.now();
-      await manager.requestApproval(testAction, ['user_001']);
+      const promise = manager.requestApproval(testAction, ['user_001']);
+      manager.rejectAction('action_request_001', 'user_001', 'test');
+      await promise;
       const after = Date.now();
 
       const logs = manager.getAuditLog();
@@ -363,7 +380,10 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
     });
 
     it('should support audit log queries', async () => {
-      await manager.requestApproval(testAction, ['user_001']);
+      const promise = manager.requestApproval(testAction, ['user_001']);
+      manager.rejectAction('action_request_001', 'user_001', 'test');
+      await promise;
+
       const logs = manager.queryAuditLog({
         agentId: 'agent_001',
         startTime: Date.now() - 10000,
@@ -373,8 +393,9 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
     });
 
     it('should filter audit logs by type', async () => {
-      await manager.requestApproval(testAction, ['user_001']);
-      await manager.approveAction('action_request_001', 'user_001', true);
+      const promise = manager.requestApproval(testAction, ['user_001']);
+      manager.approveAction('action_request_001', 'user_001', true);
+      await promise;
 
       const requestLogs = manager.queryAuditLog({ type: 'request' });
       const decisionLogs = manager.queryAuditLog({ type: 'decision' });
@@ -441,10 +462,11 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
         estimatedImpact: 'critical',
       };
 
-      await manager.requestApproval(highImpactAction, ['user_001']);
-      await manager.approveAction('action_request_001', 'user_001', true);
+      const promise = manager.requestApproval(highImpactAction, ['user_001']);
+      manager.approveAction('action_request_001', 'user_001', true);
+      await promise;
 
-      // Handler should potentially be called
+      // Handler should be registered
       expect(handler).toBeDefined();
     });
 
@@ -468,6 +490,7 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
 
     it('should handle invalid approver IDs', async () => {
       const invalidApprovers = ['', null, undefined].filter(Boolean) as string[];
+      // Empty after filter → same as empty approvers
       const result = await manager.requestApproval(testAction, invalidApprovers);
 
       expect(result).toBeDefined();
@@ -477,10 +500,14 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
       const action1: AgentAction = { ...testAction, id: 'action_concurrent_001' };
       const action2: AgentAction = { ...testAction, id: 'action_concurrent_002' };
 
-      const [result1, result2] = await Promise.all([
-        manager.requestApproval(action1, ['user_001']),
-        manager.requestApproval(action2, ['user_002']),
-      ]);
+      const promise1 = manager.requestApproval(action1, ['user_001']);
+      const promise2 = manager.requestApproval(action2, ['user_002']);
+
+      // Approve both
+      manager.approveAction('action_request_001', 'user_001', true);
+      manager.approveAction('action_request_002', 'user_002', true);
+
+      const [result1, result2] = await Promise.all([promise1, promise2]);
 
       expect(result1).toBeDefined();
       expect(result2).toBeDefined();
@@ -497,7 +524,7 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
       const promise = manager.requestApproval(testAction, ['reviewer_001']);
 
       // 2. Reviewer approves
-      await manager.approveAction('action_request_001', 'reviewer_001', true, 'Approved for production');
+      manager.approveAction('action_request_001', 'reviewer_001', true, 'Approved for production');
 
       // 3. Check decision
       const decision = await promise;
@@ -508,7 +535,7 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
     it('should handle rejection and retry workflow', async () => {
       // 1. First request - rejected
       const promise1 = manager.requestApproval(testAction, ['reviewer_001']);
-      await manager.rejectAction('action_request_001', 'reviewer_001', 'Needs adjustment');
+      manager.rejectAction('action_request_001', 'reviewer_001', 'Needs adjustment');
       const decision1 = await promise1;
       expect(decision1.approved).toBe(false);
 
@@ -520,7 +547,7 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
       };
 
       const promise2 = manager.requestApproval(modifiedAction, ['reviewer_001']);
-      await manager.approveAction('action_request_002', 'reviewer_001', true);
+      manager.approveAction('action_request_002', 'reviewer_001', true);
       const decision2 = await promise2;
       expect(decision2.approved).toBe(true);
     });
@@ -531,12 +558,14 @@ describe('HITL Manager - Comprehensive Test Suite', () => {
         id: `history_action_00${i + 1}`,
       }));
 
-      for (const action of actions) {
-        await manager.requestApproval(action, ['user_001']);
+      for (let i = 0; i < actions.length; i++) {
+        const promise = manager.requestApproval(actions[i], ['user_001']);
+        manager.approveAction(`action_request_${String(i + 1).padStart(3, '0')}`, 'user_001', true);
+        await promise;
       }
 
       const history = manager.getActionHistory();
-      expect(history.length).toBeGreaterThanOrEqual(0);
+      expect(history.length).toBeGreaterThanOrEqual(5);
     });
   });
 });

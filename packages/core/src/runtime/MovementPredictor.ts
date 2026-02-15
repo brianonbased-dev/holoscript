@@ -77,45 +77,33 @@ export class MovementPredictor {
   }
 
   /**
-   * Tier 2: Recurrent Placeholder (Non-linear pathing)
-   * In a full implementation, this would use an LSTM/RNN.
-   * Here we simulate it by analyzing the curvature of the history.
+   * Tier 2: Non-linear pathing (Bezier-based extrapolation)
+   * Analyzes path curvature to predict smooth turns.
    */
   private predictRecurrent(lookahead: number): [number, number, number] {
-    if (this.history.length < 10) return this.predictLinear(lookahead);
+    if (this.history.length < 5) return this.predictLinear(lookahead);
 
-    // Calculate average acceleration (curvature)
-    const midIdx = Math.floor(this.history.length / 2);
-    const startPosTuple = this.toTuple(this.history[0]);
-    const midPosTuple = this.toTuple(this.history[midIdx]);
-    const endPosTuple = this.toTuple(this.history[this.history.length - 1]);
+    // Use last 3 points to determine quadratic Bezier control point
+    const p2 = this.toTuple(this.history[this.history.length - 1]);
+    const p1 = this.toTuple(this.history[this.history.length - 3]);
+    const p0 = this.toTuple(this.history[this.history.length - 5]);
 
-    // Simple spline-like estimation
-    const linearPred = this.predictLinear(lookahead);
-
-    // If the path is curving, bias the prediction towards the curve
-    const chord1: [number, number, number] = [
-      midPosTuple[0] - startPosTuple[0],
-      midPosTuple[1] - startPosTuple[1],
-      midPosTuple[2] - startPosTuple[2],
-    ];
-    const chord2: [number, number, number] = [
-      endPosTuple[0] - midPosTuple[0],
-      endPosTuple[1] - midPosTuple[1],
-      endPosTuple[2] - midPosTuple[2],
-    ];
-
-    const turnFactor = 0.5; // Simulated RNN weight
-    const curveOffset: [number, number, number] = [
-      (chord2[0] - chord1[0]) * lookahead * turnFactor,
-      (chord2[1] - chord1[1]) * lookahead * turnFactor,
-      (chord2[2] - chord1[2]) * lookahead * turnFactor,
+    // Calculate velocity and acceleration vectors
+    const v1 = [(p2[0] - p1[0]), (p2[1] - p1[1]), (p2[2] - p1[2])];
+    const v0 = [(p1[0] - p0[0]), (p1[1] - p0[1]), (p1[2] - p0[2])];
+    
+    // Predicted point based on constant velocity and acceleration
+    // pos = p + v*t + 0.5*a*t^2
+    const acc = [
+      (v1[0] - v0[0]),
+      (v1[1] - v0[1]),
+      (v1[2] - v0[2])
     ];
 
     return [
-      linearPred[0] + curveOffset[0],
-      linearPred[1] + curveOffset[1],
-      linearPred[2] + curveOffset[2],
+      p2[0] + v1[0] * lookahead + 0.5 * acc[0] * (lookahead ** 2),
+      p2[1] + v1[1] * lookahead + 0.5 * acc[1] * (lookahead ** 2),
+      p2[2] + v1[2] * lookahead + 0.5 * acc[2] * (lookahead ** 2)
     ];
   }
 

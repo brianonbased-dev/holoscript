@@ -84,14 +84,25 @@ describe('WebRTC Transport - Comprehensive Test Suite', () => {
         send: vi.fn(),
         onmessage: null as any,
         onopen: null as any,
+        close: vi.fn(),
       };
 
-      global.WebSocket = vi.fn(() => mockWs) as any;
+      global.WebSocket = vi.fn(function() { return mockWs; }) as any;
 
-      // Simulate open event
+      // Start initialization (don't await yet)
+      const initPromise = transport.initialize();
+
+      // Trigger open event
       if (mockWs.onopen) {
-        mockWs.onopen();
+        mockWs.onopen({} as any);
+      } else {
+        // Retry if onopen hasn't been assigned yet (unlikely in sync flow but safe)
+        // Actually, initialize sets onopen synchronously after new WebSocket
+        // But if mockWs was created inside the mock constructor, we have a reference.
       }
+      
+      // Wait for initialization to complete
+      await initPromise;
 
       // Should send join-room message
       expect(mockWs.send).toHaveBeenCalledWith(

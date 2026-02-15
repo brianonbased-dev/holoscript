@@ -116,7 +116,10 @@ function runEffect(effect: EffectFunc): void {
 // REACTIVE PROXY
 // =============================================================================
 
-function createReactiveProxy<T extends object>(target: T): T {
+function createReactiveProxy<T extends object>(
+  target: T,
+  onMutation?: (target: T, key: string | symbol, value: any, oldValue: any) => void
+): T {
   return new Proxy(target, {
     get(obj, key: string | symbol) {
       track(obj, key);
@@ -124,7 +127,7 @@ function createReactiveProxy<T extends object>(target: T): T {
 
       // Deep reactivity for nested objects
       if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-        return createReactiveProxy(value);
+        return createReactiveProxy(value, onMutation);
       }
 
       return value;
@@ -136,6 +139,9 @@ function createReactiveProxy<T extends object>(target: T): T {
 
       if (oldValue !== value) {
         trigger(obj, key);
+        if (onMutation) {
+            onMutation(obj, key, value, oldValue);
+        }
       }
 
       return result;
@@ -168,7 +174,7 @@ export class ReactiveState<T extends StateDeclaration> implements IReactiveState
   private syncId?: string;
   private isApplyingSync: boolean = false;
   private crdt: CRDTStateManager;
-  private undoManager: UndoManager = new UndoManager();
+  private undoManager: UndoManager<CRDTOperation> = new UndoManager<CRDTOperation>();
   private clientId: string;
 
   constructor(initialState: T, syncId?: string) {
@@ -192,14 +198,16 @@ export class ReactiveState<T extends StateDeclaration> implements IReactiveState
     const oldValue = this.state[key];
     if (oldValue === value) return;
 
-    // Create operations for undo
-    const redoOp = this.crdt.createOperation(key as string, value);
-    const undoOp = this.crdt.createOperation(key as string, oldValue);
-
+    // 1. Update Proxy/State
     this.proxy[key] = value;
+
+    // 2. Create and reconcile local CRDT operation
+    const redoOp = this.crdt.createOperation(key as string, value);
     this.crdt.reconcile(redoOp);
 
+    // 3. Track in UndoManager if not applying a sync
     if (!this.isApplyingSync) {
+      const undoOp = { ...redoOp, value: oldValue }; // Mirror op with old value
       this.undoManager.push(undoOp, redoOp);
     }
 
@@ -430,8 +438,11 @@ export function ref<T>(value: T): { value: T } {
   return createReactiveProxy({ value });
 }
 
-export function reactive<T extends object>(target: T): T {
-  return createReactiveProxy(target);
+export function reactive<T extends object>(
+    target: T, 
+    onMutation?: (target: T, key: string | symbol, value: any, oldValue: any) => void
+): T {
+  return createReactiveProxy(target, onMutation);
 }
 
 export function effect(fn: EffectFunc, _options?: EffectOptions): UnsubscribeFunc {

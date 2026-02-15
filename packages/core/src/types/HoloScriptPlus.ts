@@ -799,6 +799,33 @@ export interface TerrainAnchorTrait extends BaseTrait {
   altitude?: number;
 }
 
+// ============================================================================
+// Creator Economy & Web3 Traits
+// ============================================================================
+
+export interface Web3Trait extends BaseTrait {
+  contractAddress: string;
+  tokenId: string;
+  chainId: number; // e.g., 8453 for Base
+  tokenType: 'ERC721' | 'ERC1155';
+  metadataUrl?: string;
+}
+
+export interface TokenGatedTrait extends BaseTrait {
+  contractAddress: string;
+  minBalance: string;
+  chainId: number;
+  message?: string; // "You need 1 Base Paint to enter"
+}
+
+export interface MintableTrait extends BaseTrait {
+  price?: string; // ETH/USDC
+  currency?: string;
+  maxSupply?: number;
+  royaltyBps?: number;
+  platform?: 'zora' | 'manifold' | 'custom';
+}
+
 export interface RooftopAnchorTrait extends BaseTrait {
   buildingId?: string;
 }

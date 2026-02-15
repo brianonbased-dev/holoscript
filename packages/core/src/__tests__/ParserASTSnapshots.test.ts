@@ -355,7 +355,7 @@ import { Controller } from "./logic/Controller.hsplus"`;
       expect(ast).toMatchSnapshot();
     });
 
-    test.skip('multiple compositions AST', () => {
+    test('multiple compositions AST', () => {
       const source = `composition First {
   color: "red"
 }
@@ -364,8 +364,7 @@ composition Second {
   color: "blue"
 }`;
       const result = parser.parse(source);
-      // HoloScriptPlus parser doesn't support multiple top-level compositions in one source file
-      // Skip this test as it's a parser limitation
+      // Parser handles multiple top-level compositions gracefully
       expect(result.success).toBe(true);
       expect(result).toMatchSnapshot();
     });

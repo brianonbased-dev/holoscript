@@ -168,6 +168,12 @@ export class CircuitBreaker {
    * Get current circuit breaker state (accessor method)
    */
   getState(): CircuitBreakerState {
+    if (
+      this.state === CircuitBreakerState.OPEN &&
+      Date.now() - (this.lastFailureTime || 0) > this.config.resetTimeoutMs
+    ) {
+      return CircuitBreakerState.HALF_OPEN;
+    }
     return this.state;
   }
 

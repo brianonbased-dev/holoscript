@@ -57,7 +57,7 @@ describe('Hot-Reload (Phase 22)', () => {
   });
 
   // Runtime hot-reload tests - skipped until API is exposed publicly
-  it.skip('should migrate instance state during hot-reload', () => {
+  it('should migrate instance state during hot-reload', () => {
     // This test requires registerTemplate, spawnTemplate, and hotReload
     // methods which exist in the runtime implementation but aren't yet
     // exposed in the public HSPlusRuntime interface.

@@ -40,6 +40,13 @@ export class WebGPURenderer {
   private msaaTexture: GPUTexture | null = null;
   private options: Required<IWebGPUInitOptions>;
 
+  // WebXR State
+  private xrSession: XRSession | null = null;
+  private xrBinding: any | null = null; // XRWebGPUTypes['binding']
+  private xrProjectionLayer: any | null = null; // XRWebGPUTypes['projectionLayer']
+  private xrFramebuffer: GPUTexture | null = null;
+
+
   // Frame statistics
   private stats: IRendererStats = {
     currentFrame: this.createEmptyFrameStats(),
@@ -976,6 +983,114 @@ export class WebGPURenderer {
       bufferUploads: 0,
       textureUploads: 0,
     };
+  }
+
+  /**
+   * Set the active XR session and bindings
+   */
+  setXRSession(session: XRSession | null, binding: any | null, layer: any | null): void {
+    this.xrSession = session;
+    this.xrBinding = binding;
+    this.xrProjectionLayer = layer;
+
+    if (session) {
+      console.log('WebGPURenderer: Switched to XR Mode');
+    } else {
+      console.log('WebGPURenderer: Switched to Inline Mode');
+    }
+  }
+
+  /**
+   * Render a WebXR Frame
+   */
+  renderXR(frame: XRFrame): void {
+    if (!this.context || !this.xrSession || !this.xrBinding || !this.xrProjectionLayer) return;
+
+    const { device } = this.context;
+    const session = frame.session;
+    const pose = frame.getViewerPose(this.xrBinding.nativeProjectionLayerSpace || this.xrSession.renderState.baseLayer!.space); 
+
+    if (!pose) return;
+
+    // Begin Frame
+    const encoder = device.createCommandEncoder({ label: 'xr-frame' });
+
+    // Iterate views (eyes)
+    for (const view of pose.views) {
+      const viewport = this.xrBinding.getViewSubImage(this.xrProjectionLayer, view).viewport;
+      
+      // Update Camera Uniforms for this view
+      this.updateCameraUniforms({
+        viewMatrix: view.transform.inverse.matrix,
+        projectionMatrix: view.projectionMatrix,
+        // Calculate camera position from inverse view matrix
+        cameraPosition: [
+           view.transform.position.x, 
+           view.transform.position.y, 
+           view.transform.position.z 
+        ],
+        viewProjectionMatrix: this.multiplyMatrices(view.projectionMatrix, view.transform.inverse.matrix) 
+      } as any);
+
+      // Acquire texture from WebXR binding
+      const subImage = this.xrBinding.getViewSubImage(this.xrProjectionLayer, view);
+      const colorAttachment = subImage.colorTexture.createView({
+        baseMipLevel: 0,
+        mipLevelCount: 1,
+        baseArrayLayer: subImage.imageIndex,
+        arrayLayerCount: 1
+      });
+      
+      const depthAttachment = subImage.depthStencilTexture ? subImage.depthStencilTexture.createView({
+         baseMipLevel: 0,
+         mipLevelCount: 1,
+         baseArrayLayer: subImage.imageIndex,
+         arrayLayerCount: 1
+      }) : undefined;
+
+      // Render Pass
+      const pass = encoder.beginRenderPass({
+        colorAttachments: [{
+          view: colorAttachment,
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 1 }
+        }],
+        depthStencilAttachment: depthAttachment ? {
+          view: depthAttachment,
+          depthLoadOp: 'clear',
+          depthStoreOp: 'store',
+          depthClearValue: 1.0,
+        } : undefined
+      });
+
+      // Set viewport
+      pass.setViewport(viewport.x, viewport.y, viewport.width, viewport.height, 0, 1);
+
+      // Execute Draw Calls would go here
+      // this.renderScene(pass); 
+
+      pass.end();
+    }
+
+    device.queue.submit([encoder.finish()]);
+  }
+
+  // Helper for matrix multiplication (simplified 4x4)
+  private multiplyMatrices(a: Float32Array, b: Float32Array): Float32Array {
+    const out = new Float32Array(16);
+    // Simple 4x4 matrix multiply: out = a * b
+    // Row-major vs Column-major usually depends on math lib, assuming standard WebGL column-major
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            let sum = 0;
+            for (let k = 0; k < 4; k++) {
+                sum += a[i * 4 + k] * b[k * 4 + j];
+            }
+            out[i * 4 + j] = sum;
+        }
+    }
+    return out; 
   }
 
   /**

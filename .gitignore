@@ -90,5 +90,21 @@ hotreload_*.txt
 mcp_v*.txt
 ast_v*.txt
 full_suite_result.txt
+full_suite_*.txt
 parser_snap_v*.txt
 ci-debug*.txt
+c[0-9]*_result*.txt
+c[0-9]*_*.txt
+snap_fail.txt
+resilience_v*.txt
+webrtc_v*.txt
+tsc_output.txt
+runtime_debug.log
+stryker-run.log
+stryker.log
+
+# Next.js build output
+.next/
+
+# Studio build artifacts
+packages/studio/.next/

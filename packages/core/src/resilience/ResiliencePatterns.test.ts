@@ -65,7 +65,7 @@ describe('Resilience Patterns', () => {
       }
     });
 
-    it.skip('should transition to HALF_OPEN after timeout', async () => {
+    it('should transition to HALF_OPEN after timeout', async () => {
       const failingFn = vi.fn().mockRejectedValue(new Error('fail'));
       for (let i = 0; i < 3; i++) {
         try {

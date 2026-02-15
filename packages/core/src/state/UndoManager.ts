@@ -1,38 +1,43 @@
 /**
  * Undo Manager for HoloScript+
- *
- * Tracks local operation history and provides undo/redo capabilities
- * with causal consistency in collaborative sessions.
+ * 
+ * Tracks operation history with a temporal buffer (5s+).
  */
 
-import { CRDTOperation } from './CRDTStateManager';
-
-export interface UndoStep {
-  redo: CRDTOperation;
-  undo: CRDTOperation;
+// Generic operation type
+export interface UndoStep<OpType> {
+  redo: OpType;
+  undo: OpType;
+  timestamp: number;
 }
 
-export class UndoManager {
-  private undoStack: UndoStep[] = [];
-  private redoStack: UndoStep[] = [];
-  private maxStack: number = 100;
+export class UndoManager<OpType = any> {
+  private undoStack: UndoStep<OpType>[] = [];
+  private redoStack: UndoStep<OpType>[] = [];
+  private maxDurationMs: number = 5000; // 5 seconds buffer
 
   /**
-   * Record a new step in the history
+   * Record a new step in the history.
+   * Automatically prunes steps older than maxDurationMs.
    */
-  public push(undoOp: CRDTOperation, redoOp: CRDTOperation): void {
-    this.undoStack.push({ undo: undoOp, redo: redoOp });
-    this.redoStack = []; // Clear redo stack on new operation
+  public push(undoOp: OpType, redoOp: OpType): void {
+    const now = Date.now();
+    this.undoStack.push({ undo: undoOp, redo: redoOp, timestamp: now });
+    this.redoStack = []; 
 
-    if (this.undoStack.length > this.maxStack) {
+    this.prune(now);
+  }
+
+  /**
+   * Remove steps older than 5 seconds.
+   */
+  private prune(now: number): void {
+    while (this.undoStack.length > 0 && now - this.undoStack[0].timestamp > this.maxDurationMs) {
       this.undoStack.shift();
     }
   }
 
-  /**
-   * Pop most recent step for undoing
-   */
-  public undo(): UndoStep | null {
+  public undo(): UndoStep<OpType> | null {
     const step = this.undoStack.pop();
     if (step) {
       this.redoStack.push(step);
@@ -41,10 +46,7 @@ export class UndoManager {
     return null;
   }
 
-  /**
-   * Pop most recent step for redoing
-   */
-  public redo(): UndoStep | null {
+  public redo(): UndoStep<OpType> | null {
     const step = this.redoStack.pop();
     if (step) {
       this.undoStack.push(step);
@@ -56,5 +58,9 @@ export class UndoManager {
   public clear(): void {
     this.undoStack = [];
     this.redoStack = [];
+  }
+
+  public getStackDepth(): number {
+    return this.undoStack.length;
   }
 }
