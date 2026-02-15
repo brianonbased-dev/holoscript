@@ -8,6 +8,55 @@ A declarative language with tooling that compiles to multiple platforms. This ro
 
 ---
 
+## 🚀 v3.5.0 - Hololand Bootstrap: Build in VR with Brittney (March–May 2026)
+
+**Status:** 📋 **PLANNING** | **Vision Doc:** [VISION_HOLOLAND_BOOTSTRAP.md](VISION_HOLOLAND_BOOTSTRAP.md)
+
+The endgame: put on a headset, talk to Brittney, build Hololand in VR. HoloScript becomes the application layer for Hololand, and Brittney generates it from inside the world.
+
+### Phase 0: Language Foundations (Weeks 1-2)
+
+| Task | Status |
+| --- | --- |
+| `system` keyword in parser (named trait+logic containers) | 🔲 Not started |
+| `component` keyword for UI declarations | 🔲 Not started |
+| Inter-file `import`/`export` module resolution | 🔲 Not started |
+| `storage` and `device` built-in runtime APIs | 🔲 Not started |
+
+### Phase 1: End-to-End Pipeline (Weeks 3-4)
+
+| Task | Status |
+| --- | --- |
+| R3F compiler → Hololand runtime bridge | 🔲 Not started |
+| Browser execution verification (`.hsplus` → rendered scene) | 🔲 Not started |
+| WebXR session verification | 🔲 Not started |
+| Hot-reload in active VR session | 🔲 Not started |
+
+### Phase 2: Brittney Training (Weeks 3-6, parallel)
+
+| Task | Status |
+| --- | --- |
+| TrainingMonkey `generate_hololand_training` tool (9 categories, 4,200 examples) | 🔲 Not started |
+| Brittney v5 fine-tune with Hololand-specific data | 🔲 Not started |
+
+### Phase 3: Spatial Brittney (Weeks 5-8)
+
+| Task | Status |
+| --- | --- |
+| `brittney-workspace.holo` VR dev environment composition | 🔲 Not started |
+| Voice → MCP pipeline in VR | 🔲 Not started |
+| Brittney spatial avatar with lip-sync | 🔲 Not started |
+
+### Phase 4-5: Migration & Self-Building World (Weeks 7-12)
+
+| Task | Status |
+| --- | --- |
+| Hololand Central migrated to `.hsplus` root composition | 🔲 Not started |
+| Brittney writes + hot-reloads `.hsplus` files from VR | 🔲 Not started |
+| Git integration (auto-commit, rollback via voice) | 🔲 Not started |
+
+---
+
 ## ✅ v3.4.0 - Full Runtime Engine & Scientific Computing (February 2026)
 
 **Status:** ✅ **COMPLETE** (February 15, 2026)
