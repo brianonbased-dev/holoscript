@@ -39,6 +39,12 @@ export const SCIENTIFIC_COMPUTING_TRAITS = [
   'atom_labels',         // Display atom labels
   'residue_labels',      // Display residue labels
 
+  // AI/ML Prediction (4 traits)
+  'alphafold_predict',     // AlphaFold structure prediction from sequence
+  'structure_confidence',  // pLDDT confidence score visualization
+  'multimer_predict',      // AlphaFold-Multimer (protein complexes)
+  'pae_visualization',     // Predicted Aligned Error heatmap
+
   // Legacy/Extended (3 traits - for backward compatibility)
   'protein_structure',     // General protein structure trait
   'simulation_control',    // Control simulation parameters
@@ -51,9 +57,10 @@ export const SCIENTIFIC_COMPUTING_TRAITS = [
 export type ScientificComputingTraitName = typeof SCIENTIFIC_COMPUTING_TRAITS[number];
 
 /**
- * Total count: 24 traits
- * Integration: @holoscript/narupa-plugin v1.0.0+
+ * Total count: 28 traits
+ * Integration: @holoscript/narupa-plugin v1.0.0+, @holoscript/alphafold-plugin v1.0.0+
  * Phase: 1 of 5 (scientific traits expansion)
  * v1.1.0: Added database_query trait for PDB/AlphaFold fetching
  * v1.2.0: Added auto_dock trait for AutoDock Vina integration
+ * v1.3.0: Added AlphaFold prediction traits (alphafold_predict, structure_confidence, multimer_predict, pae_visualization)
  */
