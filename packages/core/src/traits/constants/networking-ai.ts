@@ -19,4 +19,11 @@ export const NETWORKING_AI_TRAITS = [
   'neural_link',
   'neural_forge',
   'vision',
+  // V43 Tier 2: AI Generative (Stable Diffusion family)
+  'stable_diffusion',
+  'controlnet',
+  'ai_texture_gen',
+  'diffusion_realtime',
+  'ai_inpainting',
+  'ai_upscaling',
 ] as const;

@@ -33,4 +33,11 @@ export const XR_PLATFORM_TRAITS = [
   // V43 Tier 2: visionOS Spatial Persona & SharePlay
   'spatial_persona',
   'shareplay',
+  // V43 Tier 2: visionOS Object Tracking & Scene Reconstruction
+  'object_tracking',
+  'scene_reconstruction',
+  'realitykit_mesh',
+  'room_mesh',
+  'volumetric_window',
+  'spatial_navigation',
 ] as const;
