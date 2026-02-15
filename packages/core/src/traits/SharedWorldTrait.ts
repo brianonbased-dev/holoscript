@@ -32,6 +32,9 @@ interface SharedWorldState {
   syncAccumulator: number;
   connectedPeers: Set<string>;
   pendingUpdates: Array<{ nodeId: string; state: unknown; version: number }>;
+  // V43 Tier 2: Spatial Persona State
+  spatialPersonas?: Map<string, { position: [number, number, number]; rotation: number; feature: string }>;
+  activeActivity?: string;
 }
 
 interface SharedWorldConfig {
@@ -43,6 +46,16 @@ interface SharedWorldConfig {
   state_persistence: boolean;
   max_objects: number;
   interpolation: boolean;
+  // V43 Tier 2: visionOS Spatial Persona & SharePlay
+  persona_count?: number;
+  persona_feature?: 'spatial_audio' | 'eye_contact' | 'hand_gestures' | 'body_language' | 'spatial_presence';
+  avatar_style?: 'realistic' | 'stylized' | 'minimal';
+  spatial_audio_enabled?: boolean;
+  activity_type?: 'collaborative_design' | 'shared_viewing' | 'multiplayer_game' | 'co_browsing' | 'spatial_presentation';
+  sync_mode?: 'realtime' | 'eventual' | 'optimistic';
+  latency_compensation?: boolean;
+  persona_radius?: number;
+  height_offset?: number;
 }
 
 // =============================================================================
@@ -61,6 +74,16 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
     state_persistence: false,
     max_objects: 1000,
     interpolation: true,
+    // V43 Tier 2: visionOS defaults
+    persona_count: 4,
+    persona_feature: 'spatial_audio',
+    avatar_style: 'realistic',
+    spatial_audio_enabled: true,
+    activity_type: 'collaborative_design',
+    sync_mode: 'realtime',
+    latency_compensation: true,
+    persona_radius: 2.0,
+    height_offset: 1.6,
   },
 
   onAttach(node, config, context) {
@@ -73,6 +96,9 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
       syncAccumulator: 0,
       connectedPeers: new Set(),
       pendingUpdates: [],
+      // V43 Tier 2: Initialize spatial persona state
+      spatialPersonas: config.persona_count ? new Map() : undefined,
+      activeActivity: config.activity_type,
     };
     (node as any).__sharedWorldState = state;
 
@@ -80,7 +106,26 @@ export const sharedWorldHandler: TraitHandler<SharedWorldConfig> = {
       node,
       authorityModel: config.authority_model,
       syncRate: config.sync_rate,
+      // V43: visionOS metadata
+      personaCount: config.persona_count,
+      activityType: config.activity_type,
     });
+
+    // V43: Initialize spatial personas in circular arrangement
+    if (config.persona_count && state.spatialPersonas) {
+      const radius = config.persona_radius || 2.0;
+      const heightOffset = config.height_offset || 1.6;
+      for (let i = 0; i < config.persona_count; i++) {
+        const angle = (i / config.persona_count) * Math.PI * 2;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        state.spatialPersonas.set(`persona_${i}`, {
+          position: [x, heightOffset, z],
+          rotation: angle + Math.PI, // Face center
+          feature: config.persona_feature || 'spatial_audio',
+        });
+      }
+    }
   },
 
   onDetach(node, config, context) {

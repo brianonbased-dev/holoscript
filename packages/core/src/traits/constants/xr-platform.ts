@@ -30,4 +30,7 @@ export const XR_PLATFORM_TRAITS = [
   // V43 Tier 1: Spatial Systems
   'spatial_awareness',
   'shared_world',
+  // V43 Tier 2: visionOS Spatial Persona & SharePlay
+  'spatial_persona',
+  'shareplay',
 ] as const;
