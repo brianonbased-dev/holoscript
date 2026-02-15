@@ -61,6 +61,13 @@ HoloScript/                     # This repo - complete language system
 │   ├── holoscript/             # SDK: Smart Assets & HoloHub client
 │   ├── compiler-wasm/          # WebAssembly parser for browsers
 │   ├── visual/                 # Node-based visual programming editor
+│   ├── studio/                 # AI-powered 3D scene builder (Next.js)
+│   │   └── src/
+│   │       ├── app/            # Pages: create, projects, templates, generate
+│   │       ├── components/     # React components, scene viewer, template grid
+│   │       ├── lib/            # Store, mock generator, utilities
+│   │       ├── embed/          # Embeddable scene viewer
+│   │       └── hooks/          # React hooks
 │   ├── registry/               # Package registry & team workspace API
 │   ├── partner-sdk/            # Partner integration SDK
 │   ├── adapter-postgres/       # PostgreSQL database adapter
@@ -154,6 +161,13 @@ But HoloScript works without Hololand.
 | `@holoscript/partner-sdk`      | Partner integration SDK                 | v3.0.0  |
 | `@holoscript/adapter-postgres` | PostgreSQL database adapter             | v3.0.0  |
 | `holoscript` (Python)          | Python bindings                         | v3.0.0  |
+
+### Companion Repositories
+
+| Repository | Purpose | Version |
+| --- | --- | --- |
+| `holoscript-compiler` | Standalone `.hsplus` → USD compiler for robotics simulation (NVIDIA Isaac Sim). Lexer, parser, AST, USD code generator, CLI, and structured robot templates. | v0.1.0 |
+| `@holoscript/narupa-plugin` | Scientific plugin for VR drug discovery: Narupa process manager, multi-agent orchestrator, Unity VR target, database fetcher, Python bridge. | v1.2.0 |
 
 ## Data Flow
 

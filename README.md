@@ -110,9 +110,18 @@ composition "Hello Holo" {
 
 ## 🛠️ Tooling
 
+- **HoloScript Studio** - AI-powered 3D scene builder with templates (Enchanted Forest, Space Station, Art Gallery, Zen Garden, Neon City).
+- **Plugin System** - Sandboxed plugin API with PluginLoader, ModRegistry, and permission-based asset/event access.
 - **VS Code Extension** - Syntax highlighting and trait IntelliSense.
 - **MCP Server** - Give your AI agents the power to build spatial worlds.
 - **HoloScript CLI** - Parse, validate, and compile from your terminal.
+
+### Companion Repositories
+
+| Repository | Description | Version |
+| --- | --- | --- |
+| [`holoscript-compiler`](https://github.com/brianonbased-dev/holoscript-compiler) | Standalone `.hsplus` → USD/URDF/SDF/MJCF compiler for robotics (NVIDIA Isaac Sim) | v0.1.0 |
+| [`holoscript-scientific-plugin`](https://github.com/brianonbased-dev/holoscript-scientific-plugin) | Narupa molecular dynamics + VR drug discovery plugin | v1.2.0 |
 
 ---
 

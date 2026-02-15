@@ -38,6 +38,11 @@ Massive expansion adding 287 new source modules, 113 test suites, and 275+ new t
 - **New domains:** Scientific computing, robotics/industrial
 - **New implementations:** 13 (GrabbableTrait, VisionTrait, NeuralForgeTrait, NPCAITrait, etc.)
 
+### Companion Repositories
+
+- **holoscript-compiler** (v0.1.0) - Standalone robotics compiler: `.hsplus` → USD/URDF/SDF/MJCF for NVIDIA Isaac Sim
+- **holoscript-scientific-plugin** (v1.2.0) - VR drug discovery: Narupa MD, multi-agent orchestration, 6 example compositions
+
 ---
 
 ## 🎉 HoloScript 3.0 Released - All Sprints Complete!

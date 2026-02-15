@@ -147,6 +147,24 @@ This release adds 287 new source modules, 113 test suites, and expands the trait
 - **ReactiveState** - Observable state with computed properties
 - **Production Deployment Guide** - Comprehensive deployment documentation
 
+#### Plugin System (3 modules)
+
+- **PluginLoader** - Dynamic plugin loading with sandboxed execution
+- **PluginAPI** - Safe runtime API surface with permission checks, event hooks, asset registration, and command handlers
+- **ModRegistry** - Module registry for plugin discovery and dependency resolution
+
+#### HoloScript Studio
+
+- **AI-Powered Scene Builder** - Next.js-based visual scene creation tool
+- **Template Gallery** - 5 starter templates: Enchanted Forest, Space Station, Art Gallery, Zen Garden, Neon City
+- **Embeddable Viewer** - Drop-in scene viewer component for external apps
+- **AI Generation** - Natural language to `.holo` scene generation
+
+#### Companion Repositories
+
+- **holoscript-compiler** (v0.1.0) - Standalone HoloScript+ → USD/URDF/SDF/MJCF compiler targeting NVIDIA Isaac Sim. Includes lexer, parser, AST, USD code generator, CLI tool, and structured robot templates.
+- **holoscript-scientific-plugin** (`@holoscript/narupa-plugin` v1.2.0) - Multi-agent orchestration for VR-based drug discovery. Narupa molecular dynamics integration with process manager, orchestrator, Unity VR target, and 6 example `.holo` compositions (parallel docking, HITL docking, multi-user collaboration, database queries, AutoDock integration).
+
 #### Test Coverage
 
 - 113 new test suites covering all major subsystems
