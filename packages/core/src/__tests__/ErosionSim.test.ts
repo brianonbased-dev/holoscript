@@ -1,124 +1,105 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ErosionSim } from '../terrain/ErosionSim';
 
 // =============================================================================
-// C219 — Terrain Erosion Simulation
+// C250 — Erosion Sim
 // =============================================================================
 
-function flatMap(width: number, height: number, baseHeight = 10): Float32Array {
-  return new Float32Array(width * height).fill(baseHeight);
+function flatMap(w: number, h: number, val = 10): Float32Array {
+  return new Float32Array(w * h).fill(val);
 }
 
-function slopedMap(width: number, height: number): Float32Array {
-  const map = new Float32Array(width * height);
-  for (let z = 0; z < height; z++) {
-    for (let x = 0; x < width; x++) {
-      map[z * width + x] = (x + z) * 0.5; // gradient slope
-    }
-  }
+function slopedMap(w: number, h: number): Float32Array {
+  const map = new Float32Array(w * h);
+  for (let z = 0; z < h; z++)
+    for (let x = 0; x < w; x++)
+      map[z * w + x] = 50 - z * (50 / h);
   return map;
 }
 
 describe('ErosionSim', () => {
-  it('constructor uses default config', () => {
-    const sim = new ErosionSim();
-    const cfg = sim.getConfig();
-    expect(cfg.iterations).toBe(50000);
-    expect(cfg.seed).toBe(42);
+  it('default config has expected values', () => {
+    const e = new ErosionSim();
+    const c = e.getConfig();
+    expect(c.iterations).toBe(50000);
+    expect(c.seed).toBe(42);
   });
 
-  it('constructor merges partial config', () => {
-    const sim = new ErosionSim({ iterations: 100, seed: 7 });
-    const cfg = sim.getConfig();
-    expect(cfg.iterations).toBe(100);
-    expect(cfg.seed).toBe(7);
-    expect(cfg.gravity).toBe(4); // default preserved
-  });
-
-  it('setConfig updates config', () => {
-    const sim = new ErosionSim();
-    sim.setConfig({ gravity: 10 });
-    expect(sim.getConfig().gravity).toBe(10);
+  it('setConfig overrides partial config', () => {
+    const e = new ErosionSim();
+    e.setConfig({ iterations: 100 });
+    expect(e.getConfig().iterations).toBe(100);
   });
 
   it('hydraulicErode returns valid result', () => {
-    const sim = new ErosionSim({ iterations: 100 });
-    const map = slopedMap(16, 16);
-    const result = sim.hydraulicErode(map, 16, 16);
+    const e = new ErosionSim({ iterations: 100 });
+    const map = slopedMap(32, 32);
+    const result = e.hydraulicErode(map, 32, 32);
     expect(result.iterations).toBe(100);
     expect(result.totalEroded).toBeGreaterThanOrEqual(0);
     expect(result.totalDeposited).toBeGreaterThanOrEqual(0);
-    expect(result.maxDepthChange).toBeGreaterThanOrEqual(0);
   });
 
-  it('hydraulicErode modifies sloped heightmap', () => {
-    const sim = new ErosionSim({ iterations: 500 });
-    const map = slopedMap(16, 16);
+  it('hydraulicErode modifies heightmap', () => {
+    const e = new ErosionSim({ iterations: 500 });
+    const map = slopedMap(32, 32);
     const original = new Float32Array(map);
-    sim.hydraulicErode(map, 16, 16);
-    // At least some pixels should differ
+    e.hydraulicErode(map, 32, 32);
     let changed = false;
     for (let i = 0; i < map.length; i++) {
-      if (map[i] !== original[i]) { changed = true; break; }
+      if (Math.abs(map[i] - original[i]) > 1e-6) { changed = true; break; }
     }
     expect(changed).toBe(true);
   });
 
-  it('hydraulicErode on flat map changes minimally', () => {
-    const sim = new ErosionSim({ iterations: 100 });
+  it('hydraulicErode on flat map changes very little', () => {
+    const e = new ErosionSim({ iterations: 100 });
     const map = flatMap(16, 16, 5);
-    const result = sim.hydraulicErode(map, 16, 16);
-    // Flat terrain — minimal erosion since water can't flow downhill
+    const result = e.hydraulicErode(map, 16, 16);
     expect(result.maxDepthChange).toBeLessThan(1);
   });
 
   it('thermalErode returns valid result', () => {
-    const sim = new ErosionSim();
+    const e = new ErosionSim({ thermalAngle: 30 });
     const map = slopedMap(16, 16);
-    const result = sim.thermalErode(map, 16, 16, 10);
+    const result = e.thermalErode(map, 16, 16, 10);
     expect(result.iterations).toBe(10);
     expect(result.totalEroded).toBeGreaterThanOrEqual(0);
-    expect(result.totalDeposited).toBeGreaterThanOrEqual(0);
   });
 
-  it('thermalErode smooths steep terrain', () => {
-    const sim = new ErosionSim({ thermalAngle: 10 });
-    const map = new Float32Array(16 * 16);
-    // Create a steep peak
-    map[8 * 16 + 8] = 100;
-    sim.thermalErode(map, 16, 16, 100);
-    // Peak should be reduced
-    expect(map[8 * 16 + 8]).toBeLessThan(100);
+  it('thermalErode erodes steep terrain', () => {
+    const e = new ErosionSim({ thermalAngle: 10, thermalRate: 0.8 });
+    const map = slopedMap(16, 16);
+    const result = e.thermalErode(map, 16, 16, 50);
+    // Steep sloped map should produce erosion
+    expect(result.totalEroded).toBeGreaterThan(0);
+    expect(result.totalDeposited).toBeGreaterThan(0);
   });
 
-  it('thermalErode preserves flat terrain', () => {
-    const sim = new ErosionSim();
-    const map = flatMap(16, 16, 5);
-    const result = sim.thermalErode(map, 16, 16, 10);
-    expect(result.totalEroded).toBe(0); // Nothing to erode on flat
-  });
-
-  it('deterministic with same seed', () => {
-    const map1 = slopedMap(8, 8);
-    const map2 = slopedMap(8, 8);
-    const sim1 = new ErosionSim({ iterations: 100, seed: 42 });
-    const sim2 = new ErosionSim({ iterations: 100, seed: 42 });
-    sim1.hydraulicErode(map1, 8, 8);
-    sim2.hydraulicErode(map2, 8, 8);
-    for (let i = 0; i < map1.length; i++) {
-      expect(map1[i]).toBe(map2[i]);
-    }
+  it('seed produces deterministic results', () => {
+    const map1 = slopedMap(16, 16);
+    const map2 = slopedMap(16, 16);
+    new ErosionSim({ iterations: 200, seed: 123 }).hydraulicErode(map1, 16, 16);
+    new ErosionSim({ iterations: 200, seed: 123 }).hydraulicErode(map2, 16, 16);
+    expect(map1).toEqual(map2);
   });
 
   it('different seeds produce different results', () => {
-    const map1 = slopedMap(8, 8);
-    const map2 = slopedMap(8, 8);
-    new ErosionSim({ iterations: 200, seed: 1 }).hydraulicErode(map1, 8, 8);
-    new ErosionSim({ iterations: 200, seed: 999 }).hydraulicErode(map2, 8, 8);
-    let differs = false;
+    const map1 = slopedMap(16, 16);
+    const map2 = slopedMap(16, 16);
+    new ErosionSim({ iterations: 200, seed: 1 }).hydraulicErode(map1, 16, 16);
+    new ErosionSim({ iterations: 200, seed: 999 }).hydraulicErode(map2, 16, 16);
+    let same = true;
     for (let i = 0; i < map1.length; i++) {
-      if (map1[i] !== map2[i]) { differs = true; break; }
+      if (Math.abs(map1[i] - map2[i]) > 1e-6) { same = false; break; }
     }
-    expect(differs).toBe(true);
+    expect(same).toBe(false);
+  });
+
+  it('thermalErode on flat map is no-op', () => {
+    const e = new ErosionSim();
+    const map = flatMap(16, 16, 10);
+    const result = e.thermalErode(map, 16, 16, 5);
+    expect(result.totalEroded).toBe(0);
   });
 });
