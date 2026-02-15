@@ -14,6 +14,14 @@ import { handleGraphTool } from './graph-tools';
 import { handleIDETool } from './ide-tools';
 import { handleBrittneyLiteTool } from './brittney-lite';
 import { PluginManager } from './PluginManager';
+import {
+  browserLaunch,
+  browserExecute,
+  browserScreenshot,
+  BrowserLaunchSchema,
+  BrowserExecuteSchema,
+  BrowserScreenshotSchema
+} from './browser/browser-tools';
 
 // Trait categories mapping
 const TRAIT_CATEGORIES: Record<string, string[]> = {
@@ -96,6 +104,14 @@ export async function handleTool(name: string, args: Record<string, unknown>): P
       return handleCreateShareLink(args);
     case 'convert_format':
       return handleConvertFormat(args);
+
+    // Browser control tools
+    case 'browser_launch':
+      return browserLaunch(BrowserLaunchSchema.parse(args));
+    case 'browser_execute':
+      return browserExecute(BrowserExecuteSchema.parse(args));
+    case 'browser_screenshot':
+      return browserScreenshot(BrowserScreenshotSchema.parse(args));
   }
 
   // Graph understanding tools (migrated from Hololand)

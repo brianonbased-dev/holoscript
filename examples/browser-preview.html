@@ -249,6 +249,17 @@
         window.addEventListener('resize', onResize);
         setupEventListeners();
         animate();
+        
+        // Expose for MCP tools
+        window.holoscriptRenderer = {
+          initialized: true,
+          scene: scene,
+          camera: camera,
+          renderer: renderer,
+          objects: objects,
+          animatedObjects: animatedObjects,
+          particleSystems: particleSystems
+        };
       }
 
       function onResize() {
@@ -791,6 +802,23 @@
       }
 
       init();
+
+      // Check for file query param
+      const urlParams = new URLSearchParams(window.location.search);
+      const file = urlParams.get('file');
+      if (file) {
+        console.log('Loading file from URL:', file);
+        // Use fetch to load the file
+        fetch(file)
+          .then((res) => res.text())
+          .then((content) => {
+            document.getElementById('file-name').textContent = file.split(/[\\/]/).pop();
+            document.getElementById('code-editor').value = content;
+            document.getElementById('drop-zone').style.display = 'none';
+            parseAndRender(content);
+          })
+          .catch((err) => console.error('Failed to load file:', err));
+      }
     </script>
   </body>
 </html>

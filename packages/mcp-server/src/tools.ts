@@ -10,6 +10,11 @@ import { graphTools } from './graph-tools';
 import { ideTools } from './ide-tools';
 import { brittneyLiteTools } from './brittney-lite';
 import { PluginManager } from './PluginManager';
+import {
+  BrowserLaunchSchema,
+  BrowserExecuteSchema,
+  BrowserScreenshotSchema
+} from './browser/browser-tools';
 
 /**
  * All MCP tools for HoloScript
@@ -439,7 +444,34 @@ export const textTo3DTools: Tool[] = [
 ];
 
 /**
- * All tools combined: core + graph + IDE + Brittney-Lite + text-to-3D
+ * Browser control tools (AI-controlled browser preview)
+ */
+export const browserControlTools: Tool[] = [
+  {
+    name: 'browser_launch',
+    description:
+      'Launch HoloScript file in browser preview with AI control. ' +
+      'Opens a browser window showing the 3D scene and returns a session ID for further control.',
+    inputSchema: BrowserLaunchSchema.shape as any,
+  },
+  {
+    name: 'browser_execute',
+    description:
+      'Execute JavaScript in the browser to inspect or validate HoloScript scenes. ' +
+      'Use for trait validation, performance checking, and scene manipulation.',
+    inputSchema: BrowserExecuteSchema.shape as any,
+  },
+  {
+    name: 'browser_screenshot',
+    description:
+      'Take screenshot of HoloScript preview for visual validation and regression testing. ' +
+      'Returns base64-encoded image or saves to file.',
+    inputSchema: BrowserScreenshotSchema.shape as any,
+  },
+];
+
+/**
+ * All tools combined: core + graph + IDE + Brittney-Lite + text-to-3D + browser
  */
 export const tools: Tool[] = [
   ...coreTools,
@@ -447,6 +479,7 @@ export const tools: Tool[] = [
   ...ideTools,
   ...brittneyLiteTools,
   ...textTo3DTools,
+  ...browserControlTools,
   ...PluginManager.getTools(),
 ];
 
