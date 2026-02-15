@@ -26,4 +26,10 @@ export const NETWORKING_AI_TRAITS = [
   'diffusion_realtime',
   'ai_inpainting',
   'ai_upscaling',
+  // V43 Tier 3: AI Knowledge & Memory Systems
+  'memory',
+  'vector_db',
+  'rag_knowledge',
+  'embedding_search',
+  'ai_npc_brain',
 ] as const;
