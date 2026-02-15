@@ -606,6 +606,53 @@ export interface SystemNode extends ASTNode {
   type: 'system';
   id: string;
   properties: Record<string, HoloScriptValue>;
+  /** System state declarations */
+  state?: Record<string, HoloScriptValue>;
+  /** Named actions that can be invoked */
+  actions?: Array<{
+    name: string;
+    params: string[];
+    body: string;
+  }>;
+  /** Lifecycle hooks: on_start, on_update, on_destroy, etc. */
+  hooks?: Array<{
+    name: string;
+    body: string;
+  }>;
+  /** Nested UI block declarations */
+  ui?: ASTNode[];
+  /** Nested children (objects, templates, etc.) */
+  children?: ASTNode[];
+  /** Trait directives on the system */
+  directives?: HSPlusDirective[];
+}
+
+export interface ComponentNode extends ASTNode {
+  type: 'component';
+  name: string;
+  /** Component props declarations (with defaults) */
+  props?: Record<string, HoloScriptValue>;
+  /** Component internal state */
+  state?: Record<string, HoloScriptValue>;
+  /** Named actions */
+  actions?: Array<{
+    name: string;
+    params: string[];
+    body: string;
+  }>;
+  /** UI block for rendering */
+  ui?: ASTNode[];
+  /** Lifecycle hooks */
+  hooks?: Array<{
+    name: string;
+    body: string;
+  }>;
+  /** Nested children */
+  children?: ASTNode[];
+  /** Trait directives */
+  directives?: HSPlusDirective[];
+  /** Component properties (non-special) */
+  properties?: Record<string, HoloScriptValue>;
 }
 
 export interface CoreConfigNode extends ASTNode {
@@ -839,6 +886,40 @@ export interface UIStyle {
   borderRadius?: number;
   padding?: number;
   margin?: number;
+}
+
+// ============================================================================
+// Built-in API Types (storage, device, input)
+// ============================================================================
+
+/** Built-in storage API for persistent key/value data */
+export interface StorageAPI {
+  get(key: string): HoloScriptValue;
+  set(key: string, value: HoloScriptValue): void;
+  remove(key: string): void;
+  has(key: string): boolean;
+  clear(): void;
+}
+
+/** Built-in device API for platform detection and preferences */
+export interface DeviceAPI {
+  isMobile: boolean;
+  isVR: boolean;
+  isAR: boolean;
+  isDesktop: boolean;
+  prefersReducedMotion(): boolean;
+  screenWidth: number;
+  screenHeight: number;
+  pixelRatio: number;
+  hasTouch: boolean;
+  hasGamepad: boolean;
+}
+
+/** Built-in input API for handling user input */
+export interface InputAPI {
+  setMovement(x: number, y: number): void;
+  jump(): void;
+  interact(): void;
 }
 
 // ============================================================================

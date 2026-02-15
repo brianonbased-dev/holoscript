@@ -39,6 +39,8 @@ import type {
   ZoneNode,
   HologramShape,
   CompositionNode,
+  SystemNode,
+  ComponentNode,
 } from './types';
 
 // =============================================================================
@@ -326,6 +328,11 @@ export class HoloScriptCodeParser {
       'object',
       'light',
       'camera',
+      // System and component keywords (Phase 0: Hololand Bootstrap)
+      'system',
+      'component',
+      'action',
+      'props',
       // Additional scene keywords
       'npc',
       'player',
@@ -853,6 +860,10 @@ export class HoloScriptCodeParser {
           return this.parseComposition();
         case 'template':
           return this.parseTemplate();
+        case 'system':
+          return this.parseSystem();
+        case 'component':
+          return this.parseComponent();
         case 'migrate':
           return this.parseMigration();
         case 'settings':
@@ -1226,7 +1237,7 @@ export class HoloScriptCodeParser {
     let template: string | undefined;
     if (this.check('keyword', 'using')) {
       this.advance();
-      template = this.expectIdentifier() || undefined;
+      template = this.expectName() || undefined;
     }
 
     const properties: Record<string, HoloScriptValue> = {};
@@ -1681,7 +1692,7 @@ export class HoloScriptCodeParser {
     let template: string | undefined;
     if (this.check('keyword', 'using')) {
       this.advance();
-      template = this.expectIdentifier() || undefined;
+      template = this.expectName() || undefined;
     }
 
     const properties: Record<string, HoloScriptValue> = {};
@@ -1900,8 +1911,12 @@ export class HoloScriptCodeParser {
         }
 
         // Try parsing as a declaration (nested nodes)
+        // Save position and error count so we can backtrack if parseDeclaration
+        // consumes tokens without producing a useful node
+        const startPos = this.position;
+        const errorCount = this.errors.length;
         const node = this.parseDeclaration();
-        if (node) {
+        if (node && node.type !== 'expression') {
           if (node.type === 'migration') {
             migrations.push(node as MigrationNode);
           } else {
@@ -1910,6 +1925,9 @@ export class HoloScriptCodeParser {
           this.skipNewlines();
           continue;
         }
+        // Reset position and errors if parseDeclaration didn't produce a useful node
+        this.position = startPos;
+        this.errors.length = errorCount;
 
         // Try parsing as a property
         const prop = this.parseProperty();
@@ -1935,6 +1953,331 @@ export class HoloScriptCodeParser {
       version,
       migrations,
     };
+  }
+
+  /**
+   * Parse system declaration: system Name { state {}, on_start {}, action name() {}, ui {} }
+   *
+   * Systems are named trait+logic containers that auto-initialize within a composition.
+   * They encapsulate state, lifecycle hooks, actions, and optional UI.
+   *
+   * Syntax:
+   *   system TutorialSystem {
+   *     state { currentStep: 0, completed: false }
+   *     on_start { ... }
+   *     on_update { ... }
+   *     action next() { ... }
+   *     action skip() { ... }
+   *     ui { ... }
+   *   }
+   */
+  private parseSystem(): SystemNode | null {
+    this.expect('keyword', 'system');
+    const name = this.expectName() || 'unnamed_system';
+
+    const state: Record<string, HoloScriptValue> = {};
+    const actions: Array<{ name: string; params: string[]; body: string }> = [];
+    const hooks: Array<{ name: string; body: string }> = [];
+    const directives: HSPlusDirective[] = [];
+    const properties: Record<string, HoloScriptValue> = {};
+    const children: ASTNode[] = [];
+    const uiNodes: ASTNode[] = [];
+
+    if (this.check('punctuation', '{')) {
+      this.advance(); // {
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+        this.skipNewlines();
+        if (this.check('punctuation', '}')) break;
+
+        const token = this.currentToken();
+
+        // Handle directives (@grabbable, @networked, etc.)
+        if (token?.type === 'punctuation' && token.value === '@') {
+          const directive = this.parseDirective();
+          if (directive) directives.push(directive);
+          this.skipNewlines();
+          continue;
+        }
+
+        if (token?.type === 'keyword' || token?.type === 'identifier') {
+          const val = token.value.toLowerCase();
+
+          // state { ... }
+          if (val === 'state') {
+            this.advance();
+            if (this.check('punctuation', '{')) {
+              const stateObj = this.parseObject() as Record<string, HoloScriptValue>;
+              Object.assign(state, stateObj);
+            }
+            this.skipNewlines();
+            continue;
+          }
+
+          // action name(params) { body }
+          if (val === 'action') {
+            this.advance();
+            const actionName = this.expectIdentifier();
+            if (actionName) {
+              const params: string[] = [];
+              if (this.check('punctuation', '(')) {
+                this.advance();
+                while (!this.check('punctuation', ')') && this.position < this.tokens.length) {
+                  const p = this.expectIdentifier();
+                  if (p) params.push(p);
+                  if (this.check('punctuation', ',')) this.advance();
+                }
+                this.expect('punctuation', ')');
+              }
+              const body = this.parseBlockBody();
+              actions.push({ name: actionName, params, body });
+            }
+            this.skipNewlines();
+            continue;
+          }
+
+          // on_start, on_update, on_destroy, on_event(...) — lifecycle hooks
+          if (val.startsWith('on_')) {
+            this.advance();
+            const body = this.parseBlockBody();
+            hooks.push({ name: val, body });
+            this.skipNewlines();
+            continue;
+          }
+
+          // ui { ... } — embedded UI block
+          if (val === 'ui') {
+            this.advance();
+            if (this.check('punctuation', '{')) {
+              this.advance();
+              while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+                this.skipNewlines();
+                const node = this.parseDeclaration();
+                if (node) uiNodes.push(node);
+                this.skipNewlines();
+              }
+              this.expect('punctuation', '}');
+            }
+            this.skipNewlines();
+            continue;
+          }
+
+          // steps: [...], or other array/object properties
+          // Try nested declaration first
+          const startPos = this.position;
+          const errorCount = this.errors.length;
+          const node = this.parseDeclaration();
+          if (node && node.type !== 'expression') {
+            children.push(node);
+            this.skipNewlines();
+            continue;
+          }
+          // Reset position and errors if parseDeclaration didn't produce a useful node
+          this.position = startPos;
+          this.errors.length = errorCount;
+
+          // Try as property
+          const prop = this.parseProperty();
+          if (prop) {
+            properties[prop.key] = prop.value;
+            this.skipNewlines();
+            continue;
+          }
+        }
+
+        // Skip unknown tokens to avoid infinite loop
+        this.advance();
+      }
+      this.expect('punctuation', '}');
+    }
+
+    return {
+      type: 'system',
+      id: name,
+      properties,
+      state: Object.keys(state).length > 0 ? state : undefined,
+      actions: actions.length > 0 ? actions : undefined,
+      hooks: hooks.length > 0 ? hooks : undefined,
+      ui: uiNodes.length > 0 ? uiNodes : undefined,
+      children: children.length > 0 ? children : undefined,
+      directives: directives.length > 0 ? (directives as any) : undefined,
+    };
+  }
+
+  /**
+   * Parse component declaration: component Name { props {}, state {}, ui {}, action name() {} }
+   *
+   * Components are UI-focused declarations with props, state, and render/ui blocks.
+   *
+   * Syntax:
+   *   component MobileControls {
+   *     props { visible: true, joystickSize: 120 }
+   *     state { isMoving: false }
+   *     ui { ... }
+   *   }
+   */
+  private parseComponent(): ComponentNode | null {
+    this.expect('keyword', 'component');
+    const name = this.expectName() || 'unnamed_component';
+
+    const props: Record<string, HoloScriptValue> = {};
+    const state: Record<string, HoloScriptValue> = {};
+    const actions: Array<{ name: string; params: string[]; body: string }> = [];
+    const hooks: Array<{ name: string; body: string }> = [];
+    const directives: HSPlusDirective[] = [];
+    const properties: Record<string, HoloScriptValue> = {};
+    const children: ASTNode[] = [];
+    const uiNodes: ASTNode[] = [];
+
+    if (this.check('punctuation', '{')) {
+      this.advance(); // {
+      while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+        this.skipNewlines();
+        if (this.check('punctuation', '}')) break;
+
+        const token = this.currentToken();
+
+        // Handle directives
+        if (token?.type === 'punctuation' && token.value === '@') {
+          const directive = this.parseDirective();
+          if (directive) directives.push(directive);
+          this.skipNewlines();
+          continue;
+        }
+
+        if (token?.type === 'keyword' || token?.type === 'identifier') {
+          const val = token.value.toLowerCase();
+
+          // props { ... }
+          if (val === 'props') {
+            this.advance();
+            if (this.check('punctuation', '{')) {
+              const propsObj = this.parseObject() as Record<string, HoloScriptValue>;
+              Object.assign(props, propsObj);
+            }
+            this.skipNewlines();
+            continue;
+          }
+
+          // state { ... }
+          if (val === 'state') {
+            this.advance();
+            if (this.check('punctuation', '{')) {
+              const stateObj = this.parseObject() as Record<string, HoloScriptValue>;
+              Object.assign(state, stateObj);
+            }
+            this.skipNewlines();
+            continue;
+          }
+
+          // action name(params) { body }
+          if (val === 'action') {
+            this.advance();
+            const actionName = this.expectIdentifier();
+            if (actionName) {
+              const params: string[] = [];
+              if (this.check('punctuation', '(')) {
+                this.advance();
+                while (!this.check('punctuation', ')') && this.position < this.tokens.length) {
+                  const p = this.expectIdentifier();
+                  if (p) params.push(p);
+                  if (this.check('punctuation', ',')) this.advance();
+                }
+                this.expect('punctuation', ')');
+              }
+              const body = this.parseBlockBody();
+              actions.push({ name: actionName, params, body });
+            }
+            this.skipNewlines();
+            continue;
+          }
+
+          // on_* lifecycle hooks
+          if (val.startsWith('on_')) {
+            this.advance();
+            const body = this.parseBlockBody();
+            hooks.push({ name: val, body });
+            this.skipNewlines();
+            continue;
+          }
+
+          // ui { ... }
+          if (val === 'ui') {
+            this.advance();
+            if (this.check('punctuation', '{')) {
+              this.advance();
+              while (!this.check('punctuation', '}') && this.position < this.tokens.length) {
+                this.skipNewlines();
+                const node = this.parseDeclaration();
+                if (node) uiNodes.push(node);
+                this.skipNewlines();
+              }
+              this.expect('punctuation', '}');
+            }
+            this.skipNewlines();
+            continue;
+          }
+
+          // Try nested declarations
+          const startPos = this.position;
+          const errorCount = this.errors.length;
+          const node = this.parseDeclaration();
+          if (node && node.type !== 'expression') {
+            children.push(node);
+            this.skipNewlines();
+            continue;
+          }
+          // Reset position and errors if parseDeclaration didn't produce a useful node
+          this.position = startPos;
+          this.errors.length = errorCount;
+
+          // Try as property
+          const prop = this.parseProperty();
+          if (prop) {
+            properties[prop.key] = prop.value;
+            this.skipNewlines();
+            continue;
+          }
+        }
+
+        this.advance();
+      }
+      this.expect('punctuation', '}');
+    }
+
+    return {
+      type: 'component',
+      name,
+      props: Object.keys(props).length > 0 ? props : undefined,
+      state: Object.keys(state).length > 0 ? state : undefined,
+      actions: actions.length > 0 ? actions : undefined,
+      hooks: hooks.length > 0 ? hooks : undefined,
+      ui: uiNodes.length > 0 ? uiNodes : undefined,
+      children: children.length > 0 ? children : undefined,
+      directives: directives.length > 0 ? (directives as any) : undefined,
+      properties: Object.keys(properties).length > 0 ? properties : undefined,
+    };
+  }
+
+  /**
+   * Parse a block body { ... } — captures everything between braces as a string.
+   * Used for action bodies and lifecycle hooks where we capture the raw body.
+   */
+  private parseBlockBody(): string {
+    let body = '';
+    if (this.check('punctuation', '{')) {
+      this.advance(); // {
+      let braceDepth = 1;
+      while (braceDepth > 0 && this.position < this.tokens.length) {
+        const t = this.advance()!;
+        if (t.value === '{') braceDepth++;
+        if (t.value === '}') braceDepth--;
+        if (braceDepth > 0) {
+          const val = t.type === 'string' ? JSON.stringify(t.value) : t.value;
+          body += val + ' ';
+        }
+      }
+    }
+    return body.trim();
   }
 
   /**

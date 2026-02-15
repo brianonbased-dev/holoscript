@@ -1,3 +1,43 @@
+## [3.5.0-alpha.1] - 2026-02-16
+
+### 🏗️ Phase 0: Language Foundations (Hololand Bootstrap)
+
+First implementation phase of the Hololand Bootstrap vision — adding `system` and `component` as first-class parser constructs to support the HoloScript-first migration plan.
+
+### Added
+
+#### Parser: `system` Keyword Support
+
+- New `parseSystem()` method for parsing `system Name { state {}, action name() {}, on_start {}, ui {} }` declarations
+- Systems support state blocks, named actions with parameters, lifecycle hooks (`on_start`, `on_update`, `on_destroy`), embedded UI, directives, nested children, and properties
+- Added `system` and `action` to parser keyword set
+
+#### Parser: `component` Keyword Support
+
+- New `parseComponent()` method for parsing `component Name { props {}, state {}, ui {}, action name() {} }` declarations
+- Components support props blocks, state blocks, actions, lifecycle hooks, embedded UI, directives, and nested children
+- Added `component` and `props` to parser keyword set
+
+#### Type System Expansions
+
+- Expanded `SystemNode` with `state`, `actions`, `hooks`, `ui`, `children`, `directives` fields
+- Added `ComponentNode` interface with full prop/state/action/hook/ui/directive support
+- Added `StorageAPI`, `DeviceAPI`, `InputAPI` built-in API interfaces for runtime type safety
+- Exported all new types from `@holoscript/core`
+
+#### Parser Improvements
+
+- `parseBlockBody()` helper for capturing raw action/hook body text between braces
+- Position + error count save/restore in `parseTemplate()`, `parseSystem()`, `parseComponent()` for reliable backtracking when `parseDeclaration()` fails
+- `parseOrb()` and `parsePrimitive()` now accept quoted strings after `using` (e.g., `object "Portal" using "Template"`)
+
+### Tests
+
+- 20 new test cases covering system parsing, component parsing, import paths, exports, and migration spec integration
+- Full integration test: `app.hsplus` with imports + composition + systems + templates + objects
+
+---
+
 ## [3.4.0] - 2026-02-15
 
 ### 🚀 HoloScript 3.4 - Scientific Computing, Robotics & Full Runtime Engine

@@ -444,4 +444,395 @@ orb alsoValid { }`;
       expect(zone).toBeDefined();
     });
   });
-});
+
+  // =========================================================================
+  // System Parsing (Phase 0: Hololand Bootstrap)
+  // =========================================================================
+  describe('system parsing', () => {
+    it('should parse empty system declaration', () => {
+      const code = 'system TestSystem { }';
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const sys = result.ast.find((n) => n.type === 'system');
+      expect(sys).toBeDefined();
+      if (sys && 'id' in sys) {
+        expect((sys as any).id).toBe('TestSystem');
+      }
+    });
+
+    it('should parse system with state block', () => {
+      const code = `system TutorialSystem {
+  state {
+    currentStep: 0
+    completed: false
+    visible: true
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const sys = result.ast.find((n) => n.type === 'system') as any;
+      expect(sys).toBeDefined();
+      expect(sys.state).toBeDefined();
+      expect(sys.state.currentStep).toBe(0);
+      expect(sys.state.completed).toBe(false);
+      expect(sys.state.visible).toBe(true);
+    });
+
+    it('should parse system with actions', () => {
+      const code = `system TutorialSystem {
+  action next() {
+    state.currentStep += 1
+  }
+  action skip() {
+    finish()
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const sys = result.ast.find((n) => n.type === 'system') as any;
+      expect(sys).toBeDefined();
+      expect(sys.actions).toBeDefined();
+      expect(sys.actions.length).toBe(2);
+      expect(sys.actions[0].name).toBe('next');
+      expect(sys.actions[1].name).toBe('skip');
+    });
+
+    it('should parse system with lifecycle hooks', () => {
+      const code = `system ThemeSystem {
+  on_start {
+    loadTheme()
+  }
+  on_update {
+    checkTheme()
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const sys = result.ast.find((n) => n.type === 'system') as any;
+      expect(sys).toBeDefined();
+      expect(sys.hooks).toBeDefined();
+      expect(sys.hooks.length).toBe(2);
+      expect(sys.hooks[0].name).toBe('on_start');
+      expect(sys.hooks[1].name).toBe('on_update');
+    });
+
+    it('should parse system with directives', () => {
+      const code = `system MultiplayerSystem {
+  @networked
+  state {
+    connected: false
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const sys = result.ast.find((n) => n.type === 'system') as any;
+      expect(sys).toBeDefined();
+      expect(sys.directives).toBeDefined();
+      expect(sys.directives.length).toBe(1);
+    });
+
+    it('should parse system with properties', () => {
+      const code = `system EasterEggSystem {
+  difficulty: 3
+  maxEggs: 10
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const sys = result.ast.find((n) => n.type === 'system') as any;
+      expect(sys).toBeDefined();
+      expect(sys.properties.difficulty).toBe(3);
+      expect(sys.properties.maxEggs).toBe(10);
+    });
+
+    it('should parse system inside composition', () => {
+      const code = `composition "Hololand" {
+  system TutorialSystem {
+    state { step: 0 }
+  }
+  system ThemeSystem {
+    state { theme: "default" }
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const comp = result.ast.find((n) => n.type === 'composition') as any;
+      expect(comp).toBeDefined();
+      const systems = comp.children.filter((n: any) => n.type === 'system');
+      expect(systems.length).toBe(2);
+    });
+
+    it('should parse full system matching migration spec pattern', () => {
+      const code = `system TutorialSystem {
+  state {
+    currentStep: 0
+    completed: false
+    visible: true
+  }
+
+  on_start {
+    if (storage.get("tutorial_completed")) {
+      state.visible = false
+    }
+  }
+
+  action next() {
+    state.currentStep += 1
+  }
+
+  action skip() {
+    finish()
+  }
+
+  action finish() {
+    state.visible = false
+    state.completed = true
+    storage.set("tutorial_completed", true)
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const sys = result.ast.find((n) => n.type === 'system') as any;
+      expect(sys).toBeDefined();
+      expect(sys.id).toBe('TutorialSystem');
+      expect(sys.state).toBeDefined();
+      expect(sys.actions?.length).toBe(3);
+      expect(sys.hooks?.length).toBe(1);
+      expect(sys.hooks[0].name).toBe('on_start');
+    });
+  });
+
+  // =========================================================================
+  // Component Parsing (Phase 0: Hololand Bootstrap)
+  // =========================================================================
+  describe('component parsing', () => {
+    it('should parse empty component declaration', () => {
+      const code = 'component TestComponent { }';
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const comp = result.ast.find((n) => n.type === 'component');
+      expect(comp).toBeDefined();
+      if (comp && 'name' in comp) {
+        expect((comp as any).name).toBe('TestComponent');
+      }
+    });
+
+    it('should parse component with props', () => {
+      const code = `component MobileControls {
+  props {
+    visible: true
+    joystickSize: 120
+    deadzone: 0.1
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const comp = result.ast.find((n) => n.type === 'component') as any;
+      expect(comp).toBeDefined();
+      expect(comp.props).toBeDefined();
+      expect(comp.props.joystickSize).toBe(120);
+      expect(comp.props.deadzone).toBe(0.1);
+    });
+
+    it('should parse component with state', () => {
+      const code = `component JoystickInput {
+  state {
+    isMoving: false
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const comp = result.ast.find((n) => n.type === 'component') as any;
+      expect(comp).toBeDefined();
+      expect(comp.state).toBeDefined();
+    });
+
+    it('should parse component with actions', () => {
+      const code = `component Controls {
+  action handleMove(x, y) {
+    input.setMovement(x, y)
+  }
+  action handleJump() {
+    input.jump()
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const comp = result.ast.find((n) => n.type === 'component') as any;
+      expect(comp).toBeDefined();
+      expect(comp.actions?.length).toBe(2);
+      expect(comp.actions[0].name).toBe('handleMove');
+      expect(comp.actions[0].params).toEqual(['x', 'y']);
+    });
+
+    it('should parse component with directives', () => {
+      const code = `component OverlayUI {
+  @overlay
+  props { position: "center" }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const comp = result.ast.find((n) => n.type === 'component') as any;
+      expect(comp).toBeDefined();
+      expect(comp.directives).toBeDefined();
+    });
+
+    it('should parse full component matching migration spec pattern', () => {
+      const code = `component MobileControls {
+  props {
+    visible: true
+    joystickSize: 120
+    deadzone: 0.1
+  }
+
+  state {
+    isMoving: false
+  }
+
+  action handleMove(x, y) {
+    state.isMoving = true
+    input.setMovement(x, y)
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const comp = result.ast.find((n) => n.type === 'component') as any;
+      expect(comp).toBeDefined();
+      expect(comp.name).toBe('MobileControls');
+      expect(comp.props).toBeDefined();
+      expect(comp.state).toBeDefined();
+      expect(comp.actions?.length).toBe(1);
+    });
+  });
+
+  // =========================================================================
+  // Import with Module Paths (Phase 0: Hololand Bootstrap)
+  // =========================================================================
+  describe('import with .hsplus paths', () => {
+    it('should parse import from .hsplus file', () => {
+      const code = 'import { TutorialSystem } from "./systems/Tutorial.hsplus"';
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const imp = result.ast.find((n) => n.type === 'import') as any;
+      expect(imp).toBeDefined();
+      expect(imp.imports).toContain('TutorialSystem');
+      expect(imp.modulePath).toBe('./systems/Tutorial.hsplus');
+    });
+
+    it('should parse multiple named imports', () => {
+      const code = 'import { ThemeSystem, EasterEggSystem } from "./systems/Game.hsplus"';
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const imp = result.ast.find((n) => n.type === 'import') as any;
+      expect(imp).toBeDefined();
+      expect(imp.imports).toContain('ThemeSystem');
+      expect(imp.imports).toContain('EasterEggSystem');
+    });
+
+    it('should parse default import', () => {
+      const code = 'import App from "./App.hsplus"';
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const imp = result.ast.find((n) => n.type === 'import') as any;
+      expect(imp).toBeDefined();
+      expect(imp.defaultImport).toBe('App');
+    });
+  });
+
+  // =========================================================================
+  // Export with System/Component (Phase 0: Hololand Bootstrap)
+  // =========================================================================
+  describe('export system/component', () => {
+    it('should parse export system', () => {
+      const code = `export system TutorialSystem {
+  state { step: 0 }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const exp = result.ast.find((n) => n.type === 'export') as any;
+      expect(exp).toBeDefined();
+      expect(exp.declaration).toBeDefined();
+      expect(exp.declaration.type).toBe('system');
+    });
+
+    it('should parse export component', () => {
+      const code = `export component MobileControls {
+  props { visible: true }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+      const exp = result.ast.find((n) => n.type === 'export') as any;
+      expect(exp).toBeDefined();
+      expect(exp.declaration).toBeDefined();
+      expect(exp.declaration.type).toBe('component');
+    });
+  });
+
+  // =========================================================================
+  // Migration Spec Integration Test (Phase 0: Hololand Bootstrap)
+  // =========================================================================
+  describe('migration spec integration', () => {
+    it('should parse app.hsplus root composition with imports and systems', () => {
+      const code = `import { TutorialSystem } from "./systems/Tutorial.hsplus"
+import { EasterEggSystem } from "./systems/EasterEggs.hsplus"
+import { ThemeSystem } from "./systems/Themes.hsplus"
+import { MultiplayerSystem } from "./systems/Multiplayer.hsplus"
+
+composition "Hololand Central" {
+  environment {
+    skybox: "space"
+  }
+
+  system TutorialSystem { }
+  system EasterEggSystem { }
+  system ThemeSystem { }
+  system MultiplayerSystem { }
+
+  template "Portal" {
+    @collidable
+    geometry: "torus"
+    color: "purple"
+  }
+
+  object "MainPortal" using "Portal" {
+    position: [0, 1, -5]
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      // Should have 4 imports
+      const imports = result.ast.filter((n) => n.type === 'import');
+      expect(imports.length).toBe(4);
+
+      // Should have 1 composition
+      const comp = result.ast.find((n) => n.type === 'composition') as any;
+      expect(comp).toBeDefined();
+      expect(comp.name).toBe('Hololand Central');
+      expect(comp.children.length).toBeGreaterThan(0);
+
+      // Verify composition children types
+      const childTypes = comp.children.map((n: any) => n.type);
+      expect(childTypes).toContain('environment');
+      expect(childTypes).toContain('system');
+      expect(childTypes).toContain('template');
+      expect(childTypes).toContain('orb');
+
+      // Verify systems were parsed
+      const systems = comp.children.filter((n: any) => n.type === 'system');
+      expect(systems.length).toBe(4);
+      expect(systems.map((s: any) => s.id)).toEqual([
+        'TutorialSystem', 'EasterEggSystem', 'ThemeSystem', 'MultiplayerSystem'
+      ]);
+
+      // Verify template has properties
+      const tmpl = comp.children.find((n: any) => n.type === 'template');
+      expect(tmpl.name).toBe('Portal');
+      expect(tmpl.properties.geometry).toBe('torus');
+      expect(tmpl.properties.color).toBe('purple');
+
+      // Verify object uses template
+      const obj = comp.children.find((n: any) => n.type === 'orb');
+      expect(obj.name).toBe('MainPortal');
+      expect(obj.template).toBe('Portal');
+    });
+  });});

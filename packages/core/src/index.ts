@@ -227,7 +227,19 @@ export {
 } from './state/ReactiveState';
 
 // Core types
-export type { HSPlusAST, VRTraitName } from './types';
+export type {
+  HSPlusAST,
+  VRTraitName,
+  SystemNode,
+  ComponentNode,
+  ImportNode,
+  ExportNode,
+  CompositionNode,
+  TemplateNode,
+  StorageAPI,
+  DeviceAPI,
+  InputAPI,
+} from './types';
 
 // HoloScript R3F Compiler (NEW)
 export { R3FCompiler, type R3FNode, ENVIRONMENT_PRESETS } from './compiler/R3FCompiler';
