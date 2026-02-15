@@ -13,4 +13,7 @@ export const HUMANOID_AVATAR_TRAITS = [
   'locomotion',
   'poseable',
   'morph',
+  // V43 Tier 1: Perception
+  'eye_tracked',
+  'hand_tracking',
 ] as const;

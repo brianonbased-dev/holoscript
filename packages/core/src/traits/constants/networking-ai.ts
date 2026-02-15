@@ -18,4 +18,5 @@ export const NETWORKING_AI_TRAITS = [
   'llm_agent',
   'neural_link',
   'neural_forge',
+  'vision',
 ] as const;
