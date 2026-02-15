@@ -1913,6 +1913,14 @@ export class R3FCompiler {
   }
 
   public compileNode(node: ASTNode): R3FNode {
+    // Dispatch to dedicated methods for rich node types
+    if (node.type === 'system') {
+      return this.compileSystemNode(node);
+    }
+    if (node.type === 'component') {
+      return this.compileComponentNode(node);
+    }
+
     const rawProps = (node as any).properties || {};
     const type = this.mapType(node.type, rawProps);
 
@@ -1961,6 +1969,24 @@ export class R3FCompiler {
     if (composition.templates) {
       for (const tmpl of composition.templates) {
         templateMap.set(tmpl.name, tmpl);
+      }
+    }
+
+    // Process children array from parser output (CompositionNode).
+    // The parser puts all child declarations (systems, components,
+    // templates, objects, etc.) into a flat children array.
+    // We extract templates into the templateMap first, then compile
+    // all other children via compileChildNode dispatch.
+    if (composition.children && Array.isArray(composition.children)) {
+      // First pass: collect templates into templateMap
+      for (const child of composition.children) {
+        if (child.type === 'template' && child.name) {
+          templateMap.set(child.name, child);
+        }
+      }
+      // Second pass: compile all children
+      for (const child of composition.children) {
+        root.children!.push(this.compileChildNode(child, templateMap));
       }
     }
 
@@ -2627,6 +2653,193 @@ export class R3FCompiler {
     return r3fNode;
   }
 
+  /**
+   * Compile a SystemNode into an R3FNode.
+   *
+   * Systems are logical containers with state, actions, lifecycle hooks,
+   * and optionally child objects/UI. In the R3F tree, a system compiles
+   * to a group node annotated with its rich metadata (state, actions,
+   * hooks) so the runtime/renderer can wire up behavior.
+   */
+  private compileSystemNode(node: any, templateMap?: Map<string, any>): R3FNode {
+    const props: Record<string, any> = {};
+
+    // Preserve system metadata for runtime
+    if (node.state) {
+      props.systemState = node.state;
+    }
+    if (node.actions) {
+      props.systemActions = node.actions;
+    }
+    if (node.hooks) {
+      props.systemHooks = node.hooks;
+    }
+
+    // Copy regular properties
+    if (node.properties && typeof node.properties === 'object') {
+      for (const [key, value] of Object.entries(node.properties)) {
+        props[key] = value;
+      }
+    }
+
+    const r3fNode: R3FNode = {
+      type: 'System',
+      id: node.id || node.name,
+      props,
+      children: [],
+      traits: new Map(),
+      directives: node.directives || [],
+    };
+
+    // Add trait directives
+    if (node.directives) {
+      for (const d of node.directives) {
+        if (d.type === 'trait') {
+          r3fNode.traits?.set(d.name, d.config || {});
+        }
+      }
+    }
+
+    // Compile nested children (objects, templates, etc.)
+    if (node.children && Array.isArray(node.children)) {
+      for (const child of node.children) {
+        r3fNode.children!.push(this.compileChildNode(child, templateMap));
+      }
+    }
+
+    // Compile embedded UI nodes as children
+    if (node.ui && Array.isArray(node.ui)) {
+      for (const uiNode of node.ui) {
+        r3fNode.children!.push(this.compileNode(uiNode));
+      }
+    }
+
+    return r3fNode;
+  }
+
+  /**
+   * Compile a ComponentNode into an R3FNode.
+   *
+   * Components are UI-focused containers with props, state, actions,
+   * and render/UI blocks. They compile to a group node annotated with
+   * component metadata for the runtime.
+   */
+  private compileComponentNode(node: any, templateMap?: Map<string, any>): R3FNode {
+    const props: Record<string, any> = {};
+
+    // Preserve component metadata for runtime
+    if (node.props) {
+      props.componentProps = node.props;
+    }
+    if (node.state) {
+      props.componentState = node.state;
+    }
+    if (node.actions) {
+      props.componentActions = node.actions;
+    }
+    if (node.hooks) {
+      props.componentHooks = node.hooks;
+    }
+
+    // Copy regular properties
+    if (node.properties && typeof node.properties === 'object') {
+      for (const [key, value] of Object.entries(node.properties)) {
+        props[key] = value;
+      }
+    }
+
+    const r3fNode: R3FNode = {
+      type: 'Component',
+      id: node.id || node.name,
+      props,
+      children: [],
+      traits: new Map(),
+      directives: node.directives || [],
+    };
+
+    // Add trait directives
+    if (node.directives) {
+      for (const d of node.directives) {
+        if (d.type === 'trait') {
+          r3fNode.traits?.set(d.name, d.config || {});
+        }
+      }
+    }
+
+    // Compile nested children
+    if (node.children && Array.isArray(node.children)) {
+      for (const child of node.children) {
+        r3fNode.children!.push(this.compileChildNode(child, templateMap));
+      }
+    }
+
+    // Compile embedded UI nodes as children
+    if (node.ui && Array.isArray(node.ui)) {
+      for (const uiNode of node.ui) {
+        r3fNode.children!.push(this.compileNode(uiNode));
+      }
+    }
+
+    return r3fNode;
+  }
+
+  /**
+   * Dispatch a child node to the appropriate compile method based on its type.
+   * Used by compileSystemNode, compileComponentNode, and compileComposition
+   * when processing the parser's children array.
+   */
+  private compileChildNode(child: any, templateMap?: Map<string, any>): R3FNode {
+    switch (child.type) {
+      case 'system':
+        return this.compileSystemNode(child, templateMap);
+      case 'component':
+        return this.compileComponentNode(child, templateMap);
+      case 'object':
+        return this.compileObjectDecl(child, templateMap);
+      case 'template':
+        // Templates are type definitions, not visual elements.
+        // Compile as a group containing their children, and add
+        // to the templateMap for object declarations to reference.
+        if (templateMap && child.name) {
+          templateMap.set(child.name, child);
+        }
+        return this.compileTemplateNode(child, templateMap);
+      case 'spatial_group':
+        return this.compileSpatialGroup(child, templateMap);
+      default:
+        return this.compileNode(child);
+    }
+  }
+
+  /**
+   * Compile a template node. Templates define reusable types.
+   * In the R3F tree, they compile to an empty group (they're not
+   * rendered directly — objects "using" them inherit their properties).
+   */
+  private compileTemplateNode(node: any, _templateMap?: Map<string, any>): R3FNode {
+    const props: Record<string, any> = {};
+
+    // Preserve template metadata
+    if (node.state || node.properties?.state) {
+      props.templateState = node.state || node.properties?.state;
+    }
+    if (node.properties) {
+      for (const [key, value] of Object.entries(node.properties)) {
+        if (key !== 'state') {
+          props[key] = value;
+        }
+      }
+    }
+
+    return {
+      type: 'Template',
+      id: node.name,
+      props,
+      children: [],
+      traits: new Map(),
+    };
+  }
+
   private compileSpatialGroup(group: any, templateMap?: Map<string, any>): R3FNode {
     const props: Record<string, any> = {};
     if (group.properties) {
@@ -2904,6 +3117,8 @@ export class R3FCompiler {
       ui_status_indicator: 'UIStatusIndicator',
       tool_slot: 'ToolSlot',
       behavior: 'group',
+      system: 'System',
+      component: 'Component',
       avatar: 'Avatar',
       dna: 'DNA',
       gaussian_splat: 'GaussianSplat',

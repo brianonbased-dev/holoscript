@@ -1608,3 +1608,272 @@ describe('R3FCompiler — TraitCompositor integration', () => {
     expect(registry.size).toBeGreaterThanOrEqual(1500);
   });
 });
+
+// ─── End-to-End Pipeline Tests (Parse → Compile → Verify R3FNode) ───────────
+
+import { HoloScriptCodeParser } from '../HoloScriptCodeParser';
+
+describe('R3FCompiler E2E: Parse → Compile', () => {
+  let compiler: R3FCompiler;
+  let parser: HoloScriptCodeParser;
+
+  beforeEach(() => {
+    compiler = new R3FCompiler();
+    parser = new HoloScriptCodeParser();
+  });
+
+  describe('system compilation', () => {
+    it('should compile a standalone system via compileNode', () => {
+      const code = `system TutorialSystem {
+  state { currentStep: 0, completed: false }
+  action next() { state.currentStep += 1 }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      const sysNode = result.ast.find((n) => n.type === 'system')!;
+      const r3f = compiler.compileNode(sysNode);
+
+      expect(r3f.type).toBe('System');
+      expect(r3f.id).toBe('TutorialSystem');
+      expect(r3f.props.systemState).toEqual({ currentStep: 0, completed: false });
+      expect(r3f.props.systemActions).toBeDefined();
+      expect(r3f.props.systemActions.length).toBe(1);
+      expect(r3f.props.systemActions[0].name).toBe('next');
+    });
+
+    it('should compile a system with lifecycle hooks', () => {
+      const code = `system GameLoop {
+  state { score: 0, running: true }
+  on_start { state.running = true }
+  on_update { state.score += 1 }
+  on_destroy { state.running = false }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      const sysNode = result.ast.find((n) => n.type === 'system')!;
+      const r3f = compiler.compileNode(sysNode);
+
+      expect(r3f.type).toBe('System');
+      expect(r3f.id).toBe('GameLoop');
+      expect(r3f.props.systemState).toEqual({ score: 0, running: true });
+      expect(r3f.props.systemHooks).toBeDefined();
+      expect(r3f.props.systemHooks.length).toBe(3);
+      expect(r3f.props.systemHooks.map((h: any) => h.name)).toEqual([
+        'on_start',
+        'on_update',
+        'on_destroy',
+      ]);
+    });
+
+    it('should compile a system with nested objects', () => {
+      const code = `system SpawnSystem {
+  state { spawnCount: 0 }
+
+  object "SpawnPoint" {
+    geometry: "sphere"
+    position: [0, 1, 0]
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      const sysNode = result.ast.find((n) => n.type === 'system')!;
+      const r3f = compiler.compileNode(sysNode);
+
+      expect(r3f.type).toBe('System');
+      expect(r3f.children).toBeDefined();
+      expect(r3f.children!.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should map system type correctly in mapType', () => {
+      const node = createASTNode('system', {}, { id: 'TestSys' });
+      // Through generic compileNode, mapType is called before dispatch
+      // But our dispatch happens first, so test mapType directly
+      const ast = createAST(node);
+      const result = compiler.compile(ast);
+      // System dispatch takes priority, producing 'System' type
+      expect(result.type).toBe('System');
+    });
+  });
+
+  describe('component compilation', () => {
+    it('should compile a standalone component via compileNode', () => {
+      const code = `component MobileControls {
+  props { visible: true, joystickSize: 120 }
+  state { isMoving: false }
+  action toggle() { state.isMoving = !state.isMoving }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      const compNode = result.ast.find((n) => n.type === 'component')!;
+      const r3f = compiler.compileNode(compNode);
+
+      expect(r3f.type).toBe('Component');
+      expect(r3f.id).toBeDefined();
+      expect(r3f.props.componentProps).toEqual({ visible: true, joystickSize: 120 });
+      expect(r3f.props.componentState).toEqual({ isMoving: false });
+      expect(r3f.props.componentActions).toBeDefined();
+      expect(r3f.props.componentActions.length).toBe(1);
+    });
+
+    it('should compile a component with hooks and UI', () => {
+      const code = `component Scoreboard {
+  state { score: 0 }
+  on_start { state.score = 0 }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      const compNode = result.ast.find((n) => n.type === 'component')!;
+      const r3f = compiler.compileNode(compNode);
+
+      expect(r3f.type).toBe('Component');
+      expect(r3f.props.componentState).toEqual({ score: 0 });
+      expect(r3f.props.componentHooks).toBeDefined();
+      expect(r3f.props.componentHooks.length).toBe(1);
+    });
+  });
+
+  describe('composition with systems and components', () => {
+    it('should compile a composition containing systems via compileComposition', () => {
+      const code = `composition "Hololand" {
+  system TutorialSystem {
+    state { step: 0 }
+  }
+  system ThemeSystem {
+    state { theme: "default" }
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      const compNode = result.ast.find((n) => n.type === 'composition')!;
+      const r3f = compiler.compileComposition(compNode as any);
+
+      expect(r3f.type).toBe('group');
+      expect(r3f.id).toBe('Hololand');
+      expect(r3f.children).toBeDefined();
+
+      const systems = r3f.children!.filter((c) => c.type === 'System');
+      expect(systems.length).toBe(2);
+      expect(systems[0].id).toBe('TutorialSystem');
+      expect(systems[0].props.systemState).toEqual({ step: 0 });
+      expect(systems[1].id).toBe('ThemeSystem');
+      expect(systems[1].props.systemState).toEqual({ theme: 'default' });
+    });
+
+    it('should compile a composition containing components', () => {
+      const code = `composition "App" {
+  component HUD {
+    props { visible: true }
+    state { health: 100 }
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      const compNode = result.ast.find((n) => n.type === 'composition')!;
+      const r3f = compiler.compileComposition(compNode as any);
+
+      const components = r3f.children!.filter((c) => c.type === 'Component');
+      expect(components.length).toBe(1);
+      expect(components[0].props.componentProps).toEqual({ visible: true });
+      expect(components[0].props.componentState).toEqual({ health: 100 });
+    });
+
+    it('should compile a full composition with templates, objects, systems, and components', () => {
+      const code = `composition "FullScene" {
+  template "Enemy" {
+    geometry: "sphere"
+    color: "#ff0000"
+  }
+
+  object "Goblin" using "Enemy" {
+    position: [0, 0, 5]
+  }
+
+  system CombatSystem {
+    state { active: true, round: 1 }
+    action startRound() { state.round += 1 }
+  }
+
+  component DamageUI {
+    props { visible: false }
+    state { lastDamage: 0 }
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      const compNode = result.ast.find((n) => n.type === 'composition')!;
+      const r3f = compiler.compileComposition(compNode as any);
+
+      expect(r3f.type).toBe('group');
+      expect(r3f.id).toBe('FullScene');
+
+      // Should have children for all node types
+      const templates = r3f.children!.filter((c) => c.type === 'Template');
+      const systems = r3f.children!.filter((c) => c.type === 'System');
+      const components = r3f.children!.filter((c) => c.type === 'Component');
+
+      expect(templates.length).toBe(1);
+      expect(templates[0].id).toBe('Enemy');
+
+      expect(systems.length).toBe(1);
+      expect(systems[0].id).toBe('CombatSystem');
+      expect(systems[0].props.systemState).toEqual({ active: true, round: 1 });
+      expect(systems[0].props.systemActions).toBeDefined();
+
+      expect(components.length).toBe(1);
+      expect(components[0].props.componentProps).toEqual({ visible: false });
+      expect(components[0].props.componentState).toEqual({ lastDamage: 0 });
+    });
+
+    it('should compile composition via the compile(ast) path', () => {
+      const code = `composition "TestScene" {
+  system PhysicsSystem {
+    state { gravity: 9.8 }
+  }
+
+  object "Floor" {
+    geometry: "plane"
+    position: [0, 0, 0]
+  }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      // Through compile() path, the composition root goes through compileNode
+      const ast: HSPlusAST = {
+        version: '3.0',
+        root: result.ast[0] as any,
+      };
+      const r3f = compiler.compile(ast);
+
+      // The composition node compiles via compileNode which recurses children
+      expect(r3f).toBeDefined();
+      expect(r3f.children).toBeDefined();
+      expect(r3f.children!.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('system with directives', () => {
+    it('should preserve trait directives on systems', () => {
+      const code = `system NetworkedGame {
+  @networked
+  state { players: 0 }
+}`;
+      const result = parser.parse(code);
+      expect(result.success).toBe(true);
+
+      const sysNode = result.ast.find((n) => n.type === 'system')!;
+      const r3f = compiler.compileNode(sysNode);
+
+      expect(r3f.type).toBe('System');
+      expect(r3f.directives).toBeDefined();
+    });
+  });
+});

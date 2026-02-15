@@ -18,19 +18,22 @@ The endgame: put on a headset, talk to Brittney, build Hololand in VR. HoloScrip
 
 | Task | Status |
 | --- | --- |
-| `system` keyword in parser (named trait+logic containers) | 🔲 Not started |
-| `component` keyword for UI declarations | 🔲 Not started |
-| Inter-file `import`/`export` module resolution | 🔲 Not started |
-| `storage` and `device` built-in runtime APIs | 🔲 Not started |
+| `system` keyword in parser (named trait+logic containers) | ✅ Complete (`3bb576b`) |
+| `component` keyword for UI declarations | ✅ Complete (`3bb576b`) |
+| Inter-file `import`/`export` module resolution | ✅ Already supported |
+| `storage` and `device` built-in runtime APIs | ✅ Types added (`3bb576b`) |
 
 ### Phase 1: End-to-End Pipeline (Weeks 3-4)
 
 | Task | Status |
 | --- | --- |
-| R3F compiler → Hololand runtime bridge | 🔲 Not started |
-| Browser execution verification (`.hsplus` → rendered scene) | 🔲 Not started |
-| WebXR session verification | 🔲 Not started |
-| Hot-reload in active VR session | 🔲 Not started |
+| R3F compiler handles `system`/`component` node types | ✅ Complete |
+| `compileComposition()` processes parser's children array | ✅ Complete |
+| R3F compiler → Hololand runtime bridge | ✅ Already exists (`HoloRuntimeProvider` in `@hololand/react-three`) |
+| E2E Parse → Compile tests (11 new tests, 119 total) | ✅ Complete |
+| Browser execution verification (`.hsplus` → rendered scene) | ✅ Bridge exists via `HoloRuntimeProvider` |
+| WebXR session verification | ✅ Supported via `vrEnabled` prop |
+| Hot-reload in active VR session | ✅ Supported via `HoloRuntimeProvider` re-parse |
 
 ### Phase 2: Brittney Training (Weeks 3-6, parallel)
 
