@@ -39,7 +39,10 @@ The endgame: put on a headset, talk to Brittney, build Hololand in VR. HoloScrip
 
 | Task | Status |
 | --- | --- |
-| TrainingMonkey `generate_hololand_training` tool (9 categories, 4,200 examples) | 🔲 Not started |
+| TrainingMonkey `generate_hololand_training` tool — HoloScript templates (9 categories × 4 difficulties, system/component/import syntax) | ✅ Complete |
+| MCP schema updated (holoscript/r3f frameworks, production difficulty) | ✅ Complete |
+| Framework-aware template selection in `training-generators.ts` | ✅ Complete |
+| 10 new tests (all 9 categories, VR traits, networking traits, Phase 0 keywords) | ✅ Complete |
 | Brittney v5 fine-tune with Hololand-specific data | 🔲 Not started |
 
 ### Phase 3: Spatial Brittney (Weeks 5-8)
