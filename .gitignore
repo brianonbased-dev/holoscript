@@ -81,3 +81,14 @@ VISUAL_*.md
 
 # AI Ecosystem
 .ai-context-stream.jsonl
+
+# Temporary test/debug output files
+*_result.txt
+*_result*.txt
+hitl_*.txt
+hotreload_*.txt
+mcp_v*.txt
+ast_v*.txt
+full_suite_result.txt
+parser_snap_v*.txt
+ci-debug*.txt

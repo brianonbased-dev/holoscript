@@ -9,7 +9,44 @@ HoloScript is a **full programming language** for spatial computing, not just a 
 ```
 HoloScript/                     # This repo - complete language system
 ├── packages/
-│   ├── core/                   # Parser, AST, validator, 16 compilers
+│   ├── core/                   # Parser, AST, validator, 18 compilers, runtime engine
+│   │   └── src/
+│   │       ├── ai/             # AI copilot, behavior trees, GOAP, utility AI, steering
+│   │       ├── animation/      # Animation graph, IK, skeletal, spline, cinematic
+│   │       ├── audio/          # Audio engine, mixer, spatial audio, synthesis, occlusion
+│   │       ├── assets/         # Asset bundler, hot reload, resource cache, texture atlas
+│   │       ├── camera/         # Camera system and extensions
+│   │       ├── combat/         # Combat and damage systems
+│   │       ├── compiler/       # Multi-target compilers + robotics training data
+│   │       ├── debug/          # Console logger, profiler, memory tracker, GC
+│   │       ├── dialogue/       # Dialogue tree system
+│   │       ├── ecs/            # Archetype-based entity component system
+│   │       ├── editor/         # Scene editor, inspector, node graph, history
+│   │       ├── environment/    # Skybox, fog, lighting environments
+│   │       ├── events/         # Event bus and event system
+│   │       ├── gameplay/       # Quest, inventory, achievement systems
+│   │       ├── input/          # Input manager, keyboard, gamepad
+│   │       ├── lod/            # LOD streaming, transitions, impostors
+│   │       ├── lsp/            # Language server: completion, diagnostics
+│   │       ├── math/           # Math utilities
+│   │       ├── multiplayer/    # Multiplayer session management
+│   │       ├── navigation/     # Pathfinding and navmesh
+│   │       ├── network/        # Network manager, matchmaker, anti-cheat, sync
+│   │       ├── particles/      # Particle system and forces
+│   │       ├── performance/    # Frustum culling, spatial hash, LOD
+│   │       ├── persistence/    # Save/load, scene serialization
+│   │       ├── physics/        # Soft body, cloth, fluid, rope, ragdoll, vehicle
+│   │       ├── plugins/        # Plugin loader and sandboxing
+│   │       ├── procedural/     # Procedural generation
+│   │       ├── render/         # WebGPU renderer, physics debug drawer
+│   │       ├── rendering/      # Render pipeline, post-processing, shaders
+│   │       ├── replay/         # Recording and playback
+│   │       ├── runtime/        # Scene runner, WebXR, keyboard, network predictor
+│   │       ├── scene/          # Scene graph and management
+│   │       ├── terrain/        # Terrain, foliage, world streaming
+│   │       ├── traits/         # 1,800+ trait definitions (68 modules) + implementations
+│   │       ├── ui/             # Spatial UI components
+│   │       └── world/          # World streaming and management
 │   ├── runtime/                # Browser runtime, traits, physics, events
 │   ├── cli/                    # Command-line tools (32+ commands)
 │   ├── lsp/                    # Language Server Protocol
@@ -81,8 +118,8 @@ But HoloScript works without Hololand.
 
 | Package               | Purpose                                     | Version |
 | --------------------- | ------------------------------------------- | ------- |
-| `@holoscript/core`    | Parser, AST, validator, 16 compilers        | v3.0.0  |
-| `@holoscript/runtime` | Browser runtime, 50+ traits, physics        | v3.0.0  |
+| `@holoscript/core`    | Parser, AST, validator, 18 compilers, 50+ runtime modules | v3.4.0  |
+| `@holoscript/runtime` | Browser runtime, 1,800+ traits, physics     | v3.4.0  |
 | `@holoscript/std`     | Standard library (types, math, collections) | v3.0.0  |
 | `@holoscript/fs`      | Filesystem utilities & file watching        | v3.0.0  |
 | `@holoscript/cli`     | Command-line tools (32+ commands)           | v3.0.0  |
@@ -110,7 +147,7 @@ But HoloScript works without Hololand.
 
 | Package                        | Purpose                                 | Version |
 | ------------------------------ | --------------------------------------- | ------- |
-| `@holoscript/mcp-server`       | MCP for AI agent integration (35 tools) | v3.0.0  |
+| `@holoscript/mcp-server`       | MCP for AI agent integration (35 tools) | v3.4.0  |
 | `@holoscript/sdk`              | Smart Asset SDK & HoloHub client        | v3.0.0  |
 | `@holoscript/wasm`             | WebAssembly parser for browsers         | v3.0.0  |
 | `@holoscript/registry`         | Package registry & team workspace API   | v3.0.0  |

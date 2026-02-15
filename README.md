@@ -1,12 +1,12 @@
-# HoloScript v3.3.0
+# HoloScript v3.4.0
 
 **Write once. Run everywhere. Spatial computing for everyone.**
 
 HoloScript is an AI-native, declarative language for spatial computing. It allows developers and AI agents to define interactive worlds, complex behaviors, and high-fidelity graphics that compile to 18+ platforms from a single source.
 
-![version-badge](https://img.shields.io/badge/version-v3.3.0-green?style=for-the-badge)
+![version-badge](https://img.shields.io/badge/version-v3.4.0-green?style=for-the-badge)
 ![Quickstart Badge](https://img.shields.io/badge/Quickstart-5_min-blue?style=for-the-badge)
-![Traits Badge](https://img.shields.io/badge/traits-1525+-orange?style=for-the-badge)
+![Traits Badge](https://img.shields.io/badge/traits-1800+-orange?style=for-the-badge)
 
 ---
 
@@ -75,11 +75,14 @@ composition "Hello Holo" {
 
 ## 🔥 Key Features
 
-- ✅ **1,525+ VR Traits** - `@grabbable`, `@physics`, `@ai_agent`, `@teleport`, and more.
+- ✅ **1,800+ VR Traits** - `@grabbable`, `@physics`, `@ai_agent`, `@teleport`, 213 robotics/industrial traits, 24 scientific computing traits, and more.
 - ✅ **600+ Visual Traits** - PBR materials, procedural textures, and mood-based lighting.
+- ✅ **50+ Core Modules** - AI, physics, ECS, animation, audio, terrain, particles, networking, editor, and more.
 - ✅ **18 Compile Targets** - VRChat, Unreal Engine, iOS/ARKit, Android/ARCore, Unity, WebAssembly, and more.
 - ✅ **AI-Native** - Built for LLMs with 34 high-level MCP tools for real-time generation.
-- ✅ **Brave Rendering** - Native support for R3F, WebGPU, and VisionOS.
+- ✅ **Scientific Computing** - Molecular dynamics, drug discovery, and AutoDock Vina integration via `@holoscript/narupa-plugin`.
+- ✅ **Robotics & Industrial** - URDF/USD/SDF/MJCF export with 213 declarative traits for joints, actuators, sensors, and control systems.
+- ✅ **Production-Ready Runtime** - Resilience patterns, CRDT state, reactive state, WebGPU rendering, and WebXR session management.
 
 ---
 
@@ -98,7 +101,7 @@ composition "Hello Holo" {
 ## 📚 Documentation
 
 - 📗 **[Quickstart](./docs/getting-started/quickstart.md)** - Start building in minutes.
-- 📘 **[Traits Reference](./docs/TRAITS_REFERENCE.md)** - Explore the massive library of 1,525+ VR traits.
+- 📘 **[Traits Reference](./docs/TRAITS_REFERENCE.md)** - Explore the massive library of 1,800+ VR traits.
 - 📙 **[Academy](./docs/academy/README.md)** - Master HoloScript through interactive lessons.
 - 📕 **[Troubleshooting](./docs/guides/troubleshooting.md)** - Solutions to common issues.
 - 🔘 **[Architecture](./docs/architecture/README.md)** - Deep dive into the engine and compiler.
@@ -113,7 +116,49 @@ composition "Hello Holo" {
 
 ---
 
-## 🤝 Contributing
+## � New in v3.4: Scientific Computing & Robotics
+
+### Scientific Computing (24 traits)
+
+HoloScript now supports VR-based drug discovery and molecular dynamics through `@holoscript/narupa-plugin`:
+
+```holo
+composition "Drug Discovery Lab" {
+  object "Protein" {
+    @protein_visualization
+    @pdb_loader(file: "1ubq.pdb")
+    @hydrogen_bonds
+    @electrostatic_surface
+  }
+
+  object "Ligand" {
+    @ligand_visualization
+    @auto_dock(receptor: "Protein")
+    @interactive_forces
+    @binding_affinity
+  }
+}
+```
+
+### Robotics & Industrial (213 traits)
+
+Declarative robot authoring with export to URDF, USD, SDF, and MJCF:
+
+```holo
+composition "Robot Arm" {
+  object "Joint1" {
+    @joint_revolute
+    @position_controlled
+    @harmonic_drive
+    @force_torque_sensor
+    @joint_safety_controller
+  }
+}
+```
+
+---
+
+## �🤝 Contributing
 
 HoloScript is **MIT licensed** and open-source. We welcome contributions to the core engine, compilers, and documentation.
 
