@@ -88,7 +88,7 @@ Massive single-session sprint covering plugins, training data, and infrastructur
 | Integration tests for all plugins | ✅ Complete |
 | Plugin ecosystem documentation in HoloScript repo | ✅ Complete |
 | GitHub repos created (holoscript-robotics-plugin, holoscript-medical-plugin) | ✅ Complete |
-| npm publish: `@holoscript/robotics-plugin`, `@holoscript/medical-plugin` | 🔲 Awaiting publish |
+| npm publish: `@holoscript/robotics-plugin`, `@holoscript/medical-plugin` | ✅ Complete |
 
 ---
 
