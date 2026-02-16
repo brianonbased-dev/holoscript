@@ -72,8 +72,20 @@ The endgame: put on a headset, talk to Brittney, build Hololand in VR. HoloScrip
 | `HoloScriptHotReloader.ts` — watches `.hsplus` files, AST diff, patch scene graph | ✅ Complete |
 | `VRGitIntegration.ts` — auto-commit, rollback, snapshots from VR | ✅ Complete |
 | Brittney writes + hot-reloads `.hsplus` files from VR | ✅ Complete (infrastructure) |
-| Collaborative CRDT editing | 🔲 Not started |
-| Self-improvement loop (failed generations → TrainingMonkey harvest) | 🔲 Not started |
+| Collaborative CRDT editing | ✅ Complete (CRDTDocument, CollaborationSession — 42 tests) |
+| Self-improvement loop (failed generations → TrainingMonkey harvest) | ✅ Complete (SelfImprovementPipeline — 14 tests) |
+
+### "Commence All II" — WorldBuilder & Ecosystem (February 15, 2026)
+
+Second sprint covering CRDT collaboration, self-improvement, component library, and IDE:
+
+| Task | Status |
+| --- | --- |
+| **CRDT Collaboration** — CRDTDocument, CollaborationSession, CollaborationTransport (42 tests) | ✅ Complete |
+| **Self-Improvement Pipeline** — Failed generation harvesting, TrainingMonkey integration (14 tests) | ✅ Complete |
+| **Component Library** — 25 .holo templates across 5 categories (NPCs, Weapons, UI, Environment, Game Systems) | ✅ Complete |
+| **Playground IDE** — Monaco editor with syntax highlighting, Three.js preview, file I/O | ✅ Complete |
+| **Track 3: Enhanced WorldBuilder** — HoloScript I/O, Visual Scripting, Brittney Integration, Multi-Object Editing (1118 lines, 50 tests), Performance Tools (1119 lines, 34 tests), Playground IDE integration | ✅ Complete |
 
 ### "Commence All" — Ecosystem Expansion (February 15, 2026)
 
