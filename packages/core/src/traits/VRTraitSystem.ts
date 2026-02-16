@@ -164,6 +164,9 @@ import { flowFieldHandler } from './FlowFieldTrait';
 import { choreographyHandler } from './ChoreographyTrait';
 import { negotiationHandler } from './NegotiationTrait';
 
+// v3.3 Multiplayer Networking
+import { networkedHandler } from './NetworkedTraitHandler';
+
 // =============================================================================
 // TRAIT STATE
 // =============================================================================
@@ -1254,6 +1257,9 @@ export class VRTraitRegistry {
     this.register(handMenuHandler as TraitHandler);
     this.register(scrollableHandler as TraitHandler);
     this.register(gestureHandler as TraitHandler);
+
+    // v3.3 Multiplayer Networking
+    this.register(networkedHandler as TraitHandler);
   }
 
   register<T>(handler: TraitHandler<T>): void {
@@ -1486,4 +1492,4 @@ export {
 import { handMenuHandler } from './HandMenuTrait';
 import { scrollableHandler } from './ScrollableTrait';
 import { gestureHandler } from './GestureTrait';
-export { handMenuHandler, scrollableHandler, gestureHandler };
+export { handMenuHandler, scrollableHandler, gestureHandler, networkedHandler };
