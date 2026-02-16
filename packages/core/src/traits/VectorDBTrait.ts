@@ -26,6 +26,7 @@ export interface VectorDBConfig {
   similarity_metric: 'cosine' | 'euclidean' | 'dot_product';
   max_entries: number;
   index_type: 'flat' | 'hnsw' | 'ivf';
+  similarity_threshold?: number; // Optional, defaults to 0.7
 }
 
 interface VectorDBState {
@@ -83,6 +84,7 @@ export const vectorDBHandler: TraitHandler<VectorDBConfig> = {
     similarity_metric: 'cosine',
     max_entries: 10000,
     index_type: 'hnsw',
+    similarity_threshold: 0.7,
   },
 
   onAttach(node, config, context) {

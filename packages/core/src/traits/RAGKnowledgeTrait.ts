@@ -28,6 +28,8 @@ export interface RAGConfig {
   retrieval_k: number; // Number of chunks to retrieve
   rerank: boolean;
   citation_mode: boolean;
+  similarity_threshold?: number; // Optional, defaults to 0.7
+  metadata_fields?: string[]; // Optional metadata to preserve
 }
 
 interface RAGState {
@@ -69,6 +71,8 @@ export const ragKnowledgeHandler: TraitHandler<RAGConfig> = {
     retrieval_k: 5,
     rerank: true,
     citation_mode: true,
+    similarity_threshold: 0.7,
+    metadata_fields: ['source', 'timestamp', 'category'],
   },
 
   onAttach(node, config, context) {

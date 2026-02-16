@@ -16,11 +16,21 @@ import type { HandTrackingConfig } from './HandTrackingTrait';
 // =============================================================================
 
 export interface HandMeshAIConfig extends HandTrackingConfig {
+  // Hand tracking model
+  hand_model: 'mediapipe_hands' | 'frankmocap' | 'mano' | 'handoccnet';
+  joint_count: 21 | 42;
+  bimanual_tracking: boolean;
+
   // Mesh-specific additions
   mesh_resolution: 'low' | 'medium' | 'high' | 'ultra';
   texture_enabled: boolean;
   vertex_count: number;
   real_time_generation: boolean;
+
+  // Gesture and performance
+  gesture_detection: boolean;
+  inference_fps: number;
+  temporal_smoothing: number;
 }
 
 interface HandMesh {
@@ -91,11 +101,19 @@ export const handMeshAIHandler: TraitHandler<HandMeshAIConfig> = {
 
   defaultConfig: {
     ...handTrackingHandler.defaultConfig,
+    // Hand tracking model
+    hand_model: 'mediapipe_hands',
+    joint_count: 21,
+    bimanual_tracking: false,
     // Mesh defaults
     mesh_resolution: 'medium',
     texture_enabled: false,
     vertex_count: 256,
     real_time_generation: true,
+    // Gesture and performance
+    gesture_detection: false,
+    inference_fps: 30,
+    temporal_smoothing: 0.3,
   },
 
   onAttach(node, config, context) {
