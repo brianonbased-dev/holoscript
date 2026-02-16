@@ -54,8 +54,8 @@ export async function browserLaunch(args: z.infer<typeof BrowserLaunchSchema>) {
     });
 
     // Determine the preview URL
-    // This assumes HoloScript has a local dev server or we serve the preview ourselves
-    const previewUrl = `file://${path.resolve('examples/browser-preview.html')}?file=${encodeURIComponent(args.holoscriptFile)}`;
+    // Resolve relative to HoloScript root (up 2 dirs from packages/mcp-server)
+    const previewUrl = `file://${path.resolve(__dirname, '../../../examples/browser-preview.html')}?file=${encodeURIComponent(args.holoscriptFile)}`;
 
     // Navigate to preview
     await session.page.goto(previewUrl, {
@@ -68,35 +68,17 @@ export async function browserLaunch(args: z.infer<typeof BrowserLaunchSchema>) {
     }, { timeout: 10000 });
 
     return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            success: true,
-            sessionId: session.id,
-            url: previewUrl,
-            viewport: {
-              width: args.width,
-              height: args.height
-            },
-            message: `HoloScript preview launched: ${args.holoscriptFile}`
-          }, null, 2)
-        }
-      ]
+      success: true,
+      sessionId: session.id,
+      url: previewUrl,
+      viewport: {
+        width: args.width,
+        height: args.height
+      },
+      message: `HoloScript preview launched: ${args.holoscriptFile}`
     };
   } catch (error) {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            success: false,
-            error: error instanceof Error ? error.message : String(error)
-          }, null, 2)
-        }
-      ],
-      isError: true
-    };
+    throw error;
   }
 }
 
@@ -123,19 +105,10 @@ export async function browserExecute(args: z.infer<typeof BrowserExecuteSchema>)
     // Execute script
     const result = await session.page.evaluate(args.script);
 
-    const executeResult: BrowserExecuteResult = {
+    return {
       success: true,
       result,
       logs: args.captureConsole ? logs : undefined
-    };
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(executeResult, null, 2)
-        }
-      ]
     };
   } catch (error) {
     const executeResult: BrowserExecuteResult = {
@@ -184,33 +157,15 @@ export async function browserScreenshot(args: z.infer<typeof BrowserScreenshotSc
     const base64 = args.outputPath ? undefined : screenshot.toString('base64');
 
     return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            success: true,
-            sessionId: args.sessionId,
-            outputPath: args.outputPath,
-            format: args.type,
-            size: screenshot.length,
-            base64: base64 ? `data:image/${args.type};base64,${base64}` : undefined
-          }, null, 2)
-        }
-      ]
+      success: true,
+      sessionId: args.sessionId,
+      outputPath: args.outputPath,
+      format: args.type,
+      size: screenshot.length,
+      base64: base64 ? `data:image/${args.type};base64,${base64}` : undefined
     };
   } catch (error) {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            success: false,
-            error: error instanceof Error ? error.message : String(error)
-          }, null, 2)
-        }
-      ],
-      isError: true
-    };
+    throw error;
   }
 }
 
